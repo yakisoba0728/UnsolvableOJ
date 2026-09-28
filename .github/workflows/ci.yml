@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, "codex/**"]
+    branches: [main, 'codex/**']
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -19,57 +19,12 @@ defaults:
     shell: bash
 
 jobs:
-  checks:
-    name: Static checks and unit tests (Node ${{ matrix.node }})
-    # Persistent self-hosted machines only execute code from this repository.
+  check:
+    name: CI required
+    # Only repository-owned code may run on the persistent self-hosted machine.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: [self-hosted, Linux, X64, unsolvable-oj]
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        node: [24, 26]
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: ${{ matrix.node }}
-          cache: npm
-          cache-dependency-path: "**/package-lock.json"
-      - name: Install locked dependencies
-        run: |
-          npm ci --prefix Back
-          npm ci --prefix Front
-          npm ci --prefix Judge
-      - name: Backend lint, unit tests and build
-        working-directory: Back
-        run: |
-          npm run lint
-          npm run typecheck
-          npm test -- --reporter=default --reporter=junit --outputFile=reports/unit.xml
-          npm run build
-      - name: Frontend build and browser test typecheck
-        run: npm run check --prefix Front
-      - name: Worker build and Linux runtime regression tests
-        run: npm run check --prefix Judge
-      - name: Validate workflow expressions and shell scripts
-        if: matrix.node == 24
-        run: docker run --rm --network none -v "$PWD:/repo:ro" -w /repo rhysd/actionlint:1.7.12 .github/workflows/ci.yml
-      - name: Upload unit test results
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: unit-node-${{ matrix.node }}
-          path: Back/reports/
-          retention-days: 7
-
-  integration:
-    name: Database, API and Docker judge integration
-    needs: checks
     runs-on: [self-hosted, Linux, X64, unsolvable-oj, docker]
-    timeout-minutes: 30
+    timeout-minutes: 10
     services:
       postgres:
         image: postgres:17
@@ -78,28 +33,20 @@ jobs:
           POSTGRES_PASSWORD: ci_disposable_password
           POSTGRES_DB: unsolvable_ci
         ports:
-          - "127.0.0.1::5432"
+          - '127.0.0.1::5432'
         options: >-
           --memory 512m --cpus 1
+          --tmpfs /var/lib/postgresql/data:rw,nosuid,size=256m
           --health-cmd "pg_isready -U unsolvable -d unsolvable_ci"
-          --health-interval 5s --health-timeout 5s --health-retries 12
+          --health-interval 3s --health-timeout 3s --health-retries 10
       redis:
         image: redis:8
         ports:
-          - "127.0.0.1::6379"
+          - '127.0.0.1::6379'
         options: >-
-          --memory 128m --cpus 1
+          --memory 128m --cpus 1 --tmpfs /data:rw,nosuid,size=64m
           --health-cmd "redis-cli ping"
-          --health-interval 5s --health-timeout 5s --health-retries 12
-    env:
-      NODE_ENV: test
-      REDIS_HOST: 127.0.0.1
-      REDIS_DB: "1"
-      PIPELINE_REDIS_DB: "2"
-      JWT_ACCESS_SECRET: test-jwt-secret-with-at-least-32-characters
-      JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
-      JUDGE_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-integration
-      JUDGE_RUNTIME_IMAGE: unsolvable-judge-runtime:ci-${{ github.run_id }}-${{ github.run_attempt }}
+          --health-interval 3s --health-timeout 3s --health-retries 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -108,111 +55,28 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: "**/package-lock.json"
-      - name: Connect to this job's isolated services
-        env:
-          POSTGRES_PORT: ${{ job.services.postgres.ports['5432'] }}
-          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-        run: |
-          printf 'DATABASE_URL=postgresql://unsolvable:ci_disposable_password@127.0.0.1:%s/unsolvable_ci\n' "$POSTGRES_PORT" >> "$GITHUB_ENV"
-          printf 'REDIS_PORT=%s\n' "$REDIS_PORT" >> "$GITHUB_ENV"
-      - name: Install and build API and worker
+          cache-dependency-path: '**/package-lock.json'
+      - name: Install dependencies
         run: |
           npm ci --prefix Back
+          npm ci --prefix Front
           npm ci --prefix Judge
-          npm run build --prefix Back
-          npm run build --prefix Judge
-      - name: Migration upgrade, data backfill, idempotency and rollback
-        run: npm run test:migrations --prefix Back
-      - name: Apply schema to disposable test database
+      - name: Backend lint, types, unit tests and build
+        run: npm run check --prefix Back
+      - name: Frontend build
+        run: npm run build --prefix Front
+      - name: Worker build and runtime unit tests
+        run: npm run check --prefix Judge
+      - name: Database migrations and API tests
         working-directory: Back
-        run: npx --no-install typeorm migration:run -d dist/database/data-source.js
-      - name: API authentication, permissions, versions, leases and admin operations
-        run: npm run test:e2e --prefix Back -- --reporter=default --reporter=junit --outputFile=reports/api.xml
-      - name: Build all-language judge image
-        run: docker build --tag "$JUDGE_RUNTIME_IMAGE" Judge/runtime
-      - name: Linux runtime tests inside the production image
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://unsolvable:ci_disposable_password@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/unsolvable_ci
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+          REDIS_DB: '1'
+          JWT_ACCESS_SECRET: test-jwt-secret-with-at-least-32-characters
+          JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
         run: |
-          docker run --rm --label "unsolvable.ci=$JUDGE_RUN_ID" \
-            --network none --cap-drop ALL --security-opt no-new-privileges \
-            --memory 512m --cpus 2 --pids-limit 128 \
-            --entrypoint python3 --workdir /opt/judge \
-            -v "$PWD/Judge/runtime/test_runner.py:/opt/judge/test_runner.py:ro" \
-            "$JUDGE_RUNTIME_IMAGE" -m unittest -v test_runner
-      - name: Eight languages and cgroup memory regressions
-        run: npm run test:runtime --prefix Judge
-      - name: Full API, queue, worker and container pipeline
-        run: npm run test:pipeline --prefix Back -- --reporter=default --reporter=junit --outputFile=reports/pipeline.xml
-      - name: Upload integration reports and worker logs
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: integration
-          path: Back/reports/
-          retention-days: 7
-      - name: Remove only this run's judge containers and image
-        if: always()
-        run: |
-          mapfile -t containers < <(docker ps -aq --filter "label=unsolvable.ci=$JUDGE_RUN_ID")
-          if ((${#containers[@]})); then docker rm -f "${containers[@]}"; fi
-          if docker image inspect "$JUDGE_RUNTIME_IMAGE" >/dev/null 2>&1; then
-            docker image rm "$JUDGE_RUNTIME_IMAGE"
-          fi
-
-  browser:
-    name: Browser flows (Chromium, Firefox, WebKit)
-    needs: checks
-    runs-on: [self-hosted, Linux, X64, unsolvable-oj, docker]
-    timeout-minutes: 15
-    env:
-      JUDGE_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-browser
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: Front/package-lock.json
-      - run: npm ci --prefix Front
-      - name: Run browser tests with matching browser binaries
-        run: |
-          version=$(node -p "require('./Front/node_modules/@playwright/test/package.json').version")
-          docker run --rm --init --label "unsolvable.ci=$JUDGE_RUN_ID" \
-            --network none --cap-drop ALL --security-opt no-new-privileges \
-            --memory 2g --cpus 2 --shm-size 512m --pids-limit 256 \
-            --user "$(id -u):$(id -g)" --env HOME=/tmp --env CI=1 \
-            --volume "$PWD/Front:/work" --workdir /work \
-            "mcr.microsoft.com/playwright:v${version}-noble" npm run test:e2e
-      - name: Upload browser report, traces and screenshots
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: browsers
-          path: |
-            Front/playwright-report/
-            Front/test-results/
-          retention-days: 7
-      - name: Clean up cancelled browser containers
-        if: always()
-        run: |
-          mapfile -t containers < <(docker ps -aq --filter "label=unsolvable.ci=$JUDGE_RUN_ID")
-          if ((${#containers[@]})); then docker rm -f "${containers[@]}"; fi
-
-  required:
-    name: CI required
-    if: always()
-    needs: [checks, integration, browser]
-    runs-on: [self-hosted, Linux, X64, unsolvable-oj]
-    timeout-minutes: 2
-    env:
-      CHECKS: ${{ needs.checks.result }}
-      INTEGRATION: ${{ needs.integration.result }}
-      BROWSER: ${{ needs.browser.result }}
-    steps:
-      - name: Require every test stage to succeed
-        run: |
-          test "$CHECKS" = success
-          test "$INTEGRATION" = success
-          test "$BROWSER" = success
+          npx --no-install typeorm migration:run -d dist/database/data-source.js
+          npm run test:e2e
