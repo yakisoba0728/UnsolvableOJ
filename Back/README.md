@@ -154,4 +154,4 @@ npm run check                 # lint + unit test + build
 npm run test:e2e              # compose 인프라가 실행 중일 때 E2E
 ```
 
-CI는 마이그레이션, 백엔드 검사, E2E, 워커 검사와 8개 언어 Docker smoke test를 실행합니다. 운영에서는 Docker 소켓 접근 권한을 가진 워커를 API 서버와 분리된 호스트에서 실행해야 합니다.
+검증은 로컬에서 위 명령어와 `Judge/`의 `npm run check`, `npm run test:runtime`으로 실행합니다. 운영에서는 Docker 소켓 접근 권한을 가진 워커를 API 서버와 분리된 호스트에서 실행해야 합니다.
