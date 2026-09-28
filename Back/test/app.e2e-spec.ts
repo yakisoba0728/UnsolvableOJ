@@ -128,6 +128,20 @@ describe('AppController (e2e)', () => {
       .set(judgeHeader)
       .expect(200);
     expect(claimed.body.testCases).toHaveLength(2);
+    expect(
+      claimed.body.testCases.map(
+        (testCase: { isSample: boolean }) => testCase.isSample,
+      ),
+    ).toEqual([true, false]);
+    const debugOutputs = [
+      {
+        testCase: 1,
+        stdout: '3\n',
+        stderr: 'debug message\n',
+        stdoutTruncated: false,
+        stderrTruncated: false,
+      },
+    ];
     const judged = await request(app.getHttpServer())
       .patch(`/api/v1/internal/judge/submissions/${submitted.body.id}/result`)
       .set(judgeHeader)
@@ -137,6 +151,7 @@ describe('AppController (e2e)', () => {
         totalTestCases: 2,
         runtimeMs: 8,
         memoryKb: 1024,
+        debugOutputs,
       })
       .expect(200);
     expect(judged.body.status).toBe('ACCEPTED');
@@ -158,6 +173,23 @@ describe('AppController (e2e)', () => {
       .expect(200);
     expect(mine.body.sourceCode).toContain('print(sum');
     expect(mine.body.status).toBe('ACCEPTED');
+    expect(mine.body.debugOutputs).toEqual(debugOutputs);
+
+    const list = await request(app.getHttpServer())
+      .get('/api/v1/submissions')
+      .set('Authorization', `Bearer ${solver.accessToken}`)
+      .expect(200);
+    expect(list.body.items[0]).not.toHaveProperty('debugOutputs');
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/submissions/${submitted.body.id}/rejudge`)
+      .set('Authorization', `Bearer ${authorLogin.body.accessToken}`)
+      .expect(202);
+    const requeued = await request(app.getHttpServer())
+      .get(`/api/v1/submissions/${submitted.body.id}`)
+      .set('Authorization', `Bearer ${solver.accessToken}`)
+      .expect(200);
+    expect(requeued.body.debugOutputs).toEqual([]);
   });
 
   afterAll(async () => {
@@ -165,6 +197,8 @@ describe('AppController (e2e)', () => {
       const queue = app.get<Queue>(getQueueToken(JUDGE_QUEUE));
       const job = await queue.getJob(`${submissionId}-1`);
       if (job) await job.remove();
+      const rejudgeJob = await queue.getJob(`${submissionId}-2`);
+      if (rejudgeJob) await rejudgeJob.remove();
     }
     if (problemId) {
       await dataSource.query('DELETE FROM submissions WHERE problem_id = $1', [

@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { DebugOutputs1790552000000 } from './migrations/1790552000000-debug-outputs.js';
 import { DataSource } from 'typeorm';
 import { User } from '../modules/users/user.entity.js';
 import { Problem } from '../modules/problems/problem.entity.js';
@@ -23,6 +24,7 @@ export default new DataSource({
     InitialSchema1726916400000,
     BackendFoundations1790550000000,
     BackfillSolves1790551000000,
+    DebugOutputs1790552000000,
   ],
   synchronize: false,
 });

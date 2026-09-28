@@ -144,6 +144,36 @@ npm run db:bootstrap:admin -- admin@example.com
 
 지원 판정값은 `ACCEPTED`, `WRONG_ANSWER`, `TIME_LIMIT_EXCEEDED`, `MEMORY_LIMIT_EXCEEDED`, `RUNTIME_ERROR`, `COMPILE_ERROR`, `OUTPUT_LIMIT_EXCEEDED`, `SYSTEM_ERROR`, `CANCELLED`입니다.
 
+## 실행 출력 디버깅
+
+`GET /api/v1/submissions/:id`는 제출자 본인에게 `debugOutputs`를 반환합니다.
+Python `print`, C `printf`, Java `System.out`, JavaScript `console.log` 등
+언어와 관계없이 표준 출력(`stdout`)과 표준 오류(`stderr`)를 수집합니다.
+프론트에서는 각 문자열을 HTML로 해석하지 않고 일반 텍스트로 표시하세요.
+
+```json
+{
+  "debugOutputs": [
+    {
+      "testCase": 1,
+      "stdout": "3\n",
+      "stderr": "debug message\n",
+      "stdoutTruncated": false,
+      "stderrTruncated": false
+    }
+  ]
+}
+```
+
+- 공개 예제 중 실제 실행된 최대 5개만 저장합니다. `testCase`는 채점 순서의 1부터 시작하는 번호입니다.
+- 각 스트림의 앞 1,000바이트를 UTF-8로 변환합니다. 잘린 출력은 `*Truncated`로 표시합니다.
+- 출력 미리보기 제한은 정답 비교에 영향을 주지 않습니다. `stdout`에 추가한 디버깅 출력은 기존처럼 오답이 될 수 있으므로 진단용 메시지는 `stderr`를 사용하세요.
+- 기존처럼 첫 실패에서 채점을 중단하므로 뒤쪽 예제는 실행되지 않을 수 있습니다. 빈 배열은 실행된 공개 예제가 없거나 이전 워커의 결과임을 뜻합니다.
+- 비공개 테스트의 출력과 오류 내용은 노출하지 않습니다. 컴파일 오류는 기존 `compileOutput`을 확인합니다.
+- 실행 오류·시간 초과·출력 초과에도 그때까지 수집된 공개 예제 출력을 반환합니다. 프로그램이 버퍼를 비우지 않은 출력은 남지 않을 수 있습니다.
+- 목록 API에는 출력을 포함하지 않고, 재채점 시 이전 출력은 초기화합니다.
+- 적용 전 `npm run db:migration:run`을 실행하고 채점 이미지를 다시 빌드하세요. 백엔드 마이그레이션 및 API를 먼저 반영한 뒤 새 워커/이미지를 적용합니다.
+
 ## 명령어
 
 ```bash

@@ -74,6 +74,13 @@ def execute(command, input_bytes, timeout, limit_files=True):
 
 
 def judge(payload):
+    debug_outputs = []
+    verdict = judge_cases(payload, debug_outputs)
+    verdict['debugOutputs'] = debug_outputs
+    return verdict
+
+
+def judge_cases(payload, debug_outputs):
     language = payload['language']
     cases = payload['testCases']
     if language not in LANGUAGES:
@@ -92,18 +99,27 @@ def judge(payload):
     max_runtime = 0
     max_memory = 0
     limit = payload['limits']['timeMs'] / 1000
-    for case in cases:
+    for index, case in enumerate(cases, start=1):
         process, timed_out, runtime, output, errors, memory = execute(
             run_command, case['input'].encode(), limit,
         )
         max_runtime = max(max_runtime, runtime)
         max_memory = max(max_memory, memory)
+        if case.get('isSample') is True and len(debug_outputs) < 5:
+            debug_outputs.append({
+                'testCase': index,
+                'stdout': output[:1000].decode('utf-8', errors='replace'),
+                'stderr': errors[:1000].decode('utf-8', errors='replace'),
+                'stdoutTruncated': len(output) > 1000,
+                'stderrTruncated': len(errors) > 1000,
+            })
         if timed_out:
             return result('TIME_LIMIT_EXCEEDED', passed, len(cases), max_runtime, memory_kb=max_memory)
-        if len(output) >= OUTPUT_LIMIT:
+        if len(output) >= OUTPUT_LIMIT or len(errors) >= OUTPUT_LIMIT:
             return result('OUTPUT_LIMIT_EXCEEDED', passed, len(cases), max_runtime, memory_kb=max_memory)
         if process.returncode != 0:
-            detail = errors[:1000].decode('utf-8', errors='replace')
+            detail = (errors[:1000].decode('utf-8', errors='replace')
+                      if case.get('isSample') is True else 'Runtime error on a private test case')
             return result('RUNTIME_ERROR', passed, len(cases), max_runtime, message=detail, memory_kb=max_memory)
         if output.rstrip() != case['expectedOutput'].encode().rstrip():
             return result('WRONG_ANSWER', passed, len(cases), max_runtime, memory_kb=max_memory)

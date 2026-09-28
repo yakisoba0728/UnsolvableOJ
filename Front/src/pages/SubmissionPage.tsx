@@ -118,6 +118,23 @@ export function SubmissionPage() {
           <pre>{submission.compileOutput}</pre>
         </div>
       ) : null}
+      {submission.debugOutputs && submission.debugOutputs.length > 0 ? (
+        <section className="source-section">
+          <h2>실행 출력</h2>
+          <p className="muted">실행된 공개 예제의 출력입니다. 비공개 테스트 출력은 표시하지 않습니다.</p>
+          {submission.debugOutputs.map((output) => (
+            <div className="notice" key={output.testCase}>
+              <h3>테스트 {output.testCase} · 공개 예제</h3>
+              <strong>표준 출력 (stdout)</strong>
+              <pre className="source-code">{output.stdout || '(출력 없음)'}</pre>
+              {output.stdoutTruncated ? <p>출력이 길어 앞부분만 표시합니다.</p> : null}
+              <strong>오류 출력 (stderr)</strong>
+              <pre className="source-code">{output.stderr || '(출력 없음)'}</pre>
+              {output.stderrTruncated ? <p>오류 출력이 길어 앞부분만 표시합니다.</p> : null}
+            </div>
+          ))}
+        </section>
+      ) : null}
       <section className="source-section">
         <div className="section-heading">
           <div>
