@@ -76,6 +76,9 @@ function runContainer(claim: Claim): Promise<JudgeResult> {
         "-i",
         "--name",
         name,
+        ...(process.env.JUDGE_RUN_ID
+          ? ["--label", `unsolvable.ci=${process.env.JUDGE_RUN_ID}`]
+          : []),
         "--network",
         "none",
         "--read-only",

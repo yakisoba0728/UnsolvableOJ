@@ -73,7 +73,7 @@ export function ProblemPage() {
     setError("");
     setProblem(null);
     setLoading(true);
-    void api<Problem>(`/problems/${encodeURIComponent(slug ?? "")}`, {
+    void api<Problem>(`/problems/by-slug/${encodeURIComponent(slug ?? "")}`, {
       signal: controller.signal,
     })
       .then(setProblem)
@@ -251,7 +251,7 @@ export function ProblemPage() {
               <Link
                 className="button button-full"
                 to="/auth"
-                state={{ from: `/problems/${problem.slug}` }}
+                state={{ from: `/problems/view/${encodeURIComponent(problem.slug)}` }}
               >
                 로그인하고 풀기
               </Link>

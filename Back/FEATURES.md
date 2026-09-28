@@ -1,0 +1,119 @@
+# 백엔드 기능 목록
+
+현재 컨트롤러·서비스·운영 스크립트를 기준으로 작성했습니다. API 기본 경로는 `/api/v1`이며 표에서는 생략합니다. `로그인`은 USER·AUTHOR·ADMIN 모두, `문제 소유자`는 AUTHOR이면서 해당 문제를 작성한 사용자를 뜻합니다. ADMIN은 모든 문제를 관리할 수 있습니다.
+
+## 1. 계정과 인증
+
+| API | 권한 | 기능 |
+|---|---|---|
+| `POST /auth/register` | 공개 | 회원가입 후 JWT와 사용자 정보 반환 |
+| `POST /auth/login` | 공개 | 이메일·비밀번호 확인 후 JWT와 사용자 정보 반환 |
+| `GET /users/me` | 로그인 | 내 계정·역할·XP·레벨·rating·가입일·해결 문제 수 |
+
+- 이메일 소문자 정규화, 이메일·사용자 이름 중복 거절. 사용자 이름은 영문·숫자·밑줄 3–30자, 비밀번호는 10–128자입니다.
+- 사용자별 salt와 scrypt로 비밀번호를 해시하고 상수 시간 비교로 검증합니다. 비밀번호 해시는 응답에 포함하지 않습니다.
+- 가입 시 USER이며 AUTHOR는 문제 작성자, ADMIN은 관리자입니다. JWT 기본 유효 기간은 15분으로 환경 변수에서 조정할 수 있습니다.
+- 인증 요청마다 DB의 현재 역할과 `tokenVersion`을 확인합니다. 관리자 역할 변경과 CLI 승격은 기존 JWT를 무효화합니다.
+
+## 2. 문제와 테스트케이스
+
+| API | 권한 | 기능 |
+|---|---|---|
+| `GET /problems` | 공개 | 공개 문제 목록, 난이도 필터, 페이지 조회 |
+| `GET /problems/by-slug/:slug` | 공개 | 공개 문제 설명·제한·예제 조회 |
+| `GET /problems/:slug` | 공개 | 기존 상세 주소의 호환 경로; `mine`은 관리 경로가 우선 |
+| `POST /problems` | AUTHOR/ADMIN | 문제·테스트케이스·최초 버전 생성; 공개 상태 생성은 ADMIN만 가능 |
+| `GET /problems/mine` | AUTHOR/ADMIN | 내 문제 최신 100개, ADMIN은 전체 중 최신 100개 |
+| `GET /problems/:id/manage` | 문제 소유자/ADMIN | 비공개 테스트케이스를 포함한 관리 상세 |
+| `PATCH /problems/:id` | 문제 소유자/ADMIN | 내용·난이도·제한·테스트케이스 수정 및 버전 증가 |
+| `PATCH /problems/:id/status` | 문제 소유자/ADMIN | DRAFT·PUBLISHED·ARCHIVED 전환; PUBLISHED는 ADMIN만 가능 |
+
+- 본문·입력 설명·출력 설명을 Markdown으로 저장합니다. 난이도는 BEGINNER/EASY/MEDIUM/HARD/EXPERT입니다.
+- 공개 목록은 최신 생성순, 기본 20개·최대 100개입니다. 공개 상세에는 `isSample=true`인 예제만 반환합니다.
+- 시간 제한은 기본 1,000ms, 범위 100–60,000ms이며 메모리는 기본 256MB, 범위 16–4,096MB입니다.
+- 테스트케이스는 1–100개이고 입력·기대 출력 각각 최대 100만 자입니다. 순서·예제 여부·score(1–10,000)를 저장합니다. 현재 판정은 모든 테스트 통과 여부를 사용하며 부분 점수 계산은 없습니다.
+- 수정에서 생략한 필드는 유지하고 빈 수정·필수 필드의 null을 거절합니다. slug는 수정할 수 없습니다.
+- 내용 수정마다 `currentVersion`을 증가시키고 제한·전체 테스트케이스를 `problem_versions`에 불변 스냅샷으로 저장합니다. 상태만 변경할 때는 버전을 증가시키지 않습니다.
+- AUTHOR가 공개 문제를 수정하면 초안으로 돌아가 관리자 재검수가 필요합니다. ADMIN 수정은 공개 상태를 유지합니다.
+- 각 필드 제한과 별도로 JSON 요청 전체는 **16MiB** 이하입니다. 여러 대형 테스트케이스의 합계에도 적용됩니다.
+- 웹 공개 주소는 `/problems/view/:slug`입니다. `mine`, `new` 같은 slug도 관리 경로와 충돌하지 않습니다.
+
+## 3. 제출과 재채점
+
+| API | 권한 | 기능 |
+|---|---|---|
+| `POST /problems/:problemId/submissions` | 로그인 | 공개 문제에 제출하고 채점 큐 등록, HTTP 202 반환 |
+| `GET /submissions` | 로그인 | 내 제출 목록, 문제 ID 필터, 페이지 조회 |
+| `GET /submissions/:id` | 제출자 본인 | 판정·소스 코드·실행 정보·공개 예제 출력 |
+| `POST /submissions/:id/rejudge` | 문제 소유자/ADMIN | 원래 문제 버전으로 재채점, HTTP 202 반환 |
+
+- 지원 언어는 C/CPP/JAVA/PYTHON/JAVASCRIPT/TYPESCRIPT/GO/RUST, 소스 크기는 1–200,000자입니다.
+- 제출 생성 당시 문제 버전을 고정합니다. 이후 수정·비공개 전환에도 원래 제한과 테스트케이스로 채점합니다.
+- 목록은 최신 제출순, 기본 20개·최대 100개입니다. 소스는 본인 상세에만 반환하고 다른 사용자의 상세 조회는 404입니다.
+- 응답에는 상태, 문제 버전, 채점 세대, 실행 시간·메모리, 통과/전체 테스트 수, 컴파일 출력, 채점 메시지, 생성/수정 시각이 포함됩니다.
+- 재채점은 세대를 증가시키고 이전 시도·판정 정보를 초기화합니다. 이전 워커가 뒤늦게 보낸 결과는 거절합니다.
+- 최초 큐 등록 실패는 SYSTEM_ERROR로 저장하고 503을 반환합니다. 재채점 큐 등록 실패는 복구 작업이 재시도하도록 QUEUED를 유지합니다.
+
+진행 상태는 QUEUED/JUDGING, 최종 상태는 ACCEPTED, WRONG_ANSWER, TIME_LIMIT_EXCEEDED, MEMORY_LIMIT_EXCEEDED, RUNTIME_ERROR, COMPILE_ERROR, OUTPUT_LIMIT_EXCEEDED, SYSTEM_ERROR, CANCELLED입니다. CANCELLED는 내부 결과 계약의 상태이며 사용자 취소 API는 없습니다.
+
+- 본인 상세의 `debugOutputs`에는 실행된 공개 예제 최대 5개의 stdout·stderr 앞 1,000바이트와 잘림 여부를 반환합니다. 비공개 테스트 출력은 숨기고 재채점 시 초기화합니다.
+
+## 4. XP·레벨·랭킹
+
+| API | 권한 | 기능 |
+|---|---|---|
+| `GET /rankings` | 공개 | XP 상위 100명의 사용자 이름·레벨·XP·rating·해결 문제 수 |
+
+- 사용자·문제별 첫 정답에만 XP를 지급합니다. 추가 정답과 동일 판정 재전송에는 중복 지급하지 않습니다.
+- 첫 정답의 문제 버전 난이도에 따라 BEGINNER 10, EASY 20, MEDIUM 40, HARD 80, EXPERT 160 XP를 지급합니다.
+- 레벨은 `1 + floor(XP / 100)`입니다. 랭킹은 XP 내림차순, 동점일 때 가입일 오름차순입니다.
+- 재채점으로 정답이 취소되면 다른 정답 제출을 확인합니다. 남아 있으면 XP를 유지하고 마지막 정답이 취소되면 해결 기록과 XP를 회수합니다.
+- rating은 저장·조회 필드만 있으며 별도 계산·갱신 로직은 없습니다.
+
+## 5. 관리자 운영
+
+| API | 권한 | 기능 |
+|---|---|---|
+| `GET /admin/users` | ADMIN | 최신 사용자 100명의 계정·역할·XP 등 조회 |
+| `PATCH /admin/users/:id/role` | ADMIN | USER·AUTHOR·ADMIN 역할 변경, 기존 JWT 무효화 |
+| `GET /admin/audit` | ADMIN | 최근 감사 이벤트 100개 |
+| `GET /admin/ops` | ADMIN | 큐·판정별 제출 수·워커 상태·최근 실패 작업 |
+
+- 관리자는 자신의 관리자 권한을 해제할 수 없습니다.
+- 감사 로그는 문제 생성·수정·상태 변경, 재채점, 역할 변경의 수행자·대상·상세·시각을 기록합니다.
+- 운영 조회에는 waiting/active/delayed/failed/completed 작업 수, DB 상태별 제출 수, 최근 30초 내 응답한 워커, 실패 작업 10개의 사유·시도 횟수가 포함됩니다.
+
+## 6. 채점기 내부 API와 복구
+
+| API | 인증 | 기능 |
+|---|---|---|
+| `POST /internal/judge/heartbeat` | 채점 토큰 + 워커 UUID | 워커 생존 상태 갱신 |
+| `GET /internal/judge/submissions/:id` | 채점 토큰 + 세대/시도 ID | 채점 권한 획득, 소스·제한·전체 테스트 반환 |
+| `PATCH /internal/judge/submissions/:id/heartbeat` | 동일 | 제출별 lease 연장 |
+| `PATCH /internal/judge/submissions/:id/result` | 동일 | 최종 판정 저장과 XP 정산 |
+
+- `X-Judge-Token`을 상수 시간 비교로 인증합니다. 워커는 `X-Judge-Worker`, 채점 시도는 `X-Judge-Generation`·`X-Judge-Attempt`로 구분합니다.
+- PostgreSQL이 상태의 기준입니다. Redis/BullMQ에는 소스·비공개 테스트 대신 `submissionId`, `generation`만 전달합니다.
+- DB 잠금과 세대·시도 ID로 중복 claim과 오래된 결과를 거절합니다. 같은 시도의 동일 최종 판정 재전송은 허용하고 다른 판정으로 바꾸는 요청은 거절합니다.
+- lease는 60초, 워커·제출 heartbeat는 10초 간격입니다. 워커 목록에서 60초 이상 지난 항목을 정리합니다.
+- 복구 작업은 30초마다 실행합니다. 10초 이상 대기한 제출에 큐 작업이 없으면 재등록합니다. 작업이 이미 실패·완료됐는데 DB가 QUEUED이면 SYSTEM_ERROR로 전환합니다. 만료된 JUDGING은 새 세대로 재등록합니다. 각 조회는 회차당 100건입니다.
+- 작업은 최대 3회 시도하고 1초부터 지수 backoff를 적용합니다. 완료 작업은 1,000개, 실패 작업은 5,000개를 보관합니다.
+- 실제 실행은 별도 `Judge/`가 담당합니다. Docker 네트워크 차단·읽기 전용 루트·프로세스/CPU/메모리 제한, 테스트별 시간·출력·프로세스 트리 메모리 검사, 자식 프로세스 정리를 사용합니다. 세부 기준은 [Judge 문서](../Judge/README.md)에 있습니다.
+
+## 7. 공통 API와 개발·운영 지원
+
+- `GET /health`: PostgreSQL·Redis 접근과 큐 상태를 확인합니다. 정상은 200, 의존성 장애는 503입니다. 워커 실행 여부는 관리자 운영 조회로 따로 확인합니다.
+- `/docs`: Swagger API 문서와 Bearer 인증 입력을 제공합니다.
+- DTO 변환·검증, 미등록 필드 거절, UUID 검사, 허용 Origin 기반 CORS, Helmet 보안 헤더를 적용합니다.
+- 기본 속도 제한은 IP·핸들러별 분당 100회이며 회원가입 5회, 로그인 10회, 제출 생성 20회입니다. 내부 채점 API는 제외합니다.
+- 환경 변수 스키마 검증, PostgreSQL SSL 옵션, Redis 주소·계정·DB 설정, API 바인딩 주소·포트 설정을 지원합니다.
+- 마이그레이션은 초기 스키마, 버전·채점 시도·해결 기록·감사 로그 추가, 기존 정답 XP/해결 기록 보정과 과거 채점 lease 복구를 제공합니다. 스키마 자동 동기화는 사용하지 않습니다.
+- `npm run db:bootstrap:admin -- <email>`: 기존 계정을 관리자로 승격하고 토큰을 무효화합니다. 계정이 없으면 실패합니다.
+- `npm run db:seed:demo`: 데모 작성자·A+B 공개 문제·스냅샷과 무작위 비밀번호를 준비합니다. 재실행 시 데모 비밀번호와 토큰 버전이 변경됩니다.
+- lint, 단위 테스트, 빌드, PostgreSQL·Redis 기반 E2E 테스트 명령을 제공합니다.
+
+## 8. 화면 연결과 미구현 범위
+
+현재 웹 화면은 회원가입·로그인, 공개 문제 목록/상세, 제출·결과 조회, AUTHOR 초안 저장과 ADMIN 즉시 게시를 연결합니다. 문제 관리·검수·수정, 재채점, XP/랭킹, 관리자 운영은 API가 있으며 전용 웹 화면은 아직 없습니다.
+
+Refresh token, 서버 로그아웃/전체 세션 관리 API, 이메일 인증, 비밀번호 재설정, 문제 삭제, 사용자 제출 취소, 부분 점수 채점, 대회, 커뮤니티는 구현되어 있지 않습니다.

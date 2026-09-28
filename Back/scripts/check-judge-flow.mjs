@@ -20,9 +20,9 @@ const env = {
   DATABASE_URL:
     process.env.DATABASE_URL ||
     'postgresql://unsolvable:local_password@localhost:5432/unsolvable_oj',
-  REDIS_HOST: '127.0.0.1',
-  REDIS_PORT: '6379',
-  REDIS_DB: '2',
+  REDIS_HOST: process.env.REDIS_HOST || '127.0.0.1',
+  REDIS_PORT: process.env.REDIS_PORT || '6379',
+  REDIS_DB: process.env.PIPELINE_REDIS_DB || '2',
   JWT_ACCESS_SECRET: randomUUID() + randomUUID(),
   JUDGE_SERVICE_TOKEN: randomUUID() + randomUUID(),
   API_BASE_URL: base,
@@ -84,7 +84,13 @@ try {
   assert.ok(healthy, 'Test API did not become healthy');
   start(judge, 'dist/worker.js');
   queue = new Queue('judge-submissions', {
-    connection: { host: env.REDIS_HOST, port: 6379, db: 2 },
+    connection: {
+      host: env.REDIS_HOST,
+      port: Number(env.REDIS_PORT),
+      db: Number(env.REDIS_DB),
+      username: env.REDIS_USERNAME || undefined,
+      password: env.REDIS_PASSWORD || undefined,
+    },
   });
   const suffix = randomUUID().slice(0, 8);
   const email = `judge-flow-${suffix}@example.com`;

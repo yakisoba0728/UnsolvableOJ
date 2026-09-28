@@ -1,29 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import helmet from 'helmet';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module.js';
+import { configureHttp } from './configure-http.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const config = app.get(ConfigService);
-  app.use(helmet());
-  app.setGlobalPrefix('api/v1');
-  app.enableCors({
-    origin: config
-      .getOrThrow<string>('CORS_ORIGIN')
-      .split(',')
-      .map((origin) => origin.trim()),
-    credentials: true,
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
   });
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: true,
-    }),
-  );
+  const config = app.get(ConfigService);
+  configureHttp(app);
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('UnsolvableOJ API')

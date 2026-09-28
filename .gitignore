@@ -8,6 +8,9 @@
 **/*.tsbuildinfo
 **/__pycache__/
 **/*.pyc
+**/reports/
+**/playwright-report/
+**/test-results/
 **/.env
 **/.env.*
 !**/.env.example

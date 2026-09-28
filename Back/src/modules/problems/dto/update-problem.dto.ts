@@ -1,6 +1,6 @@
-import { OmitType, PartialType } from '@nestjs/swagger';
-import { CreateProblemDto } from './create-problem.dto.js';
+import { PartialType } from '@nestjs/swagger';
+import { ProblemContentDto } from './create-problem.dto.js';
 
-export class UpdateProblemDto extends PartialType(
-  OmitType(CreateProblemDto, ['slug', 'status'] as const),
-) {}
+export class UpdateProblemDto extends PartialType(ProblemContentDto, {
+  skipNullProperties: false,
+}) {}

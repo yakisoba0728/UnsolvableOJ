@@ -51,7 +51,7 @@ export class ProblemsController {
     return this.problemsService.findForManagement(id, user);
   }
 
-  @Get(':slug')
+  @Get(['by-slug/:slug', ':slug'])
   findOne(@Param('slug') slug: string) {
     return this.problemsService.findPublishedBySlug(slug);
   }
