@@ -1,0 +1,25 @@
+{
+  "name": "@unsolvable-oj/judge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/worker.js",
+    "start:dev": "node --experimental-strip-types src/worker.ts",
+    "check": "npm run build && python3 -m unittest discover -s runtime -p 'test_*.py'",
+    "test:runtime": "python3 runtime/smoke.py"
+  },
+  "dependencies": {
+    "bullmq": "^6.3.8",
+    "dotenv": "^17.2.2",
+    "ioredis": "^5.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^6.0.2"
+  }
+}

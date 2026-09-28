@@ -1,0 +1,74 @@
+name: Backend
+
+on:
+  push:
+    paths:
+      - 'Back/**'
+      - 'Judge/**'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    paths:
+      - 'Back/**'
+      - 'Judge/**'
+      - '.github/workflows/backend.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: unsolvable
+          POSTGRES_PASSWORD: local_password
+          POSTGRES_DB: unsolvable_oj
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U unsolvable -d unsolvable_oj"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:8
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://unsolvable:local_password@localhost:5432/unsolvable_oj
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      JWT_ACCESS_SECRET: test-jwt-secret-with-at-least-32-characters
+      JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            Back/package-lock.json
+            Judge/package-lock.json
+      - name: Install backend
+        run: npm ci
+        working-directory: Back
+      - name: Install judge
+        run: npm ci
+        working-directory: Judge
+      - name: Migrate database
+        run: npm run db:migration:run
+        working-directory: Back
+      - name: Check backend
+        run: npm run check
+        working-directory: Back
+      - name: Test backend API
+        run: npm run test:e2e
+        working-directory: Back
+      - name: Check judge
+        run: npm run check
+        working-directory: Judge
+      - name: Build sandbox image
+        run: docker build -t unsolvable-judge-runtime:local Judge/runtime
+      - name: Smoke test all languages
+        run: npm run test:runtime
+        working-directory: Judge
