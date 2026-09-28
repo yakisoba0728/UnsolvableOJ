@@ -55,6 +55,20 @@ export interface Submission {
   updatedAt: string;
 }
 
+export interface UserProfile extends User {
+  createdAt: string;
+  solvedCount: number;
+}
+
+export interface RankingEntry {
+  id: string;
+  username: string;
+  level: number;
+  xp: number;
+  rating: number;
+  solvedCount: number;
+}
+
 export interface Page<T> {
   items: T[];
   page: number;

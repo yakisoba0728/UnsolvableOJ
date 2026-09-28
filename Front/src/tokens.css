@@ -1,0 +1,46 @@
+/* Design tokens — UnsolvableJ Design Foundations (Figma: 01 Foundations / 02 Components) */
+:root {
+  /* Color: surfaces & structure */
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-border: #e3e5e6;
+
+  /* Color: ink (text/icons) */
+  --color-ink-900: #17191a;
+  --color-ink-600: #596573;
+  --color-ink-400: #8996a9;
+
+  /* Color: primary action */
+  --color-primary: #1c4fd8;
+  --color-primary-hover: #143ea9;
+  --color-primary-soft: #e7edff;
+
+  /* Color: status */
+  --color-success: #137647;
+  --color-success-soft: #e3f7ec;
+  --color-danger: #c13f4b;
+  --color-danger-soft: #ffe3e4;
+  --color-warning: #c07a1b;
+  --color-warning-soft: #fff1db;
+
+  /* Typography */
+  --font-sans: "Noto Sans KR", "DM Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --text-display: 700 32px/1.25 var(--font-sans);
+  --text-h1: 700 24px/1.3 var(--font-sans);
+  --text-section: 600 20px/1.35 var(--font-sans);
+  --text-body: 400 16px/1.7 var(--font-sans);
+  --text-caption: 400 14px/1.5 var(--font-sans);
+  --text-code: 400 14px/1.6 var(--font-mono);
+
+  /* Spacing (8px grid) */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+
+  /* Controls */
+  --control-height: 44px;
+  --radius-control: 10px;
+}

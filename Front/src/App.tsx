@@ -2,6 +2,7 @@ import { Link, NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "./auth";
 import { AuthPage } from "./pages/AuthPage";
 import { CreateProblemPage } from "./pages/CreateProblemPage";
+import { HomePage } from "./pages/HomePage";
 import { ProblemPage } from "./pages/ProblemPage";
 import { ProblemsPage } from "./pages/ProblemsPage";
 import { SubmissionPage } from "./pages/SubmissionPage";
@@ -13,7 +14,7 @@ export function App() {
     <div className="app-shell">
       <header className="site-header">
         <div className="header-inner">
-          <Link to="/problems" className="brand" aria-label="못풀준 홈">
+          <Link to="/" className="brand" aria-label="못풀준 홈">
             <span className="brand-mark">
               U<span>_</span>
             </span>
@@ -22,6 +23,9 @@ export function App() {
             </span>
           </Link>
           <nav className="main-nav" aria-label="주 메뉴">
+            <NavLink to="/" end>
+              홈
+            </NavLink>
             <NavLink to="/problems">문제</NavLink>
             {session ? <NavLink to="/submissions">내 제출</NavLink> : null}
             {session && session.user.role !== "USER" ? (
@@ -49,7 +53,7 @@ export function App() {
       </header>
       <main className="main-content">
         <Routes>
-          <Route path="/" element={<Navigate to="/problems" replace />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/problems" element={<ProblemsPage />} />
           <Route
