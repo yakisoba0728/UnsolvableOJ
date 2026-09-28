@@ -29,7 +29,8 @@
     "check": "npm run lint && npm run typecheck && npm run test && npm run build",
     "test:pipeline": "vitest run --config ./vitest.config.pipeline.ts",
     "test:migrations": "node scripts/check-migrations.mjs",
-    "typecheck": "tsc --noEmit --incremental false"
+    "typecheck": "tsc --noEmit --incremental false",
+    "test:judge-flow": "node scripts/check-judge-flow.mjs"
   },
   "dependencies": {
     "@nestjs/bullmq": "^12.0.0",

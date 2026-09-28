@@ -15,7 +15,10 @@ def run(language, source, *, memory_mb=256, container_memory_mb=None, time_ms=50
     payload = {
         'language': language, 'sourceCode': source,
         'limits': {'timeMs': time_ms, 'memoryMb': memory_mb},
-        'testCases': [{'input': '5 7\n', 'expectedOutput': '12\n'}],
+        'testCases': [
+            {'input': '5 7\n', 'expectedOutput': '12\n', 'isSample': True},
+            {'input': '1 2\n', 'expectedOutput': '3\n', 'isSample': False},
+        ],
     }
     container_memory_mb = container_memory_mb or max(128, memory_mb + 96)
     command = [
@@ -53,6 +56,13 @@ if __name__ == '__main__':
         if status != 'ACCEPTED':
             failed = True
             print(result.get('compileOutput') or result.get('judgeMessage') or '', flush=True)
+
+        elif result.get('debugOutputs') != [{
+            'testCase': 1, 'stdout': '12\n', 'stderr': '',
+            'stdoutTruncated': False, 'stderrTruncated': False,
+        }]:
+            failed = True
+            print('Unexpected sample debug output', result.get('debugOutputs'), flush=True)
 
     regressions = [
         ('problem memory limit', 'data = bytearray(64 * 1024 * 1024); print(12)',

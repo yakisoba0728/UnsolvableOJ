@@ -188,6 +188,13 @@ def execute(command, input_bytes, timeout, limit_files=True, memory_limit_kb=Non
 
 
 def judge(payload):
+    debug_outputs = []
+    verdict = judge_cases(payload, debug_outputs)
+    verdict['debugOutputs'] = debug_outputs
+    return verdict
+
+
+def judge_cases(payload, debug_outputs):
     language = payload['language']
     cases = payload['testCases']
     if language not in LANGUAGES:
@@ -208,21 +215,34 @@ def judge(payload):
     max_runtime = 0
     max_memory = 0
     limit = payload['limits']['timeMs'] / 1000
-    for case in cases:
+    # Public samples run first so private input left in files cannot appear
+    # in a later sample's visible output. Keep original test case numbers.
+    ordered_cases = sorted(enumerate(cases, start=1),
+                           key=lambda item: item[1].get('isSample') is not True)
+    for index, case in ordered_cases:
         execution = execute(
             run_command, case['input'].encode(), limit,
             memory_limit_kb=payload['limits']['memoryMb'] * 1024,
         )
         max_runtime = max(max_runtime, execution.duration_ms)
         max_memory = max(max_memory, execution.memory_kb)
+        if case.get('isSample') is True and len(debug_outputs) < 5:
+            debug_outputs.append({
+                'testCase': index,
+                'stdout': execution.stdout[:1000].decode('utf-8', errors='replace'),
+                'stderr': execution.stderr[:1000].decode('utf-8', errors='replace'),
+                'stdoutTruncated': len(execution.stdout) > 1000,
+                'stderrTruncated': len(execution.stderr) > 1000,
+            })
         if execution.memory_exceeded:
             return result('MEMORY_LIMIT_EXCEEDED', passed, len(cases), max_runtime, memory_kb=max_memory)
         if execution.timed_out:
             return result('TIME_LIMIT_EXCEEDED', passed, len(cases), max_runtime, memory_kb=max_memory)
-        if len(execution.stdout) >= OUTPUT_LIMIT:
+        if len(execution.stdout) >= OUTPUT_LIMIT or len(execution.stderr) >= OUTPUT_LIMIT:
             return result('OUTPUT_LIMIT_EXCEEDED', passed, len(cases), max_runtime, memory_kb=max_memory)
         if execution.returncode != 0:
-            detail = execution.stderr[:1000].decode('utf-8', errors='replace')
+            detail = (execution.stderr[:1000].decode('utf-8', errors='replace')
+                      if case.get('isSample') is True else 'Runtime error on a private test case')
             return result('RUNTIME_ERROR', passed, len(cases), max_runtime, message=detail, memory_kb=max_memory)
         if execution.stdout.rstrip() != case['expectedOutput'].encode().rstrip():
             return result('WRONG_ANSWER', passed, len(cases), max_runtime, memory_kb=max_memory)

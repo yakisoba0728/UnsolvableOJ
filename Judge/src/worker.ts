@@ -13,11 +13,19 @@ interface Claim {
     id: string;
     input: string;
     expectedOutput: string;
+    isSample: boolean;
     score: number;
   }[];
 }
 
 interface JudgeResult {
+  debugOutputs?: {
+    testCase: number;
+    stdout: string;
+    stderr: string;
+    stdoutTruncated: boolean;
+    stderrTruncated: boolean;
+  }[];
   status: string;
   runtimeMs?: number;
   memoryKb?: number;

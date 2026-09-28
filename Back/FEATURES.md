@@ -44,7 +44,7 @@
 |---|---|---|
 | `POST /problems/:problemId/submissions` | 로그인 | 공개 문제에 제출하고 채점 큐 등록, HTTP 202 반환 |
 | `GET /submissions` | 로그인 | 내 제출 목록, 문제 ID 필터, 페이지 조회 |
-| `GET /submissions/:id` | 제출자 본인 | 판정·소스 코드·실행 정보 |
+| `GET /submissions/:id` | 제출자 본인 | 판정·소스 코드·실행 정보·공개 예제 출력 |
 | `POST /submissions/:id/rejudge` | 문제 소유자/ADMIN | 원래 문제 버전으로 재채점, HTTP 202 반환 |
 
 - 지원 언어는 C/CPP/JAVA/PYTHON/JAVASCRIPT/TYPESCRIPT/GO/RUST, 소스 크기는 1–200,000자입니다.
@@ -55,6 +55,8 @@
 - 최초 큐 등록 실패는 SYSTEM_ERROR로 저장하고 503을 반환합니다. 재채점 큐 등록 실패는 복구 작업이 재시도하도록 QUEUED를 유지합니다.
 
 진행 상태는 QUEUED/JUDGING, 최종 상태는 ACCEPTED, WRONG_ANSWER, TIME_LIMIT_EXCEEDED, MEMORY_LIMIT_EXCEEDED, RUNTIME_ERROR, COMPILE_ERROR, OUTPUT_LIMIT_EXCEEDED, SYSTEM_ERROR, CANCELLED입니다. CANCELLED는 내부 결과 계약의 상태이며 사용자 취소 API는 없습니다.
+
+- 본인 상세의 `debugOutputs`에는 실행된 공개 예제 최대 5개의 stdout·stderr 앞 1,000바이트와 잘림 여부를 반환합니다. 비공개 테스트 출력은 숨기고 재채점 시 초기화합니다.
 
 ## 4. XP·레벨·랭킹
 

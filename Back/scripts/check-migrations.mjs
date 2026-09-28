@@ -50,7 +50,10 @@ try {
   );
   await db.destroy();
   db = await new DataSource(options).initialize();
-  assert.equal((await db.runMigrations()).length, 2);
+  assert.equal(
+    (await db.runMigrations()).length,
+    configured.options.migrations.length - 1,
+  );
   const [{ snapshot }] = await db.query(
     'SELECT snapshot FROM problem_versions WHERE problem_id = $1',
     [problem.id],

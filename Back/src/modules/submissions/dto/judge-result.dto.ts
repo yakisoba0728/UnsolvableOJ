@@ -1,4 +1,7 @@
 import {
+  ArrayMaxSize,
+  IsArray,
+  ValidateNested,
   IsEnum,
   IsInt,
   IsOptional,
@@ -7,9 +10,18 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { DebugOutputDto } from './debug-output.dto.js';
 import { SubmissionStatus } from '../submission.enums.js';
 
 export class JudgeResultDto {
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(5)
+  @ValidateNested({ each: true })
+  @Type(() => DebugOutputDto)
+  debugOutputs?: DebugOutputDto[];
+
   @IsEnum(SubmissionStatus)
   status: SubmissionStatus;
 

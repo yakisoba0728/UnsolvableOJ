@@ -12,11 +12,19 @@ import {
 import { Problem } from '../problems/problem.entity.js';
 import { User } from '../users/user.entity.js';
 import { SubmissionLanguage, SubmissionStatus } from './submission.enums.js';
+import type { DebugOutputDto } from './dto/debug-output.dto.js';
 
 @Entity({ name: 'submissions' })
 @Index('idx_submissions_user_created', ['userId', 'createdAt'])
 @Index('idx_submissions_problem_created', ['problemId', 'createdAt'])
 export class Submission {
+  @Column({
+    name: 'debug_outputs',
+    type: 'jsonb',
+    default: () => "'[]'::jsonb",
+  })
+  debugOutputs: DebugOutputDto[];
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

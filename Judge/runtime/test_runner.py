@@ -21,7 +21,7 @@ class JudgeRunnerTests(unittest.TestCase):
             'language': 'PYTHON',
             'sourceCode': source,
             'limits': {'timeMs': time_ms, 'memoryMb': 256},
-            'testCases': [{'input': '1 2\n', 'expectedOutput': expected}],
+            'testCases': [{'input': '1 2\n', 'expectedOutput': expected, 'isSample': True}],
         }
 
     def test_accepted(self):
@@ -33,6 +33,58 @@ class JudgeRunnerTests(unittest.TestCase):
     def test_wrong_answer(self):
         result = runner.judge(self.payload('print(4)'))
         self.assertEqual(result['status'], 'WRONG_ANSWER')
+        self.assertEqual(result['debugOutputs'][0]['stdout'], '4\n')
+
+    def test_stdout_and_stderr_do_not_change_verdict(self):
+        result = runner.judge(self.payload('import sys\nprint(3)\nprint("debug", file=sys.stderr)'))
+        self.assertEqual(result['status'], 'ACCEPTED')
+        self.assertEqual(result['debugOutputs'][0]['stdout'], '3\n')
+        self.assertEqual(result['debugOutputs'][0]['stderr'], 'debug\n')
+
+    def test_private_case_outputs_are_not_exposed(self):
+        for sample_flag in (False, None):
+            payload = self.payload('import sys\nprint(input())\nraise RuntimeError("private-input")')
+            payload['testCases'][0]['isSample'] = sample_flag
+            result = runner.judge(payload)
+            self.assertEqual(result['status'], 'RUNTIME_ERROR')
+            self.assertEqual(result['debugOutputs'], [])
+            self.assertNotIn('private-input', result['judgeMessage'])
+
+    def test_output_preview_is_bounded_without_changing_comparison(self):
+        payload = self.payload('print("x" * 2000)', expected='x' * 2000 + '\n')
+        payload['testCases'] *= 7
+        result = runner.judge(payload)
+        self.assertEqual(result['status'], 'ACCEPTED')
+        self.assertEqual(result['passedTestCases'], 7)
+        self.assertEqual(len(result['debugOutputs']), 5)
+        self.assertEqual(len(result['debugOutputs'][0]['stdout']), 1000)
+        self.assertTrue(result['debugOutputs'][0]['stdoutTruncated'])
+
+    def test_stderr_output_limit(self):
+        result = runner.judge(self.payload('import sys\nsys.stderr.write("x" * 1000001)'))
+        self.assertEqual(result['status'], 'OUTPUT_LIMIT_EXCEEDED')
+
+    def test_private_input_cannot_be_carried_into_sample_output(self):
+        payload = self.payload(
+            'from pathlib import Path\n'
+            'value = input()\n'
+            'saved = Path("saved.txt")\n'
+            'print(saved.read_text() if saved.exists() else value)\n'
+            'saved.write_text(value)')
+        payload['testCases'] = [
+            {'input': 'secret', 'expectedOutput': 'public', 'isSample': False},
+            {'input': 'public', 'expectedOutput': 'public', 'isSample': True},
+        ]
+        result = runner.judge(payload)
+        self.assertEqual(result['status'], 'ACCEPTED')
+        self.assertEqual(result['debugOutputs'][0]['testCase'], 2)
+        self.assertEqual(result['debugOutputs'][0]['stdout'], 'public\n')
+        self.assertNotIn('secret', str(result['debugOutputs']))
+
+    def test_timeout_keeps_flushed_output(self):
+        result = runner.judge(self.payload('print("before timeout", flush=True)\nwhile True: pass', time_ms=100))
+        self.assertEqual(result['status'], 'TIME_LIMIT_EXCEEDED')
+        self.assertEqual(result['debugOutputs'][0]['stdout'], 'before timeout\n')
 
     def test_time_limit(self):
         result = runner.judge(self.payload('while True: pass', time_ms=100))
@@ -48,11 +100,20 @@ class JudgeRunnerTests(unittest.TestCase):
         self.assertIn('broken', result['judgeMessage'])
 
     def test_memory_limit(self):
-        payload = self.payload('data = bytearray(64 * 1024 * 1024)\nprint(3)')
-        payload['limits']['memoryMb'] = 32
-        result = runner.judge(payload)
-        self.assertEqual(result['status'], 'MEMORY_LIMIT_EXCEEDED')
-        self.assertGreater(result['memoryKb'], 32 * 1024)
+        for is_sample in (True, False):
+            with self.subTest(is_sample=is_sample):
+                payload = self.payload(
+                    'import sys\nprint("before memory", file=sys.stderr, flush=True)\n'
+                    'data = bytearray(64 * 1024 * 1024)\nprint(3)')
+                payload['limits']['memoryMb'] = 32
+                payload['testCases'][0]['isSample'] = is_sample
+                result = runner.judge(payload)
+                self.assertEqual(result['status'], 'MEMORY_LIMIT_EXCEEDED')
+                self.assertGreater(result['memoryKb'], 32 * 1024)
+                if is_sample:
+                    self.assertEqual(result['debugOutputs'][0]['stderr'], 'before memory\n')
+                else:
+                    self.assertEqual(result['debugOutputs'], [])
 
     def test_sigkill_without_oom_is_runtime_error(self):
         result = runner.judge(self.payload('import os, signal\nos.kill(os.getpid(), signal.SIGKILL)'))
