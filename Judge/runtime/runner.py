@@ -99,7 +99,11 @@ def judge_cases(payload, debug_outputs):
     max_runtime = 0
     max_memory = 0
     limit = payload['limits']['timeMs'] / 1000
-    for index, case in enumerate(cases, start=1):
+    # A submission can leave files behind between executions. Run public samples
+    # first so a later sample cannot print data saved by a private test.
+    ordered_cases = sorted(enumerate(cases, start=1),
+                           key=lambda item: item[1].get('isSample') is not True)
+    for index, case in ordered_cases:
         process, timed_out, runtime, output, errors, memory = execute(
             run_command, case['input'].encode(), limit,
         )

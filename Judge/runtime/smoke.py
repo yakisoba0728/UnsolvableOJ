@@ -22,7 +22,10 @@ def run(language, source):
     payload = {
         'language': language, 'sourceCode': source,
         'limits': {'timeMs': 5000, 'memoryMb': 256},
-        'testCases': [{'input': '5 7\n', 'expectedOutput': '12\n'}],
+        'testCases': [
+            {'input': '5 7\n', 'expectedOutput': '12\n', 'isSample': True},
+            {'input': '1 2\n', 'expectedOutput': '3\n', 'isSample': False},
+        ],
     }
     command = [
         'docker', 'run', '--rm', '-i', '--name', name,
@@ -51,4 +54,10 @@ if __name__ == '__main__':
         if status != 'ACCEPTED':
             failed = True
             print(result.get('compileOutput') or result.get('judgeMessage') or '', flush=True)
+        elif result.get('debugOutputs') != [{
+            'testCase': 1, 'stdout': '12\n', 'stderr': '',
+            'stdoutTruncated': False, 'stderrTruncated': False,
+        }]:
+            failed = True
+            print('Unexpected sample debug output', result.get('debugOutputs'), flush=True)
     sys.exit(1 if failed else 0)

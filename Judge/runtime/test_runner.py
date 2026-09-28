@@ -62,6 +62,23 @@ class JudgeRunnerTests(unittest.TestCase):
         result = runner.judge(self.payload('import sys\nsys.stderr.write("x" * 1000001)'))
         self.assertEqual(result['status'], 'OUTPUT_LIMIT_EXCEEDED')
 
+    def test_private_input_cannot_be_carried_into_sample_output(self):
+        payload = self.payload(
+            'from pathlib import Path\n'
+            'value = input()\n'
+            'saved = Path("saved.txt")\n'
+            'print(saved.read_text() if saved.exists() else value)\n'
+            'saved.write_text(value)')
+        payload['testCases'] = [
+            {'input': 'secret', 'expectedOutput': 'public', 'isSample': False},
+            {'input': 'public', 'expectedOutput': 'public', 'isSample': True},
+        ]
+        result = runner.judge(payload)
+        self.assertEqual(result['status'], 'ACCEPTED')
+        self.assertEqual(result['debugOutputs'][0]['testCase'], 2)
+        self.assertEqual(result['debugOutputs'][0]['stdout'], 'public\n')
+        self.assertNotIn('secret', str(result['debugOutputs']))
+
     def test_timeout_keeps_flushed_output(self):
         result = runner.judge(self.payload('print("before timeout", flush=True)\nwhile True: pass', time_ms=100))
         self.assertEqual(result['status'], 'TIME_LIMIT_EXCEEDED')
