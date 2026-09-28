@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import { configureHttp } from '../src/configure-http.js';
 import { randomUUID } from 'node:crypto';
 import { DataSource } from 'typeorm';
 import { getQueueToken } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
 import { JUDGE_QUEUE } from '../src/common/queue.constants.js';
 import request from 'supertest';
-import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module.js';
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: NestExpressApplication;
   let dataSource: DataSource;
   const userIds: string[] = [];
   let problemId: string | undefined;
@@ -21,15 +21,10 @@ describe('AppController (e2e)', () => {
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix('api/v1');
-    app.useGlobalPipes(
-      new ValidationPipe({
-        transform: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-      }),
-    );
+    app = moduleFixture.createNestApplication<NestExpressApplication>({
+      bodyParser: false,
+    });
+    configureHttp(app);
     await app.init();
     dataSource = app.get(DataSource);
   });

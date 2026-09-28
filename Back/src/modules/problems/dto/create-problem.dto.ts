@@ -36,13 +36,8 @@ export class CreateTestCaseDto {
   score = 1;
 }
 
-export class CreateProblemDto {
-  @ApiProperty({ example: 'a-plus-b' })
-  @IsString()
-  @Length(3, 80)
-  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-  slug: string;
-
+// Shared validation has no creation defaults: PATCH must preserve omitted fields.
+export class ProblemContentDto {
   @IsString()
   @Length(1, 150)
   title: string;
@@ -62,19 +57,15 @@ export class CreateProblemDto {
   @IsEnum(ProblemDifficulty)
   difficulty: ProblemDifficulty;
 
-  @IsOptional()
-  @IsEnum(ProblemStatus)
-  status: ProblemStatus = ProblemStatus.DRAFT;
-
   @IsInt()
   @Min(100)
   @Max(60_000)
-  timeLimitMs = 1000;
+  timeLimitMs: number;
 
   @IsInt()
   @Min(16)
   @Max(4096)
-  memoryLimitMb = 256;
+  memoryLimitMb: number;
 
   @IsArray()
   @ArrayMinSize(1)
@@ -82,4 +73,19 @@ export class CreateProblemDto {
   @ValidateNested({ each: true })
   @Type(() => CreateTestCaseDto)
   testCases: CreateTestCaseDto[];
+}
+
+export class CreateProblemDto extends ProblemContentDto {
+  @ApiProperty({ example: 'a-plus-b' })
+  @IsString()
+  @Length(3, 80)
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  slug: string;
+
+  @IsOptional()
+  @IsEnum(ProblemStatus)
+  status: ProblemStatus = ProblemStatus.DRAFT;
+
+  override timeLimitMs = 1000;
+  override memoryLimitMb = 256;
 }

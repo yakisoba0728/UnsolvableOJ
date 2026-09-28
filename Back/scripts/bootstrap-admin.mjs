@@ -5,7 +5,7 @@ if (!email) throw new Error('사용법: npm run db:bootstrap:admin -- admin@exam
 
 await dataSource.initialize();
 try {
-  const changed = await dataSource.query(
+  const [changed] = await dataSource.query(
     "UPDATE users SET role = 'ADMIN', token_version = token_version + 1, updated_at = now() WHERE email = $1 RETURNING id, email, role",
     [email],
   );

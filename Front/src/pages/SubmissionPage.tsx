@@ -131,7 +131,7 @@ export function SubmissionPage() {
         <pre className="source-code">{submission.sourceCode}</pre>
       </section>
       {submission.problem.slug ? (
-        <Link className="button" to={`/problems/${submission.problem.slug}`}>
+        <Link className="button" to={`/problems/view/${encodeURIComponent(submission.problem.slug)}`}>
           문제로 돌아가기 ↗
         </Link>
       ) : null}

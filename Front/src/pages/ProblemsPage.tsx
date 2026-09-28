@@ -105,7 +105,7 @@ export function ProblemsPage() {
             {data.items.map((problem, index) => (
               <Link
                 className="problem-row"
-                to={`/problems/${problem.slug}`}
+                to={`/problems/view/${encodeURIComponent(problem.slug)}`}
                 key={problem.id}
               >
                 <span className="problem-index">
