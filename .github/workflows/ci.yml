@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check:
+    name: CI required
+    # Only repository-owned code may run on the persistent self-hosted machine.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, Linux, X64, unsolvable-oj, docker]
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: unsolvable
+          POSTGRES_PASSWORD: ci_disposable_password
+          POSTGRES_DB: unsolvable_ci
+        ports:
+          - '127.0.0.1::5432'
+        options: >-
+          --memory 512m --cpus 1
+          --tmpfs /var/lib/postgresql/data:rw,nosuid,size=256m
+          --health-cmd "pg_isready -U unsolvable -d unsolvable_ci"
+          --health-interval 3s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:8
+        ports:
+          - '127.0.0.1::6379'
+        options: >-
+          --memory 128m --cpus 1 --tmpfs /data:rw,nosuid,size=64m
+          --health-cmd "redis-cli ping"
+          --health-interval 3s --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: '**/package-lock.json'
+      - name: Install dependencies
+        run: |
+          npm ci --prefix Back
+          npm ci --prefix Front
+          npm ci --prefix Judge
+      - name: Backend lint, types, unit tests and build
+        run: npm run check --prefix Back
+      - name: Frontend build
+        run: npm run build --prefix Front
+      - name: Worker build and runtime unit tests
+        run: npm run check --prefix Judge
+      - name: Database migrations and API tests
+        working-directory: Back
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://unsolvable:ci_disposable_password@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/unsolvable_ci
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+          REDIS_DB: '1'
+          JWT_ACCESS_SECRET: test-jwt-secret-with-at-least-32-characters
+          JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
+        run: |
+          npx --no-install typeorm migration:run -d dist/database/data-source.js
+          npm run test:e2e
