@@ -55,3 +55,9 @@ cp Judge/.env.example Judge/.env
 ```
 
 자세한 API와 채점 계약은 [Back/README.md](./Back/README.md), 채점기 동작은 [Judge/README.md](./Judge/README.md)에 있습니다.
+
+## 지속적 통합
+
+GitHub Actions의 전용 self-hosted 러너에서 Node 24/26 검사, DB/API 통합,
+실제 Docker 채점, Chromium·Firefox·WebKit 테스트를 실행합니다.
+검사 범위와 러너 운영·로컬 재현 방법은 [CI 운영 문서](.github/CI.md)를 참고하세요.

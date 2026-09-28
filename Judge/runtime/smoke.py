@@ -5,17 +5,9 @@ import os
 import subprocess
 import sys
 from uuid import uuid4
+from pathlib import Path
 
-SOURCES = {
-    'C': '#include <stdio.h>\nint main(void) { int a,b; scanf("%d %d", &a, &b); printf("%d\\n", a+b); }',
-    'CPP': '#include <iostream>\nint main() { int a,b; std::cin >> a >> b; std::cout << a+b << "\\n"; }',
-    'JAVA': 'import java.util.*; public class Main { public static void main(String[] args) { Scanner s = new Scanner(System.in); System.out.println(s.nextInt()+s.nextInt()); } }',
-    'PYTHON': 'a,b=map(int,input().split()); print(a+b)',
-    'JAVASCRIPT': 'const fs=require("fs"); const [a,b]=fs.readFileSync(0,"utf8").trim().split(/\\s+/).map(Number); console.log(a+b);',
-    'TYPESCRIPT': 'import * as fs from "fs"; const [a,b]=fs.readFileSync(0,"utf8").trim().split(/\\s+/).map(Number); console.log(a+b);',
-    'GO': 'package main\nimport "fmt"\nfunc main(){var a,b int;fmt.Scan(&a,&b);fmt.Println(a+b)}',
-    'RUST': 'use std::io::{self,Read}; fn main(){let mut s=String::new();io::stdin().read_to_string(&mut s).unwrap();let v:Vec<i32>=s.split_whitespace().map(|x|x.parse().unwrap()).collect();println!("{}",v[0]+v[1]);}',
-}
+SOURCES = json.loads(Path(__file__).with_name("smoke-sources.json").read_text())
 
 
 def run(language, source, *, memory_mb=256, container_memory_mb=None, time_ms=5000):
@@ -28,6 +20,8 @@ def run(language, source, *, memory_mb=256, container_memory_mb=None, time_ms=50
     container_memory_mb = container_memory_mb or max(128, memory_mb + 96)
     command = [
         'docker', 'run', '--rm', '-i', '--name', name,
+        *(['--label', f'unsolvable.ci={os.environ["JUDGE_RUN_ID"]}']
+          if os.environ.get('JUDGE_RUN_ID') else []),
         '--network', 'none', '--read-only', '--cap-drop', 'ALL',
         '--security-opt', 'no-new-privileges', '--pids-limit', '64',
         '--memory', f'{container_memory_mb}m', '--memory-swap', f'{container_memory_mb}m', '--cpus', '1',
