@@ -12,7 +12,7 @@
   --color-ink-900: #17191c;
   --color-ink-700: #3b4045;
   --color-ink-600: #596574;
-  --color-ink-400: #8996a9;
+  --color-ink-400: #5f6c80; /* 보조 정보용, 흰 배경 기준 대비 5:1 이상 */
 
   /* Color: primary action */
   --color-primary: #1d4fd8;
@@ -24,7 +24,7 @@
   --color-success-soft: #e3f7ec;
   --color-danger: #c9262b;
   --color-danger-soft: #fdebec;
-  --color-warning: #c07a1b;
+  --color-warning: #8f5a0c;
   --color-warning-soft: #fff1db;
 
   /* Color: code surface (읽는 영역은 밝게, 코드에만 짙은 면) */

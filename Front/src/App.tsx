@@ -84,9 +84,7 @@ export function App() {
             <span className="brand-mark">
               U<span>_</span>
             </span>
-            <span>
-              못풀준 <small>UNSOLVABLE OJ</small>
-            </span>
+            <span>못풀준</span>
           </Link>
           <nav className="main-nav" aria-label="주 메뉴">
             <NavLink to="/" end>
@@ -134,8 +132,8 @@ export function App() {
       {isDemo ? (
         <div className="demo-banner" role="status">
           <span>
-            <strong>데모 모드</strong> · 더미 데이터로 화면을 시연합니다. 채점은
-            실제 실행이 아닌 시뮬레이션이고, 기록은 이 브라우저에만 저장됩니다.
+            <strong>데모 모드</strong> · 더미 데이터와 시뮬레이션 채점 · 기록은
+            이 브라우저에만 저장됩니다.
           </span>
           <button
             className="text-button"

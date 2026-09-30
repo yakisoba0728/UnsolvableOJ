@@ -167,15 +167,19 @@ export function ProblemsPage() {
 
       <div className="filter-card">
         <div className="filter-row">
-          <input
-            ref={searchRef}
-            type="search"
-            className="search-input"
-            placeholder="문제 제목 또는 주소(slug) 검색  ( / 키로 이동 )"
-            aria-label="문제 검색"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
+          <div className="search-field">
+            <input
+              ref={searchRef}
+              type="search"
+              className="search-input"
+              placeholder="문제 제목 또는 주소(slug) 검색"
+              aria-label="문제 검색"
+              aria-keyshortcuts="/"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+            <kbd aria-hidden="true">/</kbd>
+          </div>
           {session ? (
             <select
               aria-label="풀이 상태"
