@@ -118,6 +118,17 @@ export function HomePage() {
               <p className="muted">
                 문제 풀이, 랭킹, 성장 기록을 한곳에서 확인할 수 있어요.
               </p>
+              <ul className="highlight-stats" aria-label="서비스 현황">
+                <li>
+                  <strong>{problems.length}</strong> 공개 문제
+                </li>
+                <li>
+                  <strong>8</strong> 지원 언어
+                </li>
+                <li>
+                  <strong>실시간</strong> 채점
+                </li>
+              </ul>
               <div className="card-actions">
                 <Link className="button" to="/auth">
                   로그인

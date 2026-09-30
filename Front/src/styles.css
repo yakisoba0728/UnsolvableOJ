@@ -2104,3 +2104,47 @@ button.heat-cell.selected {
   margin-top: 8px;
   padding-bottom: 72px;
 }
+.solved-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--color-ink-600);
+}
+.solved-summary strong {
+  color: var(--color-primary);
+  font-size: 18px;
+}
+.solved-summary .progress {
+  flex: 1;
+  max-width: 280px;
+}
+.chip-count {
+  margin-left: 6px;
+  font-size: 12px;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+.highlight-stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 4px 0 12px;
+  padding: 0;
+  font-size: 13px;
+  color: var(--color-ink-600);
+}
+.highlight-stats strong {
+  color: var(--color-primary);
+  font-size: 20px;
+  margin-right: 4px;
+}
+kbd {
+  font: 11px var(--font-mono);
+  background: var(--color-disabled);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 1px 6px;
+}

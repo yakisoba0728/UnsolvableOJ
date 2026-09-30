@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth";
 import { Pagination } from "../components/Pagination";
 import { ProblemStatus, solveState } from "../components/ProblemStatus";
@@ -36,6 +36,21 @@ export function ProblemsPage() {
   const [status, setStatus] = useState("");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
+  const navigate = useNavigate();
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // "/" 키로 검색창에 바로 이동 (LeetCode·GitHub 방식)
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      const target = event.target as HTMLElement;
+      if (event.key !== "/" || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))
+        return;
+      event.preventDefault();
+      searchRef.current?.focus();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => setPage(1), [difficulty, status, query]);
 
@@ -71,6 +86,22 @@ export function ProblemsPage() {
     ? problems.find((problem) => problem.id === resume.problem.id)
     : null;
 
+  const solvedCount = problems.filter((problem) =>
+    history.solved.has(problem.id),
+  ).length;
+  const countByDifficulty = (value: Difficulty | "") =>
+    value
+      ? problems.filter((problem) => problem.difficulty === value).length
+      : problems.length;
+
+  // 안 푼 문제 중 무작위, 모두 풀었다면 전체 중 무작위
+  function pickRandom() {
+    const pool = problems.filter((problem) => !history.solved.has(problem.id));
+    const list = pool.length ? pool : problems;
+    if (!list.length) return;
+    navigate(`/problems/${list[Math.floor(Math.random() * list.length)].slug}`);
+  }
+
   function reset() {
     setDifficulty("");
     setStatus("");
@@ -85,14 +116,34 @@ export function ProblemsPage() {
           <span className="pill">{problems.length}문제</span>
         </div>
         <p>한 문제씩, 더 단단해지는 실력. 오늘 풀 문제를 찾아보세요.</p>
+        {session && problems.length ? (
+          <div className="solved-summary">
+            <span>
+              <strong>{solvedCount}</strong> / {problems.length} 해결
+            </span>
+            <div
+              className="progress"
+              role="progressbar"
+              aria-label="해결한 문제 비율"
+              aria-valuemin={0}
+              aria-valuemax={problems.length}
+              aria-valuenow={solvedCount}
+            >
+              <span
+                style={{ width: `${(solvedCount / problems.length) * 100}%` }}
+              />
+            </div>
+          </div>
+        ) : null}
       </header>
 
       <div className="filter-card">
         <div className="filter-row">
           <input
+            ref={searchRef}
             type="search"
             className="search-input"
-            placeholder="문제 제목 또는 주소(slug) 검색"
+            placeholder="문제 제목 또는 주소(slug) 검색  ( / 키로 이동 )"
             aria-label="문제 검색"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -110,6 +161,14 @@ export function ProblemsPage() {
               ))}
             </select>
           ) : null}
+          <button
+            type="button"
+            className="button button-outline"
+            onClick={pickRandom}
+            disabled={!problems.length}
+          >
+            무작위 문제
+          </button>
         </div>
         <div className="filter-bar" role="group" aria-label="난이도 필터">
           <span className="filter-label">난이도</span>
@@ -121,6 +180,9 @@ export function ProblemsPage() {
               onClick={() => setDifficulty(item.value)}
             >
               {item.label}
+              <span className="chip-count">
+                {countByDifficulty(item.value)}
+              </span>
             </button>
           ))}
         </div>

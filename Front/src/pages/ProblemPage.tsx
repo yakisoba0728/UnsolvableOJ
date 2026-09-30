@@ -366,6 +366,12 @@ export function ProblemPage() {
                 value={source}
                 onChange={(event) => setSource(event.target.value)}
                 onKeyDown={(event) => {
+                  // Ctrl/⌘ + Enter 로 바로 제출 (LeetCode·HackerRank 방식)
+                  if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+                    event.preventDefault();
+                    event.currentTarget.form?.requestSubmit();
+                    return;
+                  }
                   if (event.key !== "Tab") return;
                   event.preventDefault();
                   const target = event.currentTarget;
@@ -392,7 +398,8 @@ export function ProblemPage() {
               {session ? (
                 <>
                   <span className="editor-note">
-                    제출하면 전체 테스트 케이스로 채점합니다.
+                    제출하면 전체 테스트 케이스로 채점합니다 ·{" "}
+                    <kbd>Ctrl/⌘ + Enter</kbd>
                   </span>
                   <button
                     className="button"
