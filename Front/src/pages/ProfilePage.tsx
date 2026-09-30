@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { PageHeader } from "../components/PageHeader";
 import {
   dayKey,
   streakDays,
@@ -99,10 +100,10 @@ export function ProfilePage() {
 
   return (
     <div className="page-width profile-page">
-      <header className="list-header">
-        <h1>내 학습 기록</h1>
-        <p>쌓아 온 실력과 꾸준함을 한눈에 확인하세요.</p>
-      </header>
+      <PageHeader
+        title="내 학습 기록"
+        description="쌓아 온 실력과 꾸준함을 한눈에 확인하세요."
+      />
       {error ? (
         <p className="error-message" role="alert">
           {error}

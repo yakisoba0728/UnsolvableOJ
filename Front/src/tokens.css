@@ -7,6 +7,8 @@
   --color-surface-muted: #f6f8fa;
   --color-disabled: #eef0f3;
   --color-feature: #eaf0ff;
+  --color-feature-border: #d5e0fb;
+  --color-divider: #edf0f5;
 
   /* Color: ink (text/icons) */
   --color-ink-900: #17191c;
@@ -22,8 +24,10 @@
   /* Color: status */
   --color-success: #137547;
   --color-success-soft: #e3f7ec;
+  --color-success-border: #c4e8d5;
   --color-danger: #c9262b;
   --color-danger-soft: #fdebec;
+  --color-danger-border: #f5c6c8;
   --color-warning: #8f5a0c;
   --color-warning-soft: #fff1db;
 

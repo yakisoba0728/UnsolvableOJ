@@ -6,6 +6,7 @@ import {
   ProblemStatus,
   solveState,
 } from "../components/ProblemStatus";
+import { PageHeader } from "../components/PageHeader";
 import { LearningIllustration } from "../components/LearningIllustration";
 import { WeekStrip } from "../components/WeekStrip";
 import {
@@ -83,15 +84,15 @@ export function HomePage() {
 
   return (
     <div className="page-width home-page">
-      <header className="home-header">
-        <div>
-          <h1>{name ? `${name}님, 오늘도 한 걸음.` : "오늘도 한 걸음."}</h1>
-          <p>어제의 고민을 오늘의 실력으로 이어가세요.</p>
-        </div>
-        {session && streak > 0 ? (
-          <span className="pill pill-success">{streak}일 연속 학습 중</span>
-        ) : null}
-      </header>
+      <PageHeader
+        title={name ? `${name}님, 오늘도 한 걸음.` : "오늘도 한 걸음."}
+        description="어제의 고민을 오늘의 실력으로 이어가세요."
+        aside={
+          session && streak > 0 ? (
+            <span className="pill pill-success">{streak}일 연속 학습 중</span>
+          ) : null
+        }
+      />
 
       {error || rankError ? (
         <p className="error-message" role="alert">

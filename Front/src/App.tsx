@@ -24,7 +24,6 @@ const upcoming = [
     path: "/analysis",
     label: "코드 분석",
     page: {
-      eyebrow: "CODE ANALYSIS",
       title: "코드 분석",
       description: "모범 답안을 읽고 원리를 추론하는 학습 모드입니다.",
       points: [
@@ -39,7 +38,6 @@ const upcoming = [
     path: "/community",
     label: "커뮤니티",
     page: {
-      eyebrow: "COMMUNITY",
       title: "커뮤니티",
       description: "질문하고, 풀이를 나누고, 더 좋은 풀이로 이어가는 공간입니다.",
       points: [
@@ -54,7 +52,6 @@ const upcoming = [
     path: "/missions",
     label: "미션",
     page: {
-      eyebrow: "MISSIONS",
       title: "미션",
       description: "일일 퀘스트와 시즌 미션으로 꾸준히 학습을 이어가세요.",
       points: [
@@ -69,7 +66,6 @@ const upcoming = [
     path: "/enterprise",
     label: "기업 테스트",
     page: {
-      eyebrow: "COMPANY TEST",
       title: "기업 테스트",
       description: "기업이 코딩 테스트를 만들고 운영하는 공간입니다.",
       points: [

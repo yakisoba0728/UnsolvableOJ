@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
+import { PageHeader } from "./PageHeader";
 
 interface ComingSoonProps {
-  eyebrow: string;
   title: string;
   description: string;
   points: string[];
@@ -10,7 +10,6 @@ interface ComingSoonProps {
 
 /** 백엔드가 아직 없는 메뉴: 가짜 데이터 대신 계획된 내용과 지금 할 수 있는 행동을 안내한다. */
 export function ComingSoonPage({
-  eyebrow,
   title,
   description,
   points,
@@ -18,9 +17,7 @@ export function ComingSoonPage({
 }: ComingSoonProps) {
   return (
     <div className="page-width soon-page">
-      <span className="eyebrow">{eyebrow}</span>
-      <h1>{title}</h1>
-      <p className="soon-lead">{description}</p>
+      <PageHeader title={title} description={description} />
       <div className="soon-card">
         <span className="soon-badge">준비 중</span>
         <h2>이런 기능이 들어옵니다</h2>

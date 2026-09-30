@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { PageHeader } from "../components/PageHeader";
 import type { Difficulty, Problem } from "../types";
 
 interface TestCaseInput {
@@ -77,15 +78,11 @@ export function CreateProblemPage() {
 
   return (
     <div className="page-width create-page">
-      <Link className="back-link" to="/problems">
-        ← 문제 목록
-      </Link>
-      <span className="eyebrow">AUTHOR WORKSPACE</span>
-      <h1>새 문제 만들기</h1>
-      <p className="muted">
-        저장하면 문제가 바로 공개됩니다. 예제만 문제 페이지에 표시되고, 나머지
-        테스트케이스는 채점에만 사용됩니다.
-      </p>
+      <PageHeader
+        back={{ to: "/problems", label: "문제 목록" }}
+        title="새 문제 만들기"
+        description="저장하면 문제가 바로 공개됩니다. 예제만 문제 페이지에 표시되고, 나머지 테스트케이스는 채점에만 사용됩니다."
+      />
       <form onSubmit={submit} className="create-form">
         <div className="form-card">
           <h2>기본 정보</h2>

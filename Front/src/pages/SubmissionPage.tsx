@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { PageHeader } from "../components/PageHeader";
 import { WeekStrip } from "../components/WeekStrip";
 import { streakDays, submissionsByDay, useSubmissionHistory } from "../hooks";
 import type { Submission } from "../types";
@@ -63,19 +64,17 @@ export function SubmissionPage() {
     );
   return (
     <div className="page-width result-page">
-      <Link className="back-link" to="/submissions">
-        ← 내 제출
-      </Link>
-      <span className="eyebrow">
-        SUBMISSION / {submission.id.slice(0, 8).toUpperCase()}
-      </span>
-      <h1>{submission.problem.title ?? "제출 결과"}</h1>
+      <PageHeader
+        back={{ to: "/submissions", label: "내 제출" }}
+        title={submission.problem.title ?? "제출 결과"}
+        description={`제출 ${submission.id.slice(0, 8).toUpperCase()} · ${new Date(submission.createdAt).toLocaleString("ko-KR")}`}
+      />
       <div className="result-summary">
       <div
         className={`result-banner result-${submission.status.toLowerCase()}`}
       >
         <div>
-          <span className="eyebrow">JUDGE RESULT</span>
+          <span className="result-label">채점 결과</span>
           <strong>{submission.status.replaceAll("_", " ")}</strong>
         </div>
         <span className="result-symbol">
@@ -135,12 +134,8 @@ export function SubmissionPage() {
       <section className="source-section">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">SOURCE CODE</span>
             <h2>제출한 코드</h2>
           </div>
-          <span className="muted">
-            {new Date(submission.createdAt).toLocaleString("ko-KR")}
-          </span>
         </div>
         <pre className="source-code">{submission.sourceCode}</pre>
       </section>

@@ -221,7 +221,7 @@ p {
   padding: 26px 0 32px;
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid #e8edf4;
+  border-top: 1px solid var(--color-divider);
   color: var(--color-ink-600);
   font-size: 12px;
 }
@@ -238,121 +238,13 @@ p {
   font-weight: 500;
   color: var(--color-primary);
 }
-.hero {
-  margin: 32px 0 90px;
-  min-height: 455px;
-  border-radius: 26px;
-  background: #101d36;
-  color: #fff;
-  display: grid;
-  grid-template-columns: 1.08fr 0.92fr;
-  overflow: hidden;
-  position: relative;
-}
-.hero:before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(
-      circle at 77% 47%,
-      rgba(68, 126, 255, 0.2),
-      transparent 40%
-    ),
-    linear-gradient(120deg, transparent 50%, rgba(255, 255, 255, 0.025) 50%);
-  pointer-events: none;
-}
-.hero-copy {
-  padding: 70px 0 70px 74px;
-  position: relative;
-  z-index: 1;
-}
 .hero .eyebrow {
   color: #84b5ff;
-}
-.hero h1 {
-  font-size: clamp(39px, 4.1vw, 60px);
-  line-height: 1.23;
-  margin: 25px 0 20px;
 }
 .hero h1 em,
 .auth-intro h1 em {
   font-style: normal;
   color: #9ce7c9;
-}
-.hero p {
-  max-width: 400px;
-  color: #aebbd1;
-  font-size: 15px;
-  margin-bottom: 32px;
-}
-.hero-art {
-  position: relative;
-  min-height: 430px;
-  display: grid;
-  place-items: center;
-}
-.hero-orbit {
-  position: absolute;
-  border: 1px solid rgba(156, 189, 246, 0.13);
-  border-radius: 50%;
-  aspect-ratio: 1;
-}
-.orbit-one {
-  width: 450px;
-}
-.orbit-two {
-  width: 310px;
-}
-.hero-core {
-  width: 190px;
-  height: 190px;
-  border-radius: 45px;
-  background: linear-gradient(140deg, #638fff, #2857cf);
-  display: grid;
-  place-items: center;
-  font:
-    700 70px "JetBrains Mono",
-    monospace;
-  transform: rotate(-10deg);
-  box-shadow:
-    0 35px 80px rgba(0, 0, 0, 0.3),
-    inset 0 2px 2px rgba(255, 255, 255, 0.28);
-}
-.hero-core:after {
-  content: "";
-  position: absolute;
-  width: 75%;
-  height: 75%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 28px;
-}
-.hero-chip {
-  position: absolute;
-  background: #1f304f;
-  border: 1px solid #345071;
-  color: #d6e7ff;
-  border-radius: 10px;
-  padding: 11px 16px;
-  font:
-    12px "JetBrains Mono",
-    monospace;
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.2);
-}
-.chip-one {
-  top: 65px;
-  left: 15px;
-  transform: rotate(-8deg);
-}
-.chip-two {
-  right: 27px;
-  bottom: 79px;
-  transform: rotate(7deg);
-  color: #a9f0d3;
-}
-.content-section {
-  margin-bottom: 100px;
-  scroll-margin-top: 100px;
 }
 .section-heading {
   display: flex;
@@ -384,7 +276,7 @@ p {
 }
 .filter-chip {
   background: white;
-  border: 1px solid #e5eaf2;
+  border: 1px solid var(--color-divider);
   border-radius: 999px;
   padding: 9px 16px;
   color: var(--color-ink-600);
@@ -411,7 +303,7 @@ p {
   gap: 26px;
   min-height: 88px;
   padding: 19px 25px;
-  border-bottom: 1px solid #edf0f5;
+  border-bottom: 1px solid var(--color-divider);
   transition: background 0.15s;
 }
 .problem-row:last-child {
@@ -419,13 +311,6 @@ p {
 }
 .problem-row:hover {
   background: var(--color-feature);
-}
-.problem-index {
-  width: 32px;
-  color: var(--color-ink-600);
-  font:
-    13px "JetBrains Mono",
-    monospace;
 }
 .problem-title {
   flex: 1;
@@ -455,11 +340,11 @@ p {
   border-radius: 6px;
   font-size: 12px;
   font-weight: 800;
-  background: #e7f5ef;
+  background: var(--color-success-soft);
   color: var(--color-success);
 }
 .difficulty-easy {
-  background: #e8f2ff;
+  background: var(--color-primary-soft);
   color: #1f58b8;
 }
 .difficulty-medium {
@@ -467,7 +352,7 @@ p {
   color: #8f5a0c;
 }
 .difficulty-hard {
-  background: #ffe8e8;
+  background: var(--color-danger-soft);
   color: #b0303c;
 }
 .difficulty-expert {
@@ -488,8 +373,8 @@ p {
 }
 .empty-state {
   background: #fff;
-  border: 1px dashed #d8e0ed;
-  border-radius: 14px;
+  border: 1px dashed var(--color-divider);
+  border-radius: var(--radius-panel);
   text-align: center;
   padding: 65px 20px;
   color: var(--color-ink-600);
@@ -509,7 +394,7 @@ p {
   font-size: 13px;
 }
 .pagination button {
-  border: 1px solid #dde5f1;
+  border: 1px solid var(--color-divider);
   background: #fff;
   border-radius: 8px;
   padding: 8px 15px;
@@ -534,9 +419,9 @@ p {
   color: var(--color-ink-600);
 }
 .error-message {
-  background: #fff0f0;
-  border: 1px solid #ffd1d1;
-  color: #b63048;
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
   border-radius: 8px;
   padding: 11px 14px;
   font-size: 13px;
@@ -612,7 +497,7 @@ textarea {
 }
 .intro-decoration span {
   width: 72px;
-  border-top: 2px solid #e4eaf3;
+  border-top: 2px solid var(--color-divider);
   padding-top: 12px;
 }
 .intro-decoration span:first-child {
@@ -622,7 +507,6 @@ textarea {
 .auth-card {
   background: #fff;
   border: 1px solid var(--color-border);
-  box-shadow: 0 24px 70px rgba(37, 62, 110, 0.07);
   border-radius: var(--radius-feature);
   padding: 45px;
 }
@@ -643,15 +527,6 @@ textarea {
 .auth-card .back-link {
   margin: 34px 0 0;
 }
-.detail-page {
-  padding-bottom: 100px;
-}
-.detail-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-  margin-bottom: 22px;
-}
 .detail-heading h1,
 .result-page h1,
 .create-page h1 {
@@ -665,8 +540,8 @@ textarea {
   display: flex;
   gap: 35px;
   padding: 16px 0;
-  border-top: 1px solid #e5ebf3;
-  border-bottom: 1px solid #e5ebf3;
+  border-top: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--color-divider);
   color: #657790;
   font-size: 13px;
 }
@@ -674,17 +549,10 @@ textarea {
   color: #263958;
   margin-right: 9px;
 }
-.detail-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 370px;
-  gap: 45px;
-  margin-top: 36px;
-  align-items: start;
-}
 .problem-content {
   background: white;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-panel);
   padding: 38px 42px;
 }
 .problem-content section + section {
@@ -707,16 +575,16 @@ textarea {
 }
 .markdown pre,
 .sample-grid pre {
-  background: #f5f7fb;
-  border: 1px solid #e9edf3;
-  border-radius: 9px;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-control);
   padding: 15px;
   margin: 0;
   color: #334762;
   font-size: 13px;
 }
 .markdown code {
-  background: #f0f3f8;
+  background: var(--color-surface-muted);
   border-radius: 4px;
   padding: 2px 4px;
 }
@@ -730,24 +598,11 @@ textarea {
   color: var(--color-ink-600);
   margin-bottom: 9px;
 }
-.editor-panel {
-  position: sticky;
-  top: 100px;
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 26px;
-  box-shadow: 0 18px 50px rgba(36, 65, 104, 0.04);
-}
-.editor-heading h2 {
-  font-size: 22px;
-  margin: 8px 0 22px;
-}
 .code-editor {
   min-height: 320px;
-  background: #111e34;
+  background: var(--color-code);
   color: #dce8ff;
-  border-color: #111e34;
+  border-color: var(--color-code);
   font:
     12px/1.6 "JetBrains Mono",
     monospace;
@@ -761,10 +616,6 @@ textarea {
   font-size: 11px;
   color: var(--color-ink-600);
   margin: 18px 0 0;
-}
-.sign-in-prompt p {
-  font-size: 13px;
-  color: var(--color-ink-600);
 }
 .standalone-section {
   padding-top: 55px;
@@ -817,9 +668,9 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #ecf4ff;
-  border: 1px solid #d8e8ff;
-  border-radius: 15px;
+  background: var(--color-feature);
+  border: 1px solid var(--color-feature-border);
+  border-radius: var(--radius-panel);
   padding: 30px 36px;
   color: #3067c0;
 }
@@ -835,17 +686,17 @@ textarea {
   color: inherit;
 }
 .result-banner.result-accepted {
-  background: #e8f8f0;
-  border-color: #ceefdf;
+  background: var(--color-success-soft);
+  border-color: var(--color-success-border);
   color: var(--color-success);
 }
 .result-banner.result-wrong_answer,
 .result-banner.result-runtime_error,
 .result-banner.result-compile_error,
 .result-banner.result-system_error {
-  background: #fff0f0;
-  border-color: #f9dada;
-  color: #c14e5b;
+  background: var(--color-danger-soft);
+  border-color: var(--color-danger-border);
+  color: var(--color-danger);
 }
 .result-symbol {
   font:
@@ -860,7 +711,7 @@ textarea {
 }
 .result-stats > div {
   background: #fff;
-  border: 1px solid #e8edf4;
+  border: 1px solid var(--color-divider);
   border-radius: 12px;
   padding: 20px;
 }
@@ -876,7 +727,7 @@ textarea {
 .notice {
   background: #fff;
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   padding: 20px;
   margin-bottom: 16px;
 }
@@ -893,7 +744,7 @@ textarea {
   margin: 48px 0 28px;
 }
 .source-code {
-  background: #111e34;
+  background: var(--color-code);
   color: #dce8ff;
   border-radius: 12px;
   padding: 25px;
@@ -917,7 +768,7 @@ textarea {
 .form-card {
   background: #fff;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-panel);
   padding: 30px;
   width: 100%;
 }
@@ -980,7 +831,7 @@ textarea {
 .continue-card {
   background: var(--color-primary-soft);
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-panel);
   padding: 30px;
   display: flex;
   flex-direction: column;
@@ -997,7 +848,7 @@ textarea {
 .ranking-card {
   background: #fff;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-panel);
   padding: 24px;
 }
 .ranking-card-heading h2 {
@@ -1053,9 +904,6 @@ textarea {
     12px "JetBrains Mono",
     monospace;
   white-space: nowrap;
-}
-.home-stats {
-  margin-bottom: 40px;
 }
 /* ===== Figma 화면 구성 (홈 · 문제 · 풀이 · 프로필 · 준비 중) ===== */
 .sr-only {
@@ -1137,21 +985,6 @@ textarea {
   align-items: center;
   gap: 10px;
 }
-.list-header h1,
-.home-header h1 {
-  font: var(--text-display);
-  letter-spacing: -0.03em;
-  margin: 0 0 6px;
-}
-.list-header p,
-.home-header p {
-  margin: 0;
-  color: var(--color-ink-600);
-  font-size: 14px;
-}
-.list-header {
-  padding: 32px 0 20px;
-}
 .title-line {
   display: flex;
   align-items: center;
@@ -1181,20 +1014,13 @@ textarea {
 .home-page {
   padding-bottom: 72px;
 }
-.home-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  padding: 32px 0 24px;
-}
 .home-top-grid {
   grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
   margin: 0 0 20px;
 }
 .continue-card {
   background: var(--color-feature);
-  border-color: #d5e0fb;
+  border-color: var(--color-feature-border);
   border-radius: var(--radius-feature);
   padding: 32px;
   align-items: flex-start;
@@ -1425,7 +1251,7 @@ textarea {
   border: 0;
   background: none;
   padding: 10px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1447,7 +1273,7 @@ textarea {
   padding: 0 12px;
   border: 1px solid transparent;
   background: transparent;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   color: var(--color-ink-900);
   font-weight: 700;
 }
@@ -1575,7 +1401,7 @@ textarea {
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   font-size: 13px;
 }
 .history-list a:hover {
@@ -1844,7 +1670,7 @@ button.heat-cell.selected {
 }
 .soon-card {
   background: var(--color-feature);
-  border: 1px solid #d5e0fb;
+  border: 1px solid var(--color-feature-border);
   border-radius: var(--radius-feature);
   padding: 32px;
 }
@@ -2008,18 +1834,6 @@ button.heat-cell.selected {
   .main-nav {
     gap: 18px;
   }
-  .hero-copy {
-    padding-left: 45px;
-  }
-  .hero-art {
-    transform: scale(0.8);
-  }
-  .detail-grid {
-    grid-template-columns: 1fr;
-  }
-  .editor-panel {
-    position: static;
-  }
   .auth-layout {
     gap: 35px;
   }
@@ -2069,20 +1883,6 @@ button.heat-cell.selected {
   .account-name {
     display: none;
   }
-  .hero {
-    grid-template-columns: 1fr;
-    min-height: 0;
-    margin: 20px 0 60px;
-  }
-  .hero-copy {
-    padding: 42px 30px;
-  }
-  .hero h1 {
-    font-size: 37px;
-  }
-  .hero-art {
-    display: none;
-  }
   .section-heading h1,
   .section-heading h2 {
     font-size: 28px;
@@ -2091,10 +1891,6 @@ button.heat-cell.selected {
     gap: 12px;
     padding: 17px;
     min-height: 75px;
-  }
-  .problem-index {
-    width: 22px;
-    font-size: 11px;
   }
   .problem-title strong {
     font-size: 14px;
@@ -2124,10 +1920,6 @@ button.heat-cell.selected {
   }
   .auth-card {
     padding: 27px;
-  }
-  .detail-heading {
-    align-items: start;
-    gap: 10px;
   }
   .meta-strip {
     gap: 13px;
@@ -2525,7 +2317,7 @@ kbd {
 .history-row {
   min-height: 68px;
   padding: 12px 24px;
-  border-bottom: 1px solid #edf0f5;
+  border-bottom: 1px solid var(--color-divider);
   transition: background 0.15s;
 }
 .history-row:last-child {
@@ -2709,4 +2501,181 @@ kbd {
   .activity-graph {
     width: 100%;
   }
+}
+
+/* =====================================================================
+   디자인 통일 (Figma 토큰 기준)
+   - 페이지 머리글: 제목 32/700 + 설명 14, 위 32 · 아래 24
+   - 카드: 흰 배경 + 1px 테두리 + 모서리 16, 그림자 없음 / 강조 카드 20
+   - 블록 간격: 24
+   - 예외: 풀이 화면(에디터, 전체 폭) · 폼/로그인(좁은 열)
+   ===================================================================== */
+.page-header {
+  padding: 32px 0 24px;
+}
+.page-header .back-link {
+  display: inline-block;
+  margin: 0 0 12px;
+  padding: 4px 0;
+}
+.page-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.page-header-main {
+  min-width: 0;
+}
+.page-title-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.page-header h1 {
+  font: var(--text-display);
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.page-header p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-ink-600);
+}
+.page-header-aside {
+  flex: none;
+}
+
+/* 일반 화면 컨테이너: 아래 여백과 블록 간격 */
+.home-page,
+.problems-page,
+.profile-page,
+.page-body,
+.create-page,
+.result-page,
+.soon-page {
+  padding-top: 0;
+  padding-bottom: 72px;
+}
+.home-top-grid,
+.daily-card,
+.stat-tiles,
+.filter-card,
+.result-summary,
+.streak-card {
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+.profile-page {
+  gap: 24px;
+}
+.notice {
+  margin-bottom: 24px;
+}
+.page-body .problem-list {
+  margin-top: 0;
+}
+
+/* 카드: 모두 같은 표면 */
+.panel,
+.filter-card,
+.profile-card,
+.daily-card,
+.stat-tile,
+.problem-card,
+.ranking-card,
+.guide-card,
+.standing-card,
+.form-card,
+.problem-list,
+.notice,
+.streak-card,
+.result-stats > div,
+.auth-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  box-shadow: none;
+}
+.auth-card {
+  border-radius: var(--radius-feature);
+}
+.continue-card,
+.soon-card,
+.result-banner {
+  border-radius: var(--radius-feature);
+}
+
+/* 섹션 제목: 화면마다 같은 크기 */
+.section-heading {
+  align-items: center;
+  margin-bottom: 16px;
+}
+.section-heading h2 {
+  font: var(--text-section);
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+.section-heading p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-ink-600);
+}
+
+/* 채점 결과 배너: 상태 색 토큰 + 본문 서체 */
+.result-banner {
+  background: var(--color-feature);
+  border: 1px solid var(--color-feature-border);
+  color: var(--color-primary);
+}
+.result-banner strong {
+  font: 700 24px var(--font-sans);
+  letter-spacing: -0.02em;
+  margin-top: 6px;
+}
+.result-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+.result-banner.result-accepted {
+  background: var(--color-success-soft);
+  border-color: var(--color-success-border);
+  color: var(--color-success);
+}
+.result-banner.result-wrong_answer,
+.result-banner.result-runtime_error,
+.result-banner.result-compile_error,
+.result-banner.result-time_limit_exceeded,
+.result-banner.result-memory_limit_exceeded,
+.result-banner.result-system_error {
+  background: var(--color-danger-soft);
+  border-color: var(--color-danger-border);
+  color: var(--color-danger);
+}
+
+/* 준비 중 카드 */
+.soon-card {
+  background: var(--color-feature);
+  border: 1px solid var(--color-feature-border);
+}
+
+@media (max-width: 650px) {
+  .page-header {
+    padding: 24px 0 16px;
+  }
+  .page-header h1 {
+    font-size: 26px;
+  }
+  .page-header-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+}
+.result-page .source-section {
+  margin-top: 0;
+  margin-bottom: 24px;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
+import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { ProblemStatus, solveState } from "../components/ProblemStatus";
 import { useAllProblems, useMyStanding, useSubmissionHistory } from "../hooks";
@@ -139,12 +140,11 @@ export function ProblemsPage() {
 
   return (
     <div className="page-width problems-page">
-      <header className="list-header">
-        <div className="title-line">
-          <h1>문제 목록</h1>
-          <span className="pill">{problems.length}문제</span>
-        </div>
-        <p>한 문제씩, 더 단단해지는 실력. 오늘 풀 문제를 찾아보세요.</p>
+      <PageHeader
+        title="문제 목록"
+        badge={<span className="pill">{problems.length}문제</span>}
+        description="한 문제씩, 더 단단해지는 실력. 오늘 풀 문제를 찾아보세요."
+      >
         {session && problems.length ? (
           <div className="solved-summary">
             <span>
@@ -164,7 +164,7 @@ export function ProblemsPage() {
             </div>
           </div>
         ) : null}
-      </header>
+      </PageHeader>
 
       <div className="filter-card">
         <div className="filter-row">

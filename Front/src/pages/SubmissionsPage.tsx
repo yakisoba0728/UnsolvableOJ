@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import type { Page, Submission } from "../types";
 
@@ -49,15 +50,12 @@ export function SubmissionsPage() {
   }, [page, session]);
 
   return (
-    <div className="page-width content-section standalone-section">
-      <div className="section-heading">
-        <div>
-          <span className="eyebrow">YOUR HISTORY</span>
-          <h1>내 제출</h1>
-          <p>제출한 코드와 판정을 확인하세요.</p>
-        </div>
-        <span className="total-count">{data?.total ?? 0}건</span>
-      </div>
+    <div className="page-width page-body">
+      <PageHeader
+        title="내 제출"
+        badge={<span className="pill">{data?.total ?? 0}건</span>}
+        description="제출한 코드와 판정을 확인하세요."
+      />
       {error ? (
         <p className="error-message" role="alert">
           {error}
