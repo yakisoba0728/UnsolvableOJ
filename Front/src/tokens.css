@@ -1,30 +1,39 @@
-/* Design tokens — UnsolvableJ Design Foundations (Figma: 01 Foundations / 02 Components) */
+/* Design tokens — 못풀준 Design Foundations (Figma Test Page: 01 Foundations / 02 Components / 45) */
 :root {
   /* Color: surfaces & structure */
-  --color-bg: #ffffff;
+  --color-bg: #f6f8fc;
   --color-surface: #ffffff;
-  --color-border: #e3e5e6;
+  --color-border: #e1e4e8;
+  --color-surface-muted: #f6f8fa;
+  --color-disabled: #eef0f3;
+  --color-feature: #eaf0ff;
 
   /* Color: ink (text/icons) */
-  --color-ink-900: #17191a;
-  --color-ink-600: #596573;
+  --color-ink-900: #17191c;
+  --color-ink-700: #3b4045;
+  --color-ink-600: #596574;
   --color-ink-400: #8996a9;
 
   /* Color: primary action */
-  --color-primary: #1c4fd8;
-  --color-primary-hover: #143ea9;
-  --color-primary-soft: #e7edff;
+  --color-primary: #1d4fd8;
+  --color-primary-hover: #153ea9;
+  --color-primary-soft: #e7eeff;
 
   /* Color: status */
-  --color-success: #137647;
+  --color-success: #137547;
   --color-success-soft: #e3f7ec;
-  --color-danger: #c13f4b;
-  --color-danger-soft: #ffe3e4;
+  --color-danger: #c9262b;
+  --color-danger-soft: #fdebec;
   --color-warning: #c07a1b;
   --color-warning-soft: #fff1db;
 
+  /* Color: code surface (읽는 영역은 밝게, 코드에만 짙은 면) */
+  --color-code: #243247;
+  --color-code-ink: #e9f0f9;
+  --color-code-bar: #303f54;
+
   /* Typography */
-  --font-sans: "Noto Sans KR", "DM Sans", sans-serif;
+  --font-sans: "Inter", "Noto Sans KR", "DM Sans", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
   --text-display: 700 32px/1.25 var(--font-sans);
@@ -40,7 +49,9 @@
   --space-3: 24px;
   --space-4: 32px;
 
-  /* Controls */
+  /* Controls & radii: 버튼·입력 12 / 패널 16 / 팝업·강조 카드 20 */
   --control-height: 44px;
-  --radius-control: 10px;
+  --radius-control: 12px;
+  --radius-panel: 16px;
+  --radius-feature: 20px;
 }

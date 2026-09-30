@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { Pagination } from "../components/Pagination";
 import type { Page, Submission } from "../types";
 
 export function SubmissionsPage() {
@@ -83,24 +84,12 @@ export function SubmissionsPage() {
           <Link to="/problems">첫 문제를 골라보세요.</Link>
         </div>
       )}
-      {data && data.totalPages > 1 ? (
-        <div className="pagination">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((value) => value - 1)}
-          >
-            이전
-          </button>
-          <span>
-            {page} / {data.totalPages}
-          </span>
-          <button
-            disabled={page >= data.totalPages}
-            onClick={() => setPage((value) => value + 1)}
-          >
-            다음
-          </button>
-        </div>
+      {data ? (
+        <Pagination
+          page={page}
+          totalPages={data.totalPages}
+          onChange={setPage}
+        />
       ) : null}
     </div>
   );

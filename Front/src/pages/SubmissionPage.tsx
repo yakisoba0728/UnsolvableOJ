@@ -130,11 +130,32 @@ export function SubmissionPage() {
         </div>
         <pre className="source-code">{submission.sourceCode}</pre>
       </section>
-      {submission.problem.slug ? (
-        <Link className="button" to={`/problems/${submission.problem.slug}`}>
-          문제로 돌아가기 ↗
-        </Link>
-      ) : null}
+      <div className="card-actions result-actions">
+        {submission.status === "ACCEPTED" ? (
+          <>
+            <Link className="button" to="/problems">
+              다음 문제 찾기
+            </Link>
+            <Link className="button button-outline" to="/profile">
+              내 학습 기록
+            </Link>
+          </>
+        ) : (
+          <>
+            {submission.problem.slug ? (
+              <Link
+                className="button"
+                to={`/problems/${submission.problem.slug}`}
+              >
+                코드 수정하고 다시 풀기
+              </Link>
+            ) : null}
+            <Link className="button button-outline" to="/submissions">
+              제출 내역
+            </Link>
+          </>
+        )}
+      </div>
     </div>
   );
 }
