@@ -23,6 +23,12 @@ export async function api<T>(
     },
   });
   const data = await response.json().catch(() => null);
+  // 백엔드가 없거나 주소가 틀리면 SPA의 index.html(200)이 돌아온다. 빈 값을 성공으로 넘기지 않는다.
+  if (response.ok && data === null)
+    throw new ApiError(
+      response.status,
+      "서버 응답을 확인할 수 없습니다. 백엔드 주소(VITE_API_BASE_URL) 설정을 확인해 주세요.",
+    );
   if (!response.ok) {
     const detail = data?.message;
     throw new ApiError(
