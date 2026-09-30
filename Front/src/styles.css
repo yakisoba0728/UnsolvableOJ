@@ -2664,3 +2664,49 @@ kbd {
     flex-direction: column;
   }
 }
+
+/* 프로필 활동: 그래프와 상세 카드를 같은 높이로, 범례는 그래프에 붙인다 */
+.activity {
+  align-items: stretch;
+  gap: 32px;
+}
+.activity-graph {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 100%;
+}
+.activity-graph .heat-legend {
+  align-self: flex-end;
+  margin-top: 14px;
+}
+.day-detail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.day-detail .day-more {
+  margin-top: auto;
+  padding-left: 0;
+  align-self: flex-start;
+}
+@media (max-width: 650px) {
+  .heatmap,
+  .heat-days,
+  .heat-col {
+    gap: 4px;
+  }
+  .heat-cell {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+  }
+  .heat-days span {
+    height: 18px;
+    line-height: 18px;
+    width: 14px;
+  }
+  .activity-graph {
+    width: 100%;
+  }
+}

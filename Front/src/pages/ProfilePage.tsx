@@ -10,7 +10,8 @@ import {
 } from "../hooks";
 import type { RankingEntry, UserProfile } from "../types";
 
-const WEEKS = 12;
+const WEEKS_WIDE = 20;
+const WEEKS_NARROW = 12;
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
 /** 서버 규칙: level = 1 + xp / 100 */
@@ -27,6 +28,16 @@ export function ProfilePage() {
   const [error, setError] = useState("");
   const [selected, setSelected] = useState(dayKey(new Date()));
   const history = useSubmissionHistory(session);
+  // 넓은 화면에서는 폭을 채우도록 주 수를 늘리고, 좁은 화면에서는 가로 스크롤이 생기지 않게 줄인다.
+  const [weeks, setWeeks] = useState(() =>
+    window.matchMedia("(max-width: 650px)").matches ? WEEKS_NARROW : WEEKS_WIDE,
+  );
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 650px)");
+    const update = () => setWeeks(media.matches ? WEEKS_NARROW : WEEKS_WIDE);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     if (!session) return;
@@ -57,8 +68,8 @@ export function ProfilePage() {
   // 오늘이 속한 주를 마지막 열로, 일요일 시작 12주 격자
   const today = new Date();
   const start = new Date(today);
-  start.setDate(today.getDate() - today.getDay() - (WEEKS - 1) * 7);
-  const columns = Array.from({ length: WEEKS }, (_, week) =>
+  start.setDate(today.getDate() - today.getDay() - (weeks - 1) * 7);
+  const columns = Array.from({ length: weeks }, (_, week) =>
     Array.from({ length: 7 }, (_, day) => {
       const date = new Date(start);
       date.setDate(start.getDate() + week * 7 + day);
@@ -149,12 +160,13 @@ export function ProfilePage() {
           <div>
             <h2>최근 제출 활동</h2>
             <p>
-              최근 {WEEKS}주 · 총 {history.submissions.length}회 제출 · 현재{" "}
+              최근 {weeks}주 · 총 {history.submissions.length}회 제출 · 현재{" "}
               {streak}일 연속 학습
             </p>
           </div>
         </div>
         <div className="activity">
+          <div className="activity-graph">
           <div className="heatmap" role="group" aria-label="일별 제출 활동">
             <div className="heat-days" aria-hidden="true">
               {weekdays.map((day) => (
@@ -181,6 +193,14 @@ export function ProfilePage() {
               </div>
             ))}
           </div>
+          <div className="heat-legend" aria-hidden="true">
+            <span>적음</span>
+            {[0, 1, 2, 3, 4].map((level) => (
+              <i key={level} className={`heat-cell level-${level}`} />
+            ))}
+            <span>많음</span>
+          </div>
+          </div>
           <div className="day-detail">
             <span className="muted">
               {sm}월 {sd}일{selected === dayKey(today) ? " · 오늘" : ""}
@@ -191,7 +211,7 @@ export function ProfilePage() {
             </p>
             {selectedSubmissions.length ? (
               <ul className="history-list">
-                {selectedSubmissions.slice(0, 4).map((item) => (
+                {selectedSubmissions.slice(0, 3).map((item) => (
                   <li key={item.id}>
                     <Link to={`/submissions/${item.id}`}>
                       <span
@@ -204,20 +224,19 @@ export function ProfilePage() {
                   </li>
                 ))}
               </ul>
-            ) : (
+            ) : null}
+            {selectedSubmissions.length > 3 ? (
+              <Link className="inline-button day-more" to="/submissions">
+                제출 {selectedSubmissions.length}건 모두 보기 →
+              </Link>
+            ) : null}
+            {selectedSubmissions.length === 0 ? (
               <p className="muted">
                 이 날은 제출 기록이 없어요.{" "}
                 <Link to="/problems">문제 풀러 가기</Link>
               </p>
-            )}
+            ) : null}
           </div>
-        </div>
-        <div className="heat-legend" aria-hidden="true">
-          <span>적음</span>
-          {[0, 1, 2, 3, 4].map((level) => (
-            <i key={level} className={`heat-cell level-${level}`} />
-          ))}
-          <span>많음</span>
         </div>
       </section>
 
