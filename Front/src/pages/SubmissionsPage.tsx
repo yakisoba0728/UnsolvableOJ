@@ -5,6 +5,17 @@ import { useAuth } from "../auth";
 import { Pagination } from "../components/Pagination";
 import type { Page, Submission } from "../types";
 
+const languageLabels: Record<string, string> = {
+  C: "C",
+  CPP: "C++",
+  JAVA: "Java",
+  PYTHON: "Python",
+  JAVASCRIPT: "JavaScript",
+  TYPESCRIPT: "TypeScript",
+  GO: "Go",
+  RUST: "Rust",
+};
+
 export function SubmissionsPage() {
   const { session } = useAuth();
   const [page, setPage] = useState(1);
@@ -56,24 +67,48 @@ export function SubmissionsPage() {
         <div className="empty-state">제출을 불러오는 중입니다…</div>
       ) : data?.items.length ? (
         <div className="problem-list">
+          <div className="history-head" aria-hidden="true">
+            <span>문제</span>
+            <span>판정</span>
+            <span>언어</span>
+            <span>실행 결과</span>
+            <span>제출 시각</span>
+          </div>
           {data.items.map((item) => (
             <Link
-              className="problem-row submission-row"
+              className="history-row"
               to={`/submissions/${item.id}`}
               key={item.id}
             >
-              <span className="problem-title">
+              <span className="history-title">
                 <strong>{item.problem.title ?? "문제"}</strong>
                 <small>
-                  {item.language} ·{" "}
-                  {new Date(item.createdAt).toLocaleString("ko-KR")}
+                  {item.passedTestCases} / {item.totalTestCases} 통과
                 </small>
               </span>
               <span className={`verdict verdict-${item.status.toLowerCase()}`}>
                 {item.status.replaceAll("_", " ")}
               </span>
+              <span className="history-lang">
+                {languageLabels[item.language] ?? item.language}
+              </span>
+              <span className="history-metrics">
+                {item.runtimeMs === null ? "—" : `${item.runtimeMs}ms`}
+                {" · "}
+                {item.memoryKb === null
+                  ? "—"
+                  : `${(item.memoryKb / 1024).toFixed(1)}MB`}
+              </span>
+              <time className="history-time" dateTime={item.createdAt}>
+                {new Date(item.createdAt).toLocaleString("ko-KR", {
+                  month: "numeric",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </time>
               <span className="row-arrow" aria-hidden="true">
-                ↗
+                ›
               </span>
             </Link>
           ))}

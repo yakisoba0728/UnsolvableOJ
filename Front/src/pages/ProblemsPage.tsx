@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { Pagination } from "../components/Pagination";
 import { ProblemStatus, solveState } from "../components/ProblemStatus";
@@ -42,7 +42,8 @@ export function ProblemsPage() {
   const history = useSubmissionHistory(session);
   const [difficulty, setDifficulty] = useState<Difficulty | "">("");
   const [status, setStatus] = useState("");
-  const [query, setQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [sort, setSort] = useState("latest");
   const [page, setPage] = useState(1);
   const { profile, rank } = useMyStanding(session);

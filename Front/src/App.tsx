@@ -1,7 +1,15 @@
-import { Link, NavLink, Navigate, Route, Routes } from "react-router-dom";
+import {
+  Link,
+  NavLink,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import { isDemo } from "./api";
 import { useAuth } from "./auth";
 import { ComingSoonPage } from "./components/ComingSoonPage";
+import { NotFoundPage } from "./components/NotFoundPage";
 import { AuthPage } from "./pages/AuthPage";
 import { CreateProblemPage } from "./pages/CreateProblemPage";
 import { HomePage } from "./pages/HomePage";
@@ -76,6 +84,7 @@ const upcoming = [
 
 export function App() {
   const { session, setSession } = useAuth();
+  const { pathname } = useLocation();
   return (
     <div className="app-shell">
       <header className="site-header">
@@ -90,7 +99,15 @@ export function App() {
             <NavLink to="/" end>
               홈
             </NavLink>
-            <NavLink to="/problems">문제</NavLink>
+            {/* /problems/new 는 "문제 만들기"만 활성화한다 */}
+            <NavLink
+              to="/problems"
+              className={({ isActive }) =>
+                isActive && pathname !== "/problems/new" ? "active" : ""
+              }
+            >
+              문제
+            </NavLink>
             {upcoming.map((item) => (
               <NavLink to={item.path} key={item.path}>
                 {item.label}
@@ -195,12 +212,7 @@ export function App() {
           />
           <Route
             path="*"
-            element={
-              <div className="empty-state">
-                <h1>페이지를 찾을 수 없습니다.</h1>
-                <Link to="/problems">문제 목록으로</Link>
-              </div>
-            }
+            element={<NotFoundPage />}
           />
         </Routes>
       </main>

@@ -6,6 +6,7 @@ import {
   ProblemStatus,
   solveState,
 } from "../components/ProblemStatus";
+import { LearningIllustration } from "../components/LearningIllustration";
 import { WeekStrip } from "../components/WeekStrip";
 import {
   solvedToday,
@@ -87,6 +88,7 @@ export function HomePage() {
 
       <div className="home-top-grid">
         <section className="continue-card" aria-label="이어서 학습">
+          <LearningIllustration />
           {session && resume ? (
             <>
               <span className="pill pill-primary">이어서 학습</span>
