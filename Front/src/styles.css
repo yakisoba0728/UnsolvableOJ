@@ -2287,3 +2287,36 @@ kbd {
     gap: 6px;
   }
 }
+.demo-banner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--color-warning-soft);
+  color: #7a4c0c;
+  font-size: 13px;
+  padding: 8px 24px;
+  text-align: center;
+}
+.demo-banner .text-button {
+  color: #7a4c0c;
+  text-decoration: underline;
+  font-size: 13px;
+}
+.demo-hint {
+  background: var(--color-feature);
+  border-radius: var(--radius-control);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--color-ink-700);
+  margin: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+.demo-hint code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}

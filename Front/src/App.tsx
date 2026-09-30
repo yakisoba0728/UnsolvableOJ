@@ -1,4 +1,5 @@
 import { Link, NavLink, Navigate, Route, Routes } from "react-router-dom";
+import { isDemo } from "./api";
 import { useAuth } from "./auth";
 import { ComingSoonPage } from "./components/ComingSoonPage";
 import { AuthPage } from "./pages/AuthPage";
@@ -130,6 +131,28 @@ export function App() {
           </div>
         </div>
       </header>
+      {isDemo ? (
+        <div className="demo-banner" role="status">
+          <span>
+            <strong>데모 모드</strong> · 더미 데이터로 화면을 시연합니다. 채점은
+            실제 실행이 아닌 시뮬레이션이고, 기록은 이 브라우저에만 저장됩니다.
+          </span>
+          <button
+            className="text-button"
+            onClick={() => {
+              try {
+                localStorage.removeItem("unsolvable-oj-demo-v1");
+                localStorage.removeItem("unsolvable-oj-session-v1");
+              } catch {
+                /* 저장소를 쓸 수 없으면 새로고침만 한다 */
+              }
+              window.location.assign("/");
+            }}
+          >
+            데이터 초기화
+          </button>
+        </div>
+      ) : null}
       <main className="main-content">
         <Routes>
           <Route path="/" element={<HomePage />} />

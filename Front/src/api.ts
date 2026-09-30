@@ -1,4 +1,8 @@
+import { mockApi } from "./demo/mockApi";
+
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+/** 백엔드 없이 더미 데이터로 시연하는 모드 (Vercel 데모 배포용) */
+export const isDemo = import.meta.env.VITE_DEMO_MODE === "true";
 
 export class ApiError extends Error {
   constructor(
@@ -14,6 +18,7 @@ export async function api<T>(
   options: RequestInit = {},
   token?: string,
 ): Promise<T> {
+  if (isDemo) return mockApi<T>(path, options, token);
   const response = await fetch(`${baseUrl}${path}`, {
     ...options,
     headers: {
