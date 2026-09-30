@@ -2573,12 +2573,9 @@ kbd {
 .soon-lead {
   max-width: 720px;
 }
+/* 폼 화면은 좁은 열을 가운데에 둔다 (GitHub 새 저장소, 구글 폼과 같은 방식) */
 .create-page {
-  width: min(1180px, calc(100% - 48px));
-}
-.create-page .create-form,
-.create-page > .muted {
-  max-width: 880px;
+  width: min(880px, calc(100% - 48px));
 }
 .notfound-page {
   max-width: 560px;

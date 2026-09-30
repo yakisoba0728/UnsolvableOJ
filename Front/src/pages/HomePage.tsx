@@ -18,6 +18,9 @@ import {
 import type { RankingEntry, UserProfile } from "../types";
 import { difficultyLabel } from "./ProblemsPage";
 
+// 안 푼 문제 중 가장 쉬운 것부터 제안한다 (학습 순서)
+const difficultyOrder = ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"];
+
 export function HomePage() {
   const { session } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -58,11 +61,21 @@ export function HomePage() {
     : -1;
   const topRankings = rankings.slice(0, 5);
 
-  // 이어 풀 문제: 아직 해결하지 못한 가장 최근 시도. 없으면 가장 최근 제출.
+  // 이어 풀 문제: 시도했지만 아직 해결하지 못한 가장 최근 문제만 해당한다.
   const resume =
     history.submissions.find(
       (item) => !history.solved.has(item.problem.id) && item.problem.slug,
-    ) ?? history.latest;
+    ) ?? null;
+  // 진행 중인 문제가 없으면 아직 해결하지 않은 다음 문제를 제안한다.
+  const nextProblem = resume
+    ? null
+    : ([...problems]
+        .filter((problem) => !history.solved.has(problem.id))
+        .sort(
+          (a, b) =>
+            difficultyOrder.indexOf(a.difficulty) -
+            difficultyOrder.indexOf(b.difficulty),
+        )[0] ?? null);
   const recommended = problems
     .filter((problem) => !history.solved.has(problem.id))
     .slice(0, 3);
@@ -94,8 +107,7 @@ export function HomePage() {
               <span className="pill pill-primary">이어서 학습</span>
               <h2>{resume.problem.title ?? "문제"}</h2>
               <p className="muted">
-                {history.solved.has(resume.problem.id) ? "해결함" : "풀이 중"} ·
-                최근 제출{" "}
+                풀이 중 · 최근 제출{" "}
                 {new Date(resume.updatedAt).toLocaleDateString("ko-KR")}
               </p>
               <Link
@@ -107,6 +119,27 @@ export function HomePage() {
                 }
               >
                 이어서 풀기
+              </Link>
+            </>
+          ) : session && nextProblem ? (
+            <>
+              <span className="pill pill-primary">다음 도전</span>
+              <h2>{nextProblem.title}</h2>
+              <p className="muted">
+                {difficultyLabel(nextProblem.difficulty)} ·{" "}
+                {nextProblem.timeLimitMs}ms · {nextProblem.memoryLimitMb}MB
+              </p>
+              <Link className="button" to={`/problems/${nextProblem.slug}`}>
+                풀어보기
+              </Link>
+            </>
+          ) : session && history.solved.size > 0 && !loading ? (
+            <>
+              <span className="pill pill-success">모두 해결</span>
+              <h2>공개된 문제를 모두 해결했어요.</h2>
+              <p className="muted">새 문제가 올라오면 여기에서 알려드릴게요.</p>
+              <Link className="button button-outline" to="/profile">
+                내 학습 기록
               </Link>
             </>
           ) : session ? (
