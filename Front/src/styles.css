@@ -1937,6 +1937,40 @@ button.heat-cell.selected {
   opacity: 0.6;
 }
 
+/* ===== 채점 결과: 판정 + 수치를 한 덩어리로 ===== */
+.result-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+.result-summary .result-banner {
+  padding: 24px 32px;
+  border-radius: var(--radius-feature);
+}
+.result-summary .result-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+.result-summary .result-stats > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 20px;
+  border-radius: var(--radius-panel);
+}
+.result-summary .result-stats small {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.result-summary .result-stats strong {
+  font-size: 18px;
+}
+.result-page h1 {
+  font-size: clamp(30px, 3vw, 40px);
+  margin-bottom: 20px;
+}
 @media (max-width: 1100px) {
   .list-layout {
     grid-template-columns: 1fr;
@@ -2422,5 +2456,39 @@ kbd {
   .filter-row .search-field,
   .filter-row > .button {
     grid-column: 1 / -1;
+  }
+}
+.streak-card {
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  text-align: left;
+  padding: 16px 24px;
+  margin: 0 0 16px;
+  border-radius: var(--radius-panel);
+}
+.streak-text {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.streak-card strong {
+  font-size: 32px;
+}
+.streak-card .streak-text > span {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .result-summary {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 650px) {
+  .streak-card {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

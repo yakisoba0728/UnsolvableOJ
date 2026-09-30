@@ -70,6 +70,7 @@ export function SubmissionPage() {
         SUBMISSION / {submission.id.slice(0, 8).toUpperCase()}
       </span>
       <h1>{submission.problem.title ?? "제출 결과"}</h1>
+      <div className="result-summary">
       <div
         className={`result-banner result-${submission.status.toLowerCase()}`}
       >
@@ -109,10 +110,13 @@ export function SubmissionPage() {
           </strong>
         </div>
       </div>
+      </div>
       {submission.status === "ACCEPTED" ? (
         <section className="streak-card" aria-label="연속 학습">
-          <strong>{streakDays(submissionsByDay(history.submissions))}일</strong>
-          <span>연속 학습 중이에요. 내일도 이어가 보세요!</span>
+          <div className="streak-text">
+            <strong>{streakDays(submissionsByDay(history.submissions))}일</strong>
+            <span>연속 학습 중이에요. 내일도 이어가 보세요!</span>
+          </div>
           <WeekStrip counts={submissionsByDay(history.submissions)} />
         </section>
       ) : null}
