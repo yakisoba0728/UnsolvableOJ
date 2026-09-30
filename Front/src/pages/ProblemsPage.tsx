@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth";
 import { Pagination } from "../components/Pagination";
 import { ProblemStatus, solveState } from "../components/ProblemStatus";
-import { useAllProblems, useSubmissionHistory } from "../hooks";
+import { useAllProblems, useMyStanding, useSubmissionHistory } from "../hooks";
 import type { Difficulty } from "../types";
 
 const difficulties: { value: Difficulty | ""; label: string }[] = [
@@ -21,6 +21,14 @@ export function difficultyLabel(value: Difficulty) {
 
 const PAGE_SIZE = 20;
 
+const sorts = [
+  { value: "latest", label: "정렬: 최신순" },
+  { value: "easy", label: "쉬운 난이도순" },
+  { value: "hard", label: "어려운 난이도순" },
+  { value: "title", label: "제목순" },
+];
+const order: Difficulty[] = ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"];
+
 const statusFilters = [
   { value: "", label: "풀이 상태: 전체" },
   { value: "solved", label: "해결" },
@@ -35,7 +43,9 @@ export function ProblemsPage() {
   const [difficulty, setDifficulty] = useState<Difficulty | "">("");
   const [status, setStatus] = useState("");
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState("latest");
   const [page, setPage] = useState(1);
+  const { profile, rank } = useMyStanding(session);
   const navigate = useNavigate();
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -52,11 +62,21 @@ export function ProblemsPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  useEffect(() => setPage(1), [difficulty, status, query]);
+  useEffect(() => setPage(1), [difficulty, status, query, sort]);
 
   const filtered = useMemo(() => {
     const keyword = query.trim().toLowerCase();
-    return problems.filter((problem) => {
+    const base = [...problems];
+    if (sort === "easy" || sort === "hard")
+      base.sort(
+        (a, b) =>
+          (order.indexOf(a.difficulty) - order.indexOf(b.difficulty)) *
+          (sort === "easy" ? 1 : -1),
+      );
+    else if (sort === "title")
+      base.sort((a, b) => a.title.localeCompare(b.title, "ko"));
+    else base.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return base.filter((problem) => {
       if (difficulty && problem.difficulty !== difficulty) return false;
       if (
         status &&
@@ -69,7 +89,15 @@ export function ProblemsPage() {
         problem.slug.toLowerCase().includes(keyword)
       );
     });
-  }, [problems, difficulty, status, query, history.solved, history.attempted]);
+  }, [
+    problems,
+    difficulty,
+    status,
+    query,
+    sort,
+    history.solved,
+    history.attempted,
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
@@ -161,6 +189,17 @@ export function ProblemsPage() {
               ))}
             </select>
           ) : null}
+          <select
+            aria-label="정렬"
+            value={sort}
+            onChange={(event) => setSort(event.target.value)}
+          >
+            {sorts.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
           <button
             type="button"
             className="button button-outline"
@@ -271,6 +310,25 @@ export function ProblemsPage() {
         </section>
 
         <aside className="side-stack">
+          {profile ? (
+            <Link to="/profile" className="standing-card">
+              <h2>내 요약</h2>
+              <dl>
+                <div>
+                  <dt>순위</dt>
+                  <dd>{rank >= 0 ? `${rank + 1}위` : "—"}</dd>
+                </div>
+                <div>
+                  <dt>XP</dt>
+                  <dd>{profile.xp.toLocaleString()}</dd>
+                </div>
+                <div>
+                  <dt>해결한 문제</dt>
+                  <dd>{profile.solvedCount}개</dd>
+                </div>
+              </dl>
+            </Link>
+          ) : null}
           {resume && resumeProblem ? (
             <div className="resume-card">
               <span className="pill pill-dark">이어서 풀기</span>

@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
-import type { Page, ProblemSummary, Session, Submission } from "./types";
+import type {
+  Page,
+  ProblemSummary,
+  RankingEntry,
+  Session,
+  Submission,
+  UserProfile,
+} from "./types";
 
 const PAGE_LIMIT = 100;
 const MAX_PAGES = 5;
@@ -114,4 +121,49 @@ export function streakDays(counts: Map<string, number>) {
     cursor.setDate(cursor.getDate() - 1);
   }
   return streak;
+}
+
+/** 오늘 새로 해결(ACCEPTED)한 서로 다른 문제 수. */
+export function solvedToday(submissions: Submission[]) {
+  const today = dayKey(new Date());
+  return new Set(
+    submissions
+      .filter(
+        (item) =>
+          item.status === "ACCEPTED" &&
+          dayKey(new Date(item.createdAt)) === today,
+      )
+      .map((item) => item.problem.id),
+  ).size;
+}
+
+/** 내 프로필과 전체 랭킹 순위. */
+export function useMyStanding(session: Session | null) {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [rank, setRank] = useState(-1);
+
+  useEffect(() => {
+    if (!session) {
+      setProfile(null);
+      setRank(-1);
+      return;
+    }
+    const controller = new AbortController();
+    Promise.all([
+      api<UserProfile>(
+        "/users/me",
+        { signal: controller.signal },
+        session.accessToken,
+      ),
+      api<RankingEntry[]>("/rankings", { signal: controller.signal }),
+    ])
+      .then(([me, rankings]) => {
+        setProfile(me);
+        setRank(rankings.findIndex((entry) => entry.id === me.id));
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [session]);
+
+  return { profile, rank };
 }

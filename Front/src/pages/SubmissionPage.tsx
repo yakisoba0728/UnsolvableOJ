@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { WeekStrip } from "../components/WeekStrip";
+import { streakDays, submissionsByDay, useSubmissionHistory } from "../hooks";
 import type { Submission } from "../types";
 
 export function SubmissionPage() {
@@ -9,6 +11,7 @@ export function SubmissionPage() {
   const { session } = useAuth();
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [error, setError] = useState("");
+  const history = useSubmissionHistory(session);
 
   useEffect(() => {
     if (!session || !id) return;
@@ -106,6 +109,13 @@ export function SubmissionPage() {
           </strong>
         </div>
       </div>
+      {submission.status === "ACCEPTED" ? (
+        <section className="streak-card" aria-label="연속 학습">
+          <strong>{streakDays(submissionsByDay(history.submissions))}일</strong>
+          <span>연속 학습 중이에요. 내일도 이어가 보세요!</span>
+          <WeekStrip counts={submissionsByDay(history.submissions)} />
+        </section>
+      ) : null}
       {submission.judgeMessage ? (
         <div className="notice">
           <strong>채점 메시지</strong>

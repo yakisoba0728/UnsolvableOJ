@@ -6,7 +6,9 @@ import {
   ProblemStatus,
   solveState,
 } from "../components/ProblemStatus";
+import { WeekStrip } from "../components/WeekStrip";
 import {
+  solvedToday,
   streakDays,
   submissionsByDay,
   useAllProblems,
@@ -46,7 +48,10 @@ export function HomePage() {
     return () => controller.abort();
   }, [session]);
 
-  const streak = streakDays(submissionsByDay(history.submissions));
+  const dayCounts = submissionsByDay(history.submissions);
+  const streak = streakDays(dayCounts);
+  const todaySolved = solvedToday(history.submissions);
+  const DAILY_GOAL = 1;
   const myRank = session
     ? rankings.findIndex((entry) => entry.id === session.user.id)
     : -1;
@@ -185,6 +190,37 @@ export function HomePage() {
           )}
         </section>
       </div>
+
+      {session ? (
+        <section className="daily-card" aria-label="오늘의 목표">
+          <div className="daily-goal">
+            <h2>오늘의 목표</h2>
+            <p>
+              {todaySolved >= DAILY_GOAL
+                ? "오늘 목표를 달성했어요. 한 문제 더 도전해 볼까요?"
+                : `문제 ${DAILY_GOAL}개 해결하기`}
+            </p>
+            <div
+              className="progress"
+              role="progressbar"
+              aria-label="오늘의 목표 진행률"
+              aria-valuemin={0}
+              aria-valuemax={DAILY_GOAL}
+              aria-valuenow={Math.min(todaySolved, DAILY_GOAL)}
+            >
+              <span
+                style={{
+                  width: `${(Math.min(todaySolved, DAILY_GOAL) / DAILY_GOAL) * 100}%`,
+                }}
+              />
+            </div>
+            <small>
+              {Math.min(todaySolved, DAILY_GOAL)} / {DAILY_GOAL}
+            </small>
+          </div>
+          <WeekStrip counts={dayCounts} />
+        </section>
+      ) : null}
 
       {profile ? (
         <div className="stat-tiles">
