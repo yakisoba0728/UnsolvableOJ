@@ -4,7 +4,12 @@ import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { ProblemStatus, solveState } from "../components/ProblemStatus";
-import { useAllProblems, useMyStanding, useSubmissionHistory } from "../hooks";
+import {
+  useAllProblems,
+  useDocumentTitle,
+  useMyStanding,
+  useSubmissionHistory,
+} from "../hooks";
 import type { Difficulty } from "../types";
 
 const difficulties: { value: Difficulty | ""; label: string }[] = [
@@ -39,6 +44,7 @@ const statusFilters = [
 
 export function ProblemsPage() {
   const { session } = useAuth();
+  useDocumentTitle("문제 목록");
   const { problems, loading, error } = useAllProblems();
   const history = useSubmissionHistory(session);
   const [difficulty, setDifficulty] = useState<Difficulty | "">("");
@@ -144,8 +150,8 @@ export function ProblemsPage() {
         title="문제 목록"
         badge={<span className="pill">{problems.length}문제</span>}
         description="한 문제씩, 더 단단해지는 실력. 오늘 풀 문제를 찾아보세요."
-      >
-        {session && problems.length ? (
+        aside={
+          session && problems.length ? (
           <div className="solved-summary">
             <span>
               <strong>{solvedCount}</strong> / {problems.length} 해결
@@ -163,8 +169,9 @@ export function ProblemsPage() {
               />
             </div>
           </div>
-        ) : null}
-      </PageHeader>
+          ) : null
+        }
+      />
 
       <div className="filter-card">
         <div className="filter-row">
@@ -173,7 +180,7 @@ export function ProblemsPage() {
               ref={searchRef}
               type="search"
               className="search-input"
-              placeholder="문제 제목 또는 주소(slug) 검색"
+              placeholder="문제 제목 검색"
               aria-label="문제 검색"
               aria-keyshortcuts="/"
               value={query}
@@ -265,7 +272,6 @@ export function ProblemsPage() {
                 >
                   <span className="problem-title">
                     <strong>{problem.title}</strong>
-                    <small>/{problem.slug}</small>
                   </span>
                   <ProblemStatus
                     state={solveState(

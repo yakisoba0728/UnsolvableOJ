@@ -167,3 +167,10 @@ export function useMyStanding(session: Session | null) {
 
   return { profile, rank };
 }
+
+/** 탭·히스토리·공유에서 화면을 구분하도록 페이지별 제목을 설정한다. 제목이 없으면 기본 제목. */
+export function useDocumentTitle(title?: string) {
+  useEffect(() => {
+    document.title = title ? `${title} | 못풀준` : "못풀준 · UnsolvableOJ";
+  }, [title]);
+}

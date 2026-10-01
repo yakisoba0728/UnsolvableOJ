@@ -7,8 +7,7 @@ import {
   dayKey,
   streakDays,
   submissionsByDay,
-  useSubmissionHistory,
-} from "../hooks";
+  useSubmissionHistory, useDocumentTitle } from "../hooks";
 import type { RankingEntry, UserProfile } from "../types";
 
 const WEEKS_WIDE = 20;
@@ -23,6 +22,7 @@ function heatLevel(count: number) {
 }
 
 export function ProfilePage() {
+  useDocumentTitle("내 학습 기록");
   const { session } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [rankings, setRankings] = useState<RankingEntry[]>([]);

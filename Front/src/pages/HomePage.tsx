@@ -13,6 +13,7 @@ import {
   solvedToday,
   streakDays,
   submissionsByDay,
+  useDocumentTitle,
   useAllProblems,
   useSubmissionHistory,
 } from "../hooks";
@@ -24,6 +25,7 @@ const difficultyOrder = ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"];
 
 export function HomePage() {
   const { session } = useAuth();
+  useDocumentTitle();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [rankings, setRankings] = useState<RankingEntry[]>([]);
   const [rankError, setRankError] = useState("");
@@ -87,11 +89,6 @@ export function HomePage() {
       <PageHeader
         title={name ? `${name}님, 오늘도 한 걸음.` : "오늘도 한 걸음."}
         description="어제의 고민을 오늘의 실력으로 이어가세요."
-        aside={
-          session && streak > 0 ? (
-            <span className="pill pill-success">{streak}일 연속 학습 중</span>
-          ) : null
-        }
       />
 
       {error || rankError ? (

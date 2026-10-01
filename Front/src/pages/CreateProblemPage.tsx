@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { useDocumentTitle } from "../hooks";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
@@ -19,6 +20,7 @@ const blankCase = (): TestCaseInput => ({
 });
 
 export function CreateProblemPage() {
+  useDocumentTitle("새 문제 만들기");
   const { session } = useAuth();
   const navigate = useNavigate();
   const [slug, setSlug] = useState("");

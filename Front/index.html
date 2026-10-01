@@ -3,8 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#101a30" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="못풀준(UnsolvableOJ) — 문제 풀이, 채점, 성장 기록을 한곳에서. 게임처럼 성장하는 온라인 저지."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="못풀준 · UnsolvableOJ" />
+    <meta
+      property="og:description"
+      content="문제 풀이, 채점, 성장 기록을 한곳에서. 게임처럼 성장하는 온라인 저지."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>못풀준 · UnsolvableOJ</title>
+    <!-- 첫 화면이 그려지기 전에 테마를 적용해 라이트→다크 깜빡임을 막는다 (src/theme.ts와 같은 규칙) -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("unsolvable-oj-theme-v1");
+          if (t !== "light" && t !== "dark")
+            t = matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+          document.documentElement.dataset.theme = t;
+          document
+            .querySelector('meta[name="theme-color"]')
+            .setAttribute("content", t === "dark" ? "#171d27" : "#ffffff");
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

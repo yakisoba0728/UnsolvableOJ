@@ -63,7 +63,7 @@ p {
 }
 .site-header {
   height: 76px;
-  background: #fff;
+  background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
@@ -91,15 +91,15 @@ p {
   place-items: center;
   width: 38px;
   height: 38px;
-  background: var(--color-primary);
-  color: white;
+  background: var(--color-primary-solid);
+  color: var(--color-on-solid);
   border-radius: var(--radius-control);
   font-family: "JetBrains Mono", monospace;
   letter-spacing: -0.15em;
   font-size: 18px;
 }
 .brand-mark span {
-  color: #dbe6ff;
+  color: var(--color-on-solid);
 }
 .main-nav {
   display: flex;
@@ -147,7 +147,7 @@ p {
   padding: 0;
   border: 0;
   background: none;
-  color: #62748f;
+  color: var(--color-ink-600);
   font-weight: 700;
 }
 .text-button:hover,
@@ -164,10 +164,10 @@ p {
   gap: 12px;
   min-height: var(--control-height);
   padding: 0 22px;
-  border: 1px solid var(--color-primary);
+  border: 1px solid var(--color-primary-solid);
   border-radius: var(--radius-control);
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--color-primary-solid);
+  color: var(--color-on-solid);
   font-size: 14px;
   font-weight: 800;
   transition:
@@ -176,7 +176,7 @@ p {
     box-shadow 0.15s;
 }
 .button:hover {
-  background: var(--color-primary-hover);
+  background: var(--color-primary-solid-hover);
   transform: translateY(-1px);
 }
 .button:disabled {
@@ -193,7 +193,7 @@ p {
   width: 100%;
 }
 .button-outline {
-  background: #fff;
+  background: var(--color-surface);
   border-color: var(--color-border);
   color: var(--color-ink-900);
 }
@@ -206,7 +206,7 @@ p {
   color: var(--color-primary);
 }
 .button-soft:hover {
-  background: #d9e4ff;
+  background: var(--color-feature-border);
 }
 .button:focus-visible,
 .filter-chip:focus-visible,
@@ -223,7 +223,7 @@ p {
   justify-content: space-between;
   border-top: 1px solid var(--color-divider);
   color: var(--color-ink-600);
-  font-size: 12px;
+  font-size: 13px;
 }
 .site-footer span:last-child {
   font-family: "JetBrains Mono", monospace;
@@ -238,13 +238,10 @@ p {
   font-weight: 500;
   color: var(--color-primary);
 }
-.hero .eyebrow {
-  color: #84b5ff;
-}
 .hero h1 em,
 .auth-intro h1 em {
   font-style: normal;
-  color: #9ce7c9;
+  color: var(--color-success);
 }
 .section-heading {
   display: flex;
@@ -275,7 +272,7 @@ p {
   margin: 26px 0 22px;
 }
 .filter-chip {
-  background: white;
+  background: var(--color-surface);
   border: 1px solid var(--color-divider);
   border-radius: 999px;
   padding: 9px 16px;
@@ -284,7 +281,7 @@ p {
   font-weight: 700;
 }
 .filter-chip:hover {
-  border-color: #aabdea;
+  border-color: var(--color-border-strong);
 }
 .filter-chip.selected {
   background: var(--color-primary-soft);
@@ -292,7 +289,7 @@ p {
   color: var(--color-primary);
 }
 .problem-list {
-  background: white;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   overflow: hidden;
@@ -325,7 +322,7 @@ p {
   display: block;
   color: var(--color-ink-600);
   font:
-    12px "JetBrains Mono",
+    13px "JetBrains Mono",
     monospace;
   margin-top: 6px;
   white-space: nowrap;
@@ -338,41 +335,41 @@ p {
   min-width: 65px;
   padding: 6px 10px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   background: var(--color-success-soft);
   color: var(--color-success);
 }
 .difficulty-easy {
   background: var(--color-primary-soft);
-  color: #1f58b8;
+  color: var(--badge-easy-fg);
 }
 .difficulty-medium {
-  background: #fff1db;
-  color: #8f5a0c;
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
 }
 .difficulty-hard {
   background: var(--color-danger-soft);
-  color: #b0303c;
+  color: var(--badge-hard-fg);
 }
 .difficulty-expert {
-  background: #eee9ff;
-  color: #7554bf;
+  background: var(--badge-expert-bg);
+  color: var(--badge-expert-fg);
 }
 .problem-limit {
   width: 146px;
   text-align: right;
   color: var(--color-ink-600);
   font:
-    12px "JetBrains Mono",
+    13px "JetBrains Mono",
     monospace;
 }
 .row-arrow {
-  color: #6b778a;
+  color: var(--color-ink-400);
   font-size: 19px;
 }
 .empty-state {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px dashed var(--color-divider);
   border-radius: var(--radius-panel);
   text-align: center;
@@ -395,10 +392,10 @@ p {
 }
 .pagination button {
   border: 1px solid var(--color-divider);
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 8px;
   padding: 8px 15px;
-  color: #4b6388;
+  color: var(--color-ink-600);
   font-weight: 700;
 }
 .pagination button:disabled {
@@ -438,7 +435,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  color: #4e607a;
+  color: var(--color-ink-600);
   font-size: 13px;
   font-weight: 700;
 }
@@ -446,11 +443,11 @@ input,
 select,
 textarea {
   width: 100%;
-  border: 1px solid #c9d1dc;
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-control);
   min-height: var(--control-height);
   padding: 10px 14px;
-  background: #fff;
+  background: var(--color-surface);
   color: var(--color-ink-900);
   outline: none;
 }
@@ -458,7 +455,7 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(29, 79, 216, 0.14);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 textarea {
   resize: vertical;
@@ -490,7 +487,7 @@ textarea {
   display: flex;
   gap: 13px;
   margin-top: 50px;
-  color: #b2bfd1;
+  color: var(--color-border-strong);
   font:
     11px "JetBrains Mono",
     monospace;
@@ -505,7 +502,7 @@ textarea {
   border-color: var(--color-primary);
 }
 .auth-card {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-feature);
   padding: 45px;
@@ -542,15 +539,15 @@ textarea {
   padding: 16px 0;
   border-top: 1px solid var(--color-divider);
   border-bottom: 1px solid var(--color-divider);
-  color: #657790;
+  color: var(--color-ink-600);
   font-size: 13px;
 }
 .meta-strip strong {
-  color: #263958;
+  color: var(--color-ink-900);
   margin-right: 9px;
 }
 .problem-content {
-  background: white;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   padding: 38px 42px;
@@ -565,7 +562,7 @@ textarea {
   margin-bottom: 17px;
 }
 .markdown {
-  color: #3c4b63;
+  color: var(--color-ink-700);
   font-size: 15px;
   line-height: 1.8;
   overflow-wrap: anywhere;
@@ -580,7 +577,7 @@ textarea {
   border-radius: var(--radius-control);
   padding: 15px;
   margin: 0;
-  color: #334762;
+  color: var(--color-ink-700);
   font-size: 13px;
 }
 .markdown code {
@@ -594,7 +591,7 @@ textarea {
   gap: 14px;
 }
 .sample-grid h3 {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--color-ink-600);
   margin-bottom: 9px;
 }
@@ -604,16 +601,16 @@ textarea {
   color: #dce8ff;
   border-color: var(--color-code);
   font:
-    12px/1.6 "JetBrains Mono",
+    13px/1.6 "JetBrains Mono",
     monospace;
   tab-size: 4;
 }
 .code-editor:focus {
-  border-color: #739aff;
-  box-shadow: 0 0 0 3px rgba(68, 121, 245, 0.2);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 .editor-note {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--color-ink-600);
   margin: 18px 0 0;
 }
@@ -631,7 +628,7 @@ textarea {
   border-radius: 999px;
   background: var(--color-disabled);
   font:
-    700 12px "JetBrains Mono",
+    700 13px "JetBrains Mono",
     monospace;
   letter-spacing: 0.02em;
   color: var(--color-ink-600);
@@ -653,7 +650,7 @@ textarea {
 .verdict-queued,
 .verdict-judging {
   background: var(--color-warning-soft);
-  color: #8f5a0c;
+  color: var(--color-warning);
 }
 .result-page {
   padding-bottom: 90px;
@@ -672,7 +669,7 @@ textarea {
   border: 1px solid var(--color-feature-border);
   border-radius: var(--radius-panel);
   padding: 30px 36px;
-  color: #3067c0;
+  color: var(--color-primary);
 }
 .result-banner strong {
   display: block;
@@ -710,7 +707,7 @@ textarea {
   margin: 20px 0 30px;
 }
 .result-stats > div {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-divider);
   border-radius: 12px;
   padding: 20px;
@@ -718,14 +715,14 @@ textarea {
 .result-stats small {
   display: block;
   color: var(--color-ink-600);
-  font-size: 11px;
+  font-size: 13px;
   margin-bottom: 8px;
 }
 .result-stats strong {
   font-size: 15px;
 }
 .notice {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-control);
   padding: 20px;
@@ -749,7 +746,7 @@ textarea {
   border-radius: 12px;
   padding: 25px;
   min-height: 180px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
 }
 .create-page {
@@ -766,7 +763,7 @@ textarea {
   align-items: flex-start;
 }
 .form-card {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   padding: 30px;
@@ -804,14 +801,14 @@ textarea {
 }
 .case-heading .text-button {
   margin-left: auto;
-  font-size: 12px;
+  font-size: 13px;
 }
 .check-label {
   display: flex;
   align-items: center;
   gap: 8px;
   color: var(--color-ink-600);
-  font-size: 12px;
+  font-size: 13px;
 }
 .check-label input {
   width: auto;
@@ -819,7 +816,7 @@ textarea {
 }
 .case-editor .sample-grid textarea {
   font-family: "JetBrains Mono", monospace;
-  font-size: 12px;
+  font-size: 13px;
 }
 .home-top-grid {
   display: grid;
@@ -846,7 +843,7 @@ textarea {
   margin-top: 6px;
 }
 .ranking-card {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   padding: 24px;
@@ -878,7 +875,7 @@ textarea {
   width: 18px;
   color: var(--color-ink-400);
   font:
-    12px "JetBrains Mono",
+    13px "JetBrains Mono",
     monospace;
 }
 .ranking-name {
@@ -896,12 +893,12 @@ textarea {
 .ranking-name small {
   font-weight: 500;
   color: var(--color-ink-400);
-  font-size: 12px;
+  font-size: 13px;
 }
 .ranking-xp {
   color: var(--color-ink-600);
   font:
-    12px "JetBrains Mono",
+    13px "JetBrains Mono",
     monospace;
   white-space: nowrap;
 }
@@ -919,7 +916,7 @@ textarea {
   align-items: center;
   padding: 5px 12px;
   border-radius: 999px;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   color: var(--color-ink-600);
   font-size: 13px;
@@ -927,7 +924,7 @@ textarea {
   white-space: nowrap;
 }
 .pill-primary {
-  background: #fff;
+  background: var(--color-surface);
   border-color: transparent;
   color: var(--color-primary);
 }
@@ -949,7 +946,7 @@ textarea {
 .button-white {
   background: #fff;
   border-color: #fff;
-  color: var(--color-primary);
+  color: #1d4fd8;
 }
 .button-white:hover {
   background: var(--color-feature);
@@ -976,8 +973,8 @@ textarea {
 .avatar-large {
   width: 80px;
   height: 80px;
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--color-primary-solid);
+  color: var(--color-on-solid);
   font-size: 32px;
 }
 .account-link {
@@ -1061,7 +1058,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   padding: 18px 20px;
@@ -1080,7 +1077,7 @@ textarea {
 }
 .stat-tile span {
   color: var(--color-ink-400);
-  font-size: 12px;
+  font-size: 13px;
 }
 .home-section .section-heading {
   align-items: center;
@@ -1099,7 +1096,7 @@ textarea {
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   padding: 22px;
@@ -1115,7 +1112,7 @@ textarea {
 .problem-card small {
   color: var(--color-ink-400);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13px;
 }
 .problem-card-foot {
   display: flex;
@@ -1171,12 +1168,12 @@ textarea {
 .problem-head {
   padding: 12px 24px;
   color: var(--color-ink-400);
-  font-size: 12px;
+  font-size: 13px;
   border-bottom: 1px solid var(--color-border);
 }
 .problem-row:not(.submission-row) {
-  min-height: 72px;
-  padding: 14px 24px;
+  min-height: 56px;
+  padding: 10px 24px;
 }
 .problem-limit {
   width: auto;
@@ -1186,7 +1183,7 @@ textarea {
   justify-content: center;
   padding: 5px 12px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   background: var(--color-disabled);
   color: var(--color-ink-600);
@@ -1216,8 +1213,8 @@ textarea {
   top: 92px;
 }
 .resume-card {
-  background: #172238;
-  color: #fff;
+  background: var(--color-strong-bg);
+  color: var(--color-strong-ink);
   border-radius: var(--radius-feature);
   padding: 24px;
 }
@@ -1226,12 +1223,12 @@ textarea {
   margin: 14px 0 6px;
 }
 .resume-card p {
-  color: #b9c7db;
+  color: var(--color-strong-muted);
   font-size: 13px;
   margin-bottom: 18px;
 }
 .guide-card {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   padding: 20px;
@@ -1261,7 +1258,7 @@ textarea {
 }
 .guide-card button span {
   color: var(--color-ink-600);
-  font-size: 12px;
+  font-size: 13px;
 }
 .pagination {
   gap: 4px;
@@ -1289,7 +1286,7 @@ textarea {
   color: var(--color-ink-600);
 }
 .page-button.page-nav:last-child:not(:disabled) {
-  background: #fff;
+  background: var(--color-surface);
   border-color: var(--color-border);
   color: var(--color-ink-900);
 }
@@ -1343,7 +1340,7 @@ textarea {
   min-height: 560px;
 }
 .solve-panel {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   overflow: hidden;
@@ -1433,7 +1430,7 @@ textarea {
 }
 .save-state {
   flex: 1;
-  font-size: 12px;
+  font-size: 13px;
   color: #b9c7db;
 }
 .code-form {
@@ -1488,7 +1485,7 @@ textarea {
   justify-content: space-between;
   gap: 16px;
   padding: 12px 16px;
-  background: #fff;
+  background: var(--color-surface);
 }
 .code-actions .editor-note {
   margin: 0;
@@ -1587,7 +1584,7 @@ textarea {
 .heat-days span {
   height: 24px;
   line-height: 24px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--color-ink-400);
   width: 16px;
 }
@@ -1601,16 +1598,16 @@ textarea {
   background: var(--color-disabled);
 }
 .heat-cell.level-1 {
-  background: #c5d6fb;
+  background: var(--heat-1);
 }
 .heat-cell.level-2 {
-  background: #7fa1f2;
+  background: var(--heat-2);
 }
 .heat-cell.level-3 {
-  background: #3b6be0;
+  background: var(--heat-3);
 }
 .heat-cell.level-4 {
-  background: var(--color-primary);
+  background: var(--heat-4);
 }
 .heat-cell:disabled {
   opacity: 0.35;
@@ -1626,7 +1623,7 @@ button.heat-cell.selected {
   gap: 6px;
   margin-top: 16px;
   color: var(--color-ink-400);
-  font-size: 11px;
+  font-size: 12px;
 }
 .heat-legend .heat-cell {
   width: 16px;
@@ -1676,11 +1673,11 @@ button.heat-cell.selected {
 }
 .soon-badge {
   display: inline-block;
-  background: #fff;
+  background: var(--color-surface);
   color: var(--color-primary);
   border-radius: 999px;
   padding: 4px 12px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 .soon-card h2 {
@@ -1745,10 +1742,10 @@ button.heat-cell.selected {
   padding: 6px 8px;
 }
 .heat-cell {
-  background: #e3e7ed;
+  background: var(--heat-0);
 }
 .heat-cell.level-1 {
-  background: #c5d6fb;
+  background: var(--heat-1);
 }
 .heat-days span {
   font-size: 12px;
@@ -1787,7 +1784,7 @@ button.heat-cell.selected {
   border-radius: var(--radius-panel);
 }
 .result-summary .result-stats small {
-  font-size: 12px;
+  font-size: 13px;
   margin-bottom: 4px;
 }
 .result-summary .result-stats strong {
@@ -1899,7 +1896,7 @@ button.heat-cell.selected {
     display: none;
   }
   .difficulty {
-    font-size: 11px;
+    font-size: 12px;
     min-width: 54px;
   }
   .row-arrow {
@@ -2029,7 +2026,7 @@ button.heat-cell.selected {
 }
 .chip-count {
   margin-left: 6px;
-  font-size: 12px;
+  font-size: 13px;
   opacity: 0.7;
   font-variant-numeric: tabular-nums;
 }
@@ -2062,7 +2059,7 @@ kbd {
   align-items: center;
   gap: 24px;
   flex-wrap: wrap;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   padding: 20px 24px;
@@ -2102,7 +2099,7 @@ kbd {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-ink-600);
 }
 .week-strip i {
@@ -2112,19 +2109,19 @@ kbd {
   height: 32px;
   border-radius: 50%;
   background: var(--color-disabled);
-  color: #fff;
+  color: var(--color-on-solid);
   font-style: normal;
   font-weight: 700;
 }
 .week-strip li.done i {
-  background: var(--color-primary);
+  background: var(--color-primary-solid);
 }
 .week-strip li.today span:first-child {
   color: var(--color-primary);
   font-weight: 700;
 }
 .week-strip li.today i {
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-primary-soft);
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-primary-soft);
 }
 .week-strip li.future {
   opacity: 0.55;
@@ -2135,7 +2132,7 @@ kbd {
   align-items: center;
   gap: 8px;
   text-align: center;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-feature);
   padding: 24px;
@@ -2152,7 +2149,7 @@ kbd {
   margin-bottom: 8px;
 }
 .standing-card {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   padding: 18px 20px;
@@ -2170,7 +2167,7 @@ kbd {
 }
 .standing-card dt {
   color: var(--color-ink-600);
-  font-size: 12px;
+  font-size: 13px;
 }
 .standing-card dd {
   margin: 2px 0 0;
@@ -2199,13 +2196,13 @@ kbd {
   gap: 16px;
   flex-wrap: wrap;
   background: var(--color-warning-soft);
-  color: #7a4c0c;
+  color: var(--color-warning);
   font-size: 13px;
   padding: 8px 24px;
   text-align: center;
 }
 .demo-banner .text-button {
-  color: #7a4c0c;
+  color: var(--color-warning);
   text-decoration: underline;
   font-size: 13px;
 }
@@ -2230,13 +2227,13 @@ kbd {
     justify-content: space-between;
     gap: 8px;
     padding: 6px 15px;
-    font-size: 12px;
+    font-size: 13px;
     text-align: left;
     flex-wrap: nowrap;
   }
   .demo-banner .text-button {
     flex: none;
-    font-size: 12px;
+    font-size: 13px;
   }
   .home-header .pill {
     align-self: flex-start;
@@ -2311,7 +2308,7 @@ kbd {
 .history-head {
   padding: 12px 24px;
   color: var(--color-ink-600);
-  font-size: 12px;
+  font-size: 13px;
   border-bottom: 1px solid var(--color-border);
 }
 .history-row {
@@ -2338,7 +2335,7 @@ kbd {
   display: block;
   margin-top: 4px;
   color: var(--color-ink-600);
-  font-size: 12px;
+  font-size: 13px;
 }
 .history-row .verdict {
   justify-self: start;
@@ -2416,11 +2413,6 @@ kbd {
 }
 .soon-inline {
   padding: 16px 24px;
-}
-@media (max-width: 900px) {
-  .learning-illustration {
-    display: none;
-  }
 }
 @media (max-width: 650px) {
   .history-head {
@@ -2637,7 +2629,7 @@ kbd {
 }
 .result-label {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   opacity: 0.85;
 }
@@ -2678,4 +2670,182 @@ kbd {
 .result-page .source-section {
   margin-top: 0;
   margin-bottom: 24px;
+}
+
+
+/* =====================================================================
+   v2: 반응형 헤더 메뉴 · 한국어 줄바꿈 · 목록 밀도 · 다크 모드 보정
+   ===================================================================== */
+
+/* B5. 한국어는 어절 단위로 줄바꿈(단어 중간 끊김 방지). 코드·입력은 예외 */
+body {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+pre,
+code,
+kbd,
+textarea,
+input,
+.code-editor,
+.history-metrics,
+.line-numbers {
+  word-break: normal;
+}
+
+/* 아이콘 버튼(테마 전환, 메뉴) */
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-ink-600);
+}
+.icon-button:hover {
+  background: var(--color-feature);
+  color: var(--color-primary);
+}
+.icon-button:focus-visible {
+  outline: 3px solid var(--color-ink-900);
+  outline-offset: 2px;
+}
+.menu-button {
+  display: none;
+}
+.account-actions {
+  gap: 8px;
+}
+
+/* A1. 헤더: 메뉴가 들어갈 폭이 없으면(1100px 미만) 접는다. 계정 영역은 항상 보인다 */
+.main-nav {
+  gap: 28px;
+}
+@media (max-width: 1100px) {
+  .header-inner {
+    gap: 12px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    padding: 0;
+  }
+  .site-header {
+    height: 76px;
+    min-height: 0;
+  }
+  .menu-button {
+    display: inline-grid;
+  }
+  .account-actions {
+    margin-left: auto;
+  }
+  .main-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    order: 0;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 8px max(24px, calc((100% - 1220px) / 2)) 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    overflow: visible;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: 0 16px 24px rgba(0, 0, 0, 0.08);
+    z-index: 19;
+  }
+  .main-nav.open {
+    display: flex;
+  }
+  .main-nav a {
+    height: 48px;
+    padding: 0 12px;
+    font-size: 16px;
+    border-bottom: 1px solid var(--color-divider);
+  }
+  .main-nav a:last-child {
+    border-bottom: 0;
+  }
+  .main-nav a.active:after {
+    left: 0;
+    right: auto;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    height: auto;
+    border-radius: 3px;
+  }
+}
+@media (max-width: 650px) {
+  .site-header {
+    height: 64px;
+  }
+  .header-inner {
+    width: min(100% - 30px, 1220px);
+  }
+  .main-nav {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-top: 0;
+  }
+  .account-link .account-name {
+    display: none;
+  }
+  .account-actions {
+    font-size: 13px;
+  }
+}
+
+/* 일러스트: 좁은 폭에서도 숨기지 않고 위치만 바꾼다 */
+@media (max-width: 650px) {
+  .continue-card .learning-illustration {
+    position: static;
+    order: 99;
+    align-self: flex-end;
+    width: min(260px, 80%);
+    margin: 8px -16px -32px 0;
+  }
+}
+@media (min-width: 651px) and (max-width: 900px) {
+  .learning-illustration {
+    width: min(300px, 38%);
+  }
+}
+
+/* B6. 문제 목록 머리글: 진행률은 제목 줄 오른쪽으로 */
+.page-header-aside .solved-summary {
+  margin: 0;
+  min-width: 240px;
+}
+.problem-title strong {
+  font-size: 16px;
+}
+.section-heading.compact {
+  margin-bottom: 12px;
+}
+
+/* ---- 다크 모드 보정 ---- */
+@media (max-width: 1100px) {
+  :root[data-theme="dark"] .main-nav {
+    box-shadow: 0 16px 24px rgba(0, 0, 0, 0.4);
+  }
+}
+:root[data-theme="dark"] .site-header {
+  border-bottom-color: var(--color-border);
+}
+:root[data-theme="dark"] .pill-dark {
+  background: rgba(255, 255, 255, 0.12);
+}
+:root[data-theme="dark"] .code-panel {
+  border-color: var(--color-border);
+}
+:root[data-theme="dark"] .demo-banner {
+  background: var(--color-warning-soft);
 }

@@ -1,9 +1,13 @@
-/* Design tokens — 못풀준 Design Foundations (Figma Test Page: 01 Foundations / 02 Components / 45) */
+/* Design tokens — 못풀준 Design Foundations (Figma Test Page: 01 Foundations / 02 Components / 45)
+   라이트가 기본이고, <html data-theme="dark"> 일 때 다크 값으로 바뀐다. (테마 선택: src/theme.ts) */
 :root {
+  color-scheme: light;
+
   /* Color: surfaces & structure */
   --color-bg: #f6f8fc;
   --color-surface: #ffffff;
   --color-border: #e1e4e8;
+  --color-border-strong: #c9d1dc;
   --color-surface-muted: #f6f8fa;
   --color-disabled: #eef0f3;
   --color-feature: #eaf0ff;
@@ -16,10 +20,14 @@
   --color-ink-600: #596574;
   --color-ink-400: #5f6c80; /* 보조 정보용, 흰 배경 기준 대비 5:1 이상 */
 
-  /* Color: primary action */
+  /* Color: primary action — accent는 글자·테두리·채움, solid는 흰 글자가 올라가는 면 */
   --color-primary: #1d4fd8;
   --color-primary-hover: #153ea9;
   --color-primary-soft: #e7eeff;
+  --color-primary-solid: #1d4fd8;
+  --color-primary-solid-hover: #153ea9;
+  --color-on-solid: #ffffff;
+  --focus-ring: rgba(29, 79, 216, 0.14);
 
   /* Color: status */
   --color-success: #137547;
@@ -30,6 +38,24 @@
   --color-danger-border: #f5c6c8;
   --color-warning: #8f5a0c;
   --color-warning-soft: #fff1db;
+
+  /* Color: 난이도 배지 */
+  --badge-easy-fg: #1f58b8;
+  --badge-hard-fg: #b0303c;
+  --badge-expert-bg: #eee9ff;
+  --badge-expert-fg: #6a47b5;
+
+  /* Color: 강조 어두운 카드(이어서 풀기) */
+  --color-strong-bg: #172238;
+  --color-strong-ink: #ffffff;
+  --color-strong-muted: #b9c7db;
+
+  /* Color: 활동 히트맵 */
+  --heat-0: #e3e7ed;
+  --heat-1: #c5d6fb;
+  --heat-2: #7fa1f2;
+  --heat-3: #3b6be0;
+  --heat-4: #1d4fd8;
 
   /* Color: code surface (읽는 영역은 밝게, 코드에만 짙은 면) */
   --color-code: #243247;
@@ -58,4 +84,57 @@
   --radius-control: 12px;
   --radius-panel: 16px;
   --radius-feature: 20px;
+}
+
+/* 다크: 밝은 면 대신 짙은 면, 파랑은 밝게(글자) / 진하게(흰 글자가 올라가는 면) */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #0e131a;
+  --color-surface: #171d27;
+  --color-border: #2b3544;
+  --color-border-strong: #3d4a5e;
+  --color-surface-muted: #1c2431;
+  --color-disabled: #232c3a;
+  --color-feature: #172544;
+  --color-feature-border: #2a3f73;
+  --color-divider: #222b39;
+
+  --color-ink-900: #eef2f7;
+  --color-ink-700: #cfd6e0;
+  --color-ink-600: #a9b4c4;
+  --color-ink-400: #9aa7ba;
+
+  --color-primary: #8bacff;
+  --color-primary-hover: #adc6ff;
+  --color-primary-soft: #1b2a4f;
+  --color-primary-solid: #3566e8;
+  --color-primary-solid-hover: #2a56cf;
+  --focus-ring: rgba(139, 172, 255, 0.3);
+
+  --color-success: #4cc98a;
+  --color-success-soft: #12301f;
+  --color-success-border: #1f5238;
+  --color-danger: #ff8086;
+  --color-danger-soft: #3a1a1d;
+  --color-danger-border: #5f2b30;
+  --color-warning: #f0b660;
+  --color-warning-soft: #38290f;
+
+  --badge-easy-fg: #9db9ff;
+  --badge-hard-fg: #ff8086;
+  --badge-expert-bg: #2a2347;
+  --badge-expert-fg: #bba8f5;
+
+  --color-strong-bg: #263550;
+  --color-strong-muted: #b9c7db;
+
+  --heat-0: #2a3342;
+  --heat-1: #23407a;
+  --heat-2: #3a64c4;
+  --heat-3: #5b8aff;
+  --heat-4: #9bb8ff;
+
+  --color-code: #1b2435;
+  --color-code-bar: #263147;
 }

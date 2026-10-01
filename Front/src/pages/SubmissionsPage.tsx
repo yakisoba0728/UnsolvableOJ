@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useDocumentTitle } from "../hooks";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
@@ -18,6 +19,7 @@ const languageLabels: Record<string, string> = {
 };
 
 export function SubmissionsPage() {
+  useDocumentTitle("내 제출");
   const { session } = useAuth();
   const [page, setPage] = useState(1);
   const [data, setData] = useState<Page<Submission> | null>(null);

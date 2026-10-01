@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from "react";
+import { useDocumentTitle } from "../hooks";
 import { Link, useNavigate } from "react-router-dom";
 
 /** 404: 사과하는 짧은 문구 + 검색으로 빠져나갈 길 + 주요 이동 (NN/G 404 가이드) */
 export function NotFoundPage() {
+  useDocumentTitle("페이지를 찾을 수 없음");
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
@@ -22,7 +24,7 @@ export function NotFoundPage() {
         <input
           type="search"
           aria-label="문제 검색"
-          placeholder="문제 제목 또는 주소 검색"
+          placeholder="문제 제목 검색"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />

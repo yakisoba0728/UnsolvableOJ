@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useDocumentTitle } from "../hooks";
 import { PageHeader } from "./PageHeader";
 
 interface ComingSoonProps {
@@ -15,6 +16,7 @@ export function ComingSoonPage({
   points,
   cta,
 }: ComingSoonProps) {
+  useDocumentTitle(title);
   return (
     <div className="page-width soon-page">
       <PageHeader title={title} description={description} />

@@ -4,13 +4,21 @@ import { api } from "../api";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import { WeekStrip } from "../components/WeekStrip";
-import { streakDays, submissionsByDay, useSubmissionHistory } from "../hooks";
+import {
+  streakDays,
+  submissionsByDay,
+  useDocumentTitle,
+  useSubmissionHistory,
+} from "../hooks";
 import type { Submission } from "../types";
 
 export function SubmissionPage() {
   const { id } = useParams();
   const { session } = useAuth();
   const [submission, setSubmission] = useState<Submission | null>(null);
+  useDocumentTitle(
+    submission ? `${submission.problem.title ?? "제출"} 채점 결과` : "채점 결과",
+  );
   const [error, setError] = useState("");
   const history = useSubmissionHistory(session);
 

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { useDocumentTitle } from "../hooks";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api, isDemo } from "../api";
 import { useAuth } from "../auth";
@@ -6,6 +7,7 @@ import type { Session } from "../types";
 
 export function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
+  useDocumentTitle(mode === "login" ? "로그인" : "회원가입");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
