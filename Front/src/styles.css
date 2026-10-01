@@ -62,7 +62,7 @@ p {
   margin: auto;
 }
 .site-header {
-  height: 76px;
+  height: 64px;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
@@ -461,7 +461,7 @@ textarea {
   resize: vertical;
 }
 .auth-layout {
-  min-height: calc(100vh - 165px);
+  min-height: calc(100vh - 153px);
   display: grid;
   grid-template-columns: 1fr 1fr;
   width: min(1100px, calc(100% - 48px));
@@ -1210,7 +1210,7 @@ textarea {
   flex-direction: column;
   gap: 16px;
   position: sticky;
-  top: 92px;
+  top: 80px;
 }
 .resume-card {
   background: var(--color-strong-bg);
@@ -1337,7 +1337,7 @@ textarea {
   grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
   gap: 16px;
   align-items: stretch;
-  height: calc(100vh - 188px);
+  height: calc(100vh - 176px);
   min-height: 560px;
 }
 .solve-panel {
@@ -2733,7 +2733,7 @@ input,
     padding: 0;
   }
   .site-header {
-    height: 76px;
+    height: 64px;
     min-height: 0;
   }
   .menu-button {
