@@ -70,15 +70,22 @@
   --color-code-bar: #303f54;
 
   /* Typography */
-  --font-sans: "Inter", "Noto Sans KR", "DM Sans", sans-serif;
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Noto Sans KR", system-ui, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --text-display: 700 32px/1.25 var(--font-sans);
-  --text-h1: 700 24px/1.3 var(--font-sans);
-  --text-section: 600 20px/1.35 var(--font-sans);
+  --text-display: 800 32px/1.25 var(--font-sans);
+  --text-h1: 800 24px/1.3 var(--font-sans);
+  --text-section: 700 20px/1.35 var(--font-sans);
   --text-body: 400 16px/1.7 var(--font-sans);
   --text-caption: 400 14px/1.5 var(--font-sans);
   --text-code: 400 14px/1.6 var(--font-mono);
+
+  /* Weight scale — 같은 글꼴, 굵기로 위계를 만든다 */
+  --weight-body: 400; /* 본문·보조 설명 */
+  --weight-label: 600; /* 메뉴·버튼·칩·배지·라벨 */
+  --weight-title: 700; /* 섹션·카드 제목 */
+  --weight-display: 800; /* 페이지 제목·큰 숫자 */
 
   /* Spacing (8px grid) */
   --space-1: 8px;

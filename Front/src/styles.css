@@ -1,5 +1,4 @@
 @import "./tokens.css";
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap");
 
 :root {
   font-family: var(--font-sans);
@@ -113,7 +112,7 @@ p {
   display: flex;
   align-items: center;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: var(--weight-label);
   color: var(--color-ink-600);
   position: relative;
   white-space: nowrap;
@@ -140,7 +139,7 @@ p {
 }
 .account-name {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--weight-label);
 }
 .text-button,
 .inline-button {
@@ -148,7 +147,7 @@ p {
   border: 0;
   background: none;
   color: var(--color-ink-600);
-  font-weight: 700;
+  font-weight: var(--weight-label);
 }
 .text-button:hover,
 .inline-button:hover {
@@ -169,7 +168,7 @@ p {
   background: var(--color-button);
   color: var(--color-on-solid);
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   transition:
     transform 0.15s,
     background 0.15s,
@@ -278,7 +277,7 @@ p {
   padding: 9px 16px;
   color: var(--color-ink-600);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--weight-label);
 }
 .filter-chip:hover {
   border-color: var(--color-border-strong);
@@ -336,7 +335,7 @@ p {
   padding: 6px 10px;
   border-radius: 6px;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   background: var(--color-success-soft);
   color: var(--color-success);
 }
@@ -379,7 +378,7 @@ p {
 }
 .empty-state a {
   color: var(--color-primary);
-  font-weight: 700;
+  font-weight: var(--weight-label);
 }
 .pagination {
   display: flex;
@@ -396,7 +395,7 @@ p {
   border-radius: 8px;
   padding: 8px 15px;
   color: var(--color-ink-600);
-  font-weight: 700;
+  font-weight: var(--weight-label);
 }
 .pagination button:disabled {
   opacity: 0.45;
@@ -406,7 +405,7 @@ p {
   display: inline-block;
   color: var(--color-ink-600);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--weight-label);
   margin: 32px 0 28px;
 }
 .back-link:hover {
@@ -437,7 +436,7 @@ p {
   gap: 8px;
   color: var(--color-ink-600);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--weight-label);
 }
 input,
 select,
@@ -628,7 +627,7 @@ textarea {
   border-radius: 999px;
   background: var(--color-disabled);
   font:
-    700 13px "JetBrains Mono",
+    600 13px "JetBrains Mono",
     monospace;
   letter-spacing: 0.02em;
   color: var(--color-ink-600);
@@ -674,7 +673,7 @@ textarea {
 .result-banner strong {
   display: block;
   font:
-    800 27px "DM Sans",
+    800 27px "Pretendard Variable",
     sans-serif;
   letter-spacing: -0.02em;
   margin-top: 8px;
@@ -877,7 +876,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 700;
+  font-weight: var(--weight-label);
   color: var(--color-ink-900);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -913,7 +912,7 @@ textarea {
   border: 1px solid var(--color-border);
   color: var(--color-ink-600);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--weight-label);
   white-space: nowrap;
 }
 .pill-primary {
@@ -960,7 +959,7 @@ textarea {
   border-radius: 50%;
   background: var(--color-primary-soft);
   color: var(--color-primary);
-  font-weight: 800;
+  font-weight: 700;
   font-size: 14px;
 }
 .avatar-large {
@@ -1034,7 +1033,7 @@ textarea {
   align-items: baseline;
 }
 .ranking-xp {
-  font-weight: 700;
+  font-weight: var(--weight-label);
   font-variant-numeric: tabular-nums;
 }
 .stat-tiles {
@@ -1129,7 +1128,7 @@ textarea {
 .filter-row select {
   width: auto;
   min-width: 160px;
-  font-weight: 700;
+  font-weight: var(--weight-label);
 }
 .filter-bar {
   margin: 14px 0 0;
@@ -1138,7 +1137,7 @@ textarea {
 .filter-label {
   color: var(--color-ink-600);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--weight-label);
   margin-right: 4px;
 }
 .list-layout {
@@ -1173,7 +1172,7 @@ textarea {
   padding: 5px 12px;
   border-radius: 999px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--weight-label);
   background: var(--color-disabled);
   color: var(--color-ink-600);
 }
@@ -1261,7 +1260,7 @@ textarea {
   background: transparent;
   border-radius: var(--radius-control);
   color: var(--color-ink-900);
-  font-weight: 700;
+  font-weight: var(--weight-label);
 }
 .page-button:hover:not(:disabled) {
   background: var(--color-feature);
@@ -1348,7 +1347,7 @@ textarea {
   border: 0;
   background: none;
   padding: 12px 14px;
-  font-weight: 700;
+  font-weight: var(--weight-label);
   color: var(--color-ink-600);
   border-bottom: 3px solid transparent;
 }
@@ -1416,7 +1415,7 @@ textarea {
   background: var(--color-code);
   border-color: #4a5b73;
   color: var(--color-code-ink);
-  font-weight: 700;
+  font-weight: var(--weight-label);
 }
 .save-state {
   flex: 1;
@@ -1552,7 +1551,7 @@ textarea {
 .profile-stats dd {
   margin: 0;
   font-size: 28px;
-  font-weight: 700;
+  font-weight: var(--weight-display);
   letter-spacing: -0.03em;
 }
 .activity {
@@ -1668,7 +1667,7 @@ button.heat-cell.selected {
   border-radius: 999px;
   padding: 4px 12px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--weight-label);
 }
 .soon-card h2 {
   font: var(--text-section);
@@ -2360,7 +2359,7 @@ kbd {
 }
 .notfound-code {
   display: block;
-  font: 700 88px/1 var(--font-sans);
+  font: 800 88px/1 var(--font-sans);
   letter-spacing: -0.05em;
   color: var(--color-primary-soft);
   -webkit-text-stroke: 2px var(--color-primary);
@@ -2609,7 +2608,7 @@ kbd {
   color: var(--color-primary);
 }
 .result-banner strong {
-  font: 700 24px var(--font-sans);
+  font: 800 24px var(--font-sans);
   letter-spacing: -0.02em;
   margin-top: 6px;
 }
@@ -2869,7 +2868,7 @@ input,
   border-radius: var(--radius-feature);
 }
 .home-banner h2 {
-  font: 700 24px/1.3 var(--font-sans);
+  font: 800 24px/1.3 var(--font-sans);
   letter-spacing: -0.03em;
   margin: 6px 0 2px;
 }
@@ -3088,4 +3087,39 @@ input,
 .stat-tile small,
 .stat-tile span {
   line-height: 1.4;
+}
+
+
+/* ===== 글꼴: 한 가족(Pretendard)의 굵기 위계 + 코드·수치용 모노 ===== */
+body {
+  font-weight: var(--weight-body);
+}
+h1 {
+  font-weight: var(--weight-display);
+  letter-spacing: -0.035em;
+}
+h2,
+h3 {
+  font-weight: var(--weight-title);
+}
+.page-header h1 {
+  font: var(--text-display);
+  letter-spacing: -0.035em;
+}
+.stat-tile strong,
+.streak-card strong,
+.day-count strong,
+.daily-goal h2 {
+  font-weight: var(--weight-display);
+}
+.stat-tile strong,
+.profile-stats dd,
+.standing-card dd,
+.ranking-xp {
+  font-variant-numeric: tabular-nums;
+}
+.problem-card strong,
+.history-title strong,
+.problem-title strong {
+  font-weight: var(--weight-title);
 }
