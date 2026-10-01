@@ -27,6 +27,13 @@
   --color-primary-solid: #1d4fd8;
   --color-primary-solid-hover: #153ea9;
   --color-on-solid: #ffffff;
+
+  /* 버튼 전용: 선명한 accent보다 한 단계 차분한 인디고 블루
+     (Color Hunt 팔레트 #FF95A5 #FFF6DC #76C0EC #425B9A 의 #425B9A, 흰 글자 대비 6.6:1) */
+  --color-button: #425b9a;
+  --color-button-hover: #364c82;
+  --color-button-soft-bg: #e8edf8;
+  --color-button-soft-fg: #364c82;
   --focus-ring: rgba(29, 79, 216, 0.14);
 
   /* Color: status */
@@ -111,6 +118,10 @@
   --color-primary-solid: #3566e8;
   --color-primary-solid-hover: #2a56cf;
   --focus-ring: rgba(139, 172, 255, 0.3);
+  --color-button: #4a63ad;
+  --color-button-hover: #5a75c4;
+  --color-button-soft-bg: #1f2a47;
+  --color-button-soft-fg: #aebff0;
 
   --color-success: #4cc98a;
   --color-success-soft: #12301f;

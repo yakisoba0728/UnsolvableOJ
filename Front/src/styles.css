@@ -164,9 +164,9 @@ p {
   gap: 12px;
   min-height: var(--control-height);
   padding: 0 22px;
-  border: 1px solid var(--color-primary-solid);
+  border: 1px solid var(--color-button);
   border-radius: var(--radius-control);
-  background: var(--color-primary-solid);
+  background: var(--color-button);
   color: var(--color-on-solid);
   font-size: 14px;
   font-weight: 800;
@@ -176,7 +176,7 @@ p {
     box-shadow 0.15s;
 }
 .button:hover {
-  background: var(--color-primary-solid-hover);
+  background: var(--color-button-hover);
   transform: translateY(-1px);
 }
 .button:disabled {
@@ -3062,4 +3062,30 @@ input,
   .arrow-button {
     transition: none;
   }
+}
+
+/* ===== 버튼 색: 선명한 accent 대신 차분한 버튼 전용 색 ===== */
+.button-soft {
+  background: var(--color-button-soft-bg);
+  border-color: var(--color-button-soft-bg);
+  color: var(--color-button-soft-fg);
+}
+.button-soft:hover {
+  background: var(--color-feature-border);
+}
+.button-white {
+  color: #364c82;
+}
+.problem-card-more .more-arrow {
+  background: var(--color-button);
+}
+.problem-card-more:hover .more-arrow {
+  background: var(--color-button-hover);
+}
+.stat-tile strong {
+  line-height: 1.2; /* 한글/숫자 폰트 차이로 타일마다 글자 높이가 달라지지 않게 */
+}
+.stat-tile small,
+.stat-tile span {
+  line-height: 1.4;
 }
