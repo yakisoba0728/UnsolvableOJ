@@ -2361,8 +2361,7 @@ kbd {
   display: block;
   font: 800 88px/1 var(--font-sans);
   letter-spacing: -0.05em;
-  color: var(--color-primary-soft);
-  -webkit-text-stroke: 2px var(--color-primary);
+  color: var(--color-button-soft-fg); /* 가변 글꼴은 윤곽선이 겹쳐 text-stroke가 깨지므로 단색 */
 }
 .notfound-page h1 {
   font: var(--text-h1);
@@ -3229,4 +3228,17 @@ h3 {
   .filter-spacer {
     display: none;
   }
+}
+
+/* 로그인 소개의 단계 표시(01 02 03): 장식이어도 읽을 수 있는 크기·대비로 */
+.intro-decoration {
+  font-size: 12px;
+  color: var(--color-ink-600);
+}
+.intro-decoration span {
+  border-top-color: var(--color-border-strong);
+}
+.intro-decoration span:first-child {
+  color: var(--color-primary);
+  border-top-color: var(--color-primary);
 }
