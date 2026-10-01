@@ -416,7 +416,7 @@ export function ProblemPage() {
                     className="button"
                     disabled={submitting || !source.trim()}
                   >
-                    {submitting ? "제출 중…" : "제출 및 채점"}
+                    {submitting ? "제출 중…" : "제출하고 채점하기 →"}
                   </button>
                 </>
               ) : (
