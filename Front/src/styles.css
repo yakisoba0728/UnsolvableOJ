@@ -2944,3 +2944,122 @@ input,
     margin: 4px -8px -20px 0;
   }
 }
+
+/* ===== 추천 문제 슬라이더 ===== */
+.app-shell {
+  overflow-x: clip; /* 100vw(스크롤바 포함)로 확장해도 가로 스크롤바가 생기지 않게 */
+}
+.slider-arrows {
+  display: flex;
+  gap: 8px;
+}
+.arrow-button {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-ink-900);
+  transition: background 0.15s, border-color 0.15s;
+}
+.arrow-button:hover:not(:disabled) {
+  background: var(--color-feature);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.arrow-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.arrow-button:focus-visible,
+.slider-track:focus-visible {
+  outline: 3px solid var(--color-ink-900);
+  outline-offset: 2px;
+}
+.slider-area {
+  position: relative;
+}
+/* 트랙은 컨테이너 오른쪽 여백을 지나 화면 끝까지 확장된다. 끝에서는 마지막 카드가 컨테이너 오른쪽 선에 맞는다. */
+.slider-track {
+  display: flex;
+  gap: 16px;
+  margin-right: calc((100% - 100vw) / 2);
+  padding: 2px calc((100vw - 100%) / 2) 4px 2px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: 2px; /* 왼쪽 패딩과 같은 값: 시작 위치가 scrollLeft 0이 되게 */
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.slider-track::-webkit-scrollbar {
+  display: none;
+}
+.slider-track > .problem-card {
+  flex: 0 0 340px;
+  scroll-snap-align: start;
+}
+.problem-card-more {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  background: var(--color-feature);
+  border-style: dashed;
+}
+.problem-card-more .more-arrow {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-primary-solid);
+  color: var(--color-on-solid);
+  font-size: 20px;
+}
+.problem-card-more:hover .more-arrow {
+  background: var(--color-primary-solid-hover);
+}
+/* 가장자리 블러: 오른쪽은 원래 여백이던 영역까지, 왼쪽은 컨테이너 안쪽 */
+.slider-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+.slider-fade.right {
+  right: calc((100% - 100vw) / 2);
+  width: calc((100vw - 100%) / 2 + 64px);
+  background: linear-gradient(to right, transparent, var(--color-bg) 80%);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 55%);
+  mask-image: linear-gradient(to right, transparent, #000 55%);
+}
+.slider-fade.left {
+  left: 0;
+  width: 56px;
+  background: linear-gradient(to left, transparent, var(--color-bg) 80%);
+  -webkit-mask-image: linear-gradient(to left, transparent, #000 55%);
+  mask-image: linear-gradient(to left, transparent, #000 55%);
+}
+.slider-fade.hidden {
+  opacity: 0;
+}
+@media (max-width: 650px) {
+  .slider-arrows {
+    display: none; /* 모바일은 스와이프 */
+  }
+  .slider-track > .problem-card {
+    flex-basis: min(280px, 78%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slider-fade,
+  .arrow-button {
+    transition: none;
+  }
+}

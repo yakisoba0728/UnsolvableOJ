@@ -7,6 +7,7 @@ import {
   solveState,
 } from "../components/ProblemStatus";
 import { PageHeader } from "../components/PageHeader";
+import { CardSlider } from "../components/CardSlider";
 import { LearningIllustration } from "../components/LearningIllustration";
 import { WeekStrip } from "../components/WeekStrip";
 import {
@@ -81,7 +82,7 @@ export function HomePage() {
         )[0] ?? null);
   const recommended = problems
     .filter((problem) => !history.solved.has(problem.id))
-    .slice(0, 3);
+    .slice(0, 10);
   const name = session?.user.username;
 
   return (
@@ -285,62 +286,80 @@ export function HomePage() {
         </section>
       </div>
 
-      <section className="home-section">
-        <div className="section-heading">
-          <div>
-            <h2>지금 풀기 좋은 문제</h2>
-            <p>
-              {session
-                ? "아직 해결하지 않은 문제부터 골라 도전해 보세요."
-                : "관심 있는 문제부터 시작해 보세요."}
-            </p>
+      {loading ? (
+        <section className="home-section">
+          <div className="section-heading">
+            <div>
+              <h2>지금 풀기 좋은 문제</h2>
+            </div>
           </div>
-          <Link className="inline-button" to="/problems">
-            전체보기 →
-          </Link>
-        </div>
-        {loading ? (
           <div className="empty-state">불러오는 중입니다…</div>
-        ) : recommended.length ? (
-          <div className="card-grid">
-            {recommended.map((problem) => (
-              <Link
-                className="problem-card"
-                to={`/problems/${problem.slug}`}
-                key={problem.id}
+        </section>
+      ) : recommended.length ? (
+        <CardSlider
+          title="지금 풀기 좋은 문제"
+          description={
+            session
+              ? "아직 해결하지 않은 문제부터 골라 도전해 보세요."
+              : "관심 있는 문제부터 시작해 보세요."
+          }
+          label="추천 문제"
+          count={recommended.length}
+        >
+          {recommended.map((problem) => (
+            <Link
+              className="problem-card"
+              to={`/problems/${problem.slug}`}
+              key={problem.id}
+            >
+              <span
+                className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
               >
-                <span
-                  className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
-                >
-                  {difficultyLabel(problem.difficulty)}
+                {difficultyLabel(problem.difficulty)}
+              </span>
+              <strong>{problem.title}</strong>
+              <small>
+                {problem.timeLimitMs}ms · {problem.memoryLimitMb}MB
+              </small>
+              <span className="problem-card-foot">
+                <ProblemStatus
+                  state={solveState(
+                    problem.id,
+                    history.solved,
+                    history.attempted,
+                  )}
+                />
+                <span className="button button-outline button-small">
+                  문제 보기
                 </span>
-                <strong>{problem.title}</strong>
-                <small>
-                  {problem.timeLimitMs}ms · {problem.memoryLimitMb}MB
-                </small>
-                <span className="problem-card-foot">
-                  <ProblemStatus
-                    state={solveState(
-                      problem.id,
-                      history.solved,
-                      history.attempted,
-                    )}
-                  />
-                  <span className="button button-outline button-small">
-                    문제 보기
-                  </span>
-                </span>
-              </Link>
-            ))}
+              </span>
+            </Link>
+          ))}
+          <Link className="problem-card problem-card-more" to="/problems">
+            <span className="more-arrow" aria-hidden="true">
+              →
+            </span>
+            <strong>전체보기</strong>
+            <small>{problems.length}개 문제 모두 보기</small>
+          </Link>
+        </CardSlider>
+      ) : (
+        <section className="home-section">
+          <div className="section-heading">
+            <div>
+              <h2>지금 풀기 좋은 문제</h2>
+            </div>
+            <Link className="inline-button" to="/problems">
+              전체보기 →
+            </Link>
           </div>
-        ) : (
           <div className="empty-state">
             {problems.length
               ? "모든 문제를 해결했어요. 새 문제를 기다려 주세요."
               : "공개된 문제가 아직 없습니다."}
           </div>
-        )}
-      </section>
+        </section>
+      )}
     </div>
   );
 }
