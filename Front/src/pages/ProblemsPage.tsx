@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
+import { newSeed, seededShuffle } from "../shuffle";
 import { ProblemStatus, solveState } from "../components/ProblemStatus";
 import {
   useAllProblems,
@@ -32,6 +33,7 @@ const sorts = [
   { value: "easy", label: "쉬운 난이도순" },
   { value: "hard", label: "어려운 난이도순" },
   { value: "title", label: "제목순" },
+  { value: "random", label: "무작위 순서" },
 ];
 const order: Difficulty[] = ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"];
 
@@ -52,9 +54,10 @@ export function ProblemsPage() {
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [sort, setSort] = useState("latest");
+  const [seed, setSeed] = useState(newSeed);
+  const [announce, setAnnounce] = useState("");
   const [page, setPage] = useState(1);
   const { profile, rank } = useMyStanding(session);
-  const navigate = useNavigate();
   const searchRef = useRef<HTMLInputElement>(null);
 
   // "/" 키로 검색창에 바로 이동 (LeetCode·GitHub 방식)
@@ -74,8 +77,13 @@ export function ProblemsPage() {
 
   const filtered = useMemo(() => {
     const keyword = query.trim().toLowerCase();
-    const base = [...problems];
-    if (sort === "easy" || sort === "hard")
+    // 무작위: 전체를 한 번 섞은 뒤 필터를 적용한다. 필터를 바꿔도 상대 순서가 유지되고,
+    // 난이도 칩을 고른 채 섞으면 그 난이도 안에서의 무작위 순서가 된다.
+    const base =
+      sort === "random" ? seededShuffle(problems, seed) : [...problems];
+    if (sort === "random") {
+      /* 이미 섞인 순서를 그대로 쓴다 */
+    } else if (sort === "easy" || sort === "hard")
       base.sort(
         (a, b) =>
           (order.indexOf(a.difficulty) - order.indexOf(b.difficulty)) *
@@ -103,6 +111,7 @@ export function ProblemsPage() {
     status,
     query,
     sort,
+    seed,
     history.solved,
     history.attempted,
   ]);
@@ -130,12 +139,14 @@ export function ProblemsPage() {
       ? problems.filter((problem) => problem.difficulty === value).length
       : problems.length;
 
-  // 안 푼 문제 중 무작위, 모두 풀었다면 전체 중 무작위
-  function pickRandom() {
-    const pool = problems.filter((problem) => !history.solved.has(problem.id));
-    const list = pool.length ? pool : problems;
-    if (!list.length) return;
-    navigate(`/problems/${list[Math.floor(Math.random() * list.length)].slug}`);
+  // 목록을 무작위 순서로 섞는다(이동하지 않는다). 선택한 난이도·상태 필터 안에서 섞인다.
+  function shuffle() {
+    const next = newSeed();
+    setSeed(next);
+    setSort("random");
+    setPage(1);
+    const scope = difficulty ? `${difficultyLabel(difficulty)} 난이도 ` : "";
+    setAnnounce(`${scope}문제 목록을 무작위로 섞었어요.`);
   }
 
   function reset() {
@@ -204,7 +215,10 @@ export function ProblemsPage() {
           <select
             aria-label="정렬"
             value={sort}
-            onChange={(event) => setSort(event.target.value)}
+            onChange={(event) => {
+              setSort(event.target.value);
+              if (event.target.value === "random") setSeed(newSeed());
+            }}
           >
             {sorts.map((item) => (
               <option key={item.value} value={item.value}>
@@ -215,10 +229,20 @@ export function ProblemsPage() {
           <button
             type="button"
             className="button button-outline"
-            onClick={pickRandom}
-            disabled={!problems.length}
+            onClick={shuffle}
+            disabled={filtered.length < 2}
           >
-            무작위 문제
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+              <path
+                d="M3 7h3.2c1.6 0 3 .8 3.9 2.1l2.8 3.8c.9 1.3 2.3 2.1 3.9 2.1H21M3 17h3.2c1.6 0 3-.8 3.9-2.1M14 8.2c.8-.7 1.8-1.2 2.9-1.2H21M18.5 4 21 7l-2.5 3M18.5 11 21 14l-2.5 3"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {sort === "random" ? "다시 섞기" : "무작위 섞기"}
           </button>
         </div>
         <div className="filter-bar" role="group" aria-label="난이도 필터">
@@ -245,10 +269,27 @@ export function ProblemsPage() {
         </p>
       ) : null}
 
+      <p className="sr-only" role="status" aria-live="polite">
+        {announce}
+      </p>
       <div className="list-layout">
         <section aria-label="문제 목록">
           <div className="section-heading compact">
-            <h2>{hasFilter ? "검색 결과" : "전체 문제"}</h2>
+            <div className="title-line">
+              <h2>{hasFilter ? "검색 결과" : "전체 문제"}</h2>
+              {sort === "random" ? (
+                <>
+                  <span className="pill pill-primary">무작위 순서</span>
+                  <button
+                    type="button"
+                    className="inline-button"
+                    onClick={() => setSort("latest")}
+                  >
+                    기본 순서로
+                  </button>
+                </>
+              ) : null}
+            </div>
             <span className="total-count">
               {filtered.length}문제
               {filtered.length ? ` 중 ${(current - 1) * PAGE_SIZE + 1}–${(current - 1) * PAGE_SIZE + visible.length}` : ""}
