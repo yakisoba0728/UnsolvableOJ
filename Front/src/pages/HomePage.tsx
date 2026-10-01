@@ -97,8 +97,7 @@ export function HomePage() {
         </p>
       ) : null}
 
-      <div className="home-top-grid">
-        <section className="continue-card" aria-label="이어서 학습">
+        <section className="home-banner" aria-label="이어서 학습">
           <LearningIllustration />
           {session && resume ? (
             <>
@@ -179,6 +178,68 @@ export function HomePage() {
           )}
         </section>
 
+      <div className={`home-main-grid ${session ? "" : "solo"}`}>
+        {session ? (
+          <div className="home-main-left">
+        {session ? (
+          <section className="daily-card" aria-label="오늘의 목표">
+            <div className="daily-goal">
+              <h2>오늘의 목표</h2>
+              <p>
+                {todaySolved >= DAILY_GOAL
+                  ? "오늘 목표를 달성했어요. 한 문제 더 도전해 볼까요?"
+                  : `문제 ${DAILY_GOAL}개 해결하기`}
+              </p>
+              <div
+                className="progress"
+                role="progressbar"
+                aria-label="오늘의 목표 진행률"
+                aria-valuemin={0}
+                aria-valuemax={DAILY_GOAL}
+                aria-valuenow={Math.min(todaySolved, DAILY_GOAL)}
+              >
+                <span
+                  style={{
+                    width: `${(Math.min(todaySolved, DAILY_GOAL) / DAILY_GOAL) * 100}%`,
+                  }}
+                />
+              </div>
+              <small>
+                {Math.min(todaySolved, DAILY_GOAL)} / {DAILY_GOAL}
+              </small>
+            </div>
+            <WeekStrip counts={dayCounts} />
+          </section>
+        ) : null}
+
+        {profile ? (
+          <div className="stat-tiles">
+            <Link to="/profile" className="stat-tile">
+              <small>레벨</small>
+              <strong>Lv.{profile.level}</strong>
+              <span>{profile.xp.toLocaleString()} XP</span>
+            </Link>
+            <Link to="/profile" className="stat-tile">
+              <small>해결한 문제</small>
+              <strong>{profile.solvedCount}</strong>
+              <span>
+                {myRank >= 0 ? `랭킹 ${myRank + 1}위` : "랭킹 집계 전"}
+              </span>
+            </Link>
+            <Link to="/profile" className="stat-tile">
+              <small>연속 학습</small>
+              <strong>{streak}일</strong>
+              <span>{streak > 0 ? "오늘도 이어가요" : "오늘 한 문제 풀어요"}</span>
+            </Link>
+            <Link to="/profile" className="stat-tile">
+              <small>레이팅</small>
+              <strong>{profile.rating.toLocaleString()}</strong>
+              <span>제출 {history.submissions.length}회</span>
+            </Link>
+          </div>
+        ) : null}
+          </div>
+        ) : null}
         <section className="ranking-card" aria-label="랭킹">
           <div className="ranking-card-heading">
             <h2>랭킹</h2>
@@ -223,64 +284,6 @@ export function HomePage() {
           )}
         </section>
       </div>
-
-      {session ? (
-        <section className="daily-card" aria-label="오늘의 목표">
-          <div className="daily-goal">
-            <h2>오늘의 목표</h2>
-            <p>
-              {todaySolved >= DAILY_GOAL
-                ? "오늘 목표를 달성했어요. 한 문제 더 도전해 볼까요?"
-                : `문제 ${DAILY_GOAL}개 해결하기`}
-            </p>
-            <div
-              className="progress"
-              role="progressbar"
-              aria-label="오늘의 목표 진행률"
-              aria-valuemin={0}
-              aria-valuemax={DAILY_GOAL}
-              aria-valuenow={Math.min(todaySolved, DAILY_GOAL)}
-            >
-              <span
-                style={{
-                  width: `${(Math.min(todaySolved, DAILY_GOAL) / DAILY_GOAL) * 100}%`,
-                }}
-              />
-            </div>
-            <small>
-              {Math.min(todaySolved, DAILY_GOAL)} / {DAILY_GOAL}
-            </small>
-          </div>
-          <WeekStrip counts={dayCounts} />
-        </section>
-      ) : null}
-
-      {profile ? (
-        <div className="stat-tiles">
-          <Link to="/profile" className="stat-tile">
-            <small>레벨</small>
-            <strong>Lv.{profile.level}</strong>
-            <span>{profile.xp.toLocaleString()} XP</span>
-          </Link>
-          <Link to="/profile" className="stat-tile">
-            <small>해결한 문제</small>
-            <strong>{profile.solvedCount}</strong>
-            <span>
-              {myRank >= 0 ? `랭킹 ${myRank + 1}위` : "랭킹 집계 전"}
-            </span>
-          </Link>
-          <Link to="/profile" className="stat-tile">
-            <small>연속 학습</small>
-            <strong>{streak}일</strong>
-            <span>{streak > 0 ? "오늘도 이어가요" : "오늘 한 문제 풀어요"}</span>
-          </Link>
-          <Link to="/profile" className="stat-tile">
-            <small>레이팅</small>
-            <strong>{profile.rating.toLocaleString()}</strong>
-            <span>제출 {history.submissions.length}회</span>
-          </Link>
-        </div>
-      ) : null}
 
       <section className="home-section">
         <div className="section-heading">
