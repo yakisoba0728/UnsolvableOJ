@@ -82,7 +82,7 @@ export function HomePage() {
         )[0] ?? null);
   const recommended = problems
     .filter((problem) => !history.solved.has(problem.id))
-    .slice(0, 10);
+    .slice(0, 7); // 슬라이더는 이 7장 + "전체보기" 카드 = 총 8장
   const name = session?.user.username;
 
   return (

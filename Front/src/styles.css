@@ -90,7 +90,7 @@ p {
   place-items: center;
   width: 38px;
   height: 38px;
-  background: var(--color-primary-solid);
+  background: var(--color-button);
   color: var(--color-on-solid);
   border-radius: var(--radius-control);
   font-family: "JetBrains Mono", monospace;
