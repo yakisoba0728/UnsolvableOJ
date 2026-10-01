@@ -51,6 +51,13 @@ export interface Submission {
   compileOutput: string | null;
   judgeMessage: string | null;
   sourceCode?: string;
+  debugOutputs?: {
+    testCase: number;
+    stdout: string;
+    stderr: string;
+    stdoutTruncated: boolean;
+    stderrTruncated: boolean;
+  }[];
   createdAt: string;
   updatedAt: string;
 }

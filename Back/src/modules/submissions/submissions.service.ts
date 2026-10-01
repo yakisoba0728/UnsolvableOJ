@@ -57,6 +57,7 @@ interface ProblemSnapshot {
     id: string;
     input: string;
     expectedOutput: string;
+    isSample?: boolean;
     score: number;
     order: number;
   }[];
@@ -170,6 +171,7 @@ export class SubmissionsService {
       current.passedTestCases = 0;
       current.totalTestCases = 0;
       current.compileOutput = null;
+      current.debugOutputs = [];
       current.judgeMessage = null;
       await manager.save(current);
       await manager.query(
@@ -238,10 +240,11 @@ export class SubmissionsService {
         },
         testCases: [...snapshot.testCases]
           .sort((a, b) => a.order - b.order)
-          .map(({ id: caseId, input, expectedOutput, score }) => ({
+          .map(({ id: caseId, input, expectedOutput, score, isSample }) => ({
             id: caseId,
             input,
             expectedOutput,
+            isSample: isSample === true,
             score,
           })),
       };
@@ -300,6 +303,7 @@ export class SubmissionsService {
       submission.passedTestCases = dto.passedTestCases;
       submission.totalTestCases = dto.totalTestCases;
       submission.compileOutput = dto.compileOutput ?? null;
+      submission.debugOutputs = dto.debugOutputs ?? [];
       submission.judgeMessage = dto.judgeMessage ?? null;
       submission.judgeLeaseExpiresAt = null;
       await manager.save(submission);
@@ -470,7 +474,12 @@ export class SubmissionsService {
       totalTestCases: submission.totalTestCases,
       compileOutput: submission.compileOutput,
       judgeMessage: submission.judgeMessage,
-      ...(includeSource ? { sourceCode: submission.sourceCode } : {}),
+      ...(includeSource
+        ? {
+            sourceCode: submission.sourceCode,
+            debugOutputs: submission.debugOutputs ?? [],
+          }
+        : {}),
       createdAt: submission.createdAt,
       updatedAt: submission.updatedAt,
     };

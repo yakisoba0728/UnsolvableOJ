@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && npm install -g esbuild \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY runner.py /opt/judge/runner.py
-RUN chmod 644 /opt/judge/runner.py
+COPY runner.py execute.py /opt/judge/
+RUN chmod 644 /opt/judge/runner.py /opt/judge/execute.py
 USER 65534:65534
 WORKDIR /workspace
 ENTRYPOINT ["python3", "/opt/judge/runner.py"]

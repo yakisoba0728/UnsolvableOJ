@@ -15,6 +15,7 @@ import {
   useMyStanding,
   useSubmissionHistory,
 } from "../hooks";
+import { problemPath } from "../paths";
 import { newSeed, seededShuffle } from "../shuffle";
 import type { Difficulty, ProblemSummary } from "../types";
 
@@ -225,7 +226,7 @@ export function ProblemsPage() {
               {continueTarget ? (
                 <Link
                   className="button"
-                  to={`/problems/${continueTarget.slug}`}
+                  to={problemPath(continueTarget.slug)}
                   title={`${continueTarget.title} · ${continueTarget.label}`}
                 >
                   {continueTarget.label} <span aria-hidden="true">→</span>
@@ -410,7 +411,7 @@ export function ProblemsPage() {
                     title={problem.title}
                     onToggle={() => toggleFavorite(problem.id)}
                   />
-                  <Link className="problem-row" to={`/problems/${problem.slug}`}>
+                  <Link className="problem-row" to={problemPath(problem.slug)}>
                     <span className="problem-title">
                       <strong>{problem.title}</strong>
                     </span>

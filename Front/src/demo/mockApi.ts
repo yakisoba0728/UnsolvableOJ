@@ -239,7 +239,7 @@ export async function mockApi<T>(
   if (pathname === "/problems" && method === "POST") {
     const user = authed(token);
     if (user.role === "USER") throw new ApiError(403, "작성자 권한이 필요합니다.");
-    const input = body(options) as Partial<DemoProblem> & { testCases?: unknown[] };
+    const input = body(options) as Partial<DemoProblem> & { testCases?: unknown[]; status?: string };
     if (!input.slug || !input.title) throw new ApiError(400, "주소와 제목을 입력해 주세요.");
     if (s.problems.some((p) => p.slug === input.slug))
       throw new ApiError(409, "이미 사용 중인 문제 주소입니다.");
@@ -256,11 +256,14 @@ export async function mockApi<T>(
       id: `demo-problem-${Date.now().toString(36)}`,
       createdAt: new Date().toISOString(),
     } as Store["problems"][number];
-    s.problems.push(created);
-    save();
-    return { ...summary(created), ...created, status: "PUBLISHED", updatedAt: created.createdAt } as T;
+    const status = input.status === "DRAFT" ? "DRAFT" : "PUBLISHED";
+    if (status === "PUBLISHED") {
+      s.problems.push(created);
+      save();
+    }
+    return { ...summary(created), ...created, status, updatedAt: created.createdAt } as T;
   }
-  const problemMatch = /^\/problems\/([^/]+)$/.exec(pathname);
+  const problemMatch = /^\/problems\/(?:by-slug\/)?([^/]+)$/.exec(pathname);
   if (problemMatch && method === "GET") {
     const found = s.problems.find((p) => p.slug === decodeURIComponent(problemMatch[1]));
     if (!found) throw new ApiError(404, "문제를 찾을 수 없습니다.");

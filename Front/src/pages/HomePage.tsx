@@ -22,6 +22,7 @@ import {
   useSubmissionHistory,
 } from "../hooks";
 import type { RankingEntry, UserProfile } from "../types";
+import { problemPath } from "../paths";
 import { difficultyLabel } from "./ProblemsPage";
 
 export function HomePage() {
@@ -105,7 +106,7 @@ export function HomePage() {
                 className="button"
                 to={
                   resume.problem.slug
-                    ? `/problems/${resume.problem.slug}`
+                    ? problemPath(resume.problem.slug)
                     : "/problems"
                 }
               >
@@ -120,7 +121,7 @@ export function HomePage() {
                 {difficultyLabel(nextProblem.difficulty)} ·{" "}
                 {nextProblem.timeLimitMs}ms · {nextProblem.memoryLimitMb}MB
               </p>
-              <Link className="button" to={`/problems/${nextProblem.slug}`}>
+              <Link className="button" to={problemPath(nextProblem.slug)}>
                 풀어보기
               </Link>
             </>
@@ -293,7 +294,7 @@ export function HomePage() {
           {recommended.map((problem) => (
             <Link
               className="problem-card"
-              to={`/problems/${problem.slug}`}
+              to={problemPath(problem.slug)}
               key={problem.id}
             >
               <span

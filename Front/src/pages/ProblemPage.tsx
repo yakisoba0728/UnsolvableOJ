@@ -6,6 +6,7 @@ import { api } from "../api";
 import { useAuth } from "../auth";
 import type { Language, Page, Problem, Submission } from "../types";
 import { FavoriteButton } from "../components/FavoriteButton";
+import { problemPath } from "../paths";
 import { difficultyLabel } from "./ProblemsPage";
 
 const languages: { value: Language; label: string; starter: string }[] = [
@@ -137,7 +138,7 @@ export function ProblemPage() {
     setError("");
     setProblem(null);
     setLoading(true);
-    void api<Problem>(`/problems/${encodeURIComponent(slug ?? "")}`, {
+    void api<Problem>(`/problems/by-slug/${encodeURIComponent(slug ?? "")}`, {
       signal: controller.signal,
     })
       .then(setProblem)
@@ -427,7 +428,7 @@ export function ProblemPage() {
                   <Link
                     className="button"
                     to="/auth"
-                    state={{ from: `/problems/${problem.slug}` }}
+                    state={{ from: problemPath(problem.slug) }}
                   >
                     로그인하고 풀기
                   </Link>

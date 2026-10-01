@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useDocumentTitle } from "../hooks";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { problemPath } from "../paths";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
@@ -34,6 +35,8 @@ export function CreateProblemPage() {
   const [testCases, setTestCases] = useState<TestCaseInput[]>([blankCase()]);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [createdDraft, setCreatedDraft] = useState<Problem | null>(null);
+  const canPublish = session?.user.role === "ADMIN";
 
   function updateCase(index: number, patch: Partial<TestCaseInput>) {
     setTestCases((previous) =>
@@ -60,7 +63,7 @@ export function CreateProblemPage() {
             inputDescriptionMarkdown,
             outputDescriptionMarkdown,
             difficulty,
-            status: "PUBLISHED",
+            status: canPublish ? "PUBLISHED" : "DRAFT",
             timeLimitMs,
             memoryLimitMb,
             testCases,
@@ -68,7 +71,8 @@ export function CreateProblemPage() {
         },
         session.accessToken,
       );
-      navigate(`/problems/${problem.slug}`);
+      if (problem.status === "PUBLISHED") navigate(problemPath(problem.slug));
+      else setCreatedDraft(problem);
     } catch (cause) {
       setError(
         cause instanceof Error ? cause.message : "문제를 만들지 못했습니다.",
@@ -78,12 +82,32 @@ export function CreateProblemPage() {
     }
   }
 
+  if (createdDraft)
+    return (
+      <div className="page-width create-page">
+        <PageHeader
+          back={{ to: "/problems", label: "문제 목록" }}
+          title="초안을 저장했습니다."
+          description={`“${createdDraft.title}” 문제는 관리자 검수 후 공개됩니다.`}
+        />
+        <div className="card-actions">
+          <Link className="button" to="/problems">
+            문제 목록으로
+          </Link>
+        </div>
+      </div>
+    );
+
   return (
     <div className="page-width create-page">
       <PageHeader
         back={{ to: "/problems", label: "문제 목록" }}
         title="새 문제 만들기"
-        description="저장하면 문제가 바로 공개됩니다. 예제만 문제 페이지에 표시되고, 나머지 테스트케이스는 채점에만 사용됩니다."
+        description={`${
+          canPublish
+            ? "저장하면 문제가 바로 공개됩니다."
+            : "초안으로 저장한 뒤 관리자 검수를 거쳐 공개됩니다."
+        } 예제만 문제 페이지에 표시되고, 나머지 테스트케이스는 채점에만 사용됩니다.`}
       />
       <form onSubmit={submit} className="create-form">
         <div className="form-card">
@@ -254,7 +278,11 @@ export function CreateProblemPage() {
           </p>
         ) : null}
         <button className="button" disabled={pending}>
-          {pending ? "게시 중…" : "문제 게시하기 →"}
+          {pending
+            ? "저장 중…"
+            : canPublish
+              ? "문제 게시하기 →"
+              : "초안 저장하기 →"}
         </button>
       </form>
     </div>

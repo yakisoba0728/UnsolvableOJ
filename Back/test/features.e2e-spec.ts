@@ -1,12 +1,12 @@
 import { Test } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import { configureHttp } from '../src/configure-http.js';
 import { randomUUID } from 'node:crypto';
 import { DataSource } from 'typeorm';
 import { getQueueToken } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
 import { JUDGE_QUEUE } from '../src/common/queue.constants.js';
 import request from 'supertest';
-import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module.js';
 
 const base = '/api/v1';
@@ -18,7 +18,7 @@ const judge = (generation: number, attempt: string) => ({
 });
 
 describe('Backend features (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: NestExpressApplication;
   let db: DataSource;
   const userIds: string[] = [];
   let problemId: string | undefined;
@@ -28,15 +28,10 @@ describe('Backend features (e2e)', () => {
     const module = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
-    app = module.createNestApplication();
-    app.setGlobalPrefix('api/v1');
-    app.useGlobalPipes(
-      new ValidationPipe({
-        transform: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-      }),
-    );
+    app = module.createNestApplication<NestExpressApplication>({
+      bodyParser: false,
+    });
+    configureHttp(app);
     await app.init();
     db = app.get(DataSource);
   });
@@ -86,13 +81,13 @@ describe('Backend features (e2e)', () => {
       .send({
         slug: `version-${suffix}`,
         title: 'Version one',
-        statementMarkdown: 'Sum',
+        statementMarkdown: 'x'.repeat(150_000),
         inputDescriptionMarkdown: 'numbers',
         outputDescriptionMarkdown: 'sum',
         difficulty: 'BEGINNER',
         status: 'DRAFT',
-        timeLimitMs: 1000,
-        memoryLimitMb: 256,
+        timeLimitMs: 5000,
+        memoryLimitMb: 512,
         testCases: [
           { input: '1 2\n', expectedOutput: '3\n', isSample: true },
           { input: '5 7\n', expectedOutput: '12\n', isSample: false },
@@ -122,10 +117,23 @@ describe('Backend features (e2e)', () => {
     const submitted = await request(app.getHttpServer())
       .post(`${base}/problems/${problemId}/submissions`)
       .set(bearer(solver.accessToken))
-      .send({ language: 'PYTHON', sourceCode: 'print(3)' })
+      .send({
+        language: 'PYTHON',
+        sourceCode: 'print(3)\n#' + 'x'.repeat(199_990),
+      })
       .expect(202);
     submissionId = submitted.body.id;
     expect(submitted.body.problemVersion).toBe(1);
+    await request(app.getHttpServer())
+      .patch(`${base}/problems/${problemId}`)
+      .set(bearer(authorToken))
+      .send({})
+      .expect(409);
+    await request(app.getHttpServer())
+      .patch(`${base}/problems/${problemId}`)
+      .set(bearer(authorToken))
+      .send({ timeLimitMs: null })
+      .expect(400);
     const updated = await request(app.getHttpServer())
       .patch(`${base}/problems/${problemId}`)
       .set(bearer(authorToken))
@@ -138,6 +146,10 @@ describe('Backend features (e2e)', () => {
       .expect(200);
     expect(updated.body.currentVersion).toBe(2);
     expect(updated.body.status).toBe('DRAFT');
+    expect(updated.body).toMatchObject({
+      timeLimitMs: 5000,
+      memoryLimitMb: 512,
+    });
     const path = `${base}/internal/judge/submissions/${submissionId}`;
     const firstAttempt = randomUUID();
     const claim = await request(app.getHttpServer())

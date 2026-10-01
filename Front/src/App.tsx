@@ -229,6 +229,7 @@ export function App() {
               )
             }
           />
+          <Route path="/problems/view/:slug" element={<ProblemPage />} />
           <Route path="/problems/:slug" element={<ProblemPage />} />
           <Route
             path="/profile"

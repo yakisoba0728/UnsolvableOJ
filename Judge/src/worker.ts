@@ -13,11 +13,19 @@ interface Claim {
     id: string;
     input: string;
     expectedOutput: string;
+    isSample: boolean;
     score: number;
   }[];
 }
 
 interface JudgeResult {
+  debugOutputs?: {
+    testCase: number;
+    stdout: string;
+    stderr: string;
+    stdoutTruncated: boolean;
+    stderrTruncated: boolean;
+  }[];
   status: string;
   runtimeMs?: number;
   memoryKb?: number;
@@ -68,6 +76,9 @@ function runContainer(claim: Claim): Promise<JudgeResult> {
         "-i",
         "--name",
         name,
+        ...(process.env.JUDGE_RUN_ID
+          ? ["--label", `unsolvable.ci=${process.env.JUDGE_RUN_ID}`]
+          : []),
         "--network",
         "none",
         "--read-only",
