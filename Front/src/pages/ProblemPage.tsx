@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { useDocumentTitle } from "../hooks";
+import { useDocumentTitle, useFavorites } from "../hooks";
 import Markdown from "react-markdown";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import type { Language, Page, Problem, Submission } from "../types";
+import { FavoriteButton } from "../components/FavoriteButton";
 import { difficultyLabel } from "./ProblemsPage";
 
 const languages: { value: Language; label: string; starter: string }[] = [
@@ -75,6 +76,7 @@ export function ProblemPage() {
   const { slug } = useParams();
   const [problem, setProblem] = useState<Problem | null>(null);
   useDocumentTitle(problem?.title);
+  const { favorites, toggle: toggleFavorite } = useFavorites();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [language, setLanguage] = useState<Language>("PYTHON");
@@ -201,6 +203,12 @@ export function ProblemPage() {
           <span>{problem.slug}</span>
         </nav>
         <h1>{problem.title}</h1>
+        <FavoriteButton
+          className="star-inline"
+          active={favorites.has(problem.id)}
+          title={problem.title}
+          onToggle={() => toggleFavorite(problem.id)}
+        />
         <span
           className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
         >

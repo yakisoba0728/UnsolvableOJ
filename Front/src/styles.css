@@ -3123,3 +3123,110 @@ h3 {
 .problem-title strong {
   font-weight: var(--weight-title);
 }
+
+/* ===== 목록: 즐겨찾기 별 · 상태 칩 · URL 상태 ===== */
+.problem-row-wrap {
+  position: relative;
+}
+.star-button {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-ink-400);
+}
+.star-button svg {
+  fill: none;
+  stroke: currentColor;
+}
+.star-button:hover {
+  background: var(--color-feature);
+  color: var(--color-warning);
+}
+.star-button.active svg {
+  fill: var(--color-star);
+  stroke: var(--color-warning);
+}
+.star-button:focus-visible {
+  outline: 3px solid var(--color-ink-900);
+  outline-offset: 1px;
+}
+.problem-head {
+  padding-left: 60px;
+}
+.problem-row:not(.submission-row) {
+  padding-left: 60px;
+}
+.filter-spacer {
+  flex: 1;
+}
+.filter-chip-star {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.filter-chip-star .chip-star {
+  fill: none;
+  stroke: currentColor;
+}
+.filter-chip-star.selected .chip-star {
+  fill: var(--color-star);
+  stroke: var(--color-warning);
+}
+.filter-bar .inline-button {
+  padding: 6px 8px;
+}
+@media (max-width: 650px) {
+  .star-button {
+    left: 6px;
+  }
+  .problem-row:not(.submission-row) {
+    padding-left: 48px;
+  }
+  .filter-spacer {
+    flex-basis: 100%;
+    height: 0;
+  }
+}
+.star-button.star-inline {
+  position: static;
+  transform: none;
+  flex: none;
+}
+
+/* 모바일: 필터 카드를 낮춘다 — 칩 줄은 한 줄 가로 스크롤, 정렬과 섞기는 한 줄 */
+@media (max-width: 650px) {
+  .filter-row > .button {
+    grid-column: auto;
+  }
+  .filter-card {
+    padding: 14px;
+  }
+  .filter-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 12px -14px 0;
+    padding: 0 14px 2px;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  }
+  .filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .filter-bar > * {
+    flex: none;
+  }
+  .filter-spacer {
+    display: none;
+  }
+}

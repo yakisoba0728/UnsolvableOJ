@@ -47,6 +47,8 @@
   --color-warning-soft: #fff1db;
 
   /* Color: 난이도 배지 */
+  --color-star: #e2a11a;
+
   --badge-easy-fg: #1f58b8;
   --badge-hard-fg: #b0303c;
   --badge-expert-bg: #eee9ff;
@@ -138,6 +140,8 @@
   --color-danger-border: #5f2b30;
   --color-warning: #f0b660;
   --color-warning-soft: #38290f;
+
+  --color-star: #f0b660;
 
   --badge-easy-fg: #9db9ff;
   --badge-hard-fg: #ff8086;
