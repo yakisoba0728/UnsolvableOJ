@@ -3245,3 +3245,60 @@ h3 {
     margin: 4px -12px -28px 0;
   }
 }
+
+/* ===== 문제 목록: 머리글 이어서 풀기 버튼, 비로그인 소개 카드 ===== */
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.header-actions .button {
+  white-space: nowrap;
+}
+.brand-card {
+  padding: 16px 20px 22px;
+  background: linear-gradient(160deg, var(--color-feature) 0%, var(--color-primary-soft) 100%);
+  border: 1px solid var(--color-feature-border);
+  border-radius: var(--radius-feature);
+}
+.brand-card .brand-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 0 6px;
+}
+.brand-card h2 {
+  font: var(--text-section);
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+.brand-card p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-ink-600);
+}
+@media (max-width: 650px) {
+  .header-actions {
+    justify-content: flex-start;
+    gap: 14px;
+  }
+}
+@media (max-width: 650px) {
+  .page-header-aside {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .header-actions {
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+  .header-actions .solved-summary {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .header-actions .solved-summary .progress {
+    max-width: none;
+  }
+}

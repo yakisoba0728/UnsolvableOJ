@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
+import { BrandArt } from "../components/BrandArt";
 import { FavoriteButton } from "../components/FavoriteButton";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
@@ -9,6 +10,8 @@ import {
   useAllProblems,
   useDocumentTitle,
   useFavorites,
+  pickNextProblem,
+  pickResume,
   useMyStanding,
   useSubmissionHistory,
 } from "../hooks";
@@ -167,13 +170,18 @@ export function ProblemsPage() {
   const solvedCount = problems.filter((p) => history.solved.has(p.id)).length;
   const favoriteCount = problems.filter((p) => favorites.has(p.id)).length;
 
-  const resume =
-    history.submissions.find(
-      (item) => !history.solved.has(item.problem.id) && item.problem.slug,
-    ) ?? null;
-  const resumeProblem = resume
-    ? problems.find((problem) => problem.id === resume.problem.id)
-    : null;
+  // 이어 풀 문제(시도했지만 못 푼 가장 최근 문제). 없으면 가장 쉬운 안 푼 문제.
+  const resume = pickResume(history.submissions, history.solved);
+  const next = resume ? null : pickNextProblem(problems, history.solved);
+  const continueTarget = resume
+    ? {
+        slug: resume.problem.slug as string,
+        title: resume.problem.title ?? "문제",
+        label: "이어서 풀기",
+      }
+    : next
+      ? { slug: next.slug, title: next.title, label: "다음 문제 풀기" }
+      : null;
 
   function toggleDifficulty(value: Difficulty | "") {
     if (value === "") return update({ d: null });
@@ -213,19 +221,30 @@ export function ProblemsPage() {
         description="한 문제씩, 더 단단해지는 실력. 오늘 풀 문제를 찾아보세요."
         aside={
           session && problems.length ? (
-            <div className="solved-summary">
-              <span>
-                <strong>{solvedCount}</strong> / {problems.length} 해결
-              </span>
-              <div
-                className="progress"
-                role="progressbar"
-                aria-label="해결한 문제 비율"
-                aria-valuemin={0}
-                aria-valuemax={problems.length}
-                aria-valuenow={solvedCount}
-              >
-                <span style={{ width: `${(solvedCount / problems.length) * 100}%` }} />
+            <div className="header-actions">
+              {continueTarget ? (
+                <Link
+                  className="button"
+                  to={`/problems/${continueTarget.slug}`}
+                  title={`${continueTarget.title} · ${continueTarget.label}`}
+                >
+                  {continueTarget.label} <span aria-hidden="true">→</span>
+                </Link>
+              ) : null}
+              <div className="solved-summary">
+                <span>
+                  <strong>{solvedCount}</strong> / {problems.length} 해결
+                </span>
+                <div
+                  className="progress"
+                  role="progressbar"
+                  aria-label="해결한 문제 비율"
+                  aria-valuemin={0}
+                  aria-valuemax={problems.length}
+                  aria-valuenow={solvedCount}
+                >
+                  <span style={{ width: `${(solvedCount / problems.length) * 100}%` }} />
+                </div>
               </div>
             </div>
           ) : null
@@ -458,25 +477,14 @@ export function ProblemsPage() {
               </dl>
             </Link>
           ) : null}
-          {resume && resumeProblem ? (
-            <div className="resume-card">
-              <span className="pill pill-dark">이어서 풀기</span>
-              <h2>{resumeProblem.title}</h2>
+          {!session ? (
+            <div className="brand-card">
+              <BrandArt />
+              <h2>게임처럼 성장하는 온라인 저지</h2>
               <p>
-                {difficultyLabel(resumeProblem.difficulty)} · {resumeProblem.timeLimitMs}ms
+                풀수록 레벨이 오르고 랭킹·미션으로 이어집니다. 마음에 드는 문제를
+                골라 바로 풀어 보세요.
               </p>
-              <Link className="button button-white" to={`/problems/${resumeProblem.slug}`}>
-                계속 풀기 →
-              </Link>
-            </div>
-          ) : !session ? (
-            <div className="resume-card">
-              <span className="pill pill-dark">기록 남기기</span>
-              <h2>로그인하고 풀이 상태를 확인하세요</h2>
-              <p>해결한 문제와 풀이 중인 문제가 목록에 표시됩니다.</p>
-              <Link className="button button-white" to="/auth">
-                로그인 →
-              </Link>
             </div>
           ) : null}
           <div className="guide-card">
