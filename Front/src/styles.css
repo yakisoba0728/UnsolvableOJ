@@ -817,7 +817,7 @@ textarea {
   font-family: "JetBrains Mono", monospace;
   font-size: 13px;
 }
-.home-banner {
+.continue-card {
   background: var(--color-primary-soft);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
@@ -827,10 +827,10 @@ textarea {
   justify-content: center;
   gap: 10px;
 }
-.home-banner h2 {
+.continue-card h2 {
   font-size: 22px;
 }
-.home-banner .button {
+.continue-card .button {
   align-self: flex-start;
   margin-top: 6px;
 }
@@ -1003,7 +1003,7 @@ textarea {
 .home-page {
   padding-bottom: 72px;
 }
-.home-banner {
+.continue-card {
   background: var(--color-feature);
   border-color: var(--color-feature-border);
   border-radius: var(--radius-feature);
@@ -1011,12 +1011,12 @@ textarea {
   align-items: flex-start;
   min-height: 260px;
 }
-.home-banner h2 {
+.continue-card h2 {
   font: var(--text-h1);
   font-size: 28px;
   margin: 8px 0 0;
 }
-.home-banner p {
+.continue-card p {
   margin: 0 0 12px;
 }
 .card-actions {
@@ -2269,11 +2269,11 @@ kbd {
 }
 
 /* ===== 여백·정렬 점검 (홈 일러스트 · 제출 표 · 준비 중 · 폼 폭 · 404) ===== */
-.home-banner {
+.continue-card {
   position: relative;
   overflow: hidden;
 }
-.home-banner > :not(.learning-illustration) {
+.continue-card > :not(.learning-illustration) {
   position: relative;
   z-index: 1;
 }
@@ -2578,7 +2578,7 @@ kbd {
 .auth-card {
   border-radius: var(--radius-feature);
 }
-.home-banner,
+.continue-card,
 .soon-card,
 .result-banner {
   border-radius: var(--radius-feature);
@@ -2789,7 +2789,7 @@ input,
 
 /* 일러스트: 좁은 폭에서도 숨기지 않고 위치만 바꾼다 */
 @media (max-width: 650px) {
-  .home-banner .learning-illustration {
+  .continue-card .learning-illustration {
     position: static;
     order: 99;
     align-self: flex-end;
@@ -2849,99 +2849,6 @@ input,
   }
 }
 
-
-/* ===== 홈: 이어서 학습 배너 + [오늘의 목표·통계 | 랭킹] ===== */
-.home-banner {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 2px;
-  min-height: 0;
-  padding: 24px 36px;
-  margin-bottom: 24px;
-  background: linear-gradient(100deg, var(--color-feature) 0%, var(--color-primary-soft) 100%);
-  border: 1px solid var(--color-feature-border);
-  border-radius: var(--radius-feature);
-}
-.home-banner h2 {
-  font: 800 24px/1.3 var(--font-sans);
-  letter-spacing: -0.03em;
-  margin: 6px 0 2px;
-}
-.home-banner h2,
-.home-banner p {
-  max-width: calc(100% - 300px); /* 일러스트(232px + 여백)와 겹치지 않게 */
-}
-.home-banner p {
-  margin: 0 0 12px;
-}
-.home-banner .highlight-stats {
-  margin: 4px 0 14px;
-}
-.home-banner .learning-illustration {
-  position: absolute;
-  right: 40px;
-  bottom: 0;
-  width: 232px;
-  height: auto;
-}
-.home-main-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
-  gap: 24px;
-  align-items: stretch;
-  margin-bottom: 24px;
-}
-.home-main-grid.solo {
-  grid-template-columns: 1fr;
-}
-.home-main-left {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  min-width: 0;
-}
-.home-main-left .daily-card,
-.home-main-left .stat-tiles {
-  margin-bottom: 0;
-}
-.home-main-left .stat-tiles {
-  flex: 1;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-.home-main-left .stat-tile {
-  justify-content: center;
-}
-.home-main-grid .ranking-card {
-  margin: 0;
-}
-@media (max-width: 900px) {
-  .home-main-grid {
-    grid-template-columns: 1fr;
-  }
-}
-@media (max-width: 650px) {
-  .home-banner {
-    padding: 24px 20px 20px;
-  }
-  .home-banner h2 {
-    font-size: 22px;
-  }
-  .home-banner h2,
-  .home-banner p {
-    max-width: none;
-  }
-  .home-banner .learning-illustration {
-    position: static;
-    align-self: flex-end;
-    width: min(220px, 70%);
-    margin: 4px -8px -20px 0;
-  }
-}
 
 /* ===== 추천 문제 슬라이더 ===== */
 .app-shell {
@@ -3241,4 +3148,19 @@ h3 {
 .intro-decoration span:first-child {
   color: var(--color-primary);
   border-top-color: var(--color-primary);
+}
+
+
+/* ===== 홈 상단: 이어서 학습 카드 + 랭킹 (원래 배치) ===== */
+.home-top-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+  margin: 0 0 24px;
+}
+@media (max-width: 900px) {
+  .home-top-grid {
+    grid-template-columns: 1fr;
+  }
 }
