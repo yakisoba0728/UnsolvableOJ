@@ -8,9 +8,12 @@ import {
 } from "../components/ProblemStatus";
 import { PageHeader } from "../components/PageHeader";
 import { CardSlider } from "../components/CardSlider";
+import { BrandArt } from "../components/BrandArt";
 import { LearningIllustration } from "../components/LearningIllustration";
 import { WeekStrip } from "../components/WeekStrip";
 import {
+  pickNextProblem,
+  pickResume,
   solvedToday,
   streakDays,
   submissionsByDay,
@@ -20,9 +23,6 @@ import {
 } from "../hooks";
 import type { RankingEntry, UserProfile } from "../types";
 import { difficultyLabel } from "./ProblemsPage";
-
-// 안 푼 문제 중 가장 쉬운 것부터 제안한다 (학습 순서)
-const difficultyOrder = ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"];
 
 export function HomePage() {
   const { session } = useAuth();
@@ -66,20 +66,9 @@ export function HomePage() {
   const topRankings = rankings.slice(0, 5);
 
   // 이어 풀 문제: 시도했지만 아직 해결하지 못한 가장 최근 문제만 해당한다.
-  const resume =
-    history.submissions.find(
-      (item) => !history.solved.has(item.problem.id) && item.problem.slug,
-    ) ?? null;
+  const resume = pickResume(history.submissions, history.solved);
   // 진행 중인 문제가 없으면 아직 해결하지 않은 다음 문제를 제안한다.
-  const nextProblem = resume
-    ? null
-    : ([...problems]
-        .filter((problem) => !history.solved.has(problem.id))
-        .sort(
-          (a, b) =>
-            difficultyOrder.indexOf(a.difficulty) -
-            difficultyOrder.indexOf(b.difficulty),
-        )[0] ?? null);
+  const nextProblem = resume ? null : pickNextProblem(problems, history.solved);
   const recommended = problems
     .filter((problem) => !history.solved.has(problem.id))
     .slice(0, 7); // 슬라이더는 이 7장 + "전체보기" 카드 = 총 8장
@@ -99,8 +88,11 @@ export function HomePage() {
       ) : null}
 
       <div className="home-top-grid">
-                <section className="continue-card" aria-label="이어서 학습">
-          <LearningIllustration />
+                <section
+          className={`continue-card ${session ? "" : "with-art"}`}
+          aria-label="이어서 학습"
+        >
+          {session ? <LearningIllustration /> : <BrandArt />}
           {session && resume ? (
             <>
               <span className="pill pill-primary">이어서 학습</span>
@@ -153,9 +145,9 @@ export function HomePage() {
           ) : (
             <>
               <span className="pill pill-primary">못풀준과 함께</span>
-              <h2>로그인하고 학습 기록을 남겨보세요.</h2>
+              <h2>게임처럼 성장하는 온라인 저지</h2>
               <p className="muted">
-                문제 풀이, 랭킹, 성장 기록을 한곳에서 확인할 수 있어요.
+                문제를 풀고 채점받으며 레벨·랭킹·미션으로 꾸준히 성장해 보세요.
               </p>
               <ul className="highlight-stats" aria-label="서비스 현황">
                 <li>
@@ -168,14 +160,9 @@ export function HomePage() {
                   <strong>실시간</strong> 채점
                 </li>
               </ul>
-              <div className="card-actions">
-                <Link className="button" to="/auth">
-                  로그인
-                </Link>
-                <Link className="button button-outline" to="/problems">
-                  문제 먼저 보기
-                </Link>
-              </div>
+              <Link className="button" to="/problems">
+                문제 둘러보기
+              </Link>
             </>
           )}
         </section>

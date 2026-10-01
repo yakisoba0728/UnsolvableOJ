@@ -215,3 +215,25 @@ export function useFavorites() {
 
   return { favorites: new Set(ids), toggle };
 }
+
+const difficultyRank = ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"];
+
+/** 시도했지만 아직 해결하지 못한 가장 최근 문제(이어서 풀 문제). */
+export function pickResume(submissions: Submission[], solved: Set<string>) {
+  return (
+    submissions.find((item) => !solved.has(item.problem.id) && item.problem.slug) ??
+    null
+  );
+}
+
+/** 아직 해결하지 않은 문제 중 가장 쉬운 것(다음 도전). */
+export function pickNextProblem(problems: ProblemSummary[], solved: Set<string>) {
+  return (
+    [...problems]
+      .filter((problem) => !solved.has(problem.id))
+      .sort(
+        (a, b) =>
+          difficultyRank.indexOf(a.difficulty) - difficultyRank.indexOf(b.difficulty),
+      )[0] ?? null
+  );
+}

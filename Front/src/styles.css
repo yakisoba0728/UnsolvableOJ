@@ -3164,3 +3164,84 @@ h3 {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== 사이트 소개 그림(BrandArt): 은은한 움직임, 모션 감소 설정 존중 ===== */
+.brand-art .float,
+.brand-art .twinkle {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.brand-art .float {
+  animation: brand-float 6s ease-in-out infinite;
+}
+.brand-art .float.d2 {
+  animation-delay: -2s;
+}
+.brand-art .float.d3 {
+  animation-delay: -4s;
+}
+.brand-art .twinkle {
+  animation: brand-twinkle 3s ease-in-out infinite;
+}
+.brand-art .twinkle.t2 {
+  animation-delay: -1s;
+}
+.brand-art .twinkle.t3 {
+  animation-delay: -2s;
+}
+@keyframes brand-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes brand-twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-art .float,
+  .brand-art .twinkle {
+    animation: none;
+  }
+}
+
+/* 홈 카드의 사이트 소개 그림: 카드 자체 폭을 기준으로 배치한다(컨테이너 쿼리) */
+.continue-card {
+  container-type: inline-size;
+  container-name: card;
+}
+.continue-card h2 {
+  text-wrap: balance;
+}
+.continue-card .brand-art {
+  position: absolute;
+  right: 20px;
+  bottom: 0;
+  width: min(380px, 48%);
+  height: auto;
+}
+@container card (min-width: 620px) {
+  .continue-card.with-art > :not(.brand-art) {
+    max-width: calc(100% - 380px);
+  }
+}
+@container card (max-width: 619px) {
+  .continue-card.with-art .brand-art {
+    position: static;
+    order: 99;
+    align-self: flex-end;
+    width: min(320px, 92%);
+    margin: 4px -12px -28px 0;
+  }
+}
