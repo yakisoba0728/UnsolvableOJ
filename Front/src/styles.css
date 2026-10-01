@@ -933,11 +933,11 @@ textarea {
 .pill-dark {
   background: rgba(255, 255, 255, 0.14);
   border-color: transparent;
-  color: #fff;
+  color: var(--color-on-solid);
 }
 .button-white {
-  background: #fff;
-  border-color: #fff;
+  background: var(--color-surface);
+  border-color: var(--color-surface);
   color: #1d4fd8;
 }
 .button-white:hover {
@@ -949,7 +949,7 @@ textarea {
   padding: 8px 10px;
 }
 .text-button.light:hover {
-  color: #fff;
+  color: var(--color-on-solid);
 }
 .avatar {
   display: inline-grid;

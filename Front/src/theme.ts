@@ -4,7 +4,7 @@ export type Theme = "light" | "dark";
 
 const storageKey = "unsolvable-oj-theme-v1";
 const themeColor: Record<Theme, string> = {
-  light: "#ffffff",
+  light: "#fbfcfe",
   dark: "#171d27",
 };
 

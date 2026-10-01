@@ -4,15 +4,15 @@
   color-scheme: light;
 
   /* Color: surfaces & structure */
-  --color-bg: #f6f8fc;
-  --color-surface: #ffffff;
-  --color-border: #e1e4e8;
-  --color-border-strong: #c9d1dc;
-  --color-surface-muted: #f6f8fa;
-  --color-disabled: #eef0f3;
+  --color-bg: #f0f3f9;
+  --color-surface: #fbfcfe; /* 순백 대신 푸른 기운의 오프화이트 (Exercism #fbfcfe 등) */
+  --color-border: #dce2ed;
+  --color-border-strong: #c5cedd;
+  --color-surface-muted: #f3f6fb;
+  --color-disabled: #e9edf5;
   --color-feature: #eaf0ff;
   --color-feature-border: #d5e0fb;
-  --color-divider: #edf0f5;
+  --color-divider: #e8ecf4;
 
   /* Color: ink (text/icons) */
   --color-ink-900: #17191c;
@@ -26,7 +26,7 @@
   --color-primary-soft: #e7eeff;
   --color-primary-solid: #1d4fd8;
   --color-primary-solid-hover: #153ea9;
-  --color-on-solid: #ffffff;
+  --color-on-solid: #fbfcfe;
 
   /* 버튼 전용: 선명한 accent보다 한 단계 차분한 인디고 블루
      (Color Hunt 팔레트 #FF95A5 #FFF6DC #76C0EC #425B9A 의 #425B9A, 흰 글자 대비 6.6:1) */
@@ -54,11 +54,11 @@
 
   /* Color: 강조 어두운 카드(이어서 풀기) */
   --color-strong-bg: #172238;
-  --color-strong-ink: #ffffff;
+  --color-strong-ink: #fbfcfe;
   --color-strong-muted: #b9c7db;
 
   /* Color: 활동 히트맵 */
-  --heat-0: #e3e7ed;
+  --heat-0: #e2e8f2;
   --heat-1: #c5d6fb;
   --heat-2: #7fa1f2;
   --heat-3: #3b6be0;
