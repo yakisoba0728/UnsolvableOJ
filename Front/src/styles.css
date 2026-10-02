@@ -3348,3 +3348,11 @@ h3 {
   border-left: 0;
   box-shadow: inset 1px 0 0 var(--color-feature-border);
 }
+
+/* 수치 패널: 숫자(13·8)와 한글(실시간)이 서로 다른 글꼴(Plus Jakarta Sans / Pretendard)로 그려져
+   크기·기준선이 어긋나 보였다. 한 글꼴(Pretendard)로 통일해 높이와 크기를 맞춘다 */
+.continue-card.with-art .highlight-stats strong {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-display);
+  line-height: 1.3;
+}
