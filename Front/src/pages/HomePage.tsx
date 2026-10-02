@@ -9,11 +9,8 @@ import {
 import { PageHeader } from "../components/PageHeader";
 import { CardSlider } from "../components/CardSlider";
 import { BrandArt } from "../components/BrandArt";
-import { LearningIllustration } from "../components/LearningIllustration";
 import { WeekStrip } from "../components/WeekStrip";
 import {
-  pickNextProblem,
-  pickResume,
   solvedToday,
   streakDays,
   submissionsByDay,
@@ -67,10 +64,6 @@ export function HomePage() {
   // 내가 6위 밖이면 상위 5명 + 내 순위, 그 외에는 상위 6명 (어느 쪽이든 6줄로 카드 높이를 맞춘다)
   const topRankings = rankings.slice(0, myRank >= 5 ? 5 : 6);
 
-  // 이어 풀 문제: 시도했지만 아직 해결하지 못한 가장 최근 문제만 해당한다.
-  const resume = pickResume(history.submissions, history.solved);
-  // 진행 중인 문제가 없으면 아직 해결하지 않은 다음 문제를 제안한다.
-  const nextProblem = resume ? null : pickNextProblem(problems, history.solved);
   const recommended = problems
     .filter((problem) => !history.solved.has(problem.id))
     .slice(0, 7); // 슬라이더는 이 7장 + "전체보기" 카드 = 총 8장
@@ -91,60 +84,10 @@ export function HomePage() {
 
       <div className="home-top-grid">
                 <section
-          className={`continue-card ${session ? "" : "with-art"}`}
-          aria-label="이어서 학습"
+          className="continue-card with-art"
+          aria-label="못풀준 소개"
         >
-          {session ? <LearningIllustration /> : <BrandArt />}
-          {session && resume ? (
-            <>
-              <span className="pill pill-primary">이어서 학습</span>
-              <h2>{resume.problem.title ?? "문제"}</h2>
-              <p className="muted">
-                풀이 중 · 최근 제출{" "}
-                {new Date(resume.updatedAt).toLocaleDateString("ko-KR")}
-              </p>
-              <Link
-                className="button"
-                to={
-                  resume.problem.slug
-                    ? problemPath(resume.problem.slug)
-                    : "/problems"
-                }
-              >
-                이어서 풀기
-              </Link>
-            </>
-          ) : session && nextProblem ? (
-            <>
-              <span className="pill pill-primary">다음 도전</span>
-              <h2>{nextProblem.title}</h2>
-              <p className="muted">
-                {difficultyLabel(nextProblem.difficulty)} ·{" "}
-                {nextProblem.timeLimitMs}ms · {nextProblem.memoryLimitMb}MB
-              </p>
-              <Link className="button" to={problemPath(nextProblem.slug)}>
-                풀어보기
-              </Link>
-            </>
-          ) : session && history.solved.size > 0 && !loading ? (
-            <>
-              <span className="pill pill-success">모두 해결</span>
-              <h2>공개된 문제를 모두 해결했어요.</h2>
-              <p className="muted">새 문제가 올라오면 여기에서 알려드릴게요.</p>
-              <Link className="button button-outline" to="/profile">
-                내 학습 기록
-              </Link>
-            </>
-          ) : session ? (
-            <>
-              <span className="pill pill-primary">시작해보세요</span>
-              <h2>첫 문제를 골라 도전해보세요.</h2>
-              <p className="muted">쉬운 문제부터 차근차근 시작할 수 있어요.</p>
-              <Link className="button" to="/problems">
-                문제 둘러보기
-              </Link>
-            </>
-          ) : (
+          <BrandArt />
             <>
               <span className="pill pill-primary">못풀준과 함께</span>
               <h2>게임처럼 성장하는 온라인 저지</h2>
@@ -166,7 +109,6 @@ export function HomePage() {
                 문제 둘러보기
               </Link>
             </>
-          )}
         </section>
 
         <section className="ranking-card" aria-label="랭킹">
