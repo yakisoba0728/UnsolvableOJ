@@ -3264,3 +3264,20 @@ h3 {
     transition: none;
   }
 }
+
+/* 데스크톱 메뉴: 마우스를 올리면 글자가 10% 커진다 (레이아웃은 밀리지 않도록 transform 사용) */
+@media (min-width: 1101px) and (hover: hover) {
+  .main-nav a {
+    transition:
+      transform 160ms ease-out,
+      color 150ms ease;
+  }
+  .main-nav a:hover {
+    transform: scale(1.1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .main-nav a {
+    transition: color 150ms ease;
+  }
+}
