@@ -3325,3 +3325,13 @@ h3 {
     padding: 12px 16px;
   }
 }
+
+/* 홈 소개 수치 패널: 칸 폭을 같게 하고 숫자·설명을 가운데 정렬 */
+.continue-card.with-art .highlight-stats {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.continue-card.with-art .highlight-stats li {
+  align-items: center;
+  text-align: center;
+}
