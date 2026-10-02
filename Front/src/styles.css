@@ -80,6 +80,7 @@ p {
   display: flex;
   gap: 11px;
   align-items: center;
+  font-family: var(--font-display);
   font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.06em;
@@ -2359,7 +2360,7 @@ kbd {
 }
 .notfound-code {
   display: block;
-  font: 800 88px/1 var(--font-sans);
+  font: 800 88px/1 var(--font-display);
   letter-spacing: -0.05em;
   color: var(--color-button-soft-fg); /* 가변 글꼴은 윤곽선이 겹쳐 text-stroke가 깨지므로 단색 */
 }
@@ -2607,7 +2608,7 @@ kbd {
   color: var(--color-primary);
 }
 .result-banner strong {
-  font: 800 24px var(--font-sans);
+  font: 800 24px var(--font-display);
   letter-spacing: -0.02em;
   margin-top: 6px;
 }
