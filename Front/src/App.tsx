@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Link,
   NavLink,
@@ -87,6 +87,34 @@ export function App() {
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
+  // 데스크톱 메뉴: 활성 메뉴 아래 표시선이 새 위치로 미끄러져 이동한다.
+  const navRef = useRef<HTMLElement>(null);
+  const [indicator, setIndicator] = useState<{ x: number; w: number } | null>(
+    null,
+  );
+  const [indicatorReady, setIndicatorReady] = useState(false);
+  const role = session?.user.role;
+  useLayoutEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const measure = () => {
+      const active = nav.querySelector<HTMLElement>("a.active");
+      setIndicator(
+        active ? { x: active.offsetLeft, w: active.offsetWidth } : null,
+      );
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(nav);
+    void document.fonts?.ready.then(measure);
+    // 첫 배치는 애니메이션 없이 제자리에 놓는다.
+    const frame = requestAnimationFrame(() => setIndicatorReady(true));
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [pathname, Boolean(session), role]);
+
   // 화면을 옮기면 메뉴를 닫는다.
   useEffect(() => setMenuOpen(false), [pathname]);
 
@@ -122,6 +150,7 @@ export function App() {
             className={`main-nav ${menuOpen ? "open" : ""}`}
             id="main-menu"
             aria-label="주 메뉴"
+            ref={navRef}
           >
             <NavLink to="/" end>
               홈
@@ -144,6 +173,15 @@ export function App() {
             {session && session.user.role !== "USER" ? (
               <NavLink to="/problems/new">문제 만들기</NavLink>
             ) : null}
+            <span
+              className={`nav-indicator ${indicatorReady ? "ready" : ""}`}
+              aria-hidden="true"
+              style={{
+                width: indicator?.w ?? 0,
+                transform: `translateX(${indicator?.x ?? 0}px)`,
+                opacity: indicator ? 1 : 0,
+              }}
+            />
           </nav>
           <div className="account-actions">
             <ThemeToggle />
