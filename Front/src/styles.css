@@ -3291,3 +3291,37 @@ h3 {
   flex: 1;
   justify-content: space-between;
 }
+
+/* 홈 소개 카드: 버튼 없이 수치 패널로 하단을 채운다 */
+.continue-card.with-art {
+  justify-content: center;
+}
+.continue-card.with-art .highlight-stats {
+  gap: 0;
+  flex-wrap: nowrap;
+  margin: 22px 0 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-feature-border);
+  border-radius: var(--radius-control);
+}
+.continue-card.with-art .highlight-stats li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 22px;
+  white-space: nowrap;
+}
+.continue-card.with-art .highlight-stats li + li {
+  border-left: 1px solid var(--color-feature-border);
+}
+.continue-card.with-art .highlight-stats strong {
+  margin: 0;
+  font: var(--text-h1);
+  font-size: 22px;
+  line-height: 1.2;
+}
+@container card (max-width: 619px) {
+  .continue-card.with-art .highlight-stats li {
+    padding: 12px 16px;
+  }
+}

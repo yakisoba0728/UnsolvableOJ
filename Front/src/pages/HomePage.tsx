@@ -96,18 +96,18 @@ export function HomePage() {
               </p>
               <ul className="highlight-stats" aria-label="서비스 현황">
                 <li>
-                  <strong>{problems.length}</strong> 공개 문제
+                  <strong>{problems.length}</strong>
+                  <span>공개 문제</span>
                 </li>
                 <li>
-                  <strong>8</strong> 지원 언어
+                  <strong>8</strong>
+                  <span>지원 언어</span>
                 </li>
                 <li>
-                  <strong>실시간</strong> 채점
+                  <strong>실시간</strong>
+                  <span>자동 채점</span>
                 </li>
               </ul>
-              <Link className="button" to="/problems">
-                문제 둘러보기
-              </Link>
             </>
         </section>
 
