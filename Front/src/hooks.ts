@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "./api";
 import type {
   Page,
@@ -173,47 +173,6 @@ export function useDocumentTitle(title?: string) {
   useEffect(() => {
     document.title = title ? `${title} | 못풀준` : "못풀준 · UnsolvableOJ";
   }, [title]);
-}
-
-const favoritesKey = "unsolvable-oj-favorites-v1";
-
-function readFavorites(): string[] {
-  try {
-    const raw = localStorage.getItem(favoritesKey);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed.filter((id) => typeof id === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
-/** 즐겨찾기(★) 문제. 이 브라우저에 저장하고, 다른 탭의 변경도 반영한다. */
-export function useFavorites() {
-  const [ids, setIds] = useState<string[]>(readFavorites);
-
-  useEffect(() => {
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === favoritesKey) setIds(readFavorites());
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
-  const toggle = useCallback((id: string) => {
-    setIds((current) => {
-      const next = current.includes(id)
-        ? current.filter((value) => value !== id)
-        : [...current, id];
-      try {
-        localStorage.setItem(favoritesKey, JSON.stringify(next));
-      } catch {
-        /* 저장소를 쓸 수 없어도 이번 방문에는 반영한다 */
-      }
-      return next;
-    });
-  }, []);
-
-  return { favorites: new Set(ids), toggle };
 }
 
 const difficultyRank = ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"];

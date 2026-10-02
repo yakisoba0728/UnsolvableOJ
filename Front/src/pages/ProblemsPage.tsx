@@ -2,14 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { BrandArt } from "../components/BrandArt";
-import { FavoriteButton } from "../components/FavoriteButton";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { ProblemStatus, solveState, type SolveState } from "../components/ProblemStatus";
 import {
   useAllProblems,
   useDocumentTitle,
-  useFavorites,
   pickNextProblem,
   pickResume,
   useMyStanding,
@@ -39,7 +37,6 @@ const sorts = [
   { value: "easy", label: "쉬운 난이도순" },
   { value: "hard", label: "어려운 난이도순" },
   { value: "title", label: "제목순" },
-  { value: "random", label: "무작위 순서" },
 ];
 
 const statusChips: { value: "" | SolveState; label: string }[] = [
@@ -58,7 +55,6 @@ export function ProblemsPage() {
   useDocumentTitle("문제 목록");
   const { problems, loading, error } = useAllProblems();
   const history = useSubmissionHistory(session);
-  const { favorites, toggle: toggleFavorite } = useFavorites();
   const { profile, rank } = useMyStanding(session);
   const [params, setParams] = useSearchParams();
   const searchRef = useRef<HTMLInputElement>(null);
@@ -71,7 +67,6 @@ export function ProblemsPage() {
   const status = (params.get("s") ?? "") as "" | SolveState;
   const sort = params.get("sort") ?? "latest";
   const seed = Number(params.get("seed")) || 1;
-  const favoritesOnly = params.get("fav") === "1";
   const page = Math.max(1, Number(params.get("page")) || 1);
 
   function update(
@@ -132,7 +127,6 @@ export function ProblemsPage() {
     )
       return false;
     if (skip !== "status" && status && stateOf(problem) !== status) return false;
-    if (favoritesOnly && !favorites.has(problem.id)) return false;
     return (
       !keyword ||
       problem.title.toLowerCase().includes(keyword) ||
@@ -155,7 +149,7 @@ export function ProblemsPage() {
       base.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     return base.filter((problem) => matches(problem, null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [problems, sort, seed, params, favorites, history.solved, history.attempted]);
+  }, [problems, sort, seed, params, history.solved, history.attempted]);
 
   const statusCount = (value: "" | SolveState) =>
     problems.filter((p) => matches(p, "status") && (!value || stateOf(p) === value)).length;
@@ -166,10 +160,9 @@ export function ProblemsPage() {
   const current = Math.min(page, totalPages);
   const visible = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
   const hasFilter = Boolean(
-    selectedDifficulties.length || status || favoritesOnly || keyword,
+    selectedDifficulties.length || status || keyword,
   );
   const solvedCount = problems.filter((p) => history.solved.has(p.id)).length;
-  const favoriteCount = problems.filter((p) => favorites.has(p.id)).length;
 
   // 이어 풀 문제(시도했지만 못 푼 가장 최근 문제). 없으면 가장 쉬운 안 푼 문제.
   const resume = pickResume(history.submissions, history.solved);
@@ -202,13 +195,12 @@ export function ProblemsPage() {
   }
 
   function changeSort(value: string) {
-    if (value === "random") update({ sort: "random", seed: String(newSeed()) });
-    else update({ sort: value === "latest" ? null : value, seed: null });
+    update({ sort: value === "latest" ? null : value, seed: null });
   }
 
   function resetFilters() {
     const next = new URLSearchParams(params);
-    ["q", "d", "s", "fav", "page"].forEach((key) => next.delete(key));
+    ["q", "d", "s", "page"].forEach((key) => next.delete(key));
     setParams(next, { replace: true });
     setQueryText("");
     lastWritten.current = "";
@@ -218,7 +210,6 @@ export function ProblemsPage() {
     <div className="page-width problems-page">
       <PageHeader
         title="문제 목록"
-        badge={<span className="pill">{problems.length}문제</span>}
         description="한 문제씩, 더 단단해지는 실력. 오늘 풀 문제를 찾아보세요."
         aside={
           session && problems.length ? (
@@ -232,21 +223,6 @@ export function ProblemsPage() {
                   {continueTarget.label} <span aria-hidden="true">→</span>
                 </Link>
               ) : null}
-              <div className="solved-summary">
-                <span>
-                  <strong>{solvedCount}</strong> / {problems.length} 해결
-                </span>
-                <div
-                  className="progress"
-                  role="progressbar"
-                  aria-label="해결한 문제 비율"
-                  aria-valuemin={0}
-                  aria-valuemax={problems.length}
-                  aria-valuenow={solvedCount}
-                >
-                  <span style={{ width: `${(solvedCount / problems.length) * 100}%` }} />
-                </div>
-              </div>
             </div>
           ) : null
         }
@@ -269,7 +245,7 @@ export function ProblemsPage() {
           </div>
           <select
             aria-label="정렬"
-            value={sort}
+            value={sort === "random" ? "latest" : sort}
             onChange={(event) => changeSort(event.target.value)}
           >
             {sorts.map((item) => (
@@ -294,7 +270,7 @@ export function ProblemsPage() {
                 strokeLinejoin="round"
               />
             </svg>
-            {sort === "random" ? "다시 섞기" : "무작위 섞기"}
+            무작위 섞기
           </button>
         </div>
 
@@ -336,22 +312,6 @@ export function ProblemsPage() {
               <span className="chip-count">{difficultyCount(item.value)}</span>
             </button>
           ))}
-          <span className="filter-spacer" />
-          <button
-            className={`filter-chip filter-chip-star ${favoritesOnly ? "selected" : ""}`}
-            aria-pressed={favoritesOnly}
-            onClick={() => update({ fav: favoritesOnly ? null : "1" })}
-          >
-            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false" className="chip-star">
-              <path
-                d="m12 3.4 2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6-4.4-4.2 6-.8L12 3.4Z"
-                strokeWidth="2"
-                strokeLinejoin="round"
-              />
-            </svg>
-            즐겨찾기
-            <span className="chip-count">{favoriteCount}</span>
-          </button>
           {hasFilter ? (
             <button className="inline-button" onClick={resetFilters}>
               필터 초기화
@@ -406,11 +366,6 @@ export function ProblemsPage() {
               </div>
               {visible.map((problem) => (
                 <div className="problem-row-wrap" key={problem.id}>
-                  <FavoriteButton
-                    active={favorites.has(problem.id)}
-                    title={problem.title}
-                    onToggle={() => toggleFavorite(problem.id)}
-                  />
                   <Link className="problem-row" to={problemPath(problem.slug)}>
                     <span className="problem-title">
                       <strong>{problem.title}</strong>
