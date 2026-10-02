@@ -64,7 +64,8 @@ export function HomePage() {
   const myRank = session
     ? rankings.findIndex((entry) => entry.id === session.user.id)
     : -1;
-  const topRankings = rankings.slice(0, 5);
+  // 내가 6위 밖이면 상위 5명 + 내 순위, 그 외에는 상위 6명 (어느 쪽이든 6줄로 카드 높이를 맞춘다)
+  const topRankings = rankings.slice(0, myRank >= 5 ? 5 : 6);
 
   // 이어 풀 문제: 시도했지만 아직 해결하지 못한 가장 최근 문제만 해당한다.
   const resume = pickResume(history.submissions, history.solved);

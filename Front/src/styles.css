@@ -3281,3 +3281,13 @@ h3 {
     transition: color 150ms ease;
   }
 }
+
+/* 홈 랭킹: 옆 카드가 더 높아도 줄이 카드를 채우도록 간격을 나눈다(아래 빈 공간 방지) */
+.ranking-card {
+  display: flex;
+  flex-direction: column;
+}
+.ranking-list {
+  flex: 1;
+  justify-content: space-between;
+}
