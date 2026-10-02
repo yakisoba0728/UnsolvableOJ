@@ -3335,3 +3335,16 @@ h3 {
   align-items: center;
   text-align: center;
 }
+
+/* 수치 패널: 칸이 내용보다 좁아져 마지막 칸 글자가 밀리지 않도록 최소 폭을 내용 폭으로 고정하고,
+   구분선은 레이아웃을 차지하지 않는 그림자로 그려 칸 중앙을 맞춘다 */
+.continue-card.with-art .highlight-stats {
+  grid-template-columns: repeat(3, minmax(max-content, 1fr));
+}
+.continue-card.with-art .highlight-stats li {
+  padding: 14px 20px;
+}
+.continue-card.with-art .highlight-stats li + li {
+  border-left: 0;
+  box-shadow: inset 1px 0 0 var(--color-feature-border);
+}
