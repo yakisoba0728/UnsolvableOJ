@@ -17,7 +17,7 @@ export function AuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const destination =
-    (location.state as { from?: string } | null)?.from ?? "/problems";
+    (location.state as { from?: string } | null)?.from ?? "/";
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

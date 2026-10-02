@@ -114,7 +114,7 @@ test("registration sends the username and starts a session", async ({
   await page.getByLabel("사용자 이름").fill("new_solver");
   await page.getByLabel("비밀번호").fill("browser-password");
   await page.getByRole("button", { name: "회원가입", exact: true }).click();
-  await expect(page).toHaveURL(/\/problems$/);
+  await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("button", { name: "로그아웃" })).toBeVisible();
 });
 
