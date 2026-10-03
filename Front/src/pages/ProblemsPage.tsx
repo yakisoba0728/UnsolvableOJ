@@ -460,7 +460,7 @@ export function ProblemsPage() {
               </li>
               {session ? (
                 <li>
-                  <button onClick={() => update({ s: "none" })}>
+                  <button onClick={() => update({ s: "none", d: null })}>
                     <strong>아직 안 푼 문제만 보기</strong>
                     <span>새로운 문제에 집중해요</span>
                   </button>
