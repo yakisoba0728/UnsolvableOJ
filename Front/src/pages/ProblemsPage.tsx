@@ -177,6 +177,10 @@ export function ProblemsPage() {
       ? { slug: next.slug, title: next.title, label: "다음 문제 풀기" }
       : null;
 
+  const continueDifficulty = continueTarget
+    ? problems.find((problem) => problem.slug === continueTarget.slug)?.difficulty
+    : undefined;
+
   function toggleDifficulty(value: Difficulty | "") {
     if (value === "") return update({ d: null });
     const next = new Set(selectedDifficulties);
@@ -420,7 +424,16 @@ export function ProblemsPage() {
               </dl>
               {continueTarget ? (
                 <div className="standing-continue">
-                  <strong>{continueTarget.title}</strong>
+                  <div className="standing-continue-title">
+                    <strong>{continueTarget.title}</strong>
+                    {continueDifficulty ? (
+                      <span
+                        className={`difficulty difficulty-${continueDifficulty.toLowerCase()}`}
+                      >
+                        {difficultyLabel(continueDifficulty)}
+                      </span>
+                    ) : null}
+                  </div>
                   <Link
                     className="button"
                     to={problemPath(continueTarget.slug)}
