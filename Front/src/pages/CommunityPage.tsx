@@ -176,8 +176,8 @@ export function CommunityPage() {
   ].filter((item): item is { key: string; label: string } => item !== null);
   const hasFilter = Boolean(activeFilters.length || urlQuery.trim());
 
-  function write() {
-    if (session) navigate("/community/new");
+  function write(initialCategory?: CategoryKey) {
+    if (session) navigate("/community/new", { state: { category: initialCategory } });
     else navigate("/auth", { state: { from: "/community/new" } });
   }
 
@@ -196,11 +196,6 @@ export function CommunityPage() {
       <PageHeader
         title="함께 풀면, 더 멀리."
         description="궁금한 코드는 질문하고, 발견한 풀이는 나누세요."
-        aside={
-          <button type="button" className="button" onClick={write}>
-            글쓰기
-          </button>
-        }
       />
 
       <div className="filter-card">
@@ -389,7 +384,7 @@ export function CommunityPage() {
                 <>
                   <strong>아직 올라온 글이 없어요.</strong>
                   <p>첫 글을 남겨 보세요.</p>
-                  <button type="button" className="button" onClick={write}>
+                  <button type="button" className="button" onClick={() => write()}>
                     글쓰기
                   </button>
                 </>
@@ -400,7 +395,7 @@ export function CommunityPage() {
           {visible.length > 0 && visible.length < 4 ? (
             <div className="community-nudge">
               <span>찾는 글이 없나요? 궁금한 점을 직접 질문해 보세요.</span>
-              <button type="button" className="button button-small" onClick={write}>
+              <button type="button" className="button button-small" onClick={() => write()}>
                 질문하기
               </button>
             </div>
@@ -435,33 +430,37 @@ export function CommunityPage() {
 
         <aside className="side-stack">
           <div className="community-guide">
-            <h2>
-              좋은 질문은
-              <br />
-              함께 풀 실마리가 됩니다.
-            </h2>
-            <img src={guideArt} alt="" width="232" height="186" />
-            <h3>질문을 올리기 전 확인해 보세요.</h3>
-            <ul>
-              <li>어떤 문제에서 막혔나요?</li>
-              <li>시도한 코드와 입력은 무엇인가요?</li>
-              <li>기대한 결과와 실제 결과가 다른가요?</li>
-            </ul>
-          </div>
-          <div className="community-about">
-            <h2>풀이를 나누는 공간</h2>
-            <p>
-              정답뿐 아니라 생각한 과정도 함께 남겨주세요.
-              <br />
-              다른 관점이 더 좋은 풀이로 이어집니다.
-            </p>
-            <div className="community-about-chips">
-              <button type="button" onClick={() => update({ c: "question" })}>
-                질문
-              </button>
-              <button type="button" onClick={() => update({ c: "solution" })}>
-                풀이 공유
-              </button>
+            <div className="community-guide-head">
+              <h2>질문을 주고 받으며 풀이를 공유하면 모두의 힘이 됩니다.</h2>
+              <img src={guideArt} alt="" width="232" height="186" />
+            </div>
+            <div className="community-guide-cols">
+              <div className="guide-col">
+                <h3>질문을 올리기 전 확인해 보세요.</h3>
+                <ul>
+                  <li>어떤 문제에서 막혔나요?</li>
+                  <li>시도한 코드와 입력은 무엇인가요?</li>
+                  <li>기대한 결과와 실제 결과가 다른가요?</li>
+                </ul>
+                <button type="button" className="button" onClick={() => write()}>
+                  질문 작성하기
+                </button>
+              </div>
+              <div className="guide-col">
+                <h3>풀이를 나누는 공간</h3>
+                <ul>
+                  <li>정답뿐 아니라 생각한 과정도 남겨요.</li>
+                  <li>시간·메모리 복잡도를 함께 적어요.</li>
+                  <li>다른 관점이 더 좋은 풀이로 이어져요.</li>
+                </ul>
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => write("solution")}
+                >
+                  풀이 공유하기
+                </button>
+              </div>
             </div>
           </div>
         </aside>

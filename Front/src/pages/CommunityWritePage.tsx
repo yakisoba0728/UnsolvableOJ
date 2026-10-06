@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
@@ -21,15 +21,20 @@ export function CommunityWritePage() {
   useDocumentTitle("글 작성");
   const { session } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const requestedCategory = (location.state as { category?: CategoryKey } | null)?.category;
   const isAdmin = session?.user.role === "ADMIN";
   const options = categories.filter((item) => item.key !== "notice" || isAdmin);
 
   // 이전에 임시 저장한 초안이 있으면 한 번만 복원한다.
   const [restored] = useState(readDraft);
+  // 배너에서 "풀이 공유하기"로 들어오면 그 카테고리로 시작한다.
   const [category, setCategory] = useState<CategoryKey>(
-    restored && options.some((item) => item.key === restored.category)
-      ? restored.category
-      : "question",
+    requestedCategory && options.some((item) => item.key === requestedCategory)
+      ? requestedCategory
+      : restored && options.some((item) => item.key === restored.category)
+        ? restored.category
+        : "question",
   );
   const [title, setTitle] = useState(restored?.title ?? "");
   const [tags, setTags] = useState<string[]>(restored?.tags ?? []);

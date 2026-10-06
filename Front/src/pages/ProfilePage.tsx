@@ -232,10 +232,18 @@ export function ProfilePage() {
               </Link>
             ) : null}
             {selectedSubmissions.length === 0 ? (
-              <p className="muted">
-                이 날은 제출 기록이 없어요.{" "}
-                <Link to="/problems">문제 풀러 가기</Link>
-              </p>
+              selected === dayKey(today) ? (
+                <div className="day-empty">
+                  <p className="muted">
+                    오늘 제출이 없어요. 문제 하나로 하루를 시작해 보세요.
+                  </p>
+                  <Link className="button" to="/problems">
+                    문제 풀러 가기 <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
+              ) : (
+                <p className="muted">이 날은 제출 기록이 없어요.</p>
+              )
             ) : null}
           </div>
         </div>

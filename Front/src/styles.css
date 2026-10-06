@@ -4526,3 +4526,229 @@ h3 {
     width: 100%;
   }
 }
+
+/* 문제 목록: 상태·난이도 필터를 가로로 나란히 (좁은 화면에서는 줄바꿈) */
+.filter-groups {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 28px;
+  margin-top: 14px;
+}
+.filter-groups .filter-bar {
+  margin: 0;
+  flex-wrap: nowrap;
+}
+@media (max-width: 650px) {
+  .filter-groups {
+    gap: 12px;
+  }
+  .filter-groups .filter-bar {
+    flex-wrap: wrap;
+    flex: 1 1 100%;
+  }
+}
+
+/* 내 학습 기록: 프로필 이미지 색을 버튼 색과 같게, 오늘 기록이 없을 때의 안내 */
+.avatar-large {
+  background: var(--color-button);
+  color: var(--color-on-solid);
+}
+.day-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+.day-empty p {
+  margin: 0;
+}
+/* 커뮤니티 질문 가이드 배너 안의 글쓰기 버튼 */
+.community-guide .button-full {
+  margin-top: 20px;
+}
+
+/* 질문 가이드 배너: 안쪽 여백을 줄인다 */
+.community-guide {
+  padding: 16px 18px 18px;
+}
+.community-guide .button-full {
+  margin-top: 14px;
+}
+
+/* 풀이 공유 안내: 위 질문 가이드 배너와 같은 형식(feature 바탕·같은 여백·폭 전체 버튼) */
+.community-about {
+  padding: 16px 18px 18px;
+  background: var(--color-feature);
+  border: 1px solid var(--color-feature-border);
+  border-radius: var(--radius-feature);
+}
+.community-about h2 {
+  font: var(--text-section);
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.community-about p {
+  margin-bottom: 14px;
+}
+
+/* 질문 가이드 + 풀이 공유 안내를 한 배너로 합침 */
+.community-guide-note {
+  margin: 14px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-feature-border);
+  color: var(--color-ink-600);
+  font-size: 14px;
+}
+.community-guide-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.community-guide-actions .button {
+  padding: 0 10px;
+}
+
+/* 배너 하단: 질문 안내와 풀이 공유 안내를 가로로 나누고, 각 버튼을 자기 내용 아래 같은 높이에 맞춘다 */
+.community-guide-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-top: 4px;
+}
+.guide-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-right: 14px;
+}
+.guide-col + .guide-col {
+  padding: 0 0 0 14px;
+  border-left: 1px solid var(--color-feature-border);
+}
+.guide-col h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.guide-col ul {
+  margin: 0 0 14px;
+  padding-left: 16px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.guide-col p {
+  margin: 0 0 14px;
+  color: var(--color-ink-600);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.guide-col .button {
+  margin-top: auto;
+  padding: 0 10px;
+  width: 100%;
+}
+@media (max-width: 380px) {
+  .community-guide-cols {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .guide-col,
+  .guide-col + .guide-col {
+    padding: 0;
+    border-left: 0;
+  }
+}
+
+/* 두 칸의 제목·목록·버튼을 같은 스타일로 */
+.guide-col h3 {
+  min-height: 2.8em;
+}
+.guide-col ul {
+  flex: 1;
+}
+
+/* 배너 상단: 제목과 일러스트를 아래 두 칸과 같은 폭·간격으로 */
+.community-guide h2 {
+  margin-bottom: 4px;
+}
+.community-guide img {
+  width: min(208px, 72%);
+  margin: -4px auto 12px;
+}
+
+/* 배너 상단: 제목(왼쪽)과 일러스트(오른쪽)를 가로로 */
+.community-guide-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.community-guide-head h2 {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  line-height: 1.45;
+  text-wrap: balance;
+}
+.community-guide-head img {
+  flex: none;
+  width: 44%;
+  max-width: 168px;
+  height: auto;
+  margin: -6px -6px -6px 0;
+}
+
+/* 배너: 제목 / 질문 작성 / 풀이 공유 세 항목을 세로로 나열 */
+.community-guide-cols {
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin-top: 0;
+}
+.guide-col,
+.guide-col + .guide-col {
+  padding: 16px 0 0;
+  border-left: 0;
+  border-top: 1px solid var(--color-feature-border);
+}
+.guide-col + .guide-col {
+  margin-top: 16px;
+}
+.guide-col h3 {
+  min-height: 0;
+}
+.guide-col ul {
+  flex: none;
+}
+@media (max-width: 380px) {
+  .guide-col,
+  .guide-col + .guide-col {
+    padding: 16px 0 0;
+    border-top: 1px solid var(--color-feature-border);
+  }
+}
+
+/* 커뮤니티 사이드 배너 폭을 줄여(392px → 262px) 목록에 더 많은 폭을 준다 */
+.community-layout {
+  grid-template-columns: minmax(0, 1fr) 262px;
+}
+@media (max-width: 1100px) {
+  .community-layout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (min-width: 1101px) {
+  /* 좁아진 배너에서는 제목 아래에 일러스트를 가운데로 둔다 */
+  .community-guide-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+  .community-guide-head img {
+    align-self: center;
+    width: 150px;
+    max-width: none;
+    margin: -8px 0 -8px;
+  }
+}

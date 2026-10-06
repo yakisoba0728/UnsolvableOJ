@@ -252,6 +252,7 @@ export function ProblemsPage() {
           </button>
         </div>
 
+        <div className="filter-groups">
         {session ? (
           <div className="filter-bar">
             <span className="filter-label">상태</span>
@@ -288,6 +289,7 @@ export function ProblemsPage() {
               필터 초기화
             </button>
           ) : null}
+        </div>
         </div>
       </div>
 
