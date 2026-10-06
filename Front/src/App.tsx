@@ -13,6 +13,9 @@ import { ComingSoonPage } from "./components/ComingSoonPage";
 import { NotFoundPage } from "./components/NotFoundPage";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { AuthPage } from "./pages/AuthPage";
+import { CommunityPage } from "./pages/CommunityPage";
+import { CommunityPostPage } from "./pages/CommunityPostPage";
+import { CommunityWritePage } from "./pages/CommunityWritePage";
 import { CreateProblemPage } from "./pages/CreateProblemPage";
 import { HomePage } from "./pages/HomePage";
 import { ProblemPage } from "./pages/ProblemPage";
@@ -275,13 +278,19 @@ export function App() {
               session ? <ProfilePage /> : <Navigate to="/auth" replace />
             }
           />
-          {upcoming.map((item) => (
+          <Route path="/community" element={<CommunityPage />} />
+          <Route path="/community/new" element={<CommunityWritePage />} />
+          <Route path="/community/:id" element={<CommunityPostPage />} />
+          {/* 커뮤니티는 실제 화면이 있으므로 준비 중 안내에서 제외한다 */}
+          {upcoming
+            .filter((item) => item.path !== "/community")
+            .map((item) => (
             <Route
               key={item.path}
               path={item.path}
               element={<ComingSoonPage {...item.page} />}
             />
-          ))}
+            ))}
           <Route
             path="/submissions"
             element={
