@@ -3445,3 +3445,14 @@ h3 {
 .result-banner:not(.result-accepted) .result-progress .progress-divider {
   background: var(--color-danger-soft);
 }
+
+/* 진행 막대를 배너 전체 폭(✓ 아래까지)으로 펴고, 굵기는 3/4(14px→10.5px)로 줄인다 */
+.result-banner {
+  flex-wrap: wrap;
+}
+.result-banner .result-progress {
+  flex: 0 0 100%;
+}
+.result-progress .progress {
+  height: 10.5px;
+}
