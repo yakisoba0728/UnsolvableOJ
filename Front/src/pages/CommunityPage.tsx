@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import guideArt from "../assets/community-guide.png";
-import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import {
   acceptedAnswerId,
@@ -20,7 +19,9 @@ import {
 } from "../community/types";
 import { useDocumentTitle } from "../hooks";
 
-const PAGE_SIZE = 5;
+const SIZES = [10, 20, 30, 50] as const;
+const DEFAULT_SIZE = 10;
+const sizeKey = "unsolvable-oj-community-size-v1";
 
 const sortOptions = [
   { value: "latest", label: "최신순" },
@@ -28,8 +29,23 @@ const sortOptions = [
   { value: "answers", label: "답변 많은 순" },
 ];
 
+const statusOptions = [
+  { value: "", label: "전체" },
+  { value: "open", label: "답변 대기" },
+  { value: "accepted", label: "채택 완료" },
+];
+
 const isCategory = (value: string | null): value is CategoryKey =>
   categories.some((item) => item.key === value);
+
+function storedSize() {
+  try {
+    const value = Number(localStorage.getItem(sizeKey));
+    return SIZES.includes(value as (typeof SIZES)[number]) ? value : DEFAULT_SIZE;
+  } catch {
+    return DEFAULT_SIZE;
+  }
+}
 
 export function CommunityPage() {
   useDocumentTitle("커뮤니티");
@@ -40,9 +56,15 @@ export function CommunityPage() {
 
   const categoryParam = params.get("c");
   const category = isCategory(categoryParam) ? categoryParam : null;
+  const status = params.get("s") ?? "";
   const sort = params.get("sort") ?? "latest";
   const urlQuery = params.get("q") ?? "";
   const page = Math.max(1, Number(params.get("page")) || 1);
+  const sizeParam = Number(params.get("size"));
+  const [savedSize, setSavedSize] = useState(storedSize);
+  const size = SIZES.includes(sizeParam as (typeof SIZES)[number])
+    ? sizeParam
+    : savedSize;
 
   // 검색어는 입력 중에는 로컬 상태로 두고, 잠시 멈추면 주소에 반영한다.
   const [queryText, setQueryText] = useState(urlQuery);
@@ -69,20 +91,47 @@ export function CommunityPage() {
     setParams(next, { replace: true });
   }
 
+  // 필터 메뉴: 버튼으로 열고, 바깥 클릭·Esc로 닫는다 (Esc는 버튼으로 포커스를 돌려준다).
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointer = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setMenuOpen(false);
+      menuButtonRef.current?.focus();
+    };
+    document.addEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
   const posts = allPosts(activity);
   const answerCount = (post: CommunityPost) =>
     answersOf(activity, post.id).length;
 
   const filtered = useMemo(() => {
     const keyword = urlQuery.trim().toLowerCase();
-    const list = posts.filter(
-      (post) =>
-        (!category || post.category === category) &&
-        (!keyword ||
-          post.title.toLowerCase().includes(keyword) ||
-          post.body.toLowerCase().includes(keyword) ||
-          post.tags.some((tag) => tag.toLowerCase().includes(keyword))),
-    );
+    const list = posts.filter((post) => {
+      if (category && post.category !== category) return false;
+      if (status === "open" && !(post.category === "question" && answersOf(activity, post.id).length === 0))
+        return false;
+      if (status === "accepted" && acceptedAnswerId(activity, post.id) === null)
+        return false;
+      return (
+        !keyword ||
+        post.title.toLowerCase().includes(keyword) ||
+        post.body.toLowerCase().includes(keyword) ||
+        post.tags.some((tag) => tag.toLowerCase().includes(keyword))
+      );
+    });
     list.sort((a, b) => {
       // 고정 공지는 항상 맨 위
       if (Boolean(a.pinned) !== Boolean(b.pinned)) return a.pinned ? -1 : 1;
@@ -92,77 +141,181 @@ export function CommunityPage() {
     });
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activity, category, sort, urlQuery]);
+  }, [activity, category, status, sort, urlQuery]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / size));
   const current = Math.min(page, totalPages);
-  const visible = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
-  const hasFilter = Boolean(category || urlQuery.trim());
+  const first = (current - 1) * size;
+  const visible = filtered.slice(first, first + size);
+  const activeFilters = [
+    category ? { key: "c", label: categoryLabel(category) } : null,
+    status
+      ? { key: "s", label: statusOptions.find((item) => item.value === status)?.label ?? status }
+      : null,
+  ].filter((item): item is { key: string; label: string } => item !== null);
+  const hasFilter = Boolean(activeFilters.length || urlQuery.trim());
 
   function write() {
     if (session) navigate("/community/new");
     else navigate("/auth", { state: { from: "/community/new" } });
   }
 
+  function changeSize(next: number) {
+    setSavedSize(next);
+    try {
+      localStorage.setItem(sizeKey, String(next));
+    } catch {
+      /* 저장소를 쓸 수 없어도 이번 방문에는 반영한다 */
+    }
+    update({ size: next === DEFAULT_SIZE ? null : String(next) });
+  }
+
   return (
     <div className="page-width community-page">
-      <PageHeader
-        title="함께 풀면, 더 멀리."
-        description="궁금한 코드는 질문하고, 발견한 풀이는 나누세요."
-        aside={
+      <section className="community-hero" aria-label="커뮤니티 검색">
+        <div className="community-hero-top">
+          <div>
+            <h1>함께 풀면, 더 멀리.</h1>
+            <p>궁금한 코드는 질문하고, 발견한 풀이는 나누세요.</p>
+          </div>
           <button type="button" className="button" onClick={write}>
             글쓰기
           </button>
-        }
-      />
+        </div>
+        <div className="community-search-field">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="2" />
+            <path d="m16 16 4.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+          <input
+            type="search"
+            aria-label="게시글 검색"
+            placeholder="궁금한 질문이나 풀이를 검색해 보세요 (제목·내용·태그)"
+            value={queryText}
+            onChange={(event) => setQueryText(event.target.value)}
+          />
+        </div>
+      </section>
 
       <div className="community-layout">
         <section aria-label="커뮤니티 글 목록">
           <div className="community-toolbar">
-            <div className="community-tabs" role="group" aria-label="카테고리">
+            <div className="filter-menu" ref={menuRef}>
               <button
                 type="button"
-                className={`community-tab ${category === null ? "selected" : ""}`}
-                aria-pressed={category === null}
-                onClick={() => update({ c: null })}
+                ref={menuButtonRef}
+                className={`button button-outline filter-menu-button ${activeFilters.length ? "active" : ""}`}
+                aria-haspopup="true"
+                aria-expanded={menuOpen}
+                aria-controls="community-filter-menu"
+                onClick={() => setMenuOpen((open) => !open)}
               >
-                전체
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                필터
+                {activeFilters.length ? (
+                  <span className="filter-count">{activeFilters.length}</span>
+                ) : null}
               </button>
-              {categories.map((item) => (
+              {menuOpen ? (
+                <div className="filter-popover" id="community-filter-menu" role="group" aria-label="필터">
+                  <div className="filter-group" role="group" aria-label="카테고리">
+                    <strong>카테고리</strong>
+                    <div className="filter-options">
+                      {[{ key: null, label: "전체" }, ...categories].map((item) => (
+                        <button
+                          type="button"
+                          key={item.key ?? "all"}
+                          className={`filter-option ${category === item.key ? "selected" : ""}`}
+                          aria-pressed={category === item.key}
+                          onClick={() => update({ c: item.key })}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="filter-group" role="group" aria-label="상태">
+                    <strong>상태</strong>
+                    <div className="filter-options">
+                      {statusOptions.map((item) => (
+                        <button
+                          type="button"
+                          key={item.value}
+                          className={`filter-option ${status === item.value ? "selected" : ""}`}
+                          aria-pressed={status === item.value}
+                          onClick={() => update({ s: item.value || null })}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="filter-popover-footer">
+                    <button
+                      type="button"
+                      className="inline-button"
+                      disabled={!activeFilters.length}
+                      onClick={() => update({ c: null, s: null })}
+                    >
+                      필터 초기화
+                    </button>
+                    <button
+                      type="button"
+                      className="button button-small"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        menuButtonRef.current?.focus();
+                      }}
+                    >
+                      닫기
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            <div className="sort-segment" role="radiogroup" aria-label="정렬">
+              {sortOptions.map((item) => (
                 <button
                   type="button"
-                  key={item.key}
-                  className={`community-tab ${category === item.key ? "selected" : ""}`}
-                  aria-pressed={category === item.key}
-                  onClick={() => update({ c: item.key })}
+                  key={item.value}
+                  role="radio"
+                  aria-checked={sort === item.value}
+                  className={`sort-option ${sort === item.value ? "selected" : ""}`}
+                  onClick={() => update({ sort: item.value === "latest" ? null : item.value })}
                 >
                   {item.label}
                 </button>
               ))}
             </div>
-            <div className="community-find">
-              <input
-                type="search"
-                className="community-search"
-                placeholder="글 검색"
-                aria-label="커뮤니티 검색"
-                value={queryText}
-                onChange={(event) => setQueryText(event.target.value)}
-              />
-              <select
-                aria-label="정렬"
-                value={sort}
-                onChange={(event) =>
-                  update({ sort: event.target.value === "latest" ? null : event.target.value })
-                }
-              >
-                {sortOptions.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
+          </div>
+
+          <div className="community-summary">
+            <span>
+              {hasFilter ? "검색 결과 " : "전체 글 "}
+              <b>{filtered.length}</b>개
+            </span>
+            {activeFilters.length || urlQuery.trim() ? (
+              <ul className="active-filters" aria-label="적용된 필터">
+                {urlQuery.trim() ? (
+                  <li>
+                    <button type="button" onClick={() => { setQueryText(""); update({ q: null }); }}>
+                      “{urlQuery.trim()}” <span aria-hidden="true">✕</span>
+                      <span className="sr-only">검색어 지우기</span>
+                    </button>
+                  </li>
+                ) : null}
+                {activeFilters.map((item) => (
+                  <li key={item.key}>
+                    <button type="button" onClick={() => update({ [item.key]: null })}>
+                      {item.label} <span aria-hidden="true">✕</span>
+                      <span className="sr-only">{item.label} 필터 해제</span>
+                    </button>
+                  </li>
                 ))}
-              </select>
-            </div>
+              </ul>
+            ) : null}
           </div>
 
           {visible.length ? (
@@ -180,18 +333,29 @@ export function CommunityPage() {
                         {categoryLabel(post.category)}
                       </span>
                       <span className="post-main">
-                        <strong className="post-title">{post.title}</strong>
+                        <span className="post-title-line">
+                          <strong className="post-title">{post.title}</strong>
+                          <span
+                            className={`post-answer-badge ${accepted ? "accepted" : ""}`}
+                            aria-label={`답변 ${count}개${accepted ? ", 채택 완료" : ""}`}
+                          >
+                            {accepted ? "✓ " : ""}답변 {count}
+                          </span>
+                        </span>
                         <span className="post-meta">
                           {post.author.name} · {relativeTime(post.createdAt)}
-                          {post.pinned ? " · 고정" : ` · 추천 ${upvoteCount(activity, post.id, post.upvotes)}`}
-                          {accepted ? (
-                            <span className="post-accepted"> · 채택 완료</span>
-                          ) : null}
+                          {post.pinned ? " · 고정" : ""}
                         </span>
                       </span>
-                      <span className="post-answers">
-                        <small>답변</small>
-                        <b>{count}</b>
+                      <span className="post-stats-cols">
+                        <span>
+                          <b>{upvoteCount(activity, post.id, post.upvotes)}</b>
+                          <small>추천</small>
+                        </span>
+                        <span>
+                          <b>{post.views.toLocaleString()}</b>
+                          <small>조회</small>
+                        </span>
                       </span>
                     </Link>
                   </li>
@@ -203,7 +367,7 @@ export function CommunityPage() {
               {hasFilter ? (
                 <>
                   <strong>조건에 맞는 글이 없어요.</strong>
-                  <p>카테고리나 검색어를 바꿔 보세요.</p>
+                  <p>필터나 검색어를 바꿔 보세요.</p>
                   <button
                     type="button"
                     className="inline-button"
@@ -219,18 +383,49 @@ export function CommunityPage() {
                 <>
                   <strong>아직 올라온 글이 없어요.</strong>
                   <p>첫 글을 남겨 보세요.</p>
+                  <button type="button" className="button" onClick={write}>
+                    글쓰기
+                  </button>
                 </>
               )}
             </div>
           )}
 
-          <Pagination
-            page={current}
-            totalPages={totalPages}
-            onChange={(next) =>
-              update({ page: next === 1 ? null : String(next) }, { resetPage: false })
-            }
-          />
+          {visible.length > 0 && visible.length < 4 ? (
+            <div className="community-nudge">
+              <span>찾는 글이 없나요? 궁금한 점을 직접 질문해 보세요.</span>
+              <button type="button" className="button button-small" onClick={write}>
+                질문하기
+              </button>
+            </div>
+          ) : null}
+
+          {filtered.length > 0 ? (
+          <div className="community-pager">
+            <label className="page-size">
+              페이지당
+              <select value={size} onChange={(event) => changeSize(Number(event.target.value))}>
+                {SIZES.map((value) => (
+                  <option key={value} value={value}>
+                    {value}개
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Pagination
+              page={current}
+              totalPages={totalPages}
+              onChange={(next) =>
+                update({ page: next === 1 ? null : String(next) }, { resetPage: false })
+              }
+            />
+            <span className="page-range" aria-live="polite">
+              {filtered.length
+                ? `${first + 1}–${first + visible.length} / ${filtered.length}`
+                : ""}
+            </span>
+          </div>
+          ) : null}
         </section>
 
         <aside className="side-stack">

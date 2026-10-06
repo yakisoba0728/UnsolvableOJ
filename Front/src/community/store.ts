@@ -1,5 +1,4 @@
 import { useSyncExternalStore } from "react";
-import { authorStats, seedAccepted, seedAnswers, seedPosts } from "./data";
 import type {
   AuthorStats,
   CategoryKey,
@@ -7,6 +6,25 @@ import type {
   CommunityAuthor,
   CommunityPost,
 } from "./types";
+
+/**
+ * 화면 구동용 더미 글·답변은 배포용 저장소에만 있는 `seed.ts`에서 온다.
+ * 파일이 없으면(백엔드 연동 전 실제 코드만 있는 상태) 빈 목록으로 시작한다.
+ */
+interface Seed {
+  seedPosts: CommunityPost[];
+  seedAnswers: CommunityAnswer[];
+  seedAccepted: Record<string, string>;
+  authorStats: Record<string, AuthorStats>;
+}
+const seedModules = import.meta.glob<Seed>("./seed.ts", { eager: true });
+const seed: Seed = Object.values(seedModules)[0] ?? {
+  seedPosts: [],
+  seedAnswers: [],
+  seedAccepted: {},
+  authorStats: {},
+};
+const { seedPosts, seedAnswers, seedAccepted, authorStats } = seed;
 
 /** 이 브라우저에만 저장되는 사용자 활동. 더미 데이터 위에 겹쳐서 보여준다. */
 interface Activity {
