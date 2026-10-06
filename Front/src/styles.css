@@ -3394,6 +3394,7 @@ h3 {
 }
 .standing-continue-title .difficulty {
   flex: none;
+  margin-left: auto;
 }
 .standing-continue .button {
   white-space: nowrap;
