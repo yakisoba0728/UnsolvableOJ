@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import { CommunityUi1791200001000 } from './migrations/1791200001000-community-ui.js';
+import { Community1791200000000 } from './migrations/1791200000000-community.js';
 import { DebugOutputs1790552000000 } from './migrations/1790552000000-debug-outputs.js';
 import { DataSource } from 'typeorm';
 import { User } from '../modules/users/user.entity.js';
@@ -25,6 +27,8 @@ export default new DataSource({
     BackendFoundations1790550000000,
     BackfillSolves1790551000000,
     DebugOutputs1790552000000,
+    Community1791200000000,
+    CommunityUi1791200001000,
   ],
   synchronize: false,
 });

@@ -4002,3 +4002,10 @@ h3 {
 .write-form textarea {
   font-weight: var(--weight-body);
 }
+
+/* Community API integration additions; retain the shared design tokens. */
+.community-problem-links { display: flex; flex-wrap: wrap; gap: 1rem; margin-block: .75rem; }
+.post-body pre { max-width: 100%; overflow-x: auto; }
+.community-page .community-tabs { flex-wrap: wrap; }
+.post-column, .post-card, .community-layout > section { min-width: 0; }
+.answer form textarea { width: 100%; }

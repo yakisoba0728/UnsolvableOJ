@@ -35,7 +35,9 @@ const empty: Activity = {
 function load(): Activity {
   try {
     const raw = localStorage.getItem(storageKey);
-    return raw ? { ...empty, ...(JSON.parse(raw) as Partial<Activity>) } : empty;
+    return raw
+      ? { ...empty, ...(JSON.parse(raw) as Partial<Activity>) }
+      : empty;
   } catch {
     return empty;
   }
@@ -82,6 +84,8 @@ export const communityActions = {
     title: string;
     body: string;
     tags: string[];
+    code?: string;
+    language?: string;
     author: CommunityAuthor;
   }): CommunityPost {
     const post: CommunityPost = {
@@ -133,11 +137,8 @@ export function acceptedAnswerId(activity: Activity, postId: string) {
 }
 
 /** 내가 추천했다면 +1 (추천 취소는 더미 값 그대로) */
-export const upvoteCount = (
-  activity: Activity,
-  id: string,
-  base: number,
-) => base + (activity.upvoted.includes(id) ? 1 : 0);
+export const upvoteCount = (activity: Activity, id: string, base: number) =>
+  base + (activity.upvoted.includes(id) ? 1 : 0);
 
 export function statsOf(activity: Activity, name: string): AuthorStats {
   const known = authorStats[name];
@@ -160,29 +161,51 @@ export interface PostDraft {
   tags: string[];
   body: string;
   savedAt: number;
+  code?: string;
+  language?: string;
+  problemId?: string | null;
 }
 
-export function readDraft(): PostDraft | null {
+export function readDraft(scope = "demo"): PostDraft | null {
   try {
-    const raw = localStorage.getItem(draftKey);
-    return raw ? (JSON.parse(raw) as PostDraft) : null;
+    const raw = localStorage.getItem(draftKey + ":" + scope);
+    if (!raw) return null;
+    const value = JSON.parse(raw) as PostDraft;
+    if (
+      !value ||
+      !["question", "solution", "review", "free", "notice"].includes(
+        value.category,
+      ) ||
+      typeof value.title !== "string" ||
+      typeof value.body !== "string" ||
+      !Array.isArray(value.tags) ||
+      value.tags.some((t) => typeof t !== "string")
+    )
+      return null;
+    if (
+      (value.code !== undefined && typeof value.code !== "string") ||
+      (value.language !== undefined && typeof value.language !== "string") ||
+      (value.problemId != null && typeof value.problemId !== "string")
+    )
+      return null;
+    return value;
   } catch {
     return null;
   }
 }
 
-export function writeDraft(draft: PostDraft): boolean {
+export function writeDraft(draft: PostDraft, scope = "demo"): boolean {
   try {
-    localStorage.setItem(draftKey, JSON.stringify(draft));
+    localStorage.setItem(draftKey + ":" + scope, JSON.stringify(draft));
     return true;
   } catch {
     return false;
   }
 }
 
-export function clearDraft() {
+export function clearDraft(scope = "demo") {
   try {
-    localStorage.removeItem(draftKey);
+    localStorage.removeItem(draftKey + ":" + scope);
   } catch {
     /* 무시 */
   }

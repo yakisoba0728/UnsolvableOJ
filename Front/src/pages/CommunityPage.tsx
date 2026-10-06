@@ -20,6 +20,8 @@ import {
 } from "../community/types";
 import { useDocumentTitle } from "../hooks";
 
+import { isDemo } from "../api";
+import { listPosts, errorMessage, type Page } from "../community/api";
 const PAGE_SIZE = 5;
 
 const sortOptions = [
@@ -42,19 +44,22 @@ export function CommunityPage() {
   const category = isCategory(categoryParam) ? categoryParam : null;
   const sort = params.get("sort") ?? "latest";
   const urlQuery = params.get("q") ?? "";
-  const page = Math.max(1, Number(params.get("page")) || 1);
+  const page = Math.min(
+    100000,
+    Math.max(1, Math.floor(Number(params.get("page"))) || 1),
+  );
 
   // 검색어는 입력 중에는 로컬 상태로 두고, 잠시 멈추면 주소에 반영한다.
   const [queryText, setQueryText] = useState(urlQuery);
   useEffect(() => setQueryText(urlQuery), [urlQuery]);
   useEffect(() => {
-    if (queryText === urlQuery) return;
+    if (queryText.trim() === urlQuery) return;
     const timer = window.setTimeout(() => {
       update({ q: queryText.trim() || null });
     }, 250);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryText]);
+  }, [queryText, urlQuery, params]);
 
   function update(
     patch: Record<string, string | null>,
@@ -69,6 +74,44 @@ export function CommunityPage() {
     setParams(next, { replace: true });
   }
 
+  const [remote, setRemote] = useState<Page<CommunityPost>>({
+    items: [],
+    total: 0,
+    page: 1,
+    totalPages: 0,
+  });
+  const [loading, setLoading] = useState(!isDemo);
+  const [loadError, setLoadError] = useState("");
+  const [retry, setRetry] = useState(0);
+  const problemId = params.get("problemId");
+  useEffect(() => {
+    if (isDemo) return;
+    const controller = new AbortController();
+    setLoading(true);
+    setLoadError("");
+    const query = new URLSearchParams({
+      page: String(page),
+      limit: String(PAGE_SIZE),
+      sort: ["latest", "votes", "answers"].includes(sort) ? sort : "latest",
+    });
+    if (category) query.set("category", category.toUpperCase());
+    if (urlQuery) query.set("q", urlQuery);
+    if (problemId) query.set("problemId", problemId);
+    listPosts(query, controller.signal)
+      .then((result) => {
+        if (controller.signal.aborted) return;
+        setRemote(result);
+        if (result.totalPages > 0 && page > result.totalPages)
+          update({ page: String(result.totalPages) }, { resetPage: false });
+      })
+      .catch((e) => {
+        if (!controller.signal.aborted) setLoadError(errorMessage(e));
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [category, sort, urlQuery, page, problemId, retry]);
   const posts = allPosts(activity);
   const answerCount = (post: CommunityPost) =>
     answersOf(activity, post.id).length;
@@ -94,13 +137,20 @@ export function CommunityPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activity, category, sort, urlQuery]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const totalPages = isDemo
+    ? Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+    : Math.max(1, remote.totalPages);
   const current = Math.min(page, totalPages);
-  const visible = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+  const visible = isDemo
+    ? filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE)
+    : remote.items;
   const hasFilter = Boolean(category || urlQuery.trim());
 
   function write() {
-    if (session) navigate("/community/new");
+    if (session)
+      navigate(
+        `/community/new?${new URLSearchParams({ ...(category ? { c: category } : {}), ...(problemId ? { problemId } : {}) })}`,
+      );
     else navigate("/auth", { state: { from: "/community/new" } });
   }
 
@@ -146,6 +196,7 @@ export function CommunityPage() {
                 className="community-search"
                 placeholder="글 검색"
                 aria-label="커뮤니티 검색"
+                maxLength={100}
                 value={queryText}
                 onChange={(event) => setQueryText(event.target.value)}
               />
@@ -153,7 +204,12 @@ export function CommunityPage() {
                 aria-label="정렬"
                 value={sort}
                 onChange={(event) =>
-                  update({ sort: event.target.value === "latest" ? null : event.target.value })
+                  update({
+                    sort:
+                      event.target.value === "latest"
+                        ? null
+                        : event.target.value,
+                  })
                 }
               >
                 {sortOptions.map((item) => (
@@ -165,11 +221,33 @@ export function CommunityPage() {
             </div>
           </div>
 
-          {visible.length ? (
+          {problemId && (
+            <p className="notice-inline">
+              문제에 연결된 글{" "}
+              <button
+                className="inline-button"
+                onClick={() => update({ problemId: null })}
+              >
+                문제 필터 해제
+              </button>
+            </p>
+          )}
+          {loading ? (
+            <p role="status">게시글을 불러오는 중…</p>
+          ) : loadError ? (
+            <div role="alert">
+              {loadError}{" "}
+              <button onClick={() => setRetry((n) => n + 1)}>다시 시도</button>
+            </div>
+          ) : visible.length ? (
             <ul className="post-list">
               {visible.map((post) => {
-                const count = answerCount(post);
-                const accepted = acceptedAnswerId(activity, post.id) !== null;
+                const count = isDemo
+                  ? answerCount(post)
+                  : (post.commentCount ?? 0);
+                const accepted = isDemo
+                  ? acceptedAnswerId(activity, post.id) !== null
+                  : Boolean(post.acceptedCommentId);
                 return (
                   <li key={post.id}>
                     <Link
@@ -183,7 +261,9 @@ export function CommunityPage() {
                         <strong className="post-title">{post.title}</strong>
                         <span className="post-meta">
                           {post.author.name} · {relativeTime(post.createdAt)}
-                          {post.pinned ? " · 고정" : ` · 추천 ${upvoteCount(activity, post.id, post.upvotes)}`}
+                          {post.pinned
+                            ? " · 고정"
+                            : ` · 추천 ${isDemo ? upvoteCount(activity, post.id, post.upvotes) : post.upvotes}`}
                           {accepted ? (
                             <span className="post-accepted"> · 채택 완료</span>
                           ) : null}
@@ -228,7 +308,10 @@ export function CommunityPage() {
             page={current}
             totalPages={totalPages}
             onChange={(next) =>
-              update({ page: next === 1 ? null : String(next) }, { resetPage: false })
+              update(
+                { page: next === 1 ? null : String(next) },
+                { resetPage: false },
+              )
             }
           />
         </section>
