@@ -85,6 +85,28 @@ export function SubmissionPage() {
         <div>
           <span className="result-label">채점 결과</span>
           <strong>{submission.status.replaceAll("_", " ")}</strong>
+          {submission.totalTestCases > 0 ? (
+            <div className="result-progress">
+              <span>
+                테스트 {submission.passedTestCases} / {submission.totalTestCases}{" "}
+                통과
+              </span>
+              <div
+                className="progress"
+                role="progressbar"
+                aria-label="통과한 테스트 비율"
+                aria-valuemin={0}
+                aria-valuemax={submission.totalTestCases}
+                aria-valuenow={submission.passedTestCases}
+              >
+                <span
+                  style={{
+                    width: `${(submission.passedTestCases / submission.totalTestCases) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
         </div>
         <span className="result-symbol">
           {submission.status === "ACCEPTED"

@@ -3399,3 +3399,25 @@ h3 {
 .standing-continue .button {
   white-space: nowrap;
 }
+
+/* 채점 결과 배너: 통과한 테스트 진행 막대 */
+.result-banner > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.result-progress {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  max-width: 420px;
+  font-size: 13px;
+  font-weight: var(--weight-label);
+  font-variant-numeric: tabular-nums;
+}
+.result-progress .progress {
+  max-width: none;
+  background: color-mix(in srgb, currentColor 18%, transparent);
+}
+.result-progress .progress span {
+  background: currentColor;
+}
