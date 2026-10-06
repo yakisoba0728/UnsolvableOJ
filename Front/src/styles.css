@@ -3356,3 +3356,36 @@ h3 {
   font-weight: var(--weight-display);
   line-height: 1.3;
 }
+
+/* 내 요약 카드: 카드 전체는 프로필 링크(늘린 링크)로 두고, 이어서 풀기 버튼만 그 위에 올린다 */
+.standing-card {
+  position: relative;
+}
+.standing-card .standing-link {
+  color: inherit;
+}
+.standing-card .standing-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.standing-continue {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-divider);
+}
+.standing-continue strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.standing-continue .button {
+  white-space: nowrap;
+}

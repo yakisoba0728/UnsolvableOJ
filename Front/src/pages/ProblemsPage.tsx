@@ -211,21 +211,6 @@ export function ProblemsPage() {
       <PageHeader
         title="문제 목록"
         description="한 문제씩, 더 단단해지는 실력. 오늘 풀 문제를 찾아보세요."
-        aside={
-          session && problems.length ? (
-            <div className="header-actions">
-              {continueTarget ? (
-                <Link
-                  className="button"
-                  to={problemPath(continueTarget.slug)}
-                  title={`${continueTarget.title} · ${continueTarget.label}`}
-                >
-                  {continueTarget.label} <span aria-hidden="true">→</span>
-                </Link>
-              ) : null}
-            </div>
-          ) : null
-        }
       />
 
       <div className="filter-card">
@@ -415,8 +400,10 @@ export function ProblemsPage() {
 
         <aside className="side-stack">
           {profile ? (
-            <Link to="/profile" className="standing-card">
-              <h2>내 요약</h2>
+            <div className="standing-card">
+              <Link to="/profile" className="standing-link">
+                <h2>내 요약</h2>
+              </Link>
               <dl>
                 <div>
                   <dt>순위</dt>
@@ -431,7 +418,19 @@ export function ProblemsPage() {
                   <dd>{profile.solvedCount}개</dd>
                 </div>
               </dl>
-            </Link>
+              {continueTarget ? (
+                <div className="standing-continue">
+                  <strong>{continueTarget.title}</strong>
+                  <Link
+                    className="button"
+                    to={problemPath(continueTarget.slug)}
+                    title={`${continueTarget.title} · ${continueTarget.label}`}
+                  >
+                    {continueTarget.label} <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
+              ) : null}
+            </div>
           ) : null}
           {!session ? (
             <div className="brand-card">
