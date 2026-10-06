@@ -93,42 +93,6 @@ export function SubmissionPage() {
               ? "…"
               : "!"}
         </span>
-        {submission.totalTestCases > 0 ? (
-          <div className="result-progress">
-            <span>
-              테스트 {submission.passedTestCases} / {submission.totalTestCases}{" "}
-              통과
-            </span>
-            <div
-              className="progress"
-              role="progressbar"
-              aria-label="통과한 테스트 비율"
-              aria-valuemin={0}
-              aria-valuemax={submission.totalTestCases}
-              aria-valuenow={submission.passedTestCases}
-            >
-              <span
-                style={{
-                  width: `${(submission.passedTestCases / submission.totalTestCases) * 100}%`,
-                }}
-              />
-              {submission.totalTestCases <= 50
-                ? Array.from(
-                    { length: submission.totalTestCases - 1 },
-                    (_, index) => (
-                      <i
-                        key={index}
-                        className="progress-divider"
-                        style={{
-                          left: `${((index + 1) / submission.totalTestCases) * 100}%`,
-                        }}
-                      />
-                    ),
-                  )
-                : null}
-            </div>
-          </div>
-        ) : null}
       </div>
       <div className="result-stats">
         <div>
