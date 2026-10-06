@@ -3,6 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { BrandArt } from "../components/BrandArt";
 import { PageHeader } from "../components/PageHeader";
+import { Select } from "../components/Select";
+import { SlideToggle } from "../components/SlideToggle";
 import { Pagination } from "../components/Pagination";
 import { ProblemStatus, solveState, type SolveState } from "../components/ProblemStatus";
 import {
@@ -181,14 +183,6 @@ export function ProblemsPage() {
     ? problems.find((problem) => problem.slug === continueTarget.slug)?.difficulty
     : undefined;
 
-  function toggleDifficulty(value: Difficulty | "") {
-    if (value === "") return update({ d: null });
-    const next = new Set(selectedDifficulties);
-    if (next.has(value)) next.delete(value);
-    else next.add(value);
-    update({ d: order.filter((item) => next.has(item)).join(",") || null });
-  }
-
   // 목록을 무작위 순서로 섞는다(이동하지 않는다). 선택한 조건 안에서 섞인다.
   function shuffle() {
     update({ sort: "random", seed: String(newSeed()) });
@@ -232,17 +226,12 @@ export function ProblemsPage() {
             />
             <kbd aria-hidden="true">/</kbd>
           </div>
-          <select
-            aria-label="정렬"
+          <Select
+            ariaLabel="정렬"
             value={sort === "random" ? "latest" : sort}
-            onChange={(event) => changeSort(event.target.value)}
-          >
-            {sorts.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
+            options={sorts.map((item) => ({ value: item.value, label: item.label }))}
+            onChange={changeSort}
+          />
           <button
             type="button"
             className="button button-outline"
@@ -264,43 +253,36 @@ export function ProblemsPage() {
         </div>
 
         {session ? (
-          <div className="filter-bar" role="group" aria-label="풀이 상태 필터">
+          <div className="filter-bar">
             <span className="filter-label">상태</span>
-            {statusChips.map((item) => (
-              <button
-                key={item.value}
-                className={`filter-chip ${status === item.value ? "selected" : ""}`}
-                aria-pressed={status === item.value}
-                onClick={() => update({ s: item.value || null })}
-              >
-                {item.label}
-                <span className="chip-count">{statusCount(item.value)}</span>
-              </button>
-            ))}
+            <SlideToggle
+              ariaLabel="풀이 상태 필터"
+              value={status}
+              options={statusChips.map((item) => ({
+                value: item.value,
+                label: item.label,
+                count: statusCount(item.value),
+              }))}
+              onChange={(next) => update({ s: next || null })}
+            />
           </div>
         ) : null}
 
-        <div className="filter-bar" role="group" aria-label="난이도 필터">
+        <div className="filter-bar">
           <span className="filter-label">난이도</span>
-          <button
-            className={`filter-chip ${selectedDifficulties.length === 0 ? "selected" : ""}`}
-            aria-pressed={selectedDifficulties.length === 0}
-            onClick={() => toggleDifficulty("")}
-          >
-            전체
-            <span className="chip-count">{difficultyCount("")}</span>
-          </button>
-          {difficultyOptions.map((item) => (
-            <button
-              key={item.value}
-              className={`filter-chip ${selectedDifficulties.includes(item.value) ? "selected" : ""}`}
-              aria-pressed={selectedDifficulties.includes(item.value)}
-              onClick={() => toggleDifficulty(item.value)}
-            >
-              {item.label}
-              <span className="chip-count">{difficultyCount(item.value)}</span>
-            </button>
-          ))}
+          <SlideToggle
+            ariaLabel="난이도 필터"
+            value={selectedDifficulties.length === 1 ? selectedDifficulties[0] : ""}
+            options={[
+              { value: "", label: "전체", count: difficultyCount("") },
+              ...difficultyOptions.map((item) => ({
+                value: item.value,
+                label: item.label,
+                count: difficultyCount(item.value),
+              })),
+            ]}
+            onChange={(next) => update({ d: next || null })}
+          />
           {hasFilter ? (
             <button className="inline-button" onClick={resetFilters}>
               필터 초기화

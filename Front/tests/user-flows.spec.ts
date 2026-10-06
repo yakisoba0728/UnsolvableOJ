@@ -239,7 +239,7 @@ test("difficulty changes reset pagination", async ({ page }) => {
   await page.goto("/problems");
   await page.getByRole("button", { name: "다음", exact: true }).click();
   await expect(page).toHaveURL(/[?&]page=2(&|$)/);
-  await page.getByRole("button", { name: /^어려움/ }).click();
+  await page.getByRole("radio", { name: /^어려움/ }).click();
   await expect(page).toHaveURL(/[?&]d=HARD(&|$)/);
   await expect(page).not.toHaveURL(/[?&]page=/);
   await expect(

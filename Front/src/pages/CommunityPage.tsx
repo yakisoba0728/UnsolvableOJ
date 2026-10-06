@@ -2,7 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import guideArt from "../assets/community-guide.png";
+import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
+import { Select } from "../components/Select";
+import { SlideToggle } from "../components/SlideToggle";
 import {
   acceptedAnswerId,
   allPosts,
@@ -91,6 +94,24 @@ export function CommunityPage() {
     setParams(next, { replace: true });
   }
 
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const typing =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target?.isContentEditable;
+      if (event.key === "/" && !typing && !event.metaKey && !event.ctrlKey) {
+        event.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
   // 필터 메뉴: 버튼으로 열고, 바깥 클릭·Esc로 닫는다 (Esc는 버튼으로 포커스를 돌려준다).
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -172,34 +193,31 @@ export function CommunityPage() {
 
   return (
     <div className="page-width community-page">
-      <section className="community-hero" aria-label="커뮤니티 검색">
-        <div className="community-hero-top">
-          <div>
-            <h1>함께 풀면, 더 멀리.</h1>
-            <p>궁금한 코드는 질문하고, 발견한 풀이는 나누세요.</p>
-          </div>
+      <PageHeader
+        title="함께 풀면, 더 멀리."
+        description="궁금한 코드는 질문하고, 발견한 풀이는 나누세요."
+        aside={
           <button type="button" className="button" onClick={write}>
             글쓰기
           </button>
-        </div>
-        <div className="community-search-field">
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
-            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="2" />
-            <path d="m16 16 4.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-          <input
-            type="search"
-            aria-label="게시글 검색"
-            placeholder="궁금한 질문이나 풀이를 검색해 보세요 (제목·내용·태그)"
-            value={queryText}
-            onChange={(event) => setQueryText(event.target.value)}
-          />
-        </div>
-      </section>
+        }
+      />
 
-      <div className="community-layout">
-        <section aria-label="커뮤니티 글 목록">
-          <div className="community-toolbar">
+      <div className="filter-card">
+        <div className="filter-row">
+          <div className="search-field">
+            <input
+              ref={searchRef}
+              type="search"
+              className="search-input"
+              placeholder="질문이나 풀이를 검색해 보세요"
+              aria-label="게시글 검색"
+              aria-keyshortcuts="/"
+              value={queryText}
+              onChange={(event) => setQueryText(event.target.value)}
+            />
+            <kbd aria-hidden="true">/</kbd>
+          </div>
             <div className="filter-menu" ref={menuRef}>
               <button
                 type="button"
@@ -220,37 +238,26 @@ export function CommunityPage() {
               </button>
               {menuOpen ? (
                 <div className="filter-popover" id="community-filter-menu" role="group" aria-label="필터">
-                  <div className="filter-group" role="group" aria-label="카테고리">
+                  <div className="filter-group">
                     <strong>카테고리</strong>
-                    <div className="filter-options">
-                      {[{ key: null, label: "전체" }, ...categories].map((item) => (
-                        <button
-                          type="button"
-                          key={item.key ?? "all"}
-                          className={`filter-option ${category === item.key ? "selected" : ""}`}
-                          aria-pressed={category === item.key}
-                          onClick={() => update({ c: item.key })}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
+                    <SlideToggle
+                      ariaLabel="카테고리"
+                      value={category ?? ""}
+                      options={[
+                        { value: "", label: "전체" },
+                        ...categories.map((item) => ({ value: item.key, label: item.label })),
+                      ]}
+                      onChange={(next) => update({ c: next || null })}
+                    />
                   </div>
-                  <div className="filter-group" role="group" aria-label="상태">
+                  <div className="filter-group">
                     <strong>상태</strong>
-                    <div className="filter-options">
-                      {statusOptions.map((item) => (
-                        <button
-                          type="button"
-                          key={item.value}
-                          className={`filter-option ${status === item.value ? "selected" : ""}`}
-                          aria-pressed={status === item.value}
-                          onClick={() => update({ s: item.value || null })}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
+                    <SlideToggle
+                      ariaLabel="상태"
+                      value={status}
+                      options={statusOptions}
+                      onChange={(next) => update({ s: next || null })}
+                    />
                   </div>
                   <div className="filter-popover-footer">
                     <button
@@ -275,49 +282,48 @@ export function CommunityPage() {
                 </div>
               ) : null}
             </div>
-            <div className="sort-segment" role="radiogroup" aria-label="정렬">
-              {sortOptions.map((item) => (
-                <button
-                  type="button"
-                  key={item.value}
-                  role="radio"
-                  aria-checked={sort === item.value}
-                  className={`sort-option ${sort === item.value ? "selected" : ""}`}
-                  onClick={() => update({ sort: item.value === "latest" ? null : item.value })}
-                >
-                  {item.label}
+            <SlideToggle
+              className="sort-toggle"
+              ariaLabel="정렬"
+              value={sort}
+              options={sortOptions}
+              onChange={(next) => update({ sort: next === "latest" ? null : next })}
+            />
+        </div>
+        {activeFilters.length ? (
+          <div className="filter-bar" role="group" aria-label="적용된 필터">
+            <span className="filter-label">적용됨</span>
+            {activeFilters.map((item) => (
+              <button
+                type="button"
+                key={item.key}
+                className="filter-chip selected"
+                onClick={() => update({ [item.key]: null })}
+              >
+                {item.label} <span aria-hidden="true">✕</span>
+                <span className="sr-only">{item.label} 필터 해제</span>
+              </button>
+            ))}
+            <button type="button" className="inline-button" onClick={() => update({ c: null, s: null })}>
+              필터 초기화
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="community-layout">
+        <section aria-label="커뮤니티 글 목록">
+          <div className="section-heading compact">
+            <div className="title-line">
+              <h2>{hasFilter ? "검색 결과" : "전체 글"}</h2>
+              {urlQuery.trim() ? (
+                <button type="button" className="inline-button" onClick={() => { setQueryText(""); update({ q: null }); }}>
+                  “{urlQuery.trim()}” 지우기
                 </button>
-              ))}
+              ) : null}
             </div>
+            <span className="total-count">{filtered.length}개</span>
           </div>
-
-          <div className="community-summary">
-            <span>
-              {hasFilter ? "검색 결과 " : "전체 글 "}
-              <b>{filtered.length}</b>개
-            </span>
-            {activeFilters.length || urlQuery.trim() ? (
-              <ul className="active-filters" aria-label="적용된 필터">
-                {urlQuery.trim() ? (
-                  <li>
-                    <button type="button" onClick={() => { setQueryText(""); update({ q: null }); }}>
-                      “{urlQuery.trim()}” <span aria-hidden="true">✕</span>
-                      <span className="sr-only">검색어 지우기</span>
-                    </button>
-                  </li>
-                ) : null}
-                {activeFilters.map((item) => (
-                  <li key={item.key}>
-                    <button type="button" onClick={() => update({ [item.key]: null })}>
-                      {item.label} <span aria-hidden="true">✕</span>
-                      <span className="sr-only">{item.label} 필터 해제</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-
           {visible.length ? (
             <ul className="post-list">
               {visible.map((post) => {
@@ -404,13 +410,12 @@ export function CommunityPage() {
           <div className="community-pager">
             <label className="page-size">
               페이지당
-              <select value={size} onChange={(event) => changeSize(Number(event.target.value))}>
-                {SIZES.map((value) => (
-                  <option key={value} value={value}>
-                    {value}개
-                  </option>
-                ))}
-              </select>
+              <Select
+                ariaLabel="페이지당 글 수"
+                value={String(size)}
+                options={SIZES.map((value) => ({ value: String(value), label: `${value}개` }))}
+                onChange={(next) => changeSize(Number(next))}
+              />
             </label>
             <Pagination
               page={current}

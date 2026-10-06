@@ -8,6 +8,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { isDemo } from "./api";
+import logo from "./assets/logo.png";
 import { useAuth } from "./auth";
 import { ComingSoonPage } from "./components/ComingSoonPage";
 import { NotFoundPage } from "./components/NotFoundPage";
@@ -144,9 +145,7 @@ export function App() {
       <header className="site-header" ref={headerRef}>
         <div className="header-inner">
           <Link to="/" className="brand" aria-label="못풀준 홈">
-            <span className="brand-mark">
-              U<span>_</span>
-            </span>
+            <img className="brand-mark" src={logo} alt="" width="38" height="38" />
             <span>못풀준</span>
           </Link>
           <nav

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth";
+import { PageHeader } from "../components/PageHeader";
+import { Select } from "../components/Select";
 import {
   clearDraft,
   communityActions,
@@ -133,14 +135,11 @@ export function CommunityWritePage() {
 
   return (
     <div className="write-page">
-      <Link className="back-link" to="/community" onClick={(event) => {
-        if (dirty && !window.confirm("작성 중인 내용이 임시 저장되지 않은 채로 사라질 수 있어요. 나갈까요?")) {
-          event.preventDefault();
-        }
-      }}>
-        ← 커뮤니티
-      </Link>
-      <h1>글 작성</h1>
+      <PageHeader
+        back={{ to: "/community", label: "커뮤니티" }}
+        title="글 작성"
+        description="질문과 풀이를 남기면 다른 사람이 함께 답할 수 있어요."
+      />
       {showRestored ? (
         <p className="notice-inline" role="status">
           작성 중이던 초안을 불러왔어요.{" "}
@@ -163,19 +162,18 @@ export function CommunityWritePage() {
       ) : null}
       <form className="form-card write-form" onSubmit={submit} noValidate>
         <div className="form-stack">
-          <label>
-            카테고리
-            <select
+          <div className="field-group">
+            <span className="field-label" id="category-label">카테고리</span>
+            <Select
+              ariaLabel="카테고리"
               value={category}
-              onChange={(event) => setCategory(event.target.value as CategoryKey)}
-            >
-              {options.map((item) => (
-                <option key={item.key} value={item.key}>
-                  {item.key === "question" ? "질문과 답변" : item.label}
-                </option>
-              ))}
-            </select>
-          </label>
+              options={options.map((item) => ({
+                value: item.key,
+                label: item.key === "question" ? "질문과 답변" : item.label,
+              }))}
+              onChange={(next) => setCategory(next as CategoryKey)}
+            />
+          </div>
           <label>
             제목 · 필수
             <input

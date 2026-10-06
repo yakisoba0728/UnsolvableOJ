@@ -5,6 +5,7 @@ import { problemPath } from "../paths";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
+import { Select } from "../components/Select";
 import type { Difficulty, Problem } from "../types";
 
 interface TestCaseInput {
@@ -134,21 +135,21 @@ export function CreateProblemPage() {
                 required
               />
             </label>
-            <label>
-              난이도
-              <select
+            <div className="field-group">
+              <span className="field-label">난이도</span>
+              <Select
+                ariaLabel="난이도"
                 value={difficulty}
-                onChange={(event) =>
-                  setDifficulty(event.target.value as Difficulty)
-                }
-              >
-                <option value="BEGINNER">입문</option>
-                <option value="EASY">쉬움</option>
-                <option value="MEDIUM">보통</option>
-                <option value="HARD">어려움</option>
-                <option value="EXPERT">전문가</option>
-              </select>
-            </label>
+                options={[
+                  { value: "BEGINNER", label: "입문" },
+                  { value: "EASY", label: "쉬움" },
+                  { value: "MEDIUM", label: "보통" },
+                  { value: "HARD", label: "어려움" },
+                  { value: "EXPERT", label: "전문가" },
+                ]}
+                onChange={(next) => setDifficulty(next as Difficulty)}
+              />
+            </div>
             <label>
               시간 제한 (ms)
               <input

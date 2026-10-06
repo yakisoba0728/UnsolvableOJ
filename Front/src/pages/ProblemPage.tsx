@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useDocumentTitle } from "../hooks";
 import Markdown from "react-markdown";
+import { Select } from "../components/Select";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
@@ -184,9 +185,16 @@ export function ProblemPage() {
     );
   if (error || !problem)
     return (
-      <div className="page-width empty-state">
-        <p className="error-message">{error || "문제를 찾을 수 없습니다."}</p>
-        <Link to="/problems">문제 목록으로</Link>
+      <div className="page-width empty-state not-found-state" role="alert">
+        <strong>문제를 찾을 수 없어요</strong>
+        <p>
+          {error && !error.includes("찾을 수 없")
+            ? error
+            : "주소가 바뀌었거나 아직 공개되지 않은 문제일 수 있어요."}
+        </p>
+        <Link className="button" to="/problems">
+          문제 목록으로
+        </Link>
       </div>
     );
 
@@ -320,19 +328,13 @@ export function ProblemPage() {
 
         <section className="solve-panel code-panel" aria-label="코드 작성">
           <div className="code-toolbar">
-            <label className="language-select">
-              <span className="sr-only">언어</span>
-              <select
-                value={language}
-                onChange={(event) => setLanguage(event.target.value as Language)}
-              >
-                {languages.map((item) => (
-                  <option value={item.value} key={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <Select
+              className="language-select"
+              ariaLabel="언어"
+              value={language}
+              options={languages.map((item) => ({ value: item.value, label: item.label }))}
+              onChange={(next) => setLanguage(next as Language)}
+            />
             <span className="save-state" role="status">
               {savedAt
                 ? `초안 저장됨 · ${savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
@@ -401,8 +403,14 @@ export function ProblemPage() {
               {session ? (
                 <>
                   <span className="editor-note">
-                    제출하면 전체 테스트 케이스로 채점합니다 ·{" "}
-                    <kbd>Ctrl/⌘ + Enter</kbd>
+                    {source.trim() ? (
+                      <>
+                        제출하면 전체 테스트 케이스로 채점합니다 ·{" "}
+                        <kbd>Ctrl/⌘ + Enter</kbd>
+                      </>
+                    ) : (
+                      "코드를 입력하면 제출할 수 있어요."
+                    )}
                   </span>
                   <button
                     className="button"
