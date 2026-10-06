@@ -3409,7 +3409,7 @@ h3 {
   display: grid;
   gap: 8px;
   margin-top: 14px;
-  max-width: 280px;
+  max-width: none;
   font-size: 13px;
   font-weight: var(--weight-label);
   font-variant-numeric: tabular-nums;
