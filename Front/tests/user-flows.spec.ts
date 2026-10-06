@@ -223,27 +223,25 @@ for (const slug of ["new", "mine"]) {
 }
 
 test("difficulty changes reset pagination", async ({ page }) => {
-  const queries: string[] = [];
-  await page.route("**/api/v1/problems?*", async (route) => {
-    const query = new URL(route.request().url()).searchParams;
-    queries.push(query.toString());
-    await route.fulfill({
-      json: {
-        items: [problem],
-        total: 41,
-        totalPages: 3,
-        page: Number(query.get("page")),
-        limit: 20,
-      },
-    });
-  });
+  // 목록은 공개 문제를 모두 받아 브라우저에서 나눈다. 41문제 = 입문 16 + 어려움 25.
+  const items = Array.from({ length: 41 }, (_, index) => ({
+    ...problem,
+    id: `problem-${index}`,
+    slug: `problem-${index}`,
+    title: `문제 ${index}`,
+    difficulty: index < 16 ? "BEGINNER" : "HARD",
+  }));
+  await page.route("**/api/v1/problems?*", (route) =>
+    route.fulfill({
+      json: { items, total: items.length, totalPages: 1, page: 1, limit: 100 },
+    }),
+  );
   await page.goto("/problems");
   await page.getByRole("button", { name: "다음", exact: true }).click();
-  await expect.poll(() => queries.at(-1)).toContain("page=2");
-  await page.getByRole("button", { name: "어려움", exact: true }).click();
-  await expect
-    .poll(() => queries.at(-1))
-    .toBe("page=1&limit=20&difficulty=HARD");
+  await expect(page).toHaveURL(/[?&]page=2(&|$)/);
+  await page.getByRole("button", { name: /^어려움/ }).click();
+  await expect(page).toHaveURL(/[?&]d=HARD(&|$)/);
+  await expect(page).not.toHaveURL(/[?&]page=/);
   await expect(
     page.getByRole("button", { name: "이전", exact: true }),
   ).toBeDisabled();

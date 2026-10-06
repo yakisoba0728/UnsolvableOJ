@@ -191,7 +191,6 @@ export function CommunityPostPage() {
               <button
                 type="button"
                 className="button button-outline"
-                aria-pressed={activity.saved.includes(post.id)}
                 onClick={() =>
                   requireLogin(() => communityActions.toggleSaved(post.id))
                 }
@@ -333,7 +332,6 @@ export function CommunityPostPage() {
               <button
                 type="button"
                 className="button button-outline button-full"
-                aria-pressed={following}
                 onClick={() =>
                   requireLogin(() => communityActions.toggleFollow(post.author.name))
                 }
