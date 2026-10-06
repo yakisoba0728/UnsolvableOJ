@@ -3421,3 +3421,27 @@ h3 {
 .result-progress .progress span {
   background: currentColor;
 }
+
+/* 진행 막대를 더 굵게, 테스트 개수만큼 세로 선으로 나눈다. 배너 여백은 줄인다 */
+.result-summary .result-banner {
+  padding: 16px 28px;
+}
+.result-progress {
+  margin-top: 10px;
+  gap: 6px;
+}
+.result-progress .progress {
+  position: relative;
+  height: 14px;
+}
+.result-progress .progress-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--color-success-soft);
+}
+.result-banner:not(.result-accepted) .result-progress .progress-divider {
+  background: var(--color-danger-soft);
+}

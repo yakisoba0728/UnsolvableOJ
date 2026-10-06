@@ -104,6 +104,20 @@ export function SubmissionPage() {
                     width: `${(submission.passedTestCases / submission.totalTestCases) * 100}%`,
                   }}
                 />
+                {submission.totalTestCases <= 50
+                  ? Array.from(
+                      { length: submission.totalTestCases - 1 },
+                      (_, index) => (
+                        <i
+                          key={index}
+                          className="progress-divider"
+                          style={{
+                            left: `${((index + 1) / submission.totalTestCases) * 100}%`,
+                          }}
+                        />
+                      ),
+                    )
+                  : null}
               </div>
             </div>
           ) : null}
