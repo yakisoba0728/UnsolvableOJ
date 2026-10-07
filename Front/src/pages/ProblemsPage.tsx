@@ -35,7 +35,7 @@ export function difficultyLabel(value: Difficulty) {
 const PAGE_SIZE = 20;
 
 const sorts = [
-  { value: "latest", label: "정렬: 최신순" },
+  { value: "latest", label: "최신순" },
   { value: "easy", label: "쉬운 난이도순" },
   { value: "hard", label: "어려운 난이도순" },
   { value: "title", label: "제목순" },
@@ -196,14 +196,6 @@ export function ProblemsPage() {
     update({ sort: value === "latest" ? null : value, seed: null });
   }
 
-  function resetFilters() {
-    const next = new URLSearchParams(params);
-    ["q", "d", "s", "page"].forEach((key) => next.delete(key));
-    setParams(next, { replace: true });
-    setQueryText("");
-    lastWritten.current = "";
-  }
-
   return (
     <div className="page-width problems-page">
       <PageHeader
@@ -264,6 +256,7 @@ export function ProblemsPage() {
                 label: item.label,
                 count: statusCount(item.value),
               }))}
+              defaultValue=""
               onChange={(next) => update({ s: next || null })}
             />
           </div>
@@ -282,13 +275,9 @@ export function ProblemsPage() {
                 count: difficultyCount(item.value),
               })),
             ]}
+            defaultValue=""
             onChange={(next) => update({ d: next || null })}
           />
-          {hasFilter ? (
-            <button className="inline-button" onClick={resetFilters}>
-              필터 초기화
-            </button>
-          ) : null}
         </div>
         </div>
       </div>
@@ -368,9 +357,6 @@ export function ProblemsPage() {
                     {keyword ? `‘${urlQuery.trim()}’ 검색어와 ` : ""}선택한 필터를
                     유지한 채 결과가 없습니다. 조건을 줄여 다시 찾아보세요.
                   </p>
-                  <button className="button button-soft" onClick={resetFilters}>
-                    필터 초기화
-                  </button>
                 </>
               ) : (
                 "공개된 문제가 아직 없습니다."

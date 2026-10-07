@@ -176,6 +176,37 @@ export function CommunityPage() {
   ].filter((item): item is { key: string; label: string } => item !== null);
   const hasFilter = Boolean(activeFilters.length || urlQuery.trim());
 
+  // 필터 태그: 추가는 나타나고, 삭제는 사라진 뒤에 목록에서 빼서 자연스럽게 보이게 한다.
+  const [chips, setChips] = useState<
+    { key: string; label: string; leaving: boolean }[]
+  >(() => activeFilters.map((item) => ({ ...item, leaving: false })));
+  const activeSignature = activeFilters
+    .map((item) => `${item.key}:${item.label}`)
+    .join("|");
+  useEffect(() => {
+    setChips((previous) => {
+      const next = previous.map((chip) => {
+        const active = activeFilters.find((item) => item.key === chip.key);
+        return active
+          ? { ...chip, label: active.label, leaving: false }
+          : { ...chip, leaving: true };
+      });
+      for (const item of activeFilters)
+        if (!next.some((chip) => chip.key === item.key))
+          next.push({ ...item, leaving: false });
+      return next;
+    });
+    const timer = window.setTimeout(
+      () => setChips((previous) => previous.filter((chip) => !chip.leaving)),
+      240,
+    );
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSignature]);
+  // 필터 개수 배지는 사라지는 동안에도 마지막 숫자를 보여 준다.
+  const lastCount = useRef(activeFilters.length);
+  if (activeFilters.length) lastCount.current = activeFilters.length;
+
   function write(initialCategory?: CategoryKey) {
     if (session) navigate("/community/new", { state: { category: initialCategory } });
     else navigate("/auth", { state: { from: "/community/new" } });
@@ -227,9 +258,12 @@ export function CommunityPage() {
                   <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
                 필터
-                {activeFilters.length ? (
-                  <span className="filter-count">{activeFilters.length}</span>
-                ) : null}
+                <span
+                  className={`filter-count ${activeFilters.length ? "show" : ""}`}
+                  aria-hidden={!activeFilters.length}
+                >
+                  {lastCount.current}
+                </span>
               </button>
               {menuOpen ? (
                 <div className="filter-popover" id="community-filter-menu" role="group" aria-label="필터">
@@ -242,6 +276,7 @@ export function CommunityPage() {
                         { value: "", label: "전체" },
                         ...categories.map((item) => ({ value: item.key, label: item.label })),
                       ]}
+                      defaultValue=""
                       onChange={(next) => update({ c: next || null })}
                     />
                   </div>
@@ -251,28 +286,9 @@ export function CommunityPage() {
                       ariaLabel="상태"
                       value={status}
                       options={statusOptions}
+                      defaultValue=""
                       onChange={(next) => update({ s: next || null })}
                     />
-                  </div>
-                  <div className="filter-popover-footer">
-                    <button
-                      type="button"
-                      className="inline-button"
-                      disabled={!activeFilters.length}
-                      onClick={() => update({ c: null, s: null })}
-                    >
-                      필터 초기화
-                    </button>
-                    <button
-                      type="button"
-                      className="button button-small"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        menuButtonRef.current?.focus();
-                      }}
-                    >
-                      닫기
-                    </button>
                   </div>
                 </div>
               ) : null}
@@ -285,25 +301,24 @@ export function CommunityPage() {
               onChange={(next) => update({ sort: next === "latest" ? null : next })}
             />
         </div>
-        {activeFilters.length ? (
-          <div className="filter-bar" role="group" aria-label="적용된 필터">
-            <span className="filter-label">적용됨</span>
-            {activeFilters.map((item) => (
-              <button
-                type="button"
-                key={item.key}
-                className="filter-chip selected"
-                onClick={() => update({ [item.key]: null })}
-              >
-                {item.label} <span aria-hidden="true">✕</span>
-                <span className="sr-only">{item.label} 필터 해제</span>
-              </button>
-            ))}
-            <button type="button" className="inline-button" onClick={() => update({ c: null, s: null })}>
-              필터 초기화
-            </button>
+        <div className={`applied-wrap ${activeFilters.length ? "open" : ""}`}>
+          <div className="applied-inner">
+            <div className="filter-bar applied-bar" role="group" aria-label="적용된 필터">
+              {chips.map((item) => (
+                <button
+                  type="button"
+                  key={item.key}
+                  className={`filter-chip selected ${item.leaving ? "leaving" : ""}`}
+                  tabIndex={item.leaving ? -1 : 0}
+                  onClick={() => update({ [item.key]: null })}
+                >
+                  {item.label} <span aria-hidden="true">✕</span>
+                  <span className="sr-only">{item.label} 필터 해제</span>
+                </button>
+              ))}
+            </div>
           </div>
-        ) : null}
+        </div>
       </div>
 
       <div className="community-layout">
@@ -370,16 +385,6 @@ export function CommunityPage() {
                 <>
                   <strong>조건에 맞는 글이 없어요.</strong>
                   <p>필터나 검색어를 바꿔 보세요.</p>
-                  <button
-                    type="button"
-                    className="inline-button"
-                    onClick={() => {
-                      setQueryText("");
-                      setParams(new URLSearchParams(), { replace: true });
-                    }}
-                  >
-                    필터 초기화
-                  </button>
                 </>
               ) : (
                 <>

@@ -11,6 +11,8 @@ interface SlideToggleProps {
   value: string;
   options: ToggleOption[];
   onChange: (value: string) => void;
+  /** 지정하면 이미 선택된 옵션을 다시 눌렀을 때 이 값(기본 상태)으로 돌아간다. */
+  defaultValue?: string;
   ariaLabel: string;
   className?: string;
 }
@@ -23,6 +25,7 @@ export function SlideToggle({
   value,
   options,
   onChange,
+  defaultValue,
   ariaLabel,
   className = "",
 }: SlideToggleProps) {
@@ -91,7 +94,13 @@ export function SlideToggle({
             aria-checked={checked}
             tabIndex={checked || (!thumb && index === 0) ? 0 : -1}
             className={`toggle-option ${checked ? "selected" : ""}`}
-            onClick={() => onChange(option.value)}
+            onClick={() =>
+              onChange(
+                checked && defaultValue !== undefined
+                  ? defaultValue
+                  : option.value,
+              )
+            }
             onKeyDown={(event) => onKeyDown(event, index)}
           >
             {option.label}

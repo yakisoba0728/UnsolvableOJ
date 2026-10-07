@@ -244,6 +244,11 @@ test("difficulty changes reset pagination", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "이전", exact: true }),
   ).toBeDisabled();
+  // 선택된 필터를 다시 누르면 전체로 돌아가고, 필터 초기화 버튼은 없다.
+  await page.getByRole("radio", { name: /^어려움/ }).click();
+  await expect(page).not.toHaveURL(/[?&]d=/);
+  await expect(page.getByRole("radio", { name: /^전체/ }).first()).toBeChecked();
+  await expect(page.getByRole("button", { name: "필터 초기화" })).toHaveCount(0);
 });
 
 test("submission passes the source and polls through to the final verdict", async ({

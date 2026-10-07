@@ -2334,12 +2334,6 @@ kbd {
   font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
-.history-head span:nth-child(4),
-.history-head span:nth-child(5),
-.history-metrics,
-.history-time {
-  text-align: right;
-}
 .soon-page {
   max-width: none;
 }
@@ -2400,7 +2394,7 @@ kbd {
 .soon-inline {
   padding: 16px 24px;
 }
-@media (max-width: 650px) {
+@media (max-width: 880px) {
   .history-head {
     display: none;
   }
@@ -2430,6 +2424,8 @@ kbd {
   .history-metrics {
     display: none;
   }
+}
+@media (max-width: 650px) {
   .notfound-search {
     flex-direction: column;
   }
@@ -3453,20 +3449,6 @@ h3 {
 .filter-group > strong {
   font-size: 13px;
   color: var(--color-ink-600);
-}
-.filter-popover-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-divider);
-}
-.filter-popover-footer .inline-button {
-  font-size: 13px;
-}
-.filter-popover-footer .inline-button:disabled {
-  color: var(--color-ink-400);
-  cursor: default;
 }
 .post-list {
   list-style: none;
@@ -4789,4 +4771,161 @@ h3 {
 }
 .upvoted-list a:hover {
   color: var(--color-primary);
+}
+
+/* 프로필: 최근 제출 활동 + 학습 통계 */
+.profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 20px;
+  align-items: stretch;
+}
+.profile-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.stats-panel .progress {
+  max-width: none;
+}
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.stat-row .muted {
+  font-size: 12px;
+}
+.stat-row + .stat-row {
+  margin-top: 12px;
+}
+.lang-stats {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lang-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.lang-stats .progress {
+  max-width: none;
+}
+@media (max-width: 1100px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-side {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+@media (max-width: 650px) {
+  .profile-side {
+    grid-template-columns: 1fr;
+  }
+}
+
+.profile-side .stats-panel:last-child {
+  flex: 1;
+}
+.profile-side .stats-panel:last-child .lang-stats {
+  gap: 10px;
+}
+.profile-side .section-heading.compact {
+  margin-bottom: 12px;
+}
+.profile-grid > .panel {
+  display: flex;
+  flex-direction: column;
+}
+.profile-grid > .panel .activity {
+  flex: 1;
+}
+
+/* 필터 적용 상태 전환: 버튼 색, 개수 배지, 적용된 필터 태그 */
+.filter-menu-button {
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
+}
+.filter-menu-button .filter-count {
+  min-width: 0;
+  max-width: 0;
+  padding: 0;
+  margin-left: -8px;
+  opacity: 0;
+  transform: scale(0.8);
+  overflow: hidden;
+  transition:
+    max-width 0.22s ease,
+    margin 0.22s ease,
+    padding 0.22s ease,
+    opacity 0.2s ease,
+    transform 0.22s ease;
+}
+.filter-menu-button .filter-count.show {
+  min-width: 20px;
+  max-width: 32px;
+  padding: 0 6px;
+  margin-left: 0;
+  opacity: 1;
+  transform: scale(1);
+}
+.applied-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.22s ease,
+    opacity 0.2s ease;
+}
+.applied-wrap.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.applied-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+.applied-bar {
+  margin: 0;
+  padding: 14px 0 2px;
+}
+.applied-bar .filter-chip {
+  animation: chip-in 0.2s ease both;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.15s ease;
+}
+.applied-bar .filter-chip.leaving {
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: none;
+}
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .filter-menu-button,
+  .filter-menu-button .filter-count,
+  .applied-wrap,
+  .applied-bar .filter-chip {
+    transition: none;
+    animation: none;
+  }
 }
