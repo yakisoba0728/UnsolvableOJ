@@ -78,9 +78,7 @@ export function CommunityWritePage() {
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [dirty]);
 
-  useEffect(() => {
-    if (!session) navigate("/auth", { replace: true, state: { from: "/community/new" } });
-  }, [session, navigate]);
+  // 비로그인 접근은 App의 라우트에서 로그인 화면(또는 로그아웃 직후 홈)으로 보낸다.
   if (!session) return null;
 
   function addTag(raw: string) {

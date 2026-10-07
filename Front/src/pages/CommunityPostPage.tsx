@@ -14,11 +14,7 @@ import {
   useActivity,
   writeAnswerDraft,
 } from "../community/store";
-import {
-  categoryLabel,
-  categoryLongLabel,
-  type CommunityAuthor,
-} from "../community/types";
+import { categoryLabel, type CommunityAuthor } from "../community/types";
 import { useDocumentTitle } from "../hooks";
 
 const MIN_ANSWER = 5;
@@ -38,7 +34,7 @@ export function CommunityPostPage() {
   const [notice, setNotice] = useState(
     (location.state as { notice?: string } | null)?.notice ?? "",
   );
-  const answersRef = useRef<HTMLDivElement>(null);
+  const [answersOpen, setAnswersOpen] = useState(false);
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const editorFormRef = useRef<HTMLFormElement>(null);
 
@@ -46,6 +42,7 @@ export function CommunityPostPage() {
   useEffect(() => {
     setDraft(readAnswerDraft(id));
     setError("");
+    setAnswersOpen(false);
   }, [id]);
 
   useEffect(() => {
@@ -62,6 +59,8 @@ export function CommunityPostPage() {
       </div>
     );
 
+  const listSearch =
+    (location.state as { listSearch?: string } | null)?.listSearch ?? "";
   const answers = answersOf(activity, post.id);
   const acceptedId = acceptedAnswerId(activity, post.id);
   const ordered = [...answers].sort((a, b) => {
@@ -69,6 +68,9 @@ export function CommunityPostPage() {
     if (b.id === acceptedId) return 1;
     return a.createdAt.localeCompare(b.createdAt);
   });
+  const shown = answersOpen
+    ? ordered
+    : ordered.filter((answer) => answer.id === acceptedId);
   const me: CommunityAuthor | null = session
     ? { name: session.user.username, tier: "Bronze I" }
     : null;
@@ -91,7 +93,10 @@ export function CommunityPostPage() {
   }
 
   function focusEditor() {
-    editorFormRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    editorFormRef.current?.scrollIntoView({
+      block: "center",
+      behavior: "smooth",
+    });
     editorRef.current?.focus({ preventScroll: true });
   }
 
@@ -116,6 +121,7 @@ export function CommunityPostPage() {
     setDraft("");
     setPending(false);
     setNotice("답변을 등록했어요.");
+    setAnswersOpen(true);
     window.setTimeout(() => {
       document
         .getElementById(answer.id)
@@ -125,8 +131,8 @@ export function CommunityPostPage() {
 
   return (
     <div className="post-page">
-      <Link className="back-link" to={`/community?c=${post.category}`}>
-        ← 커뮤니티 · {categoryLongLabel(post.category)}
+      <Link className="back-link" to={`/community${listSearch}`}>
+        ← 커뮤니티
       </Link>
       {notice ? (
         <p className="success-message" role="status">
@@ -151,10 +157,9 @@ export function CommunityPostPage() {
                   {relativeTime(post.createdAt)}
                 </span>
               </div>
-              <span className="post-stats">
-                조회 {post.views.toLocaleString()}
-                {acceptedId ? " · 채택 완료" : ""}
-              </span>
+              {acceptedId ? (
+                <span className="post-stats">채택 완료</span>
+              ) : null}
             </div>
             <div className="markdown post-body">
               <Markdown>{post.body}</Markdown>
@@ -163,11 +168,14 @@ export function CommunityPostPage() {
               <ul className="post-tags" aria-label="태그">
                 {post.tags.map((tag) => (
                   <li key={tag}>
-                    <Link to={`/community?q=${encodeURIComponent(tag)}`}>#{tag}</Link>
+                    <Link to={`/community?q=${encodeURIComponent(tag)}`}>
+                      #{tag}
+                    </Link>
                   </li>
                 ))}
               </ul>
             ) : null}
+            <p className="post-views">조회 {post.views.toLocaleString()}</p>
             <div className="post-actions">
               <button
                 type="button"
@@ -181,39 +189,32 @@ export function CommunityPostPage() {
               </button>
               <button
                 type="button"
-                className="button button-outline"
-                onClick={() =>
-                  answersRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-                }
+                className="button"
+                onClick={() => requireLogin(focusEditor)}
               >
-                답변 보기 ({answers.length})
+                답변 작성
               </button>
-              <button
-                type="button"
-                className="button button-outline"
-                onClick={() =>
-                  requireLogin(() => communityActions.toggleSaved(post.id))
-                }
-              >
-                {activity.saved.includes(post.id) ? "저장됨" : "저장"}
-              </button>
-              {post.category !== "notice" ? (
-                <button
-                  type="button"
-                  className="button"
-                  onClick={() => requireLogin(focusEditor)}
-                >
-                  답변 작성
-                </button>
-              ) : null}
             </div>
           </article>
 
-          <section className="post-card" ref={answersRef} aria-label="답변">
-            <h2 className="post-section-title">답변 {answers.length}</h2>
-            {ordered.length ? (
-              <ul className="answer-list">
-                {ordered.map((answer) => {
+          <section className="post-card answers-card" aria-label="답변">
+            <h2 className="post-section-title">
+              <button
+                type="button"
+                className="answers-toggle"
+                aria-expanded={answersOpen}
+                aria-controls="answer-list"
+                onClick={() => setAnswersOpen((open) => !open)}
+              >
+                <span>답변 {answers.length}</span>
+                <span className="answers-chevron" aria-hidden="true">
+                  {answersOpen ? "▴" : "▾"}
+                </span>
+              </button>
+            </h2>
+            {shown.length ? (
+              <ul className="answer-list" id="answer-list">
+                {shown.map((answer) => {
                   const accepted = answer.id === acceptedId;
                   return (
                     <li
@@ -260,19 +261,21 @@ export function CommunityPostPage() {
                       <div className="markdown answer-body">
                         <Markdown>{answer.body}</Markdown>
                       </div>
-                      <small className="muted">{relativeTime(answer.createdAt)}</small>
+                      <small className="muted">
+                        {relativeTime(answer.createdAt)}
+                      </small>
                     </li>
                   );
                 })}
               </ul>
-            ) : (
+            ) : answers.length ? null : (
               <p className="muted">
                 아직 답변이 없어요. 첫 답변을 남겨 보세요.
               </p>
             )}
           </section>
 
-          {post.category !== "notice" || answers.length ? (
+          {
             <form
               className="post-card answer-editor"
               onSubmit={submit}
@@ -298,7 +301,9 @@ export function CommunityPostPage() {
                     </p>
                   ) : null}
                   <div className="answer-footer">
-                    <span className="muted">등록 전까지 작성 내용을 유지합니다.</span>
+                    <span className="muted">
+                      등록 전까지 작성 내용을 유지합니다.
+                    </span>
                     <button className="button" disabled={pending}>
                       {pending ? "등록 중…" : "답변 등록"}
                     </button>
@@ -313,7 +318,7 @@ export function CommunityPostPage() {
                 </p>
               )}
             </form>
-          ) : null}
+          }
         </div>
 
         <aside className="post-side">
@@ -333,14 +338,17 @@ export function CommunityPostPage() {
                 type="button"
                 className="button button-outline button-full"
                 onClick={() =>
-                  requireLogin(() => communityActions.toggleFollow(post.author.name))
+                  requireLogin(() =>
+                    communityActions.toggleFollow(post.author.name),
+                  )
                 }
               >
                 {following ? "✓ 팔로잉" : "+ 팔로우"}
               </button>
             ) : null}
             <small className="muted">
-              채택 답변 {authorStats.acceptedAnswers} · 작성 글 {authorStats.posts}
+              채택 답변 {authorStats.acceptedAnswers} · 작성 글{" "}
+              {authorStats.posts}
             </small>
           </section>
           {related.length ? (

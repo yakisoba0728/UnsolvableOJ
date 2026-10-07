@@ -6,6 +6,7 @@ import {
   Route,
   Routes,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import { isDemo } from "./api";
 import logo from "./assets/logo.png";
@@ -87,6 +88,15 @@ const upcoming = [
 export function App() {
   const { session, setSession } = useAuth();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  // 로그아웃 직후에는 로그인 화면이 아니라 홈으로 보낸다.
+  const signedOutRef = useRef(false);
+  useEffect(() => {
+    if (session) signedOutRef.current = false;
+  }, [session]);
+  const loginRedirect = (
+    <Navigate to={signedOutRef.current ? "/" : "/auth"} replace />
+  );
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -201,7 +211,11 @@ export function App() {
                 </Link>
                 <button
                   className="text-button"
-                  onClick={() => setSession(null)}
+                  onClick={() => {
+                    signedOutRef.current = true;
+                    setSession(null);
+                    navigate("/");
+                  }}
                 >
                   로그아웃
                 </button>
@@ -265,7 +279,7 @@ export function App() {
               session?.user.role === "ADMIN" ? (
                 <CreateProblemPage />
               ) : (
-                <Navigate to="/problems" replace />
+                <Navigate to={signedOutRef.current ? "/" : "/problems"} replace />
               )
             }
           />
@@ -274,11 +288,26 @@ export function App() {
           <Route
             path="/profile"
             element={
-              session ? <ProfilePage /> : <Navigate to="/auth" replace />
+              session ? <ProfilePage /> : loginRedirect
             }
           />
           <Route path="/community" element={<CommunityPage />} />
-          <Route path="/community/new" element={<CommunityWritePage />} />
+          <Route
+            path="/community/new"
+            element={
+              session ? (
+                <CommunityWritePage />
+              ) : signedOutRef.current ? (
+                loginRedirect
+              ) : (
+                <Navigate
+                  to="/auth"
+                  replace
+                  state={{ from: "/community/new" }}
+                />
+              )
+            }
+          />
           <Route path="/community/:id" element={<CommunityPostPage />} />
           {/* 커뮤니티는 실제 화면이 있으므로 준비 중 안내에서 제외한다 */}
           {upcoming
@@ -293,13 +322,13 @@ export function App() {
           <Route
             path="/submissions"
             element={
-              session ? <SubmissionsPage /> : <Navigate to="/auth" replace />
+              session ? <SubmissionsPage /> : loginRedirect
             }
           />
           <Route
             path="/submissions/:id"
             element={
-              session ? <SubmissionPage /> : <Navigate to="/auth" replace />
+              session ? <SubmissionPage /> : loginRedirect
             }
           />
           <Route

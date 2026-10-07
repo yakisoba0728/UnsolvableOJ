@@ -89,9 +89,8 @@ test("login returns to the problem and logout removes the saved session", async 
   await expect(page).toHaveURL(/\/problems\/view\/sum$/);
   await expect(page.getByLabel("소스 코드")).toBeVisible();
   await page.getByRole("button", { name: "로그아웃" }).click();
-  await expect(
-    page.getByRole("link", { name: "로그인하고 풀기" }),
-  ).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("link", { name: "로그인" }).first()).toBeVisible();
   expect(
     await page.evaluate((key) => localStorage.getItem(key), storageKey),
   ).toBeNull();
@@ -317,3 +316,13 @@ test("submission API errors preserve the source and re-enable submission", async
     page.getByRole("button", { name: "제출하고 채점하기 →" }),
   ).toBeEnabled();
 });
+
+for (const path of ["/profile", "/submissions", "/community/new", "/problems", "/community"]) {
+  test(`logout on ${path} lands on the home page signed out`, async ({ page }) => {
+    await authenticate(page);
+    await page.goto(path);
+    await page.getByRole("button", { name: "로그아웃" }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole("link", { name: "로그인" }).first()).toBeVisible();
+  });
+}

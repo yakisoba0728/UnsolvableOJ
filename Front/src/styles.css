@@ -4752,3 +4752,41 @@ h3 {
     margin: -8px 0 -8px;
   }
 }
+
+.post-views {
+  margin: 0;
+  color: var(--color-ink-500);
+  font-size: 13px;
+}
+.answers-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.answers-chevron {
+  color: var(--color-ink-500);
+}
+.upvoted-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.upvoted-list a {
+  display: block;
+  padding: 8px 0;
+  color: var(--color-ink-700);
+  font-weight: var(--weight-label);
+  overflow-wrap: anywhere;
+}
+.upvoted-list a:hover {
+  color: var(--color-primary);
+}

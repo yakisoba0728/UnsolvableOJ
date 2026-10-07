@@ -329,6 +329,7 @@ export function CommunityPage() {
                     <Link
                       className={`post-row ${post.pinned ? "pinned" : ""}`}
                       to={`/community/${post.id}`}
+                      state={{ listSearch: params.toString() ? `?${params.toString()}` : "" }}
                     >
                       <span className="post-category">
                         {categoryLabel(post.category)}

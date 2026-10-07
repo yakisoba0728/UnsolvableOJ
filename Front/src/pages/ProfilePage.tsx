@@ -8,6 +8,7 @@ import {
   streakDays,
   submissionsByDay,
   useSubmissionHistory, useDocumentTitle } from "../hooks";
+import { allPosts, useActivity } from "../community/store";
 import type { RankingEntry, UserProfile } from "../types";
 
 const WEEKS_WIDE = 20;
@@ -27,6 +28,10 @@ export function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [rankings, setRankings] = useState<RankingEntry[]>([]);
   const [error, setError] = useState("");
+  const activity = useActivity();
+  const upvotedPosts = allPosts(activity).filter((post) =>
+    activity.upvoted.includes(post.id),
+  );
   const [selected, setSelected] = useState(dayKey(new Date()));
   const history = useSubmissionHistory(session);
   // 넓은 화면에서는 폭을 채우도록 주 수를 늘리고, 좁은 화면에서는 가로 스크롤이 생기지 않게 줄인다.
@@ -247,6 +252,25 @@ export function ProfilePage() {
             ) : null}
           </div>
         </div>
+      </section>
+
+      <section className="panel upvoted-panel" aria-label="추천한 글">
+        <div className="section-heading compact">
+          <div>
+            <h2>추천한 글</h2>
+          </div>
+        </div>
+        {upvotedPosts.length ? (
+          <ul className="upvoted-list">
+            {upvotedPosts.map((post) => (
+              <li key={post.id}>
+                <Link to={`/community/${post.id}`}>{post.title}</Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="muted">아직 추천한 글이 없어요.</p>
+        )}
       </section>
 
       <section className="panel soon-inline">
