@@ -7,9 +7,11 @@ import {
   dayKey,
   streakDays,
   submissionsByDay,
+  useAllProblems,
   useSubmissionHistory,
   useDocumentTitle,
 } from "../hooks";
+import { PostScroller } from "../components/PostScroller";
 import { allPosts, useActivity } from "../community/store";
 import type { RankingEntry, UserProfile } from "../types";
 
@@ -37,6 +39,19 @@ const popularLanguages = [
   "RUST",
 ];
 const LANGUAGE_ROWS = 4;
+/** 모양만 보여 주는 임시 배지 */
+const sampleBadges = [
+  { label: "첫 정답", icon: "✓", tone: "success" },
+  { label: "3일 연속", icon: "★", tone: "warning" },
+  { label: "꾸준한 도전", icon: "▲", tone: "primary" },
+];
+const difficultyRows = [
+  { value: "BEGINNER", label: "입문" },
+  { value: "EASY", label: "쉬움" },
+  { value: "MEDIUM", label: "보통" },
+  { value: "HARD", label: "어려움" },
+  { value: "EXPERT", label: "전문가" },
+];
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
 /** 서버 규칙: level = 1 + xp / 100 */
@@ -53,11 +68,15 @@ export function ProfilePage() {
   const [rankings, setRankings] = useState<RankingEntry[]>([]);
   const [error, setError] = useState("");
   const activity = useActivity();
+  const myPosts = allPosts(activity).filter(
+    (post) => post.author.name === session?.user.username,
+  );
   const upvotedPosts = allPosts(activity).filter((post) =>
     activity.upvoted.includes(post.id),
   );
   const [selected, setSelected] = useState(dayKey(new Date()));
   const history = useSubmissionHistory(session);
+  const { problems } = useAllProblems();
   // 넓은 화면에서는 폭을 채우도록 주 수를 늘리고, 좁은 화면에서는 가로 스크롤이 생기지 않게 줄인다.
   const [weeks, setWeeks] = useState(() =>
     window.matchMedia("(max-width: 650px)").matches ? WEEKS_NARROW : WEEKS_WIDE,
@@ -119,6 +138,29 @@ export function ProfilePage() {
   const accuracy = totalSubmissions
     ? Math.round((acceptedSubmissions / totalSubmissions) * 100)
     : null;
+  const difficultyById = new Map(
+    problems.map((problem) => [problem.id, problem.difficulty]),
+  );
+  const solvedByDifficulty = new Map<string, number>();
+  for (const id of history.solved) {
+    const difficulty = difficultyById.get(id);
+    if (difficulty)
+      solvedByDifficulty.set(
+        difficulty,
+        (solvedByDifficulty.get(difficulty) ?? 0) + 1,
+      );
+  }
+  const solvedTotal = [...solvedByDifficulty.values()].reduce(
+    (sum, count) => sum + count,
+    0,
+  );
+  const languageAccepted = new Map<string, number>();
+  for (const item of history.submissions)
+    if (item.status === "ACCEPTED")
+      languageAccepted.set(
+        item.language,
+        (languageAccepted.get(item.language) ?? 0) + 1,
+      );
   const languageCounts = new Map<string, number>();
   for (const item of history.submissions)
     languageCounts.set(
@@ -171,6 +213,17 @@ export function ProfilePage() {
         <div className="profile-main">
           <h2>
             {profile.username} <small>@{profile.username}</small>
+            <span className="profile-badges" aria-label="획득한 배지">
+              {sampleBadges.map((badge) => (
+                <span
+                  className={`profile-badge ${badge.tone}`}
+                  key={badge.label}
+                >
+                  <span aria-hidden="true">{badge.icon}</span>
+                  {badge.label}
+                </span>
+              ))}
+            </span>
           </h2>
           <div className="profile-level">
             <span className="pill pill-warning">Lv.{profile.level}</span>
@@ -211,43 +264,15 @@ export function ProfilePage() {
       </section>
 
       <div className="profile-grid">
-        <section className="panel">
-          <div className="section-heading compact">
-            <div>
-              <h2>최근 제출 활동</h2>
-              <p>
-                최근 {weeks}주 · 총 {history.submissions.length}회 제출 · 현재{" "}
-                {streak}일 연속 학습
-              </p>
-            </div>
-          </div>
-          <div className="activity">
-            <div className="activity-graph">
-              <div className="heatmap" role="group" aria-label="일별 제출 활동">
-                <div className="heat-days" aria-hidden="true">
-                  {weekdays.map((day) => (
-                    <span key={day}>{day}</span>
-                  ))}
-                </div>
-                {columns.map((column, index) => (
-                  <div className="heat-col" key={index}>
-                    {column.map((cell) => {
-                      const key = dayKey(cell.date);
-                      return (
-                        <button
-                          key={key}
-                          type="button"
-                          disabled={cell.future}
-                          className={`heat-cell level-${heatLevel(cell.count)} ${selected === key ? "selected" : ""}`}
-                          aria-pressed={selected === key}
-                          aria-label={`${cell.date.getMonth() + 1}월 ${cell.date.getDate()}일 제출 ${cell.count}회`}
-                          title={`${cell.date.getMonth() + 1}/${cell.date.getDate()} · ${cell.count}회`}
-                          onClick={() => setSelected(key)}
-                        />
-                      );
-                    })}
-                  </div>
-                ))}
+        <div className="profile-main-col">
+          <section className="panel activity-panel">
+            <div className="section-heading compact">
+              <div>
+                <h2>최근 제출 활동</h2>
+                <p>
+                  최근 {weeks}주 · 총 {history.submissions.length}회 제출 · 현재{" "}
+                  {streak}일 연속 학습
+                </p>
               </div>
               <div className="heat-legend" aria-hidden="true">
                 <span>적음</span>
@@ -257,52 +282,101 @@ export function ProfilePage() {
                 <span>많음</span>
               </div>
             </div>
-            <div className="day-detail">
-              <span className="muted">
-                {sm}월 {sd}일{selected === dayKey(today) ? " · 오늘" : ""}
-                <span className="sr-only"> {sy}년</span>
-              </span>
-              <p className="day-count">
-                <strong>{selectedCount}회</strong> 코드를 제출했어요.
-              </p>
-              {selectedSubmissions.length ? (
-                <ul className="history-list">
-                  {selectedSubmissions.slice(0, 3).map((item) => (
-                    <li key={item.id}>
-                      <Link to={`/submissions/${item.id}`}>
-                        <span
-                          className={`verdict verdict-${item.status.toLowerCase()}`}
-                        >
-                          {item.status.replaceAll("_", " ")}
-                        </span>
-                        <span>{item.problem.title ?? "문제"}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-              {selectedSubmissions.length > 3 ? (
-                <Link className="inline-button day-more" to="/submissions">
-                  제출 {selectedSubmissions.length}건 모두 보기 →
-                </Link>
-              ) : null}
-              {selectedSubmissions.length === 0 ? (
-                selected === dayKey(today) ? (
-                  <div className="day-empty">
-                    <p className="muted">
-                      오늘 제출이 없어요. 문제 하나로 하루를 시작해 보세요.
-                    </p>
-                    <Link className="button" to="/problems">
-                      문제 풀러 가기 <span aria-hidden="true">→</span>
-                    </Link>
+            <div className="activity">
+              <div className="activity-graph">
+                <div
+                  className="heatmap"
+                  role="group"
+                  aria-label="일별 제출 활동"
+                >
+                  <div className="heat-days" aria-hidden="true">
+                    {weekdays.map((day) => (
+                      <span key={day}>{day}</span>
+                    ))}
                   </div>
-                ) : (
-                  <p className="muted">이 날은 제출 기록이 없어요.</p>
-                )
-              ) : null}
+                  {columns.map((column, index) => (
+                    <div className="heat-col" key={index}>
+                      {column.map((cell) => {
+                        const key = dayKey(cell.date);
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            disabled={cell.future}
+                            className={`heat-cell level-${heatLevel(cell.count)} ${selected === key ? "selected" : ""}`}
+                            aria-pressed={selected === key}
+                            aria-label={`${cell.date.getMonth() + 1}월 ${cell.date.getDate()}일 제출 ${cell.count}회`}
+                            title={`${cell.date.getMonth() + 1}/${cell.date.getDate()} · ${cell.count}회`}
+                            onClick={() => setSelected(key)}
+                          />
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="day-detail">
+                <span className="muted">
+                  {sm}월 {sd}일{selected === dayKey(today) ? " · 오늘" : ""}
+                  <span className="sr-only"> {sy}년</span>
+                </span>
+                <p className="day-count">
+                  <strong>{selectedCount}회</strong> 코드를 제출했어요.
+                </p>
+                {selectedSubmissions.length ? (
+                  <ul className="history-list">
+                    {selectedSubmissions.slice(0, 3).map((item) => (
+                      <li key={item.id}>
+                        <Link to={`/submissions/${item.id}`}>
+                          <span
+                            className={`verdict verdict-${item.status.toLowerCase()}`}
+                          >
+                            {item.status.replaceAll("_", " ")}
+                          </span>
+                          <span>{item.problem.title ?? "문제"}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {selectedSubmissions.length > 3 ? (
+                  <Link className="inline-button day-more" to="/submissions">
+                    제출 {selectedSubmissions.length}건 모두 보기 →
+                  </Link>
+                ) : null}
+                {selectedSubmissions.length === 0 ? (
+                  selected === dayKey(today) ? (
+                    <div className="day-empty">
+                      <p className="muted">
+                        오늘 제출이 없어요. 문제 하나로 하루를 시작해 보세요.
+                      </p>
+                      <Link className="button" to="/problems">
+                        문제 풀러 가기 <span aria-hidden="true">→</span>
+                      </Link>
+                    </div>
+                  ) : (
+                    <p className="muted">이 날은 제출 기록이 없어요.</p>
+                  )
+                ) : null}
+              </div>
             </div>
+          </section>
+
+          <div className="profile-post-pair">
+            <PostScroller
+              title="작성한 글"
+              posts={myPosts}
+              activity={activity}
+              emptyText="아직 작성한 글이 없어요."
+            />
+            <PostScroller
+              title="추천한 글"
+              posts={upvotedPosts}
+              activity={activity}
+              emptyText="아직 추천한 글이 없어요."
+            />
           </div>
-        </section>
+        </div>
 
         <aside className="profile-side" aria-label="학습 통계">
           <section className="panel stats-panel">
@@ -346,7 +420,16 @@ export function ProfilePage() {
                 return (
                   <li key={language}>
                     <div className="lang-row">
-                      <span>{languageLabels[language] ?? language}</span>
+                      <span className="lang-name">
+                        {languageLabels[language] ?? language}
+                        <span className="lang-sep" aria-hidden="true">
+                          |
+                        </span>
+                        <span className="lang-detail muted">
+                          제출 {count} · 정답{" "}
+                          {languageAccepted.get(language) ?? 0}
+                        </span>
+                      </span>
                       <span className="muted">{percent}%</span>
                     </div>
                     <div className="progress" aria-hidden="true">
@@ -357,27 +440,43 @@ export function ProfilePage() {
               })}
             </ul>
           </section>
+          <section className="panel stats-panel difficulty-panel">
+            <div className="section-heading compact">
+              <div>
+                <h2>푼 문제 난이도</h2>
+              </div>
+            </div>
+            <ul className="lang-stats">
+              {difficultyRows.map((row) => {
+                const count = solvedByDifficulty.get(row.value) ?? 0;
+                const percent = solvedTotal
+                  ? Math.round((count / solvedTotal) * 100)
+                  : 0;
+                return (
+                  <li key={row.value}>
+                    <div className="lang-row">
+                      <span className="lang-name">
+                        {row.label}
+                        <span className="lang-sep" aria-hidden="true">
+                          |
+                        </span>
+                        <span className="lang-detail muted">{count}문제</span>
+                      </span>
+                      <span className="muted">{percent}%</span>
+                    </div>
+                    <div className="progress" aria-hidden="true">
+                      <span
+                        className={`diff-${row.value.toLowerCase()}`}
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
         </aside>
       </div>
-
-      <section className="panel upvoted-panel" aria-label="추천한 글">
-        <div className="section-heading compact">
-          <div>
-            <h2>추천한 글</h2>
-          </div>
-        </div>
-        {upvotedPosts.length ? (
-          <ul className="upvoted-list">
-            {upvotedPosts.map((post) => (
-              <li key={post.id}>
-                <Link to={`/community/${post.id}`}>{post.title}</Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="muted">아직 추천한 글이 없어요.</p>
-        )}
-      </section>
 
       <section className="panel soon-inline">
         <div>

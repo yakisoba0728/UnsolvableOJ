@@ -1,4 +1,5 @@
 import { useId, type CSSProperties } from "react";
+import logo from "../assets/logo.png";
 
 const fill = (value: string): CSSProperties => ({ fill: value });
 const line = (value: string, width: number): CSSProperties => ({
@@ -23,7 +24,7 @@ function Sparkle({ x, y, size, color, className }: { x: number; y: number; size:
 
 /**
  * 사이트 정체성(문제 풀이 · 채점 · 레벨 성장)을 한 장면으로 보여주는 그림.
- * 로고 타일, 코드 창(정답 체크), 레벨·XP 배지, 상승 막대, 반짝이는 별로 구성한다.
+ * 사이트 로고, 코드 창(정답 체크), 레벨·XP 배지, 상승 막대, 반짝이는 별로 구성한다.
  * 색은 테마 토큰을 따르고, 움직임은 prefers-reduced-motion에서 멈춘다.
  */
 export function BrandArt({ className = "" }: { className?: string }) {
@@ -76,9 +77,7 @@ export function BrandArt({ className = "" }: { className?: string }) {
 
       {/* 로고 타일 */}
       <g className="float d2" transform="rotate(-8 80 62)">
-        <rect x="38" y="22" width="84" height="84" rx="22" style={fill("var(--color-button)")} />
-        <path d="M66 46v22a14 14 0 0 0 28 0V46" style={line("var(--color-on-solid)", 8)} />
-        <rect x="62" y="84" width="36" height="5" rx="2.5" style={fill("var(--color-on-solid)")} />
+        <image href={logo} x="38" y="22" width="84" height="84" />
       </g>
 
       {/* 레벨 · XP 배지 */}

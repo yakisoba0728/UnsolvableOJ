@@ -3580,28 +3580,6 @@ h3 {
   margin: 0;
   grid-column: 2;
 }
-.community-pager .page-size {
-  grid-column: 1;
-  grid-row: 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--color-ink-600);
-  font-size: 13px;
-  font-weight: var(--weight-label);
-}
-.community-pager .page-size select {
-  width: auto;
-  min-height: 36px;
-  padding: 0 10px;
-}
-.community-pager .page-range {
-  grid-column: 3;
-  justify-self: end;
-  color: var(--color-ink-600);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-}
 .community-guide {
   padding: 24px;
   background: var(--color-feature);
@@ -4052,13 +4030,7 @@ h3 {
     justify-items: center;
   }
   .community-pager .pagination,
-  .community-pager .page-size,
-  .community-pager .page-range {
-    grid-column: 1;
-    grid-row: auto;
-    justify-self: center;
-  }
-  .post-card {
+    .post-card {
     padding: 20px 16px;
   }
   .post-card h1 {
@@ -4316,14 +4288,6 @@ h3 {
   width: auto;
   min-width: 160px;
   flex: none;
-}
-.community-pager .page-size .select {
-  width: auto;
-  min-width: 88px;
-}
-.community-pager .page-size .select-button {
-  min-height: 36px;
-  padding: 0 10px;
 }
 .code-toolbar {
   position: relative;
@@ -4755,23 +4719,6 @@ h3 {
 .answers-chevron {
   color: var(--color-ink-500);
 }
-.upvoted-list {
-  display: grid;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.upvoted-list a {
-  display: block;
-  padding: 8px 0;
-  color: var(--color-ink-700);
-  font-weight: var(--weight-label);
-  overflow-wrap: anywhere;
-}
-.upvoted-list a:hover {
-  color: var(--color-primary);
-}
 
 /* 프로필: 최근 제출 활동 + 학습 통계 */
 .profile-grid {
@@ -4835,10 +4782,10 @@ h3 {
   }
 }
 
-.profile-side .stats-panel:last-child {
+.profile-side .difficulty-panel {
   flex: 1;
 }
-.profile-side .stats-panel:last-child .lang-stats {
+.profile-side .stats-panel .lang-stats {
   gap: 10px;
 }
 .profile-side .section-heading.compact {
@@ -4928,4 +4875,258 @@ h3 {
     transition: none;
     animation: none;
   }
+}
+
+/* 프로필: 최근 제출 활동 아래에 추천한 글을 두고, 오른쪽 통계 카드와 높이를 맞춘다 */
+.profile-main-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+.profile-badges {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: 12px;
+  vertical-align: middle;
+}
+.profile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px 3px 4px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+.profile-badge > span {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  font-size: 10px;
+}
+.profile-badge.success {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.profile-badge.warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+.profile-badge.primary {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+/* 프로필: 작성한 글 · 추천한 글 세로 스크롤 카드 */
+.profile-post-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  flex: 1;
+}
+.post-scroller {
+  --slide-height: 134px;
+  --slide-gap: 8px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.post-scroller .section-heading {
+  align-items: center;
+}
+.scroller-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.scroller-count {
+  margin-right: 4px;
+  color: var(--color-ink-600);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.scroller-button {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-ink-700);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+.scroller-button:hover:not(:disabled) {
+  background: var(--color-surface-muted);
+}
+.scroller-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.scroller-view {
+  height: calc(var(--slide-height) * 2 + var(--slide-gap));
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  border-radius: 12px;
+}
+.scroller-view::-webkit-scrollbar {
+  display: none;
+}
+.scroller-view:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.scroller-slide {
+  height: var(--slide-height);
+  margin-bottom: var(--slide-gap);
+  box-sizing: border-box;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  background: var(--color-surface-muted);
+  border-radius: 12px;
+  border: 1px solid transparent;
+  overflow: hidden;
+}
+.scroller-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  min-width: 0;
+}
+.scroller-head .muted {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scroller-title {
+  color: var(--color-ink-900);
+  font-size: 15px;
+  font-weight: var(--weight-label);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.scroller-title:hover {
+  color: var(--color-primary);
+}
+.scroller-stats {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.scroller-empty {
+  margin: 0;
+}
+.lang-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.lang-sep {
+  color: var(--color-border-strong);
+}
+.lang-detail {
+  font-size: 12px;
+}
+@media (max-width: 650px) {
+  .profile-post-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+.difficulty-panel .progress span.diff-beginner {
+  background: var(--color-success);
+}
+.difficulty-panel .progress span.diff-easy {
+  background: var(--badge-easy-fg);
+}
+.difficulty-panel .progress span.diff-medium {
+  background: var(--color-warning);
+}
+.difficulty-panel .progress span.diff-hard {
+  background: var(--badge-hard-fg);
+}
+.difficulty-panel .progress span.diff-expert {
+  background: var(--badge-expert-fg);
+}
+
+/* 최근 제출 활동: 상세 박스를 카드 위쪽까지 올리고, 범례는 히트맵 위(제목 줄)로 옮긴다 */
+.activity-panel {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  column-gap: 32px;
+  align-items: start;
+}
+.activity-panel > .section-heading {
+  grid-column: 1;
+  grid-row: 1;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.activity-panel .activity {
+  display: contents;
+}
+.activity-panel .activity-graph {
+  grid-column: 1;
+  grid-row: 2;
+}
+.activity-panel .day-detail {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: stretch;
+}
+@media (max-width: 1100px) {
+  .activity-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .activity-panel .day-detail {
+    grid-column: 1;
+    grid-row: 3;
+    margin-top: 24px;
+  }
+}
+.activity-panel > .section-heading .heat-legend {
+  margin-top: 0;
+}
+
+/* 최근 제출 활동 상세 박스: 세로 간격을 줄여 히트맵 높이에 맞춘다 */
+.activity-panel .day-detail {
+  padding: 14px 24px;
+}
+.activity-panel .day-detail .day-date {
+  margin-bottom: 6px;
+}
+.activity-panel .day-detail .history-list {
+  gap: 0;
+}
+.activity-panel .day-detail .history-list a {
+  padding: 5px 10px;
+}
+.activity-panel .day-detail .day-more {
+  margin-top: 4px;
 }

@@ -4,7 +4,6 @@ import { useAuth } from "../auth";
 import guideArt from "../assets/community-guide.png";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
-import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
 import {
   acceptedAnswerId,
@@ -22,9 +21,7 @@ import {
 } from "../community/types";
 import { useDocumentTitle } from "../hooks";
 
-const SIZES = [10, 20, 30, 50] as const;
-const DEFAULT_SIZE = 10;
-const sizeKey = "unsolvable-oj-community-size-v1";
+const PAGE_SIZE = 10;
 
 const sortOptions = [
   { value: "latest", label: "최신순" },
@@ -41,15 +38,6 @@ const statusOptions = [
 const isCategory = (value: string | null): value is CategoryKey =>
   categories.some((item) => item.key === value);
 
-function storedSize() {
-  try {
-    const value = Number(localStorage.getItem(sizeKey));
-    return SIZES.includes(value as (typeof SIZES)[number]) ? value : DEFAULT_SIZE;
-  } catch {
-    return DEFAULT_SIZE;
-  }
-}
-
 export function CommunityPage() {
   useDocumentTitle("커뮤니티");
   const { session } = useAuth();
@@ -63,11 +51,7 @@ export function CommunityPage() {
   const sort = params.get("sort") ?? "latest";
   const urlQuery = params.get("q") ?? "";
   const page = Math.max(1, Number(params.get("page")) || 1);
-  const sizeParam = Number(params.get("size"));
-  const [savedSize, setSavedSize] = useState(storedSize);
-  const size = SIZES.includes(sizeParam as (typeof SIZES)[number])
-    ? sizeParam
-    : savedSize;
+  const size = PAGE_SIZE;
 
   // 검색어는 입력 중에는 로컬 상태로 두고, 잠시 멈추면 주소에 반영한다.
   const [queryText, setQueryText] = useState(urlQuery);
@@ -210,16 +194,6 @@ export function CommunityPage() {
   function write(initialCategory?: CategoryKey) {
     if (session) navigate("/community/new", { state: { category: initialCategory } });
     else navigate("/auth", { state: { from: "/community/new" } });
-  }
-
-  function changeSize(next: number) {
-    setSavedSize(next);
-    try {
-      localStorage.setItem(sizeKey, String(next));
-    } catch {
-      /* 저장소를 쓸 수 없어도 이번 방문에는 반영한다 */
-    }
-    update({ size: next === DEFAULT_SIZE ? null : String(next) });
   }
 
   return (
@@ -409,15 +383,6 @@ export function CommunityPage() {
 
           {filtered.length > 0 ? (
           <div className="community-pager">
-            <label className="page-size">
-              페이지당
-              <Select
-                ariaLabel="페이지당 글 수"
-                value={String(size)}
-                options={SIZES.map((value) => ({ value: String(value), label: `${value}개` }))}
-                onChange={(next) => changeSize(Number(next))}
-              />
-            </label>
             <Pagination
               page={current}
               totalPages={totalPages}
@@ -425,11 +390,6 @@ export function CommunityPage() {
                 update({ page: next === 1 ? null : String(next) }, { resetPage: false })
               }
             />
-            <span className="page-range" aria-live="polite">
-              {filtered.length
-                ? `${first + 1}–${first + visible.length} / ${filtered.length}`
-                : ""}
-            </span>
           </div>
           ) : null}
         </section>
