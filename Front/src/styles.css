@@ -43,7 +43,7 @@ p {
 h1,
 h2,
 h3 {
-  letter-spacing: -0.045em;
+  letter-spacing: -0.02em;
 }
 p {
   line-height: 1.7;
@@ -82,8 +82,8 @@ p {
   align-items: center;
   font-family: var(--font-display);
   font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.06em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   white-space: nowrap;
 }
 .brand-mark {
@@ -235,7 +235,7 @@ p {
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;
   letter-spacing: 0.19em;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-primary);
 }
 .hero h1 em,
@@ -315,7 +315,7 @@ p {
 }
 .problem-title strong {
   display: block;
-  font-size: 15px;
+  font-size: 14px;
   letter-spacing: -0.02em;
 }
 .problem-title small {
@@ -366,7 +366,7 @@ p {
 }
 .row-arrow {
   color: var(--color-ink-400);
-  font-size: 19px;
+  font-size: 18px;
 }
 .empty-state {
   background: var(--color-surface);
@@ -508,7 +508,7 @@ textarea {
   padding: 45px;
 }
 .auth-card h2 {
-  font-size: 27px;
+  font-size: 28px;
   margin: 10px 0 4px;
 }
 .auth-card .muted {
@@ -558,12 +558,12 @@ textarea {
   padding-top: 32px;
 }
 .problem-content h2 {
-  font-size: 21px;
+  font-size: 20px;
   margin-bottom: 17px;
 }
 .markdown {
   color: var(--color-ink-700);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.8;
   overflow-wrap: anywhere;
 }
@@ -673,8 +673,7 @@ textarea {
 }
 .result-banner strong {
   display: block;
-  font:
-    800 27px "Pretendard Variable",
+  font: 700 27px "Pretendard Variable",
     sans-serif;
   letter-spacing: -0.02em;
   margin-top: 8px;
@@ -719,7 +718,7 @@ textarea {
   margin-bottom: 8px;
 }
 .result-stats strong {
-  font-size: 15px;
+  font-size: 14px;
 }
 .notice {
   background: var(--color-surface);
@@ -770,7 +769,7 @@ textarea {
   width: 100%;
 }
 .form-card h2 {
-  font-size: 22px;
+  font-size: 20px;
   margin-bottom: 22px;
 }
 .form-grid {
@@ -829,7 +828,7 @@ textarea {
   gap: 10px;
 }
 .continue-card h2 {
-  font-size: 22px;
+  font-size: 20px;
 }
 .continue-card .button {
   align-self: flex-start;
@@ -884,7 +883,7 @@ textarea {
   white-space: nowrap;
 }
 .ranking-name small {
-  font-weight: 500;
+  font-weight: 400;
   color: var(--color-ink-400);
   font-size: 13px;
 }
@@ -1062,7 +1061,7 @@ textarea {
 }
 .stat-tile strong {
   font-size: 28px;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 }
 .stat-tile span {
   color: var(--color-ink-400);
@@ -1188,7 +1187,7 @@ textarea {
 .empty-state strong {
   display: block;
   color: var(--color-ink-900);
-  font-size: 17px;
+  font-size: 18px;
   margin-bottom: 6px;
 }
 .empty-state .button {
@@ -1208,7 +1207,7 @@ textarea {
   padding: 24px;
 }
 .resume-card h2 {
-  font-size: 22px;
+  font-size: 20px;
   margin: 14px 0 6px;
 }
 .resume-card p {
@@ -1223,7 +1222,7 @@ textarea {
   padding: 20px;
 }
 .guide-card h2 {
-  font-size: 17px;
+  font-size: 18px;
   margin-bottom: 8px;
 }
 .guide-card ol {
@@ -1369,7 +1368,7 @@ textarea {
   margin-bottom: 24px;
 }
 .statement-panel .problem-content h2 {
-  font-size: 17px;
+  font-size: 18px;
 }
 .history-panel {
   padding: 20px 24px;
@@ -1511,7 +1510,7 @@ textarea {
 }
 .profile-main h2 small {
   color: var(--color-ink-600);
-  font-weight: 500;
+  font-weight: 400;
   font-size: 16px;
 }
 .profile-level {
@@ -1553,7 +1552,7 @@ textarea {
   margin: 0;
   font-size: 28px;
   font-weight: var(--weight-display);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 }
 .activity {
   display: grid;
@@ -1839,7 +1838,7 @@ button.heat-cell.selected {
     padding: 12px 0;
   }
   .brand {
-    font-size: 15px;
+    font-size: 14px;
   }
   .brand-mark {
     width: 34px;
@@ -1887,7 +1886,7 @@ button.heat-cell.selected {
     min-width: 54px;
   }
   .row-arrow {
-    font-size: 15px;
+    font-size: 14px;
   }
   .auth-layout {
     grid-template-columns: 1fr;
@@ -1897,7 +1896,7 @@ button.heat-cell.selected {
     padding: 0;
   }
   .auth-intro h1 {
-    font-size: 38px;
+    font-size: 40px;
   }
   .intro-decoration {
     display: none;
@@ -2057,7 +2056,7 @@ kbd {
   min-width: 240px;
 }
 .daily-goal h2 {
-  font-size: 17px;
+  font-size: 18px;
   margin-bottom: 4px;
 }
 .daily-goal p {
@@ -2128,7 +2127,7 @@ kbd {
 .streak-card strong {
   font-size: 40px;
   color: var(--color-primary);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 }
 .streak-card > span {
   color: var(--color-ink-600);
@@ -2146,7 +2145,7 @@ kbd {
   border-color: var(--color-primary);
 }
 .standing-card h2 {
-  font-size: 15px;
+  font-size: 14px;
   margin-bottom: 10px;
 }
 .standing-card dl {
@@ -2315,7 +2314,7 @@ kbd {
 }
 .history-title strong {
   display: block;
-  font-size: 15px;
+  font-size: 14px;
   letter-spacing: -0.02em;
 }
 .history-title small {
@@ -2354,7 +2353,7 @@ kbd {
 }
 .notfound-code {
   display: block;
-  font: 800 88px/1 var(--font-display);
+  font: 700 88px/1 var(--font-display);
   letter-spacing: -0.05em;
   color: var(--color-button-soft-fg); /* 가변 글꼴은 윤곽선이 겹쳐 text-stroke가 깨지므로 단색 */
 }
@@ -2509,7 +2508,7 @@ kbd {
 }
 .page-header h1 {
   font: var(--text-display);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   margin: 0;
 }
 .page-header p {
@@ -2604,7 +2603,7 @@ kbd {
   color: var(--color-primary);
 }
 .result-banner strong {
-  font: 800 24px var(--font-display);
+  font: 700 24px var(--font-display);
   letter-spacing: -0.02em;
   margin-top: 6px;
 }
@@ -2641,7 +2640,7 @@ kbd {
     padding: 24px 0 16px;
   }
   .page-header h1 {
-    font-size: 26px;
+    font-size: 24px;
   }
   .page-header-row {
     flex-wrap: wrap;
@@ -2999,7 +2998,7 @@ body {
 }
 h1 {
   font-weight: var(--weight-display);
-  letter-spacing: -0.035em;
+  letter-spacing: -0.02em;
 }
 h2,
 h3 {
@@ -3007,7 +3006,7 @@ h3 {
 }
 .page-header h1 {
   font: var(--text-display);
-  letter-spacing: -0.035em;
+  letter-spacing: -0.02em;
 }
 .stat-tile strong,
 .streak-card strong,
@@ -3313,7 +3312,7 @@ h3 {
 .continue-card.with-art .highlight-stats strong {
   margin: 0;
   font: var(--text-h1);
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1.2;
 }
 @container card (max-width: 619px) {
@@ -3345,8 +3344,7 @@ h3 {
   box-shadow: inset 1px 0 0 var(--color-feature-border);
 }
 
-/* 수치 패널: 숫자(13·8)와 한글(실시간)이 서로 다른 글꼴(Plus Jakarta Sans / Pretendard)로 그려져
-   크기·기준선이 어긋나 보였다. 한 글꼴(Pretendard)로 통일해 높이와 크기를 맞춘다 */
+/* 수치 패널: 숫자와 한글이 같은 글꼴(Pretendard)로 그려지도록 높이와 크기를 맞춘다 */
 .continue-card.with-art .highlight-stats strong {
   font-family: var(--font-sans);
   font-weight: var(--weight-display);
@@ -3599,7 +3597,7 @@ h3 {
   object-fit: contain;
 }
 .community-guide h3 {
-  font-size: 15px;
+  font-size: 14px;
   margin-bottom: 10px;
 }
 .community-guide ul {
@@ -3841,11 +3839,11 @@ h3 {
   gap: 12px;
 }
 .author-card strong {
-  font: 800 17px var(--font-display);
+  font: 700 18px var(--font-display);
 }
 .related-card h2 {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
 }
 .related-card ul {
   margin: 0;
@@ -3950,7 +3948,7 @@ h3 {
   border: 0;
   background: none;
   color: inherit;
-  font-size: 11px;
+  font-size: 12px;
 }
 .notice-inline {
   margin: 0 0 16px;
@@ -4034,7 +4032,7 @@ h3 {
     padding: 20px 16px;
   }
   .post-card h1 {
-    font-size: 22px;
+    font-size: 20px;
   }
   .post-actions .button {
     flex: 1 1 auto;
@@ -4103,10 +4101,10 @@ h3 {
   margin-bottom: 8px;
 }
 .community-guide h3 {
-  font-size: 15px;
+  font-size: 14px;
 }
 .community-about h2 {
-  font-size: 17px;
+  font-size: 18px;
 }
 /* 상세·작성: 카드 제목 크기 통일, 작성 화면은 문제 만들기와 같은 폭·머리글 */
 .post-section-title,
@@ -4144,7 +4142,7 @@ h3 {
 .solve-heading h1 {
   font: var(--text-display);
   font-size: 28px;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 }
 .solve-grid {
   height: calc(100vh - 196px);
@@ -4575,7 +4573,7 @@ h3 {
 }
 .guide-col h3 {
   margin: 0 0 8px;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.4;
 }
 .guide-col ul {
@@ -4908,7 +4906,7 @@ h3 {
   height: 18px;
   border-radius: 50%;
   background: var(--color-surface);
-  font-size: 10px;
+  font-size: 12px;
 }
 .profile-badge.success {
   background: var(--color-success-soft);
@@ -5017,7 +5015,7 @@ h3 {
 }
 .scroller-title {
   color: var(--color-ink-900);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: var(--weight-label);
   line-height: 1.4;
   display: -webkit-box;
@@ -5037,6 +5035,12 @@ h3 {
   font-variant-numeric: tabular-nums;
 }
 .scroller-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+.scroller-empty p {
   margin: 0;
 }
 .lang-name {
@@ -5129,4 +5133,554 @@ h3 {
 }
 .activity-panel .day-detail .day-more {
   margin-top: 4px;
+}
+
+/* ===== 문제 만들기·수정 화면 ===== */
+.create-form {
+  gap: 20px;
+  align-items: stretch;
+}
+.create-page .form-card {
+  padding: 28px;
+  scroll-margin-top: 132px;
+}
+.create-page .form-card h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.create-page .section-heading h2 {
+  margin-bottom: 6px;
+}
+.step-num {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: var(--weight-title);
+}
+/* 위쪽 단계 막대: 스크롤해도 따라다니며 현재 위치와 완료 여부를 알려 준다 */
+.step-nav {
+  position: sticky;
+  top: 72px;
+  z-index: 10;
+  display: flex;
+  gap: 4px;
+  margin: 0 0 20px;
+  padding: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  overflow-x: auto;
+}
+.step-nav button {
+  flex: 1 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-ink-600);
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--weight-label);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.step-nav button:hover {
+  background: var(--color-primary-soft);
+}
+.step-nav button.active {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.step-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-strong);
+  font-size: 12px;
+}
+.step-nav button.done .step-dot {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: #fff;
+}
+.create-page .form-grid {
+  gap: 18px;
+}
+.create-page .form-grid .span-2 {
+  grid-column: span 2;
+}
+.create-page .field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.create-page .field-group > .field-label,
+.md-field .field-label {
+  color: var(--color-ink-700);
+  font-weight: var(--weight-label);
+}
+.limit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.required-mark {
+  color: var(--color-primary);
+  opacity: 0.75;
+  font-weight: var(--weight-label);
+}
+.field-help {
+  color: var(--color-ink-600);
+  font-size: 12px;
+  font-weight: 400;
+}
+.create-page [aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+.create-page input[readonly] {
+  background: var(--color-bg);
+  color: var(--color-ink-600);
+}
+/* Markdown 입력 칸: 작성 / 미리보기 */
+.md-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scroll-margin-top: 140px;
+}
+.md-field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.md-tabs {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+.md-tabs button {
+  min-height: 26px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-ink-600);
+  font: inherit;
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  cursor: pointer;
+}
+.md-tabs button.active {
+  background: var(--color-surface);
+  color: var(--color-ink-900);
+  box-shadow: 0 0 0 1px var(--color-border);
+}
+.md-preview {
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-control);
+  padding: 14px 16px;
+  background: var(--color-surface);
+}
+.optional-box {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: 0 16px;
+}
+.optional-box > summary {
+  cursor: pointer;
+  padding: 12px 0;
+  font-size: 13px;
+  font-weight: var(--weight-label);
+  color: var(--color-ink-700);
+}
+.optional-box[open] > summary {
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 16px;
+}
+.optional-box .form-stack {
+  padding-bottom: 16px;
+}
+/* 테스트케이스 */
+.case-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+}
+.case-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  white-space: nowrap;
+}
+.case-pill.sample {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.case-pill.hidden {
+  background: var(--color-bg);
+  color: var(--color-ink-600);
+  border: 1px solid var(--color-border);
+}
+.case-pill.status-published {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.case-pill.status-draft {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+.case-pill.status-archived {
+  background: var(--color-bg);
+  color: var(--color-ink-600);
+}
+.case-heading strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.case-editor {
+  border-left: 3px solid transparent;
+  padding-left: 14px;
+}
+.case-editor.sample {
+  border-left-color: var(--color-primary);
+}
+.case-editor.hidden {
+  border-left-color: var(--color-border-strong);
+}
+.case-heading {
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+.case-heading .slide-toggle {
+  margin-left: auto;
+}
+.case-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.case-actions .text-button {
+  margin-left: 0;
+  padding: 4px 8px;
+}
+.case-actions .text-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.text-button.danger {
+  color: var(--color-danger);
+}
+.case-collapsed {
+  margin: 0;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.code-input {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  tab-size: 4;
+  white-space: pre;
+  overflow: auto;
+  background: var(--color-bg);
+}
+.case-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+.case-tools .text-button {
+  font-size: 13px;
+}
+/* 확인 목록 */
+.checklist,
+.check-warnings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.checklist {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+}
+.checklist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  font-size: 14px;
+}
+.check-mark {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: var(--weight-title);
+}
+.checklist .ok .check-mark {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.checklist .todo .check-mark {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+.check-state {
+  margin-left: auto;
+  color: var(--color-ink-600);
+  font-size: 12px;
+}
+.checklist .inline-button {
+  margin-left: auto;
+  font-size: 12px;
+}
+.check-warnings {
+  margin-top: 16px;
+  padding: 12px 14px 12px 28px;
+  border-radius: 8px;
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+  font-size: 13px;
+  list-style: disc;
+}
+.check-warnings li + li {
+  margin-top: 4px;
+}
+.create-form .error-message {
+  margin-top: 16px;
+}
+/* 하단 고정 저장 막대 */
+.editor-bar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+}
+.editor-status {
+  margin: 0;
+  color: var(--color-ink-600);
+  font-size: 13px;
+}
+.editor-actions {
+  display: flex;
+  gap: 8px;
+}
+/* 내 문제 */
+.my-problem-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+}
+.my-problem-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+}
+.my-problem-row + .my-problem-row {
+  border-top: 1px solid var(--color-border);
+}
+.my-problem-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.my-problem-main strong {
+  font-size: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.my-problem-main .muted {
+  font-size: 13px;
+}
+.my-problem-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.my-problems-page .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .step-nav button {
+    transition: none;
+  }
+}
+@media (max-width: 720px) {
+  .create-page .form-card {
+    padding: 20px;
+  }
+  .create-page .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .create-page .form-grid .span-2 {
+    grid-column: auto;
+  }
+  .checklist {
+    grid-template-columns: 1fr;
+  }
+  .case-heading .slide-toggle {
+    margin-left: 0;
+  }
+  .editor-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .editor-actions {
+    justify-content: flex-end;
+  }
+  .my-problem-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .step-nav {
+    top: 68px;
+  }
+}
+.create-page label.field-label,
+.md-field-head label.field-label {
+  display: block;
+  gap: 0;
+}
+.label-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.required-mark {
+  font-size: 12px;
+}
+.required-mark::before {
+  content: "· ";
+}
+.code-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.my-problem-actions .text-button {
+  font-size: 13px;
+}
+
+/* 제출 결과: 케이스별 입력·기대 출력·내 출력 */
+.case-results {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.case-result {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  padding: 18px 20px;
+}
+.case-result-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.case-result-head h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.case-pill.match {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.case-pill.mismatch {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+.case-io {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.case-io.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.io-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.io-block > strong {
+  color: var(--color-ink-700);
+  font-size: 13px;
+  font-weight: var(--weight-label);
+}
+.io-block .source-code {
+  margin: 0;
+  min-height: 44px;
+  max-height: 220px;
+  overflow: auto;
+}
+.io-block.good .source-code {
+  box-shadow: inset 0 0 0 1px var(--color-success);
+}
+.io-block.bad .source-code {
+  box-shadow: inset 0 0 0 1px var(--color-danger);
+}
+.case-result > .io-block {
+  margin-top: 12px;
+}
+@media (max-width: 720px) {
+  .case-io.three {
+    grid-template-columns: 1fr;
+  }
 }

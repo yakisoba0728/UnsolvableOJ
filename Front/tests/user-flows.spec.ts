@@ -173,6 +173,8 @@ for (const role of ["AUTHOR", "ADMIN"] as const) {
     await page
       .getByLabel("문제 본문 (Markdown)")
       .fill(problem.statementMarkdown);
+    await page.getByLabel("입력 설명").fill("두 정수");
+    await page.getByLabel("출력 설명").fill("합");
     await page.getByLabel("입력", { exact: true }).fill("1 2");
     await page.getByLabel("기대 출력").fill("3");
     await page
@@ -198,6 +200,115 @@ for (const role of ["AUTHOR", "ADMIN"] as const) {
     });
   });
 }
+
+test.describe("problem editor", () => {
+  test("empty form shows field errors and does not call the API", async ({ page }) => {
+    await authenticate(page, "AUTHOR");
+    let posted = false;
+    await page.route("**/api/v1/problems", (route) => {
+      posted = true;
+      return route.fulfill({ status: 201, json: problem });
+    });
+    await page.goto("/problems/new");
+    await page.getByRole("button", { name: "초안 저장하기 →" }).click();
+    await expect(page.getByText("제목을 입력해 주세요.")).toBeVisible();
+    await expect(page.getByText("문제 본문을 입력해 주세요.")).toBeVisible();
+    await expect(page.getByText("출력 형식을 설명해 주세요.")).toBeVisible();
+    await expect(page.getByText("기대 출력을 입력해 주세요.")).toBeVisible();
+    expect(posted).toBe(false);
+  });
+
+  test("slug follows an English title until edited by hand", async ({ page }) => {
+    await authenticate(page, "AUTHOR");
+    await page.goto("/problems/new");
+    await page.getByLabel("제목", { exact: true }).fill("Sum Of Two");
+    await expect(page.getByLabel("주소용 slug")).toHaveValue("sum-of-two");
+    await page.getByLabel("주소용 slug").fill("my-sum");
+    await page.getByLabel("제목", { exact: true }).fill("Sum Of Three");
+    await expect(page.getByLabel("주소용 slug")).toHaveValue("my-sum");
+  });
+
+  test("preview tab renders the markdown", async ({ page }) => {
+    await authenticate(page, "AUTHOR");
+    await page.goto("/problems/new");
+    await page.getByLabel("문제 본문 (Markdown)").fill("**굵게** 설명");
+    await page.getByRole("tab", { name: "미리보기" }).first().click();
+    await expect(page.locator(".md-preview strong")).toHaveText("굵게");
+  });
+
+  test("test cases can be duplicated and switched between sample and hidden", async ({ page }) => {
+    await authenticate(page, "AUTHOR");
+    await page.goto("/problems/new");
+    await expect(page.getByText("예제 1개", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "복제" }).click();
+    await expect(page.getByText("예제 2개", { exact: true })).toBeVisible();
+    await page
+      .getByRole("radiogroup", { name: "테스트 2 공개 여부" })
+      .getByText("숨김", { exact: true })
+      .click();
+    await expect(page.getByText("예제 1개", { exact: true })).toBeVisible();
+    await expect(page.getByText("숨김 1개", { exact: true })).toBeVisible();
+  });
+
+  test("an unsaved draft is restored after reload", async ({ page }) => {
+    await authenticate(page, "AUTHOR");
+    await page.goto("/problems/new");
+    await page.getByLabel("제목", { exact: true }).fill("임시 저장 문제");
+    await expect(page.getByText(/임시 저장됨/)).toBeVisible();
+    await page.reload();
+    await expect(page.getByText("작성 중이던 문제를 불러왔어요.")).toBeVisible();
+    await expect(page.getByLabel("제목", { exact: true })).toHaveValue("임시 저장 문제");
+  });
+
+  test("author edits an existing problem from the my problems list", async ({ page }) => {
+    await authenticate(page, "AUTHOR");
+    const managed = {
+      ...problem,
+      status: "PUBLISHED",
+      statementMarkdown: "본문\n\n## 힌트\n작은 수부터",
+      testCases: [
+        { input: "1 2\n", expectedOutput: "3\n", isSample: true, score: 1 },
+        { input: "5 5\n", expectedOutput: "10\n", isSample: false, score: 1 },
+      ],
+    };
+    let patched: Record<string, unknown> | undefined;
+    await page.route("**/api/v1/problems/mine", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: problem.id,
+            slug: problem.slug,
+            title: problem.title,
+            status: "PUBLISHED",
+            difficulty: problem.difficulty,
+            currentVersion: 1,
+            updatedAt: problem.updatedAt,
+          },
+        ],
+      }),
+    );
+    await page.route(`**/api/v1/problems/${problem.id}/manage`, (route) =>
+      route.fulfill({ json: managed }),
+    );
+    await page.route(`**/api/v1/problems/${problem.id}`, async (route) => {
+      patched = route.request().postDataJSON();
+      await route.fulfill({ json: managed });
+    });
+    await page.goto("/my-problems");
+    await page.getByRole("link", { name: "수정" }).click();
+    await expect(page).toHaveURL(new RegExp(`/my-problems/${problem.id}/edit$`));
+    await expect(page.getByLabel("제목", { exact: true })).toHaveValue(problem.title);
+    await expect(page.getByLabel("주소용 slug")).toHaveAttribute("readonly", "");
+    await expect(page.getByText("숨김 1개", { exact: true })).toBeVisible();
+    await page.getByLabel("제목", { exact: true }).fill("수정한 제목");
+    await page.getByRole("button", { name: "수정 저장하기 →" }).click();
+    await expect(page).toHaveURL(/\/my-problems$/);
+    await expect(page.getByText(/초안으로 돌아가며/)).toBeVisible();
+    expect(patched).toMatchObject({ title: "수정한 제목" });
+    expect(String(patched?.statementMarkdown)).toContain("## 힌트");
+    expect(patched).not.toHaveProperty("slug");
+  });
+});
 
 for (const slug of ["new", "mine"]) {
   test(`public slug ${slug} opens from the problem list`, async ({ page }) => {
@@ -300,6 +411,49 @@ test("submission passes the source and polls through to the final verdict", asyn
   await expect(page.getByText("2 / 2", { exact: true })).toBeVisible();
   await page.waitForTimeout(2200); // One full polling period after the terminal response.
   expect(reads).toBe(3);
+});
+
+test("a rejected submission shows each public case with input, expected and actual output", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.route("**/api/v1/problems/by-slug/sum", (route) =>
+    route.fulfill({
+      json: { ...problem, samples: [{ input: "1 2\n", expectedOutput: "3\n" }] },
+    }),
+  );
+  await page.route("**/api/v1/submissions/wrong-id", (route) =>
+    route.fulfill({
+      json: {
+        id: "wrong-id",
+        problem: { id: problem.id, slug: "sum", title: problem.title },
+        language: "PYTHON",
+        status: "WRONG_ANSWER",
+        runtimeMs: 10,
+        memoryKb: 1000,
+        passedTestCases: 0,
+        totalTestCases: 2,
+        compileOutput: null,
+        judgeMessage: null,
+        sourceCode: "print(0)",
+        debugOutputs: [
+          { testCase: 1, stdout: "0\n", stderr: "", stdoutTruncated: false, stderrTruncated: false },
+        ],
+        createdAt: "2026-09-01T00:00:00Z",
+        updatedAt: "2026-09-01T00:00:00Z",
+      },
+    }),
+  );
+  await page.route("**/api/v1/submissions", (route) => route.fulfill({ json: [] }));
+  await page.goto("/submissions/wrong-id");
+  const result = page.locator(".case-result");
+  await expect(result.getByText("예제 1")).toBeVisible();
+  await expect(result.getByText("기대 출력과 달라요")).toBeVisible();
+  await expect(result.locator(".io-block").nth(0)).toContainText("1 2");
+  await expect(result.locator(".io-block").nth(1)).toContainText("3");
+  await expect(result.locator(".io-block").nth(2)).toContainText("0");
+  await expect(page.getByRole("link", { name: "코드 수정하기" })).toBeVisible();
+  await expect(page.getByText("코드 수정하고 다시 풀기")).toHaveCount(0);
 });
 
 test("submission API errors preserve the source and re-enable submission", async ({

@@ -178,7 +178,9 @@ export function CommunityWritePage() {
             />
           </div>
           <label>
-            제목 · 필수
+            <span className="label-row">
+              제목<span className="required-mark">필수</span>
+            </span>
             <input
               ref={titleRef}
               value={title}
@@ -224,7 +226,9 @@ export function CommunityWritePage() {
             </div>
           </div>
           <label>
-            본문 · 필수
+            <span className="label-row">
+              본문<span className="required-mark">필수</span>
+            </span>
             <textarea
               ref={bodyRef}
               rows={10}

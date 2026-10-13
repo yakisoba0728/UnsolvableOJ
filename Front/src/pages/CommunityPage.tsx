@@ -31,7 +31,7 @@ const sortOptions = [
 
 const statusOptions = [
   { value: "", label: "전체" },
-  { value: "open", label: "답변 대기" },
+  { value: "unaccepted", label: "채택 전" },
   { value: "accepted", label: "채택 완료" },
 ];
 
@@ -125,17 +125,19 @@ export function CommunityPage() {
   const filtered = useMemo(() => {
     const keyword = urlQuery.trim().toLowerCase();
     const list = posts.filter((post) => {
-      if (category && post.category !== category) return false;
-      if (status === "open" && !(post.category === "question" && answersOf(activity, post.id).length === 0))
-        return false;
-      if (status === "accepted" && acceptedAnswerId(activity, post.id) === null)
-        return false;
-      return (
+      const matchesKeyword =
         !keyword ||
         post.title.toLowerCase().includes(keyword) ||
         post.body.toLowerCase().includes(keyword) ||
-        post.tags.some((tag) => tag.toLowerCase().includes(keyword))
-      );
+        post.tags.some((tag) => tag.toLowerCase().includes(keyword));
+      // 고정 공지는 분류·상태 필터와 상관없이 항상 보인다(검색어는 그대로 적용)
+      if (post.pinned) return matchesKeyword;
+      if (category && post.category !== category) return false;
+      if (status === "unaccepted" && acceptedAnswerId(activity, post.id) !== null)
+        return false;
+      if (status === "accepted" && acceptedAnswerId(activity, post.id) === null)
+        return false;
+      return matchesKeyword;
     });
     list.sort((a, b) => {
       // 고정 공지는 항상 맨 위
@@ -199,8 +201,8 @@ export function CommunityPage() {
   return (
     <div className="page-width community-page">
       <PageHeader
-        title="함께 풀면, 더 멀리."
-        description="궁금한 코드는 질문하고, 발견한 풀이는 나누세요."
+        title="막힌 문제, 같이 풀어요."
+        description="막힌 코드는 물어보고, 나만의 풀이는 나눠 보세요."
       />
 
       <div className="filter-card">

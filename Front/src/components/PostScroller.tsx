@@ -14,6 +14,8 @@ interface PostScrollerProps {
   posts: CommunityPost[];
   activity: ActivityState;
   emptyText: string;
+  /** 글이 없을 때 안내 문구 아래에 보여 줄 이동 버튼 */
+  emptyAction?: { label: string; to: string };
 }
 
 /**
@@ -25,6 +27,7 @@ export function PostScroller({
   posts,
   activity,
   emptyText,
+  emptyAction,
 }: PostScrollerProps) {
   const viewRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -152,7 +155,14 @@ export function PostScroller({
           ))}
         </div>
       ) : (
-        <p className="muted scroller-empty">{emptyText}</p>
+        <div className="scroller-empty">
+          <p className="muted">{emptyText}</p>
+          {emptyAction ? (
+            <Link className="button" to={emptyAction.to}>
+              {emptyAction.label} <span aria-hidden="true">→</span>
+            </Link>
+          ) : null}
+        </div>
       )}
     </section>
   );

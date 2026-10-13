@@ -226,7 +226,7 @@ export function writeAnswerDraft(postId: string, text: string) {
   }
 }
 
-/** "2시간 전" · "어제" 같은 짧은 상대 시각 */
+/** "2시간 전" · "어제" · "3개월 전" 같은 상대 시각(항상 상대 표기로 통일) */
 export function relativeTime(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
   const minutes = Math.floor(diff / 60_000);
@@ -236,6 +236,8 @@ export function relativeTime(iso: string) {
   if (hours < 24) return `${hours}시간 전`;
   const days = Math.floor(hours / 24);
   if (days === 1) return "어제";
-  if (days < 7) return `${days}일 전`;
-  return new Date(iso).toLocaleDateString("ko-KR");
+  if (days < 30) return `${days}일 전`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}개월 전`;
+  return `${Math.floor(days / 365)}년 전`;
 }

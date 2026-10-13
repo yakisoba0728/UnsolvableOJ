@@ -154,13 +154,6 @@ export function ProfilePage() {
     (sum, count) => sum + count,
     0,
   );
-  const languageAccepted = new Map<string, number>();
-  for (const item of history.submissions)
-    if (item.status === "ACCEPTED")
-      languageAccepted.set(
-        item.language,
-        (languageAccepted.get(item.language) ?? 0) + 1,
-      );
   const languageCounts = new Map<string, number>();
   for (const item of history.submissions)
     languageCounts.set(
@@ -367,13 +360,15 @@ export function ProfilePage() {
               title="작성한 글"
               posts={myPosts}
               activity={activity}
-              emptyText="아직 작성한 글이 없어요."
+              emptyText="아직 작성한 글이 없어요. 궁금한 점이나 나만의 풀이를 첫 글로 남겨 보세요."
+              emptyAction={{ label: "글 작성하러 가기", to: "/community/new" }}
             />
             <PostScroller
               title="추천한 글"
               posts={upvotedPosts}
               activity={activity}
-              emptyText="아직 추천한 글이 없어요."
+              emptyText="아직 추천한 글이 없어요. 도움이 된 글에 추천을 눌러 보세요."
+              emptyAction={{ label: "커뮤니티 둘러보기", to: "/community" }}
             />
           </div>
         </div>
@@ -422,13 +417,6 @@ export function ProfilePage() {
                     <div className="lang-row">
                       <span className="lang-name">
                         {languageLabels[language] ?? language}
-                        <span className="lang-sep" aria-hidden="true">
-                          |
-                        </span>
-                        <span className="lang-detail muted">
-                          제출 {count} · 정답{" "}
-                          {languageAccepted.get(language) ?? 0}
-                        </span>
                       </span>
                       <span className="muted">{percent}%</span>
                     </div>
@@ -478,15 +466,6 @@ export function ProfilePage() {
         </aside>
       </div>
 
-      <section className="panel soon-inline">
-        <div>
-          <span className="pill">준비 중</span>
-          <h2>나의 배지</h2>
-          <p className="muted">
-            연속 학습, 정확도 같은 성과 배지가 곧 추가됩니다.
-          </p>
-        </div>
-      </section>
     </div>
   );
 }
