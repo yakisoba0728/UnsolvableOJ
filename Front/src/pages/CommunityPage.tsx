@@ -133,7 +133,10 @@ export function CommunityPage() {
       // 고정 공지는 분류·상태 필터와 상관없이 항상 보인다(검색어는 그대로 적용)
       if (post.pinned) return matchesKeyword;
       if (category && post.category !== category) return false;
-      if (status === "unaccepted" && acceptedAnswerId(activity, post.id) !== null)
+      if (
+        status === "unaccepted" &&
+        acceptedAnswerId(activity, post.id) !== null
+      )
         return false;
       if (status === "accepted" && acceptedAnswerId(activity, post.id) === null)
         return false;
@@ -157,7 +160,12 @@ export function CommunityPage() {
   const activeFilters = [
     category ? { key: "c", label: categoryLabel(category) } : null,
     status
-      ? { key: "s", label: statusOptions.find((item) => item.value === status)?.label ?? status }
+      ? {
+          key: "s",
+          label:
+            statusOptions.find((item) => item.value === status)?.label ??
+            status,
+        }
       : null,
   ].filter((item): item is { key: string; label: string } => item !== null);
   const hasFilter = Boolean(activeFilters.length || urlQuery.trim());
@@ -194,7 +202,8 @@ export function CommunityPage() {
   if (activeFilters.length) lastCount.current = activeFilters.length;
 
   function write(initialCategory?: CategoryKey) {
-    if (session) navigate("/community/new", { state: { category: initialCategory } });
+    if (session)
+      navigate("/community/new", { state: { category: initialCategory } });
     else navigate("/auth", { state: { from: "/community/new" } });
   }
 
@@ -220,66 +229,91 @@ export function CommunityPage() {
             />
             <kbd aria-hidden="true">/</kbd>
           </div>
-            <div className="filter-menu" ref={menuRef}>
-              <button
-                type="button"
-                ref={menuButtonRef}
-                className={`button button-outline filter-menu-button ${activeFilters.length ? "active" : ""}`}
-                aria-haspopup="true"
-                aria-expanded={menuOpen}
-                aria-controls="community-filter-menu"
-                onClick={() => setMenuOpen((open) => !open)}
+          <div className="filter-menu" ref={menuRef}>
+            <button
+              type="button"
+              ref={menuButtonRef}
+              className={`button button-outline filter-menu-button ${activeFilters.length ? "active" : ""}`}
+              aria-haspopup="true"
+              aria-expanded={menuOpen}
+              aria-controls="community-filter-menu"
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                aria-hidden="true"
+                focusable="false"
               >
-                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-                필터
-                <span
-                  className={`filter-count ${activeFilters.length ? "show" : ""}`}
-                  aria-hidden={!activeFilters.length}
-                >
-                  {lastCount.current}
-                </span>
-              </button>
-              {menuOpen ? (
-                <div className="filter-popover" id="community-filter-menu" role="group" aria-label="필터">
-                  <div className="filter-group">
-                    <strong>카테고리</strong>
-                    <SlideToggle
-                      ariaLabel="카테고리"
-                      value={category ?? ""}
-                      options={[
-                        { value: "", label: "전체" },
-                        ...categories.map((item) => ({ value: item.key, label: item.label })),
-                      ]}
-                      defaultValue=""
-                      onChange={(next) => update({ c: next || null })}
-                    />
-                  </div>
-                  <div className="filter-group">
-                    <strong>상태</strong>
-                    <SlideToggle
-                      ariaLabel="상태"
-                      value={status}
-                      options={statusOptions}
-                      defaultValue=""
-                      onChange={(next) => update({ s: next || null })}
-                    />
-                  </div>
+                <path
+                  d="M4 7h16M4 12h16M4 17h16"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+              필터
+              <span
+                className={`filter-count ${activeFilters.length ? "show" : ""}`}
+                aria-hidden={!activeFilters.length}
+              >
+                {lastCount.current}
+              </span>
+            </button>
+            {menuOpen ? (
+              <div
+                className="filter-popover"
+                id="community-filter-menu"
+                role="group"
+                aria-label="필터"
+              >
+                <div className="filter-group">
+                  <strong>카테고리</strong>
+                  <SlideToggle
+                    ariaLabel="카테고리"
+                    value={category ?? ""}
+                    options={[
+                      { value: "", label: "전체" },
+                      ...categories.map((item) => ({
+                        value: item.key,
+                        label: item.label,
+                      })),
+                    ]}
+                    defaultValue=""
+                    onChange={(next) => update({ c: next || null })}
+                  />
                 </div>
-              ) : null}
-            </div>
-            <SlideToggle
-              className="sort-toggle"
-              ariaLabel="정렬"
-              value={sort}
-              options={sortOptions}
-              onChange={(next) => update({ sort: next === "latest" ? null : next })}
-            />
+                <div className="filter-group">
+                  <strong>상태</strong>
+                  <SlideToggle
+                    ariaLabel="상태"
+                    value={status}
+                    options={statusOptions}
+                    defaultValue=""
+                    onChange={(next) => update({ s: next || null })}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </div>
+          <SlideToggle
+            className="sort-toggle"
+            ariaLabel="정렬"
+            value={sort}
+            options={sortOptions}
+            onChange={(next) =>
+              update({ sort: next === "latest" ? null : next })
+            }
+          />
         </div>
         <div className={`applied-wrap ${activeFilters.length ? "open" : ""}`}>
           <div className="applied-inner">
-            <div className="filter-bar applied-bar" role="group" aria-label="적용된 필터">
+            <div
+              className="filter-bar applied-bar"
+              role="group"
+              aria-label="적용된 필터"
+            >
               {chips.map((item) => (
                 <button
                   type="button"
@@ -303,7 +337,14 @@ export function CommunityPage() {
             <div className="title-line">
               <h2>{hasFilter ? "검색 결과" : "전체 글"}</h2>
               {urlQuery.trim() ? (
-                <button type="button" className="inline-button" onClick={() => { setQueryText(""); update({ q: null }); }}>
+                <button
+                  type="button"
+                  className="inline-button"
+                  onClick={() => {
+                    setQueryText("");
+                    update({ q: null });
+                  }}
+                >
                   “{urlQuery.trim()}” 지우기
                 </button>
               ) : null}
@@ -311,7 +352,14 @@ export function CommunityPage() {
             <span className="total-count">{filtered.length}개</span>
           </div>
           {visible.length ? (
-            <ul className="post-list">
+            <ul className="post-list data-list list-posts">
+              <li className="post-head" aria-hidden="true">
+                <span>분류</span>
+                <span>제목</span>
+                <span>추천</span>
+                <span>조회</span>
+                <span />
+              </li>
               {visible.map((post) => {
                 const count = answerCount(post);
                 const accepted = acceptedAnswerId(activity, post.id) !== null;
@@ -320,35 +368,54 @@ export function CommunityPage() {
                     <Link
                       className={`post-row ${post.pinned ? "pinned" : ""}`}
                       to={`/community/${post.id}`}
-                      state={{ listSearch: params.toString() ? `?${params.toString()}` : "" }}
+                      state={{
+                        listSearch: params.toString()
+                          ? `?${params.toString()}`
+                          : "",
+                      }}
                     >
                       <span className="post-category">
                         {categoryLabel(post.category)}
                       </span>
                       <span className="post-main">
                         <span className="post-title-line">
-                          <strong className="post-title">{post.title}</strong>
+                          <strong className="post-title" title={post.title}>
+                            {post.title}
+                          </strong>
                           <span
-                            className={`post-answer-badge ${accepted ? "accepted" : ""}`}
-                            aria-label={`답변 ${count}개${accepted ? ", 채택 완료" : ""}`}
+                            className="post-answer-badge"
+                            title="달린 답변의 수"
                           >
-                            {accepted ? "✓ " : ""}답변 {count}
+                            답변 {count}
                           </span>
+                          {accepted ? (
+                            <span
+                              className="post-accepted-badge"
+                              title="질문자가 답변을 채택했어요"
+                            >
+                              <span aria-hidden="true">✓</span> 채택 완료
+                            </span>
+                          ) : null}
                         </span>
                         <span className="post-meta">
                           {post.author.name} · {relativeTime(post.createdAt)}
                           {post.pinned ? " · 고정" : ""}
                         </span>
                       </span>
-                      <span className="post-stats-cols">
-                        <span>
-                          <b>{upvoteCount(activity, post.id, post.upvotes)}</b>
-                          <small>추천</small>
-                        </span>
-                        <span>
-                          <b>{post.views.toLocaleString()}</b>
-                          <small>조회</small>
-                        </span>
+                      <span
+                        className="post-num post-num-up"
+                        aria-label={`추천 ${upvoteCount(activity, post.id, post.upvotes)}`}
+                      >
+                        {upvoteCount(activity, post.id, post.upvotes)}
+                      </span>
+                      <span
+                        className="post-num post-num-view"
+                        aria-label={`조회 ${post.views.toLocaleString()}`}
+                      >
+                        {post.views.toLocaleString()}
+                      </span>
+                      <span className="row-arrow" aria-hidden="true">
+                        ›
                       </span>
                     </Link>
                   </li>
@@ -366,7 +433,11 @@ export function CommunityPage() {
                 <>
                   <strong>아직 올라온 글이 없어요.</strong>
                   <p>첫 글을 남겨 보세요.</p>
-                  <button type="button" className="button" onClick={() => write()}>
+                  <button
+                    type="button"
+                    className="button"
+                    onClick={() => write()}
+                  >
                     글쓰기
                   </button>
                 </>
@@ -377,22 +448,29 @@ export function CommunityPage() {
           {visible.length > 0 && visible.length < 4 ? (
             <div className="community-nudge">
               <span>찾는 글이 없나요? 궁금한 점을 직접 질문해 보세요.</span>
-              <button type="button" className="button button-small" onClick={() => write()}>
+              <button
+                type="button"
+                className="button button-small"
+                onClick={() => write()}
+              >
                 질문하기
               </button>
             </div>
           ) : null}
 
           {filtered.length > 0 ? (
-          <div className="community-pager">
-            <Pagination
-              page={current}
-              totalPages={totalPages}
-              onChange={(next) =>
-                update({ page: next === 1 ? null : String(next) }, { resetPage: false })
-              }
-            />
-          </div>
+            <div className="community-pager">
+              <Pagination
+                page={current}
+                totalPages={totalPages}
+                onChange={(next) =>
+                  update(
+                    { page: next === 1 ? null : String(next) },
+                    { resetPage: false },
+                  )
+                }
+              />
+            </div>
           ) : null}
         </section>
 
@@ -410,7 +488,11 @@ export function CommunityPage() {
                   <li>시도한 코드와 입력은 무엇인가요?</li>
                   <li>기대한 결과와 실제 결과가 다른가요?</li>
                 </ul>
-                <button type="button" className="button" onClick={() => write()}>
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => write()}
+                >
                   질문 작성하기
                 </button>
               </div>

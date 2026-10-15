@@ -413,6 +413,76 @@ test("submission passes the source and polls through to the final verdict", asyn
   expect(reads).toBe(3);
 });
 
+test("my submissions can be searched, filtered and grouped by problem", async ({
+  page,
+}) => {
+  await authenticate(page);
+  const make = (id: string, title: string, status: string, language: string, at: string) => ({
+    id,
+    problem: { id: `p-${title}`, slug: title, title },
+    language,
+    status,
+    runtimeMs: 10,
+    memoryKb: 2048,
+    passedTestCases: status === "ACCEPTED" ? 2 : 0,
+    totalTestCases: 2,
+    compileOutput: null,
+    judgeMessage: null,
+    createdAt: at,
+    updatedAt: at,
+  });
+  const items = [
+    make("s4", "피보나치", "WRONG_ANSWER", "PYTHON", "2026-10-04T00:00:00Z"),
+    make("s3", "피보나치", "ACCEPTED", "CPP", "2026-10-03T00:00:00Z"),
+    make("s2", "정렬", "WRONG_ANSWER", "PYTHON", "2026-10-02T00:00:00Z"),
+    make("s1", "정렬", "WRONG_ANSWER", "PYTHON", "2026-10-01T00:00:00Z"),
+  ];
+  await page.route("**/api/v1/submissions?*", (route) =>
+    route.fulfill({
+      json: { items, total: 4, page: 1, limit: 100, totalPages: 1 },
+    }),
+  );
+  await page.goto("/submissions");
+  const rows = page.locator(".history-row");
+  await expect(rows).toHaveCount(4);
+
+  await page.getByRole("radiogroup", { name: "판정 필터" }).getByText("정답").click();
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toContainText("피보나치");
+  // 선택한 항목을 다시 누르면 전체로 돌아간다
+  await page.getByRole("radiogroup", { name: "판정 필터" }).getByText("정답").click();
+  await expect(rows).toHaveCount(4);
+
+  await page.getByLabel("제출한 문제 검색").fill("정렬");
+  await expect(rows).toHaveCount(2);
+  await page.getByLabel("제출한 문제 검색").fill("");
+  await expect(rows).toHaveCount(4);
+
+  await page.getByRole("radiogroup", { name: "보기 방식" }).getByText("문제별 최신").click();
+  await expect(rows).toHaveCount(2);
+  await expect(rows.first()).toContainText("이 문제 2회 제출");
+});
+
+test("list rows are whole-row links reachable and openable with the keyboard", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.route("**/api/v1/problems?*", (route) =>
+    route.fulfill({
+      json: { items: [problem], total: 1, totalPages: 1, page: 1, limit: 20 },
+    }),
+  );
+  await page.goto("/problems");
+  const row = page.locator("a.problem-row").first();
+  await expect(row).toHaveAttribute("href", /\/problems\/view\/sum$/);
+  await row.focus();
+  await expect(row).toBeFocused();
+  const outline = await row.evaluate((el) => getComputedStyle(el).outlineStyle);
+  expect(outline).toBe("solid");
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/problems\/view\/sum$/);
+});
+
 test("a rejected submission shows each public case with input, expected and actual output", async ({
   page,
 }) => {

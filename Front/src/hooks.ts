@@ -12,7 +12,7 @@ import type {
 const PAGE_LIMIT = 100;
 const MAX_PAGES = 5;
 
-async function fetchAll<T>(
+export async function fetchAll<T>(
   path: string,
   signal: AbortSignal,
   token?: string,
