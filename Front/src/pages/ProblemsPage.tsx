@@ -6,6 +6,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
 import { Pagination } from "../components/Pagination";
+import { ShuffleIcon } from "../components/ShuffleIcon";
 import {
   ProblemStatus,
   solveState,
@@ -17,6 +18,7 @@ import {
   pickNextProblem,
   pickResume,
   useMyStanding,
+  useStickyTop,
   useSubmissionHistory,
 } from "../hooks";
 import { problemPath } from "../paths";
@@ -43,6 +45,7 @@ const sorts = [
   { value: "easy", label: "쉬운 난이도순" },
   { value: "hard", label: "어려운 난이도순" },
   { value: "title", label: "제목순" },
+  { value: "random", label: "무작위" },
 ];
 
 const statusChips: { value: "" | SolveState; label: string }[] = [
@@ -64,7 +67,11 @@ export function ProblemsPage() {
   const { profile, rank } = useMyStanding(session);
   const [params, setParams] = useSearchParams();
   const searchRef = useRef<HTMLInputElement>(null);
+  const sideRef = useRef<HTMLElement>(null);
+  useStickyTop(sideRef);
   const [announce, setAnnounce] = useState("");
+  // 다시 섞기 아이콘을 누를 때마다 화살표가 오른쪽으로 빠져나갔다 왼쪽에서 다시 들어오게 한다(키가 바뀌면 애니메이션이 처음부터 다시 실행된다).
+  const [spinKey, setSpinKey] = useState(0);
 
   const urlQuery = params.get("q") ?? "";
   const selectedDifficulties = (params.get("d") ?? "")
@@ -72,7 +79,11 @@ export function ProblemsPage() {
     .filter((value): value is Difficulty =>
       order.includes(value as Difficulty),
     );
-  const status = (session ? (params.get("s") ?? "") : "") as "" | SolveState;
+  const statuses = (session ? (params.get("s") ?? "") : "")
+    .split(",")
+    .filter((value): value is SolveState =>
+      ["solved", "attempted", "none"].includes(value),
+    );
   const sort = params.get("sort") ?? "latest";
   const seed = Number(params.get("seed")) || 1;
   const page = Math.max(1, Number(params.get("page")) || 1);
@@ -139,7 +150,11 @@ export function ProblemsPage() {
       !selectedDifficulties.includes(problem.difficulty)
     )
       return false;
-    if (skip !== "status" && status && stateOf(problem) !== status)
+    if (
+      skip !== "status" &&
+      statuses.length &&
+      !statuses.includes(stateOf(problem))
+    )
       return false;
     return (
       !keyword ||
@@ -181,7 +196,9 @@ export function ProblemsPage() {
     (current - 1) * PAGE_SIZE,
     current * PAGE_SIZE,
   );
-  const hasFilter = Boolean(selectedDifficulties.length || status || keyword);
+  const hasFilter = Boolean(
+    selectedDifficulties.length || statuses.length || keyword,
+  );
   const solvedCount = problems.filter((p) => history.solved.has(p.id)).length;
 
   // 이어 풀 문제(시도했지만 못 푼 가장 최근 문제). 없으면 가장 쉬운 안 푼 문제.
@@ -212,7 +229,11 @@ export function ProblemsPage() {
   }
 
   function changeSort(value: string) {
-    update({ sort: value === "latest" ? null : value, seed: null });
+    update({
+      sort: value === "latest" ? null : value,
+      // 무작위를 고를 때마다 새 순서를 만든다.
+      seed: value === "random" ? String(newSeed()) : null,
+    });
   }
 
   return (
@@ -239,37 +260,13 @@ export function ProblemsPage() {
           </div>
           <Select
             ariaLabel="정렬"
-            value={sort === "random" ? "latest" : sort}
+            value={sort}
             options={sorts.map((item) => ({
               value: item.value,
               label: item.label,
             }))}
             onChange={changeSort}
           />
-          <button
-            type="button"
-            className="button button-outline"
-            onClick={shuffle}
-            disabled={filtered.length < 2}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="18"
-              height="18"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path
-                d="M3 7h3.2c1.6 0 3 .8 3.9 2.1l2.8 3.8c.9 1.3 2.3 2.1 3.9 2.1H21M3 17h3.2c1.6 0 3-.8 3.9-2.1M14 8.2c.8-.7 1.8-1.2 2.9-1.2H21M18.5 4 21 7l-2.5 3M18.5 11 21 14l-2.5 3"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            무작위 섞기
-          </button>
         </div>
 
         <div className="filter-groups">
@@ -277,15 +274,16 @@ export function ProblemsPage() {
             <span className="filter-label">상태</span>
             {session ? (
               <SlideToggle
+                multiple
                 ariaLabel="풀이 상태 필터"
-                value={status}
+                values={statuses}
                 options={statusChips.map((item) => ({
                   value: item.value,
                   label: item.label,
                   count: statusCount(item.value),
                 }))}
                 defaultValue=""
-                onChange={(next) => update({ s: next || null })}
+                onChangeValues={(next) => update({ s: next.join(",") || null })}
               />
             ) : (
               <div className="slide-toggle toggle-note">
@@ -299,10 +297,9 @@ export function ProblemsPage() {
           <div className="filter-bar">
             <span className="filter-label">난이도</span>
             <SlideToggle
+              multiple
               ariaLabel="난이도 필터"
-              value={
-                selectedDifficulties.length === 1 ? selectedDifficulties[0] : ""
-              }
+              values={selectedDifficulties}
               options={[
                 { value: "", label: "전체", count: difficultyCount("") },
                 ...difficultyOptions.map((item) => ({
@@ -312,9 +309,24 @@ export function ProblemsPage() {
                 })),
               ]}
               defaultValue=""
-              onChange={(next) => update({ d: next || null })}
+              onChangeValues={(next) => update({ d: next.join(",") || null })}
             />
           </div>
+          {sort === "random" ? (
+            <button
+              type="button"
+              className="shuffle-icon-button"
+              aria-label="무작위로 다시 섞기"
+              title="무작위로 다시 섞기"
+              onClick={() => {
+                setSpinKey((key) => key + 1);
+                shuffle();
+              }}
+              disabled={filtered.length < 2}
+            >
+              <ShuffleIcon playKey={spinKey} />
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -412,7 +424,7 @@ export function ProblemsPage() {
           />
         </section>
 
-        <aside className="side-stack">
+        <aside className="side-stack" ref={sideRef}>
           {profile ? (
             <div className="standing-card">
               <Link to="/profile" className="standing-link">
@@ -501,7 +513,9 @@ export function ProblemsPage() {
                 <li>
                   <button
                     aria-pressed={
-                      status === "none" && !selectedDifficulties.length
+                      statuses.length === 1 &&
+                      statuses[0] === "none" &&
+                      !selectedDifficulties.length
                     }
                     onClick={() => update({ s: "none", d: null })}
                   >

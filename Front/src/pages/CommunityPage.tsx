@@ -4,6 +4,7 @@ import { useAuth } from "../auth";
 import guideArt from "../assets/community-guide.png";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
+import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
 import {
   acceptedAnswerId,
@@ -19,14 +20,15 @@ import {
   type CategoryKey,
   type CommunityPost,
 } from "../community/types";
-import { useDocumentTitle } from "../hooks";
+import { useDocumentTitle, useStickyTop } from "../hooks";
 
 const PAGE_SIZE = 10;
 
 const sortOptions = [
   { value: "latest", label: "최신순" },
+  { value: "views", label: "조회순" },
   { value: "votes", label: "추천순" },
-  { value: "answers", label: "답변 많은 순" },
+  { value: "answers", label: "답변순" },
 ];
 
 const statusOptions = [
@@ -45,9 +47,12 @@ export function CommunityPage() {
   const activity = useActivity();
   const [params, setParams] = useSearchParams();
 
-  const categoryParam = params.get("c");
-  const category = isCategory(categoryParam) ? categoryParam : null;
-  const status = params.get("s") ?? "";
+  const selectedCategories = (params.get("c") ?? "")
+    .split(",")
+    .filter((value): value is CategoryKey => isCategory(value));
+  const statuses = (params.get("s") ?? "")
+    .split(",")
+    .filter((value) => value === "unaccepted" || value === "accepted");
   const sort = params.get("sort") ?? "latest";
   const urlQuery = params.get("q") ?? "";
   const page = Math.max(1, Number(params.get("page")) || 1);
@@ -79,6 +84,8 @@ export function CommunityPage() {
   }
 
   const searchRef = useRef<HTMLInputElement>(null);
+  const sideRef = useRef<HTMLElement>(null);
+  useStickyTop(sideRef);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
@@ -96,110 +103,76 @@ export function CommunityPage() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  // 필터 메뉴: 버튼으로 열고, 바깥 클릭·Esc로 닫는다 (Esc는 버튼으로 포커스를 돌려준다).
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onPointer = (event: PointerEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setMenuOpen(false);
-      menuButtonRef.current?.focus();
-    };
-    document.addEventListener("pointerdown", onPointer);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("pointerdown", onPointer);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [menuOpen]);
-
   const posts = allPosts(activity);
   const answerCount = (post: CommunityPost) =>
     answersOf(activity, post.id).length;
 
+  const keyword = urlQuery.trim().toLowerCase();
+  // 분류·상태 조건을 바꿔 가며 "그 칩을 눌렀을 때의 결과 수"를 셀 수 있게 조건을 인자로 받는다.
+  const matches = (
+    post: CommunityPost,
+    categoryFilter: CategoryKey[],
+    statusFilter: string[],
+  ) => {
+    const matchesKeyword =
+      !keyword ||
+      post.title.toLowerCase().includes(keyword) ||
+      post.body.toLowerCase().includes(keyword) ||
+      post.tags.some((tag) => tag.toLowerCase().includes(keyword));
+    // 고정 공지는 분류·상태 필터와 상관없이 항상 보인다(검색어는 그대로 적용)
+    if (post.pinned) return matchesKeyword;
+    if (categoryFilter.length && !categoryFilter.includes(post.category))
+      return false;
+    if (statusFilter.length) {
+      const accepted = acceptedAnswerId(activity, post.id) !== null;
+      // 고른 상태 중 하나라도 맞으면 보인다(채택 전 + 채택 완료 = 전체).
+      const ok = statusFilter.some((state) =>
+        state === "accepted" ? accepted : !accepted,
+      );
+      if (!ok) return false;
+    }
+    return matchesKeyword;
+  };
+  // 고정 공지는 어떤 필터에서도 항상 보이므로 칩·목록 개수에서는 빼서 합계가 맞게 한다.
+  const categoryCount = (value: CategoryKey | "") =>
+    posts.filter(
+      (post) => !post.pinned && matches(post, value ? [value] : [], statuses),
+    ).length;
+  const statusCount = (value: string) =>
+    posts.filter(
+      (post) =>
+        !post.pinned && matches(post, selectedCategories, value ? [value] : []),
+    ).length;
+
   const filtered = useMemo(() => {
-    const keyword = urlQuery.trim().toLowerCase();
-    const list = posts.filter((post) => {
-      const matchesKeyword =
-        !keyword ||
-        post.title.toLowerCase().includes(keyword) ||
-        post.body.toLowerCase().includes(keyword) ||
-        post.tags.some((tag) => tag.toLowerCase().includes(keyword));
-      // 고정 공지는 분류·상태 필터와 상관없이 항상 보인다(검색어는 그대로 적용)
-      if (post.pinned) return matchesKeyword;
-      if (category && post.category !== category) return false;
-      if (
-        status === "unaccepted" &&
-        acceptedAnswerId(activity, post.id) !== null
-      )
-        return false;
-      if (status === "accepted" && acceptedAnswerId(activity, post.id) === null)
-        return false;
-      return matchesKeyword;
-    });
+    const list = posts.filter((post) =>
+      matches(post, selectedCategories, statuses),
+    );
     list.sort((a, b) => {
       // 고정 공지는 항상 맨 위
       if (Boolean(a.pinned) !== Boolean(b.pinned)) return a.pinned ? -1 : 1;
+      if (sort === "views") return b.views - a.views;
       if (sort === "votes") return b.upvotes - a.upvotes;
       if (sort === "answers") return answerCount(b) - answerCount(a);
       return b.createdAt.localeCompare(a.createdAt);
     });
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activity, category, status, sort, urlQuery]);
+  }, [
+    activity,
+    selectedCategories.join(","),
+    statuses.join(","),
+    sort,
+    urlQuery,
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / size));
   const current = Math.min(page, totalPages);
   const first = (current - 1) * size;
   const visible = filtered.slice(first, first + size);
-  const activeFilters = [
-    category ? { key: "c", label: categoryLabel(category) } : null,
-    status
-      ? {
-          key: "s",
-          label:
-            statusOptions.find((item) => item.value === status)?.label ??
-            status,
-        }
-      : null,
-  ].filter((item): item is { key: string; label: string } => item !== null);
-  const hasFilter = Boolean(activeFilters.length || urlQuery.trim());
-
-  // 필터 태그: 추가는 나타나고, 삭제는 사라진 뒤에 목록에서 빼서 자연스럽게 보이게 한다.
-  const [chips, setChips] = useState<
-    { key: string; label: string; leaving: boolean }[]
-  >(() => activeFilters.map((item) => ({ ...item, leaving: false })));
-  const activeSignature = activeFilters
-    .map((item) => `${item.key}:${item.label}`)
-    .join("|");
-  useEffect(() => {
-    setChips((previous) => {
-      const next = previous.map((chip) => {
-        const active = activeFilters.find((item) => item.key === chip.key);
-        return active
-          ? { ...chip, label: active.label, leaving: false }
-          : { ...chip, leaving: true };
-      });
-      for (const item of activeFilters)
-        if (!next.some((chip) => chip.key === item.key))
-          next.push({ ...item, leaving: false });
-      return next;
-    });
-    const timer = window.setTimeout(
-      () => setChips((previous) => previous.filter((chip) => !chip.leaving)),
-      240,
-    );
-    return () => window.clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeSignature]);
-  // 필터 개수 배지는 사라지는 동안에도 마지막 숫자를 보여 준다.
-  const lastCount = useRef(activeFilters.length);
-  if (activeFilters.length) lastCount.current = activeFilters.length;
+  const hasFilter = Boolean(
+    selectedCategories.length || statuses.length || urlQuery.trim(),
+  );
 
   function write(initialCategory?: CategoryKey) {
     if (session)
@@ -229,76 +202,7 @@ export function CommunityPage() {
             />
             <kbd aria-hidden="true">/</kbd>
           </div>
-          <div className="filter-menu" ref={menuRef}>
-            <button
-              type="button"
-              ref={menuButtonRef}
-              className={`button button-outline filter-menu-button ${activeFilters.length ? "active" : ""}`}
-              aria-haspopup="true"
-              aria-expanded={menuOpen}
-              aria-controls="community-filter-menu"
-              onClick={() => setMenuOpen((open) => !open)}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                width="18"
-                height="18"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path
-                  d="M4 7h16M4 12h16M4 17h16"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-              필터
-              <span
-                className={`filter-count ${activeFilters.length ? "show" : ""}`}
-                aria-hidden={!activeFilters.length}
-              >
-                {lastCount.current}
-              </span>
-            </button>
-            {menuOpen ? (
-              <div
-                className="filter-popover"
-                id="community-filter-menu"
-                role="group"
-                aria-label="필터"
-              >
-                <div className="filter-group">
-                  <strong>카테고리</strong>
-                  <SlideToggle
-                    ariaLabel="카테고리"
-                    value={category ?? ""}
-                    options={[
-                      { value: "", label: "전체" },
-                      ...categories.map((item) => ({
-                        value: item.key,
-                        label: item.label,
-                      })),
-                    ]}
-                    defaultValue=""
-                    onChange={(next) => update({ c: next || null })}
-                  />
-                </div>
-                <div className="filter-group">
-                  <strong>상태</strong>
-                  <SlideToggle
-                    ariaLabel="상태"
-                    value={status}
-                    options={statusOptions}
-                    defaultValue=""
-                    onChange={(next) => update({ s: next || null })}
-                  />
-                </div>
-              </div>
-            ) : null}
-          </div>
-          <SlideToggle
-            className="sort-toggle"
+          <Select
             ariaLabel="정렬"
             value={sort}
             options={sortOptions}
@@ -307,26 +211,38 @@ export function CommunityPage() {
             }
           />
         </div>
-        <div className={`applied-wrap ${activeFilters.length ? "open" : ""}`}>
-          <div className="applied-inner">
-            <div
-              className="filter-bar applied-bar"
-              role="group"
-              aria-label="적용된 필터"
-            >
-              {chips.map((item) => (
-                <button
-                  type="button"
-                  key={item.key}
-                  className={`filter-chip selected ${item.leaving ? "leaving" : ""}`}
-                  tabIndex={item.leaving ? -1 : 0}
-                  onClick={() => update({ [item.key]: null })}
-                >
-                  {item.label} <span aria-hidden="true">✕</span>
-                  <span className="sr-only">{item.label} 필터 해제</span>
-                </button>
-              ))}
-            </div>
+        <div className="filter-groups">
+          <div className="filter-bar">
+            <span className="filter-label">분류</span>
+            <SlideToggle
+              multiple
+              ariaLabel="분류 필터"
+              values={selectedCategories}
+              options={[
+                { value: "", label: "전체", count: categoryCount("") },
+                ...categories.map((item) => ({
+                  value: item.key,
+                  label: item.label,
+                  count: categoryCount(item.key),
+                })),
+              ]}
+              defaultValue=""
+              onChangeValues={(next) => update({ c: next.join(",") || null })}
+            />
+          </div>
+          <div className="filter-bar">
+            <span className="filter-label">상태</span>
+            <SlideToggle
+              multiple
+              ariaLabel="채택 상태 필터"
+              values={statuses}
+              options={statusOptions.map((item) => ({
+                ...item,
+                count: statusCount(item.value),
+              }))}
+              defaultValue=""
+              onChangeValues={(next) => update({ s: next.join(",") || null })}
+            />
           </div>
         </div>
       </div>
@@ -349,7 +265,9 @@ export function CommunityPage() {
                 </button>
               ) : null}
             </div>
-            <span className="total-count">{filtered.length}개</span>
+            <span className="total-count">
+              {filtered.filter((post) => !post.pinned).length}개
+            </span>
           </div>
           {visible.length ? (
             <ul className="post-list data-list list-posts">
@@ -474,7 +392,7 @@ export function CommunityPage() {
           ) : null}
         </section>
 
-        <aside className="side-stack">
+        <aside className="side-stack" ref={sideRef}>
           <div className="community-guide">
             <div className="community-guide-head">
               <h2>질문을 주고 받으며 풀이를 공유하면 모두의 힘이 됩니다.</h2>

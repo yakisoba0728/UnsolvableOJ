@@ -4382,7 +4382,16 @@ h3 {
   transition:
     transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
     width 280ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 150ms ease;
+    opacity 240ms ease;
+}
+/* 다른 구간에 합쳐지는 thumb: 같이 움직이며 서서히 사라진다 */
+.toggle-thumb.leaving {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .toggle-thumb.ready {
+    transition: none;
+  }
 }
 .toggle-option {
   position: relative;
@@ -4468,8 +4477,7 @@ h3 {
     flex-wrap: wrap;
   }
   .community-page .filter-row .search-field,
-  .community-page .filter-row .filter-menu,
-  .community-page .filter-row .sort-toggle {
+  .community-page .filter-row .select {
     flex: 1 1 100%;
     width: 100%;
   }
@@ -5726,15 +5734,11 @@ h3 {
 /* ===== 문제 목록 오른쪽 카드: 하나의 규격(안쪽 여백 20 · 제목 16/700 · 카드 간격 16) ===== */
 .side-stack {
   gap: 16px;
-  /* 카드가 화면보다 길 수 있어 기본은 일반 흐름, 화면이 충분히 높을 때만 따라다닌다 */
-  position: static;
   align-self: start;
-}
-@media (min-height: 1000px) and (min-width: 1101px) {
-  .side-stack {
-    position: sticky;
-    top: 80px;
-  }
+  /* 스크롤을 따라다닌다. 카드가 화면보다 길면 top이 음수가 되어(useStickyTop)
+     아래쪽이 화면 아래에 닿을 때까지 함께 스크롤된 뒤 고정되므로 잘리지 않는다 */
+  position: sticky;
+  top: var(--side-top, 80px);
 }
 .side-stack .standing-card,
 .side-stack .guide-card {
@@ -6177,4 +6181,49 @@ h3 {
 }
 .toggle-note .toggle-option {
   cursor: default;
+}
+
+/* 문제 목록: 정렬이 '무작위'일 때만 보이는 다시 섞기 아이콘 버튼(필터 줄 맨 오른쪽) — 다른 입력 칸과 같은 둥근 사각형 */
+.filter-groups .shuffle-icon-button {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--control-height);
+  height: var(--control-height);
+  margin-left: auto;
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-ink-700);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.shuffle-icon-button:hover:not(:disabled) {
+  background: var(--color-feature);
+  border-color: var(--color-feature-border);
+  color: var(--color-primary);
+}
+.shuffle-icon-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.shuffle-icon-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+/* 섞을 때 두 화살표가 곡선을 따라 얽히며 오른쪽으로 나갔다 왼쪽에서 들어온다(버튼 밖은 잘린다) */
+.shuffle-icon-button {
+  overflow: hidden;
+}
+.shuffle-icon-button .shuffle-icon {
+  overflow: visible;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shuffle-icon-button {
+    transition: none;
+  }
 }

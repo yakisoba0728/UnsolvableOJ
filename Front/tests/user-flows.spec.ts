@@ -90,7 +90,9 @@ test("login returns to the problem and logout removes the saved session", async 
   await expect(page.getByLabel("소스 코드")).toBeVisible();
   await page.getByRole("button", { name: "로그아웃" }).click();
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("link", { name: "로그인" }).first()).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "로그인" }).first(),
+  ).toBeVisible();
   expect(
     await page.evaluate((key) => localStorage.getItem(key), storageKey),
   ).toBeNull();
@@ -202,7 +204,9 @@ for (const role of ["AUTHOR", "ADMIN"] as const) {
 }
 
 test.describe("problem editor", () => {
-  test("empty form shows field errors and does not call the API", async ({ page }) => {
+  test("empty form shows field errors and does not call the API", async ({
+    page,
+  }) => {
     await authenticate(page, "AUTHOR");
     let posted = false;
     await page.route("**/api/v1/problems", (route) => {
@@ -218,7 +222,9 @@ test.describe("problem editor", () => {
     expect(posted).toBe(false);
   });
 
-  test("slug follows an English title until edited by hand", async ({ page }) => {
+  test("slug follows an English title until edited by hand", async ({
+    page,
+  }) => {
     await authenticate(page, "AUTHOR");
     await page.goto("/problems/new");
     await page.getByLabel("제목", { exact: true }).fill("Sum Of Two");
@@ -236,7 +242,9 @@ test.describe("problem editor", () => {
     await expect(page.locator(".md-preview strong")).toHaveText("굵게");
   });
 
-  test("test cases can be duplicated and switched between sample and hidden", async ({ page }) => {
+  test("test cases can be duplicated and switched between sample and hidden", async ({
+    page,
+  }) => {
     await authenticate(page, "AUTHOR");
     await page.goto("/problems/new");
     await expect(page.getByText("예제 1개", { exact: true })).toBeVisible();
@@ -256,11 +264,17 @@ test.describe("problem editor", () => {
     await page.getByLabel("제목", { exact: true }).fill("임시 저장 문제");
     await expect(page.getByText(/임시 저장됨/)).toBeVisible();
     await page.reload();
-    await expect(page.getByText("작성 중이던 문제를 불러왔어요.")).toBeVisible();
-    await expect(page.getByLabel("제목", { exact: true })).toHaveValue("임시 저장 문제");
+    await expect(
+      page.getByText("작성 중이던 문제를 불러왔어요."),
+    ).toBeVisible();
+    await expect(page.getByLabel("제목", { exact: true })).toHaveValue(
+      "임시 저장 문제",
+    );
   });
 
-  test("author edits an existing problem from the my problems list", async ({ page }) => {
+  test("author edits an existing problem from the my problems list", async ({
+    page,
+  }) => {
     await authenticate(page, "AUTHOR");
     const managed = {
       ...problem,
@@ -296,9 +310,16 @@ test.describe("problem editor", () => {
     });
     await page.goto("/my-problems");
     await page.getByRole("link", { name: "수정" }).click();
-    await expect(page).toHaveURL(new RegExp(`/my-problems/${problem.id}/edit$`));
-    await expect(page.getByLabel("제목", { exact: true })).toHaveValue(problem.title);
-    await expect(page.getByLabel("주소용 slug")).toHaveAttribute("readonly", "");
+    await expect(page).toHaveURL(
+      new RegExp(`/my-problems/${problem.id}/edit$`),
+    );
+    await expect(page.getByLabel("제목", { exact: true })).toHaveValue(
+      problem.title,
+    );
+    await expect(page.getByLabel("주소용 slug")).toHaveAttribute(
+      "readonly",
+      "",
+    );
     await expect(page.getByText("숨김 1개", { exact: true })).toBeVisible();
     await page.getByLabel("제목", { exact: true }).fill("수정한 제목");
     await page.getByRole("button", { name: "수정 저장하기 →" }).click();
@@ -349,17 +370,29 @@ test("difficulty changes reset pagination", async ({ page }) => {
   await page.goto("/problems");
   await page.getByRole("button", { name: "다음", exact: true }).click();
   await expect(page).toHaveURL(/[?&]page=2(&|$)/);
-  await page.getByRole("radio", { name: /^어려움/ }).click();
+  await page
+    .getByRole("group", { name: "난이도 필터" })
+    .getByRole("button", { name: /^어려움/ })
+    .click();
   await expect(page).toHaveURL(/[?&]d=HARD(&|$)/);
   await expect(page).not.toHaveURL(/[?&]page=/);
   await expect(
     page.getByRole("button", { name: "이전", exact: true }),
   ).toBeDisabled();
   // 선택된 필터를 다시 누르면 전체로 돌아가고, 필터 초기화 버튼은 없다.
-  await page.getByRole("radio", { name: /^어려움/ }).click();
+  await page
+    .getByRole("group", { name: "난이도 필터" })
+    .getByRole("button", { name: /^어려움/ })
+    .click();
   await expect(page).not.toHaveURL(/[?&]d=/);
-  await expect(page.getByRole("radio", { name: /^전체/ }).first()).toBeChecked();
-  await expect(page.getByRole("button", { name: "필터 초기화" })).toHaveCount(0);
+  await expect(
+    page
+      .getByRole("group", { name: "난이도 필터" })
+      .getByRole("button", { name: /^전체/ }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "필터 초기화" })).toHaveCount(
+    0,
+  );
 });
 
 test("submission passes the source and polls through to the final verdict", async ({
@@ -417,7 +450,13 @@ test("my submissions can be searched, filtered and grouped by problem", async ({
   page,
 }) => {
   await authenticate(page);
-  const make = (id: string, title: string, status: string, language: string, at: string) => ({
+  const make = (
+    id: string,
+    title: string,
+    status: string,
+    language: string,
+    at: string,
+  ) => ({
     id,
     problem: { id: `p-${title}`, slug: title, title },
     language,
@@ -446,19 +485,43 @@ test("my submissions can be searched, filtered and grouped by problem", async ({
   const rows = page.locator(".history-row");
   await expect(rows).toHaveCount(4);
 
-  await page.getByRole("radiogroup", { name: "판정 필터" }).getByText("정답").click();
+  const verdicts = page.getByRole("group", { name: "판정 필터" });
+  await verdicts.getByRole("button", { name: /^정답/ }).click();
   await expect(rows).toHaveCount(1);
   await expect(rows.first()).toContainText("피보나치");
   // 선택한 항목을 다시 누르면 전체로 돌아간다
-  await page.getByRole("radiogroup", { name: "판정 필터" }).getByText("정답").click();
+  await verdicts.getByRole("button", { name: /^정답/ }).click();
   await expect(rows).toHaveCount(4);
+
+  // ⌘/Ctrl+클릭으로 같은 종류 안에서 여러 개를 고른다(정답 + 오답·오류 = 전부)
+  await verdicts
+    .getByRole("button", { name: /^정답/ })
+    .click({ modifiers: ["ControlOrMeta"] });
+  await expect(rows).toHaveCount(1);
+  await verdicts
+    .getByRole("button", { name: /^오답/ })
+    .click({ modifiers: ["ControlOrMeta"] });
+  await expect(rows).toHaveCount(4);
+  await expect(page).toHaveURL(/s=accepted%2Cwrong/);
+  // '전체'는 수정자 키를 무시하고 단독 선택으로 돌아간다
+  await verdicts
+    .getByRole("button", { name: /^전체/ })
+    .click({ modifiers: ["ControlOrMeta"] });
+  await expect(page).not.toHaveURL(/s=/);
+  await expect(verdicts.getByRole("button", { name: /^전체/ })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
 
   await page.getByLabel("제출한 문제 검색").fill("정렬");
   await expect(rows).toHaveCount(2);
   await page.getByLabel("제출한 문제 검색").fill("");
   await expect(rows).toHaveCount(4);
 
-  await page.getByRole("radiogroup", { name: "보기 방식" }).getByText("문제별 최신").click();
+  await page
+    .getByRole("radiogroup", { name: "보기 방식" })
+    .getByText("문제별 최신")
+    .click();
   await expect(rows).toHaveCount(2);
   await expect(rows.first()).toContainText("이 문제 2회 제출");
 });
@@ -483,13 +546,107 @@ test("list rows are whole-row links reachable and openable with the keyboard", a
   await expect(page).toHaveURL(/\/problems\/view\/sum$/);
 });
 
+test("filter toggles allow ⌘/Ctrl+click multi-select within one group only", async ({
+  page,
+}) => {
+  // 샘플 글이 없는 환경에서도 같은 결과가 나오도록 이 테스트가 쓸 글을 저장소에 직접 넣어 둔다.
+  const author = { name: "tester", tier: "브론즈" };
+  const post = (
+    id: string,
+    category: string,
+    title: string,
+    pinned = false,
+  ) => ({
+    id,
+    category,
+    title,
+    body: "본문",
+    tags: [],
+    author,
+    createdAt: "2026-10-01T00:00:00Z",
+    upvotes: 1,
+    views: 10,
+    ...(pinned ? { pinned: true } : {}),
+  });
+  await page.addInitScript(
+    (posts) => {
+      localStorage.setItem(
+        "unsolvable-oj-community-v1",
+        JSON.stringify({
+          posts,
+          answers: [],
+          upvoted: [],
+          saved: [],
+          followed: [],
+          accepted: {},
+        }),
+      );
+    },
+    [
+      post("t-notice", "notice", "고정 공지", true),
+      post("t-q1", "question", "질문 하나"),
+      post("t-q2", "question", "질문 둘"),
+      post("t-f1", "free", "자유 글"),
+      post("t-s1", "solution", "풀이 공유 글"),
+    ],
+  );
+  await page.goto("/community");
+  const category = page.getByRole("group", { name: "분류 필터" });
+  const status = page.getByRole("group", { name: "채택 상태 필터" });
+  const modifier = { modifiers: ["ControlOrMeta" as const] };
+
+  await category.getByRole("button", { name: /^질문/ }).click(modifier);
+  await category.getByRole("button", { name: /^자유/ }).click(modifier);
+  await expect(page).toHaveURL(/c=question%2Cfree/);
+  const labels = await page
+    .locator(".post-row:not(.pinned) .post-category")
+    .allTextContents();
+  expect(labels.length).toBeGreaterThan(0);
+  expect(labels.every((text) => text === "질문" || text === "자유")).toBe(true);
+  await expect(category.getByRole("button", { name: /^질문/ })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(category.getByRole("button", { name: /^자유/ })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(category.getByRole("button", { name: /^전체/ })).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+
+  // 다른 종류(상태) 필터는 영향을 받지 않는다
+  await status.getByRole("button", { name: /^채택 완료/ }).click();
+  await expect(page).toHaveURL(/s=accepted/);
+  await expect(page).toHaveURL(/c=question%2Cfree/);
+
+  // 평범한 클릭은 그 하나만 선택하고, ⌘/Ctrl+클릭으로 다시 누르면 해제된다
+  await category.getByRole("button", { name: /^질문/ }).click(modifier);
+  await expect(page).toHaveURL(/c=free(&|$)/);
+  await category.getByRole("button", { name: /^공지/ }).click();
+  await expect(page).toHaveURL(/c=notice/);
+  await expect(category.getByRole("button", { name: /^자유/ })).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+
+  // '전체'는 수정자 키를 무시한다
+  await category.getByRole("button", { name: /^전체/ }).click(modifier);
+  await expect(page).not.toHaveURL(/c=/);
+  await expect(page).toHaveURL(/s=accepted/);
+});
+
 test("a rejected submission shows each public case with input, expected and actual output", async ({
   page,
 }) => {
   await authenticate(page);
   await page.route("**/api/v1/problems/by-slug/sum", (route) =>
     route.fulfill({
-      json: { ...problem, samples: [{ input: "1 2\n", expectedOutput: "3\n" }] },
+      json: {
+        ...problem,
+        samples: [{ input: "1 2\n", expectedOutput: "3\n" }],
+      },
     }),
   );
   await page.route("**/api/v1/submissions/wrong-id", (route) =>
@@ -507,14 +664,22 @@ test("a rejected submission shows each public case with input, expected and actu
         judgeMessage: null,
         sourceCode: "print(0)",
         debugOutputs: [
-          { testCase: 1, stdout: "0\n", stderr: "", stdoutTruncated: false, stderrTruncated: false },
+          {
+            testCase: 1,
+            stdout: "0\n",
+            stderr: "",
+            stdoutTruncated: false,
+            stderrTruncated: false,
+          },
         ],
         createdAt: "2026-09-01T00:00:00Z",
         updatedAt: "2026-09-01T00:00:00Z",
       },
     }),
   );
-  await page.route("**/api/v1/submissions", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/submissions", (route) =>
+    route.fulfill({ json: [] }),
+  );
   await page.goto("/submissions/wrong-id");
   const result = page.locator(".case-result");
   await expect(result.getByText("예제 1")).toBeVisible();
@@ -546,12 +711,22 @@ test("submission API errors preserve the source and re-enable submission", async
   ).toBeEnabled();
 });
 
-for (const path of ["/profile", "/submissions", "/community/new", "/problems", "/community"]) {
-  test(`logout on ${path} lands on the home page signed out`, async ({ page }) => {
+for (const path of [
+  "/profile",
+  "/submissions",
+  "/community/new",
+  "/problems",
+  "/community",
+]) {
+  test(`logout on ${path} lands on the home page signed out`, async ({
+    page,
+  }) => {
     await authenticate(page);
     await page.goto(path);
     await page.getByRole("button", { name: "로그아웃" }).click();
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByRole("link", { name: "로그인" }).first()).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "로그인" }).first(),
+    ).toBeVisible();
   });
 }

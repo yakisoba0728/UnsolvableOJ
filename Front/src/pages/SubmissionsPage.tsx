@@ -45,7 +45,11 @@ export function SubmissionsPage() {
   const searchRef = useRef<HTMLInputElement>(null);
 
   const urlQuery = params.get("q") ?? "";
-  const status = (params.get("s") ?? "") as StatusGroup;
+  const statuses = (params.get("s") ?? "")
+    .split(",")
+    .filter((value): value is StatusGroup =>
+      ["accepted", "wrong", "pending"].includes(value),
+    );
   const language = params.get("l") ?? "";
   const grouped = params.get("g") === "problem";
   const page = Math.max(1, Number(params.get("page")) || 1);
@@ -122,7 +126,8 @@ export function SubmissionsPage() {
   const { rows, filteredCount } = useMemo(() => {
     const filtered = all.filter(
       (item) =>
-        matchesBase(item) && (!status || groupOf(item.status) === status),
+        matchesBase(item) &&
+        (!statuses.length || statuses.includes(groupOf(item.status))),
     );
     if (!grouped)
       return {
@@ -138,12 +143,12 @@ export function SubmissionsPage() {
       .map((item) => ({ item, count: counts.get(item.problem.id) ?? 1 }));
     return { rows: latest, filteredCount: latest.length };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [all, status, language, keyword, grouped]);
+  }, [all, statuses.join(","), language, keyword, grouped]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
   const visible = rows.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
-  const hasFilter = Boolean(status || language || keyword);
+  const hasFilter = Boolean(statuses.length || language || keyword);
 
   return (
     <div className="page-width page-body">
@@ -182,15 +187,16 @@ export function SubmissionsPage() {
           <div className="filter-bar">
             <span className="filter-label">판정</span>
             <SlideToggle
+              multiple
               ariaLabel="판정 필터"
-              value={status}
+              values={statuses}
               options={statusChips.map((item) => ({
                 value: item.value,
                 label: item.label,
                 count: statusCount(item.value),
               }))}
               defaultValue=""
-              onChange={(next) => update({ s: next || null })}
+              onChangeValues={(next) => update({ s: next.join(",") || null })}
             />
           </div>
           <div className="filter-bar">
