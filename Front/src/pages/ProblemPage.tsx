@@ -150,6 +150,13 @@ export function ProblemPage() {
     submissionId,
     session,
   );
+  const submittingRef = useRef(false);
+  const currentProblemId = useRef<string | null>(null);
+  currentProblemId.current = problem?.id ?? null;
+  // 로그아웃·세션 만료 시 이전 채점 결과 패널을 닫는다.
+  useEffect(() => {
+    if (!session) setSubmissionId(null);
+  }, [session]);
   const finishedId = result && !isJudging(result) ? result.id : null;
 
   const starter = (value: Language) =>
@@ -218,7 +225,10 @@ export function ProblemPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!problem || !session) return;
+    // Ctrl/⌘+Enter로도 제출되므로 버튼 비활성화만으로는 중복 제출을 막을 수 없다.
+    if (!problem || !session || submittingRef.current) return;
+    submittingRef.current = true;
+    const requestedFor = problem.id;
     setSubmitting(true);
     setSubmitError("");
     try {
@@ -230,13 +240,18 @@ export function ProblemPage() {
         },
         session.accessToken,
       );
-      setSubmissionId(submitted.id);
-      setPanelOpen(true);
+      // 응답을 기다리는 사이 다른 문제로 옮겼다면 그 화면에는 결과를 보이지 않는다.
+      if (currentProblemId.current === requestedFor) {
+        setSubmissionId(submitted.id);
+        setPanelOpen(true);
+      }
     } catch (cause) {
-      setSubmitError(
-        cause instanceof Error ? cause.message : "제출하지 못했습니다.",
-      );
+      if (currentProblemId.current === requestedFor)
+        setSubmitError(
+          cause instanceof Error ? cause.message : "제출하지 못했습니다.",
+        );
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   }
@@ -650,6 +665,7 @@ export function ProblemPage() {
                   <strong>채점 결과</strong>
                   {result ? (
                     <span
+                      role="status"
                       className={`verdict verdict-${result.status.toLowerCase()}`}
                     >
                       {result.status.replaceAll("_", " ")}
@@ -682,7 +698,7 @@ export function ProblemPage() {
                   </span>
                 </div>
                 {panelOpen ? (
-                  <div className="judge-panel-body" role="status">
+                  <div className="judge-panel-body">
                     {resultError ? (
                       <p className="error-message" role="alert">
                         {resultError}

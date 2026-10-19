@@ -1145,6 +1145,31 @@ test("a rejected submission is shown under the editor with each example compared
   await expect(page.getByLabel("소스 코드")).toHaveValue("print(0)");
 });
 
+test("Ctrl/⌘+Enter pressed twice creates only one submission", async ({
+  page,
+}) => {
+  await authenticate(page);
+  let posts = 0;
+  await page.route(
+    "**/api/v1/problems/problem-id/submissions",
+    async (route) => {
+      posts += 1;
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      await route.fulfill({
+        status: 429,
+        json: { message: "잠시 후 다시 제출하세요." },
+      });
+    },
+  );
+  await page.goto("/problems/view/sum");
+  const editor = page.getByLabel("소스 코드");
+  await editor.fill("print(1)");
+  await editor.press("ControlOrMeta+Enter");
+  await editor.press("ControlOrMeta+Enter");
+  await expect(page.getByRole("alert")).toHaveText("잠시 후 다시 제출하세요.");
+  expect(posts).toBe(1);
+});
+
 test("submission API errors preserve the source and re-enable submission", async ({
   page,
 }) => {
