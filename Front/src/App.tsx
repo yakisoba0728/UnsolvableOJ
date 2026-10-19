@@ -26,6 +26,11 @@ import { NotFoundPage } from "./components/NotFoundPage";
 import { ThemeToggle } from "./components/ThemeToggle";
 
 // 화면 단위로 코드를 나눠, 처음 방문한 화면의 코드만 내려받는다.
+const AnalysisPage = lazy(() =>
+  import("./pages/AnalysisPage").then((module) => ({
+    default: module.AnalysisPage,
+  })),
+);
 const AuthPage = lazy(() =>
   import("./pages/AuthPage").then((module) => ({ default: module.AuthPage })),
 );
@@ -47,6 +52,26 @@ const CommunityWritePage = lazy(() =>
 const CreateProblemPage = lazy(() =>
   import("./pages/CreateProblemPage").then((module) => ({
     default: module.CreateProblemPage,
+  })),
+);
+const EnterprisePage = lazy(() =>
+  import("./pages/EnterprisePage").then((module) => ({
+    default: module.EnterprisePage,
+  })),
+);
+const EnterpriseFormPage = lazy(() =>
+  import("./pages/EnterpriseFormPage").then((module) => ({
+    default: module.EnterpriseFormPage,
+  })),
+);
+const EnterpriseDetailPage = lazy(() =>
+  import("./pages/EnterpriseDetailPage").then((module) => ({
+    default: module.EnterpriseDetailPage,
+  })),
+);
+const MissionsPage = lazy(() =>
+  import("./pages/MissionsPage").then((module) => ({
+    default: module.MissionsPage,
   })),
 );
 const MyProblemsPage = lazy(() =>
@@ -139,6 +164,14 @@ const upcoming = [
     },
   },
 ];
+
+/** 실제 화면이 있는 메뉴: 위 목록은 메뉴 순서용이고, 이 경로들은 준비 중 안내를 쓰지 않는다. */
+const implemented = new Set([
+  "/community",
+  "/analysis",
+  "/missions",
+  "/enterprise",
+]);
 
 export function App() {
   const { session, setSession } = useAuth();
@@ -414,9 +447,17 @@ export function App() {
               }
             />
             <Route path="/community/:id" element={<CommunityPostPage />} />
-            {/* 커뮤니티는 실제 화면이 있으므로 준비 중 안내에서 제외한다 */}
+            <Route path="/analysis" element={<AnalysisPage />} />
+            <Route path="/missions" element={<MissionsPage />} />
+            <Route path="/enterprise" element={<EnterprisePage />} />
+            <Route path="/enterprise/new" element={<EnterpriseFormPage />} />
+            <Route path="/enterprise/:id" element={<EnterpriseDetailPage />} />
+            <Route
+              path="/enterprise/:id/edit"
+              element={<EnterpriseFormPage />}
+            />
             {upcoming
-              .filter((item) => item.path !== "/community")
+              .filter((item) => !implemented.has(item.path))
               .map((item) => (
                 <Route
                   key={item.path}
