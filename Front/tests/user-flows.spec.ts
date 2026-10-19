@@ -162,6 +162,13 @@ for (const role of ["AUTHOR", "ADMIN"] as const) {
   }) => {
     await authenticate(page, role);
     let submitted: Record<string, unknown> | undefined;
+    // A new slug must not exist during the debounced duplicate check. Once
+    // created, ADMIN's redirect can read the published problem at this URL.
+    await page.route("**/api/v1/problems/by-slug/new", (route) =>
+      submitted
+        ? route.fulfill({ json: { ...problem, ...submitted } })
+        : route.fulfill({ status: 404, json: { message: "Not found" } }),
+    );
     await page.route("**/api/v1/problems", async (route) => {
       submitted = route.request().postDataJSON();
       expect(route.request().headers().authorization).toBe(
@@ -171,6 +178,7 @@ for (const role of ["AUTHOR", "ADMIN"] as const) {
     });
     await page.goto("/problems/new");
     await page.getByLabel("제목", { exact: true }).fill(problem.title);
+    const slugChecked = page.waitForResponse("**/api/v1/problems/by-slug/new");
     await page.getByLabel("주소용 slug").fill("new");
     await page
       .getByLabel("문제 본문 (Markdown)")
@@ -179,6 +187,7 @@ for (const role of ["AUTHOR", "ADMIN"] as const) {
     await page.getByLabel("출력 설명").fill("합");
     await page.getByLabel("입력", { exact: true }).fill("1 2");
     await page.getByLabel("기대 출력").fill("3");
+    expect((await slugChecked).status()).toBe(404);
     await page
       .getByRole("button", {
         name: role === "AUTHOR" ? "초안 저장하기 →" : "문제 게시하기 →",
