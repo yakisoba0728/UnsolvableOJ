@@ -80,29 +80,49 @@ npm run db:bootstrap:admin -- admin@example.com
 로컬 데모용으로는 `npm run db:seed:demo`를 사용할 수 있습니다. `A + B` 문제와 작성자 계정을 만들고 무작위 비밀번호를 터미널에 출력합니다. 재실행하면 작성자 비밀번호가 회전합니다.
 관리자는 `PATCH /api/v1/admin/users/:id/role`로 작성자와 관리자 역할을 지정할 수 있습니다. 역할 변경 시 기존 access token은 즉시 무효화됩니다.
 
+## BOJ 한국어 문제 반입
+
+적격성 감사 결과(`summary.json`, `eligible_problem_ids.json`)와 원본 데이터셋을 사용합니다. `Back/.env`의 DB에 연결하며, 기본 실행은 변환·검증만 하고 DB를 변경하지 않습니다.
+
+```bash
+npm run db:import:boj -- --dataset /path/to/boj_dataset --audit /path/to/boj_import_audit --output reports/boj-import --status PUBLISHED
+# 모든 INSERT와 스냅샷을 검증한 다음 롤백
+npm run db:import:boj -- --dataset /path/to/boj_dataset --audit /path/to/boj_import_audit --output reports/boj-import --status PUBLISHED --rollback-check
+# 실제 반영
+npm run db:import:boj -- --dataset /path/to/boj_dataset --audit /path/to/boj_import_audit --output reports/boj-import --status PUBLISHED --apply
+```
+
+`--status` 기본값은 `DRAFT`입니다. 샘플만 `is_sample=true`로 저장하고 줄바꿈을 LF로 통일합니다. HTML은 표·수식·첨자·이미지를 보존하는 Markdown으로 변환하며, 영상과 동적 시각 자료는 링크로 연결합니다. 원문 링크와 공개 예제 전용 안내를 본문에 표시합니다.
+
+브론즈/실버/골드/플래티넘/다이아·루비를 입문/쉬움/보통/어려움/전문가에 대응시키며, 미평가는 임시 보통으로 분류하고 본문에 표시합니다. 원본 난이도, 태그, 원본 HTML 해시와 반입 해시는 `problem_versions.snapshot.importMetadata`에 보존합니다.
+
+하나의 트랜잭션에서 전용 `boj_import` 작성자, 문제, 예제, 버전, 감사 로그를 저장합니다. 전용 작성자는 무작위 비밀번호를 해시로 저장하고 비밀번호를 출력하지 않습니다. 동일한 반입 해시의 기존 slug는 건너뛰고, 다른 내용의 충돌은 전체 반입을 중단합니다. 재실행으로 기존 문제를 덮어쓰지 않습니다. `--apply` 전 대상 DB를 백업하세요. 결과와 반입 ID는 `--output`의 `import-result.json`에 저장됩니다.
+
+변환 회귀 검사는 `npm run test:boj-import`로 실행합니다.
+
 ## 주요 API
 
-| Method | Path | 인증 | 설명 |
-|---|---|---|---|
-| `POST` | `/api/v1/auth/register` | 없음 | 회원가입 |
-| `POST` | `/api/v1/auth/login` | 없음 | 로그인 |
-| `GET` | `/api/v1/problems` | 없음 | 공개 문제 목록 |
-| `GET` | `/api/v1/problems/by-slug/:slug` | 없음 | 공개 문제와 예제 조회 |
-| `POST` | `/api/v1/problems` | AUTHOR/ADMIN | 문제와 테스트케이스 생성(공개는 ADMIN만) |
-| `GET` | `/api/v1/problems/mine` | AUTHOR/ADMIN | 내 문제 관리 목록(관리자는 전체) |
-| `GET` | `/api/v1/problems/:id/manage` | 작성자/ADMIN | 비공개 테스트케이스 포함 상세 |
-| `PATCH` | `/api/v1/problems/:id` | 작성자/ADMIN | 내용·테스트케이스 수정과 버전 증가 |
-| `PATCH` | `/api/v1/problems/:id/status` | 작성자/ADMIN | 상태 전환(PUBLISHED 공개는 ADMIN 검수) |
-| `POST` | `/api/v1/problems/:id/submissions` | USER | 제출 생성 및 채점 큐 등록 |
-| `GET` | `/api/v1/submissions` | USER | 내 제출 목록 |
-| `GET` | `/api/v1/submissions/:id` | USER | 내 제출 결과와 소스 조회 |
-| `POST` | `/api/v1/submissions/:id/rejudge` | 작성자/ADMIN | 원래 문제 버전으로 재채점 |
-| `GET` | `/api/v1/users/me` | USER | XP, 레벨, 해결 문제 수 |
-| `GET` | `/api/v1/rankings` | 없음 | XP 상위 100명 |
-| `GET` | `/api/v1/admin/users` | ADMIN | 최근 사용자 100명 |
-| `PATCH` | `/api/v1/admin/users/:id/role` | ADMIN | 역할 변경 |
-| `GET` | `/api/v1/admin/audit` | ADMIN | 최근 변경 이력 100건 |
-| `GET` | `/api/v1/admin/ops` | ADMIN | 큐 상태·실패 작업·워커 상태 |
+| Method  | Path                               | 인증         | 설명                                     |
+| ------- | ---------------------------------- | ------------ | ---------------------------------------- |
+| `POST`  | `/api/v1/auth/register`            | 없음         | 회원가입                                 |
+| `POST`  | `/api/v1/auth/login`               | 없음         | 로그인                                   |
+| `GET`   | `/api/v1/problems`                 | 없음         | 공개 문제 목록                           |
+| `GET`   | `/api/v1/problems/by-slug/:slug`   | 없음         | 공개 문제와 예제 조회                    |
+| `POST`  | `/api/v1/problems`                 | AUTHOR/ADMIN | 문제와 테스트케이스 생성(공개는 ADMIN만) |
+| `GET`   | `/api/v1/problems/mine`            | AUTHOR/ADMIN | 내 문제 관리 목록(관리자는 전체)         |
+| `GET`   | `/api/v1/problems/:id/manage`      | 작성자/ADMIN | 비공개 테스트케이스 포함 상세            |
+| `PATCH` | `/api/v1/problems/:id`             | 작성자/ADMIN | 내용·테스트케이스 수정과 버전 증가       |
+| `PATCH` | `/api/v1/problems/:id/status`      | 작성자/ADMIN | 상태 전환(PUBLISHED 공개는 ADMIN 검수)   |
+| `POST`  | `/api/v1/problems/:id/submissions` | USER         | 제출 생성 및 채점 큐 등록                |
+| `GET`   | `/api/v1/submissions`              | USER         | 내 제출 목록                             |
+| `GET`   | `/api/v1/submissions/:id`          | USER         | 내 제출 결과와 소스 조회                 |
+| `POST`  | `/api/v1/submissions/:id/rejudge`  | 작성자/ADMIN | 원래 문제 버전으로 재채점                |
+| `GET`   | `/api/v1/users/me`                 | USER         | XP, 레벨, 해결 문제 수                   |
+| `GET`   | `/api/v1/rankings`                 | 없음         | XP 상위 100명                            |
+| `GET`   | `/api/v1/admin/users`              | ADMIN        | 최근 사용자 100명                        |
+| `PATCH` | `/api/v1/admin/users/:id/role`     | ADMIN        | 역할 변경                                |
+| `GET`   | `/api/v1/admin/audit`              | ADMIN        | 최근 변경 이력 100건                     |
+| `GET`   | `/api/v1/admin/ops`                | ADMIN        | 큐 상태·실패 작업·워커 상태              |
 
 문제 수정은 `currentVersion`을 증가시키고 당시 제한과 테스트케이스를 `problem_versions`에 저장합니다. 작성자가 공개 문제를 수정하면 다시 초안이 되어 관리자 재검수가 필요합니다. 제출은 생성 당시 버전을 참조하므로 이후 수정·보관에도 원래 기준으로 채점합니다. 공개 조회에는 예제만 반환합니다.
 

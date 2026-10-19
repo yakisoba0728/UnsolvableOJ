@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useDocumentTitle } from "../hooks";
-import Markdown from "react-markdown";
 import { Select } from "../components/Select";
+import { ProblemMarkdown } from "../components/ProblemMarkdown";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
@@ -252,14 +252,14 @@ export function ProblemPage() {
               <section>
                 <h2>문제</h2>
                 <div className="markdown">
-                  <Markdown>{problem.statementMarkdown}</Markdown>
+                  <ProblemMarkdown>{problem.statementMarkdown}</ProblemMarkdown>
                 </div>
               </section>
               {problem.inputDescriptionMarkdown ? (
                 <section>
                   <h2>입력</h2>
                   <div className="markdown">
-                    <Markdown>{problem.inputDescriptionMarkdown}</Markdown>
+                    <ProblemMarkdown>{problem.inputDescriptionMarkdown}</ProblemMarkdown>
                   </div>
                 </section>
               ) : null}
@@ -267,7 +267,7 @@ export function ProblemPage() {
                 <section>
                   <h2>출력</h2>
                   <div className="markdown">
-                    <Markdown>{problem.outputDescriptionMarkdown}</Markdown>
+                    <ProblemMarkdown>{problem.outputDescriptionMarkdown}</ProblemMarkdown>
                   </div>
                 </section>
               ) : null}

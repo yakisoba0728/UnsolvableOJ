@@ -21,9 +21,7 @@ defaults:
 jobs:
   check:
     name: CI required
-    # Only repository-owned code may run on the persistent self-hosted machine.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: [self-hosted, Linux, X64, unsolvable-oj, docker]
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     services:
       postgres:
