@@ -1,3 +1,4 @@
+import { Eye, ThumbsUp } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
@@ -293,8 +294,12 @@ export function CommunityPage() {
               <li className="post-head" aria-hidden="true">
                 <span>분류</span>
                 <span>제목</span>
-                <span>추천</span>
-                <span>조회</span>
+                <span>
+                  <ThumbsUp size={14} aria-label="추천" />
+                </span>
+                <span>
+                  <Eye size={14} aria-label="조회" />
+                </span>
               </li>
               {visible.map((post) => {
                 const count = answerCount(post);
@@ -342,12 +347,14 @@ export function CommunityPage() {
                         className="post-num post-num-up"
                         aria-label={`추천 ${upvoteCount(activity, post.id, post.upvotes)}`}
                       >
+                        <ThumbsUp size={14} aria-hidden="true" />
                         {upvoteCount(activity, post.id, post.upvotes)}
                       </span>
                       <span
                         className="post-num post-num-view"
                         aria-label={`조회 ${post.views.toLocaleString()}`}
                       >
+                        <Eye size={14} aria-hidden="true" />
                         {post.views.toLocaleString()}
                       </span>
                     </Link>

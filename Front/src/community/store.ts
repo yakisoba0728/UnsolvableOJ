@@ -99,6 +99,29 @@ export const communityActions = {
     commit({ ...state, posts: [post, ...state.posts] });
     return post;
   },
+  /** 내가 쓴 글의 분류·제목·본문·태그를 고친다. */
+  updatePost(
+    postId: string,
+    input: {
+      category: CategoryKey;
+      title: string;
+      body: string;
+      tags: string[];
+    },
+  ) {
+    commit({
+      ...state,
+      posts: state.posts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              ...input,
+              pinned: input.category === "notice" ? true : undefined,
+            }
+          : post,
+      ),
+    });
+  },
   addAnswer(postId: string, body: string, author: CommunityAuthor) {
     const answer: CommunityAnswer = {
       id: `ua-${Date.now().toString(36)}`,

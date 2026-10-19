@@ -390,6 +390,16 @@ export function App() {
                 )
               }
             />
+            <Route
+              path="/community/:id/edit"
+              element={
+                session ? (
+                  <CommunityWritePage />
+                ) : (
+                  <Navigate to="/auth" replace />
+                )
+              }
+            />
             <Route path="/community/:id" element={<CommunityPostPage />} />
             {/* 커뮤니티는 실제 화면이 있으므로 준비 중 안내에서 제외한다 */}
             {upcoming

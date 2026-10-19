@@ -774,7 +774,7 @@ test.describe("community post: delete own post and answer layout", () => {
     deleted: [],
   };
 
-  test("the answer editor comes first and there is no separate write-answer button", async ({
+  test("the answer editor and the answer list share one card, editor first, with no separate write-answer button", async ({
     page,
   }) => {
     await authenticate(page);
@@ -785,11 +785,15 @@ test.describe("community post: delete own post and answer layout", () => {
     await expect(
       page.getByRole("button", { name: "답변 작성", exact: true }),
     ).toHaveCount(0);
-    const editorTop = (await page.locator(".answer-editor").boundingBox())!.y;
-    const listTop = (await page.locator(".answers-card").boundingBox())!.y;
-    expect(editorTop).toBeLessThan(listTop);
-    // 남의 글에는 삭제 버튼이 없다
-    await expect(page.getByRole("button", { name: "글 삭제" })).toHaveCount(0);
+    const card = page.locator(".answers-card");
+    await expect(card.locator(".answer-editor")).toBeVisible();
+    const editorTop = (await card.locator(".answer-editor").boundingBox())!.y;
+    const toggleTop = (await card.locator(".answers-toggle").boundingBox())!.y;
+    expect(toggleTop).toBeLessThan(editorTop);
+    // 남의 글에는 글 관리(⋮) 메뉴가 없다
+    await expect(page.getByRole("button", { name: "글 관리" })).toHaveCount(0);
+    // 조회수는 아이콘과 숫자로 보인다
+    await expect(page.getByLabel("조회 3")).toBeVisible();
   });
 
   test("the author can delete their own post and it disappears from the list", async ({
@@ -805,13 +809,15 @@ test.describe("community post: delete own post and answer layout", () => {
     }, seedStore);
     await page.goto("/community/mine-1");
     page.once("dialog", (dialog) => dialog.dismiss());
-    await page.getByRole("button", { name: "글 삭제" }).click();
+    await page.getByRole("button", { name: "글 관리" }).click();
+    await page.getByRole("menuitem", { name: "삭제" }).click();
     await expect(
       page.getByRole("heading", { name: "내가 쓴 글" }),
     ).toBeVisible();
 
     page.once("dialog", (dialog) => dialog.accept());
-    await page.getByRole("button", { name: "글 삭제" }).click();
+    await page.getByRole("button", { name: "글 관리" }).click();
+    await page.getByRole("menuitem", { name: "삭제" }).click();
     await expect(page).toHaveURL(/\/community$/);
     await expect(page.getByText("글을 삭제했어요.")).toBeVisible();
     // 샘플 글이 있는 환경에서는 목록이 여러 쪽이라, 검색으로 두 글의 상태를 확인한다.
@@ -820,6 +826,36 @@ test.describe("community post: delete own post and answer layout", () => {
     await expect(page.getByText("내가 쓴 글")).toHaveCount(0);
     await page.goto("/community/mine-1");
     await expect(page.getByText("글을 찾을 수 없어요.")).toBeVisible();
+  });
+
+  test("the author edits their own post from the ⋮ menu; the menu closes with Esc", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.addInitScript((value) => {
+      if (!localStorage.getItem("unsolvable-oj-community-v1"))
+        localStorage.setItem(
+          "unsolvable-oj-community-v1",
+          JSON.stringify(value),
+        );
+    }, seedStore);
+    await page.goto("/community/mine-1");
+    const trigger = page.getByRole("button", { name: "글 관리" });
+    await trigger.click();
+    await expect(page.getByRole("menuitem", { name: "수정" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("menu")).toHaveCount(0);
+    await trigger.click();
+    await page.getByRole("menuitem", { name: "수정" }).click();
+    await expect(page).toHaveURL(/\/community\/mine-1\/edit$/);
+    await expect(page.getByLabel(/^제목/)).toHaveValue("내가 쓴 글");
+    await page.getByLabel(/^제목/).fill("고친 제목");
+    await page.getByRole("button", { name: "수정 저장" }).click();
+    await expect(page).toHaveURL(/\/community\/mine-1$/);
+    await expect(page.getByText("글을 수정했어요.")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "고친 제목" }),
+    ).toBeVisible();
   });
 });
 

@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
+import {
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  Pencil,
+  ThumbsUp,
+  Trash2,
+} from "lucide-react";
+import { ActionMenu } from "../components/ActionMenu";
 import { useAuth } from "../auth";
 import {
   acceptedAnswerId,
@@ -149,10 +158,30 @@ export function CommunityPostPage() {
       <div className="post-layout">
         <div className="post-column">
           <article className="post-card">
-            <span className="post-chip">
-              {categoryLabel(post.category)}
-              {post.tags[0] ? ` · ${post.tags[0]}` : ""}
-            </span>
+            <div className="post-card-head">
+              <span className="post-chip">
+                {categoryLabel(post.category)}
+                {post.tags[0] ? ` · ${post.tags[0]}` : ""}
+              </span>
+              {isMine ? (
+                <ActionMenu
+                  label="글 관리"
+                  items={[
+                    {
+                      label: "수정",
+                      icon: <Pencil size={15} aria-hidden="true" />,
+                      onSelect: () => navigate(`/community/${post.id}/edit`),
+                    },
+                    {
+                      label: "삭제",
+                      icon: <Trash2 size={15} aria-hidden="true" />,
+                      danger: true,
+                      onSelect: deleteMyPost,
+                    },
+                  ]}
+                />
+              ) : null}
+            </div>
             <h1>{post.title}</h1>
             <div className="post-byline">
               <div className="post-author-line">
@@ -182,7 +211,14 @@ export function CommunityPostPage() {
                 ))}
               </ul>
             ) : null}
-            <p className="post-views">조회 {post.views.toLocaleString()}</p>
+            <p
+              className="post-views icon-count"
+              aria-label={`조회 ${post.views.toLocaleString()}`}
+              title="조회수"
+            >
+              <Eye size={15} aria-hidden="true" />
+              {post.views.toLocaleString()}
+            </p>
             <div className="post-actions">
               <button
                 type="button"
@@ -192,61 +228,11 @@ export function CommunityPostPage() {
                   requireLogin(() => communityActions.toggleUpvote(post.id))
                 }
               >
-                ▲ 추천 {upvoteCount(activity, post.id, post.upvotes)}
+                <ThumbsUp size={15} aria-hidden="true" /> 추천{" "}
+                {upvoteCount(activity, post.id, post.upvotes)}
               </button>
-              {isMine ? (
-                <button
-                  type="button"
-                  className="button button-danger-outline"
-                  onClick={deleteMyPost}
-                >
-                  글 삭제
-                </button>
-              ) : null}
             </div>
           </article>
-
-          <form
-            className="post-card answer-editor"
-            onSubmit={submit}
-            noValidate
-          >
-            <h2 className="post-section-title">답변 작성</h2>
-            <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
-            {session ? (
-              <>
-                <textarea
-                  ref={editorRef}
-                  rows={6}
-                  aria-label="답변 내용"
-                  aria-invalid={Boolean(error)}
-                  placeholder="답변을 입력하세요."
-                  value={draft}
-                  onChange={(event) => onDraftChange(event.target.value)}
-                />
-                {error ? (
-                  <p className="error-message" role="alert">
-                    {error}
-                  </p>
-                ) : null}
-                <div className="answer-footer">
-                  <span className="muted">
-                    등록 전까지 작성 내용을 유지합니다.
-                  </span>
-                  <button className="button" disabled={pending}>
-                    {pending ? "등록 중…" : "답변 등록"}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <p className="login-prompt">
-                답변을 남기려면 로그인해 주세요.{" "}
-                <Link to="/auth" state={{ from: `/community/${id}` }}>
-                  로그인하기
-                </Link>
-              </p>
-            )}
-          </form>
 
           <section className="post-card answers-card" aria-label="답변">
             <h2 className="post-section-title">
@@ -259,10 +245,51 @@ export function CommunityPostPage() {
               >
                 <span>답변 {answers.length}</span>
                 <span className="answers-chevron" aria-hidden="true">
-                  {answersOpen ? "▴" : "▾"}
+                  {answersOpen ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
                 </span>
               </button>
             </h2>
+            <form className="answer-editor" onSubmit={submit} noValidate>
+              <h3 className="answer-editor-title">답변 작성</h3>
+              <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
+              {session ? (
+                <>
+                  <textarea
+                    ref={editorRef}
+                    rows={6}
+                    aria-label="답변 내용"
+                    aria-invalid={Boolean(error)}
+                    placeholder="답변을 입력하세요."
+                    value={draft}
+                    onChange={(event) => onDraftChange(event.target.value)}
+                  />
+                  {error ? (
+                    <p className="error-message" role="alert">
+                      {error}
+                    </p>
+                  ) : null}
+                  <div className="answer-footer">
+                    <span className="muted">
+                      등록 전까지 작성 내용을 유지합니다.
+                    </span>
+                    <button className="button" disabled={pending}>
+                      {pending ? "등록 중…" : "답변 등록"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="login-prompt">
+                  답변을 남기려면 로그인해 주세요.{" "}
+                  <Link to="/auth" state={{ from: `/community/${id}` }}>
+                    로그인하기
+                  </Link>
+                </p>
+              )}
+            </form>
             {shown.length ? (
               <ul className="answer-list" id="answer-list">
                 {shown.map((answer) => {
@@ -291,7 +318,8 @@ export function CommunityPostPage() {
                               )
                             }
                           >
-                            ▲ {upvoteCount(activity, answer.id, answer.upvotes)}
+                            <ThumbsUp size={13} aria-hidden="true" />{" "}
+                            {upvoteCount(activity, answer.id, answer.upvotes)}
                           </button>
                           {isMine && post.category === "question" ? (
                             <button
