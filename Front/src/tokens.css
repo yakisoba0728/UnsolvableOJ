@@ -74,13 +74,12 @@
   /* Typography */
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
     "Noto Sans KR", system-ui, "Segoe UI", Roboto, sans-serif;
-  /* 제목·큰 숫자 전용: 영문·숫자는 Plus Jakarta Sans, 한글은 Pretendard로 이어진다 */
-  --font-display: "Plus Jakarta Sans", "Pretendard Variable", Pretendard,
-    -apple-system, BlinkMacSystemFont, "Noto Sans KR", system-ui, sans-serif;
+  /* 제목·큰 숫자도 본문과 같은 Pretendard 한 가족: 한글·영문 높이가 어긋나지 않게 한다 */
+  --font-display: var(--font-sans);
   --font-mono: "JetBrains Mono", monospace;
 
-  --text-display: 800 32px/1.25 var(--font-display);
-  --text-h1: 800 24px/1.3 var(--font-display);
+  --text-display: 700 32px/1.25 var(--font-display);
+  --text-h1: 700 24px/1.3 var(--font-display);
   --text-section: 700 20px/1.35 var(--font-display);
   --text-body: 400 16px/1.7 var(--font-sans);
   --text-caption: 400 14px/1.5 var(--font-sans);
@@ -90,7 +89,7 @@
   --weight-body: 400; /* 본문·보조 설명 */
   --weight-label: 600; /* 메뉴·버튼·칩·배지·라벨 */
   --weight-title: 700; /* 섹션·카드 제목 */
-  --weight-display: 800; /* 페이지 제목·큰 숫자 */
+  --weight-display: 700; /* 페이지 제목·큰 숫자 */
 
   /* Spacing (8px grid) */
   --space-1: 8px;

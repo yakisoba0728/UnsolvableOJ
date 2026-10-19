@@ -75,8 +75,32 @@ export class CommunityCommentDto {
 
 export class CommunityQuery {
   @IsOptional()
-  @IsIn(['latest', 'votes', 'answers'])
-  sort?: 'latest' | 'votes' | 'answers';
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.split(',') : value,
+  )
+  @IsArray()
+  @ArrayMaxSize(5)
+  @IsEnum(CommunityCategory, { each: true })
+  @ArrayUnique()
+  categories?: CommunityCategory[];
+
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.split(',') : value,
+  )
+  @IsArray()
+  @ArrayMaxSize(2)
+  @IsIn(['accepted', 'unaccepted'], { each: true })
+  @ArrayUnique()
+  status?: string[];
+
+  @IsOptional()
+  @IsIn(['true', 'false'])
+  includePinned?: string;
+
+  @IsOptional()
+  @IsIn(['latest', 'votes', 'answers', 'views'])
+  sort?: 'latest' | 'votes' | 'answers' | 'views';
   @IsOptional()
   @IsEnum(CommunityCategory)
   category?: CommunityCategory;

@@ -1,9 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { useAuth } from "../auth";
 import guideArt from "../assets/community-guide.png";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
+import { Select } from "../components/Select";
+import { SlideToggle } from "../components/SlideToggle";
 import {
   acceptedAnswerId,
   allPosts,
@@ -18,16 +25,23 @@ import {
   type CategoryKey,
   type CommunityPost,
 } from "../community/types";
-import { useDocumentTitle } from "../hooks";
+import { useDocumentTitle, useStickyTop } from "../hooks";
 
 import { isDemo } from "../api";
 import { listPosts, errorMessage, type Page } from "../community/api";
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 const sortOptions = [
   { value: "latest", label: "최신순" },
+  { value: "views", label: "조회순" },
   { value: "votes", label: "추천순" },
-  { value: "answers", label: "답변 많은 순" },
+  { value: "answers", label: "답변순" },
+];
+
+const statusOptions = [
+  { value: "", label: "전체" },
+  { value: "unaccepted", label: "채택 전" },
+  { value: "accepted", label: "채택 완료" },
 ];
 
 const isCategory = (value: string | null): value is CategoryKey =>
@@ -37,17 +51,31 @@ export function CommunityPage() {
   useDocumentTitle("커뮤니티");
   const { session } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [notice, setNotice] = useState(
+    (location.state as { notice?: string } | null)?.notice ?? "",
+  );
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(""), 4000);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
   const activity = useActivity();
   const [params, setParams] = useSearchParams();
 
-  const categoryParam = params.get("c");
-  const category = isCategory(categoryParam) ? categoryParam : null;
+  const selectedCategories = (params.get("c") ?? "")
+    .split(",")
+    .filter((value): value is CategoryKey => isCategory(value));
+  const statuses = (params.get("s") ?? "")
+    .split(",")
+    .filter((value) => value === "unaccepted" || value === "accepted");
   const sort = params.get("sort") ?? "latest";
   const urlQuery = params.get("q") ?? "";
   const page = Math.min(
     100000,
     Math.max(1, Math.floor(Number(params.get("page"))) || 1),
   );
+  const size = PAGE_SIZE;
 
   // 검색어는 입력 중에는 로컬 상태로 두고, 잠시 멈추면 주소에 반영한다.
   const [queryText, setQueryText] = useState(urlQuery);
@@ -74,6 +102,26 @@ export function CommunityPage() {
     setParams(next, { replace: true });
   }
 
+  const searchRef = useRef<HTMLInputElement>(null);
+  const sideRef = useRef<HTMLElement>(null);
+  useStickyTop(sideRef);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const typing =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target?.isContentEditable;
+      if (event.key === "/" && !typing && !event.metaKey && !event.ctrlKey) {
+        event.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
   const [remote, setRemote] = useState<Page<CommunityPost>>({
     items: [],
     total: 0,
@@ -92,9 +140,14 @@ export function CommunityPage() {
     const query = new URLSearchParams({
       page: String(page),
       limit: String(PAGE_SIZE),
-      sort: ["latest", "votes", "answers"].includes(sort) ? sort : "latest",
+      sort: ["latest", "votes", "answers", "views"].includes(sort)
+        ? sort
+        : "latest",
     });
-    if (category) query.set("category", category.toUpperCase());
+    query.set("includePinned", "true");
+    if (selectedCategories.length)
+      query.set("categories", selectedCategories.join(",").toUpperCase());
+    if (statuses.length) query.set("status", statuses.join(","));
     if (urlQuery) query.set("q", urlQuery);
     if (problemId) query.set("problemId", problemId);
     listPosts(query, controller.signal)
@@ -111,45 +164,108 @@ export function CommunityPage() {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [category, sort, urlQuery, page, problemId, retry]);
+  }, [
+    selectedCategories.join(","),
+    statuses.join(","),
+    sort,
+    urlQuery,
+    page,
+    problemId,
+    retry,
+  ]);
   const posts = allPosts(activity);
   const answerCount = (post: CommunityPost) =>
     answersOf(activity, post.id).length;
 
+  const keyword = urlQuery.trim().toLowerCase();
+  // 분류·상태 조건을 바꿔 가며 "그 칩을 눌렀을 때의 결과 수"를 셀 수 있게 조건을 인자로 받는다.
+  const matches = (
+    post: CommunityPost,
+    categoryFilter: CategoryKey[],
+    statusFilter: string[],
+  ) => {
+    const matchesKeyword =
+      !keyword ||
+      post.title.toLowerCase().includes(keyword) ||
+      post.body.toLowerCase().includes(keyword) ||
+      post.tags.some((tag) => tag.toLowerCase().includes(keyword));
+    // 고정 공지는 분류·상태 필터와 상관없이 항상 보인다(검색어는 그대로 적용)
+    if (post.pinned) return matchesKeyword;
+    if (categoryFilter.length && !categoryFilter.includes(post.category))
+      return false;
+    if (statusFilter.length) {
+      const accepted = isDemo
+        ? acceptedAnswerId(activity, post.id) !== null
+        : Boolean(post.acceptedCommentId);
+      // 고른 상태 중 하나라도 맞으면 보인다(채택 전 + 채택 완료 = 전체).
+      const ok = statusFilter.some((state) =>
+        state === "accepted" ? accepted : !accepted,
+      );
+      if (!ok) return false;
+    }
+    return matchesKeyword;
+  };
+  // 고정 공지는 어떤 필터에서도 항상 보이므로 칩·목록 개수에서는 빼서 합계가 맞게 한다.
+  const categoryCount = (value: CategoryKey | "") =>
+    !isDemo
+      ? (remote.facets?.categories[value.toUpperCase()] ?? 0)
+      : posts.filter(
+          (post) =>
+            !post.pinned && matches(post, value ? [value] : [], statuses),
+        ).length;
+  const statusCount = (value: string) =>
+    !isDemo
+      ? (remote.facets?.statuses[value] ?? 0)
+      : posts.filter(
+          (post) =>
+            !post.pinned &&
+            matches(post, selectedCategories, value ? [value] : []),
+        ).length;
+
   const filtered = useMemo(() => {
-    const keyword = urlQuery.trim().toLowerCase();
-    const list = posts.filter(
-      (post) =>
-        (!category || post.category === category) &&
-        (!keyword ||
-          post.title.toLowerCase().includes(keyword) ||
-          post.body.toLowerCase().includes(keyword) ||
-          post.tags.some((tag) => tag.toLowerCase().includes(keyword))),
+    const list = posts.filter((post) =>
+      matches(post, selectedCategories, statuses),
     );
     list.sort((a, b) => {
       // 고정 공지는 항상 맨 위
       if (Boolean(a.pinned) !== Boolean(b.pinned)) return a.pinned ? -1 : 1;
+      if (sort === "views") return b.views - a.views;
       if (sort === "votes") return b.upvotes - a.upvotes;
       if (sort === "answers") return answerCount(b) - answerCount(a);
       return b.createdAt.localeCompare(a.createdAt);
     });
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activity, category, sort, urlQuery]);
+  }, [
+    activity,
+    selectedCategories.join(","),
+    statuses.join(","),
+    sort,
+    urlQuery,
+  ]);
 
   const totalPages = isDemo
-    ? Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+    ? Math.max(1, Math.ceil(filtered.length / size))
     : Math.max(1, remote.totalPages);
   const current = Math.min(page, totalPages);
-  const visible = isDemo
-    ? filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE)
-    : remote.items;
-  const hasFilter = Boolean(category || urlQuery.trim());
+  const first = (current - 1) * size;
+  const visible = isDemo ? filtered.slice(first, first + size) : remote.items;
+  const hasFilter = Boolean(
+    selectedCategories.length ||
+    statuses.length ||
+    urlQuery.trim() ||
+    problemId,
+  );
 
-  function write() {
+  function write(initialCategory?: CategoryKey) {
     if (session)
       navigate(
-        `/community/new?${new URLSearchParams({ ...(category ? { c: category } : {}), ...(problemId ? { problemId } : {}) })}`,
+        "/community/new?" +
+          new URLSearchParams({
+            ...(problemId ? { problemId } : {}),
+            ...(initialCategory ? { c: initialCategory } : {}),
+          }),
+        { state: { category: initialCategory } },
       );
     else navigate("/auth", { state: { from: "/community/new" } });
   }
@@ -157,70 +273,102 @@ export function CommunityPage() {
   return (
     <div className="page-width community-page">
       <PageHeader
-        title="함께 풀면, 더 멀리."
-        description="궁금한 코드는 질문하고, 발견한 풀이는 나누세요."
-        aside={
-          <button type="button" className="button" onClick={write}>
-            글쓰기
-          </button>
-        }
+        title="막힌 문제, 같이 풀어요."
+        description="막힌 코드는 물어보고, 나만의 풀이는 나눠 보세요."
       />
+
+      {notice ? (
+        <p className="success-message" role="status">
+          {notice}
+        </p>
+      ) : null}
+
+      <div className="filter-card">
+        <div className="filter-row">
+          <div className="search-field">
+            <input
+              ref={searchRef}
+              type="search"
+              className="search-input"
+              placeholder="질문이나 풀이를 검색해 보세요"
+              aria-label="게시글 검색"
+              maxLength={100}
+              aria-keyshortcuts="/"
+              value={queryText}
+              onChange={(event) => setQueryText(event.target.value)}
+            />
+            <kbd aria-hidden="true">/</kbd>
+          </div>
+          <Select
+            ariaLabel="정렬"
+            value={sort}
+            options={sortOptions}
+            onChange={(next) =>
+              update({ sort: next === "latest" ? null : next })
+            }
+          />
+        </div>
+        <div className="filter-groups">
+          <div className="filter-bar">
+            <span className="filter-label">분류</span>
+            <SlideToggle
+              multiple
+              ariaLabel="분류 필터"
+              values={selectedCategories}
+              options={[
+                { value: "", label: "전체", count: categoryCount("") },
+                ...categories.map((item) => ({
+                  value: item.key,
+                  label: item.label,
+                  count: categoryCount(item.key),
+                })),
+              ]}
+              defaultValue=""
+              onChangeValues={(next) => update({ c: next.join(",") || null })}
+            />
+          </div>
+          <div className="filter-bar">
+            <span className="filter-label">상태</span>
+            <SlideToggle
+              multiple
+              ariaLabel="채택 상태 필터"
+              values={statuses}
+              options={statusOptions.map((item) => ({
+                ...item,
+                count: statusCount(item.value),
+              }))}
+              defaultValue=""
+              onChangeValues={(next) => update({ s: next.join(",") || null })}
+            />
+          </div>
+        </div>
+      </div>
 
       <div className="community-layout">
         <section aria-label="커뮤니티 글 목록">
-          <div className="community-toolbar">
-            <div className="community-tabs" role="group" aria-label="카테고리">
-              <button
-                type="button"
-                className={`community-tab ${category === null ? "selected" : ""}`}
-                aria-pressed={category === null}
-                onClick={() => update({ c: null })}
-              >
-                전체
-              </button>
-              {categories.map((item) => (
+          <div className="section-heading compact">
+            <div className="title-line">
+              <h2>{hasFilter ? "검색 결과" : "전체 글"}</h2>
+              {urlQuery.trim() ? (
                 <button
                   type="button"
-                  key={item.key}
-                  className={`community-tab ${category === item.key ? "selected" : ""}`}
-                  aria-pressed={category === item.key}
-                  onClick={() => update({ c: item.key })}
+                  className="inline-button"
+                  onClick={() => {
+                    setQueryText("");
+                    update({ q: null });
+                  }}
                 >
-                  {item.label}
+                  “{urlQuery.trim()}” 지우기
                 </button>
-              ))}
+              ) : null}
             </div>
-            <div className="community-find">
-              <input
-                type="search"
-                className="community-search"
-                placeholder="글 검색"
-                aria-label="커뮤니티 검색"
-                maxLength={100}
-                value={queryText}
-                onChange={(event) => setQueryText(event.target.value)}
-              />
-              <select
-                aria-label="정렬"
-                value={sort}
-                onChange={(event) =>
-                  update({
-                    sort:
-                      event.target.value === "latest"
-                        ? null
-                        : event.target.value,
-                  })
-                }
-              >
-                {sortOptions.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <span className="total-count">
+              {isDemo
+                ? filtered.filter((post) => !post.pinned).length
+                : (remote.filteredTotal ?? remote.total)}
+              개
+            </span>
           </div>
-
           {problemId && (
             <p className="notice-inline">
               문제에 연결된 글{" "}
@@ -240,38 +388,74 @@ export function CommunityPage() {
               <button onClick={() => setRetry((n) => n + 1)}>다시 시도</button>
             </div>
           ) : visible.length ? (
-            <ul className="post-list">
+            <ul className="post-list data-list list-posts">
+              <li className="post-head" aria-hidden="true">
+                <span>분류</span>
+                <span>제목</span>
+                <span>추천</span>
+                <span>조회</span>
+                <span />
+              </li>
               {visible.map((post) => {
                 const count = isDemo
                   ? answerCount(post)
                   : (post.commentCount ?? 0);
-                const accepted = isDemo
-                  ? acceptedAnswerId(activity, post.id) !== null
-                  : Boolean(post.acceptedCommentId);
+                const accepted = acceptedAnswerId(activity, post.id) !== null;
                 return (
                   <li key={post.id}>
                     <Link
                       className={`post-row ${post.pinned ? "pinned" : ""}`}
                       to={`/community/${post.id}`}
+                      state={{
+                        listSearch: params.toString()
+                          ? `?${params.toString()}`
+                          : "",
+                      }}
                     >
                       <span className="post-category">
                         {categoryLabel(post.category)}
                       </span>
                       <span className="post-main">
-                        <strong className="post-title">{post.title}</strong>
-                        <span className="post-meta">
-                          {post.author.name} · {relativeTime(post.createdAt)}
-                          {post.pinned
-                            ? " · 고정"
-                            : ` · 추천 ${isDemo ? upvoteCount(activity, post.id, post.upvotes) : post.upvotes}`}
+                        <span className="post-title-line">
+                          <strong className="post-title" title={post.title}>
+                            {post.title}
+                          </strong>
+                          <span
+                            className="post-answer-badge"
+                            title="달린 답변의 수"
+                          >
+                            답변 {count}
+                          </span>
                           {accepted ? (
-                            <span className="post-accepted"> · 채택 완료</span>
+                            <span
+                              className="post-accepted-badge"
+                              title="질문자가 답변을 채택했어요"
+                            >
+                              <span aria-hidden="true">✓</span> 채택 완료
+                            </span>
                           ) : null}
                         </span>
+                        <span className="post-meta">
+                          {post.author.name} · {relativeTime(post.createdAt)}
+                          {post.pinned ? " · 고정" : ""}
+                        </span>
                       </span>
-                      <span className="post-answers">
-                        <small>답변</small>
-                        <b>{count}</b>
+                      <span
+                        className="post-num post-num-up"
+                        aria-label={`추천 ${isDemo ? upvoteCount(activity, post.id, post.upvotes) : post.upvotes}`}
+                      >
+                        {isDemo
+                          ? upvoteCount(activity, post.id, post.upvotes)
+                          : post.upvotes}
+                      </span>
+                      <span
+                        className="post-num post-num-view"
+                        aria-label={`조회 ${post.views.toLocaleString()}`}
+                      >
+                        {post.views.toLocaleString()}
+                      </span>
+                      <span className="row-arrow" aria-hidden="true">
+                        ›
                       </span>
                     </Link>
                   </li>
@@ -283,68 +467,92 @@ export function CommunityPage() {
               {hasFilter ? (
                 <>
                   <strong>조건에 맞는 글이 없어요.</strong>
-                  <p>카테고리나 검색어를 바꿔 보세요.</p>
-                  <button
-                    type="button"
-                    className="inline-button"
-                    onClick={() => {
-                      setQueryText("");
-                      setParams(new URLSearchParams(), { replace: true });
-                    }}
-                  >
-                    필터 초기화
-                  </button>
+                  <p>필터나 검색어를 바꿔 보세요.</p>
                 </>
               ) : (
                 <>
                   <strong>아직 올라온 글이 없어요.</strong>
                   <p>첫 글을 남겨 보세요.</p>
+                  <button
+                    type="button"
+                    className="button"
+                    onClick={() => write()}
+                  >
+                    글쓰기
+                  </button>
                 </>
               )}
             </div>
           )}
 
-          <Pagination
-            page={current}
-            totalPages={totalPages}
-            onChange={(next) =>
-              update(
-                { page: next === 1 ? null : String(next) },
-                { resetPage: false },
-              )
-            }
-          />
+          {visible.length > 0 && visible.length < 4 ? (
+            <div className="community-nudge">
+              <span>찾는 글이 없나요? 궁금한 점을 직접 질문해 보세요.</span>
+              <button
+                type="button"
+                className="button button-small"
+                onClick={() => write()}
+              >
+                질문하기
+              </button>
+            </div>
+          ) : null}
+
+          {(isDemo ? filtered.length : remote.total) > 0 &&
+          !loading &&
+          !loadError ? (
+            <div className="community-pager">
+              <Pagination
+                page={current}
+                totalPages={totalPages}
+                onChange={(next) =>
+                  update(
+                    { page: next === 1 ? null : String(next) },
+                    { resetPage: false },
+                  )
+                }
+              />
+            </div>
+          ) : null}
         </section>
 
-        <aside className="side-stack">
+        <aside className="side-stack" ref={sideRef}>
           <div className="community-guide">
-            <h2>
-              좋은 질문은
-              <br />
-              함께 풀 실마리가 됩니다.
-            </h2>
-            <img src={guideArt} alt="" width="232" height="186" />
-            <h3>질문을 올리기 전 확인해 보세요.</h3>
-            <ul>
-              <li>어떤 문제에서 막혔나요?</li>
-              <li>시도한 코드와 입력은 무엇인가요?</li>
-              <li>기대한 결과와 실제 결과가 다른가요?</li>
-            </ul>
-          </div>
-          <div className="community-about">
-            <h2>풀이를 나누는 공간</h2>
-            <p>
-              정답뿐 아니라 생각한 과정도 함께 남겨주세요.
-              <br />
-              다른 관점이 더 좋은 풀이로 이어집니다.
-            </p>
-            <div className="community-about-chips">
-              <button type="button" onClick={() => update({ c: "question" })}>
-                질문
-              </button>
-              <button type="button" onClick={() => update({ c: "solution" })}>
-                풀이 공유
-              </button>
+            <div className="community-guide-head">
+              <h2>질문을 주고 받으며 풀이를 공유하면 모두의 힘이 됩니다.</h2>
+              <img src={guideArt} alt="" width="232" height="186" />
+            </div>
+            <div className="community-guide-cols">
+              <div className="guide-col">
+                <h3>질문을 올리기 전 확인해 보세요.</h3>
+                <ul>
+                  <li>어떤 문제에서 막혔나요?</li>
+                  <li>시도한 코드와 입력은 무엇인가요?</li>
+                  <li>기대한 결과와 실제 결과가 다른가요?</li>
+                </ul>
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => write()}
+                >
+                  질문 작성하기
+                </button>
+              </div>
+              <div className="guide-col">
+                <h3>풀이를 나누는 공간</h3>
+                <ul>
+                  <li>정답뿐 아니라 생각한 과정도 남겨요.</li>
+                  <li>시간·메모리 복잡도를 함께 적어요.</li>
+                  <li>다른 관점이 더 좋은 풀이로 이어져요.</li>
+                </ul>
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => write("solution")}
+                >
+                  풀이 공유하기
+                </button>
+              </div>
             </div>
           </div>
         </aside>

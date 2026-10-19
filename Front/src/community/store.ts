@@ -1,5 +1,4 @@
 import { useSyncExternalStore } from "react";
-import { authorStats, seedAccepted, seedAnswers, seedPosts } from "./data";
 import type {
   AuthorStats,
   CategoryKey,
@@ -7,6 +6,25 @@ import type {
   CommunityAuthor,
   CommunityPost,
 } from "./types";
+
+/**
+ * 화면 구동용 더미 글·답변은 배포용 저장소에만 있는 `seed.ts`에서 온다.
+ * 파일이 없으면(백엔드 연동 전 실제 코드만 있는 상태) 빈 목록으로 시작한다.
+ */
+interface Seed {
+  seedPosts: CommunityPost[];
+  seedAnswers: CommunityAnswer[];
+  seedAccepted: Record<string, string>;
+  authorStats: Record<string, AuthorStats>;
+}
+const seedModules = import.meta.glob<Seed>("./seed.ts", { eager: true });
+const seed: Seed = Object.values(seedModules)[0] ?? {
+  seedPosts: [],
+  seedAnswers: [],
+  seedAccepted: {},
+  authorStats: {},
+};
+const { seedPosts, seedAnswers, seedAccepted, authorStats } = seed;
 
 /** 이 브라우저에만 저장되는 사용자 활동. 더미 데이터 위에 겹쳐서 보여준다. */
 interface Activity {
@@ -18,6 +36,8 @@ interface Activity {
   followed: string[];
   /** 게시글 id → 채택한 답변 id (사용자가 바꾼 값만) */
   accepted: Record<string, string | null>;
+  /** 삭제한 글 id (샘플 글처럼 저장소에 없는 글을 숨기는 데도 쓴다) */
+  deleted: string[];
 }
 
 const storageKey = "unsolvable-oj-community-v1";
@@ -30,6 +50,7 @@ const empty: Activity = {
   saved: [],
   followed: [],
   accepted: {},
+  deleted: [],
 };
 
 function load(): Activity {
@@ -111,6 +132,26 @@ export const communityActions = {
     commit({ ...state, answers: [...state.answers, answer] });
     return answer;
   },
+  /** 글을 지운다. 그 글의 답변·채택·추천 기록도 함께 정리한다. */
+  deletePost(postId: string) {
+    const answerIds = state.answers
+      .filter((answer) => answer.postId === postId)
+      .map((answer) => answer.id);
+    const { [postId]: _removed, ...accepted } = state.accepted;
+    commit({
+      ...state,
+      posts: state.posts.filter((post) => post.id !== postId),
+      answers: state.answers.filter((answer) => answer.postId !== postId),
+      accepted,
+      upvoted: state.upvoted.filter(
+        (id) => id !== postId && !answerIds.includes(id),
+      ),
+      saved: state.saved.filter((id) => id !== postId),
+      deleted: state.deleted.includes(postId)
+        ? state.deleted
+        : [...state.deleted, postId],
+    });
+  },
   toggleUpvote: (id: string) =>
     commit({ ...state, upvoted: toggle(state.upvoted, id) }),
   toggleSaved: (id: string) =>
@@ -121,10 +162,10 @@ export const communityActions = {
     commit({ ...state, accepted: { ...state.accepted, [postId]: answerId } }),
 };
 
-export const allPosts = (activity: Activity) => [
-  ...activity.posts,
-  ...seedPosts,
-];
+export const allPosts = (activity: Activity) =>
+  [...activity.posts, ...seedPosts].filter(
+    (post) => !activity.deleted.includes(post.id),
+  );
 
 export const answersOf = (activity: Activity, postId: string) =>
   [...seedAnswers, ...activity.answers].filter(
@@ -231,7 +272,7 @@ export function writeAnswerDraft(postId: string, text: string) {
   }
 }
 
-/** "2시간 전" · "어제" 같은 짧은 상대 시각 */
+/** "2시간 전" · "어제" · "3개월 전" 같은 상대 시각(항상 상대 표기로 통일) */
 export function relativeTime(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
   const minutes = Math.floor(diff / 60_000);
@@ -241,6 +282,8 @@ export function relativeTime(iso: string) {
   if (hours < 24) return `${hours}시간 전`;
   const days = Math.floor(hours / 24);
   if (days === 1) return "어제";
-  if (days < 7) return `${days}일 전`;
-  return new Date(iso).toLocaleDateString("ko-KR");
+  if (days < 30) return `${days}일 전`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}개월 전`;
+  return `${Math.floor(days / 365)}년 전`;
 }

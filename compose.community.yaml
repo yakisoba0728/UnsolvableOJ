@@ -1,0 +1,66 @@
+# Local community stack. Persistent data, loopback ports, no judge worker.
+name: unsolvable-community-local
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: unsolvable_community
+      POSTGRES_USER: unsolvable
+      POSTGRES_PASSWORD: local_password
+    ports: ["127.0.0.1:55432:5432"]
+    volumes: ["community-postgres:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U unsolvable -d unsolvable_community"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports: ["127.0.0.1:56379:6379"]
+    volumes: ["community-redis:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  back:
+    build: ./Back
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      CORS_ORIGIN: http://127.0.0.1:3109,http://localhost:3109
+      DATABASE_URL: postgresql://unsolvable:local_password@postgres:5432/unsolvable_community
+      DATABASE_SSL: "false"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      JWT_ACCESS_SECRET: local-community-only-access-secret-20261019
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JUDGE_SERVICE_TOKEN: local-community-unused-judge-token-20261019
+    ports: ["127.0.0.1:3108:3000"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/v1/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+  front:
+    build:
+      context: ./Front
+      args:
+        VITE_API_BASE_URL: /api/v1
+    restart: unless-stopped
+    ports: ["127.0.0.1:3109:80"]
+    depends_on:
+      back: { condition: service_healthy }
+volumes:
+  community-postgres:
+  community-redis:

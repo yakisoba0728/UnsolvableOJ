@@ -271,6 +271,61 @@ describe('Community (PostgreSQL e2e)', () => {
     );
   });
 
+  it('supports the new multi-category, accepted-status, view sort and full-result facet counts', async () => {
+    const marker = randomUUID();
+    const question = await create({ title: marker, category: 'QUESTION' });
+    const free = await create({ title: marker, category: 'FREE' });
+    const review = await create({
+      title: marker,
+      category: 'REVIEW',
+      code: 'print(1)',
+      language: 'Python',
+    });
+    const notice = await create({ title: marker, category: 'NOTICE' }, 2);
+    const answer = await call('post', `/${question}/comments`, 1)
+      .send({ body: '채택된 답변' })
+      .expect(201);
+    await call(
+      'put',
+      `/${question}/accepted-answer/${answer.body.id}`,
+      0,
+    ).expect(200);
+    await call('post', `/${free}/view`).expect(201);
+    const selected = await call(
+      'get',
+      `?q=${marker}&categories=QUESTION,FREE&status=accepted&includePinned=true&limit=1`,
+    ).expect(200);
+    expect(selected.body.items[0].id).toBe(notice);
+    expect(selected.body.total).toBe(2);
+    expect(selected.body.filteredTotal).toBe(1);
+    expect(selected.body.facets.categories.QUESTION).toBe(1);
+    expect(selected.body.facets.categories.FREE).toBe(0);
+    expect(selected.body.facets.statuses.accepted).toBe(1);
+    expect(selected.body.facets.statuses.unaccepted).toBe(1);
+    const next = await call(
+      'get',
+      `?q=${marker}&categories=QUESTION,FREE&status=accepted&includePinned=true&limit=1&page=2`,
+    ).expect(200);
+    expect(next.body.items[0].id).toBe(question);
+    const unaccepted = await call(
+      'get',
+      `?q=${marker}&categories=FREE,REVIEW&status=unaccepted&sort=views`,
+    ).expect(200);
+    expect(unaccepted.body.items.map((p: { id: string }) => p.id)).toEqual([
+      free,
+      review,
+    ]);
+    const both = await call(
+      'get',
+      `?q=${marker}&categories=QUESTION,FREE&status=accepted,unaccepted`,
+    ).expect(200);
+    expect(both.body.total).toBe(2);
+    await call('get', '?categories=QUESTION,INVALID').expect(400);
+    await call('get', '?status=invalid').expect(400);
+    await call('get', '?status=accepted,accepted').expect(400);
+    await call('get', '?includePinned=invalid').expect(400);
+  });
+
   it('serializes duplicate votes and cascades replies/votes on post deletion', async () => {
     const id = await create();
     await Promise.all(

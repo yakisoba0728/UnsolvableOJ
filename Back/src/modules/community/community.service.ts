@@ -50,37 +50,106 @@ export class CommunityService {
 
   async list(query: CommunityQuery) {
     const params: unknown[] = [];
-    const conditions: string[] = [];
-    if (query.category) {
-      params.push(query.category);
-      conditions.push(`p.category=$${params.length}`);
-    }
+    const baseConditions: string[] = [];
     if (query.problemId) {
       params.push(query.problemId);
-      conditions.push(`p.problem_id=$${params.length}`);
+      baseConditions.push(`p.problem_id=$${params.length}`);
     }
     if (query.q) {
       params.push(query.q);
-      conditions.push(
-        `(strpos(lower(p.title), lower($${params.length})) > 0 OR strpos(lower(p.body), lower($${params.length})) > 0 OR EXISTS(SELECT 1 FROM unnest(p.tags) tag WHERE strpos(lower(tag),lower($${params.length}))>0))`,
+      baseConditions.push(
+        `(strpos(lower(p.title),lower($${params.length}))>0 OR strpos(lower(p.body),lower($${params.length}))>0 OR EXISTS(SELECT 1 FROM unnest(p.tags) tag WHERE strpos(lower(tag),lower($${params.length}))>0))`,
       );
     }
-    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-    const [count]: { total: number }[] = await this.db.query(
+    const baseWhere = baseConditions.length
+      ? 'WHERE ' + baseConditions.join(' AND ')
+      : '';
+    const groups: {
+      category: CommunityCategory;
+      accepted: boolean;
+      count: number;
+    }[] = await this.db.query(
+      `SELECT category, accepted_comment_id IS NOT NULL AS accepted, count(*)::int AS count FROM community_posts p ${baseWhere} GROUP BY category, accepted_comment_id IS NOT NULL`,
+      params,
+    );
+    const categories =
+      query.categories ?? (query.category ? [query.category] : []);
+    const statuses = query.status ?? [];
+    const statusMatches = (accepted: boolean) =>
+      !statuses.length ||
+      statuses.includes(accepted ? 'accepted' : 'unaccepted');
+    const categoryMatches = (category: CommunityCategory) =>
+      !categories.length || categories.includes(category);
+    const facets = {
+      categories: {} as Record<string, number>,
+      statuses: {} as Record<string, number>,
+    };
+    const ordinary = groups.filter(
+      (g) => g.category !== CommunityCategory.NOTICE,
+    );
+    for (const category of ['', ...Object.values(CommunityCategory)])
+      facets.categories[category] = ordinary
+        .filter(
+          (g) =>
+            (!category || g.category === category) && statusMatches(g.accepted),
+        )
+        .reduce((sum, g) => sum + g.count, 0);
+    for (const status of ['', 'accepted', 'unaccepted'])
+      facets.statuses[status] = ordinary
+        .filter(
+          (g) =>
+            categoryMatches(g.category) &&
+            (!status || g.accepted === (status === 'accepted')),
+        )
+        .reduce((sum, g) => sum + g.count, 0);
+    const filterConditions: string[] = [];
+    if (categories.length) {
+      params.push(categories);
+      filterConditions.push(`p.category=ANY($${params.length}::text[])`);
+    }
+    if (statuses.length === 1)
+      filterConditions.push(
+        statuses[0] === 'accepted'
+          ? 'p.accepted_comment_id IS NOT NULL'
+          : 'p.accepted_comment_id IS NULL',
+      );
+    const conditions = [...baseConditions];
+    if (filterConditions.length) {
+      const filters = filterConditions.join(' AND ');
+      conditions.push(
+        query.includePinned === 'true'
+          ? `(p.category='NOTICE' OR (${filters}))`
+          : `(${filters})`,
+      );
+    }
+    const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
+    const [{ total }]: { total: number }[] = await this.db.query(
       `SELECT count(*)::int AS total FROM community_posts p ${where}`,
       params,
     );
+    const sortColumn =
+      query.sort === 'votes'
+        ? '"voteCount"'
+        : query.sort === 'answers'
+          ? '"commentCount"'
+          : query.sort === 'views'
+            ? 'p.views'
+            : 'p.created_at';
     const items: Post[] = await this.db.query(
-      `SELECT ${summaryColumns}, ${publicDetails} FROM community_posts p ${joins} ${where}
-      ORDER BY (p.category='NOTICE') DESC, ${query.sort === 'votes' ? '"voteCount" DESC,' : query.sort === 'answers' ? '"commentCount" DESC,' : ''} p.created_at DESC, p.id DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      `SELECT ${summaryColumns}, ${publicDetails} FROM community_posts p ${joins} ${where} ORDER BY (p.category='NOTICE') DESC, ${sortColumn} DESC, p.created_at DESC, p.id DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, query.limit, (query.page - 1) * query.limit],
     );
+    const filteredTotal = ordinary
+      .filter((g) => categoryMatches(g.category) && statusMatches(g.accepted))
+      .reduce((sum, g) => sum + g.count, 0);
     return {
       items,
-      total: count.total,
+      total,
+      filteredTotal,
+      facets,
       page: query.page,
       limit: query.limit,
-      totalPages: Math.ceil(count.total / query.limit),
+      totalPages: Math.ceil(total / query.limit),
     };
   }
 

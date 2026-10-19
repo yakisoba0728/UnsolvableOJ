@@ -56,12 +56,15 @@ test("teammate layout: filter/search/sort requests, loading failure and retry", 
   fail = false;
   await page.getByRole("button", { name: "다시 시도" }).click();
   await expect(page.getByText(post.title)).toBeVisible();
-  await expect(page.getByText("좋은 질문은")).toBeVisible();
-  await page.getByRole("button", { name: "코드 리뷰", exact: true }).click();
-  await expect.poll(() => query).toContain("category=REVIEW");
-  await page.getByLabel("커뮤니티 검색").fill("태그검색");
+  await expect(
+    page.getByText("질문을 주고 받으며 풀이를 공유하면 모두의 힘이 됩니다."),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /^코드 리뷰/ }).click();
+  await expect.poll(() => query).toContain("categories=REVIEW");
+  await page.getByLabel("게시글 검색").fill("태그검색");
   await expect.poll(() => decodeURIComponent(query)).toContain("q=태그검색");
-  await page.getByLabel("정렬", { exact: true }).selectOption("votes");
+  await page.getByRole("combobox", { name: "정렬", exact: true }).click();
+  await page.getByRole("option", { name: "추천순", exact: true }).click();
   await expect.poll(() => query).toContain("sort=votes");
   await page.setViewportSize({ width: 390, height: 844 });
   expect(
@@ -119,8 +122,10 @@ test("review draft survives reload; failure preserves text; successful create an
     });
   });
   await page.goto("/community/new?c=review");
-  await page.getByLabel("제목 · 필수").fill("코드 리뷰 요청");
-  await page.getByLabel("본문 · 필수").fill("시간 복잡도 개선 부탁드립니다.");
+  await page.getByRole("textbox", { name: /^제목/ }).fill("코드 리뷰 요청");
+  await page
+    .getByRole("textbox", { name: /^본문/ })
+    .fill("시간 복잡도 개선 부탁드립니다.");
   await page.getByLabel("코드 언어 · 필수").fill("Python");
   await page.getByLabel("공유할 코드 · 필수").fill("print(1)");
   await page.getByLabel("태그", { exact: true }).fill("최적화");
@@ -129,7 +134,9 @@ test("review draft survives reload; failure preserves text; successful create an
   await expect(page.getByLabel("공유할 코드 · 필수")).toHaveValue("print(1)");
   await page.getByRole("button", { name: "글 등록", exact: true }).click();
   await expect(page.getByRole("alert")).toContainText("저장 실패 테스트");
-  await expect(page.getByLabel("제목 · 필수")).toHaveValue("코드 리뷰 요청");
+  await expect(page.getByRole("textbox", { name: /^제목/ })).toHaveValue(
+    "코드 리뷰 요청",
+  );
   fail = false;
   await page.getByRole("button", { name: "글 등록", exact: true }).click();
   await expect(
@@ -137,8 +144,10 @@ test("review draft survives reload; failure preserves text; successful create an
   ).toBeVisible();
   await expect(page.getByText("print(1)", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "글 수정", exact: true }).click();
-  await expect(page.getByLabel("제목 · 필수")).toHaveValue("코드 리뷰 요청");
-  await page.getByLabel("제목 · 필수").fill("수정된 리뷰");
+  await expect(page.getByRole("textbox", { name: /^제목/ })).toHaveValue(
+    "코드 리뷰 요청",
+  );
+  await page.getByRole("textbox", { name: /^제목/ }).fill("수정된 리뷰");
   await page.getByRole("button", { name: "수정 완료" }).click();
   await expect(
     page.getByRole("heading", { name: "수정된 리뷰" }),
@@ -178,4 +187,44 @@ test("solution spoiler, escaped HTML and anonymous permissions", async ({
   await expect(page.getByRole("link", { name: "글 수정" })).toHaveCount(0);
   await page.getByRole("button", { name: "▲ 추천 0" }).click();
   await expect(page).toHaveURL(/\/auth/);
+});
+
+test("solution form resolves the new problem URL and sends its ID", async ({
+  page,
+}) => {
+  await login(page);
+  await page.route("**/api/v1/problems/by-slug/**", (route) => {
+    expect(decodeURIComponent(new URL(route.request().url()).pathname)).toBe(
+      "/api/v1/problems/by-slug/sum",
+    );
+    return route.fulfill({ json: { id: uid, title: "두 수의 합" } });
+  });
+  let submitted = false;
+  await page.route("**/api/v1/community/posts", (route) => {
+    const data = route.request().postDataJSON();
+    expect(data.category).toBe("SOLUTION");
+    expect(data.problemId).toBe(uid);
+    submitted = true;
+    return route.fulfill({
+      status: 503,
+      json: { message: "테스트 저장 중단" },
+    });
+  });
+  await page.goto("/community/new?c=solution");
+  await page.getByRole("textbox", { name: /^제목/ }).fill("풀이 공유");
+  await page
+    .getByRole("textbox", { name: /^본문/ })
+    .fill("덧셈으로 해결합니다.");
+  await page
+    .getByPlaceholder("문제 페이지의 주소를 붙여넣으세요")
+    .fill(
+      "https://unsolvable-oj-front.vercel.app/problems/view/sum?tab=question",
+    );
+  await page.getByRole("button", { name: "문제 연결", exact: true }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "연결됨" }),
+  ).toContainText("두 수의 합");
+  await page.getByRole("button", { name: "글 등록", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("테스트 저장 중단");
+  expect(submitted).toBe(true);
 });

@@ -1,3 +1,4 @@
+import { problemPath } from "../paths";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
@@ -14,11 +15,7 @@ import {
   useActivity,
   writeAnswerDraft,
 } from "../community/store";
-import {
-  categoryLabel,
-  categoryLongLabel,
-  type CommunityAuthor,
-} from "../community/types";
+import { categoryLabel, type CommunityAuthor } from "../community/types";
 import { useDocumentTitle } from "../hooks";
 
 import { api, isDemo } from "../api";
@@ -141,12 +138,14 @@ export function CommunityPostPage() {
   const [notice, setNotice] = useState(
     (location.state as { notice?: string } | null)?.notice ?? "",
   );
-  const answersRef = useRef<HTMLDivElement>(null);
+  const [answersOpen, setAnswersOpen] = useState(false);
+  const listSearch =
+    (location.state as { listSearch?: string } | null)?.listSearch ?? "";
   const editorRef = useRef<HTMLTextAreaElement>(null);
-  const editorFormRef = useRef<HTMLFormElement>(null);
 
   // 다른 글로 옮기면 그 글의 작성 중 답변을 불러온다.
   useEffect(() => {
+    setAnswersOpen(false);
     setDraft(readAnswerDraft(draftScope));
     setError("");
   }, [draftScope]);
@@ -167,7 +166,12 @@ export function CommunityPostPage() {
     return (
       <div className="page-width" role="alert">
         {error}{" "}
-        <button onClick={() => setRevision((n) => n + 1)}>다시 시도</button>
+        <button
+          disabled={pending || loading}
+          onClick={() => setRevision((n) => n + 1)}
+        >
+          다시 시도
+        </button>
       </div>
     );
   if (!post)
@@ -187,6 +191,9 @@ export function CommunityPostPage() {
     if (b.id === acceptedId) return 1;
     return a.createdAt.localeCompare(b.createdAt);
   });
+  const shown = answersOpen
+    ? ordered
+    : ordered.filter((answer) => answer.id === acceptedId);
   const me: CommunityAuthor | null = session
     ? { name: session.user.username, tier: "Bronze I" }
     : null;
@@ -238,14 +245,6 @@ export function CommunityPostPage() {
     else navigate("/auth", { state: { from: `/community/${id}` } });
   }
 
-  function focusEditor() {
-    editorFormRef.current?.scrollIntoView({
-      block: "center",
-      behavior: "smooth",
-    });
-    editorRef.current?.focus({ preventScroll: true });
-  }
-
   function onDraftChange(value: string) {
     setDraft(value);
     setError("");
@@ -282,6 +281,7 @@ export function CommunityPostPage() {
     setDraft("");
     setPending(false);
     setNotice("답변을 등록했어요.");
+    setAnswersOpen(true);
     window.setTimeout(() => {
       document
         .getElementById(answer.id)
@@ -291,8 +291,8 @@ export function CommunityPostPage() {
 
   return (
     <div className="post-page">
-      <Link className="back-link" to={`/community?c=${post.category}`}>
-        ← 커뮤니티 · {categoryLongLabel(post.category)}
+      <Link className="back-link" to={`/community${listSearch}`}>
+        ← 커뮤니티
       </Link>
       {notice ? (
         <p className="success-message" role="status">
@@ -322,13 +322,10 @@ export function CommunityPostPage() {
                   {relativeTime(post.createdAt)}
                 </span>
               </div>
-              <span className="post-stats">
-                조회 {post.views.toLocaleString()}
-                {acceptedId ? " · 채택 완료" : ""}
-              </span>
+              {acceptedId && <span className="post-stats">채택 완료</span>}
             </div>
             {post.problem && (
-              <Link className="back-link" to={"/problems/" + post.problem.slug}>
+              <Link className="back-link" to={problemPath(post.problem.slug)}>
                 연결 문제 · {post.problem.title}
               </Link>
             )}
@@ -370,6 +367,7 @@ export function CommunityPostPage() {
                 ))}
               </ul>
             ) : null}
+            <p className="post-views">조회 {post.views.toLocaleString()}</p>
             <div className="post-actions">
               {!isDemo && isMine && (
                 <Link
@@ -381,8 +379,8 @@ export function CommunityPostPage() {
               )}
               {!isDemo && (isMine || session?.user.role === "ADMIN") && (
                 <button
-                  className="button button-outline"
-                  disabled={pending}
+                  className="button button-danger-outline"
+                  disabled={pending || loading}
                   onClick={async () => {
                     if (!window.confirm("게시글과 답변을 삭제할까요?")) return;
                     setPending(true);
@@ -392,7 +390,10 @@ export function CommunityPostPage() {
                         { method: "DELETE" },
                         token,
                       );
-                      navigate("/community");
+                      writeAnswerDraft(draftScope, "");
+                      navigate(`/community${listSearch}`, {
+                        state: { notice: "글을 삭제했어요." },
+                      });
                     } catch (e) {
                       setError(errorMessage(e));
                       setPending(false);
@@ -427,19 +428,9 @@ export function CommunityPostPage() {
                   ? upvoteCount(activity, post.id, post.upvotes)
                   : post.upvotes}
               </button>
+
               <button
-                type="button"
-                className="button button-outline"
-                onClick={() =>
-                  answersRef.current?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  })
-                }
-              >
-                답변 보기 ({isDemo ? answers.length : remoteAnswers.total})
-              </button>
-              <button
+                disabled={pending || loading}
                 type="button"
                 className="button button-outline"
                 onClick={() =>
@@ -457,25 +448,71 @@ export function CommunityPostPage() {
                   ? "저장됨"
                   : "저장"}
               </button>
-              {post.category !== "notice" ? (
-                <button
-                  type="button"
-                  className="button"
-                  onClick={() => requireLogin(focusEditor)}
-                >
-                  답변 작성
-                </button>
-              ) : null}
             </div>
           </article>
 
-          <section className="post-card" ref={answersRef} aria-label="답변">
+          {post.category !== "notice" || answers.length ? (
+            <form
+              className="post-card answer-editor"
+              onSubmit={submit}
+              noValidate
+            >
+              <h2 className="post-section-title">답변 작성</h2>
+              <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
+              {session ? (
+                <>
+                  <textarea
+                    ref={editorRef}
+                    maxLength={10000}
+                    rows={6}
+                    aria-label="답변 내용"
+                    aria-invalid={Boolean(error)}
+                    placeholder="답변을 입력하세요."
+                    value={draft}
+                    onChange={(event) => onDraftChange(event.target.value)}
+                  />
+
+                  <div className="answer-footer">
+                    <span className="muted">
+                      등록 전까지 작성 내용을 유지합니다.
+                    </span>
+                    <button className="button" disabled={pending || loading}>
+                      {pending ? "등록 중…" : "답변 등록"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="login-prompt">
+                  답변을 남기려면 로그인해 주세요.{" "}
+                  <Link to="/auth" state={{ from: `/community/${id}` }}>
+                    로그인하기
+                  </Link>
+                </p>
+              )}
+            </form>
+          ) : null}
+
+          <section className="post-card answers-card" aria-label="답변">
             <h2 className="post-section-title">
-              답변 {isDemo ? answers.length : remoteAnswers.total}
+              <button
+                disabled={pending || loading}
+                type="button"
+                className="answers-toggle"
+                aria-expanded={answersOpen}
+                aria-controls="answer-list"
+                onClick={() => setAnswersOpen((open) => !open)}
+              >
+                <span>
+                  답변 {isDemo ? answers.length : remoteAnswers.total}
+                </span>
+                <span className="answers-chevron" aria-hidden="true">
+                  {answersOpen ? "▴" : "▾"}
+                </span>
+              </button>
             </h2>
-            {ordered.length ? (
-              <ul className="answer-list">
-                {ordered.map((answer) => {
+            {shown.length ? (
+              <ul className="answer-list" id="answer-list">
+                {shown.map((answer) => {
                   const accepted = answer.id === acceptedId;
                   return (
                     <li
@@ -492,6 +529,7 @@ export function CommunityPostPage() {
                         </span>
                         <span className="answer-tools">
                           <button
+                            disabled={pending || loading}
                             type="button"
                             className="answer-vote"
                             aria-pressed={
@@ -521,6 +559,7 @@ export function CommunityPostPage() {
                           </button>
                           {isMine && post.category === "question" ? (
                             <button
+                              disabled={pending || loading}
                               type="button"
                               className="inline-button"
                               onClick={() =>
@@ -549,6 +588,7 @@ export function CommunityPostPage() {
                       </small>
                       {!isDemo && session?.user.id === answer.authorId && (
                         <button
+                          disabled={pending || loading}
                           className="inline-button"
                           onClick={() => {
                             setEditing(answer.id);
@@ -563,7 +603,7 @@ export function CommunityPostPage() {
                           session?.user.role === "ADMIN") && (
                           <button
                             className="inline-button"
-                            disabled={pending}
+                            disabled={pending || loading}
                             onClick={() => {
                               if (window.confirm("답변을 삭제할까요?"))
                                 void mutate("/comments/" + answer.id, "DELETE");
@@ -590,10 +630,14 @@ export function CommunityPostPage() {
                             required
                             maxLength={10000}
                           />
-                          <button className="button" disabled={pending}>
+                          <button
+                            className="button"
+                            disabled={pending || loading}
+                          >
                             수정 저장
                           </button>
                           <button
+                            disabled={pending || loading}
                             type="button"
                             onClick={() => setEditing(null)}
                           >
@@ -605,7 +649,7 @@ export function CommunityPostPage() {
                   );
                 })}
               </ul>
-            ) : (
+            ) : (isDemo ? answers.length : remoteAnswers.total) ? null : (
               <p className="muted">
                 아직 답변이 없어요. 첫 답변을 남겨 보세요.
               </p>
@@ -614,52 +658,13 @@ export function CommunityPostPage() {
               <Pagination
                 page={answerPage}
                 totalPages={Math.max(1, remoteAnswers.totalPages)}
-                onChange={setAnswerPage}
+                onChange={(next) => {
+                  setAnswerPage(next);
+                  setAnswersOpen(true);
+                }}
               />
             )}
           </section>
-
-          {post.category !== "notice" || answers.length ? (
-            <form
-              className="post-card answer-editor"
-              onSubmit={submit}
-              noValidate
-              ref={editorFormRef}
-            >
-              <h2 className="post-section-title">답변 작성</h2>
-              <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
-              {session ? (
-                <>
-                  <textarea
-                    ref={editorRef}
-                    maxLength={10000}
-                    rows={6}
-                    aria-label="답변 내용"
-                    aria-invalid={Boolean(error)}
-                    placeholder="답변을 입력하세요."
-                    value={draft}
-                    onChange={(event) => onDraftChange(event.target.value)}
-                  />
-
-                  <div className="answer-footer">
-                    <span className="muted">
-                      등록 전까지 작성 내용을 유지합니다.
-                    </span>
-                    <button className="button" disabled={pending}>
-                      {pending ? "등록 중…" : "답변 등록"}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <p className="login-prompt">
-                  답변을 남기려면 로그인해 주세요.{" "}
-                  <Link to="/auth" state={{ from: `/community/${id}` }}>
-                    로그인하기
-                  </Link>
-                </p>
-              )}
-            </form>
-          ) : null}
         </div>
 
         <aside className="post-side">
@@ -676,6 +681,7 @@ export function CommunityPostPage() {
             </span>
             {!isMine ? (
               <button
+                disabled={pending || loading}
                 type="button"
                 className="button button-outline button-full"
                 onClick={() =>

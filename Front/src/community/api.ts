@@ -28,6 +28,11 @@ interface ApiComment {
   author: ApiPost["author"];
 }
 export interface Page<T> {
+  filteredTotal?: number;
+  facets?: {
+    categories: Record<string, number>;
+    statuses: Record<string, number>;
+  };
   items: T[];
   total: number;
   page: number;

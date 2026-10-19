@@ -6,12 +6,14 @@ import {
   type KeyboardEvent,
 } from "react";
 import {
-  Link,
+  useLocation,
   useNavigate,
   useParams,
   useSearchParams,
 } from "react-router-dom";
 import { useAuth } from "../auth";
+import { PageHeader } from "../components/PageHeader";
+import { Select } from "../components/Select";
 import {
   clearDraft,
   communityActions,
@@ -41,6 +43,10 @@ function CommunityWriteForm() {
   useDocumentTitle("글 작성");
   const { session } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const requestedCategory = (
+    location.state as { category?: CategoryKey } | null
+  )?.category;
   const { id } = useParams();
   const [params] = useSearchParams();
   const scope = isDemo
@@ -62,12 +68,14 @@ function CommunityWriteForm() {
   );
   const [editable, setEditable] = useState(!id);
   const [category, setCategory] = useState<CategoryKey>(
-    restored && options.some((item) => item.key === restored.category)
-      ? restored.category
-      : categories.some((c) => c.key === params.get("c")) &&
-          params.get("c") !== "notice"
-        ? (params.get("c") as CategoryKey)
-        : "question",
+    requestedCategory && options.some((item) => item.key === requestedCategory)
+      ? requestedCategory
+      : restored && options.some((item) => item.key === restored.category)
+        ? restored.category
+        : categories.some((c) => c.key === params.get("c")) &&
+            params.get("c") !== "notice"
+          ? (params.get("c") as CategoryKey)
+          : "question",
   );
   const [title, setTitle] = useState(restored?.title ?? "");
   const [tags, setTags] = useState<string[]>(restored?.tags ?? []);
@@ -265,23 +273,11 @@ function CommunityWriteForm() {
 
   return (
     <div className="write-page">
-      <Link
-        className="back-link"
-        to="/community"
-        onClick={(event) => {
-          if (
-            dirty &&
-            !window.confirm(
-              "작성 중인 내용이 임시 저장되지 않은 채로 사라질 수 있어요. 나갈까요?",
-            )
-          ) {
-            event.preventDefault();
-          }
-        }}
-      >
-        ← 커뮤니티
-      </Link>
-      <h1>{id ? "글 수정" : "글 작성"}</h1>
+      <PageHeader
+        back={{ to: "/community", label: "커뮤니티" }}
+        title={id ? "글 수정" : "글 작성"}
+        description="질문과 풀이를 남기면 다른 사람이 함께 답할 수 있어요."
+      />
       {loading && <p role="status">게시글을 불러오는 중…</p>}
       {apiError && (
         <p className="error-message" role="alert">
@@ -336,7 +332,10 @@ function CommunityWriteForm() {
                     let slug = problemSlug.trim();
                     if (slug.includes("/problems/"))
                       slug = decodeURIComponent(
-                        slug.split("/problems/")[1].split(/[?#]/)[0],
+                        slug
+                          .split("/problems/")[1]
+                          .replace(/^view\//, "")
+                          .split(/[?#]/)[0],
                       );
                     if (!slug) throw new Error("문제 주소를 입력하세요.");
                     const p = await api<{ id: string; title: string }>(
@@ -370,24 +369,23 @@ function CommunityWriteForm() {
               )}
             </div>
           )}
-          <label>
-            카테고리
-            <select
+          <div className="field-group">
+            <span className="field-label">카테고리</span>
+            <Select
+              ariaLabel="카테고리"
               disabled={Boolean(id)}
               value={category}
-              onChange={(event) =>
-                setCategory(event.target.value as CategoryKey)
-              }
-            >
-              {options.map((item) => (
-                <option key={item.key} value={item.key}>
-                  {item.key === "question" ? "질문과 답변" : item.label}
-                </option>
-              ))}
-            </select>
-          </label>
+              options={options.map((item) => ({
+                value: item.key,
+                label: item.key === "question" ? "질문과 답변" : item.label,
+              }))}
+              onChange={(next) => setCategory(next as CategoryKey)}
+            />
+          </div>
           <label>
-            제목 · 필수
+            <span className="label-row">
+              제목<span className="required-mark">필수</span>
+            </span>
             <input
               ref={titleRef}
               value={title}
@@ -446,7 +444,9 @@ function CommunityWriteForm() {
             </div>
           </div>
           <label>
-            본문 · 필수
+            <span className="label-row">
+              본문<span className="required-mark">필수</span>
+            </span>
             <textarea
               ref={bodyRef}
               rows={10}

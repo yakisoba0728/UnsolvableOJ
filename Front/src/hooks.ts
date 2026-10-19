@@ -1,35 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type RefObject } from "react";
 import { api } from "./api";
+import { fetchAll } from "./pagination";
+export { fetchAll } from "./pagination";
 import type {
-  Page,
   ProblemSummary,
   RankingEntry,
   Session,
   Submission,
   UserProfile,
 } from "./types";
-
-const PAGE_LIMIT = 100;
-const MAX_PAGES = 5;
-
-async function fetchAll<T>(
-  path: string,
-  signal: AbortSignal,
-  token?: string,
-): Promise<T[]> {
-  const items: T[] = [];
-  for (let page = 1; page <= MAX_PAGES; page += 1) {
-    const separator = path.includes("?") ? "&" : "?";
-    const data = await api<Page<T>>(
-      `${path}${separator}page=${page}&limit=${PAGE_LIMIT}`,
-      { signal },
-      token,
-    );
-    items.push(...data.items);
-    if (page >= data.totalPages) break;
-  }
-  return items;
-}
 
 /** 공개 문제 전체. 서버에 검색 API가 없어 목록·검색·필터를 클라이언트에서 처리한다. */
 export function useAllProblems() {
@@ -64,23 +43,28 @@ export function useAllProblems() {
 export function useSubmissionHistory(session: Session | null) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(Boolean(session));
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!session) {
       setSubmissions([]);
       setLoading(false);
+      setError("");
       return;
     }
     const controller = new AbortController();
     setLoading(true);
-    fetchAll<Submission>(
-      "/submissions",
-      controller.signal,
-      session.accessToken,
-    )
+    setSubmissions([]);
+    setError("");
+    fetchAll<Submission>("/submissions", controller.signal, session.accessToken)
       .then(setSubmissions)
-      .catch(() => {
-        if (!controller.signal.aborted) setSubmissions([]);
+      .catch((cause) => {
+        if (!controller.signal.aborted)
+          setError(
+            cause instanceof Error
+              ? cause.message
+              : "제출 기록을 불러오지 못했습니다.",
+          );
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -94,7 +78,14 @@ export function useSubmissionHistory(session: Session | null) {
     attempted.add(item.problem.id);
     if (item.status === "ACCEPTED") solved.add(item.problem.id);
   }
-  return { submissions, solved, attempted, latest: submissions[0] ?? null, loading };
+  return {
+    submissions,
+    solved,
+    attempted,
+    latest: submissions[0] ?? null,
+    loading,
+    error,
+  };
 }
 
 export function dayKey(date: Date) {
@@ -180,19 +171,54 @@ const difficultyRank = ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"];
 /** 시도했지만 아직 해결하지 못한 가장 최근 문제(이어서 풀 문제). */
 export function pickResume(submissions: Submission[], solved: Set<string>) {
   return (
-    submissions.find((item) => !solved.has(item.problem.id) && item.problem.slug) ??
-    null
+    submissions.find(
+      (item) => !solved.has(item.problem.id) && item.problem.slug,
+    ) ?? null
   );
 }
 
 /** 아직 해결하지 않은 문제 중 가장 쉬운 것(다음 도전). */
-export function pickNextProblem(problems: ProblemSummary[], solved: Set<string>) {
+export function pickNextProblem(
+  problems: ProblemSummary[],
+  solved: Set<string>,
+) {
   return (
     [...problems]
       .filter((problem) => !solved.has(problem.id))
       .sort(
         (a, b) =>
-          difficultyRank.indexOf(a.difficulty) - difficultyRank.indexOf(b.difficulty),
+          difficultyRank.indexOf(a.difficulty) -
+          difficultyRank.indexOf(b.difficulty),
       )[0] ?? null
   );
+}
+
+/**
+ * 스크롤을 따라다니는(sticky) 사이드 영역의 top 값을 계산한다.
+ * 영역이 화면보다 짧으면 `top`(머리글 아래)에 붙고, 더 길면 top을 음수로 줘서
+ * 아래쪽 끝이 화면 아래에 닿을 때까지 스크롤된 뒤 멈춘다(내용이 잘리지 않는다).
+ */
+export function useStickyTop<T extends HTMLElement>(
+  ref: RefObject<T | null>,
+  top = 80,
+  bottomGap = 16,
+) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => {
+      const fit = window.innerHeight - el.offsetHeight - bottomGap;
+      el.style.setProperty("--side-top", `${Math.min(top, fit)}px`);
+    };
+    update();
+    window.addEventListener("resize", update);
+    const observer =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    observer?.observe(el);
+    return () => {
+      window.removeEventListener("resize", update);
+      observer?.disconnect();
+      el.style.removeProperty("--side-top");
+    };
+  }, [ref, top, bottomGap]);
 }

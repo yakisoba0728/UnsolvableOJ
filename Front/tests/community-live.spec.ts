@@ -46,8 +46,10 @@ test("real API: two users create, answer, accept, vote, save, follow, edit and d
   let id = "";
   try {
     await page.goto("/community/new");
-    await page.getByLabel("제목 · 필수").fill(title);
-    await page.getByLabel("본문 · 필수").fill("서버에 저장되는 질문입니다.");
+    await page.getByRole("textbox", { name: /^제목/ }).fill(title);
+    await page
+      .getByRole("textbox", { name: /^본문/ })
+      .fill("서버에 저장되는 질문입니다.");
     await page.getByRole("button", { name: "글 등록", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: title, exact: true }),
@@ -86,6 +88,7 @@ test("real API: two users create, answer, accept, vote, save, follow, edit and d
       other.getByRole("button", { name: "✓ 팔로잉", exact: true }),
     ).toBeVisible();
     await page.reload();
+    await page.getByRole("button", { name: "답변 1", exact: true }).click();
     await page.getByRole("button", { name: "채택하기", exact: true }).click();
     await expect(page.getByText("채택된 답변", { exact: true })).toBeVisible();
     await page.screenshot({
@@ -129,7 +132,7 @@ test("real API: two users create, answer, accept, vote, save, follow, edit and d
     await page.reload();
     await expect(page.getByText("채택된 답변", { exact: true })).toHaveCount(0);
     await page.getByRole("link", { name: "글 수정", exact: true }).click();
-    await page.getByLabel("제목 · 필수").fill(title + " 수정");
+    await page.getByRole("textbox", { name: /^제목/ }).fill(title + " 수정");
     await page.getByRole("button", { name: "수정 완료" }).click();
     await expect(
       page.getByRole("heading", { name: title + " 수정", exact: true }),

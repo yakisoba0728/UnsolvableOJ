@@ -3,14 +3,22 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { BrandArt } from "../components/BrandArt";
 import { PageHeader } from "../components/PageHeader";
+import { Select } from "../components/Select";
+import { SlideToggle } from "../components/SlideToggle";
 import { Pagination } from "../components/Pagination";
-import { ProblemStatus, solveState, type SolveState } from "../components/ProblemStatus";
+import { ShuffleIcon } from "../components/ShuffleIcon";
+import {
+  ProblemStatus,
+  solveState,
+  type SolveState,
+} from "../components/ProblemStatus";
 import {
   useAllProblems,
   useDocumentTitle,
   pickNextProblem,
   pickResume,
   useMyStanding,
+  useStickyTop,
   useSubmissionHistory,
 } from "../hooks";
 import { problemPath } from "../paths";
@@ -33,10 +41,11 @@ export function difficultyLabel(value: Difficulty) {
 const PAGE_SIZE = 20;
 
 const sorts = [
-  { value: "latest", label: "정렬: 최신순" },
+  { value: "latest", label: "최신순" },
   { value: "easy", label: "쉬운 난이도순" },
   { value: "hard", label: "어려운 난이도순" },
   { value: "title", label: "제목순" },
+  { value: "random", label: "무작위" },
 ];
 
 const statusChips: { value: "" | SolveState; label: string }[] = [
@@ -58,13 +67,23 @@ export function ProblemsPage() {
   const { profile, rank } = useMyStanding(session);
   const [params, setParams] = useSearchParams();
   const searchRef = useRef<HTMLInputElement>(null);
+  const sideRef = useRef<HTMLElement>(null);
+  useStickyTop(sideRef);
   const [announce, setAnnounce] = useState("");
+  // 다시 섞기 아이콘을 누를 때마다 화살표가 오른쪽으로 빠져나갔다 왼쪽에서 다시 들어오게 한다(키가 바뀌면 애니메이션이 처음부터 다시 실행된다).
+  const [spinKey, setSpinKey] = useState(0);
 
   const urlQuery = params.get("q") ?? "";
   const selectedDifficulties = (params.get("d") ?? "")
     .split(",")
-    .filter((value): value is Difficulty => order.includes(value as Difficulty));
-  const status = (params.get("s") ?? "") as "" | SolveState;
+    .filter((value): value is Difficulty =>
+      order.includes(value as Difficulty),
+    );
+  const statuses = (session ? (params.get("s") ?? "") : "")
+    .split(",")
+    .filter((value): value is SolveState =>
+      ["solved", "attempted", "none"].includes(value),
+    );
   const sort = params.get("sort") ?? "latest";
   const seed = Number(params.get("seed")) || 1;
   const page = Math.max(1, Number(params.get("page")) || 1);
@@ -115,18 +134,28 @@ export function ProblemsPage() {
   }, []);
 
   const keyword = urlQuery.trim().toLowerCase();
+  const isSingle = (value: string) =>
+    selectedDifficulties.length === 1 && selectedDifficulties[0] === value;
   const stateOf = (problem: ProblemSummary) =>
     solveState(problem.id, history.solved, history.attempted);
 
   // skip: 해당 그룹의 조건만 빼고 센다 → 칩의 숫자가 "그 칩을 눌렀을 때의 결과 수"가 된다
-  const matches = (problem: ProblemSummary, skip: "difficulty" | "status" | null) => {
+  const matches = (
+    problem: ProblemSummary,
+    skip: "difficulty" | "status" | null,
+  ) => {
     if (
       skip !== "difficulty" &&
       selectedDifficulties.length &&
       !selectedDifficulties.includes(problem.difficulty)
     )
       return false;
-    if (skip !== "status" && status && stateOf(problem) !== status) return false;
+    if (
+      skip !== "status" &&
+      statuses.length &&
+      !statuses.includes(stateOf(problem))
+    )
+      return false;
     return (
       !keyword ||
       problem.title.toLowerCase().includes(keyword) ||
@@ -136,7 +165,8 @@ export function ProblemsPage() {
 
   const filtered = useMemo(() => {
     // 무작위: 전체를 한 번 섞은 뒤 필터를 적용한다. 필터를 바꿔도 상대 순서가 유지된다.
-    const base = sort === "random" ? seededShuffle(problems, seed) : [...problems];
+    const base =
+      sort === "random" ? seededShuffle(problems, seed) : [...problems];
     if (sort === "easy" || sort === "hard")
       base.sort(
         (a, b) =>
@@ -152,15 +182,22 @@ export function ProblemsPage() {
   }, [problems, sort, seed, params, history.solved, history.attempted]);
 
   const statusCount = (value: "" | SolveState) =>
-    problems.filter((p) => matches(p, "status") && (!value || stateOf(p) === value)).length;
+    problems.filter(
+      (p) => matches(p, "status") && (!value || stateOf(p) === value),
+    ).length;
   const difficultyCount = (value: Difficulty | "") =>
-    problems.filter((p) => matches(p, "difficulty") && (!value || p.difficulty === value)).length;
+    problems.filter(
+      (p) => matches(p, "difficulty") && (!value || p.difficulty === value),
+    ).length;
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
-  const visible = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+  const visible = filtered.slice(
+    (current - 1) * PAGE_SIZE,
+    current * PAGE_SIZE,
+  );
   const hasFilter = Boolean(
-    selectedDifficulties.length || status || keyword,
+    selectedDifficulties.length || statuses.length || keyword,
   );
   const solvedCount = problems.filter((p) => history.solved.has(p.id)).length;
 
@@ -178,16 +215,9 @@ export function ProblemsPage() {
       : null;
 
   const continueDifficulty = continueTarget
-    ? problems.find((problem) => problem.slug === continueTarget.slug)?.difficulty
+    ? problems.find((problem) => problem.slug === continueTarget.slug)
+        ?.difficulty
     : undefined;
-
-  function toggleDifficulty(value: Difficulty | "") {
-    if (value === "") return update({ d: null });
-    const next = new Set(selectedDifficulties);
-    if (next.has(value)) next.delete(value);
-    else next.add(value);
-    update({ d: order.filter((item) => next.has(item)).join(",") || null });
-  }
 
   // 목록을 무작위 순서로 섞는다(이동하지 않는다). 선택한 조건 안에서 섞인다.
   function shuffle() {
@@ -199,15 +229,11 @@ export function ProblemsPage() {
   }
 
   function changeSort(value: string) {
-    update({ sort: value === "latest" ? null : value, seed: null });
-  }
-
-  function resetFilters() {
-    const next = new URLSearchParams(params);
-    ["q", "d", "s", "page"].forEach((key) => next.delete(key));
-    setParams(next, { replace: true });
-    setQueryText("");
-    lastWritten.current = "";
+    update({
+      sort: value === "latest" ? null : value,
+      // 무작위를 고를 때마다 새 순서를 만든다.
+      seed: value === "random" ? String(newSeed()) : null,
+    });
   }
 
   return (
@@ -232,86 +258,81 @@ export function ProblemsPage() {
             />
             <kbd aria-hidden="true">/</kbd>
           </div>
-          <select
-            aria-label="정렬"
-            value={sort === "random" ? "latest" : sort}
-            onChange={(event) => changeSort(event.target.value)}
-          >
-            {sorts.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            className="button button-outline"
-            onClick={shuffle}
-            disabled={filtered.length < 2}
-          >
-            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-              <path
-                d="M3 7h3.2c1.6 0 3 .8 3.9 2.1l2.8 3.8c.9 1.3 2.3 2.1 3.9 2.1H21M3 17h3.2c1.6 0 3-.8 3.9-2.1M14 8.2c.8-.7 1.8-1.2 2.9-1.2H21M18.5 4 21 7l-2.5 3M18.5 11 21 14l-2.5 3"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            무작위 섞기
-          </button>
+          <Select
+            ariaLabel="정렬"
+            value={sort}
+            options={sorts.map((item) => ({
+              value: item.value,
+              label: item.label,
+            }))}
+            onChange={changeSort}
+          />
         </div>
 
-        {session ? (
-          <div className="filter-bar" role="group" aria-label="풀이 상태 필터">
+        <div className="filter-groups">
+          <div className="filter-bar">
             <span className="filter-label">상태</span>
-            {statusChips.map((item) => (
-              <button
-                key={item.value}
-                className={`filter-chip ${status === item.value ? "selected" : ""}`}
-                aria-pressed={status === item.value}
-                onClick={() => update({ s: item.value || null })}
-              >
-                {item.label}
-                <span className="chip-count">{statusCount(item.value)}</span>
-              </button>
-            ))}
+            {session ? (
+              <SlideToggle
+                multiple
+                ariaLabel="풀이 상태 필터"
+                values={statuses}
+                options={statusChips.map((item) => ({
+                  value: item.value,
+                  label: item.label,
+                  count: statusCount(item.value),
+                }))}
+                defaultValue=""
+                onChangeValues={(next) => update({ s: next.join(",") || null })}
+              />
+            ) : (
+              <div className="slide-toggle toggle-note">
+                <span className="toggle-option">
+                  로그인하면 내 풀이 상태가 반영돼요
+                </span>
+              </div>
+            )}
           </div>
-        ) : null}
 
-        <div className="filter-bar" role="group" aria-label="난이도 필터">
-          <span className="filter-label">난이도</span>
-          <button
-            className={`filter-chip ${selectedDifficulties.length === 0 ? "selected" : ""}`}
-            aria-pressed={selectedDifficulties.length === 0}
-            onClick={() => toggleDifficulty("")}
-          >
-            전체
-            <span className="chip-count">{difficultyCount("")}</span>
-          </button>
-          {difficultyOptions.map((item) => (
+          <div className="filter-bar">
+            <span className="filter-label">난이도</span>
+            <SlideToggle
+              multiple
+              ariaLabel="난이도 필터"
+              values={selectedDifficulties}
+              options={[
+                { value: "", label: "전체", count: difficultyCount("") },
+                ...difficultyOptions.map((item) => ({
+                  value: item.value,
+                  label: item.label,
+                  count: difficultyCount(item.value),
+                })),
+              ]}
+              defaultValue=""
+              onChangeValues={(next) => update({ d: next.join(",") || null })}
+            />
+          </div>
+          {sort === "random" ? (
             <button
-              key={item.value}
-              className={`filter-chip ${selectedDifficulties.includes(item.value) ? "selected" : ""}`}
-              aria-pressed={selectedDifficulties.includes(item.value)}
-              onClick={() => toggleDifficulty(item.value)}
+              type="button"
+              className="shuffle-icon-button"
+              aria-label="무작위로 다시 섞기"
+              title="무작위로 다시 섞기"
+              onClick={() => {
+                setSpinKey((key) => key + 1);
+                shuffle();
+              }}
+              disabled={filtered.length < 2}
             >
-              {item.label}
-              <span className="chip-count">{difficultyCount(item.value)}</span>
-            </button>
-          ))}
-          {hasFilter ? (
-            <button className="inline-button" onClick={resetFilters}>
-              필터 초기화
+              <ShuffleIcon playKey={spinKey} />
             </button>
           ) : null}
         </div>
       </div>
 
-      {error ? (
+      {error || history.error ? (
         <p className="error-message" role="alert">
-          {error}
+          {error || history.error}
         </p>
       ) : null}
 
@@ -346,7 +367,7 @@ export function ProblemsPage() {
           {loading ? (
             <div className="empty-state">문제를 불러오는 중입니다…</div>
           ) : visible.length ? (
-            <div className="problem-list">
+            <div className="problem-list data-list list-problems">
               <div className="problem-head" aria-hidden="true">
                 <span>문제</span>
                 <span>풀이 상태</span>
@@ -381,12 +402,10 @@ export function ProblemsPage() {
                 <>
                   <strong>조건에 맞는 문제가 없어요.</strong>
                   <p>
-                    {keyword ? `‘${urlQuery.trim()}’ 검색어와 ` : ""}선택한 필터를
-                    유지한 채 결과가 없습니다. 조건을 줄여 다시 찾아보세요.
+                    {keyword ? `‘${urlQuery.trim()}’ 검색어와 ` : ""}선택한
+                    필터를 유지한 채 결과가 없습니다. 조건을 줄여 다시
+                    찾아보세요.
                   </p>
-                  <button className="button button-soft" onClick={resetFilters}>
-                    필터 초기화
-                  </button>
                 </>
               ) : (
                 "공개된 문제가 아직 없습니다."
@@ -397,16 +416,24 @@ export function ProblemsPage() {
             page={current}
             totalPages={totalPages}
             onChange={(next) =>
-              update({ page: next === 1 ? null : String(next) }, { resetPage: false })
+              update(
+                { page: next === 1 ? null : String(next) },
+                { resetPage: false },
+              )
             }
           />
         </section>
 
-        <aside className="side-stack">
+        <aside className="side-stack" ref={sideRef}>
           {profile ? (
             <div className="standing-card">
               <Link to="/profile" className="standing-link">
-                <h2>내 요약</h2>
+                <h2>
+                  내 요약
+                  <span className="card-more" aria-hidden="true">
+                    프로필 ›
+                  </span>
+                </h2>
               </Link>
               <dl>
                 <div>
@@ -450,8 +477,8 @@ export function ProblemsPage() {
               <BrandArt />
               <h2>게임처럼 성장하는 온라인 저지</h2>
               <p>
-                풀수록 레벨이 오르고 랭킹·미션으로 이어집니다. 마음에 드는 문제를
-                골라 바로 풀어 보세요.
+                풀수록 레벨이 오르고 랭킹·미션으로 이어집니다. 마음에 드는
+                문제를 골라 바로 풀어 보세요.
               </p>
             </div>
           ) : null}
@@ -459,27 +486,72 @@ export function ProblemsPage() {
             <h2>나에게 맞는 문제 찾기</h2>
             <ol>
               <li>
-                <button onClick={() => update({ d: "BEGINNER" })}>
+                <button
+                  aria-pressed={isSingle("BEGINNER")}
+                  onClick={() => update({ d: "BEGINNER" })}
+                >
                   <strong>쉬운 난이도로 시작하기</strong>
                   <span>부담 없는 문제부터 차근차근</span>
+                  <i className="row-chevron" aria-hidden="true">
+                    ›
+                  </i>
                 </button>
               </li>
               <li>
-                <button onClick={() => update({ d: "MEDIUM" })}>
+                <button
+                  aria-pressed={isSingle("MEDIUM")}
+                  onClick={() => update({ d: "MEDIUM" })}
+                >
                   <strong>보통 난이도에 도전하기</strong>
                   <span>익숙해졌다면 한 단계 위로</span>
+                  <i className="row-chevron" aria-hidden="true">
+                    ›
+                  </i>
                 </button>
               </li>
               {session ? (
                 <li>
-                  <button onClick={() => update({ s: "none", d: null })}>
+                  <button
+                    aria-pressed={
+                      statuses.length === 1 &&
+                      statuses[0] === "none" &&
+                      !selectedDifficulties.length
+                    }
+                    onClick={() => update({ s: "none", d: null })}
+                  >
                     <strong>아직 안 푼 문제만 보기</strong>
                     <span>새로운 문제에 집중해요</span>
+                    <i className="row-chevron" aria-hidden="true">
+                      ›
+                    </i>
                   </button>
                 </li>
               ) : null}
             </ol>
           </div>
+          {session?.user.role === "AUTHOR" || session?.user.role === "ADMIN" ? (
+            <div className="guide-card create-cta">
+              <h2>직접 문제를 만들어 보세요</h2>
+              <p>
+                떠오른 아이디어를 문제로 만들어 다른 사람과 나눠 보세요. 설명과
+                예제, 채점용 테스트케이스까지 한 화면에서 만들 수 있어요.
+              </p>
+              <ol className="create-cta-steps">
+                <li>
+                  <span>1</span>문제 설명 쓰기
+                </li>
+                <li>
+                  <span>2</span>예제와 숨김 테스트케이스 추가
+                </li>
+                <li>
+                  <span>3</span>검수를 거쳐 공개
+                </li>
+              </ol>
+              <Link className="button button-full" to="/problems/new">
+                문제 만들기 <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          ) : null}
         </aside>
       </div>
     </div>
