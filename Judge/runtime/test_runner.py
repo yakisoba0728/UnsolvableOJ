@@ -133,6 +133,19 @@ class JudgeRunnerTests(unittest.TestCase):
                 else:
                     self.assertEqual(result['debugOutputs'], [])
 
+    def test_oom_counters_support_both_cgroup_versions(self):
+        cases = [
+            ('v2', ['oom 3\noom_kill 2\n'], 2),
+            ('v1', [FileNotFoundError(), 'oom_kill_disable 0\nunder_oom 0\noom_kill 5\n'], 5),
+            ('missing', [FileNotFoundError(), FileNotFoundError()], 0),
+            ('malformed', ['invalid entry value\n', 'oom_kill 4\n'], 4),
+            ('no kills', ['oom 3\noom_kill 0\n'], 0),
+        ]
+        for label, contents, expected in cases:
+            with self.subTest(label=label), patch('runner.Path.read_text', side_effect=contents) as read:
+                self.assertEqual(runner.oom_kills(), expected)
+                self.assertEqual(read.call_count, len(contents))
+
     def test_sigkill_without_oom_is_runtime_error(self):
         result = runner.judge(self.payload('import os, signal\nos.kill(os.getpid(), signal.SIGKILL)'))
         self.assertEqual(result['status'], 'RUNTIME_ERROR')

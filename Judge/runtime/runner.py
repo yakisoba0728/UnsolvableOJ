@@ -84,13 +84,14 @@ def descendants():
 
 
 def oom_kills():
-    # Docker exposes the container's cgroup v2 at this path. A killed child
-    # does not necessarily kill PID 1, so Docker's exit code alone is not enough.
-    try:
-        events = dict(line.split() for line in Path('/sys/fs/cgroup/memory.events').read_text().splitlines())
-        return int(events.get('oom_kill', 0))
-    except (OSError, ValueError):
-        return 0
+    # An OOM-killed child may leave PID 1 alive on either cgroup version.
+    for path in ('/sys/fs/cgroup/memory.events', '/sys/fs/cgroup/memory/memory.oom_control'):
+        try:
+            events = dict(line.split() for line in Path(path).read_text().splitlines())
+            return int(events.get('oom_kill', 0))
+        except (OSError, ValueError):
+            continue
+    return 0
 
 
 def kill_group(pid):
