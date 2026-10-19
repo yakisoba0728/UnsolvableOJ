@@ -6601,3 +6601,89 @@ h3 {
   color: var(--color-ink-500);
   flex: none;
 }
+
+/* 자동완성 목록(VS Code·IntelliJ 스타일): 종류 아이콘 · 일치 글자 강조 · 시그니처 · 설명 줄 */
+.autocomplete {
+  width: 340px;
+  max-width: calc(100% - 16px);
+  padding: 0;
+  overflow: hidden;
+}
+.autocomplete ul {
+  max-height: 224px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+}
+.autocomplete li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, auto) minmax(0, 1fr);
+  align-items: center;
+  justify-content: stretch;
+  gap: 8px;
+  height: 28px;
+  padding: 0 8px;
+}
+.suggestion-icon {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: rgba(159, 176, 200, 0.2);
+  color: #9fb0c8;
+  font: 700 11px/1 var(--font-mono);
+}
+.suggestion-icon.kind-function,
+.suggestion-icon.kind-method {
+  background: rgba(178, 140, 255, 0.22);
+  color: #c9b0ff;
+}
+.suggestion-icon.kind-variable {
+  background: rgba(110, 170, 255, 0.22);
+  color: #8fbcff;
+}
+.suggestion-icon.kind-class,
+.suggestion-icon.kind-module {
+  background: rgba(255, 190, 90, 0.22);
+  color: #ffc873;
+}
+.suggestion-icon.kind-property {
+  background: rgba(110, 215, 190, 0.2);
+  color: #7fe0c8;
+}
+.suggestion-icon.kind-snippet {
+  background: rgba(120, 220, 140, 0.2);
+  color: #8fe3a0;
+}
+.autocomplete .suggestion-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.suggestion-hit {
+  color: #6fb1ff;
+  font-weight: 700;
+}
+.autocomplete li.active .suggestion-hit {
+  color: #a9d0ff;
+}
+.autocomplete .suggestion-detail {
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  font-family: var(--font-mono);
+}
+.suggestion-doc {
+  margin: 0;
+  padding: 7px 12px;
+  border-top: 1px solid #3a4a62;
+  background: rgba(255, 255, 255, 0.04);
+  color: #c5d2e6;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

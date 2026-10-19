@@ -17,7 +17,11 @@ import {
 import {
   applySuggestion,
   currentWord,
+  moveStop,
+  reconcileSession,
+  recordAccepted,
   suggest,
+  type SnippetSession,
   type Suggestion,
 } from "../editor/autocomplete";
 import {
@@ -102,6 +106,29 @@ function readDraft(problemId: string, language: Language) {
   }
 }
 
+const kindGlyph: Record<Suggestion["kind"], string> = {
+  snippet: "{}",
+  keyword: "k",
+  function: "ƒ",
+  method: "ƒ",
+  property: "p",
+  class: "C",
+  variable: "v",
+  module: "M",
+  word: "a",
+};
+const kindName: Record<Suggestion["kind"], string> = {
+  snippet: "스니펫",
+  keyword: "키워드",
+  function: "함수",
+  method: "메서드",
+  property: "속성",
+  class: "타입",
+  variable: "변수",
+  module: "모듈",
+  word: "",
+};
+
 export function ProblemPage() {
   const { slug } = useParams();
   const [problem, setProblem] = useState<Problem | null>(null);
@@ -129,6 +156,11 @@ export function ProblemPage() {
     top: number;
   } | null>(null);
   const suppressSuggest = useRef(false);
+  // 스니펫의 Tab 칸 이동 상태, 직전 입력창 값(칸 위치 보정용), 미러 동기화 중 표시
+  const sessionRef = useRef<SnippetSession | null>(null);
+  const lastValueRef = useRef("");
+  const syncingRef = useRef(false);
+  const listRef = useRef<HTMLUListElement>(null);
   // 글꼴 크기: 이 브라우저에 기억한다.
   const [fontSize, setFontSize] = useState(() => {
     try {
@@ -184,6 +216,22 @@ export function ProblemPage() {
       setSavedAt(null);
     }
   }
+
+  useEffect(() => {
+    lastValueRef.current = source;
+  }, [source]);
+
+  // 문제나 언어가 바뀌면 진행 중이던 스니펫 칸 이동을 끝낸다.
+  useEffect(() => {
+    sessionRef.current = null;
+  }, [problem?.id, language]);
+
+  // 방향키로 고른 제안이 목록 밖으로 나가지 않게 따라간다.
+  useEffect(() => {
+    listRef.current
+      ?.querySelector<HTMLElement>('[aria-selected="true"]')
+      ?.scrollIntoView({ block: "nearest" });
+  }, [popup?.index]);
 
   useEffect(() => {
     if (tab !== "history" || !session || !problem) return;
@@ -302,19 +350,36 @@ export function ProblemPage() {
     updateCursor(target);
   }
 
-  /** 입력 중인 단어에 맞는 제안을 계산해 커서 바로 아래에 띄운다. */
-  function refreshSuggest(target: HTMLTextAreaElement) {
+  /** 커서 자리에 맞는 제안을 계산해 커서 근처에 띄운다(공간이 모자라면 위쪽에). */
+  function refreshSuggest(target: HTMLTextAreaElement, manual = false) {
     if (target.selectionStart !== target.selectionEnd) return setPopup(null);
-    const items = suggest(target.value, target.selectionStart, language);
+    const items = suggest(target.value, target.selectionStart, language, {
+      manual,
+    });
     if (!items.length) return setPopup(null);
     const { line, column } = cursorPosition(
       target.value,
       target.selectionStart,
     );
-    const typed = currentWord(target.value, target.selectionStart)!.text.length;
+    const typed =
+      currentWord(target.value, target.selectionStart)?.text.length ?? 0;
     // 고정폭 글꼴이라 줄·열로 위치를 계산한다(글자 폭 0.6em, 줄 높이 1.6em).
     const frame = target.parentElement;
-    const maxLeft = Math.max(0, (frame?.clientWidth ?? 600) - 280);
+    const lineHeight = fontSize * 1.6;
+    const width = 340;
+    const maxLeft = Math.max(
+      0,
+      (frame?.clientWidth ?? 600) + (frame?.scrollLeft ?? 0) - width,
+    );
+    const below = target.offsetTop + 16 + line * lineHeight + 4;
+    // 목록(최대 8줄) + 설명 줄 높이를 어림해, 아래가 모자라면 커서 줄 위로 올린다.
+    const height = Math.min(items.length, 8) * 28 + 40;
+    const visibleBottom =
+      (frame?.scrollTop ?? 0) + (frame?.clientHeight ?? 400);
+    const top =
+      below + height > visibleBottom
+        ? Math.max(0, below - lineHeight - 8 - height)
+        : below;
     setPopup({
       items,
       index: 0,
@@ -323,7 +388,7 @@ export function ProblemPage() {
         maxLeft,
         target.offsetLeft + (column - 1 - typed) * fontSize * 0.6,
       ),
-      top: target.offsetTop + 16 + line * fontSize * 1.6 + 4,
+      top,
     });
   }
 
@@ -331,10 +396,14 @@ export function ProblemPage() {
     const target = editorRef.current;
     const item = popup?.items[index];
     if (!target || !item) return;
-    const next = applySuggestion(target.value, target.selectionStart, item);
+    const applied = applySuggestion(target.value, target.selectionStart, item);
+    recordAccepted(item.label);
     suppressSuggest.current = true; // 적용 직후에는 다시 띄우지 않는다
+    sessionRef.current = null;
     setPopup(null);
-    applyEdit(target, next);
+    applyEdit(target, applied);
+    // 옮겨 다닐 칸이 있으면 이어서 Tab으로 이동할 수 있게 한다.
+    sessionRef.current = applied.session;
   }
 
   function onEditorKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -348,6 +417,16 @@ export function ProblemPage() {
     }
     // 한글 등 조합 입력 중에는 편집 규칙을 적용하지 않는다.
     if (event.nativeEvent.isComposing) return;
+    // 수동 호출: Ctrl+Space(VS Code·IntelliJ), ⌘I(VS Code Mac), Alt+/
+    if (
+      (event.ctrlKey && event.code === "Space") ||
+      (event.metaKey && event.key.toLowerCase() === "i") ||
+      (event.altKey && event.code === "Slash")
+    ) {
+      event.preventDefault();
+      refreshSuggest(target, true);
+      return;
+    }
     if (popup) {
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
@@ -355,6 +434,18 @@ export function ProblemPage() {
         setPopup({
           ...popup,
           index: (popup.index + step + popup.items.length) % popup.items.length,
+        });
+        return;
+      }
+      if (event.key === "PageDown" || event.key === "PageUp") {
+        event.preventDefault();
+        const step = event.key === "PageDown" ? 8 : -8;
+        setPopup({
+          ...popup,
+          index: Math.min(
+            popup.items.length - 1,
+            Math.max(0, popup.index + step),
+          ),
         });
         return;
       }
@@ -371,6 +462,39 @@ export function ProblemPage() {
         event.preventDefault();
         setPopup(null);
         return;
+      }
+    }
+    // 스니펫 칸 이동: Tab/Shift+Tab으로 다음·이전 칸, Esc나 Enter, 방향키 이동은 끝낸다.
+    if (sessionRef.current) {
+      if (event.key === "Tab" && !modifier && !event.altKey) {
+        const moved = moveStop(sessionRef.current, event.shiftKey);
+        if (moved) {
+          event.preventDefault();
+          sessionRef.current = moved.session;
+          target.setSelectionRange(moved.start, moved.end);
+          updateCursor(target);
+          return;
+        }
+        sessionRef.current = null;
+      } else if (
+        [
+          "Escape",
+          "Enter",
+          "ArrowLeft",
+          "ArrowRight",
+          "ArrowUp",
+          "ArrowDown",
+          "Home",
+          "End",
+          "PageUp",
+          "PageDown",
+        ].includes(event.key)
+      ) {
+        sessionRef.current = null;
+        if (event.key === "Escape") {
+          event.preventDefault();
+          return;
+        }
       }
     }
     const state: EditState = {
@@ -621,10 +745,43 @@ export function ProblemPage() {
                   popup ? `suggestion-${popup.index}` : undefined
                 }
                 onChange={(event) => {
-                  updateSource(event.target.value);
-                  updateCursor(event.currentTarget);
-                  if (suppressSuggest.current) suppressSuggest.current = false;
-                  else refreshSuggest(event.currentTarget);
+                  const target = event.currentTarget;
+                  const native = event.nativeEvent as InputEvent;
+                  // 스니펫 칸 안에서 고친 글을 같은 번호의 다른 칸(미러)에도 반영한다.
+                  if (sessionRef.current && !syncingRef.current) {
+                    const synced = reconcileSession(
+                      sessionRef.current,
+                      lastValueRef.current,
+                      target.value,
+                      target.selectionStart,
+                    );
+                    sessionRef.current = synced.session;
+                    if (synced.session && synced.value !== target.value) {
+                      syncingRef.current = true;
+                      applyEdit(target, {
+                        value: synced.value,
+                        start: synced.caret,
+                        end: synced.caret,
+                      });
+                      syncingRef.current = false;
+                    }
+                  }
+                  updateSource(target.value);
+                  updateCursor(target);
+                  if (suppressSuggest.current) {
+                    suppressSuggest.current = false;
+                  } else if (syncingRef.current || sessionRef.current) {
+                    setPopup(null);
+                  } else if (
+                    // 지우는 중에는 이미 떠 있을 때만 갱신한다(VS Code와 같다).
+                    !native.inputType?.startsWith("delete") ||
+                    popup
+                  ) {
+                    refreshSuggest(target);
+                  } else setPopup(null);
+                }}
+                onMouseDown={() => {
+                  sessionRef.current = null;
                 }}
                 onSelect={(event) => {
                   updateCursor(event.currentTarget);
@@ -644,33 +801,59 @@ export function ProblemPage() {
                 required
               />
               {popup ? (
-                <ul
+                <div
                   className="autocomplete"
-                  id="editor-suggestions"
-                  role="listbox"
-                  aria-label="자동완성 제안"
                   style={{ left: popup.left, top: popup.top }}
                 >
-                  {popup.items.map((item, index) => (
-                    <li
-                      key={`${item.kind}-${item.label}`}
-                      id={`suggestion-${index}`}
-                      role="option"
-                      aria-selected={index === popup.index}
-                      className={index === popup.index ? "active" : ""}
-                      onMouseDown={(event) => {
-                        event.preventDefault();
-                        acceptSuggestion(index);
-                      }}
-                    >
-                      <span className="suggestion-label">{item.label}</span>
-                      <span className="suggestion-detail">
-                        {item.detail ??
-                          (item.kind === "keyword" ? "키워드" : "")}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                  <ul
+                    ref={listRef}
+                    id="editor-suggestions"
+                    role="listbox"
+                    aria-label="자동완성 제안"
+                  >
+                    {popup.items.map((item, index) => (
+                      <li
+                        key={`${item.kind}-${item.label}`}
+                        id={`suggestion-${index}`}
+                        role="option"
+                        aria-selected={index === popup.index}
+                        className={index === popup.index ? "active" : ""}
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          acceptSuggestion(index);
+                        }}
+                      >
+                        <span
+                          className={`suggestion-icon kind-${item.kind}`}
+                          aria-hidden="true"
+                        >
+                          {kindGlyph[item.kind]}
+                        </span>
+                        <span className="suggestion-label">
+                          {Array.from(item.label).map((char, at) => (
+                            <span
+                              key={at}
+                              className={
+                                item.matches?.includes(at)
+                                  ? "suggestion-hit"
+                                  : undefined
+                              }
+                            >
+                              {char}
+                            </span>
+                          ))}
+                        </span>
+                        <span className="suggestion-detail">
+                          {item.detail ?? kindName[item.kind]}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="suggestion-doc" aria-hidden="true">
+                    {popup.items[popup.index].doc ??
+                      kindName[popup.items[popup.index].kind]}
+                  </p>
+                </div>
               ) : null}
             </div>
             {submissionId ? (
@@ -742,7 +925,8 @@ export function ProblemPage() {
             ) : null}
             <p className="editor-hints">
               Tab 들여쓰기 · Shift+Tab 내어쓰기 · <kbd>Ctrl/⌘ + /</kbd> 주석 ·
-              괄호·따옴표 자동 완성 · 제안 ↑↓ 선택, Enter/Tab 적용, Esc 닫기
+              괄호·따옴표 자동 완성 · <kbd>Ctrl + Space</kbd> 제안 · ↑↓ 선택,
+              Enter/Tab 적용, 스니펫은 Tab으로 다음 칸
             </p>
             <div className="code-actions">
               {session ? (

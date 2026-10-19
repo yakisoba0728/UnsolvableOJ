@@ -993,40 +993,74 @@ test.describe("code editor basics on the solve page", () => {
     await expect(editor).toHaveValue("a\nb");
   });
 
-  test("autocomplete suggests while typing and applies with Tab or Enter", async ({
+  test("autocomplete: functions, snippet placeholders, member completion and Ctrl+Space", async ({
     page,
   }) => {
     await authenticate(page);
     await page.goto("/problems/view/sum");
     const editor = page.getByLabel("소스 코드");
+    const list = page.getByRole("listbox", { name: "자동완성 제안" });
     await editor.fill("");
     await editor.focus();
 
+    // 함수는 괄호까지 넣고 커서를 괄호 안에 둔다
     await page.keyboard.type("pri");
-    const list = page.getByRole("listbox", { name: "자동완성 제안" });
     await expect(list.getByRole("option", { name: /^print/ })).toBeVisible();
     await page.keyboard.press("Tab");
-    await expect(editor).toHaveValue("print");
+    await expect(editor).toHaveValue("print()");
+    await page.keyboard.type("1");
+    await expect(editor).toHaveValue("print(1)");
     await expect(list).toHaveCount(0);
 
     // Esc로 닫으면 Enter는 평소처럼 줄바꿈이다
-    await page.keyboard.press("Enter");
+    await editor.fill("");
     await page.keyboard.type("whi");
     await expect(list).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(list).toHaveCount(0);
 
-    // 스니펫: 들여쓰기를 이어 붙이고 커서를 괄호 안에 둔다
+    // 스니펫: 칸을 고른 채 시작하고 Tab으로 다음 칸으로 간다
     await editor.fill("");
     await editor.focus();
-    await page.keyboard.type("fo");
+    await page.keyboard.type("for");
     await expect(
       list.getByRole("option", { name: /^for/ }).first(),
     ).toBeVisible();
     await page.keyboard.press("Enter");
-    await expect(editor).toHaveValue("for i in range():\n    ");
+    await expect(editor).toHaveValue("for i in range(n):\n    ");
+    await page.keyboard.type("k");
+    await expect(editor).toHaveValue("for k in range(n):\n    ");
+    await page.keyboard.press("Tab");
     await page.keyboard.type("5");
-    await expect(editor).toHaveValue("for i in range(5):\n    ");
+    await expect(editor).toHaveValue("for k in range(5):\n    ");
+    await page.keyboard.press("Tab");
+    await page.keyboard.type("x");
+    await expect(editor).toHaveValue("for k in range(5):\n    x");
+
+    // 멤버 완성: 변수 타입을 짐작해 그 타입의 메서드만 보여 준다
+    await editor.fill("");
+    await editor.focus();
+    await page.keyboard.type("s = input()");
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("s.sp");
+    await expect(list.getByRole("option").first()).toContainText("split");
+    await expect(list.getByRole("option", { name: /append/ })).toHaveCount(0);
+    await page.keyboard.press("Tab");
+    await expect(editor).toHaveValue("s = input()\ns.split()");
+
+    // 문자열 안에서는 제안하지 않는다
+    await editor.fill("");
+    await editor.focus();
+    await page.keyboard.type('x = "pri');
+    await expect(list).toHaveCount(0);
+
+    // Ctrl+Space로 직접 부른다
+    await editor.fill("");
+    await editor.focus();
+    await page.keyboard.press("Control+Space");
+    await expect(list).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(list).toHaveCount(0);
 
     // ↑↓로 고른다
     await editor.fill("");
@@ -1036,9 +1070,10 @@ test.describe("code editor basics on the solve page", () => {
     await page.keyboard.press("ArrowDown");
     const picked = await list
       .getByRole("option", { selected: true })
+      .locator(".suggestion-label")
       .innerText();
     await page.keyboard.press("Enter");
-    await expect(editor).toHaveValue(picked.split("\n")[0]);
+    await expect(editor).toHaveValue(new RegExp(`^${picked}`));
   });
 
   test("font size changes the editor and is remembered; the cursor position is shown", async ({
