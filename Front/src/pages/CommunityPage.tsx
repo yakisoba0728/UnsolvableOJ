@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { useAuth } from "../auth";
 import guideArt from "../assets/community-guide.png";
 import { PageHeader } from "../components/PageHeader";
@@ -44,6 +49,15 @@ export function CommunityPage() {
   useDocumentTitle("커뮤니티");
   const { session } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [notice, setNotice] = useState(
+    (location.state as { notice?: string } | null)?.notice ?? "",
+  );
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(""), 4000);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
   const activity = useActivity();
   const [params, setParams] = useSearchParams();
 
@@ -186,6 +200,12 @@ export function CommunityPage() {
         title="막힌 문제, 같이 풀어요."
         description="막힌 코드는 물어보고, 나만의 풀이는 나눠 보세요."
       />
+
+      {notice ? (
+        <p className="success-message" role="status">
+          {notice}
+        </p>
+      ) : null}
 
       <div className="filter-card">
         <div className="filter-row">

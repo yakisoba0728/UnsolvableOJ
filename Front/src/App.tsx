@@ -14,6 +14,7 @@ import {
   Route,
   Routes,
   useLocation,
+  useNavigationType,
   useNavigate,
 } from "react-router-dom";
 import { isDemo } from "./api";
@@ -142,6 +143,13 @@ const upcoming = [
 export function App() {
   const { session, setSession } = useAuth();
   const { pathname } = useLocation();
+  const navigationType = useNavigationType();
+  // 다른 화면으로 이동하면 스크롤을 맨 위로 올린다(뒤로 가기는 브라우저 동작에 맡기고,
+  // 같은 화면에서 필터·검색 주소만 바뀔 때는 위치를 유지한다).
+  useEffect(() => {
+    if (navigationType === "POP") return;
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   const navigate = useNavigate();
   // 로그아웃 직후에는 로그인 화면이 아니라 홈으로 보낸다.
   const signedOutRef = useRef(false);
@@ -254,7 +262,9 @@ export function App() {
               <NavLink
                 to="/problems/new"
                 className={({ isActive }) =>
-                  isActive || pathname.startsWith("/my-problems") ? "active" : ""
+                  isActive || pathname.startsWith("/my-problems")
+                    ? "active"
+                    : ""
                 }
               >
                 문제 만들기
@@ -368,8 +378,14 @@ export function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/problems" element={<ProblemsPage />} />
-            <Route path="/problems/new" element={authorOnly(<CreateProblemPage />)} />
-            <Route path="/my-problems" element={authorOnly(<MyProblemsPage />)} />
+            <Route
+              path="/problems/new"
+              element={authorOnly(<CreateProblemPage />)}
+            />
+            <Route
+              path="/my-problems"
+              element={authorOnly(<MyProblemsPage />)}
+            />
             <Route
               path="/my-problems/:id/edit"
               element={authorOnly(<CreateProblemPage />)}

@@ -646,6 +646,274 @@ test("filter toggles allow ⌘/Ctrl+click multi-select within one group only", a
   await expect(page).toHaveURL(/s=accepted/);
 });
 
+test("opening a post from a scrolled community list starts at the top", async ({
+  page,
+}) => {
+  const author = { name: "tester", tier: "브론즈" };
+  const posts = Array.from({ length: 8 }, (_, index) => ({
+    id: `scroll-${index}`,
+    category: "free",
+    title: `스크롤 확인 글 ${index}`,
+    body: "본문",
+    tags: [],
+    author,
+    createdAt: `2030-01-0${index + 1}T00:00:00Z`,
+    upvotes: 0,
+    views: 1,
+  }));
+  await page.addInitScript((value) => {
+    localStorage.setItem(
+      "unsolvable-oj-community-v1",
+      JSON.stringify({
+        posts: value,
+        answers: [],
+        upvoted: [],
+        saved: [],
+        followed: [],
+        accepted: {},
+        deleted: [],
+      }),
+    );
+  }, posts);
+  await page.setViewportSize({ width: 1280, height: 420 });
+  await page.goto("/community");
+  const target = page.getByRole("link", { name: /스크롤 확인 글 7/ });
+  await expect(target).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeGreaterThan(100);
+  await target.click();
+  await expect(page).toHaveURL(/\/community\/scroll-7$/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+});
+
+test.describe("community post: delete own post and answer layout", () => {
+  const author = { name: "solver", tier: "Bronze I" };
+  const other = { name: "다른사람", tier: "Bronze I" };
+  const mk = (id: string, title: string, who: typeof author) => ({
+    id,
+    category: "question",
+    title,
+    body: "본문 내용입니다",
+    tags: [],
+    author: who,
+    createdAt: "2026-10-01T00:00:00Z",
+    upvotes: 0,
+    views: 3,
+  });
+  const seedStore = {
+    posts: [
+      mk("mine-1", "내가 쓴 글", author),
+      mk("other-1", "남이 쓴 글", other),
+    ],
+    answers: [
+      {
+        id: "a-1",
+        postId: "mine-1",
+        author: other,
+        body: "첫 답변입니다",
+        createdAt: "2026-10-02T00:00:00Z",
+        upvotes: 0,
+      },
+    ],
+    upvoted: [],
+    saved: [],
+    followed: [],
+    accepted: {},
+    deleted: [],
+  };
+
+  test("the answer editor comes first and there is no separate write-answer button", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.addInitScript((value) => {
+      localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
+    }, seedStore);
+    await page.goto("/community/other-1");
+    await expect(
+      page.getByRole("button", { name: "답변 작성", exact: true }),
+    ).toHaveCount(0);
+    const editorTop = (await page.locator(".answer-editor").boundingBox())!.y;
+    const listTop = (await page.locator(".answers-card").boundingBox())!.y;
+    expect(editorTop).toBeLessThan(listTop);
+    // 남의 글에는 삭제 버튼이 없다
+    await expect(page.getByRole("button", { name: "글 삭제" })).toHaveCount(0);
+  });
+
+  test("the author can delete their own post and it disappears from the list", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.addInitScript((value) => {
+      if (!localStorage.getItem("unsolvable-oj-community-v1"))
+        localStorage.setItem(
+          "unsolvable-oj-community-v1",
+          JSON.stringify(value),
+        );
+    }, seedStore);
+    await page.goto("/community/mine-1");
+    page.once("dialog", (dialog) => dialog.dismiss());
+    await page.getByRole("button", { name: "글 삭제" }).click();
+    await expect(
+      page.getByRole("heading", { name: "내가 쓴 글" }),
+    ).toBeVisible();
+
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: "글 삭제" }).click();
+    await expect(page).toHaveURL(/\/community$/);
+    await expect(page.getByText("글을 삭제했어요.")).toBeVisible();
+    // 샘플 글이 있는 환경에서는 목록이 여러 쪽이라, 검색으로 두 글의 상태를 확인한다.
+    await page.goto(`/community?q=${encodeURIComponent("쓴 글")}`);
+    await expect(page.getByText("남이 쓴 글")).toBeVisible();
+    await expect(page.getByText("내가 쓴 글")).toHaveCount(0);
+    await page.goto("/community/mine-1");
+    await expect(page.getByText("글을 찾을 수 없어요.")).toBeVisible();
+  });
+});
+
+test.describe("code editor basics on the solve page", () => {
+  test("typing a quoted string and blank lines preserves valid source", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.goto("/problems/view/sum");
+    const editor = page.getByLabel("소스 코드");
+    await editor.fill("");
+    await editor.pressSequentially('"hello"');
+    await expect(editor).toHaveValue('"hello"');
+    await editor.fill("    ");
+    await editor.press("Enter");
+    await expect(editor).toHaveValue("    \n    ");
+  });
+
+  test("moving the caret dismisses suggestions from the previous word", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.goto("/problems/view/sum");
+    const editor = page.getByLabel("소스 코드");
+    await editor.fill("wh\n");
+    await editor.pressSequentially("fo");
+    const list = page.getByRole("listbox", { name: "자동완성 제안" });
+    await expect(
+      list.getByRole("option", { name: /^for/ }).first(),
+    ).toBeVisible();
+    await editor.evaluate((el: HTMLTextAreaElement) =>
+      el.setSelectionRange(3, 3),
+    );
+    await editor.press("ArrowLeft");
+    await expect(list).toHaveCount(0);
+    await editor.press("Tab");
+    await expect(editor).toHaveValue("wh    \nfo");
+  });
+
+  test("auto indent, bracket pairing, undo, comment toggle and Shift+Tab work as typed", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.goto("/problems/view/sum");
+    const editor = page.getByLabel("소스 코드");
+    await editor.fill("");
+    await editor.focus();
+
+    // 파이썬: ':' 뒤 Enter는 한 단계 들여쓴다
+    await page.keyboard.type("def f():");
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("print(");
+    // 여는 괄호는 짝과 함께 들어가고, 닫는 괄호를 치면 건너뛴다
+    await expect(editor).toHaveValue("def f():\n    print()");
+    await page.keyboard.type("1)");
+    await expect(editor).toHaveValue("def f():\n    print(1)");
+
+    // 실행 취소(Ctrl/⌘+Z)가 자동 입력까지 되돌린다
+    await page.keyboard.press("ControlOrMeta+z");
+    await expect(editor).not.toHaveValue("def f():\n    print(1)");
+
+    await editor.fill("a\nb");
+    await editor.press("ControlOrMeta+a");
+    await page.keyboard.press("ControlOrMeta+/");
+    await expect(editor).toHaveValue("# a\n# b");
+    await page.keyboard.press("ControlOrMeta+/");
+    await expect(editor).toHaveValue("a\nb");
+
+    await editor.press("ControlOrMeta+a");
+    await page.keyboard.press("Tab");
+    await expect(editor).toHaveValue("    a\n    b");
+    await page.keyboard.press("Shift+Tab");
+    await expect(editor).toHaveValue("a\nb");
+  });
+
+  test("autocomplete suggests while typing and applies with Tab or Enter", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.goto("/problems/view/sum");
+    const editor = page.getByLabel("소스 코드");
+    await editor.fill("");
+    await editor.focus();
+
+    await page.keyboard.type("pri");
+    const list = page.getByRole("listbox", { name: "자동완성 제안" });
+    await expect(list.getByRole("option", { name: /^print/ })).toBeVisible();
+    await page.keyboard.press("Tab");
+    await expect(editor).toHaveValue("print");
+    await expect(list).toHaveCount(0);
+
+    // Esc로 닫으면 Enter는 평소처럼 줄바꿈이다
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("whi");
+    await expect(list).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(list).toHaveCount(0);
+
+    // 스니펫: 들여쓰기를 이어 붙이고 커서를 괄호 안에 둔다
+    await editor.fill("");
+    await editor.focus();
+    await page.keyboard.type("fo");
+    await expect(
+      list.getByRole("option", { name: /^for/ }).first(),
+    ).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(editor).toHaveValue("for i in range():\n    ");
+    await page.keyboard.type("5");
+    await expect(editor).toHaveValue("for i in range(5):\n    ");
+
+    // ↑↓로 고른다
+    await editor.fill("");
+    await editor.focus();
+    await page.keyboard.type("pr");
+    await expect(list).toBeVisible();
+    await page.keyboard.press("ArrowDown");
+    const picked = await list
+      .getByRole("option", { selected: true })
+      .innerText();
+    await page.keyboard.press("Enter");
+    await expect(editor).toHaveValue(picked.split("\n")[0]);
+  });
+
+  test("font size changes the editor and is remembered; the cursor position is shown", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.goto("/problems/view/sum");
+    const editor = page.getByLabel("소스 코드");
+    const size = () => editor.evaluate((el) => getComputedStyle(el).fontSize);
+    expect(await size()).toBe("13px");
+    await page.getByRole("button", { name: "글꼴 크게" }).click();
+    await page.getByRole("button", { name: "글꼴 크게" }).click();
+    expect(await size()).toBe("15px");
+    await page.reload();
+    expect(await size()).toBe("15px");
+    await page.getByRole("button", { name: "글꼴 작게" }).click();
+    expect(await size()).toBe("14px");
+
+    await editor.fill("ab\ncde");
+    await expect(page.getByText("줄 2, 열 4")).toBeVisible();
+  });
+});
+
 test("a rejected submission shows each public case with input, expected and actual output", async ({
   page,
 }) => {
