@@ -65,7 +65,11 @@ export function AuthPage() {
   }
   const fieldError = (field: Field) =>
     shown(field) ? (
-      <span id={`auth-${field}-error`} className="field-error" role="alert">
+      <span
+        id={`auth-${field}-error`}
+        className="field-error"
+        aria-live="polite"
+      >
         {shown(field)}
       </span>
     ) : null;

@@ -6404,3 +6404,8 @@ h3 {
 .auth-field [aria-invalid="true"]:focus {
   box-shadow: 0 0 0 3px var(--color-danger-soft);
 }
+@media (max-width: 880px) {
+  .problem-row:not(.submission-row) .difficulty {
+    justify-self: end;
+  }
+}
