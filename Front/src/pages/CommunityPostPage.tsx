@@ -155,7 +155,7 @@ export function CommunityPostPage() {
           {notice}
         </p>
       ) : null}
-      <div className="post-layout">
+      <div className={`post-layout ${related.length ? "" : "no-side"}`}>
         <div className="post-column">
           <article className="post-card">
             <div className="post-card-head">
@@ -188,14 +188,40 @@ export function CommunityPostPage() {
                 <span className="post-avatar" aria-hidden="true">
                   {post.author.name.slice(0, 1)}
                 </span>
-                <span>
-                  {post.author.name} · {post.author.tier} ·{" "}
-                  {relativeTime(post.createdAt)}
+                <span className="post-author-text">
+                  <strong>{post.author.name}</strong>
+                  <span className="muted">
+                    {post.author.tier}
+                    {authorStats.reputation
+                      ? ` · 명성 ${authorStats.reputation.toLocaleString()}`
+                      : ""}{" "}
+                    · {relativeTime(post.createdAt)}
+                  </span>
+                  <small className="muted">
+                    채택 답변 {authorStats.acceptedAnswers} · 작성 글{" "}
+                    {authorStats.posts}
+                  </small>
                 </span>
               </div>
-              {acceptedId ? (
-                <span className="post-stats">채택 완료</span>
-              ) : null}
+              <div className="post-byline-side">
+                {acceptedId ? (
+                  <span className="post-stats">채택 완료</span>
+                ) : null}
+                {!isMine ? (
+                  <button
+                    type="button"
+                    className="button button-outline button-small"
+                    aria-pressed={following}
+                    onClick={() =>
+                      requireLogin(() =>
+                        communityActions.toggleFollow(post.author.name),
+                      )
+                    }
+                  >
+                    {following ? "✓ 팔로잉" : "+ 팔로우"}
+                  </button>
+                ) : null}
+              </div>
             </div>
             <div className="markdown post-body">
               <Markdown>{post.body}</Markdown>
@@ -355,49 +381,22 @@ export function CommunityPostPage() {
           </section>
         </div>
 
-        <aside className="post-side">
-          <section className="post-card author-card" aria-label="작성자">
-            <span className="post-avatar large" aria-hidden="true">
-              {post.author.name.slice(0, 1)}
-            </span>
-            <strong>{post.author.name}</strong>
-            <span className="muted">
-              {post.author.tier}
-              {authorStats.reputation
-                ? ` · 명성 ${authorStats.reputation.toLocaleString()}`
-                : ""}
-            </span>
-            {!isMine ? (
-              <button
-                type="button"
-                className="button button-outline button-full"
-                onClick={() =>
-                  requireLogin(() =>
-                    communityActions.toggleFollow(post.author.name),
-                  )
-                }
-              >
-                {following ? "✓ 팔로잉" : "+ 팔로우"}
-              </button>
+        {related.length ? (
+          <aside className="post-side">
+            {related.length ? (
+              <section className="post-card related-card" aria-label="관련 글">
+                <h2>관련 질문</h2>
+                <ul>
+                  {related.map((item) => (
+                    <li key={item.id}>
+                      <Link to={`/community/${item.id}`}>{item.title}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ) : null}
-            <small className="muted">
-              채택 답변 {authorStats.acceptedAnswers} · 작성 글{" "}
-              {authorStats.posts}
-            </small>
-          </section>
-          {related.length ? (
-            <section className="post-card related-card" aria-label="관련 글">
-              <h2>관련 질문</h2>
-              <ul>
-                {related.map((item) => (
-                  <li key={item.id}>
-                    <Link to={`/community/${item.id}`}>{item.title}</Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-        </aside>
+          </aside>
+        ) : null}
       </div>
     </div>
   );

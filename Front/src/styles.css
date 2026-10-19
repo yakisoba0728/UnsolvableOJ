@@ -3678,11 +3678,6 @@ h3 {
   font-size: 14px;
   font-weight: 700;
 }
-.post-avatar.large {
-  width: 56px;
-  height: 56px;
-  font-size: 24px;
-}
 .post-body,
 .answer-body {
   color: var(--color-ink-700);
@@ -3796,14 +3791,6 @@ h3 {
 .login-prompt a {
   color: var(--color-primary);
   font-weight: var(--weight-label);
-}
-.author-card {
-  align-items: center;
-  text-align: center;
-  gap: 12px;
-}
-.author-card strong {
-  font: 700 18px var(--font-display);
 }
 .related-card h2 {
   margin: 0;
@@ -6686,4 +6673,35 @@ h3 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* 글 상단 작성자 줄: 아바타·이름·등급·시간·통계와 팔로우를 한곳에 */
+.post-layout.no-side {
+  grid-template-columns: minmax(0, 1fr);
+}
+.post-author-line {
+  gap: 12px;
+}
+.post-author-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.post-author-text strong {
+  color: var(--color-ink-900);
+  font-size: 15px;
+}
+.post-author-text small {
+  font-size: 12px;
+}
+.post-byline-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.post-avatar {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
 }

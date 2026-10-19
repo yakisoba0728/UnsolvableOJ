@@ -828,6 +828,30 @@ test.describe("community post: delete own post and answer layout", () => {
     await expect(page.getByText("글을 찾을 수 없어요.")).toBeVisible();
   });
 
+  test("author info and the follow button sit in the post header, not in a separate side card", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.addInitScript((value) => {
+      localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
+    }, seedStore);
+    await page.goto("/community/other-1");
+    const header = page.locator(".post-byline");
+    await expect(header).toContainText("다른사람");
+    await expect(header).toContainText("채택 답변 0");
+    await expect(header).toContainText("작성 글 1");
+    await expect(page.locator(".author-card")).toHaveCount(0);
+    const follow = header.getByRole("button", { name: "+ 팔로우" });
+    await follow.click();
+    await expect(
+      header.getByRole("button", { name: "✓ 팔로잉" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    // 내 글에는 팔로우 버튼이 없다
+    await page.goto("/community/mine-1");
+    await expect(page.locator(".post-byline")).toContainText("solver");
+    await expect(page.getByRole("button", { name: /팔로/ })).toHaveCount(0);
+  });
+
   test("the author edits their own post from the ⋮ menu; the menu closes with Esc", async ({
     page,
   }) => {
