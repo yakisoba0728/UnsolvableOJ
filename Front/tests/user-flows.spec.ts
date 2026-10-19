@@ -545,20 +545,20 @@ test("my submissions can be searched, filtered and grouped by problem", async ({
   await expect(rows).toHaveCount(4);
 
   const verdicts = page.getByRole("group", { name: "판정 필터" });
-  await verdicts.getByRole("button", { name: /^정답/ }).click();
+  await verdicts.getByRole("button", { name: /^성공/ }).click();
   await expect(rows).toHaveCount(1);
   await expect(rows.first()).toContainText("피보나치");
   // 선택한 항목을 다시 누르면 전체로 돌아간다
-  await verdicts.getByRole("button", { name: /^정답/ }).click();
+  await verdicts.getByRole("button", { name: /^성공/ }).click();
   await expect(rows).toHaveCount(4);
 
-  // ⌘/Ctrl+클릭으로 같은 종류 안에서 여러 개를 고른다(정답 + 오답·오류 = 전부)
+  // ⌘/Ctrl+클릭으로 같은 종류 안에서 여러 개를 고른다(성공 + 틀림·오류 = 전부)
   await verdicts
-    .getByRole("button", { name: /^정답/ })
+    .getByRole("button", { name: /^성공/ })
     .click({ modifiers: ["ControlOrMeta"] });
   await expect(rows).toHaveCount(1);
   await verdicts
-    .getByRole("button", { name: /^오답/ })
+    .getByRole("button", { name: /^틀림/ })
     .click({ modifiers: ["ControlOrMeta"] });
   await expect(rows).toHaveCount(4);
   await expect(page).toHaveURL(/s=accepted%2Cwrong/);

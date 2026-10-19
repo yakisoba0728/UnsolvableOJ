@@ -32,8 +32,8 @@ const groupOf = (status: string): StatusGroup =>
       : "wrong";
 const statusChips: { value: StatusGroup; label: string }[] = [
   { value: "", label: "전체" },
-  { value: "accepted", label: "정답" },
-  { value: "wrong", label: "오답·오류" },
+  { value: "accepted", label: "성공" },
+  { value: "wrong", label: "틀림·오류" },
   { value: "pending", label: "채점 중" },
 ];
 

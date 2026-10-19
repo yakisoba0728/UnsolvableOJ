@@ -103,9 +103,6 @@ export function ProfilePage() {
         setRankings,
       ),
     ])
-      .then(() => {
-        if (!controller.signal.aborted) setReady(true);
-      })
       .catch((cause) => {
         if (!controller.signal.aborted)
           setError(
@@ -113,6 +110,10 @@ export function ProfilePage() {
               ? cause.message
               : "정보를 불러오지 못했습니다.",
           );
+      })
+      .finally(() => {
+        // 실패해도 로딩 표시가 끝나도록 한다(오류는 아래에서 안내).
+        if (!controller.signal.aborted) setReady(true);
       });
     return () => controller.abort();
   }, [session]);

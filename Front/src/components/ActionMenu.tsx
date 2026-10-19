@@ -37,6 +37,12 @@ export function ActionMenu({
       if (event.key === "Escape") {
         setOpen(false);
         buttonRef.current?.focus();
+      } else if (event.key === "Tab") {
+        setOpen(false);
+      } else if (event.key === "Home" || event.key === "End") {
+        event.preventDefault();
+        const list = itemsEls();
+        list[event.key === "Home" ? 0 : list.length - 1]?.focus();
       } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
         const list = itemsEls();
@@ -82,6 +88,8 @@ export function ActionMenu({
               className={`action-menu-item ${item.danger ? "danger" : ""}`}
               onClick={() => {
                 setOpen(false);
+                // 선택한 항목이 사라져도 포커스가 문서 맨 앞으로 튀지 않게 버튼으로 돌려놓는다.
+                buttonRef.current?.focus();
                 item.onSelect();
               }}
             >

@@ -46,7 +46,10 @@ export function CommunityWritePage() {
     location.state as { category?: CategoryKey } | null
   )?.category;
   const isAdmin = session?.user.role === "ADMIN";
-  const options = categories.filter((item) => item.key !== "notice" || isAdmin);
+  const options = categories.filter(
+    (item) =>
+      item.key !== "notice" || isAdmin || item.key === original?.category,
+  );
 
   // 이전에 임시 저장한 초안이 있으면 한 번만 복원한다.
   // (수정 모드에서는 새 글 초안을 건드리지 않는다.)
@@ -150,7 +153,9 @@ export function CommunityWritePage() {
     if (
       dirty &&
       !window.confirm(
-        "작성 중인 내용이 임시 저장되지 않은 채로 사라질 수 있어요. 나갈까요?",
+        editing
+          ? "수정한 내용이 저장되지 않아요. 나갈까요?"
+          : "작성 중인 내용이 임시 저장되지 않은 채로 사라질 수 있어요. 나갈까요?",
       )
     ) {
       return;
@@ -176,9 +181,7 @@ export function CommunityWritePage() {
         body: body.trim(),
         tags,
       });
-      setTitle(original?.title ?? "");
-      setBody(original?.body ?? "");
-      setTags(original?.tags ?? []);
+      setPending(false);
       navigate(`/community/${editingId}`, {
         state: { notice: "글을 수정했어요." },
       });

@@ -14,6 +14,7 @@ import {
   Route,
   Routes,
   useLocation,
+  useParams,
   useNavigationType,
   useNavigate,
 } from "react-router-dom";
@@ -138,6 +139,12 @@ const upcoming = [
     },
   },
 ];
+
+/** 글 수정 화면: 글이 바뀌면 폼 상태도 새로 시작하도록 id를 key로 쓴다. */
+function CommunityEditRoute() {
+  const { id } = useParams();
+  return <CommunityWritePage key={id} />;
+}
 
 export function App() {
   const { session, setSession } = useAuth();
@@ -394,9 +401,9 @@ export function App() {
               path="/community/:id/edit"
               element={
                 session ? (
-                  <CommunityWritePage />
+                  <CommunityEditRoute />
                 ) : (
-                  <Navigate to="/auth" replace />
+                  <Navigate to="/auth" replace state={{ from: pathname }} />
                 )
               }
             />
