@@ -130,6 +130,8 @@ npm run db:import:boj -- --dataset /path/to/boj_dataset --audit /path/to/boj_imp
 
 JSON 요청 전체 제한은 16MiB입니다. 각 필드의 길이 제한과 별도로 적용되므로 여러 대형 테스트케이스를 한 번에 보내는 경우 합계 크기도 확인하세요. 기존 `/problems/:slug` 상세 경로는 호환성을 위해 유지하지만, `mine` 등의 관리 경로와 충돌하지 않는 `/problems/by-slug/:slug`를 사용하세요.
 
+프록시 뒤에서 실행할 때는 `TRUST_PROXY`에 신뢰하는 프록시 IP/CIDR을 쉼표로 지정해야 IP별 요청 제한이 분리됩니다. 기본값은 비어 있어 전달 헤더를 신뢰하지 않습니다. 프록시는 외부에서 받은 `X-Forwarded-For`를 실제 접속 IP로 덮어써야 합니다. 로컬 Compose는 API 포트를 localhost에만 공개하고 내부 사설망(`uniquelocal`)을 신뢰합니다. 외부 운영에서는 실제 프록시 주소 범위로 좁히고 API 직접 접근을 차단하세요.
+
 ## 채점기 연동 계약
 
 채점 워커는 Redis의 `judge-submissions` 큐에서 `judge-submission` 작업을 소비합니다.

@@ -37,6 +37,8 @@ services:
       NODE_ENV: production
       PORT: 3000
       HOST: 0.0.0.0
+      # Only private-network proxies are trusted; nginx overwrites forwarded IPs.
+      TRUST_PROXY: uniquelocal
       CORS_ORIGIN: http://localhost:3001
       DATABASE_URL: postgresql://unsolvable:local_password@postgres:5432/unsolvable_oj
       DATABASE_SSL: "false"

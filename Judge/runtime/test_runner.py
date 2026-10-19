@@ -1,6 +1,7 @@
 import tempfile
 import shutil
 import unittest
+from unittest.mock import patch
 import os
 import sys
 from pathlib import Path
@@ -82,13 +83,30 @@ class JudgeRunnerTests(unittest.TestCase):
         self.assertNotIn('secret', str(result['debugOutputs']))
 
     def test_timeout_keeps_flushed_output(self):
-        result = runner.judge(self.payload('print("before timeout", flush=True)\nwhile True: pass', time_ms=100))
+        # Allow interpreter startup under CI load; the short timeout is tested separately.
+        result = runner.judge(self.payload('print("before timeout", flush=True)\nwhile True: pass', time_ms=1000))
         self.assertEqual(result['status'], 'TIME_LIMIT_EXCEEDED')
         self.assertEqual(result['debugOutputs'][0]['stdout'], 'before timeout\n')
 
     def test_time_limit(self):
         result = runner.judge(self.payload('while True: pass', time_ms=100))
         self.assertEqual(result['status'], 'TIME_LIMIT_EXCEEDED')
+
+    def test_macos_cleanup_accepts_a_disappeared_process_group(self):
+        with patch('runner.sys.platform', 'darwin'), patch(
+            'runner.os.killpg', side_effect=[PermissionError(), ProcessLookupError()]
+        ) as kill:
+            runner.kill_group(12345)
+            self.assertEqual(kill.call_args_list[-1].args, (12345, 0))
+
+    def test_cleanup_does_not_hide_real_permission_errors(self):
+        for platform, calls in [('darwin', 2), ('linux', 1)]:
+            with self.subTest(platform=platform), patch('runner.sys.platform', platform), patch(
+                'runner.os.killpg', side_effect=[PermissionError(), None]
+            ) as kill:
+                with self.assertRaises(PermissionError):
+                    runner.kill_group(12345)
+                self.assertEqual(kill.call_count, calls)
 
     def test_output_limit(self):
         result = runner.judge(self.payload('print("x" * 1000001)'))

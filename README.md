@@ -37,6 +37,8 @@ cp Judge/.env.example Judge/.env
 - Swagger: `http://localhost:3000/docs`
 - 상태 확인: `http://localhost:3000/api/v1/health`
 
+전체 서비스를 Docker로 실행하려면 저장소 루트에서 `docker compose up -d --build`를 실행하세요. 기존 PostgreSQL·Redis 볼륨은 유지되며, API는 시작할 때 미적용 마이그레이션을 실행합니다. `docker compose ps`로 상태를 확인하고 `docker compose stop`으로 데이터 삭제 없이 중지할 수 있습니다. 포트는 localhost에만 공개하며 기본 비밀키는 로컬 개발 전용입니다.
+
 첫 관리자는 회원가입 후 `(cd Back && npm run db:bootstrap:admin -- admin@example.com)`으로 지정하고 **다시 로그인**합니다. 이후 관리자 API로 작성자 역할을 지정할 수 있습니다. 방법은 [백엔드 문서](./Back/README.md)를 참고하세요.
 로컬 데모가 필요하면 `(cd Back && npm run db:seed:demo)`를 실행하세요. 예제 문제를 게시하고 무작위 작성자 비밀번호를 출력합니다.
 

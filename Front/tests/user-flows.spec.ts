@@ -774,6 +774,65 @@ test.describe("community post: delete own post and answer layout", () => {
 });
 
 test.describe("code editor basics on the solve page", () => {
+  test("switching languages immediately keeps each language's latest draft", async ({
+    page,
+  }) => {
+    await page.clock.install();
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "unsolvable-oj-draft-v1:problem-id:PYTHON",
+        "print(111)",
+      );
+      localStorage.setItem("unsolvable-oj-draft-v1:problem-id:CPP", "int main() {}");
+    });
+    await page.goto("/problems/view/sum");
+    const python = page.getByRole("textbox", { name: "Python 3 소스 코드" });
+    await expect(python).toHaveValue("print(111)");
+    await python.fill("print(222)");
+    await page.getByRole("combobox", { name: "언어", exact: true }).click();
+    await page.getByRole("option", { name: "C++ 20", exact: true }).click();
+    const cpp = page.getByRole("textbox", { name: "C++ 20 소스 코드" });
+    await expect(cpp).toHaveValue("int main() {}");
+    await cpp.fill("int main() { return 0; }");
+    await page.getByRole("combobox", { name: "언어", exact: true }).click();
+    await page.getByRole("option", { name: "Python 3", exact: true }).click();
+    await expect(python).toHaveValue("print(222)");
+    expect(
+      await page.evaluate(() =>
+        localStorage.getItem("unsolvable-oj-draft-v1:problem-id:CPP"),
+      ),
+    ).toBe("int main() { return 0; }");
+  });
+
+  test("leaving the solve page immediately preserves the latest input", async ({
+    page,
+  }) => {
+    await page.clock.install();
+    await page.goto("/problems/view/sum");
+    await page.getByLabel("소스 코드").fill("print(333)");
+    await page.getByRole("link", { name: "문제 목록", exact: true }).click();
+    await page.getByRole("link", { name: new RegExp(problem.title) }).click();
+    await expect(page.getByLabel("소스 코드")).toHaveValue("print(333)");
+  });
+
+  test("reset removes the saved draft without restoring it on reload", async ({
+    page,
+  }) => {
+    await page.goto("/problems/view/sum");
+    const editor = page.getByLabel("소스 코드");
+    const starter = await editor.inputValue();
+    await editor.fill("print(444)");
+    await page.getByRole("button", { name: "초기화", exact: true }).click();
+    await expect(editor).toHaveValue(starter);
+    expect(
+      await page.evaluate(() =>
+        localStorage.getItem("unsolvable-oj-draft-v1:problem-id:PYTHON"),
+      ),
+    ).toBeNull();
+    await page.reload();
+    await expect(page.getByLabel("소스 코드")).toHaveValue(starter);
+  });
+
   test("typing a quoted string and blank lines preserves valid source", async ({
     page,
   }) => {

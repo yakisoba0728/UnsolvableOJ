@@ -8,6 +8,8 @@ export const JSON_BODY_LIMIT = 16 * 1024 * 1024;
 
 export function configureHttp(app: NestExpressApplication) {
   const config = app.get(ConfigService);
+  const trustedProxies = config.get<string>('TRUST_PROXY', '').trim();
+  if (trustedProxies) app.set('trust proxy', trustedProxies);
   app.use(helmet());
   app.setGlobalPrefix('api/v1');
   app.enableCors({

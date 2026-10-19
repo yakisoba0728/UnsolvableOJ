@@ -98,6 +98,14 @@ def kill_group(pid):
         os.killpg(pid, signal.SIGKILL)
     except ProcessLookupError:
         pass
+    except PermissionError:
+        if sys.platform == 'darwin':
+            # macOS can return EPERM while an already-killed group disappears.
+            try:
+                os.killpg(pid, 0)
+            except ProcessLookupError:
+                return
+        raise
 
 
 def clean_descendants(pid, existing):

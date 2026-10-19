@@ -150,20 +150,17 @@ export function ProblemPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [problem?.id, language]);
 
-  // 입력 후 잠시 멈추면 초안을 자동 저장한다.
-  useEffect(() => {
-    if (!problem || source === starter(language)) return;
-    const timer = setTimeout(() => {
-      try {
-        localStorage.setItem(draftKey(problem.id, language), source);
-        setSavedAt(new Date());
-      } catch {
-        setSavedAt(null);
-      }
-    }, 600);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source, problem?.id, language]);
+  // 전환·이탈 직전 입력도 남기고, 초안 복원은 다른 언어의 저장 내용을 덮어쓰지 않는다.
+  function updateSource(next: string) {
+    setSource(next);
+    if (!problem) return;
+    try {
+      localStorage.setItem(draftKey(problem.id, language), next);
+      setSavedAt(new Date());
+    } catch {
+      setSavedAt(null);
+    }
+  }
 
   useEffect(() => {
     if (tab !== "history" || !session || !problem) return;
@@ -256,7 +253,7 @@ export function ProblemPage() {
   /** 계산한 편집 결과를 입력창에 적용한다(실행 취소가 유지되도록 브라우저 편집 명령을 우선 쓴다). */
   function applyEdit(target: HTMLTextAreaElement, next: EditState) {
     if (!applyToTextarea(target, next)) {
-      setSource(next.value);
+      updateSource(next.value);
       requestAnimationFrame(() =>
         target.setSelectionRange(next.start, next.end),
       );
@@ -579,7 +576,7 @@ export function ProblemPage() {
                   popup ? `suggestion-${popup.index}` : undefined
                 }
                 onChange={(event) => {
-                  setSource(event.target.value);
+                  updateSource(event.target.value);
                   updateCursor(event.currentTarget);
                   if (suppressSuggest.current) suppressSuggest.current = false;
                   else refreshSuggest(event.currentTarget);
