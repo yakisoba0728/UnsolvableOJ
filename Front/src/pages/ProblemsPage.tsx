@@ -6,6 +6,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
 import { Pagination } from "../components/Pagination";
+import { Skeleton, SkeletonRegion, SkeletonRows } from "../components/Skeleton";
 import { ShuffleIcon } from "../components/ShuffleIcon";
 import {
   ProblemStatus,
@@ -275,6 +276,7 @@ export function ProblemsPage() {
               <SlideToggle
                 multiple
                 ariaLabel="풀이 상태 필터"
+                countsLoading={loading || history.loading}
                 values={statuses}
                 options={statusChips.map((item) => ({
                   value: item.value,
@@ -298,6 +300,7 @@ export function ProblemsPage() {
             <SlideToggle
               multiple
               ariaLabel="난이도 필터"
+              countsLoading={loading}
               values={selectedDifficulties}
               options={[
                 { value: "", label: "전체", count: difficultyCount("") },
@@ -357,14 +360,20 @@ export function ProblemsPage() {
               ) : null}
             </div>
             <span className="total-count">
-              {filtered.length}문제
-              {filtered.length
-                ? ` 중 ${(current - 1) * PAGE_SIZE + 1}–${(current - 1) * PAGE_SIZE + visible.length}`
-                : ""}
+              {loading ? (
+                <Skeleton width={80} height={14} />
+              ) : (
+                <>
+                  {filtered.length}문제
+                  {filtered.length
+                    ? ` 중 ${(current - 1) * PAGE_SIZE + 1}–${(current - 1) * PAGE_SIZE + visible.length}`
+                    : ""}
+                </>
+              )}
             </span>
           </div>
           {loading ? (
-            <div className="empty-state">문제를 불러오는 중입니다…</div>
+            <SkeletonRows count={8} />
           ) : visible.length ? (
             <div className="problem-list data-list list-problems">
               <div className="problem-head" aria-hidden="true">
@@ -379,7 +388,11 @@ export function ProblemsPage() {
                     <span className="problem-title">
                       <strong>{problem.title}</strong>
                     </span>
-                    <ProblemStatus state={stateOf(problem)} />
+                    {session && history.loading ? (
+                      <Skeleton width={48} height={16} />
+                    ) : (
+                      <ProblemStatus state={stateOf(problem)} />
+                    )}
                     <span
                       className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
                     >
@@ -424,6 +437,20 @@ export function ProblemsPage() {
         </section>
 
         <aside className="side-stack" ref={sideRef}>
+          {session && !profile ? (
+            <SkeletonRegion
+              className="standing-card"
+              label="내 요약을 불러오는 중입니다"
+            >
+              <Skeleton width={90} height={18} />
+              <div className="skeleton-stats">
+                <Skeleton height={36} />
+                <Skeleton height={36} />
+                <Skeleton height={36} />
+              </div>
+              <Skeleton height={40} radius={10} />
+            </SkeletonRegion>
+          ) : null}
           {profile ? (
             <div className="standing-card">
               <Link to="/profile" className="standing-link">

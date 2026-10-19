@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { verdictLabel } from "../verdict";
 import { api } from "../api";
 import type { Session, Submission } from "../types";
 
@@ -83,7 +84,7 @@ export function ResultSummary({ submission }: { submission: Submission }) {
       >
         <div>
           <span className="result-label">채점 결과</span>
-          <strong>{submission.status.replaceAll("_", " ")}</strong>
+          <strong>{verdictLabel(submission.status)}</strong>
         </div>
         <span className="result-symbol">
           {submission.status === "ACCEPTED"

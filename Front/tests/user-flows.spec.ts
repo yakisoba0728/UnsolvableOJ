@@ -496,9 +496,7 @@ test("submission passes the source and polls through to the final verdict", asyn
   const panel = page.getByRole("region", { name: "채점 결과" });
   await expect(panel).toBeVisible();
   await expect(page).toHaveURL(/\/problems\/view\/sum$/);
-  await expect(
-    panel.getByText("ACCEPTED", { exact: true }).first(),
-  ).toBeVisible({
+  await expect(panel.getByText("성공", { exact: true }).first()).toBeVisible({
     timeout: 10_000,
   });
   await expect(panel.getByText("2 / 2", { exact: true })).toBeVisible();
@@ -1143,6 +1141,27 @@ test("a rejected submission is shown under the editor with each example compared
   await panel.getByRole("button", { name: "닫기" }).click();
   await expect(panel).toHaveCount(0);
   await expect(page.getByLabel("소스 코드")).toHaveValue("print(0)");
+});
+
+test("lists show skeletons instead of zero placeholders while the server responds", async ({
+  page,
+}) => {
+  let release: () => void = () => undefined;
+  const gate = new Promise<void>((resolve) => (release = resolve));
+  await page.route("**/api/v1/problems?*", async (route) => {
+    await gate;
+    await route.fulfill({
+      json: { page: 1, limit: 100, total: 1, totalPages: 1, items: [problem] },
+    });
+  });
+  await page.goto("/problems");
+  await expect(page.locator(".skeleton-rows")).toBeVisible();
+  await expect(page.locator(".total-count")).not.toContainText("0문제");
+  await expect(page.locator(".toggle-count:not(.skeleton)")).toHaveCount(0);
+  release();
+  await expect(page.locator(".skeleton-rows")).toHaveCount(0);
+  await expect(page.locator(".total-count")).toContainText("1문제");
+  await expect(page.locator("a.problem-row")).toHaveCount(1);
 });
 
 test("Ctrl/⌘+Enter pressed twice creates only one submission", async ({

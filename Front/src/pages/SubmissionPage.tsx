@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
+import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { PageHeader } from "../components/PageHeader";
 import { WeekStrip } from "../components/WeekStrip";
 import { problemPath } from "../paths";
@@ -36,8 +37,15 @@ export function SubmissionPage() {
     );
   if (!submission)
     return (
-      <div className="page-width empty-state">
-        제출 결과를 불러오는 중입니다…
+      <div className="page-width result-page">
+        <SkeletonRegion label="제출 결과를 불러오는 중입니다">
+          <Skeleton width={260} height={34} style={{ margin: "8px 0 24px" }} />
+          <div className="result-skeleton-grid">
+            <Skeleton height={120} radius={14} />
+            <Skeleton height={120} radius={14} />
+          </div>
+          <Skeleton height={200} radius={14} style={{ marginTop: 16 }} />
+        </SkeletonRegion>
       </div>
     );
   return (
@@ -48,7 +56,7 @@ export function SubmissionPage() {
         description={`제출 ${submission.id.slice(0, 8).toUpperCase()} · ${new Date(submission.createdAt).toLocaleString("ko-KR")}`}
       />
       <ResultSummary submission={submission} />
-      {submission.status === "ACCEPTED" ? (
+      {submission.status === "ACCEPTED" && !history.loading ? (
         <section className="streak-card" aria-label="연속 학습">
           <div className="streak-text">
             <strong>

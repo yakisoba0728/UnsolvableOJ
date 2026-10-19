@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { verdictLabel } from "../verdict";
 import { useDocumentTitle } from "../hooks";
 import { Select } from "../components/Select";
 import { ProblemMarkdown } from "../components/ProblemMarkdown";
 import { Link, useParams } from "react-router-dom";
+import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import {
@@ -258,7 +260,15 @@ export function ProblemPage() {
 
   if (loading)
     return (
-      <div className="page-width empty-state">문제를 불러오는 중입니다…</div>
+      <div className="solve-page">
+        <SkeletonRegion label="문제를 불러오는 중입니다">
+          <Skeleton width={320} height={34} style={{ margin: "16px 0 20px" }} />
+          <div className="solve-skeleton-grid">
+            <Skeleton height={520} radius={14} />
+            <Skeleton height={520} radius={14} />
+          </div>
+        </SkeletonRegion>
+      </div>
     );
   if (error || !problem)
     return (
@@ -489,7 +499,11 @@ export function ProblemPage() {
                   로그인하면 이 문제의 제출 내역이 여기에 표시됩니다.
                 </p>
               ) : history === null ? (
-                <p className="muted">제출 내역을 불러오는 중입니다…</p>
+                <SkeletonRegion label="제출 내역을 불러오는 중입니다">
+                  <Skeleton height={40} style={{ marginBottom: 10 }} />
+                  <Skeleton height={40} style={{ marginBottom: 10 }} />
+                  <Skeleton height={40} />
+                </SkeletonRegion>
               ) : history.length ? (
                 <ul className="history-list">
                   {history.map((item) => (
@@ -498,7 +512,7 @@ export function ProblemPage() {
                         <span
                           className={`verdict verdict-${item.status.toLowerCase()}`}
                         >
-                          {item.status.replaceAll("_", " ")}
+                          {verdictLabel(item.status)}
                         </span>
                         <span>
                           {item.language} ·{" "}
@@ -668,7 +682,7 @@ export function ProblemPage() {
                       role="status"
                       className={`verdict verdict-${result.status.toLowerCase()}`}
                     >
-                      {result.status.replaceAll("_", " ")}
+                      {verdictLabel(result.status)}
                     </span>
                   ) : null}
                   <span className="judge-panel-actions">

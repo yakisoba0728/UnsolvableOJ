@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
@@ -22,7 +28,9 @@ export function CommunityWritePage() {
   const { session } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const requestedCategory = (location.state as { category?: CategoryKey } | null)?.category;
+  const requestedCategory = (
+    location.state as { category?: CategoryKey } | null
+  )?.category;
   const isAdmin = session?.user.role === "ADMIN";
   const options = categories.filter((item) => item.key !== "notice" || isAdmin);
 
@@ -45,7 +53,9 @@ export function CommunityWritePage() {
   const [saveState, setSaveState] = useState<"idle" | "saved" | "failed">(
     restored ? "saved" : "idle",
   );
-  const [savedAt, setSavedAt] = useState<number | null>(restored?.savedAt ?? null);
+  const [savedAt, setSavedAt] = useState<number | null>(
+    restored?.savedAt ?? null,
+  );
   const [showRestored, setShowRestored] = useState(Boolean(restored));
   const titleRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
@@ -104,7 +114,12 @@ export function CommunityWritePage() {
   }
 
   function cancel() {
-    if (dirty && !window.confirm("작성 중인 내용이 임시 저장되지 않은 채로 사라질 수 있어요. 나갈까요?")) {
+    if (
+      dirty &&
+      !window.confirm(
+        "작성 중인 내용이 임시 저장되지 않은 채로 사라질 수 있어요. 나갈까요?",
+      )
+    ) {
       return;
     }
     navigate("/community");
@@ -133,7 +148,9 @@ export function CommunityWritePage() {
     setTitle("");
     setBody("");
     setTags([]);
-    navigate(`/community/${post.id}`, { state: { notice: "글을 등록했어요." } });
+    navigate(`/community/${post.id}`, {
+      state: { notice: "글을 등록했어요." },
+    });
   }
 
   return (
@@ -166,7 +183,9 @@ export function CommunityWritePage() {
       <form className="form-card write-form" onSubmit={submit} noValidate>
         <div className="form-stack">
           <div className="field-group">
-            <span className="field-label" id="category-label">카테고리</span>
+            <span className="field-label" id="category-label">
+              카테고리
+            </span>
             <Select
               ariaLabel="카테고리"
               value={category}
@@ -190,7 +209,8 @@ export function CommunityWritePage() {
               aria-describedby={errors.title ? "title-error" : undefined}
               onChange={(event) => {
                 setTitle(event.target.value);
-                if (errors.title) setErrors((prev) => ({ ...prev, title: undefined }));
+                if (errors.title)
+                  setErrors((prev) => ({ ...prev, title: undefined }));
               }}
             />
             {errors.title ? (
@@ -201,14 +221,21 @@ export function CommunityWritePage() {
           </label>
           <div className="field-group">
             <label htmlFor="tag-input">태그</label>
-            <div className="tag-input" onClick={() => document.getElementById("tag-input")?.focus()}>
+            <div
+              className="tag-input"
+              onClick={() => document.getElementById("tag-input")?.focus()}
+            >
               {tags.map((tag) => (
                 <span className="tag-chip" key={tag}>
                   #{tag}
                   <button
                     type="button"
                     aria-label={`${tag} 태그 삭제`}
-                    onClick={() => setTags((previous) => previous.filter((value) => value !== tag))}
+                    onClick={() =>
+                      setTags((previous) =>
+                        previous.filter((value) => value !== tag),
+                      )
+                    }
                   >
                     ✕
                   </button>
@@ -218,7 +245,11 @@ export function CommunityWritePage() {
                 id="tag-input"
                 value={tagText}
                 disabled={tags.length >= MAX_TAGS}
-                placeholder={tags.length >= MAX_TAGS ? `태그는 ${MAX_TAGS}개까지` : "태그 입력 후 Enter"}
+                placeholder={
+                  tags.length >= MAX_TAGS
+                    ? `태그는 ${MAX_TAGS}개까지`
+                    : "태그 입력 후 Enter"
+                }
                 onChange={(event) => setTagText(event.target.value)}
                 onKeyDown={onTagKeyDown}
                 onBlur={() => addTag(tagText)}
@@ -240,7 +271,8 @@ export function CommunityWritePage() {
               aria-describedby={errors.body ? "body-error" : undefined}
               onChange={(event) => {
                 setBody(event.target.value);
-                if (errors.body) setErrors((prev) => ({ ...prev, body: undefined }));
+                if (errors.body)
+                  setErrors((prev) => ({ ...prev, body: undefined }));
               }}
             />
             {errors.body ? (
@@ -262,7 +294,11 @@ export function CommunityWritePage() {
         <button type="button" className="button button-ghost" onClick={cancel}>
           취소
         </button>
-        <button type="button" className="button button-outline" onClick={saveDraft}>
+        <button
+          type="button"
+          className="button button-outline"
+          onClick={saveDraft}
+        >
           임시 저장
         </button>
         <button
@@ -270,7 +306,9 @@ export function CommunityWritePage() {
           className="button"
           disabled={pending}
           onClick={() =>
-            (document.querySelector(".write-form") as HTMLFormElement | null)?.requestSubmit()
+            (
+              document.querySelector(".write-form") as HTMLFormElement | null
+            )?.requestSubmit()
           }
         >
           {pending ? "등록 중…" : "글 등록"}
