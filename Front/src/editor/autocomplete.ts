@@ -213,7 +213,13 @@ export function applySuggestion(
   const start = word ? word.start : caret;
   const lineStart = value.lastIndexOf("\n", start - 1) + 1;
   const indent = /^[ \t]*/.exec(value.slice(lineStart, start))![0];
-  const text = item.insert.replace(/\n/g, `\n${indent}`);
+  // 이미 입력한 #, fmt., sys.stdin. 등은 스니펫에 중복해서 넣지 않는다.
+  const qualifier = /(?:[A-Za-z_]\w*\.)+$|#$/.exec(value.slice(0, start))?.[0];
+  const insert =
+    qualifier && item.insert.startsWith(qualifier)
+      ? item.insert.slice(qualifier.length)
+      : item.insert;
+  const text = insert.replace(/\n/g, `\n${indent}`);
   const marker = text.indexOf("$0");
   const body = text.replace("$0", "");
   const cursor = start + (marker === -1 ? body.length : marker);

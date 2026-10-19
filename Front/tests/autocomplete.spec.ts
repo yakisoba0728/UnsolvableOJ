@@ -4,6 +4,7 @@ import {
   currentWord,
   suggest,
 } from "../src/editor/autocomplete";
+import type { Language } from "../src/types";
 
 test.describe("code autocomplete", () => {
   test("suggests snippets first, then keywords, then names already used", () => {
@@ -60,4 +61,15 @@ test.describe("code autocomplete", () => {
       start: 4,
     });
   });
+
+  for (const [language, value, expected] of [
+    ["CPP", "#incl", "#include <bits/stdc++.h>"],
+    ["GO", "fmt.Pr", "fmt.Println()"],
+    ["PYTHON", "sys.stdin.rea", "sys.stdin.readline().strip()"],
+  ] satisfies [Language, string, string][]) {
+    test(`${language} completion does not repeat an existing qualifier`, () => {
+      const item = suggest(value, value.length, language)[0];
+      expect(applySuggestion(value, value.length, item).value).toBe(expected);
+    });
+  }
 });

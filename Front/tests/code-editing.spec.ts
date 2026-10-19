@@ -56,6 +56,44 @@ test.describe("code editing rules", () => {
     expect(handleBackspace(at("(a)", 2))).toBeNull();
   });
 
+  test("blank lines retain their indentation without opening a block", () => {
+    for (const value of ["", "    ", "\t"]) {
+      expect(handleEnter(at(value, value.length), "PYTHON")).toEqual({
+        value: `${value}\n${value}`,
+        start: value.length * 2 + 1,
+        end: value.length * 2 + 1,
+      });
+    }
+  });
+
+  test("closing quotes skip the existing pair after string content", () => {
+    for (const quote of ['"', "'", "`"])
+      expect(handleCharacter(at(`${quote}hello${quote}`, 6), quote)).toEqual({
+        value: `${quote}hello${quote}`,
+        start: 7,
+        end: 7,
+      });
+  });
+
+  test("line commands exclude the line at the selection's exclusive end", () => {
+    expect(handleTab(at("\na", 0, 1), false).value).toBe("\na");
+    expect(handleTab(at("a\nb", 0, 2), false)).toEqual({
+      value: "    a\nb",
+      start: 4,
+      end: 6,
+    });
+    expect(handleTab(at("    a\n    b", 0, 6), true)).toEqual({
+      value: "a\n    b",
+      start: 0,
+      end: 2,
+    });
+    expect(toggleComment(at("a\nb", 0, 2), "PYTHON")).toEqual({
+      value: "# a\nb",
+      start: 2,
+      end: 4,
+    });
+  });
+
   test("Tab indents and Shift+Tab outdents one line or every selected line", () => {
     expect(handleTab(at("x", 1), false)).toMatchObject({
       value: "x    ",

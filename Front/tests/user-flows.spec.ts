@@ -774,6 +774,41 @@ test.describe("community post: delete own post and answer layout", () => {
 });
 
 test.describe("code editor basics on the solve page", () => {
+  test("typing a quoted string and blank lines preserves valid source", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.goto("/problems/view/sum");
+    const editor = page.getByLabel("소스 코드");
+    await editor.fill("");
+    await editor.pressSequentially('"hello"');
+    await expect(editor).toHaveValue('"hello"');
+    await editor.fill("    ");
+    await editor.press("Enter");
+    await expect(editor).toHaveValue("    \n    ");
+  });
+
+  test("moving the caret dismisses suggestions from the previous word", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.goto("/problems/view/sum");
+    const editor = page.getByLabel("소스 코드");
+    await editor.fill("wh\n");
+    await editor.pressSequentially("fo");
+    const list = page.getByRole("listbox", { name: "자동완성 제안" });
+    await expect(
+      list.getByRole("option", { name: /^for/ }).first(),
+    ).toBeVisible();
+    await editor.evaluate((el: HTMLTextAreaElement) =>
+      el.setSelectionRange(3, 3),
+    );
+    await editor.press("ArrowLeft");
+    await expect(list).toHaveCount(0);
+    await editor.press("Tab");
+    await expect(editor).toHaveValue("wh    \nfo");
+  });
+
   test("auto indent, bracket pairing, undo, comment toggle and Shift+Tab work as typed", async ({
     page,
   }) => {

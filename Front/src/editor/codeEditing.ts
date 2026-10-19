@@ -21,8 +21,10 @@ const CLOSERS = new Set(Object.values(PAIRS));
 const QUOTES = new Set(['"', "'", "`"]);
 
 const lineStartOf = (value: string, index: number) =>
-  value.lastIndexOf("\n", index - 1) + 1;
-const lineEndOf = (value: string, index: number) => {
+  index === 0 ? 0 : value.lastIndexOf("\n", index - 1) + 1;
+const lineEndOf = (value: string, start: number, end: number) => {
+  // 선택 끝은 포함하지 않으므로 다음 줄 첫 칸에서 끝나면 그 줄은 제외한다.
+  const index = end > start && value[end - 1] === "\n" ? end - 1 : end;
   const found = value.indexOf("\n", index);
   return found === -1 ? value.length : found;
 };
@@ -37,7 +39,8 @@ export function handleEnter(state: EditState, language: Language): EditState {
   const indent = /^[ \t]*/.exec(before)![0];
   const last = before.trimEnd().slice(-1);
   const opensBlock =
-    "{([".includes(last) || (language === "PYTHON" && last === ":");
+    (last !== "" && "{([".includes(last)) ||
+    (language === "PYTHON" && last === ":");
   const next = value[end];
   const closesRight = opensBlock && next !== undefined && PAIRS[last] === next;
   const inner = opensBlock ? indent + INDENT : indent;
@@ -73,11 +76,7 @@ export function handleCharacter(
   }
   if (hasSelection) return null;
   const next = value[start];
-  if (
-    CLOSERS.has(key) &&
-    next === key &&
-    (!QUOTES.has(key) || !isWordChar(value[start - 1]))
-  ) {
+  if (CLOSERS.has(key) && next === key) {
     return { value, start: start + 1, end: start + 1 };
   }
   if (closer === undefined) return null;
@@ -119,7 +118,7 @@ export function handleTab(state: EditState, shift: boolean): EditState {
     };
   }
   const first = lineStartOf(value, start);
-  const last = lineEndOf(value, end);
+  const last = lineEndOf(value, start, end);
   const lines = value.slice(first, last).split("\n");
   let firstDelta = 0;
   let total = 0;
@@ -163,7 +162,7 @@ export function toggleComment(state: EditState, language: Language): EditState {
   const prefix = COMMENT[language];
   const bare = prefix.trimEnd();
   const first = lineStartOf(value, start);
-  const last = lineEndOf(value, end);
+  const last = lineEndOf(value, start, end);
   const lines = value.slice(first, last).split("\n");
   const filled = lines.filter((line) => line.trim().length);
   const uncomment =

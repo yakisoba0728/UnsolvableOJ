@@ -7,6 +7,7 @@ import { api } from "../api";
 import { useAuth } from "../auth";
 import {
   applySuggestion,
+  currentWord,
   suggest,
   type Suggestion,
 } from "../editor/autocomplete";
@@ -111,6 +112,7 @@ export function ProblemPage() {
   const [popup, setPopup] = useState<{
     items: Suggestion[];
     index: number;
+    caret: number;
     left: number;
     top: number;
   } | null>(null);
@@ -271,15 +273,14 @@ export function ProblemPage() {
       target.value,
       target.selectionStart,
     );
-    const typed = /[A-Za-z_][A-Za-z0-9_]*$/.exec(
-      target.value.slice(0, target.selectionStart),
-    )![0].length;
+    const typed = currentWord(target.value, target.selectionStart)!.text.length;
     // 고정폭 글꼴이라 줄·열로 위치를 계산한다(글자 폭 0.6em, 줄 높이 1.6em).
     const frame = target.parentElement;
     const maxLeft = Math.max(0, (frame?.clientWidth ?? 600) - 280);
     setPopup({
       items,
       index: 0,
+      caret: target.selectionStart,
       left: Math.min(
         maxLeft,
         target.offsetLeft + (column - 1 - typed) * fontSize * 0.6,
@@ -585,14 +586,16 @@ export function ProblemPage() {
                 }}
                 onSelect={(event) => {
                   updateCursor(event.currentTarget);
-                  // 커서가 단어에서 벗어나면 제안을 닫는다.
+                  // 커서나 선택 범위가 바뀌면 이전 위치의 제안을 닫는다.
                   const target = event.currentTarget;
-                  if (
-                    popup &&
-                    !suggest(target.value, target.selectionStart, language)
-                      .length
-                  )
-                    setPopup(null);
+                  const { selectionStart, selectionEnd } = target;
+                  setPopup((current) =>
+                    current &&
+                    (current.caret !== selectionStart ||
+                      selectionStart !== selectionEnd)
+                      ? null
+                      : current,
+                  );
                 }}
                 onBlur={() => setPopup(null)}
                 onKeyDown={onEditorKeyDown}
