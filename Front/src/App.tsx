@@ -17,7 +17,6 @@ import {
   useNavigationType,
   useNavigate,
 } from "react-router-dom";
-import { isDemo } from "./api";
 import logo from "./assets/logo.png";
 import { useAuth } from "./auth";
 import { HomePage } from "./pages/HomePage";
@@ -346,28 +345,6 @@ export function App() {
           </button>
         </div>
       </header>
-      {isDemo ? (
-        <div className="demo-banner" role="status">
-          <span>
-            <strong>데모 모드</strong> · 더미 데이터와 시뮬레이션 채점 · 기록은
-            이 브라우저에만 저장됩니다.
-          </span>
-          <button
-            className="text-button"
-            onClick={() => {
-              try {
-                localStorage.removeItem("unsolvable-oj-demo-v1");
-                localStorage.removeItem("unsolvable-oj-session-v1");
-              } catch {
-                /* 저장소를 쓸 수 없으면 새로고침만 한다 */
-              }
-              window.location.assign("/");
-            }}
-          >
-            데이터 초기화
-          </button>
-        </div>
-      ) : null}
       <main className="main-content">
         <Suspense
           fallback={

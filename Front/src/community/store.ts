@@ -7,26 +7,7 @@ import type {
   CommunityPost,
 } from "./types";
 
-/**
- * 화면 구동용 더미 글·답변은 배포용 저장소에만 있는 `seed.ts`에서 온다.
- * 파일이 없으면(백엔드 연동 전 실제 코드만 있는 상태) 빈 목록으로 시작한다.
- */
-interface Seed {
-  seedPosts: CommunityPost[];
-  seedAnswers: CommunityAnswer[];
-  seedAccepted: Record<string, string>;
-  authorStats: Record<string, AuthorStats>;
-}
-const seedModules = import.meta.glob<Seed>("./seed.ts", { eager: true });
-const seed: Seed = Object.values(seedModules)[0] ?? {
-  seedPosts: [],
-  seedAnswers: [],
-  seedAccepted: {},
-  authorStats: {},
-};
-const { seedPosts, seedAnswers, seedAccepted, authorStats } = seed;
-
-/** 이 브라우저에만 저장되는 사용자 활동. 더미 데이터 위에 겹쳐서 보여준다. */
+/** 이 브라우저에만 저장되는 사용자 활동. 커뮤니티 서버가 생기기 전까지 화면에 보여 준다. */
 interface Activity {
   posts: CommunityPost[];
   answers: CommunityAnswer[];
@@ -161,27 +142,20 @@ export const communityActions = {
 };
 
 export const allPosts = (activity: Activity) =>
-  [...activity.posts, ...seedPosts].filter(
-    (post) => !activity.deleted.includes(post.id),
-  );
+  activity.posts.filter((post) => !activity.deleted.includes(post.id));
 
 export const answersOf = (activity: Activity, postId: string) =>
-  [...seedAnswers, ...activity.answers].filter(
-    (answer) => answer.postId === postId,
-  );
+  activity.answers.filter((answer) => answer.postId === postId);
 
 export function acceptedAnswerId(activity: Activity, postId: string) {
-  if (postId in activity.accepted) return activity.accepted[postId];
-  return seedAccepted[postId] ?? null;
+  return activity.accepted[postId] ?? null;
 }
 
-/** 내가 추천했다면 +1 (추천 취소는 더미 값 그대로) */
+/** 내가 추천했다면 +1 */
 export const upvoteCount = (activity: Activity, id: string, base: number) =>
   base + (activity.upvoted.includes(id) ? 1 : 0);
 
 export function statsOf(activity: Activity, name: string): AuthorStats {
-  const known = authorStats[name];
-  if (known) return known;
   return {
     reputation: 0,
     acceptedAnswers: activity.answers.filter(

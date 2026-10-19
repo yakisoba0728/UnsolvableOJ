@@ -39,12 +39,6 @@ const popularLanguages = [
   "RUST",
 ];
 const LANGUAGE_ROWS = 4;
-/** 모양만 보여 주는 임시 배지 */
-const sampleBadges = [
-  { label: "첫 정답", icon: "✓", tone: "success" },
-  { label: "3일 연속", icon: "★", tone: "warning" },
-  { label: "꾸준한 도전", icon: "▲", tone: "primary" },
-];
 const difficultyRows = [
   { value: "BEGINNER", label: "입문" },
   { value: "EASY", label: "쉬움" },
@@ -206,17 +200,6 @@ export function ProfilePage() {
         <div className="profile-main">
           <h2>
             {profile.username} <small>@{profile.username}</small>
-            <span className="profile-badges" aria-label="획득한 배지">
-              {sampleBadges.map((badge) => (
-                <span
-                  className={`profile-badge ${badge.tone}`}
-                  key={badge.label}
-                >
-                  <span aria-hidden="true">{badge.icon}</span>
-                  {badge.label}
-                </span>
-              ))}
-            </span>
           </h2>
           <div className="profile-level">
             <span className="pill pill-warning">Lv.{profile.level}</span>
@@ -465,7 +448,6 @@ export function ProfilePage() {
           </section>
         </aside>
       </div>
-
     </div>
   );
 }

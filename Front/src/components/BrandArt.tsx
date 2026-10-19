@@ -83,10 +83,8 @@ export function BrandArt({ className = "" }: { className?: string }) {
       {/* 레벨 · XP 배지 */}
       <g className="float d2">
         <rect x="190" y="26" width="150" height="50" rx="16" style={{ fill: "var(--color-surface)", stroke: "var(--color-feature-border)", strokeWidth: 2 }} />
-        <text x="206" y="48" style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14, fill: "var(--color-ink-900)" }}>Lv.14</text>
-        <text x="268" y="48" style={{ fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: 12, fill: "var(--color-ink-600)" }}>1,680 XP</text>
-        <rect x="206" y="57" width="118" height="8" rx="4" style={fill("var(--color-disabled)")} />
-        <rect x="206" y="57" width="80" height="8" rx="4" fill={`url(#${id}-xp)`} />
+        <rect x="206" y="47" width="118" height="8" rx="4" style={fill("var(--color-disabled)")} />
+        <rect x="206" y="47" width="80" height="8" rx="4" fill={`url(#${id}-xp)`} />
       </g>
 
       {/* 반짝임 */}

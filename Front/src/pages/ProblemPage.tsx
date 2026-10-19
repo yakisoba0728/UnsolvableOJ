@@ -2,9 +2,16 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useDocumentTitle } from "../hooks";
 import { Select } from "../components/Select";
 import { ProblemMarkdown } from "../components/ProblemMarkdown";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
+import {
+  CaseResults,
+  isJudging,
+  ResultNotices,
+  ResultSummary,
+  useSubmissionResult,
+} from "../components/JudgeResult";
 import {
   applySuggestion,
   currentWord,
@@ -103,6 +110,9 @@ export function ProblemPage() {
   const [source, setSource] = useState(languages[0].starter);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  // 이 화면에서 채점 중이거나 방금 채점한 제출(결과는 코드 창 아래에 바로 보여 준다)
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [panelOpen, setPanelOpen] = useState(true);
   const [tab, setTab] = useState<Tab>("statement");
   const [history, setHistory] = useState<Submission[] | null>(null);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
@@ -136,7 +146,11 @@ export function ProblemPage() {
     }
   }
   const { session } = useAuth();
-  const navigate = useNavigate();
+  const { submission: result, error: resultError } = useSubmissionResult(
+    submissionId,
+    session,
+  );
+  const finishedId = result && !isJudging(result) ? result.id : null;
 
   const starter = (value: Language) =>
     languages.find((item) => item.value === value)?.starter ?? "";
@@ -176,9 +190,10 @@ export function ProblemPage() {
         if (!controller.signal.aborted) setHistory([]);
       });
     return () => controller.abort();
-  }, [tab, session, problem]);
+  }, [tab, session, problem, finishedId]);
 
   useEffect(() => {
+    setSubmissionId(null);
     const controller = new AbortController();
     setError("");
     setProblem(null);
@@ -215,7 +230,8 @@ export function ProblemPage() {
         },
         session.accessToken,
       );
-      navigate(`/submissions/${submitted.id}`);
+      setSubmissionId(submitted.id);
+      setPanelOpen(true);
     } catch (cause) {
       setSubmitError(
         cause instanceof Error ? cause.message : "제출하지 못했습니다.",
@@ -628,6 +644,67 @@ export function ProblemPage() {
                 </ul>
               ) : null}
             </div>
+            {submissionId ? (
+              <section className="judge-panel" aria-label="채점 결과">
+                <div className="judge-panel-head">
+                  <strong>채점 결과</strong>
+                  {result ? (
+                    <span
+                      className={`verdict verdict-${result.status.toLowerCase()}`}
+                    >
+                      {result.status.replaceAll("_", " ")}
+                    </span>
+                  ) : null}
+                  <span className="judge-panel-actions">
+                    {result ? (
+                      <Link
+                        className="text-button"
+                        to={`/submissions/${result.id}`}
+                      >
+                        자세히 보기
+                      </Link>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="text-button"
+                      aria-expanded={panelOpen}
+                      onClick={() => setPanelOpen((open) => !open)}
+                    >
+                      {panelOpen ? "접기" : "펼치기"}
+                    </button>
+                    <button
+                      type="button"
+                      className="text-button"
+                      onClick={() => setSubmissionId(null)}
+                    >
+                      닫기
+                    </button>
+                  </span>
+                </div>
+                {panelOpen ? (
+                  <div className="judge-panel-body" role="status">
+                    {resultError ? (
+                      <p className="error-message" role="alert">
+                        {resultError}
+                      </p>
+                    ) : !result ? (
+                      <p className="muted">채점을 시작하고 있어요…</p>
+                    ) : (
+                      <>
+                        {isJudging(result) ? (
+                          <p className="muted">
+                            채점 중이에요. 끝나면 이 자리에 결과가 나타납니다.
+                          </p>
+                        ) : null}
+                        <ResultSummary submission={result} />
+                        <ResultNotices submission={result} />
+                        <CaseResults submission={result} />
+                      </>
+                    )}
+                  </div>
+                ) : null}
+              </section>
+            ) : null}
             {submitError ? (
               <p className="error-message" role="alert">
                 {submitError}

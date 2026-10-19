@@ -1,6 +1,15 @@
 export type Difficulty = "BEGINNER" | "EASY" | "MEDIUM" | "HARD" | "EXPERT";
-export type Language =
-  "C" | "CPP" | "JAVA" | "PYTHON" | "JAVASCRIPT" | "TYPESCRIPT" | "GO" | "RUST";
+export const LANGUAGES = [
+  "C",
+  "CPP",
+  "JAVA",
+  "PYTHON",
+  "JAVASCRIPT",
+  "TYPESCRIPT",
+  "GO",
+  "RUST",
+] as const;
+export type Language = (typeof LANGUAGES)[number];
 export type Role = "USER" | "AUTHOR" | "ADMIN";
 
 export interface User {

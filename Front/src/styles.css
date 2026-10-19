@@ -1738,9 +1738,6 @@ button.heat-cell.selected {
 .inline-button {
   padding: 10px 8px;
 }
-.demo-banner .text-button {
-  padding: 6px 8px;
-}
 .heat-cell {
   background: var(--heat-0);
 }
@@ -2186,52 +2183,7 @@ kbd {
     gap: 6px;
   }
 }
-.demo-banner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  background: var(--color-warning-soft);
-  color: var(--color-warning);
-  font-size: 13px;
-  padding: 8px 24px;
-  text-align: center;
-}
-.demo-banner .text-button {
-  color: var(--color-warning);
-  text-decoration: underline;
-  font-size: 13px;
-}
-.demo-hint {
-  background: var(--color-feature);
-  border-radius: var(--radius-control);
-  padding: 10px 14px;
-  font-size: 13px;
-  color: var(--color-ink-700);
-  margin: 0 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: flex-start;
-}
-.demo-hint code {
-  font-family: var(--font-mono);
-  font-size: 12px;
-}
 @media (max-width: 650px) {
-  .demo-banner {
-    justify-content: space-between;
-    gap: 8px;
-    padding: 6px 15px;
-    font-size: 13px;
-    text-align: left;
-    flex-wrap: nowrap;
-  }
-  .demo-banner .text-button {
-    flex: none;
-    font-size: 13px;
-  }
   .home-header .pill {
     align-self: flex-start;
   }
@@ -2836,9 +2788,6 @@ input,
 }
 :root[data-theme="dark"] .code-panel {
   border-color: var(--color-border);
-}
-:root[data-theme="dark"] .demo-banner {
-  background: var(--color-warning-soft);
 }
 
 /* 풀이 화면 머리글(모바일): 이동 경로는 한 줄을 차지하고, 제목·난이도는 그 아래에 놓는다 */
@@ -4905,44 +4854,6 @@ h3 {
   gap: 20px;
   min-width: 0;
 }
-.profile-badges {
-  display: inline-flex;
-  gap: 6px;
-  margin-left: 12px;
-  vertical-align: middle;
-}
-.profile-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px 3px 4px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: var(--weight-label);
-  letter-spacing: 0;
-  line-height: 1.4;
-}
-.profile-badge > span {
-  display: inline-grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--color-surface);
-  font-size: 12px;
-}
-.profile-badge.success {
-  background: var(--color-success-soft);
-  color: var(--color-success);
-}
-.profile-badge.warning {
-  background: var(--color-warning-soft);
-  color: var(--color-warning);
-}
-.profile-badge.primary {
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-}
 
 /* 프로필: 작성한 글 · 추천한 글 세로 스크롤 카드 */
 .profile-post-pair {
@@ -6407,5 +6318,72 @@ h3 {
 @media (max-width: 880px) {
   .problem-row:not(.submission-row) .difficulty {
     justify-self: end;
+  }
+}
+
+/* 풀이 화면: 코드 창 아래에서 바로 확인하는 채점 결과 */
+.judge-panel {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  max-height: 46%;
+  min-height: 0;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+.judge-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-divider);
+  font-size: 14px;
+}
+.judge-panel-actions {
+  display: inline-flex;
+  gap: 12px;
+  margin-left: auto;
+}
+.judge-panel-body {
+  overflow: auto;
+  padding: 14px 16px 16px;
+}
+.judge-panel-body .result-summary {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.judge-panel-body .result-summary .result-banner {
+  padding: 12px 18px;
+  border-radius: var(--radius-panel);
+}
+.judge-panel-body .result-banner strong {
+  font-size: 20px;
+  margin-top: 2px;
+}
+.judge-panel-body .result-symbol {
+  font-size: 28px;
+}
+.judge-panel-body .result-summary .result-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.judge-panel-body .result-summary .result-stats > div {
+  padding: 8px 12px;
+}
+.judge-panel-body .result-summary .result-stats strong {
+  font-size: 14px;
+}
+.judge-panel-body .source-section {
+  margin-top: 8px;
+}
+.judge-panel-body .source-section h2 {
+  font-size: 15px;
+}
+@media (max-width: 900px) {
+  .judge-panel {
+    max-height: none;
+  }
+  .judge-panel-body .result-summary .result-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

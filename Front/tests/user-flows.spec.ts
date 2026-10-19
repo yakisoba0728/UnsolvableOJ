@@ -492,11 +492,17 @@ test("submission passes the source and polls through to the final verdict", asyn
   await page.goto("/problems/view/sum");
   await page.getByLabel("소스 코드").fill(source);
   await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
-  await expect(page).toHaveURL(/\/submissions\/submission-id$/);
-  await expect(page.getByText("ACCEPTED", { exact: true })).toBeVisible({
+  // 화면을 옮기지 않고 코드 창 아래 채점 결과 패널에서 바로 확인한다.
+  const panel = page.getByRole("region", { name: "채점 결과" });
+  await expect(panel).toBeVisible();
+  await expect(page).toHaveURL(/\/problems\/view\/sum$/);
+  await expect(
+    panel.getByText("ACCEPTED", { exact: true }).first(),
+  ).toBeVisible({
     timeout: 10_000,
   });
-  await expect(page.getByText("2 / 2", { exact: true })).toBeVisible();
+  await expect(panel.getByText("2 / 2", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("소스 코드")).toHaveValue(source);
   await page.waitForTimeout(2200); // One full polling period after the terminal response.
   expect(reads).toBe(3);
 });
@@ -1077,6 +1083,66 @@ test("a rejected submission shows each public case with input, expected and actu
   await expect(result.locator(".io-block").nth(2)).toContainText("0");
   await expect(page.getByRole("link", { name: "코드 수정하기" })).toBeVisible();
   await expect(page.getByText("코드 수정하고 다시 풀기")).toHaveCount(0);
+});
+
+test("a rejected submission is shown under the editor with each example compared", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.route("**/api/v1/problems/by-slug/sum", (route) =>
+    route.fulfill({
+      json: {
+        ...problem,
+        samples: [{ input: "1 2\n", expectedOutput: "3\n" }],
+      },
+    }),
+  );
+  const rejected = {
+    id: "wrong-inline",
+    problem: { id: problem.id, slug: "sum", title: problem.title },
+    language: "PYTHON",
+    status: "WRONG_ANSWER",
+    runtimeMs: 10,
+    memoryKb: 1000,
+    passedTestCases: 0,
+    totalTestCases: 2,
+    compileOutput: null,
+    judgeMessage: null,
+    sourceCode: "print(0)",
+    sampleTestCases: [{ testCase: 1, input: "1 2\n", expectedOutput: "3\n" }],
+    debugOutputs: [
+      {
+        testCase: 1,
+        stdout: "0\n",
+        stderr: "",
+        stdoutTruncated: false,
+        stderrTruncated: false,
+      },
+    ],
+    createdAt: "2026-09-01T00:00:00Z",
+    updatedAt: "2026-09-01T00:00:00Z",
+  };
+  await page.route("**/api/v1/problems/problem-id/submissions", (route) =>
+    route.fulfill({ status: 202, json: { ...rejected, status: "QUEUED" } }),
+  );
+  await page.route("**/api/v1/submissions/wrong-inline", (route) =>
+    route.fulfill({ json: rejected }),
+  );
+  await page.goto("/problems/view/sum");
+  await page.getByLabel("소스 코드").fill("print(0)");
+  await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
+  const panel = page.getByRole("region", { name: "채점 결과" });
+  await expect(panel.getByText("기대 출력과 달라요")).toBeVisible();
+  await expect(panel.locator(".io-block").nth(0)).toContainText("1 2");
+  await expect(panel.locator(".io-block").nth(1)).toContainText("3");
+  await expect(panel.locator(".io-block").nth(2)).toContainText("0");
+  await expect(page).toHaveURL(/\/problems\/view\/sum$/);
+  // 접고 닫을 수 있고, 코드는 그대로다.
+  await panel.getByRole("button", { name: "접기" }).click();
+  await expect(panel.locator(".case-result")).toHaveCount(0);
+  await panel.getByRole("button", { name: "닫기" }).click();
+  await expect(panel).toHaveCount(0);
+  await expect(page.getByLabel("소스 코드")).toHaveValue("print(0)");
 });
 
 test("submission API errors preserve the source and re-enable submission", async ({
