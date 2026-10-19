@@ -189,6 +189,15 @@ describe('Backend features (e2e)', () => {
         passedTestCases: 2,
         totalTestCases: 2,
         memoryKb: 512,
+        debugOutputs: [
+          {
+            testCase: 1,
+            stdout: '3\n',
+            stderr: '',
+            stdoutTruncated: false,
+            stderrTruncated: false,
+          },
+        ],
       })
       .expect(200);
     await request(app.getHttpServer())
@@ -196,6 +205,20 @@ describe('Backend features (e2e)', () => {
       .set(judge(1, secondAttempt))
       .send({ status: 'ACCEPTED', passedTestCases: 2, totalTestCases: 2 })
       .expect(200);
+    // The current problem is now a draft with different tests. The detail must
+    // still show only the public sample from the immutable submitted version.
+    const oldDetail = await request(app.getHttpServer())
+      .get(`${base}/submissions/${submissionId}`)
+      .set(bearer(solver.accessToken))
+      .expect(200);
+    expect(oldDetail.body.sampleTestCases).toEqual([
+      { testCase: 1, input: '1 2\n', expectedOutput: '3\n' },
+    ]);
+    expect(JSON.stringify(oldDetail.body)).not.toContain('5 7');
+    await request(app.getHttpServer())
+      .get(`${base}/submissions/${submissionId}`)
+      .set(bearer(authorToken))
+      .expect(404);
     expect(
       (
         await request(app.getHttpServer())
@@ -214,6 +237,14 @@ describe('Backend features (e2e)', () => {
       .set(bearer(authorToken))
       .expect(202);
     expect(rejudge.body.judgeGeneration).toBe(2);
+    expect(
+      (
+        await request(app.getHttpServer())
+          .get(`${base}/submissions/${submissionId}`)
+          .set(bearer(solver.accessToken))
+          .expect(200)
+      ).body.sampleTestCases,
+    ).toEqual([]);
     await request(app.getHttpServer())
       .patch(`${path}/result`)
       .set(judge(1, secondAttempt))

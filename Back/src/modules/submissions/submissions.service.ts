@@ -127,7 +127,25 @@ export class SubmissionsService {
     const [items, total] = await this.submissions.findAndCount({
       where,
       relations: { problem: true },
-      order: { createdAt: 'DESC' },
+      // Lists must not load large source files or debug output into memory.
+      select: {
+        id: true,
+        problemId: true,
+        language: true,
+        status: true,
+        problemVersion: true,
+        judgeGeneration: true,
+        runtimeMs: true,
+        memoryKb: true,
+        passedTestCases: true,
+        totalTestCases: true,
+        compileOutput: true,
+        judgeMessage: true,
+        createdAt: true,
+        updatedAt: true,
+        problem: { id: true, slug: true, title: true },
+      },
+      order: { createdAt: 'DESC', id: 'DESC' },
       skip: (query.page - 1) * query.limit,
       take: query.limit,
     });
@@ -145,7 +163,34 @@ export class SubmissionsService {
       relations: { problem: true },
     });
     if (!submission) throw new NotFoundException('제출을 찾을 수 없습니다.');
-    return this.toResponse(submission, true);
+    const sampleTestCases: {
+      testCase: number;
+      input: string;
+      expectedOutput: string;
+    }[] = [];
+    if (submission.debugOutputs?.length) {
+      const rows: { snapshot: ProblemSnapshot }[] = await this.dataSource.query(
+        'SELECT snapshot FROM problem_versions WHERE problem_id = $1 AND version = $2',
+        [submission.problemId, submission.problemVersion],
+      );
+      const visible = new Set(
+        submission.debugOutputs.map((item) => item.testCase),
+      );
+      const cases = [...(rows[0]?.snapshot.testCases ?? [])].sort(
+        (left, right) => left.order - right.order,
+      );
+      cases.forEach((testCase, index) => {
+        // Use the original case number, never the current problem's samples.
+        if (testCase.isSample === true && visible.has(index + 1)) {
+          sampleTestCases.push({
+            testCase: index + 1,
+            input: testCase.input,
+            expectedOutput: testCase.expectedOutput,
+          });
+        }
+      });
+    }
+    return { ...this.toResponse(submission, true), sampleTestCases };
   }
 
   async rejudge(id: string, user: AuthenticatedUser) {
@@ -472,8 +517,8 @@ export class SubmissionsService {
       memoryKb: submission.memoryKb,
       passedTestCases: submission.passedTestCases,
       totalTestCases: submission.totalTestCases,
-      compileOutput: submission.compileOutput,
-      judgeMessage: submission.judgeMessage,
+      compileOutput: submission.compileOutput ?? null,
+      judgeMessage: submission.judgeMessage ?? null,
       ...(includeSource
         ? {
             sourceCode: submission.sourceCode,

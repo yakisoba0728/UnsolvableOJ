@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from "react";
+import { useDocumentTitle } from "../hooks";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { api } from "../api";
+import { api, demoAccount, isDemo } from "../api";
 import { useAuth } from "../auth";
 import type { Session } from "../types";
 
 export function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
+  useDocumentTitle(mode === "login" ? "로그인" : "회원가입");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -15,7 +17,7 @@ export function AuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const destination =
-    (location.state as { from?: string } | null)?.from ?? "/problems";
+    (location.state as { from?: string } | null)?.from ?? "/";
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -72,6 +74,26 @@ export function AuthPage() {
             ? "이메일과 비밀번호를 입력해 주세요."
             : "계정을 만들고 바로 문제를 풀 수 있습니다."}
         </p>
+        {isDemo && demoAccount ? (
+          <p className="demo-hint" role="note">
+            <span>
+              데모 모드입니다. 데모 계정 <code>{demoAccount.email}</code>로
+              로그인하거나(비밀번호는 아무 값이나 가능) 새로 가입할 수 있어요.
+            </span>
+            {mode === "login" ? (
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => {
+                  setEmail(demoAccount.email);
+                  setPassword(demoAccount.password);
+                }}
+              >
+                데모 계정 채우기
+              </button>
+            ) : null}
+          </p>
+        ) : null}
         <form onSubmit={submit} className="form-stack">
           <label>
             이메일

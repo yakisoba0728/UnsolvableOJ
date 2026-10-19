@@ -90,17 +90,28 @@ describe('submission debug output lifecycle', () => {
     };
     const repository = { findOne: vi.fn().mockResolvedValue(submission) };
     const queue = { add: vi.fn().mockResolvedValue({}) };
+    const db = {
+      query: vi.fn().mockResolvedValue([]),
+      transaction: async (
+        callback: (value: typeof manager) => Promise<unknown>,
+      ) => callback(manager),
+    };
     const service = new SubmissionsService(
       repository as unknown as Repository<Submission>,
       {} as Repository<Problem>,
-      {
-        transaction: async (
-          callback: (value: typeof manager) => Promise<unknown>,
-        ) => callback(manager),
-      } as unknown as DataSource,
+      db as unknown as DataSource,
       queue as unknown as Queue,
     );
-    return { service, submission, manager, user, attemptId, output };
+    return {
+      service,
+      submission,
+      manager,
+      user,
+      attemptId,
+      output,
+      db,
+      repository,
+    };
   }
 
   it('persists output and returns it through the owner detail endpoint', async () => {
@@ -140,5 +151,73 @@ describe('submission debug output lifecycle', () => {
       }),
     ).rejects.toThrow('이전 채점 시도의 결과입니다.');
     expect(submission.debugOutputs).toEqual([]);
+  });
+
+  it('returns only displayed public samples from the submitted version with original case numbers', async () => {
+    const { service, submission, user, output, db, repository } = setup();
+    submission.problemVersion = 1;
+    submission.debugOutputs = [
+      { ...output, testCase: 2 },
+      { ...output, testCase: 1 },
+    ];
+    db.query.mockResolvedValue([
+      {
+        snapshot: {
+          testCases: [
+            {
+              order: 3,
+              isSample: true,
+              input: 'unexecuted',
+              expectedOutput: 'later',
+            },
+            {
+              order: 2,
+              isSample: true,
+              input: 'old sample',
+              expectedOutput: 'old answer',
+            },
+            {
+              order: 1,
+              isSample: false,
+              input: 'secret input',
+              expectedOutput: 'secret answer',
+            },
+          ],
+        },
+      },
+    ]);
+    const detail = await service.findMineById(submission.id, user);
+    expect(detail.sampleTestCases).toEqual([
+      { testCase: 2, input: 'old sample', expectedOutput: 'old answer' },
+    ]);
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining('problem_versions'),
+      [submission.problemId, 1],
+    );
+    expect(repository.findOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: submission.id, userId: user.id },
+      }),
+    );
+  });
+
+  it('does not fall back to the current problem when the snapshot is missing', async () => {
+    const { service, submission, user, output } = setup();
+    submission.debugOutputs = [output];
+    expect(
+      (await service.findMineById(submission.id, user)).sampleTestCases,
+    ).toEqual([]);
+  });
+
+  it('does not read samples for a queued submission or another user', async () => {
+    const { service, submission, user, db, repository } = setup();
+    expect(
+      (await service.findMineById(submission.id, user)).sampleTestCases,
+    ).toEqual([]);
+    repository.findOne.mockResolvedValue(null);
+    await expect(service.findMineById(submission.id, user)).rejects.toThrow(
+      '제출을 찾을 수 없습니다.',
+    );
+    expect(db.query).not.toHaveBeenCalled();
   });
 });

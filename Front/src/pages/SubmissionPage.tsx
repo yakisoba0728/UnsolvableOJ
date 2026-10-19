@@ -2,13 +2,51 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { PageHeader } from "../components/PageHeader";
+import { WeekStrip } from "../components/WeekStrip";
+import { problemPath } from "../paths";
+import {
+  streakDays,
+  submissionsByDay,
+  useDocumentTitle,
+  useSubmissionHistory,
+} from "../hooks";
 import type { Submission } from "../types";
+
+/** Match the runner's bytes.rstrip(): only trailing ASCII whitespace is ignored. */
+const normalizeOutput = (text: string) => text.replace(/[\t\n\v\f\r ]+$/, "");
+
+function IoBlock({
+  label,
+  text,
+  tone,
+  note,
+}: {
+  label: string;
+  text: string;
+  tone?: "good" | "bad";
+  note?: string;
+}) {
+  return (
+    <div className={`io-block ${tone ?? ""}`}>
+      <strong>{label}</strong>
+      <pre className="source-code">{text || "(없음)"}</pre>
+      {note ? <small className="muted">{note}</small> : null}
+    </div>
+  );
+}
 
 export function SubmissionPage() {
   const { id } = useParams();
   const { session } = useAuth();
   const [submission, setSubmission] = useState<Submission | null>(null);
+  useDocumentTitle(
+    submission
+      ? `${submission.problem.title ?? "제출"} 채점 결과`
+      : "채점 결과",
+  );
   const [error, setError] = useState("");
+  const history = useSubmissionHistory(session);
 
   useEffect(() => {
     if (!session || !id) return;
@@ -60,52 +98,66 @@ export function SubmissionPage() {
     );
   return (
     <div className="page-width result-page">
-      <Link className="back-link" to="/submissions">
-        ← 내 제출
-      </Link>
-      <span className="eyebrow">
-        SUBMISSION / {submission.id.slice(0, 8).toUpperCase()}
-      </span>
-      <h1>{submission.problem.title ?? "제출 결과"}</h1>
-      <div
-        className={`result-banner result-${submission.status.toLowerCase()}`}
-      >
-        <div>
-          <span className="eyebrow">JUDGE RESULT</span>
-          <strong>{submission.status.replaceAll("_", " ")}</strong>
+      <PageHeader
+        back={{ to: "/submissions", label: "내 제출" }}
+        title={submission.problem.title ?? "제출 결과"}
+        description={`제출 ${submission.id.slice(0, 8).toUpperCase()} · ${new Date(submission.createdAt).toLocaleString("ko-KR")}`}
+      />
+      <div className="result-summary">
+        <div
+          className={`result-banner result-${submission.status.toLowerCase()}`}
+        >
+          <div>
+            <span className="result-label">채점 결과</span>
+            <strong>{submission.status.replaceAll("_", " ")}</strong>
+          </div>
+          <span className="result-symbol">
+            {submission.status === "ACCEPTED"
+              ? "✓"
+              : submission.status === "QUEUED" ||
+                  submission.status === "JUDGING"
+                ? "…"
+                : "!"}
+          </span>
         </div>
-        <span className="result-symbol">
-          {submission.status === "ACCEPTED"
-            ? "✓"
-            : submission.status === "QUEUED" || submission.status === "JUDGING"
-              ? "…"
-              : "!"}
-        </span>
+        <div className="result-stats">
+          <div>
+            <small>언어</small>
+            <strong>{submission.language}</strong>
+          </div>
+          <div>
+            <small>실행 시간</small>
+            <strong>
+              {submission.runtimeMs === null
+                ? "—"
+                : `${submission.runtimeMs}ms`}
+            </strong>
+          </div>
+          <div>
+            <small>메모리</small>
+            <strong>
+              {submission.memoryKb === null ? "—" : `${submission.memoryKb}KB`}
+            </strong>
+          </div>
+          <div>
+            <small>통과</small>
+            <strong>
+              {submission.passedTestCases} / {submission.totalTestCases}
+            </strong>
+          </div>
+        </div>
       </div>
-      <div className="result-stats">
-        <div>
-          <small>언어</small>
-          <strong>{submission.language}</strong>
-        </div>
-        <div>
-          <small>실행 시간</small>
-          <strong>
-            {submission.runtimeMs === null ? "—" : `${submission.runtimeMs}ms`}
-          </strong>
-        </div>
-        <div>
-          <small>메모리</small>
-          <strong>
-            {submission.memoryKb === null ? "—" : `${submission.memoryKb}KB`}
-          </strong>
-        </div>
-        <div>
-          <small>통과</small>
-          <strong>
-            {submission.passedTestCases} / {submission.totalTestCases}
-          </strong>
-        </div>
-      </div>
+      {submission.status === "ACCEPTED" ? (
+        <section className="streak-card" aria-label="연속 학습">
+          <div className="streak-text">
+            <strong>
+              {streakDays(submissionsByDay(history.submissions))}일
+            </strong>
+            <span>연속 학습 중이에요. 내일도 이어가 보세요!</span>
+          </div>
+          <WeekStrip counts={submissionsByDay(history.submissions)} />
+        </section>
+      ) : null}
       {submission.judgeMessage ? (
         <div className="notice">
           <strong>채점 메시지</strong>
@@ -119,39 +171,104 @@ export function SubmissionPage() {
         </div>
       ) : null}
       {submission.debugOutputs && submission.debugOutputs.length > 0 ? (
-        <section className="source-section">
-          <h2>실행 출력</h2>
-          <p className="muted">실행된 공개 예제의 출력입니다. 비공개 테스트 출력은 표시하지 않습니다.</p>
-          {submission.debugOutputs.map((output) => (
-            <div className="notice" key={output.testCase}>
-              <h3>테스트 {output.testCase} · 공개 예제</h3>
-              <strong>표준 출력 (stdout)</strong>
-              <pre className="source-code">{output.stdout || '(출력 없음)'}</pre>
-              {output.stdoutTruncated ? <p>출력이 길어 앞부분만 표시합니다.</p> : null}
-              <strong>오류 출력 (stderr)</strong>
-              <pre className="source-code">{output.stderr || '(출력 없음)'}</pre>
-              {output.stderrTruncated ? <p>오류 출력이 길어 앞부분만 표시합니다.</p> : null}
-            </div>
-          ))}
+        <section className="source-section case-results">
+          <h2>케이스별 입력과 출력</h2>
+          <p className="muted">
+            제출 당시 문제 버전의 공개 예제와 내 코드의 출력을 보여 드려요.
+            비공개 테스트의 입력과 출력은 표시하지 않습니다.
+          </p>
+          {[...submission.debugOutputs]
+            .sort((left, right) => left.testCase - right.testCase)
+            .map((output, index) => {
+              const sample = submission.sampleTestCases?.find(
+                (item) => item.testCase === output.testCase,
+              );
+              const same =
+                sample && !output.stdoutTruncated
+                  ? normalizeOutput(output.stdout) ===
+                    normalizeOutput(sample.expectedOutput)
+                  : null;
+              return (
+                <div className="case-result" key={output.testCase}>
+                  <div className="case-result-head">
+                    <h3>예제 {index + 1}</h3>
+                    {same === null ? null : (
+                      <span
+                        className={`case-pill ${same ? "match" : "mismatch"}`}
+                      >
+                        {same ? "기대 출력과 같아요" : "기대 출력과 달라요"}
+                      </span>
+                    )}
+                  </div>
+                  <div className={`case-io ${sample ? "three" : ""}`}>
+                    {sample ? (
+                      <IoBlock label="입력" text={sample.input} />
+                    ) : null}
+                    {sample ? (
+                      <IoBlock label="기대 출력" text={sample.expectedOutput} />
+                    ) : null}
+                    <IoBlock
+                      label="내 출력"
+                      text={output.stdout}
+                      tone={same === false ? "bad" : same ? "good" : undefined}
+                      note={
+                        output.stdoutTruncated
+                          ? "출력이 길어 앞부분만 표시합니다."
+                          : undefined
+                      }
+                    />
+                  </div>
+                  {output.stderr ? (
+                    <IoBlock
+                      label="오류 출력 (stderr)"
+                      text={output.stderr}
+                      tone="bad"
+                      note={
+                        output.stderrTruncated
+                          ? "오류 출력이 길어 앞부분만 표시합니다."
+                          : undefined
+                      }
+                    />
+                  ) : null}
+                </div>
+              );
+            })}
         </section>
       ) : null}
       <section className="source-section">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">SOURCE CODE</span>
             <h2>제출한 코드</h2>
           </div>
-          <span className="muted">
-            {new Date(submission.createdAt).toLocaleString("ko-KR")}
-          </span>
         </div>
         <pre className="source-code">{submission.sourceCode}</pre>
       </section>
-      {submission.problem.slug ? (
-        <Link className="button" to={`/problems/view/${encodeURIComponent(submission.problem.slug)}`}>
-          문제로 돌아가기 ↗
-        </Link>
-      ) : null}
+      <div className="card-actions result-actions">
+        {submission.status === "ACCEPTED" ? (
+          <>
+            <Link className="button" to="/problems">
+              다음 문제 찾기
+            </Link>
+            <Link className="button button-outline" to="/profile">
+              내 학습 기록
+            </Link>
+          </>
+        ) : (
+          <>
+            {submission.problem.slug ? (
+              <Link
+                className="button"
+                to={problemPath(submission.problem.slug)}
+              >
+                코드 수정하기
+              </Link>
+            ) : null}
+            <Link className="button button-outline" to="/submissions">
+              제출 내역
+            </Link>
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -50,7 +50,13 @@ export interface Submission {
   totalTestCases: number;
   compileOutput: string | null;
   judgeMessage: string | null;
+  problemVersion?: number;
   sourceCode?: string;
+  sampleTestCases?: {
+    testCase: number;
+    input: string;
+    expectedOutput: string;
+  }[];
   debugOutputs?: {
     testCase: number;
     stdout: string;
@@ -60,6 +66,20 @@ export interface Submission {
   }[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface UserProfile extends User {
+  createdAt: string;
+  solvedCount: number;
+}
+
+export interface RankingEntry {
+  id: string;
+  username: string;
+  level: number;
+  xp: number;
+  rating: number;
+  solvedCount: number;
 }
 
 export interface Page<T> {

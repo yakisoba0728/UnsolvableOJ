@@ -169,12 +169,17 @@ describe('AppController (e2e)', () => {
     expect(mine.body.sourceCode).toContain('print(sum');
     expect(mine.body.status).toBe('ACCEPTED');
     expect(mine.body.debugOutputs).toEqual(debugOutputs);
+    expect(mine.body.sampleTestCases).toEqual([
+      { testCase: 1, input: '1 2\n', expectedOutput: '3\n' },
+    ]);
 
     const list = await request(app.getHttpServer())
       .get('/api/v1/submissions')
       .set('Authorization', `Bearer ${solver.accessToken}`)
       .expect(200);
     expect(list.body.items[0]).not.toHaveProperty('debugOutputs');
+    expect(list.body.items[0]).not.toHaveProperty('sampleTestCases');
+    expect(list.body.items[0]).not.toHaveProperty('sourceCode');
 
     await request(app.getHttpServer())
       .post(`/api/v1/submissions/${submitted.body.id}/rejudge`)

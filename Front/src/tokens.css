@@ -1,0 +1,164 @@
+/* Design tokens — 못풀준 Design Foundations (Figma Test Page: 01 Foundations / 02 Components / 45)
+   라이트가 기본이고, <html data-theme="dark"> 일 때 다크 값으로 바뀐다. (테마 선택: src/theme.ts) */
+:root {
+  color-scheme: light;
+
+  /* Color: surfaces & structure */
+  --color-bg: #f0f3f9;
+  --color-surface: #fbfcfe; /* 순백 대신 푸른 기운의 오프화이트 (Exercism #fbfcfe 등) */
+  --color-border: #dce2ed;
+  --color-border-strong: #c5cedd;
+  --color-surface-muted: #f3f6fb;
+  --color-disabled: #e9edf5;
+  --color-feature: #eaf0ff;
+  --color-feature-border: #d5e0fb;
+  --color-divider: #e8ecf4;
+
+  /* Color: ink (text/icons) */
+  --color-ink-900: #17191c;
+  --color-ink-700: #3b4045;
+  --color-ink-600: #596574;
+  --color-ink-400: #5f6c80; /* 보조 정보용, 흰 배경 기준 대비 5:1 이상 */
+
+  /* Color: primary action — accent는 글자·테두리·채움, solid는 흰 글자가 올라가는 면 */
+  --color-primary: #1d4fd8;
+  --color-primary-hover: #153ea9;
+  --color-primary-soft: #e7eeff;
+  --color-primary-solid: #1d4fd8;
+  --color-primary-solid-hover: #153ea9;
+  --color-on-solid: #fbfcfe;
+
+  /* 버튼 전용: 선명한 accent보다 한 단계 차분한 인디고 블루
+     (Color Hunt 팔레트 #FF95A5 #FFF6DC #76C0EC #425B9A 의 #425B9A, 흰 글자 대비 6.6:1) */
+  --color-button: #425b9a;
+  --color-button-hover: #364c82;
+  --color-button-soft-bg: #e8edf8;
+  --color-button-soft-fg: #364c82;
+  --focus-ring: rgba(29, 79, 216, 0.14);
+
+  /* Color: status */
+  --color-success: #137547;
+  --color-success-soft: #e3f7ec;
+  --color-success-border: #c4e8d5;
+  --color-danger: #c9262b;
+  --color-danger-soft: #fdebec;
+  --color-danger-border: #f5c6c8;
+  --color-warning: #8f5a0c;
+  --color-warning-soft: #fff1db;
+
+  /* Color: 난이도 배지 */
+  --color-star: #e2a11a;
+
+  --badge-easy-fg: #1f58b8;
+  --badge-hard-fg: #b0303c;
+  --badge-expert-bg: #eee9ff;
+  --badge-expert-fg: #6a47b5;
+
+  /* Color: 강조 어두운 카드(이어서 풀기) */
+  --color-strong-bg: #172238;
+  --color-strong-ink: #fbfcfe;
+  --color-strong-muted: #b9c7db;
+
+  /* Color: 활동 히트맵 */
+  --heat-0: #e2e8f2;
+  --heat-1: #c5d6fb;
+  --heat-2: #7fa1f2;
+  --heat-3: #3b6be0;
+  --heat-4: #1d4fd8;
+
+  /* Color: code surface (읽는 영역은 밝게, 코드에만 짙은 면) */
+  --color-code: #243247;
+  --color-code-ink: #e9f0f9;
+  --color-code-bar: #303f54;
+
+  /* Typography */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Noto Sans KR", system-ui, "Segoe UI", Roboto, sans-serif;
+  /* 제목·큰 숫자도 본문과 같은 Pretendard 한 가족: 한글·영문 높이가 어긋나지 않게 한다 */
+  --font-display: var(--font-sans);
+  --font-mono: "JetBrains Mono", monospace;
+
+  --text-display: 700 32px/1.25 var(--font-display);
+  --text-h1: 700 24px/1.3 var(--font-display);
+  --text-section: 700 20px/1.35 var(--font-display);
+  --text-body: 400 16px/1.7 var(--font-sans);
+  --text-caption: 400 14px/1.5 var(--font-sans);
+  --text-code: 400 14px/1.6 var(--font-mono);
+
+  /* Weight scale — 같은 글꼴, 굵기로 위계를 만든다 */
+  --weight-body: 400; /* 본문·보조 설명 */
+  --weight-label: 600; /* 메뉴·버튼·칩·배지·라벨 */
+  --weight-title: 700; /* 섹션·카드 제목 */
+  --weight-display: 700; /* 페이지 제목·큰 숫자 */
+
+  /* Spacing (8px grid) */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+
+  /* Controls & radii: 버튼·입력 12 / 패널 16 / 팝업·강조 카드 20 */
+  --control-height: 44px;
+  --radius-control: 12px;
+  --radius-panel: 16px;
+  --radius-feature: 20px;
+}
+
+/* 다크: 밝은 면 대신 짙은 면, 파랑은 밝게(글자) / 진하게(흰 글자가 올라가는 면) */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #0e131a;
+  --color-surface: #171d27;
+  --color-border: #2b3544;
+  --color-border-strong: #3d4a5e;
+  --color-surface-muted: #1c2431;
+  --color-disabled: #232c3a;
+  --color-feature: #172544;
+  --color-feature-border: #2a3f73;
+  --color-divider: #222b39;
+
+  --color-ink-900: #eef2f7;
+  --color-ink-700: #cfd6e0;
+  --color-ink-600: #a9b4c4;
+  --color-ink-400: #9aa7ba;
+
+  --color-primary: #8bacff;
+  --color-primary-hover: #adc6ff;
+  --color-primary-soft: #1b2a4f;
+  --color-primary-solid: #3566e8;
+  --color-primary-solid-hover: #2a56cf;
+  --focus-ring: rgba(139, 172, 255, 0.3);
+  --color-button: #4a63ad;
+  --color-button-hover: #5a75c4;
+  --color-button-soft-bg: #1f2a47;
+  --color-button-soft-fg: #aebff0;
+
+  --color-success: #4cc98a;
+  --color-success-soft: #12301f;
+  --color-success-border: #1f5238;
+  --color-danger: #ff8086;
+  --color-danger-soft: #3a1a1d;
+  --color-danger-border: #5f2b30;
+  --color-warning: #f0b660;
+  --color-warning-soft: #38290f;
+
+  --color-star: #f0b660;
+
+  --badge-easy-fg: #9db9ff;
+  --badge-hard-fg: #ff8086;
+  --badge-expert-bg: #2a2347;
+  --badge-expert-fg: #bba8f5;
+
+  --color-strong-bg: #263550;
+  --color-strong-muted: #b9c7db;
+
+  --heat-0: #2a3342;
+  --heat-1: #23407a;
+  --heat-2: #3a64c4;
+  --heat-3: #5b8aff;
+  --heat-4: #9bb8ff;
+
+  --color-code: #1b2435;
+  --color-code-bar: #263147;
+}

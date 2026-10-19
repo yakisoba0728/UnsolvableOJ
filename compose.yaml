@@ -28,6 +28,84 @@ services:
       timeout: 3s
       retries: 10
 
+  # NestJS API. Runs pending TypeORM migrations on startup, then serves
+  # http://localhost:3000/api/v1 (Swagger at /docs).
+  back:
+    build:
+      context: ./Back
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      CORS_ORIGIN: http://localhost:3001
+      DATABASE_URL: postgresql://unsolvable:local_password@postgres:5432/unsolvable_oj
+      DATABASE_SSL: "false"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      JWT_ACCESS_SECRET: local-dev-only-jwt-access-secret-0123456789ab
+      JWT_ACCESS_EXPIRES_IN: 15m
+      # Must match the judge service's JUDGE_SERVICE_TOKEN below.
+      JUDGE_SERVICE_TOKEN: local-dev-only-judge-service-token-0123456789
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/v1/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
+  # Builds and tags the per-submission sandbox image used by `judge` below.
+  # Not a long-running service: it exits immediately once the image is built.
+  judge-runtime:
+    build:
+      context: ./Judge/runtime
+    image: unsolvable-judge-runtime:local
+    entrypoint: ["true"]
+
+  # BullMQ worker. Shells out to the host Docker daemon (via the mounted
+  # socket) to run each submission in a locked-down unsolvable-judge-runtime
+  # container. Local/dev only — see Back/README.md and Judge/README.md:
+  # in production this worker should run on a host separate from the API.
+  judge:
+    build:
+      context: ./Judge
+    environment:
+      API_BASE_URL: http://back:3000/api/v1
+      JUDGE_SERVICE_TOKEN: local-dev-only-judge-service-token-0123456789
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JUDGE_RUNTIME_IMAGE: unsolvable-judge-runtime:local
+      JUDGE_CONCURRENCY: 2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      redis:
+        condition: service_healthy
+      back:
+        condition: service_healthy
+      judge-runtime:
+        condition: service_completed_successfully
+
+  # React/Vite UI, built and served as static files through nginx, which
+  # also reverse-proxies /api/ to the back service.
+  front:
+    build:
+      context: ./Front
+      args:
+        VITE_API_BASE_URL: /api/v1
+    ports:
+      - "127.0.0.1:3001:80"
+    depends_on:
+      back:
+        condition: service_healthy
+
 volumes:
   postgres-data:
   redis-data:

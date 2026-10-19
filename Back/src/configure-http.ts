@@ -16,6 +16,7 @@ export function configureHttp(app: NestExpressApplication) {
       .split(',')
       .map((origin) => origin.trim()),
     credentials: true,
+    exposedHeaders: ['Retry-After'],
   });
   app.useBodyParser('json', { limit: JSON_BODY_LIMIT });
   app.useGlobalPipes(

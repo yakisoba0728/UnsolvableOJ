@@ -1,9 +1,12 @@
 import { useEffect, useState, type FormEvent } from "react";
-import Markdown from "react-markdown";
+import { useDocumentTitle } from "../hooks";
+import { Select } from "../components/Select";
+import { ProblemMarkdown } from "../components/ProblemMarkdown";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
-import type { Language, Problem, Submission } from "../types";
+import type { Language, Page, Problem, Submission } from "../types";
+import { problemPath } from "../paths";
 import { difficultyLabel } from "./ProblemsPage";
 
 const languages: { value: Language; label: string; starter: string }[] = [
@@ -56,17 +59,78 @@ const languages: { value: Language; label: string; starter: string }[] = [
   },
 ];
 
+type Tab = "statement" | "history";
+
+function draftKey(problemId: string, language: Language) {
+  return `unsolvable-oj-draft-v1:${problemId}:${language}`;
+}
+
+function readDraft(problemId: string, language: Language) {
+  try {
+    return localStorage.getItem(draftKey(problemId, language));
+  } catch {
+    return null;
+  }
+}
+
 export function ProblemPage() {
   const { slug } = useParams();
   const [problem, setProblem] = useState<Problem | null>(null);
+  useDocumentTitle(problem?.title);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [language, setLanguage] = useState<Language>("PYTHON");
   const [source, setSource] = useState(languages[0].starter);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [tab, setTab] = useState<Tab>("statement");
+  const [history, setHistory] = useState<Submission[] | null>(null);
+  const [savedAt, setSavedAt] = useState<Date | null>(null);
   const { session } = useAuth();
   const navigate = useNavigate();
+
+  const starter = (value: Language) =>
+    languages.find((item) => item.value === value)?.starter ?? "";
+
+  // 문제가 바뀌거나 불러와지면 저장된 초안을 복원한다.
+  useEffect(() => {
+    if (!problem) return;
+    const draft = readDraft(problem.id, language);
+    setSource(draft ?? starter(language));
+    setSavedAt(draft ? new Date() : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [problem?.id, language]);
+
+  // 입력 후 잠시 멈추면 초안을 자동 저장한다.
+  useEffect(() => {
+    if (!problem || source === starter(language)) return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(draftKey(problem.id, language), source);
+        setSavedAt(new Date());
+      } catch {
+        setSavedAt(null);
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source, problem?.id, language]);
+
+  useEffect(() => {
+    if (tab !== "history" || !session || !problem) return;
+    const controller = new AbortController();
+    setHistory(null);
+    api<Page<Submission>>(
+      `/submissions?problemId=${problem.id}&page=1&limit=20`,
+      { signal: controller.signal },
+      session.accessToken,
+    )
+      .then((data) => setHistory(data.items))
+      .catch(() => {
+        if (!controller.signal.aborted) setHistory([]);
+      });
+    return () => controller.abort();
+  }, [tab, session, problem]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -121,146 +185,268 @@ export function ProblemPage() {
     );
   if (error || !problem)
     return (
-      <div className="page-width empty-state">
-        <p className="error-message">{error || "문제를 찾을 수 없습니다."}</p>
-        <Link to="/problems">문제 목록으로</Link>
+      <div className="page-width empty-state not-found-state" role="alert">
+        <strong>문제를 찾을 수 없어요</strong>
+        <p>
+          {error && !error.includes("찾을 수 없")
+            ? error
+            : "주소가 바뀌었거나 아직 공개되지 않은 문제일 수 있어요."}
+        </p>
+        <Link className="button" to="/problems">
+          문제 목록으로
+        </Link>
       </div>
     );
 
+  const selectedLanguage = languages.find((item) => item.value === language);
+  const lineCount = source.split("\n").length;
+
   return (
-    <div className="page-width detail-page">
-      <Link className="back-link" to="/problems">
-        ← 문제 목록
-      </Link>
-      <div className="detail-heading">
-        <div>
-          <span className="eyebrow">
-            PROBLEM / {problem.slug.toUpperCase()}
-          </span>
-          <h1>{problem.title}</h1>
-        </div>
+    <div className="solve-page">
+      <div className="solve-heading">
+        <nav className="breadcrumb" aria-label="현재 위치">
+          <Link to="/problems">문제 목록</Link>
+          <span aria-hidden="true">/</span>
+          <span>{problem.slug}</span>
+        </nav>
+        <h1>{problem.title}</h1>
         <span
           className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
         >
           {difficultyLabel(problem.difficulty)}
         </span>
       </div>
-      <div className="meta-strip">
-        <span>
-          <strong>시간</strong> {problem.timeLimitMs}ms
-        </span>
-        <span>
-          <strong>메모리</strong> {problem.memoryLimitMb}MB
-        </span>
-        <span>
-          <strong>예제</strong> {problem.samples.length}개
-        </span>
-      </div>
-      <div className="detail-grid">
-        <article className="problem-content">
-          <section>
-            <h2>문제</h2>
-            <div className="markdown">
-              <Markdown>{problem.statementMarkdown}</Markdown>
-            </div>
-          </section>
-          {problem.inputDescriptionMarkdown ? (
-            <section>
-              <h2>입력</h2>
-              <div className="markdown">
-                <Markdown>{problem.inputDescriptionMarkdown}</Markdown>
-              </div>
-            </section>
-          ) : null}
-          {problem.outputDescriptionMarkdown ? (
-            <section>
-              <h2>출력</h2>
-              <div className="markdown">
-                <Markdown>{problem.outputDescriptionMarkdown}</Markdown>
-              </div>
-            </section>
-          ) : null}
-          {problem.samples.map((sample, index) => (
-            <section key={index}>
-              <h2>예제 {index + 1}</h2>
-              <div className="sample-grid">
-                <div>
-                  <h3>입력</h3>
-                  <pre>{sample.input}</pre>
-                </div>
-                <div>
-                  <h3>출력</h3>
-                  <pre>{sample.expectedOutput}</pre>
-                </div>
-              </div>
-            </section>
-          ))}
-        </article>
-        <aside className="editor-panel">
-          <div className="editor-heading">
-            <span className="eyebrow">YOUR SOLUTION</span>
-            <h2>코드 제출</h2>
+      <div className="solve-grid">
+        <section className="solve-panel statement-panel">
+          <div className="tab-list" role="tablist" aria-label="문제 보기">
+            <button
+              role="tab"
+              aria-selected={tab === "statement"}
+              className={`tab-button ${tab === "statement" ? "active" : ""}`}
+              onClick={() => setTab("statement")}
+            >
+              문제 설명
+            </button>
+            <button
+              role="tab"
+              aria-selected={tab === "history"}
+              className={`tab-button ${tab === "history" ? "active" : ""}`}
+              onClick={() => setTab("history")}
+            >
+              제출 내역
+            </button>
           </div>
-          {session ? (
-            <form onSubmit={submit} className="form-stack">
-              <label>
-                언어
-                <select
-                  value={language}
-                  onChange={(event) => {
-                    const selected = event.target.value as Language;
-                    setLanguage(selected);
-                    setSource(
-                      languages.find((item) => item.value === selected)
-                        ?.starter ?? "",
-                    );
-                  }}
-                >
-                  {languages.map((item) => (
-                    <option value={item.value} key={item.value}>
-                      {item.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                소스 코드
-                <textarea
-                  className="code-editor"
-                  spellCheck={false}
-                  value={source}
-                  onChange={(event) => setSource(event.target.value)}
-                  required
-                />
-              </label>
-              {submitError ? (
-                <p className="error-message" role="alert">
-                  {submitError}
-                </p>
+          {tab === "statement" ? (
+            <article className="problem-content">
+              <div className="meta-strip">
+                <span>
+                  <strong>시간</strong> {problem.timeLimitMs}ms
+                </span>
+                <span>
+                  <strong>메모리</strong> {problem.memoryLimitMb}MB
+                </span>
+                <span>
+                  <strong>예제</strong> {problem.samples.length}개
+                </span>
+              </div>
+              <section>
+                <h2>문제</h2>
+                <div className="markdown">
+                  <ProblemMarkdown>{problem.statementMarkdown}</ProblemMarkdown>
+                </div>
+              </section>
+              {problem.inputDescriptionMarkdown ? (
+                <section>
+                  <h2>입력</h2>
+                  <div className="markdown">
+                    <ProblemMarkdown>
+                      {problem.inputDescriptionMarkdown}
+                    </ProblemMarkdown>
+                  </div>
+                </section>
               ) : null}
-              <button
-                className="button button-full"
-                disabled={submitting || !source.trim()}
-              >
-                {submitting ? "제출 중…" : "제출하고 채점하기 →"}
-              </button>
-            </form>
+              {problem.outputDescriptionMarkdown ? (
+                <section>
+                  <h2>출력</h2>
+                  <div className="markdown">
+                    <ProblemMarkdown>
+                      {problem.outputDescriptionMarkdown}
+                    </ProblemMarkdown>
+                  </div>
+                </section>
+              ) : null}
+              {problem.samples.map((sample, index) => (
+                <section key={index}>
+                  <h2>예제 {index + 1}</h2>
+                  <div className="sample-grid">
+                    <div>
+                      <h3>입력</h3>
+                      <pre>{sample.input}</pre>
+                    </div>
+                    <div>
+                      <h3>출력</h3>
+                      <pre>{sample.expectedOutput}</pre>
+                    </div>
+                  </div>
+                </section>
+              ))}
+            </article>
           ) : (
-            <div className="sign-in-prompt">
-              <p>코드를 제출하려면 로그인해 주세요.</p>
-              <Link
-                className="button button-full"
-                to="/auth"
-                state={{ from: `/problems/view/${encodeURIComponent(problem.slug)}` }}
-              >
-                로그인하고 풀기
-              </Link>
+            <div className="history-panel">
+              {!session ? (
+                <p className="muted">
+                  로그인하면 이 문제의 제출 내역이 여기에 표시됩니다.
+                </p>
+              ) : history === null ? (
+                <p className="muted">제출 내역을 불러오는 중입니다…</p>
+              ) : history.length ? (
+                <ul className="history-list">
+                  {history.map((item) => (
+                    <li key={item.id}>
+                      <Link to={`/submissions/${item.id}`}>
+                        <span
+                          className={`verdict verdict-${item.status.toLowerCase()}`}
+                        >
+                          {item.status.replaceAll("_", " ")}
+                        </span>
+                        <span>
+                          {item.language} ·{" "}
+                          {new Date(item.createdAt).toLocaleString("ko-KR")}
+                        </span>
+                        <span className="muted">
+                          {item.passedTestCases}/{item.totalTestCases}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="muted">
+                  아직 이 문제를 제출하지 않았습니다. 오른쪽에서 코드를 작성해
+                  제출해 보세요.
+                </p>
+              )}
             </div>
           )}
-          <p className="editor-note">
-            제출 후 판정 페이지에서 결과를 확인할 수 있습니다.
-          </p>
-        </aside>
+        </section>
+
+        <section className="solve-panel code-panel" aria-label="코드 작성">
+          <div className="code-toolbar">
+            <Select
+              className="language-select"
+              ariaLabel="언어"
+              value={language}
+              options={languages.map((item) => ({
+                value: item.value,
+                label: item.label,
+              }))}
+              onChange={(next) => setLanguage(next as Language)}
+            />
+            <span className="save-state" role="status">
+              {savedAt
+                ? `초안 저장됨 · ${savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
+                : "자동 저장 대기"}
+            </span>
+            <button
+              type="button"
+              className="text-button light"
+              onClick={() => {
+                setSource(starter(language));
+                try {
+                  localStorage.removeItem(draftKey(problem.id, language));
+                } catch {
+                  /* 저장소를 쓸 수 없어도 초기화는 진행한다 */
+                }
+                setSavedAt(null);
+              }}
+            >
+              초기화
+            </button>
+          </div>
+          <form onSubmit={submit} className="code-form">
+            <div className="editor-frame">
+              <div className="line-numbers" aria-hidden="true">
+                {Array.from({ length: lineCount }, (_, index) => (
+                  <span key={index}>{index + 1}</span>
+                ))}
+              </div>
+              <textarea
+                className="code-editor"
+                aria-label={`${selectedLanguage?.label ?? ""} 소스 코드`}
+                spellCheck={false}
+                wrap="off"
+                value={source}
+                onChange={(event) => setSource(event.target.value)}
+                onKeyDown={(event) => {
+                  // Ctrl/⌘ + Enter 로 바로 제출 (LeetCode·HackerRank 방식)
+                  if (
+                    event.key === "Enter" &&
+                    (event.metaKey || event.ctrlKey)
+                  ) {
+                    event.preventDefault();
+                    event.currentTarget.form?.requestSubmit();
+                    return;
+                  }
+                  if (event.key !== "Tab") return;
+                  event.preventDefault();
+                  const target = event.currentTarget;
+                  const { selectionStart, selectionEnd } = target;
+                  setSource(
+                    `${source.slice(0, selectionStart)}    ${source.slice(selectionEnd)}`,
+                  );
+                  requestAnimationFrame(() =>
+                    target.setSelectionRange(
+                      selectionStart + 4,
+                      selectionStart + 4,
+                    ),
+                  );
+                }}
+                required
+              />
+            </div>
+            {submitError ? (
+              <p className="error-message" role="alert">
+                {submitError}
+              </p>
+            ) : null}
+            <div className="code-actions">
+              {session ? (
+                <>
+                  <span className="editor-note">
+                    {source.trim() ? (
+                      <>
+                        제출하면 전체 테스트 케이스로 채점합니다 ·{" "}
+                        <kbd>Ctrl/⌘ + Enter</kbd>
+                      </>
+                    ) : (
+                      "코드를 입력하면 제출할 수 있어요."
+                    )}
+                  </span>
+                  <button
+                    className="button"
+                    disabled={submitting || !source.trim()}
+                  >
+                    {submitting ? "제출 중…" : "제출하고 채점하기 →"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span className="editor-note">
+                    코드를 제출하려면 로그인해 주세요. 작성 중인 코드는 이
+                    브라우저에 저장됩니다.
+                  </span>
+                  <Link
+                    className="button"
+                    to="/auth"
+                    state={{ from: problemPath(problem.slug) }}
+                  >
+                    로그인하고 풀기
+                  </Link>
+                </>
+              )}
+            </div>
+          </form>
+        </section>
       </div>
     </div>
   );
