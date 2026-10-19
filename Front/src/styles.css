@@ -6391,3 +6391,16 @@ h3 {
     padding-right: 16px;
   }
 }
+
+/* 회원가입: 입력 도중에 보이는 칸별 안내 */
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.auth-field [aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+.auth-field [aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px var(--color-danger-soft);
+}
