@@ -42,8 +42,8 @@ export function scanContext(
   let quote = "";
   for (let i = 0; i < text.length; i++) {
     const ch = text[i];
-    const two = text.slice(i, i + 2);
-    const three = text.slice(i, i + 3);
+    const two = ch + (text[i + 1] ?? "");
+    const three = two + (text[i + 2] ?? "");
     if (state === "line") {
       if (ch === "\n") state = "code";
     } else if (state === "block") {
@@ -78,6 +78,14 @@ export function scanContext(
         /[A-Za-z0-9_]/.test(text[i - 1] ?? "")
       )
         continue;
+      // Rust 수명 표기('a, 'static)는 닫는 '가 곧바로 오지 않는다.
+      if (
+        ch === "'" &&
+        language === "RUST" &&
+        text[i + 1] !== "\\" &&
+        text[i + 2] !== "'"
+      )
+        continue;
       state = "str";
       quote = ch;
     }
@@ -92,7 +100,11 @@ export function scanContext(
 /** 커서 바로 앞에서 이어진 이름(영문·숫자·_)을 찾는다. */
 export function currentWord(value: string, caret: number) {
   const match = /[A-Za-z_][A-Za-z0-9_]*$/.exec(value.slice(0, caret));
-  return match ? { text: match[0], start: caret - match[0].length } : null;
+  if (!match) return null;
+  const start = caret - match[0].length;
+  // 10L, 1.5f, 0xff 같은 숫자 리터럴의 꼬리는 단어가 아니다.
+  if (/[0-9$]/.test(value[start - 1] ?? "")) return null;
+  return { text: match[0], start };
 }
 
 interface MemberContext {
@@ -144,7 +156,8 @@ export function memberContext(
   const match = /(\.|::|->)([A-Za-z_][A-Za-z0-9_]*)?$/.exec(prefix);
   if (!match) return null;
   const operator = match[1] as MemberContext["operator"];
-  const before = prefix.slice(0, match.index);
+  // a?.b, a!.b 처럼 옵셔널 체이닝·널 아님 단언 뒤의 점도 같은 receiver로 본다.
+  const before = prefix.slice(0, match.index).replace(/[?!]$/, "");
   // 1.5 같은 소수는 멤버 접근이 아니다.
   if (operator === "." && /(?:^|[^\w$.])\d+$/.test(before)) return null;
   const receiver = extractReceiver(before);
@@ -165,17 +178,22 @@ const PY_LIST_CALLS = new Set(
 
 function classifyPython(expr: string): string | null {
   const e = expr.trim();
-  if (/^\[/.test(e) || /^(?:list|sorted)\s*\(/.test(e)) return "list";
-  if (/^\{.*:/.test(e) || /^(?:dict|defaultdict|Counter)\s*\(/.test(e))
-    return "dict";
-  if (/^\{/.test(e) || /^set\s*\(/.test(e)) return "set";
-  if (/^deque\s*\(/.test(e)) return "deque";
-  if (/^[rbfu]?["']/i.test(e)) return "str";
+  // 끝의 호출이 결과 타입을 정한다("a,b".split(",") 는 리스트).
   const call = /(?:^|\.)([A-Za-z_]\w*)\s*\([^()]*\)\s*$/.exec(e);
   if (call) {
     if (PY_LIST_CALLS.has(call[1])) return "list";
     if (PY_STR_CALLS.has(call[1])) return "str";
   }
+  if (/^\[/.test(e) || /^(?:list|sorted)\s*\(/.test(e)) return "list";
+  if (
+    /^\{\s*\}/.test(e) ||
+    /^\{.*:/.test(e) ||
+    /^(?:dict|defaultdict|Counter)\s*\(/.test(e)
+  )
+    return "dict";
+  if (/^\{/.test(e) || /^set\s*\(/.test(e)) return "set";
+  if (/^deque\s*\(/.test(e)) return "deque";
+  if (/^[rbfu]?["']/i.test(e)) return "str";
   return null;
 }
 
@@ -188,10 +206,6 @@ function classifyJs(expr: string, annotation?: string): string | null {
     if (/^Set</.test(a)) return "Set";
   }
   const e = expr.trim();
-  if (/^\[/.test(e) || /^Array(?:\.from)?\s*\(/.test(e)) return "array";
-  if (/^new\s+Map\b/.test(e)) return "Map";
-  if (/^new\s+Set\b/.test(e)) return "Set";
-  if (/^["'`]/.test(e)) return "string";
   const call = /\.([A-Za-z_]\w*)\s*\([^()]*\)\s*;?$/.exec(e);
   if (call) {
     if (
@@ -207,6 +221,10 @@ function classifyJs(expr: string, annotation?: string): string | null {
     )
       return "string";
   }
+  if (/^\[/.test(e) || /^Array(?:\.from)?\s*\(/.test(e)) return "array";
+  if (/^new\s+Map\b/.test(e)) return "Map";
+  if (/^new\s+Set\b/.test(e)) return "Set";
+  if (/^["'`]/.test(e)) return "string";
   return null;
 }
 
@@ -216,7 +234,15 @@ function classifyRust(expr: string, annotation?: string): string | null {
   if (a === "String") return "String";
   if (/^HashMap</.test(a)) return "HashMap";
   if (/^(?:Option|Result)</.test(a)) return "Option";
-  const e = expr.trim();
+  // usize 같은 값 타입 표기는 멤버를 제안할 컬렉션이 아니다.
+  if (a) return null;
+  // .unwrap()·? 를 붙이면 Option/Result가 풀린 값이므로 그 앞의 식으로 판단한다.
+  const e = expr
+    .trim()
+    .replace(/(?:\.unwrap\(\)|\.expect\([^)]*\)|\?)$/, "")
+    .trim();
+  if (e !== expr.trim() && /\.(?:parse|get|first|last|pop)\b/.test(e))
+    return null;
   if (/^vec!|^Vec::|collect::<\s*Vec/.test(e)) return "Vec";
   if (/^String::|\.to_string\(\)|\.to_owned\(\)|^format!/.test(e))
     return "String";
@@ -511,6 +537,16 @@ export function fuzzyMatch(
 // ───────────────────────── 직접 쓴 이름 ─────────────────────────
 
 const RESERVED = new Set(Object.values(KEYWORDS).flat());
+/** 내장 함수·스니펫과 같은 이름은 직접 쓴 이름으로 따로 올리지 않는다(괄호·시그니처가 사라지므로). */
+const BUILTIN_LABELS: Record<Language, Set<string>> = Object.fromEntries(
+  (Object.keys(GLOBALS) as Language[]).map((language) => [
+    language,
+    new Set([
+      ...GLOBALS[language].map((item) => item.label),
+      ...SNIPPETS[language].map((item) => item.label),
+    ]),
+  ]),
+) as Record<Language, Set<string>>;
 
 const DECL_PATTERNS: Record<Language, RegExp[]> = {
   PYTHON: [/\bdef\s+([A-Za-z_]\w*)/g, /\bclass\s+([A-Za-z_]\w*)/g],
@@ -549,7 +585,12 @@ function localSymbols(
   const seen = new Map<string, SuggestionKind>();
   for (const match of text.matchAll(/[A-Za-z_$][A-Za-z0-9_$]+/g)) {
     const name = match[0];
-    if (RESERVED.has(name) || seen.has(name)) continue;
+    if (
+      RESERVED.has(name) ||
+      BUILTIN_LABELS[language].has(name) ||
+      seen.has(name)
+    )
+      continue;
     seen.set(name, kinds.get(name) ?? "word");
   }
   return [...seen].map(([label, kind]) => ({
@@ -584,6 +625,15 @@ export function resetAcceptedHistory() {
   recent.clear();
 }
 
+/** 비싼 퍼지 계산 전에 걸러 내는 값싼 부분열 검사 */
+function isSubsequence(query: string, label: string) {
+  const q = query.toLowerCase();
+  const l = label.toLowerCase();
+  let at = 0;
+  for (let i = 0; i < l.length && at < q.length; i++) if (l[i] === q[at]) at++;
+  return at === q.length;
+}
+
 function rank(
   items: Suggestion[],
   query: string,
@@ -593,6 +643,7 @@ function rank(
   const used = new Set<string>();
   for (const [order, item] of items.entries()) {
     if (used.has(item.label) || skip?.(item)) continue;
+    if (!isSubsequence(query, item.label)) continue;
     const fuzzy = fuzzyMatch(query, item.label);
     if (!fuzzy) continue;
     used.add(item.label);
@@ -673,8 +724,10 @@ export function suggest(
   options: { manual?: boolean } = {},
 ): Suggestion[] {
   const linePrefix = value.slice(value.lastIndexOf("\n", caret - 1) + 1, caret);
+  const context = scanContext(value, caret, language);
+  if (context === "comment") return [];
 
-  // #include <… / import … : 헤더·모듈 목록 (문자열 안이어도 허용)
+  // #include <… / import … : 헤더·모듈 목록 (#include "…" 는 문자열 안이어도 허용)
   if (language === "C" || language === "CPP") {
     const include = /^\s*#\s*include\s*([<"])([\w./+-]*)$/.exec(linePrefix);
     if (include) {
@@ -687,6 +740,7 @@ export function suggest(
           doc: "헤더",
         })),
         include[2],
+        (item) => item.label === include[2],
       );
     }
   }
@@ -696,7 +750,7 @@ export function suggest(
       : language === "PYTHON"
         ? /^\s*(?:import|from)\s+([\w.]*)$/.exec(linePrefix)
         : null;
-  if (importLine) {
+  if (importLine && context === "code") {
     return rank(
       (MODULES[language] ?? []).map((name) => ({
         label: name,
@@ -705,10 +759,11 @@ export function suggest(
         doc: language === "JAVA" ? "패키지·클래스" : "모듈",
       })),
       importLine[1],
+      (item) => item.label === importLine[1],
     );
   }
 
-  if (scanContext(value, caret, language) !== "code") return [];
+  if (context !== "code") return [];
   // 단어 중간에서는 제안하지 않는다(커서 뒤에 이어진 글자가 있을 때).
   if (/[A-Za-z0-9_]/.test(value[caret] ?? "")) return [];
 

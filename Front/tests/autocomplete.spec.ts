@@ -121,7 +121,7 @@ test.describe("member completion", () => {
     expect(
       inferType("a", "a = list(map(int, input().split()))\n", "PYTHON"),
     ).toBe("list");
-    expect(inferType("d", "d = {}\nd2 = {1: 2}\n", "PYTHON")).toBe("set");
+    expect(inferType("d", "d = {}\nd2 = {1: 2}\n", "PYTHON")).toBe("dict");
     expect(inferType("d2", "d = {}\nd2 = {1: 2}\n", "PYTHON")).toBe("dict");
     expect(inferType("v", "vector<int> v;\n", "CPP")).toBe("vector");
     expect(inferType("m", "std::unordered_map<int, int> m;\n", "CPP")).toBe(
@@ -295,5 +295,54 @@ test.describe("applying", () => {
       start: 4,
     });
     expect(currentWord("a + ", 4)).toBeNull();
+  });
+});
+
+test.describe("regressions found in review", () => {
+  test("a number-literal suffix is not a word", () => {
+    expect(at("long x = 10L", "JAVA")).toEqual([]);
+    expect(at("double y = 1.5f", "CPP")).toEqual([]);
+    expect(at("int z = 0xff", "C")).toEqual([]);
+    expect(currentWord("x = 10L", 7)).toBeNull();
+  });
+
+  test("an already complete module or header offers nothing, so Enter is left alone", () => {
+    expect(at("import sys", "PYTHON")).toEqual([]);
+    expect(at("#include <iostream", "CPP")).toEqual([]);
+  });
+
+  test("names already used do not hide the richer built-in entry", () => {
+    const python = at("print(1)\npri", "PYTHON");
+    expect(pick(python, "print")).toMatchObject({
+      kind: "function",
+      insert: "print($0)",
+    });
+    expect(pick(at("printf(1);\nprint", "C"), "printf").kind).not.toBe("word");
+  });
+
+  test("type inference follows the final call and ignores value-type annotations", () => {
+    expect(inferType("d", "d = {}\n", "PYTHON")).toBe("dict");
+    expect(inferType("a", 'a = "x,y".split(",")\n', "PYTHON")).toBe("list");
+    expect(inferType("a", "const a = 'x,y'.split(',');\n", "JAVASCRIPT")).toBe(
+      "array",
+    );
+    expect(
+      inferType("n", "let n: usize = s.trim().parse().unwrap();\n", "RUST"),
+    ).toBeNull();
+    expect(inferType("v", "let v = s.parse::<i32>();\n", "RUST")).toBe(
+      "Option",
+    );
+  });
+
+  test("optional chaining and non-null assertions keep member completion", () => {
+    expect(memberContext("a?.", 3)?.receiver).toBe("a");
+    expect(memberContext("a!.", 3)?.receiver).toBe("a");
+    expect(labels(at("const xs = [1];\nxs?.pu", "TYPESCRIPT"))[0]).toBe("push");
+  });
+
+  test("Rust lifetimes do not open a string, and docstrings do not get module hints", () => {
+    expect(scanContext("fn f(x: &'a str) { pri", 22, "RUST")).toBe("code");
+    expect(scanContext("let c = 'x'; pri", 16, "RUST")).toBe("code");
+    expect(at('"""\nfrom the', "PYTHON")).toEqual([]);
   });
 });

@@ -392,11 +392,16 @@ export function ProblemPage() {
     });
   }
 
-  function acceptSuggestion(index: number) {
+  /** 제안을 적용한다. 글이 바뀌지 않으면(이미 완성된 단어) 아무것도 하지 않고 false를 돌려준다. */
+  function acceptSuggestion(index: number): boolean {
     const target = editorRef.current;
     const item = popup?.items[index];
-    if (!target || !item) return;
+    if (!target || !item) return false;
     const applied = applySuggestion(target.value, target.selectionStart, item);
+    if (applied.value === target.value) {
+      setPopup(null);
+      return false;
+    }
     recordAccepted(item.label);
     suppressSuggest.current = true; // 적용 직후에는 다시 띄우지 않는다
     sessionRef.current = null;
@@ -404,6 +409,7 @@ export function ProblemPage() {
     applyEdit(target, applied);
     // 옮겨 다닐 칸이 있으면 이어서 Tab으로 이동할 수 있게 한다.
     sessionRef.current = applied.session;
+    return true;
   }
 
   function onEditorKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -416,7 +422,7 @@ export function ProblemPage() {
       return;
     }
     // 한글 등 조합 입력 중에는 편집 규칙을 적용하지 않는다.
-    if (event.nativeEvent.isComposing) return;
+    if (event.nativeEvent.isComposing || event.keyCode === 229) return;
     // 수동 호출: Ctrl+Space(VS Code·IntelliJ), ⌘I(VS Code Mac), Alt+/
     if (
       (event.ctrlKey && event.code === "Space") ||
@@ -454,9 +460,10 @@ export function ProblemPage() {
         !modifier &&
         !event.shiftKey
       ) {
+        // 바뀌는 것이 없으면 Enter·Tab은 평소 동작(줄바꿈·들여쓰기)으로 넘긴다.
+        const before = popup.index;
         event.preventDefault();
-        acceptSuggestion(popup.index);
-        return;
+        if (acceptSuggestion(before)) return;
       }
       if (event.key === "Escape") {
         event.preventDefault();
@@ -706,6 +713,8 @@ export function ProblemPage() {
               type="button"
               className="text-button light"
               onClick={() => {
+                sessionRef.current = null;
+                setPopup(null);
                 setSource(starter(language));
                 try {
                   localStorage.removeItem(draftKey(problem.id, language));
@@ -739,7 +748,7 @@ export function ProblemPage() {
                 autoCorrect="off"
                 wrap="off"
                 value={source}
-                aria-autocomplete="list"
+                aria-autocomplete={popup ? "list" : undefined}
                 aria-controls={popup ? "editor-suggestions" : undefined}
                 aria-activedescendant={
                   popup ? `suggestion-${popup.index}` : undefined
@@ -747,6 +756,12 @@ export function ProblemPage() {
                 onChange={(event) => {
                   const target = event.currentTarget;
                   const native = event.nativeEvent as InputEvent;
+                  // 한글 등 조합 중에는 값만 저장하고, 칸 보정·제안은 조합이 끝난 뒤에 한다.
+                  if (native.isComposing) {
+                    updateSource(target.value);
+                    updateCursor(target);
+                    return;
+                  }
                   // 스니펫 칸 안에서 고친 글을 같은 번호의 다른 칸(미러)에도 반영한다.
                   if (sessionRef.current && !syncingRef.current) {
                     const synced = reconcileSession(
@@ -773,9 +788,12 @@ export function ProblemPage() {
                   } else if (syncingRef.current || sessionRef.current) {
                     setPopup(null);
                   } else if (
+                    // 붙여넣기·실행 취소·끌어다 놓기로 바뀐 글에는 띄우지 않고,
                     // 지우는 중에는 이미 떠 있을 때만 갱신한다(VS Code와 같다).
-                    !native.inputType?.startsWith("delete") ||
-                    popup
+                    !/^(?:history|insertFromPaste|insertFromDrop)/.test(
+                      native.inputType ?? "",
+                    ) &&
+                    (!native.inputType?.startsWith("delete") || popup)
                   ) {
                     refreshSuggest(target);
                   } else setPopup(null);
