@@ -6249,3 +6249,119 @@ h3 {
     transition: none;
   }
 }
+
+/* 위험한 동작(삭제)용 보조 버튼 */
+.button-danger-outline,
+.button-danger-outline:hover {
+  background: var(--color-surface);
+  border-color: var(--color-danger-border);
+  color: var(--color-danger);
+}
+.button-danger-outline:hover {
+  background: var(--color-danger-soft);
+}
+
+/* 풀이 화면 에디터: 글꼴 크기·커서 위치·단축키 안내 */
+.editor-frame .code-editor,
+.editor-frame .line-numbers {
+  font-size: var(--editor-font, 13px);
+}
+.cursor-info {
+  color: #b9c7db;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.font-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #b9c7db;
+}
+.font-button {
+  min-width: 30px;
+  height: 28px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  cursor: pointer;
+}
+.font-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.font-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.font-button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+.font-size {
+  min-width: 22px;
+  text-align: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.editor-hints {
+  margin: 0;
+  padding: 8px 16px;
+  background: var(--color-code);
+  color: #b9c7db;
+  font-size: 12px;
+}
+.editor-hints kbd {
+  background: rgba(255, 255, 255, 0.12);
+  color: #e9f0f9;
+}
+@media (max-width: 650px) {
+  .cursor-info {
+    display: none;
+  }
+}
+
+/* 풀이 화면 에디터: 자동완성 제안 목록 */
+.editor-frame {
+  position: relative;
+}
+.autocomplete {
+  position: absolute;
+  z-index: 6;
+  min-width: 200px;
+  max-width: 300px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: #1b2636;
+  border: 1px solid #3a4a62;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  color: #e9f0f9;
+  font: 12px/1.4 var(--font-sans);
+}
+.autocomplete li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.autocomplete li.active {
+  background: rgba(110, 150, 255, 0.28);
+}
+.suggestion-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.suggestion-detail {
+  color: #9fb0c8;
+  font-size: 11px;
+  white-space: nowrap;
+}

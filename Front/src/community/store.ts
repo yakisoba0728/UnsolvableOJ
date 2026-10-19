@@ -36,6 +36,8 @@ interface Activity {
   followed: string[];
   /** 게시글 id → 채택한 답변 id (사용자가 바꾼 값만) */
   accepted: Record<string, string | null>;
+  /** 삭제한 글 id (샘플 글처럼 저장소에 없는 글을 숨기는 데도 쓴다) */
+  deleted: string[];
 }
 
 const storageKey = "unsolvable-oj-community-v1";
@@ -48,12 +50,15 @@ const empty: Activity = {
   saved: [],
   followed: [],
   accepted: {},
+  deleted: [],
 };
 
 function load(): Activity {
   try {
     const raw = localStorage.getItem(storageKey);
-    return raw ? { ...empty, ...(JSON.parse(raw) as Partial<Activity>) } : empty;
+    return raw
+      ? { ...empty, ...(JSON.parse(raw) as Partial<Activity>) }
+      : empty;
   } catch {
     return empty;
   }
@@ -125,6 +130,26 @@ export const communityActions = {
     commit({ ...state, answers: [...state.answers, answer] });
     return answer;
   },
+  /** 글을 지운다. 그 글의 답변·채택·추천 기록도 함께 정리한다. */
+  deletePost(postId: string) {
+    const answerIds = state.answers
+      .filter((answer) => answer.postId === postId)
+      .map((answer) => answer.id);
+    const { [postId]: _removed, ...accepted } = state.accepted;
+    commit({
+      ...state,
+      posts: state.posts.filter((post) => post.id !== postId),
+      answers: state.answers.filter((answer) => answer.postId !== postId),
+      accepted,
+      upvoted: state.upvoted.filter(
+        (id) => id !== postId && !answerIds.includes(id),
+      ),
+      saved: state.saved.filter((id) => id !== postId),
+      deleted: state.deleted.includes(postId)
+        ? state.deleted
+        : [...state.deleted, postId],
+    });
+  },
   toggleUpvote: (id: string) =>
     commit({ ...state, upvoted: toggle(state.upvoted, id) }),
   toggleSaved: (id: string) =>
@@ -135,10 +160,10 @@ export const communityActions = {
     commit({ ...state, accepted: { ...state.accepted, [postId]: answerId } }),
 };
 
-export const allPosts = (activity: Activity) => [
-  ...activity.posts,
-  ...seedPosts,
-];
+export const allPosts = (activity: Activity) =>
+  [...activity.posts, ...seedPosts].filter(
+    (post) => !activity.deleted.includes(post.id),
+  );
 
 export const answersOf = (activity: Activity, postId: string) =>
   [...seedAnswers, ...activity.answers].filter(
@@ -151,11 +176,8 @@ export function acceptedAnswerId(activity: Activity, postId: string) {
 }
 
 /** 내가 추천했다면 +1 (추천 취소는 더미 값 그대로) */
-export const upvoteCount = (
-  activity: Activity,
-  id: string,
-  base: number,
-) => base + (activity.upvoted.includes(id) ? 1 : 0);
+export const upvoteCount = (activity: Activity, id: string, base: number) =>
+  base + (activity.upvoted.includes(id) ? 1 : 0);
 
 export function statsOf(activity: Activity, name: string): AuthorStats {
   const known = authorStats[name];

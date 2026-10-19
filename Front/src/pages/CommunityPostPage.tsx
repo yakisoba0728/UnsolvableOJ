@@ -36,7 +36,6 @@ export function CommunityPostPage() {
   );
   const [answersOpen, setAnswersOpen] = useState(false);
   const editorRef = useRef<HTMLTextAreaElement>(null);
-  const editorFormRef = useRef<HTMLFormElement>(null);
 
   // 다른 글로 옮기면 그 글의 작성 중 답변을 불러온다.
   useEffect(() => {
@@ -92,12 +91,20 @@ export function CommunityPostPage() {
     else navigate("/auth", { state: { from: `/community/${id}` } });
   }
 
-  function focusEditor() {
-    editorFormRef.current?.scrollIntoView({
-      block: "center",
-      behavior: "smooth",
+  function deleteMyPost() {
+    if (!isMine) return;
+    if (
+      !window.confirm(
+        "이 글을 삭제할까요? 달린 답변도 함께 삭제되고 되돌릴 수 없어요.",
+      )
+    )
+      return;
+    writeAnswerDraft(id, "");
+    // 먼저 목록으로 이동시킨 뒤 지워서, 지워진 글 화면이 잠깐 보이지 않게 한다.
+    navigate(`/community${listSearch}`, {
+      state: { notice: "글을 삭제했어요." },
     });
-    editorRef.current?.focus({ preventScroll: true });
+    communityActions.deletePost(post!.id);
   }
 
   function onDraftChange(value: string) {
@@ -187,15 +194,59 @@ export function CommunityPostPage() {
               >
                 ▲ 추천 {upvoteCount(activity, post.id, post.upvotes)}
               </button>
-              <button
-                type="button"
-                className="button"
-                onClick={() => requireLogin(focusEditor)}
-              >
-                답변 작성
-              </button>
+              {isMine ? (
+                <button
+                  type="button"
+                  className="button button-danger-outline"
+                  onClick={deleteMyPost}
+                >
+                  글 삭제
+                </button>
+              ) : null}
             </div>
           </article>
+
+          <form
+            className="post-card answer-editor"
+            onSubmit={submit}
+            noValidate
+          >
+            <h2 className="post-section-title">답변 작성</h2>
+            <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
+            {session ? (
+              <>
+                <textarea
+                  ref={editorRef}
+                  rows={6}
+                  aria-label="답변 내용"
+                  aria-invalid={Boolean(error)}
+                  placeholder="답변을 입력하세요."
+                  value={draft}
+                  onChange={(event) => onDraftChange(event.target.value)}
+                />
+                {error ? (
+                  <p className="error-message" role="alert">
+                    {error}
+                  </p>
+                ) : null}
+                <div className="answer-footer">
+                  <span className="muted">
+                    등록 전까지 작성 내용을 유지합니다.
+                  </span>
+                  <button className="button" disabled={pending}>
+                    {pending ? "등록 중…" : "답변 등록"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p className="login-prompt">
+                답변을 남기려면 로그인해 주세요.{" "}
+                <Link to="/auth" state={{ from: `/community/${id}` }}>
+                  로그인하기
+                </Link>
+              </p>
+            )}
+          </form>
 
           <section className="post-card answers-card" aria-label="답변">
             <h2 className="post-section-title">
@@ -274,51 +325,6 @@ export function CommunityPostPage() {
               </p>
             )}
           </section>
-
-          {
-            <form
-              className="post-card answer-editor"
-              onSubmit={submit}
-              noValidate
-              ref={editorFormRef}
-            >
-              <h2 className="post-section-title">답변 작성</h2>
-              <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
-              {session ? (
-                <>
-                  <textarea
-                    ref={editorRef}
-                    rows={6}
-                    aria-label="답변 내용"
-                    aria-invalid={Boolean(error)}
-                    placeholder="답변을 입력하세요."
-                    value={draft}
-                    onChange={(event) => onDraftChange(event.target.value)}
-                  />
-                  {error ? (
-                    <p className="error-message" role="alert">
-                      {error}
-                    </p>
-                  ) : null}
-                  <div className="answer-footer">
-                    <span className="muted">
-                      등록 전까지 작성 내용을 유지합니다.
-                    </span>
-                    <button className="button" disabled={pending}>
-                      {pending ? "등록 중…" : "답변 등록"}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <p className="login-prompt">
-                  답변을 남기려면 로그인해 주세요.{" "}
-                  <Link to="/auth" state={{ from: `/community/${id}` }}>
-                    로그인하기
-                  </Link>
-                </p>
-              )}
-            </form>
-          }
         </div>
 
         <aside className="post-side">
