@@ -256,7 +256,6 @@ export function ProblemsPage() {
               value={queryText}
               onChange={(event) => setQueryText(event.target.value)}
             />
-            <kbd aria-hidden="true">/</kbd>
           </div>
           <Select
             ariaLabel="정렬"

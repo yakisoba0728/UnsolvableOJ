@@ -1344,7 +1344,7 @@ textarea {
 }
 .solve-grid {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);
   gap: 16px;
   align-items: stretch;
   height: calc(100vh - 176px);
@@ -1724,18 +1724,7 @@ button.heat-cell.selected {
   flex: 1;
 }
 .search-field .search-input {
-  padding-right: 44px;
-}
-.search-field kbd {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-.search-field .search-input:focus + kbd,
-.search-field .search-input:not(:placeholder-shown) + kbd {
-  display: none;
+  padding-right: 14px;
 }
 .standing-card dl {
   display: grid;
@@ -5881,7 +5870,7 @@ h3 {
   --cols: minmax(0, 1fr) 176px 112px 148px 168px 16px;
 }
 .data-list.list-posts {
-  --cols: 96px minmax(0, 1fr) 72px 80px 16px;
+  --cols: 96px minmax(0, 1fr) 72px 80px;
 }
 .data-list .problem-head,
 .data-list .history-head,
@@ -6364,4 +6353,41 @@ h3 {
   color: #9fb0c8;
   font-size: 11px;
   white-space: nowrap;
+}
+
+/* 난이도·풀이 상태: 알약 대신 색을 입힌 일반 텍스트 */
+.difficulty,
+.solve-badge,
+.data-list .solve-badge,
+.data-list .difficulty,
+.data-list .problem-row .solve-badge,
+.data-list .problem-row .difficulty {
+  display: inline;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  justify-self: start;
+}
+.solve-badge {
+  color: var(--color-ink-600);
+}
+.solve-solved {
+  color: var(--color-success);
+}
+.solve-attempted {
+  color: var(--color-primary);
+}
+.difficulty-expert {
+  background: none;
+}
+@media (max-width: 880px) {
+  .data-list.list-posts .post-row {
+    padding-right: 16px;
+  }
 }

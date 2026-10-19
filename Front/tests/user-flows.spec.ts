@@ -833,7 +833,7 @@ test.describe("code editor basics on the solve page", () => {
     await expect(page.getByLabel("소스 코드")).toHaveValue(starter);
   });
 
-  test("typing a quoted string and blank lines preserves valid source", async ({
+  test("typing a quoted string works and Enter on a blank line adds no indentation", async ({
     page,
   }) => {
     await authenticate(page);
@@ -844,7 +844,7 @@ test.describe("code editor basics on the solve page", () => {
     await expect(editor).toHaveValue('"hello"');
     await editor.fill("    ");
     await editor.press("Enter");
-    await expect(editor).toHaveValue("    \n    ");
+    await expect(editor).toHaveValue("    \n");
   });
 
   test("moving the caret dismisses suggestions from the previous word", async ({

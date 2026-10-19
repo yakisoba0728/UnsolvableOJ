@@ -220,7 +220,6 @@ export function CommunityPage() {
               value={queryText}
               onChange={(event) => setQueryText(event.target.value)}
             />
-            <kbd aria-hidden="true">/</kbd>
           </div>
           <Select
             ariaLabel="정렬"
@@ -296,7 +295,6 @@ export function CommunityPage() {
                 <span>제목</span>
                 <span>추천</span>
                 <span>조회</span>
-                <span />
               </li>
               {visible.map((post) => {
                 const count = answerCount(post);
@@ -351,9 +349,6 @@ export function CommunityPage() {
                         aria-label={`조회 ${post.views.toLocaleString()}`}
                       >
                         {post.views.toLocaleString()}
-                      </span>
-                      <span className="row-arrow" aria-hidden="true">
-                        ›
                       </span>
                     </Link>
                   </li>
