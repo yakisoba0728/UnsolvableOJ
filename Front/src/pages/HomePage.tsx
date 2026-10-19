@@ -76,9 +76,9 @@ export function HomePage() {
         description="어제의 고민을 오늘의 실력으로 이어가세요."
       />
 
-      {error || rankError ? (
+      {error || rankError || history.error ? (
         <p className="error-message" role="alert">
-          {error || rankError}
+          {error || rankError || history.error}
         </p>
       ) : null}
 

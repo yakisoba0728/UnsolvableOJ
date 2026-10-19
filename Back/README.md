@@ -57,7 +57,7 @@ Node.js 24 이상과 Docker가 필요합니다.
 
 ```bash
 # 저장소 루트
-docker compose up -d
+docker compose up -d postgres redis
 cp Back/.env.example Back/.env
 
 cd Back

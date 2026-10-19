@@ -330,9 +330,9 @@ export function ProblemsPage() {
         </div>
       </div>
 
-      {error ? (
+      {error || history.error ? (
         <p className="error-message" role="alert">
-          {error}
+          {error || history.error}
         </p>
       ) : null}
 

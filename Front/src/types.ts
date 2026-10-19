@@ -50,7 +50,13 @@ export interface Submission {
   totalTestCases: number;
   compileOutput: string | null;
   judgeMessage: string | null;
+  problemVersion?: number;
   sourceCode?: string;
+  sampleTestCases?: {
+    testCase: number;
+    input: string;
+    expectedOutput: string;
+  }[];
   debugOutputs?: {
     testCase: number;
     stdout: string;

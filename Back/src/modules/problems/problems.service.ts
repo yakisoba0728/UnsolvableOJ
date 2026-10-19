@@ -172,7 +172,7 @@ export class ProblemsService {
         currentVersion: true,
         createdAt: true,
       },
-      order: { createdAt: 'DESC' },
+      order: { createdAt: 'DESC', id: 'DESC' },
       skip: (query.page - 1) * query.limit,
       take: query.limit,
     });

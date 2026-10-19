@@ -3,7 +3,11 @@
  * 이 파일은 데모 모듈이 있는 배포용 저장소에서만 쓰이는 `src/demo/mockApi.ts`를 불러온다.
  */
 const demoModules = import.meta.glob<{
-  mockApi: <T>(path: string, options: RequestInit, token?: string) => Promise<T>;
+  mockApi: <T>(
+    path: string,
+    options: RequestInit,
+    token?: string,
+  ) => Promise<T>;
   demoAccount: { email: string; password: string };
 }>("./demo/mockApi.ts", { eager: true });
 const demoModule = Object.values(demoModules)[0];
@@ -19,6 +23,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    public retryAfterMs?: number,
   ) {
     super(message);
   }
@@ -47,11 +52,19 @@ export async function api<T>(
     );
   if (!response.ok) {
     const detail = data?.message;
+    const retryAfter = response.headers.get("Retry-After");
+    const seconds = retryAfter === null ? NaN : Number(retryAfter);
+    const retryAfterMs = Number.isFinite(seconds)
+      ? Math.max(0, seconds * 1000)
+      : retryAfter && Number.isFinite(Date.parse(retryAfter))
+        ? Math.max(0, Date.parse(retryAfter) - Date.now())
+        : undefined;
     throw new ApiError(
       response.status,
       Array.isArray(detail)
         ? detail.join(", ")
         : (detail ?? `요청에 실패했습니다 (${response.status}).`),
+      retryAfterMs,
     );
   }
   return data as T;

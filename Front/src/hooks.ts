@@ -1,35 +1,14 @@
 import { useEffect, useState, type RefObject } from "react";
 import { api } from "./api";
+import { fetchAll } from "./pagination";
+export { fetchAll } from "./pagination";
 import type {
-  Page,
   ProblemSummary,
   RankingEntry,
   Session,
   Submission,
   UserProfile,
 } from "./types";
-
-const PAGE_LIMIT = 100;
-const MAX_PAGES = 5;
-
-export async function fetchAll<T>(
-  path: string,
-  signal: AbortSignal,
-  token?: string,
-): Promise<T[]> {
-  const items: T[] = [];
-  for (let page = 1; page <= MAX_PAGES; page += 1) {
-    const separator = path.includes("?") ? "&" : "?";
-    const data = await api<Page<T>>(
-      `${path}${separator}page=${page}&limit=${PAGE_LIMIT}`,
-      { signal },
-      token,
-    );
-    items.push(...data.items);
-    if (page >= data.totalPages) break;
-  }
-  return items;
-}
 
 /** 공개 문제 전체. 서버에 검색 API가 없어 목록·검색·필터를 클라이언트에서 처리한다. */
 export function useAllProblems() {
@@ -64,19 +43,28 @@ export function useAllProblems() {
 export function useSubmissionHistory(session: Session | null) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(Boolean(session));
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!session) {
       setSubmissions([]);
       setLoading(false);
+      setError("");
       return;
     }
     const controller = new AbortController();
     setLoading(true);
+    setSubmissions([]);
+    setError("");
     fetchAll<Submission>("/submissions", controller.signal, session.accessToken)
       .then(setSubmissions)
-      .catch(() => {
-        if (!controller.signal.aborted) setSubmissions([]);
+      .catch((cause) => {
+        if (!controller.signal.aborted)
+          setError(
+            cause instanceof Error
+              ? cause.message
+              : "제출 기록을 불러오지 못했습니다.",
+          );
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -96,6 +84,7 @@ export function useSubmissionHistory(session: Session | null) {
     attempted,
     latest: submissions[0] ?? null,
     loading,
+    error,
   };
 }
 

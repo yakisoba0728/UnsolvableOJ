@@ -14,7 +14,7 @@ Node.js 24 이상, Python 3, Docker가 필요합니다. 아래 명령은 각각 
 
 ```bash
 # 1. PostgreSQL과 Redis
-docker compose up -d
+docker compose up -d postgres redis
 
 # 2. API
 cp Back/.env.example Back/.env
@@ -44,7 +44,7 @@ cp Judge/.env.example Judge/.env
 
 문제 생성, 제출, 채점 결과 확인까지의 기본 흐름을 제공합니다. 작성자는 초안을 저장하고 관리자는 즉시 게시할 수 있습니다. 채점기는 C, C++, Java, Python, JavaScript, TypeScript, Go, Rust를 실행합니다.
 
-백엔드에는 문제 수정·검수·버전 보존, 재채점·큐 복구, 첫 정답 XP·레벨·랭킹, 관리자 역할 변경·감사 로그·운영 조회가 구현되어 있습니다. 이 기능들의 전용 관리 화면과 커뮤니티는 아직 없습니다. API·권한·제한을 포함한 전체 목록은 [백엔드 기능 목록](./Back/FEATURES.md)을 참고하세요.
+백엔드에는 문제 수정·검수·버전 보존, 재채점·큐 복구, 첫 정답 XP·레벨·랭킹, 관리자 역할 변경·감사 로그·운영 조회가 구현되어 있습니다. 웹에는 문제 관리·수정·공개 전환, 홈 랭킹과 학습 기록 화면이 있으며, 커뮤니티는 브라우저 localStorage에만 저장됩니다. 재채점과 관리자 운영의 전용 화면은 아직 없습니다. API·권한·제한을 포함한 전체 목록은 [백엔드 기능 목록](./Back/FEATURES.md)을 참고하세요.
 
 ```bash
 (cd Back && npm run check)

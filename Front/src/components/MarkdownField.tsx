@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Markdown from "react-markdown";
+import { ProblemMarkdown } from "./ProblemMarkdown";
 
 interface MarkdownFieldProps {
   /** 폼 안에서 칸을 찾아가기 위한 id (오류·체크리스트 이동에 쓴다) */
@@ -46,11 +46,7 @@ export function MarkdownField({
             </span>
           ) : null}
         </div>
-        <div
-          className="md-tabs"
-          role="tablist"
-          aria-label="작성·미리보기 전환"
-        >
+        <div className="md-tabs" role="tablist" aria-label="작성·미리보기 전환">
           <button
             type="button"
             role="tab"
@@ -87,7 +83,7 @@ export function MarkdownField({
       ) : (
         <div className="md-preview markdown" style={{ minHeight }}>
           {value.trim() ? (
-            <Markdown>{value}</Markdown>
+            <ProblemMarkdown>{value}</ProblemMarkdown>
           ) : (
             <p className="muted">
               미리볼 내용이 없어요. 작성 탭에서 입력해 보세요.

@@ -663,6 +663,9 @@ test("a rejected submission shows each public case with input, expected and actu
         compileOutput: null,
         judgeMessage: null,
         sourceCode: "print(0)",
+        sampleTestCases: [
+          { testCase: 1, input: "1 2\n", expectedOutput: "3\n" },
+        ],
         debugOutputs: [
           {
             testCase: 1,

@@ -11,16 +11,10 @@ import {
   useDocumentTitle,
   useSubmissionHistory,
 } from "../hooks";
-import type { Problem, Submission } from "../types";
+import type { Submission } from "../types";
 
-/** 줄 끝 공백과 마지막 빈 줄 차이는 같은 출력으로 본다 */
-const normalizeOutput = (text: string) =>
-  text
-    .replace(/\r\n/g, "\n")
-    .split("\n")
-    .map((line) => line.trimEnd())
-    .join("\n")
-    .trimEnd();
+/** Match the runner's bytes.rstrip(): only trailing ASCII whitespace is ignored. */
+const normalizeOutput = (text: string) => text.replace(/[\t\n\v\f\r ]+$/, "");
 
 function IoBlock({
   label,
@@ -52,7 +46,6 @@ export function SubmissionPage() {
       : "채점 결과",
   );
   const [error, setError] = useState("");
-  const [samples, setSamples] = useState<Problem["samples"]>([]);
   const history = useSubmissionHistory(session);
 
   useEffect(() => {
@@ -89,20 +82,6 @@ export function SubmissionPage() {
       if (timer) clearTimeout(timer);
     };
   }, [id, session]);
-
-  // 공개 예제의 입력·기대 출력은 문제 정보에서 가져와 내 출력과 나란히 보여 준다.
-  const problemSlug = submission?.problem.slug;
-  const hasDebug = Boolean(submission?.debugOutputs?.length);
-  useEffect(() => {
-    if (!problemSlug || !hasDebug) return;
-    let cancelled = false;
-    api<Problem>(`/problems/by-slug/${problemSlug}`)
-      .then((problem) => !cancelled && setSamples(problem.samples ?? []))
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [problemSlug, hasDebug]);
 
   if (error)
     return (
@@ -195,17 +174,20 @@ export function SubmissionPage() {
         <section className="source-section case-results">
           <h2>케이스별 입력과 출력</h2>
           <p className="muted">
-            공개 예제의 입력과 내 코드의 출력을 보여 드려요. 비공개 테스트의
-            입력과 출력은 표시하지 않습니다.
+            제출 당시 문제 버전의 공개 예제와 내 코드의 출력을 보여 드려요.
+            비공개 테스트의 입력과 출력은 표시하지 않습니다.
           </p>
           {[...submission.debugOutputs]
             .sort((left, right) => left.testCase - right.testCase)
             .map((output, index) => {
-              const sample = samples[index];
-              const same = sample
-                ? normalizeOutput(output.stdout) ===
-                  normalizeOutput(sample.expectedOutput)
-                : null;
+              const sample = submission.sampleTestCases?.find(
+                (item) => item.testCase === output.testCase,
+              );
+              const same =
+                sample && !output.stdoutTruncated
+                  ? normalizeOutput(output.stdout) ===
+                    normalizeOutput(sample.expectedOutput)
+                  : null;
               return (
                 <div className="case-result" key={output.testCase}>
                   <div className="case-result-head">

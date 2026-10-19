@@ -259,7 +259,9 @@ export function ProblemPage() {
                 <section>
                   <h2>입력</h2>
                   <div className="markdown">
-                    <ProblemMarkdown>{problem.inputDescriptionMarkdown}</ProblemMarkdown>
+                    <ProblemMarkdown>
+                      {problem.inputDescriptionMarkdown}
+                    </ProblemMarkdown>
                   </div>
                 </section>
               ) : null}
@@ -267,7 +269,9 @@ export function ProblemPage() {
                 <section>
                   <h2>출력</h2>
                   <div className="markdown">
-                    <ProblemMarkdown>{problem.outputDescriptionMarkdown}</ProblemMarkdown>
+                    <ProblemMarkdown>
+                      {problem.outputDescriptionMarkdown}
+                    </ProblemMarkdown>
                   </div>
                 </section>
               ) : null}
@@ -332,7 +336,10 @@ export function ProblemPage() {
               className="language-select"
               ariaLabel="언어"
               value={language}
-              options={languages.map((item) => ({ value: item.value, label: item.label }))}
+              options={languages.map((item) => ({
+                value: item.value,
+                label: item.label,
+              }))}
               onChange={(next) => setLanguage(next as Language)}
             />
             <span className="save-state" role="status">
@@ -372,7 +379,10 @@ export function ProblemPage() {
                 onChange={(event) => setSource(event.target.value)}
                 onKeyDown={(event) => {
                   // Ctrl/⌘ + Enter 로 바로 제출 (LeetCode·HackerRank 방식)
-                  if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+                  if (
+                    event.key === "Enter" &&
+                    (event.metaKey || event.ctrlKey)
+                  ) {
                     event.preventDefault();
                     event.currentTarget.form?.requestSubmit();
                     return;
@@ -422,8 +432,8 @@ export function ProblemPage() {
               ) : (
                 <>
                   <span className="editor-note">
-                    코드를 제출하려면 로그인해 주세요. 작성 중인 코드는
-                    이 브라우저에 저장됩니다.
+                    코드를 제출하려면 로그인해 주세요. 작성 중인 코드는 이
+                    브라우저에 저장됩니다.
                   </span>
                   <Link
                     className="button"

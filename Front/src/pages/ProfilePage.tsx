@@ -76,7 +76,7 @@ export function ProfilePage() {
   );
   const [selected, setSelected] = useState(dayKey(new Date()));
   const history = useSubmissionHistory(session);
-  const { problems } = useAllProblems();
+  const { problems, error: problemsError } = useAllProblems();
   // 넓은 화면에서는 폭을 채우도록 주 수를 늘리고, 좁은 화면에서는 가로 스크롤이 생기지 않게 줄인다.
   const [weeks, setWeeks] = useState(() =>
     window.matchMedia("(max-width: 650px)").matches ? WEEKS_NARROW : WEEKS_WIDE,
@@ -193,9 +193,9 @@ export function ProfilePage() {
         title="내 학습 기록"
         description="쌓아 온 실력과 꾸준함을 한눈에 확인하세요."
       />
-      {error ? (
+      {error || history.error || problemsError ? (
         <p className="error-message" role="alert">
-          {error}
+          {error || history.error || problemsError}
         </p>
       ) : null}
 
