@@ -58,6 +58,6 @@ cp Judge/.env.example Judge/.env
 
 ## 지속적 통합
 
-GitHub Actions의 전용 self-hosted 러너에서 Node 24 기반 lint·타입 검사·빌드,
+GitHub Actions의 GitHub 제공 `ubuntu-24.04` 러너에서 Node 24 기반 lint·타입 검사·빌드,
 백엔드/채점기 단위 테스트와 DB/API 통합 테스트를 실행합니다.
 검사 범위와 러너 운영·로컬 재현 방법은 [CI 운영 문서](.github/CI.md)를 참고하세요.
