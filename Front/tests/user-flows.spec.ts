@@ -763,6 +763,59 @@ test("the write page shows field problems while typing like sign-up, has a tall 
   await expect(body).toHaveValue(/const a = 1;/);
 });
 
+test("underscores stay literal in the preview and in the posted text, while *emphasis* and code still render", async ({
+  page,
+}) => {
+  await authenticate(page);
+  const text =
+    "`__init__`는 코드, __init__ 과 _private 와 _x_ 는 글자 그대로, my_var_name 도 그대로, *기울임* 과 **굵게** 는 그대로 동작";
+  await page.addInitScript(
+    (value) => {
+      localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
+    },
+    {
+      posts: [
+        {
+          id: "u-1",
+          category: "question",
+          title: "밑줄 글",
+          body: text,
+          author: { name: "other", tier: "Bronze I" },
+          tags: [],
+          createdAt: "2026-10-03T00:00:00Z",
+          views: 1,
+          upvotes: 0,
+        },
+      ],
+      answers: [],
+      upvoted: [],
+      saved: [],
+      followed: [],
+      accepted: {},
+      deleted: [],
+    },
+  );
+  const expectLiteral = async (root: ReturnType<Page["locator"]>) => {
+    await expect(root).toContainText(
+      "__init__ 과 _private 와 _x_ 는 글자 그대로",
+    );
+    await expect(root).toContainText("my_var_name 도 그대로");
+    await expect(root.locator("code")).toHaveText("__init__");
+    await expect(root.locator("em")).toHaveText("기울임");
+    await expect(root.locator("strong")).toHaveText("굵게");
+  };
+
+  // 실제 글
+  await page.goto("/community/u-1");
+  await expectLiteral(page.locator(".post-body"));
+
+  // 글 작성 미리보기도 같다
+  await page.goto("/community/new");
+  await page.locator("#body-input").fill(text);
+  await page.getByRole("tab", { name: "미리보기" }).click();
+  await expectLiteral(page.locator(".write-body-preview .markdown"));
+});
+
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
   page,
 }) => {
