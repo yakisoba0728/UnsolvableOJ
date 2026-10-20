@@ -6766,16 +6766,14 @@ h3 {
   flex: none;
   height: 22px;
 }
-/* 팔로잉 알약: 작성자 이름과 같은 줄·같은 높이 */
-.data-list .post-meta {
-  display: flex;
+/* 팔로잉 알약: 작성자 이름 바로 옆(간격 4px), 같은 높이 */
+.post-author {
+  display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0 4px;
+  gap: 4px;
 }
-.data-list .post-meta .post-follow-badge {
-  margin-left: 2px;
-  vertical-align: baseline;
+.post-author .post-follow-badge {
+  margin-left: 0;
 }
 @media (max-width: 880px) {
   /* 좁은 화면에는 열 머리글이 없으니 수치 앞에 이름을 붙인다 */

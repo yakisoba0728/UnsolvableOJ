@@ -339,15 +339,17 @@ export function CommunityPage() {
                           ) : null}
                         </span>
                         <span className="post-meta">
-                          {post.author.name}
-                          {activity.followed.includes(post.author.name) ? (
-                            <span
-                              className="post-follow-badge"
-                              title="내가 팔로우한 사람이 쓴 글이에요"
-                            >
-                              팔로잉
-                            </span>
-                          ) : null}{" "}
+                          <span className="post-author">
+                            {post.author.name}
+                            {activity.followed.includes(post.author.name) ? (
+                              <span
+                                className="post-follow-badge"
+                                title="내가 팔로우한 사람이 쓴 글이에요"
+                              >
+                                팔로잉
+                              </span>
+                            ) : null}
+                          </span>{" "}
                           · {relativeTime(post.createdAt)}
                           {post.pinned ? " · 고정" : ""}
                         </span>
