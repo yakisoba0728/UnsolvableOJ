@@ -689,6 +689,10 @@ test("the write page puts tags and a narrow category on one row and the save hin
   await authenticate(page);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/community/new");
+  // 글꼴이 다 불러와져 줄 높이가 안정된 뒤에 위치를 잰다(전체 테스트를 함께 돌릴 때 간헐적으로 어긋나던 것을 막는다).
+  await page.evaluate(() => document.fonts.ready);
+  await expect(page.locator(".tag-input")).toBeVisible();
+  await expect(page.locator(".field-category .select-button")).toBeVisible();
   const box = async (selector: string) =>
     (await page.locator(selector).first().boundingBox())!;
   const tag = await box(".tag-input");
@@ -764,6 +768,54 @@ test("the write page shows field problems while typing like sign-up, has a tall 
   await expect(preview.locator("pre code")).toContainText("const a = 1;");
   await page.getByRole("tab", { name: "작성" }).click();
   await expect(body).toHaveValue(/const a = 1;/);
+});
+
+test("the home problem slider stays inside the page container and fades only on the side that has more cards", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.setViewportSize({ width: 1440, height: 1400 });
+  await page.route(/\/api\/v1\/problems(\?.*)?$/, (route) =>
+    route.fulfill({
+      json: {
+        items: Array.from({ length: 12 }, (_, index) => ({
+          ...problem,
+          id: `p-${index}`,
+          slug: `p-${index}`,
+          title: `문제 ${index + 1}`,
+        })),
+        page: 1,
+        limit: 100,
+        total: 12,
+        totalPages: 1,
+      },
+    }),
+  );
+  await page.goto("/");
+  const area = page.locator(".slider-area");
+  const track = page.locator(".slider-track");
+  await expect(track.locator(".problem-card").first()).toBeVisible();
+
+  // 트랙은 화면 끝까지 퍼지지 않고, 위·아래 카드와 같은 컨테이너 폭에 머문다.
+  const areaBox = (await area.boundingBox())!;
+  const trackBox = (await track.boundingBox())!;
+  expect(Math.abs(trackBox.x - areaBox.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(trackBox.width - areaBox.width)).toBeLessThanOrEqual(1);
+  expect(trackBox.width).toBeLessThan(1440 - 100);
+
+  // 처음에는 오른쪽만(더 볼 카드가 있는 쪽), 중간에서는 양쪽, 끝에서는 왼쪽만 흐려진다.
+  await expect(area).toHaveClass(/can-forward/);
+  await expect(area).not.toHaveClass(/can-back/);
+  await track.evaluate((el) => {
+    el.scrollLeft = el.scrollWidth / 3;
+  });
+  await expect(area).toHaveClass(/can-back/);
+  await expect(area).toHaveClass(/can-forward/);
+  await track.evaluate((el) => {
+    el.scrollLeft = el.scrollWidth;
+  });
+  await expect(area).toHaveClass(/can-back/);
+  await expect(area).not.toHaveClass(/can-forward/);
 });
 
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({

@@ -2843,21 +2843,55 @@ input,
 .slider-area {
   position: relative;
 }
-/* 트랙은 컨테이너 양쪽 여백을 지나 화면 끝까지 확장된다(좌우 대칭).
-   처음에는 첫 카드가 컨테이너 왼쪽 선에, 끝에서는 마지막 카드가 오른쪽 선에 맞는다. */
+/* 트랙은 컨테이너(위·아래 카드와 같은 폭) 안에서만 보인다.
+   스크롤된 쪽 가장자리에서는 카드가 점점 흐려지다가 컨테이너 경계에서 완전히 사라진다. */
+@property --slider-fade-left {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+@property --slider-fade-right {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+.slider-area {
+  --slider-fade-size: 72px;
+  --slider-fade-left: 0px;
+  --slider-fade-right: 0px;
+  transition:
+    --slider-fade-left 0.2s,
+    --slider-fade-right 0.2s;
+}
+.slider-area.can-back {
+  --slider-fade-left: var(--slider-fade-size);
+}
+.slider-area.can-forward {
+  --slider-fade-right: var(--slider-fade-size);
+}
 .slider-track {
   display: flex;
   gap: 16px;
-  margin-left: calc((100% - 100vw) / 2);
-  margin-right: calc((100% - 100vw) / 2);
-  padding: 2px calc((100vw - 100%) / 2) 4px calc((100vw - 100%) / 2 + 2px);
+  padding: 2px 2px 4px;
   overflow-x: auto;
   scroll-snap-type: x proximity;
-  /* 왼쪽 패딩과 같은 값: 시작 위치가 scrollLeft 0이 되게.
-     scroll-padding의 %는 트랙 전체 폭 기준이라, 컨테이너 폭(.page-width와 같은 식)을 직접 빼서 여백을 구한다 */
-  scroll-padding-left: calc((100% - min(1180px, 100% - 48px)) / 2 + 2px);
+  scroll-padding-left: 2px;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--slider-fade-left),
+    #000 calc(100% - var(--slider-fade-right)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--slider-fade-left),
+    #000 calc(100% - var(--slider-fade-right)),
+    transparent 100%
+  );
 }
 .slider-track::-webkit-scrollbar {
   display: none;
@@ -2887,29 +2921,26 @@ input,
 .problem-card-more:hover .more-arrow {
   background: var(--color-primary-solid-hover);
 }
-/* 가장자리 블러: 좌우 모두 컨테이너 바깥 여백까지 같은 폭으로 대칭 */
+/* 가장자리 블러: 컨테이너 경계 쪽으로 갈수록 강해진다(카드는 위 마스크로 같은 폭에서 투명해진다) */
 .slider-fade {
   position: absolute;
   top: 0;
   bottom: 0;
+  width: var(--slider-fade-size);
   pointer-events: none;
   transition: opacity 0.2s;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-}
-.slider-fade.right {
-  right: calc((100% - 100vw) / 2);
-  width: calc((100vw - 100%) / 2 + 64px);
-  background: linear-gradient(to right, transparent, var(--color-bg) 80%);
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 55%);
-  mask-image: linear-gradient(to right, transparent, #000 55%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .slider-fade.left {
-  left: calc((100% - 100vw) / 2);
-  width: calc((100vw - 100%) / 2 + 64px);
-  background: linear-gradient(to left, transparent, var(--color-bg) 80%);
-  -webkit-mask-image: linear-gradient(to left, transparent, #000 55%);
-  mask-image: linear-gradient(to left, transparent, #000 55%);
+  left: 0;
+  -webkit-mask-image: linear-gradient(to right, #000, transparent);
+  mask-image: linear-gradient(to right, #000, transparent);
+}
+.slider-fade.right {
+  right: 0;
+  -webkit-mask-image: linear-gradient(to left, #000, transparent);
+  mask-image: linear-gradient(to left, #000, transparent);
 }
 .slider-fade.hidden {
   opacity: 0;
@@ -2924,6 +2955,7 @@ input,
 }
 @media (prefers-reduced-motion: reduce) {
   .slider-fade,
+  .slider-area,
   .arrow-button {
     transition: none;
   }
