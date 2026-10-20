@@ -67,7 +67,7 @@ const statusChips: { value: "" | SolveState; label: string }[] = [
 ];
 
 /**
- * 목록 조건(검색어·난이도·상태·즐겨찾기·정렬·페이지)은 모두 URL에 저장한다.
+ * 목록 조건(검색어·난이도·상태·정렬·순서 뒤집기·페이지)은 모두 URL에 저장한다.
  * 문제를 열었다가 뒤로 가도 같은 목록이 복원되고, 주소를 공유할 수 있다. (LeetCode, solved.ac 방식)
  */
 export function ProblemsPage() {

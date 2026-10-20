@@ -2762,7 +2762,7 @@ input,
   }
 }
 
-/* B6. 문제 목록 머리글: 진행률은 제목 줄 오른쪽으로 */
+/* 머리글 오른쪽 영역의 푼 문제 요약(.solved-summary) — 지금은 쓰는 화면이 없다 */
 .page-header-aside .solved-summary {
   margin: 0;
   min-width: 240px;
@@ -2990,7 +2990,7 @@ h3 {
   font-weight: var(--weight-title);
 }
 
-/* ===== 목록: 즐겨찾기 별 · 상태 칩 · URL 상태 ===== */
+/* ===== 문제 목록: 행 묶음(.problem-row-wrap) · 필터 줄 안의 작은 버튼 ===== */
 .problem-row-wrap {
   position: relative;
 }
@@ -3132,7 +3132,7 @@ h3 {
   }
 }
 
-/* ===== 문제 목록: 머리글 이어서 풀기 버튼, 비로그인 소개 카드 ===== */
+/* ===== 문제 목록: 비로그인 소개 카드(.brand-card). 머리글 버튼 영역(.header-actions)은 지금 쓰지 않는다 ===== */
 .header-actions {
   display: flex;
   align-items: center;
@@ -5732,8 +5732,9 @@ h3 {
 }
 
 /* ===== 목록 통일 규격: 문제 목록 · 커뮤니티 글 목록 · 내 제출 =====
-   한 카드 안의 표: 머리글 44 · 행 72 · 안쪽 여백 24 · 칸 간격 16 · 모두 왼쪽 정렬 ·
-   제목 16/700 · 보조 13 · 배지는 높이 28의 알약 · 끝에 › 표시(문제 목록은 제외) */
+   한 카드 안의 표: 머리글 44 · 행 72 · 안쪽 여백 24 · 칸 간격 16 · 왼쪽 정렬(문제 목록의
+   난이도·푼 사람·정답률 열은 오른쪽 정렬) · 제목 16/700 · 보조 13 · 배지는 높이 28의 알약 ·
+   끝에 › 표시(문제 목록은 제외) */
 .data-list {
   --cols: minmax(0, 1fr) 96px 96px 96px;
   list-style: none;
@@ -5891,7 +5892,7 @@ h3 {
   background: var(--color-surface);
   border: 1px solid var(--color-feature-border);
 }
-/* 숫자·제한 칸: 같은 글꼴, 왼쪽 정렬 */
+/* 숫자 칸(문제 목록의 푼 사람·정답률, 내 제출·글 목록의 수치): 같은 글꼴, 기본은 왼쪽 정렬 */
 .data-list .problem-limit,
 .data-list .history-lang,
 .data-list .history-metrics,
@@ -6063,7 +6064,7 @@ h3 {
   cursor: default;
 }
 
-/* 문제 목록: 정렬이 '무작위'일 때만 보이는 다시 섞기 아이콘 버튼(필터 줄 맨 오른쪽) — 다른 입력 칸과 같은 둥근 사각형 */
+/* 문제 목록 필터 줄 맨 오른쪽의 아이콘 버튼: 무작위일 때는 다시 섞기, 그 밖에는 순서 뒤집기 — 다른 입력 칸과 같은 둥근 사각형 */
 .filter-groups .shuffle-icon-button {
   display: inline-grid;
   place-items: center;
@@ -6559,7 +6560,7 @@ h3 {
   gap: 5px;
 }
 
-/* 추천·조회 수: 아이콘 + 숫자 */
+/* 커뮤니티 목록의 추천·조회 수 칸: 행은 아이콘 + 숫자, 머리글은 '추천'·'조회 수' 텍스트 */
 .data-list .post-num,
 .data-list .post-head span:nth-child(n + 3) {
   display: inline-flex;
