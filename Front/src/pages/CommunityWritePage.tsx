@@ -11,7 +11,7 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import { PostMarkdown } from "../components/PostMarkdown";
+import Markdown from "react-markdown";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
@@ -415,11 +415,11 @@ export function CommunityWritePage() {
                 onBlur={() => touch("body")}
               />
             ) : (
-              // 글 상세 화면과 같은 방식(.markdown.post-body, PostMarkdown)으로 그려서, 올렸을 때의 모습을 그대로 보여 준다.
+              // 글 상세 화면과 같은 방식(.markdown.post-body, react-markdown)으로 그려서, 올렸을 때의 모습을 그대로 보여 준다.
               <div className="md-preview write-body-preview">
                 {body.trim() ? (
                   <div className="markdown post-body">
-                    <PostMarkdown>{body}</PostMarkdown>
+                    <Markdown>{body}</Markdown>
                   </div>
                 ) : (
                   <p className="muted">

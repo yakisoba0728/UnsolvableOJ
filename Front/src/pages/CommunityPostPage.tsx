@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { PostMarkdown } from "../components/PostMarkdown";
+import Markdown from "react-markdown";
 import {
   ChevronDown,
   ChevronUp,
@@ -215,7 +215,7 @@ export function CommunityPostPage() {
             </div>
             <h1>{post.title}</h1>
             <div className="markdown post-body">
-              <PostMarkdown>{post.body}</PostMarkdown>
+              <Markdown>{post.body}</Markdown>
             </div>
             {post.tags.length ? (
               <ul className="post-tags" aria-label="태그">
@@ -251,10 +251,7 @@ export function CommunityPostPage() {
             </div>
           </article>
 
-          <section
-            className="post-card answer-write-card"
-            aria-label="답변 작성"
-          >
+          <section className="post-card answer-write-card" aria-label="답변 작성">
             <form className="answer-editor" onSubmit={submit} noValidate>
               <h3 className="answer-editor-title">답변 작성</h3>
               <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
@@ -361,7 +358,7 @@ export function CommunityPostPage() {
                         </span>
                       </div>
                       <div className="markdown answer-body">
-                        <PostMarkdown>{answer.body}</PostMarkdown>
+                        <Markdown>{answer.body}</Markdown>
                       </div>
                       <small className="muted">
                         {relativeTime(answer.createdAt)}
