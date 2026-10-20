@@ -43,48 +43,49 @@ const languages: { value: Language; label: string; starter: string }[] = [
     value: "PYTHON",
     label: "Python 3",
     starter:
-      'import sys\n\ndef solve():\n    data = sys.stdin.read().split()\n    # 여기에 코드를 작성하세요.\n\nif __name__ == "__main__":\n    solve()\n',
+      "def solution():\n    answer = 0\n    # 입력 예시: n = int(input())  /  a, b = map(int, input().split())\n    # 여기에 코드를 작성하세요.\n    return answer\n\n\nprint(solution())\n",
   },
   {
     value: "CPP",
     label: "C++ 20",
     starter:
-      "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    return 0;\n}\n",
+      '#include <iostream>\n#include <string>\n#include <vector>\nusing namespace std;\n\nint solution() {\n    int answer = 0;\n    // 입력 예시: int n; cin >> n;\n    // 여기에 코드를 작성하세요.\n    return answer;\n}\n\nint main() {\n    cout << solution() << "\\n";\n    return 0;\n}\n',
   },
   {
     value: "C",
     label: "C 17",
-    starter: "#include <stdio.h>\n\nint main(void) {\n    return 0;\n}\n",
+    starter:
+      '#include <stdio.h>\n\nint solution(void) {\n    int answer = 0;\n    // 입력 예시: int n; scanf("%d", &n);\n    // 여기에 코드를 작성하세요.\n    return answer;\n}\n\nint main(void) {\n    printf("%d\\n", solution());\n    return 0;\n}\n',
   },
   {
     value: "JAVA",
     label: "Java 21",
     starter:
-      "public class Main {\n    public static void main(String[] args) {\n    }\n}\n",
+      "import java.util.*;\n\npublic class Main {\n    static int solution(Scanner sc) {\n        int answer = 0;\n        // 입력 예시: int n = sc.nextInt();\n        // 여기에 코드를 작성하세요.\n        return answer;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        System.out.println(solution(sc));\n    }\n}\n",
   },
   {
     value: "JAVASCRIPT",
     label: "JavaScript",
     starter:
-      'const fs = require("fs");\nconst input = fs.readFileSync(0, "utf8").trim();\n',
+      'const lines = require("fs").readFileSync(0, "utf8").trim().split("\\n");\n\nfunction solution() {\n  let answer = 0;\n  // 입력 예시: const n = Number(lines[0]);\n  // 여기에 코드를 작성하세요.\n  return answer;\n}\n\nconsole.log(solution());\n',
   },
   {
     value: "TYPESCRIPT",
     label: "TypeScript",
     starter:
-      'import * as fs from "fs";\nconst input = fs.readFileSync(0, "utf8").trim();\n',
+      'import * as fs from "fs";\nconst lines: string[] = fs.readFileSync(0, "utf8").trim().split("\\n");\n\nfunction solution(): number {\n  let answer = 0;\n  // 입력 예시: const n = Number(lines[0]);\n  // 여기에 코드를 작성하세요.\n  return answer;\n}\n\nconsole.log(solution());\n',
   },
   {
     value: "GO",
     label: "Go",
     starter:
-      'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println()\n}\n',
+      'package main\n\nimport (\n    "bufio"\n    "fmt"\n    "os"\n)\n\nfunc solution(reader *bufio.Reader) int {\n    answer := 0\n    // 입력 예시: var n int; fmt.Fscan(reader, &n)\n    // 여기에 코드를 작성하세요.\n    return answer\n}\n\nfunc main() {\n    reader := bufio.NewReader(os.Stdin)\n    fmt.Println(solution(reader))\n}\n',
   },
   {
     value: "RUST",
     label: "Rust",
     starter:
-      "use std::io::{self, Read};\n\nfn main() {\n    let mut input = String::new();\n    io::stdin().read_to_string(&mut input).unwrap();\n}\n",
+      'use std::io::{self, Read};\n\nfn solution(input: &str) -> i64 {\n    let answer: i64 = 0;\n    // 입력 예시: let n: i64 = input.split_whitespace().next().unwrap().parse().unwrap();\n    // 여기에 코드를 작성하세요.  (값을 바꾸려면 answer를 mut로 선언하세요)\n    let _ = input;\n    answer\n}\n\nfn main() {\n    let mut input = String::new();\n    io::stdin().read_to_string(&mut input).unwrap();\n    println!("{}", solution(&input));\n}\n',
   },
 ];
 
@@ -353,7 +354,9 @@ export function ProblemPage() {
   // 코드 입력 칸이 최소한 남도록, 결과 패널은 코드 패널 높이에서 일정 부분을 뺀 만큼까지만 키운다.
   function clampPanelHeight(value: number) {
     const room = panelRef.current?.parentElement?.clientHeight ?? 800;
-    return Math.round(Math.min(Math.max(PANEL_MIN, room - 200), Math.max(PANEL_MIN, value)));
+    return Math.round(
+      Math.min(Math.max(PANEL_MIN, room - 200), Math.max(PANEL_MIN, value)),
+    );
   }
   function savePanelHeight(value: number) {
     try {
