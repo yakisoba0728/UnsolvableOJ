@@ -13,7 +13,7 @@ if (config['cgroupType'] not in (1, 2)
         or config['seccomp'] is not True or config['workDir'] != '/w'):
     raise SystemExit('seccomp and cpu/memory/pids cgroups required')
 swap_limit = Path('/sys/fs/cgroup/memory.swap.max')
-no_swap = (swap_limit.read_text().strip() == '0' if swap_limit.exists()
-           else len(Path('/proc/swaps').read_text().splitlines()) <= 1)
+no_swap = (len(Path('/proc/swaps').read_text().splitlines()) <= 1
+           or (swap_limit.exists() and swap_limit.read_text().strip() == '0'))
 if not no_swap:
     raise SystemExit('Swap must be disabled for the sandbox')

@@ -71,7 +71,9 @@ jobs:
           npx --no-install playwright install --with-deps chromium firefox webkit
           npm run test:e2e -- --project=chromium
       - name: Worker build and protocol regression tests
-        run: npm run check --prefix Judge
+        run: |
+          npm run check --prefix Judge
+          python3 -m unittest discover -s Judge/runtime -p 'test_*.py'
       - name: go-judge language and isolation regression tests
         env:
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
