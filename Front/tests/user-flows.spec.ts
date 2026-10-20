@@ -850,6 +850,60 @@ test("the collapsed menu opens as a full-width panel right under the header on n
   }
 });
 
+test("community list: the vote and view columns are right-aligned like the problem list", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.addInitScript(
+    (value) => {
+      localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
+    },
+    {
+      posts: [
+        {
+          id: "c-1",
+          category: "question",
+          title: "정렬 확인",
+          body: "본문",
+          author: { name: "other", tier: "Bronze I" },
+          tags: [],
+          createdAt: "2026-10-03T00:00:00Z",
+          views: 1234,
+          upvotes: 5,
+        },
+      ],
+      answers: [],
+      upvoted: [],
+      saved: [],
+      followed: [],
+      accepted: {},
+      deleted: [],
+    },
+  );
+  await page.goto("/community?q=%EC%A0%95%EB%A0%AC");
+  await expect(page.locator(".post-row")).toHaveCount(1);
+  // 글자(범위) 기준으로 목록 오른쪽 끝에서 얼마나 떨어졌는지 잰다.
+  const gap = (selector: string) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((element) => {
+        const list = document
+          .querySelector(".list-posts")!
+          .getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return Math.round(list.right - range.getBoundingClientRect().right);
+      });
+  // 마지막 열(조회 수)은 안쪽 여백(24px + 테두리 1px)에 닿고, 머리글과 값의 오른쪽 끝이 같다.
+  expect(await gap(".post-head span:last-child")).toBeLessThanOrEqual(26);
+  expect(await gap(".post-row .post-num-view")).toBeLessThanOrEqual(26);
+  // 추천 열도 머리글과 값의 오른쪽 끝이 같다(열 폭 72px 안에서 오른쪽에 붙는다).
+  const headVote = await gap(".post-head span:nth-child(3)");
+  const rowVote = await gap(".post-row .post-num-up");
+  expect(Math.abs(headVote - rowVote)).toBeLessThanOrEqual(2);
+});
+
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
   page,
 }) => {

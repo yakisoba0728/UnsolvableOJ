@@ -7207,3 +7207,19 @@ textarea {
 .markdown em {
   font-synthesis: style;
 }
+
+/* 커뮤니티 목록: 추천·조회 수 열을 문제 목록처럼 오른쪽 정렬해, 마지막 열이 목록 안쪽 여백에 닿게 한다 */
+.data-list.list-posts .post-head span:nth-child(n + 3),
+.data-list.list-posts .post-row .post-num {
+  justify-self: end;
+  justify-content: flex-end;
+  text-align: right;
+}
+@media (max-width: 880px) {
+  /* 좁은 화면은 카드형 배치라 왼쪽 정렬을 유지한다 */
+  .data-list.list-posts .post-row .post-num {
+    justify-self: auto;
+    justify-content: flex-start;
+    text-align: left;
+  }
+}
