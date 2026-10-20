@@ -93,6 +93,11 @@ type Tab = "statement" | "history";
 const fontKey = "unsolvable-oj-editor-font-v1";
 const FONT_MIN = 11;
 const FONT_MAX = 20;
+// 채점 결과 패널의 높이(px): 위쪽 손잡이를 끌거나 ↑↓ 키로 조절하고, 마지막 값을 기억한다.
+const panelHeightKey = "unsolvable-oj-judge-height-v1";
+const PANEL_MIN = 120;
+const PANEL_DEFAULT = 260;
+const PANEL_KEY_STEP = 24;
 
 function draftKey(problemId: string, language: Language) {
   return `unsolvable-oj-draft-v1:${problemId}:${language}`;
@@ -142,6 +147,15 @@ export function ProblemPage() {
   // 이 화면에서 채점 중이거나 방금 채점한 제출(결과는 코드 창 아래에 바로 보여 준다)
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(true);
+  const panelRef = useRef<HTMLElement>(null);
+  const [panelHeight, setPanelHeight] = useState(() => {
+    try {
+      const saved = Number(localStorage.getItem(panelHeightKey));
+      return saved >= PANEL_MIN ? saved : PANEL_DEFAULT;
+    } catch {
+      return PANEL_DEFAULT;
+    }
+  });
   const [tab, setTab] = useState<Tab>("statement");
   const [history, setHistory] = useState<Submission[] | null>(null);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
@@ -335,6 +349,53 @@ export function ProblemPage() {
 
   const selectedLanguage = languages.find((item) => item.value === language);
   const lineCount = source.split("\n").length;
+
+  // 코드 입력 칸이 최소한 남도록, 결과 패널은 코드 패널 높이에서 일정 부분을 뺀 만큼까지만 키운다.
+  function clampPanelHeight(value: number) {
+    const room = panelRef.current?.parentElement?.clientHeight ?? 800;
+    return Math.round(Math.min(Math.max(PANEL_MIN, room - 200), Math.max(PANEL_MIN, value)));
+  }
+  function savePanelHeight(value: number) {
+    try {
+      localStorage.setItem(panelHeightKey, String(value));
+    } catch {
+      /* 저장할 수 없어도 화면은 그대로 동작한다 */
+    }
+  }
+  function startPanelResize(event: React.PointerEvent<HTMLDivElement>) {
+    event.preventDefault();
+    const handle = event.currentTarget;
+    handle.setPointerCapture(event.pointerId);
+    const startY = event.clientY;
+    const startHeight = panelRef.current?.offsetHeight ?? panelHeight;
+    let latest = startHeight;
+    const move = (moveEvent: PointerEvent) => {
+      latest = clampPanelHeight(startHeight + (startY - moveEvent.clientY));
+      setPanelHeight(latest);
+    };
+    const end = () => {
+      handle.removeEventListener("pointermove", move);
+      handle.removeEventListener("pointerup", end);
+      handle.removeEventListener("pointercancel", end);
+      savePanelHeight(latest);
+    };
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener("pointerup", end);
+    handle.addEventListener("pointercancel", end);
+  }
+  function resizePanelByKey(event: React.KeyboardEvent<HTMLDivElement>) {
+    const delta =
+      event.key === "ArrowUp"
+        ? PANEL_KEY_STEP
+        : event.key === "ArrowDown"
+          ? -PANEL_KEY_STEP
+          : 0;
+    if (!delta) return;
+    event.preventDefault();
+    const next = clampPanelHeight(panelHeight + delta);
+    setPanelHeight(next);
+    savePanelHeight(next);
+  }
   function updateCursor(target: HTMLTextAreaElement) {
     setCursor(cursorPosition(target.value, target.selectionStart));
   }
@@ -875,7 +936,26 @@ export function ProblemPage() {
               ) : null}
             </div>
             {submissionId ? (
-              <section className="judge-panel" aria-label="채점 결과">
+              <section
+                ref={panelRef}
+                className="judge-panel"
+                aria-label="채점 결과"
+                style={panelOpen ? { height: panelHeight } : undefined}
+              >
+                {panelOpen ? (
+                  <div
+                    className="judge-resizer"
+                    role="separator"
+                    aria-orientation="horizontal"
+                    aria-label="채점 결과 높이 조절"
+                    aria-valuemin={PANEL_MIN}
+                    aria-valuenow={panelHeight}
+                    tabIndex={0}
+                    title="위아래로 끌어 높이를 조절해요 (↑↓ 키도 가능)"
+                    onPointerDown={startPanelResize}
+                    onKeyDown={resizePanelByKey}
+                  />
+                ) : null}
                 <div className="judge-panel-head">
                   <strong>채점 결과</strong>
                   {result ? (

@@ -505,6 +505,66 @@ test("submission passes the source and polls through to the final verdict", asyn
   expect(reads).toBe(3);
 });
 
+test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
+  page,
+}) => {
+  await authenticate(page);
+  const submitted = {
+    id: "submission-id",
+    problem,
+    language: "PYTHON",
+    status: "ACCEPTED",
+    runtimeMs: 12,
+    memoryKb: 8192,
+    passedTestCases: 2,
+    totalTestCases: 2,
+    sourceCode: "print(1)",
+    compileOutput: null,
+    judgeMessage: null,
+    createdAt: problem.createdAt,
+  };
+  await page.route("**/api/v1/problems/problem-id/submissions", (route) =>
+    route.fulfill({ status: 202, json: submitted }),
+  );
+  await page.route("**/api/v1/submissions/submission-id", (route) =>
+    route.fulfill({ json: submitted }),
+  );
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/problems/view/sum");
+  await page.getByLabel("소스 코드").fill("print(1)");
+  await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
+  const panel = page.getByRole("region", { name: "채점 결과" });
+  await expect(panel).toBeVisible();
+  const handle = page.getByRole("separator", { name: "채점 결과 높이 조절" });
+  const before = (await panel.boundingBox())!.height;
+
+  // 위로 끌면 커지고, 아래로 끌면 줄어든다.
+  const grip = (await handle.boundingBox())!;
+  const x = grip.x + grip.width / 2;
+  const y = grip.y + grip.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y - 80, { steps: 4 });
+  await page.mouse.up();
+  const taller = (await panel.boundingBox())!.height;
+  expect(taller).toBeGreaterThan(before + 60);
+
+  await handle.focus();
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  const shorter = (await panel.boundingBox())!.height;
+  expect(shorter).toBeLessThan(taller - 30);
+
+  // 다시 열어도 마지막 높이를 기억한다.
+  await page.reload();
+  await page.getByLabel("소스 코드").fill("print(1)");
+  await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
+  await expect(panel).toBeVisible();
+  expect(
+    Math.abs((await panel.boundingBox())!.height - shorter),
+  ).toBeLessThanOrEqual(2);
+});
+
 test("my submissions can be searched, filtered and grouped by problem", async ({
   page,
 }) => {

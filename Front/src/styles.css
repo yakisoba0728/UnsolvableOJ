@@ -6787,3 +6787,57 @@ h3 {
     color: var(--color-ink-500);
   }
 }
+
+/* 풀이 화면: 더 넓은 작업 영역, 채점 결과 높이 조절 */
+.solve-page {
+  width: min(1440px, calc(100% - 48px));
+}
+.solve-grid {
+  height: calc(100vh - 150px);
+  min-height: 680px;
+}
+.judge-panel {
+  position: relative;
+  max-height: none;
+}
+.judge-panel-body {
+  flex: 1;
+  min-height: 0;
+}
+.judge-resizer {
+  position: absolute;
+  top: -5px;
+  left: 0;
+  right: 0;
+  height: 10px;
+  z-index: 3;
+  cursor: row-resize;
+  touch-action: none;
+}
+.judge-resizer::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 40px;
+  height: 4px;
+  margin-left: -20px;
+  border-radius: 2px;
+  background: var(--color-border);
+  transition: background 0.15s ease;
+}
+.judge-resizer:hover::after,
+.judge-resizer:focus-visible::after {
+  background: var(--color-primary);
+}
+.judge-resizer:focus-visible {
+  outline: none;
+}
+@media (max-width: 900px) {
+  .judge-panel {
+    height: auto !important;
+  }
+  .judge-resizer {
+    display: none;
+  }
+}
