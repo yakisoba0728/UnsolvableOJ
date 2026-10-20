@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { verdictLabel } from "../verdict";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { PageHeader } from "../components/PageHeader";
 import {
   dayKey,
@@ -39,12 +41,6 @@ const popularLanguages = [
   "RUST",
 ];
 const LANGUAGE_ROWS = 4;
-/** 모양만 보여 주는 임시 배지 */
-const sampleBadges = [
-  { label: "첫 정답", icon: "✓", tone: "success" },
-  { label: "3일 연속", icon: "★", tone: "warning" },
-  { label: "꾸준한 도전", icon: "▲", tone: "primary" },
-];
 const difficultyRows = [
   { value: "BEGINNER", label: "입문" },
   { value: "EASY", label: "쉬움" },
@@ -76,7 +72,12 @@ export function ProfilePage() {
   );
   const [selected, setSelected] = useState(dayKey(new Date()));
   const history = useSubmissionHistory(session);
-  const { problems, error: problemsError } = useAllProblems();
+  const {
+    problems,
+    loading: problemsLoading,
+    error: problemsError,
+  } = useAllProblems();
+  const [ready, setReady] = useState(false);
   // 넓은 화면에서는 폭을 채우도록 주 수를 늘리고, 좁은 화면에서는 가로 스크롤이 생기지 않게 줄인다.
   const [weeks, setWeeks] = useState(() =>
     window.matchMedia("(max-width: 650px)").matches ? WEEKS_NARROW : WEEKS_WIDE,
@@ -101,14 +102,19 @@ export function ProfilePage() {
       api<RankingEntry[]>("/rankings", { signal: controller.signal }).then(
         setRankings,
       ),
-    ]).catch((cause) => {
-      if (!controller.signal.aborted)
-        setError(
-          cause instanceof Error
-            ? cause.message
-            : "정보를 불러오지 못했습니다.",
-        );
-    });
+    ])
+      .catch((cause) => {
+        if (!controller.signal.aborted)
+          setError(
+            cause instanceof Error
+              ? cause.message
+              : "정보를 불러오지 못했습니다.",
+          );
+      })
+      .finally(() => {
+        // 실패해도 로딩 표시가 끝나도록 한다(오류는 아래에서 안내).
+        if (!controller.signal.aborted) setReady(true);
+      });
     return () => controller.abort();
   }, [session]);
 
@@ -172,16 +178,40 @@ export function ProfilePage() {
     (item) => dayKey(new Date(item.createdAt)) === selected,
   );
 
-  if (!profile)
+  if (error && !profile)
     return (
       <div className="page-width standalone-section">
-        {error ? (
-          <p className="error-message" role="alert">
-            {error}
-          </p>
-        ) : (
-          <div className="empty-state">학습 기록을 불러오는 중입니다…</div>
-        )}
+        <p className="error-message" role="alert">
+          {error}
+        </p>
+      </div>
+    );
+  // 프로필·랭킹·제출 기록·문제 목록이 모두 도착하기 전에는 0 같은 임시 값을 보이지 않는다.
+  if (!profile || !ready || history.loading || problemsLoading)
+    return (
+      <div className="page-width profile-page">
+        <PageHeader
+          title="내 학습 기록"
+          description="쌓아 온 실력과 꾸준함을 한눈에 확인하세요."
+        />
+        <SkeletonRegion
+          className="profile-skeleton"
+          label="학습 기록을 불러오는 중입니다"
+        >
+          <div className="profile-skeleton-card">
+            <Skeleton width={72} height={72} radius="50%" />
+            <div className="profile-skeleton-lines">
+              <Skeleton width={180} height={22} />
+              <Skeleton width={240} height={14} />
+              <Skeleton height={10} />
+            </div>
+          </div>
+          <div className="profile-skeleton-grid">
+            <Skeleton height={220} radius={14} />
+            <Skeleton height={220} radius={14} />
+          </div>
+          <Skeleton height={180} radius={14} />
+        </SkeletonRegion>
       </div>
     );
 
@@ -206,17 +236,6 @@ export function ProfilePage() {
         <div className="profile-main">
           <h2>
             {profile.username} <small>@{profile.username}</small>
-            <span className="profile-badges" aria-label="획득한 배지">
-              {sampleBadges.map((badge) => (
-                <span
-                  className={`profile-badge ${badge.tone}`}
-                  key={badge.label}
-                >
-                  <span aria-hidden="true">{badge.icon}</span>
-                  {badge.label}
-                </span>
-              ))}
-            </span>
           </h2>
           <div className="profile-level">
             <span className="pill pill-warning">Lv.{profile.level}</span>
@@ -324,7 +343,7 @@ export function ProfilePage() {
                           <span
                             className={`verdict verdict-${item.status.toLowerCase()}`}
                           >
-                            {item.status.replaceAll("_", " ")}
+                            {verdictLabel(item.status)}
                           </span>
                           <span>{item.problem.title ?? "문제"}</span>
                         </Link>
@@ -465,7 +484,6 @@ export function ProfilePage() {
           </section>
         </aside>
       </div>
-
     </div>
   );
 }

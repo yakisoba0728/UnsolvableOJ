@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { SkeletonRows } from "../components/Skeleton";
 import { PageHeader } from "../components/PageHeader";
 import { useDocumentTitle } from "../hooks";
 import { problemPath } from "../paths";
@@ -120,7 +121,7 @@ export function MyProblemsPage() {
         </p>
       ) : null}
       {problems === null && !error ? (
-        <div className="empty-state">불러오는 중입니다…</div>
+        <SkeletonRows count={4} columns={3} />
       ) : null}
       {problems && problems.length === 0 ? (
         <div className="empty-state">

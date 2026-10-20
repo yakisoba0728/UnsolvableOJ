@@ -119,6 +119,52 @@ test("registration sends the username and starts a session", async ({
   await expect(page.getByRole("button", { name: "로그아웃" })).toBeVisible();
 });
 
+test("registration shows format problems while typing, before submitting", async ({
+  page,
+}) => {
+  let called = false;
+  await page.route("**/api/v1/auth/register", (route) => {
+    called = true;
+    return route.fulfill({ status: 201, json: session });
+  });
+  await page.goto("/auth");
+  await page.getByRole("button", { name: "회원가입", exact: true }).click();
+  const email = page.getByLabel("이메일");
+  const username = page.getByLabel("사용자 이름");
+  const password = page.getByLabel("비밀번호");
+
+  // 아직 아무것도 입력하지 않았다면 오류를 보이지 않는다
+  await expect(page.locator('[aria-invalid="true"]')).toHaveCount(0);
+
+  await email.pressSequentially("abc");
+  await expect(email).toHaveAttribute("aria-invalid", "true");
+  await expect(page.getByText("이메일 형식이 올바르지 않아요")).toBeVisible();
+  await email.fill("user@example.com");
+  await expect(email).not.toHaveAttribute("aria-invalid", "true");
+
+  await username.fill("a b");
+  await expect(
+    page.getByText("영문, 숫자, 밑줄(_)만 사용할 수 있어요."),
+  ).toBeVisible();
+  await username.fill("ab");
+  await expect(page.getByText("3~30자로 입력해 주세요.")).toBeVisible();
+  await username.fill("good_name");
+  await expect(username).not.toHaveAttribute("aria-invalid", "true");
+
+  await password.fill("short");
+  await expect(page.getByText("10자 이상 입력해 주세요.")).toBeVisible();
+  await password.fill("long-enough-password");
+  await expect(password).not.toHaveAttribute("aria-invalid", "true");
+
+  // 비워 둔 채 떠난 칸도 안내하고, 잘못된 값으로는 제출되지 않는다
+  await password.fill("");
+  await email.focus();
+  await expect(password).toHaveAttribute("aria-invalid", "true");
+  await page.getByRole("button", { name: "회원가입", exact: true }).click();
+  await expect(password).toBeFocused();
+  expect(called).toBe(false);
+});
+
 test("invalid credentials show the API error and allow retry", async ({
   page,
 }) => {
@@ -342,7 +388,7 @@ test.describe("problem editor", () => {
 
 for (const slug of ["new", "mine"]) {
   test(`public slug ${slug} opens from the problem list`, async ({ page }) => {
-    await page.route("**/api/v1/problems?*", (route) =>
+    await page.route(/\/api\/v1\/problems(\?.*)?$/, (route) =>
       route.fulfill({
         json: {
           items: [{ ...problem, slug }],
@@ -446,13 +492,245 @@ test("submission passes the source and polls through to the final verdict", asyn
   await page.goto("/problems/view/sum");
   await page.getByLabel("소스 코드").fill(source);
   await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
-  await expect(page).toHaveURL(/\/submissions\/submission-id$/);
-  await expect(page.getByText("ACCEPTED", { exact: true })).toBeVisible({
+  // 화면을 옮기지 않고 코드 창 아래 채점 결과 패널에서 바로 확인한다.
+  const panel = page.getByRole("region", { name: "채점 결과" });
+  await expect(panel).toBeVisible();
+  await expect(page).toHaveURL(/\/problems\/view\/sum$/);
+  await expect(panel.getByText("성공", { exact: true }).first()).toBeVisible({
     timeout: 10_000,
   });
-  await expect(page.getByText("2 / 2", { exact: true })).toBeVisible();
+  await expect(panel.getByText("2 / 2", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("소스 코드")).toHaveValue(source);
   await page.waitForTimeout(2200); // One full polling period after the terminal response.
   expect(reads).toBe(3);
+});
+
+test("the home illustration shows the level badge only for a signed-in user, with their own level and XP", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.locator(".brand-art").first()).toBeAttached();
+  await expect(page.locator(".brand-art text")).toHaveCount(0);
+
+  await authenticate(page);
+  await page.route("**/api/v1/users/me", (route) =>
+    route.fulfill({
+      json: {
+        ...session.user,
+        level: 4,
+        xp: 372,
+        createdAt: "2026-09-01T00:00:00Z",
+        solvedCount: 5,
+      },
+    }),
+  );
+  await page.route("**/api/v1/rankings", (route) => route.fulfill({ json: [] }));
+  await page.goto("/");
+  const badge = page.locator(".brand-art");
+  await expect(badge.getByText("Lv.4")).toBeAttached();
+  await expect(badge.getByText("372 XP")).toBeAttached();
+});
+
+test("the problem list has a reverse-order button that is replaced by the shuffle button in random order", async ({
+  page,
+}) => {
+  const make = (id: string, title: string, difficulty: Problem["difficulty"], at: string) => ({
+    ...problem,
+    id,
+    slug: id,
+    title,
+    difficulty,
+    createdAt: at,
+  });
+  await page.route("**/api/v1/problems?*", (route) =>
+    route.fulfill({
+      json: {
+        items: [
+          make("p-a", "가 문제", "HARD", "2026-09-01T00:00:00Z"),
+          make("p-b", "나 문제", "BEGINNER", "2026-09-03T00:00:00Z"),
+          make("p-c", "다 문제", "MEDIUM", "2026-09-02T00:00:00Z"),
+        ],
+        page: 1,
+        limit: 100,
+        total: 3,
+        totalPages: 1,
+      },
+    }),
+  );
+  // 화면이 다시 그려질 때까지 자동으로 기다리며 순서를 확인한다.
+  const expectTitles = (expected: string[]) =>
+    expect(page.locator(".problem-row .problem-title strong")).toHaveText(
+      expected,
+    );
+  const reverse = page.getByRole("button", { name: "목록 순서 뒤집기" });
+
+  await page.goto("/problems");
+  await expectTitles(["나 문제", "다 문제", "가 문제"]); // 최신순
+  await reverse.click();
+  // 위·아래 화살표가 각자 방향으로 움직이는 애니메이션이 실행된다.
+  await expect(reverse.locator(".reverse-arrow-up")).toHaveCount(1);
+  await expect(reverse.locator(".reverse-arrow-down")).toHaveCount(1);
+  await expect(reverse).toHaveAttribute("aria-pressed", "true");
+  await expectTitles(["가 문제", "다 문제", "나 문제"]);
+  await reverse.click();
+  await expectTitles(["나 문제", "다 문제", "가 문제"]);
+
+  await page.goto("/problems?sort=difficulty");
+  await expectTitles(["나 문제", "다 문제", "가 문제"]); // 쉬운 순
+  await reverse.click();
+  await expectTitles(["가 문제", "다 문제", "나 문제"]);
+  // 옛 주소도 같은 목록을 보여 준다.
+  await page.goto("/problems?sort=hard");
+  await expectTitles(["가 문제", "다 문제", "나 문제"]);
+
+  await page.goto("/problems?sort=random&seed=3");
+  await expect(
+    page.getByRole("button", { name: "무작위로 다시 섞기" }),
+  ).toBeVisible();
+  await expect(reverse).toHaveCount(0);
+});
+
+test("typing #word and pressing Enter in the community search makes a tag pill that filters posts", async ({
+  page,
+}) => {
+  const post = (id: string, title: string, tags: string[], at: string) => ({
+    id,
+    category: "question",
+    title,
+    body: `${title} 본문`,
+    author: { name: "other", tier: "Bronze I" },
+    tags,
+    createdAt: at,
+    views: 1,
+    upvotes: 0,
+  });
+  await page.addInitScript((value) => {
+    localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
+  }, {
+    posts: [
+      post("t-1", "그리디 질문", ["greedy", "dp"], "2026-10-03T00:00:00Z"),
+      post("t-2", "다이나믹 질문", ["dp"], "2026-10-02T00:00:00Z"),
+      post("t-3", "태그 없는 질문", [], "2026-10-01T00:00:00Z"),
+    ],
+    answers: [],
+    upvoted: [],
+    saved: [],
+    followed: [],
+    accepted: {},
+    deleted: [],
+  });
+  await page.goto("/community?q=");
+  const search = page.getByRole("searchbox", { name: "게시글 검색" });
+  const rows = page.locator(".post-row .post-title");
+  const pills = page.locator(".search-tag");
+
+  // 일반 검색어는 제목에서만 찾는다: 태그에만 있는 단어('greedy')나 본문에만 있는 단어는 걸리지 않는다.
+  await search.fill("greedy");
+  await expect(rows).toHaveCount(0);
+  await search.fill("본문");
+  await expect(rows).toHaveCount(0);
+  await search.fill("그리디");
+  await expect(rows).toHaveCount(1);
+  await search.fill("");
+  await expect(rows).toHaveCount(3);
+
+  // 띄어쓰기가 있으면 태그가 아니라 일반 검색어로 남는다.
+  await search.fill("#dp 질문");
+  await search.press("Enter");
+  await expect(pills).toHaveCount(0);
+
+  // '#' 만으로는 태그가 되지 않는다.
+  await search.fill("#");
+  await search.press("Enter");
+  await expect(pills).toHaveCount(0);
+
+  await search.fill("#dp");
+  await search.press("Enter");
+  await expect(pills).toHaveCount(1);
+  await expect(pills.first()).toHaveText("#dp");
+  await expect(search).toHaveValue("");
+  await expect(page).toHaveURL(/[?&]t=dp/);
+  await expect(rows.filter({ hasText: "태그 없는 질문" })).toHaveCount(0);
+  await expect(rows).toHaveCount(2);
+
+  // 태그를 하나 더 고르면 두 태그를 모두 가진 글만 남는다. 같은 태그는 중복되지 않는다.
+  await search.fill("#GREEDY");
+  await search.press("Enter");
+  await search.fill("#dp");
+  await search.press("Enter");
+  await expect(pills).toHaveCount(2);
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toHaveText("그리디 질문");
+
+  // 입력칸이 비어 있을 때 Backspace로 마지막 태그를 지운다.
+  await search.press("Backspace");
+  await expect(pills).toHaveCount(1);
+  await expect(rows).toHaveCount(2);
+
+  // × 버튼으로도 지울 수 있다.
+  await page.getByRole("button", { name: "태그 #dp 지우기" }).click();
+  await expect(pills).toHaveCount(0);
+  await expect(page).not.toHaveURL(/[?&]t=/);
+});
+
+test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
+  page,
+}) => {
+  await authenticate(page);
+  const submitted = {
+    id: "submission-id",
+    problem,
+    language: "PYTHON",
+    status: "ACCEPTED",
+    runtimeMs: 12,
+    memoryKb: 8192,
+    passedTestCases: 2,
+    totalTestCases: 2,
+    sourceCode: "print(1)",
+    compileOutput: null,
+    judgeMessage: null,
+    createdAt: problem.createdAt,
+  };
+  await page.route("**/api/v1/problems/problem-id/submissions", (route) =>
+    route.fulfill({ status: 202, json: submitted }),
+  );
+  await page.route("**/api/v1/submissions/submission-id", (route) =>
+    route.fulfill({ json: submitted }),
+  );
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/problems/view/sum");
+  await page.getByLabel("소스 코드").fill("print(1)");
+  await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
+  const panel = page.getByRole("region", { name: "채점 결과" });
+  await expect(panel).toBeVisible();
+  const handle = page.getByRole("separator", { name: "채점 결과 높이 조절" });
+  const before = (await panel.boundingBox())!.height;
+
+  // 위로 끌면 커지고, 아래로 끌면 줄어든다.
+  const grip = (await handle.boundingBox())!;
+  const x = grip.x + grip.width / 2;
+  const y = grip.y + grip.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y - 80, { steps: 4 });
+  await page.mouse.up();
+  const taller = (await panel.boundingBox())!.height;
+  expect(taller).toBeGreaterThan(before + 60);
+
+  await handle.focus();
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  const shorter = (await panel.boundingBox())!.height;
+  expect(shorter).toBeLessThan(taller - 30);
+
+  // 다시 열어도 마지막 높이를 기억한다.
+  await page.reload();
+  await page.getByLabel("소스 코드").fill("print(1)");
+  await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
+  await expect(panel).toBeVisible();
+  expect(
+    Math.abs((await panel.boundingBox())!.height - shorter),
+  ).toBeLessThanOrEqual(2);
 });
 
 test("my submissions can be searched, filtered and grouped by problem", async ({
@@ -495,20 +773,20 @@ test("my submissions can be searched, filtered and grouped by problem", async ({
   await expect(rows).toHaveCount(4);
 
   const verdicts = page.getByRole("group", { name: "판정 필터" });
-  await verdicts.getByRole("button", { name: /^정답/ }).click();
+  await verdicts.getByRole("button", { name: /^성공/ }).click();
   await expect(rows).toHaveCount(1);
   await expect(rows.first()).toContainText("피보나치");
   // 선택한 항목을 다시 누르면 전체로 돌아간다
-  await verdicts.getByRole("button", { name: /^정답/ }).click();
+  await verdicts.getByRole("button", { name: /^성공/ }).click();
   await expect(rows).toHaveCount(4);
 
-  // ⌘/Ctrl+클릭으로 같은 종류 안에서 여러 개를 고른다(정답 + 오답·오류 = 전부)
+  // ⌘/Ctrl+클릭으로 같은 종류 안에서 여러 개를 고른다(성공 + 틀림·오류 = 전부)
   await verdicts
-    .getByRole("button", { name: /^정답/ })
+    .getByRole("button", { name: /^성공/ })
     .click({ modifiers: ["ControlOrMeta"] });
   await expect(rows).toHaveCount(1);
   await verdicts
-    .getByRole("button", { name: /^오답/ })
+    .getByRole("button", { name: /^틀림/ })
     .click({ modifiers: ["ControlOrMeta"] });
   await expect(rows).toHaveCount(4);
   await expect(page).toHaveURL(/s=accepted%2Cwrong/);
@@ -724,7 +1002,7 @@ test.describe("community post: delete own post and answer layout", () => {
     deleted: [],
   };
 
-  test("the answer editor comes first and there is no separate write-answer button", async ({
+  test("the answer editor and the answer list are separate cards, editor first, with no separate write-answer button", async ({
     page,
   }) => {
     await authenticate(page);
@@ -735,11 +1013,17 @@ test.describe("community post: delete own post and answer layout", () => {
     await expect(
       page.getByRole("button", { name: "답변 작성", exact: true }),
     ).toHaveCount(0);
-    const editorTop = (await page.locator(".answer-editor").boundingBox())!.y;
-    const listTop = (await page.locator(".answers-card").boundingBox())!.y;
-    expect(editorTop).toBeLessThan(listTop);
-    // 남의 글에는 삭제 버튼이 없다
-    await expect(page.getByRole("button", { name: "글 삭제" })).toHaveCount(0);
+    const writeCard = page.locator(".answer-write-card");
+    const listCard = page.locator(".answers-card");
+    await expect(writeCard.locator(".answer-editor")).toBeVisible();
+    await expect(listCard.locator(".answer-editor")).toHaveCount(0);
+    const writeTop = (await writeCard.boundingBox())!.y;
+    const listTop = (await listCard.boundingBox())!.y;
+    expect(writeTop).toBeLessThan(listTop);
+    // 남의 글에는 글 관리(⋮) 메뉴가 없다
+    await expect(page.getByRole("button", { name: "글 관리" })).toHaveCount(0);
+    // 조회수는 아이콘과 숫자로 보인다
+    await expect(page.getByLabel("조회 3")).toBeVisible();
   });
 
   test("the author can delete their own post and it disappears from the list", async ({
@@ -755,13 +1039,15 @@ test.describe("community post: delete own post and answer layout", () => {
     }, seedStore);
     await page.goto("/community/mine-1");
     page.once("dialog", (dialog) => dialog.dismiss());
-    await page.getByRole("button", { name: "글 삭제" }).click();
+    await page.getByRole("button", { name: "글 관리" }).click();
+    await page.getByRole("menuitem", { name: "삭제" }).click();
     await expect(
       page.getByRole("heading", { name: "내가 쓴 글" }),
     ).toBeVisible();
 
     page.once("dialog", (dialog) => dialog.accept());
-    await page.getByRole("button", { name: "글 삭제" }).click();
+    await page.getByRole("button", { name: "글 관리" }).click();
+    await page.getByRole("menuitem", { name: "삭제" }).click();
     await expect(page).toHaveURL(/\/community$/);
     await expect(page.getByText("글을 삭제했어요.")).toBeVisible();
     // 샘플 글이 있는 환경에서는 목록이 여러 쪽이라, 검색으로 두 글의 상태를 확인한다.
@@ -771,6 +1057,97 @@ test.describe("community post: delete own post and answer layout", () => {
     await page.goto("/community/mine-1");
     await expect(page.getByText("글을 찾을 수 없어요.")).toBeVisible();
   });
+
+  test("author info and the follow button sit in the post header, not in a separate side card", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.addInitScript((value) => {
+      localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
+    }, seedStore);
+    await page.goto("/community/other-1");
+    const header = page.locator(".post-byline");
+    await expect(header).toContainText("다른사람");
+    await expect(header).toContainText("채택 답변 0");
+    await expect(header).toContainText("작성 글 1");
+    await expect(page.locator(".author-card")).toHaveCount(0);
+    const follow = header.getByRole("button", { name: "+ 팔로우" });
+    await follow.click();
+    await expect(
+      header.getByRole("button", { name: "✓ 팔로잉" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    // 내 글에는 팔로우 버튼이 없다
+    await page.goto("/community/mine-1");
+    await expect(page.locator(".post-byline")).toContainText("solver");
+    await expect(page.getByRole("button", { name: /팔로/ })).toHaveCount(0);
+  });
+
+  test("the author edits their own post from the ⋮ menu; the menu closes with Esc", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await page.addInitScript((value) => {
+      if (!localStorage.getItem("unsolvable-oj-community-v1"))
+        localStorage.setItem(
+          "unsolvable-oj-community-v1",
+          JSON.stringify(value),
+        );
+    }, seedStore);
+    await page.goto("/community/mine-1");
+    const trigger = page.getByRole("button", { name: "글 관리" });
+    await trigger.click();
+    await expect(page.getByRole("menuitem", { name: "수정" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("menu")).toHaveCount(0);
+    await trigger.click();
+    await page.getByRole("menuitem", { name: "수정" }).click();
+    await expect(page).toHaveURL(/\/community\/mine-1\/edit$/);
+    await expect(page.getByLabel(/^제목/)).toHaveValue("내가 쓴 글");
+    await page.getByLabel(/^제목/).fill("고친 제목");
+    await page.getByRole("button", { name: "수정 저장" }).click();
+    await expect(page).toHaveURL(/\/community\/mine-1$/);
+    await expect(page.getByText("글을 수정했어요.")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "고친 제목" }),
+    ).toBeVisible();
+  });
+});
+
+test("only input fields show the text cursor; UI text uses the arrow and controls the pointer", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.goto("/problems/view/sum");
+  const cursorOf = (selector: string) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((el) => getComputedStyle(el).cursor);
+  const selectOf = (selector: string) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((el) => getComputedStyle(el).userSelect);
+
+  // 입력칸은 텍스트 커서
+  expect(await cursorOf("textarea.code-editor")).toBe("text");
+  // 제목·안내 문구는 화살표
+  expect(await cursorOf("h1")).toBe("default");
+  expect(await cursorOf(".editor-hints")).toBe("default");
+  // 누르는 곳은 손가락, 조작용 글자는 드래그 선택이 안 된다
+  expect(await cursorOf("button.text-button")).toBe("pointer");
+  expect(await selectOf("button.text-button")).toBe("none");
+  // 읽고 복사하는 본문은 텍스트 커서와 선택 가능
+  expect(await cursorOf(".markdown")).toBe("text");
+  expect(await selectOf(".markdown")).not.toBe("none");
+  // 입력칸 안의 글은 선택 가능
+  expect(await selectOf("textarea.code-editor")).toBe("text");
+
+  await page.goto("/problems");
+  expect(await cursorOf(".data-list .problem-title strong")).toBe("pointer");
+  // WebKit reports auto on descendants: user-select is not an inherited property.
+  expect(await selectOf(".data-list")).toBe("none");
+  expect(await cursorOf(".total-count")).toBe("default");
 });
 
 test.describe("code editor basics on the solve page", () => {
@@ -783,7 +1160,10 @@ test.describe("code editor basics on the solve page", () => {
         "unsolvable-oj-draft-v1:problem-id:PYTHON",
         "print(111)",
       );
-      localStorage.setItem("unsolvable-oj-draft-v1:problem-id:CPP", "int main() {}");
+      localStorage.setItem(
+        "unsolvable-oj-draft-v1:problem-id:CPP",
+        "int main() {}",
+      );
     });
     await page.goto("/problems/view/sum");
     const python = page.getByRole("textbox", { name: "Python 3 소스 코드" });
@@ -833,7 +1213,7 @@ test.describe("code editor basics on the solve page", () => {
     await expect(page.getByLabel("소스 코드")).toHaveValue(starter);
   });
 
-  test("typing a quoted string and blank lines preserves valid source", async ({
+  test("typing a quoted string works and Enter on a blank line adds no indentation", async ({
     page,
   }) => {
     await authenticate(page);
@@ -844,7 +1224,7 @@ test.describe("code editor basics on the solve page", () => {
     await expect(editor).toHaveValue('"hello"');
     await editor.fill("    ");
     await editor.press("Enter");
-    await expect(editor).toHaveValue("    \n    ");
+    await expect(editor).toHaveValue("    \n");
   });
 
   test("moving the caret dismisses suggestions from the previous word", async ({
@@ -904,40 +1284,74 @@ test.describe("code editor basics on the solve page", () => {
     await expect(editor).toHaveValue("a\nb");
   });
 
-  test("autocomplete suggests while typing and applies with Tab or Enter", async ({
+  test("autocomplete: functions, snippet placeholders, member completion and Ctrl+Space", async ({
     page,
   }) => {
     await authenticate(page);
     await page.goto("/problems/view/sum");
     const editor = page.getByLabel("소스 코드");
+    const list = page.getByRole("listbox", { name: "자동완성 제안" });
     await editor.fill("");
     await editor.focus();
 
+    // 함수는 괄호까지 넣고 커서를 괄호 안에 둔다
     await page.keyboard.type("pri");
-    const list = page.getByRole("listbox", { name: "자동완성 제안" });
     await expect(list.getByRole("option", { name: /^print/ })).toBeVisible();
     await page.keyboard.press("Tab");
-    await expect(editor).toHaveValue("print");
+    await expect(editor).toHaveValue("print()");
+    await page.keyboard.type("1");
+    await expect(editor).toHaveValue("print(1)");
     await expect(list).toHaveCount(0);
 
     // Esc로 닫으면 Enter는 평소처럼 줄바꿈이다
-    await page.keyboard.press("Enter");
+    await editor.fill("");
     await page.keyboard.type("whi");
     await expect(list).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(list).toHaveCount(0);
 
-    // 스니펫: 들여쓰기를 이어 붙이고 커서를 괄호 안에 둔다
+    // 스니펫: 칸을 고른 채 시작하고 Tab으로 다음 칸으로 간다
     await editor.fill("");
     await editor.focus();
-    await page.keyboard.type("fo");
+    await page.keyboard.type("for");
     await expect(
       list.getByRole("option", { name: /^for/ }).first(),
     ).toBeVisible();
     await page.keyboard.press("Enter");
-    await expect(editor).toHaveValue("for i in range():\n    ");
+    await expect(editor).toHaveValue("for i in range(n):\n    ");
+    await page.keyboard.type("k");
+    await expect(editor).toHaveValue("for k in range(n):\n    ");
+    await page.keyboard.press("Tab");
     await page.keyboard.type("5");
-    await expect(editor).toHaveValue("for i in range(5):\n    ");
+    await expect(editor).toHaveValue("for k in range(5):\n    ");
+    await page.keyboard.press("Tab");
+    await page.keyboard.type("x");
+    await expect(editor).toHaveValue("for k in range(5):\n    x");
+
+    // 멤버 완성: 변수 타입을 짐작해 그 타입의 메서드만 보여 준다
+    await editor.fill("");
+    await editor.focus();
+    await page.keyboard.type("s = input()");
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("s.sp");
+    await expect(list.getByRole("option").first()).toContainText("split");
+    await expect(list.getByRole("option", { name: /append/ })).toHaveCount(0);
+    await page.keyboard.press("Tab");
+    await expect(editor).toHaveValue("s = input()\ns.split()");
+
+    // 문자열 안에서는 제안하지 않는다
+    await editor.fill("");
+    await editor.focus();
+    await page.keyboard.type('x = "pri');
+    await expect(list).toHaveCount(0);
+
+    // Ctrl+Space로 직접 부른다
+    await editor.fill("");
+    await editor.focus();
+    await page.keyboard.press("Control+Space");
+    await expect(list).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(list).toHaveCount(0);
 
     // ↑↓로 고른다
     await editor.fill("");
@@ -947,9 +1361,10 @@ test.describe("code editor basics on the solve page", () => {
     await page.keyboard.press("ArrowDown");
     const picked = await list
       .getByRole("option", { selected: true })
+      .locator(".suggestion-label")
       .innerText();
     await page.keyboard.press("Enter");
-    await expect(editor).toHaveValue(picked.split("\n")[0]);
+    await expect(editor).toHaveValue(new RegExp(`^${picked}`));
   });
 
   test("font size changes the editor and is remembered; the cursor position is shown", async ({
@@ -1028,6 +1443,112 @@ test("a rejected submission shows each public case with input, expected and actu
   await expect(result.locator(".io-block").nth(2)).toContainText("0");
   await expect(page.getByRole("link", { name: "코드 수정하기" })).toBeVisible();
   await expect(page.getByText("코드 수정하고 다시 풀기")).toHaveCount(0);
+});
+
+test("a rejected submission is shown under the editor with each example compared", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.route("**/api/v1/problems/by-slug/sum", (route) =>
+    route.fulfill({
+      json: {
+        ...problem,
+        samples: [{ input: "1 2\n", expectedOutput: "3\n" }],
+      },
+    }),
+  );
+  const rejected = {
+    id: "wrong-inline",
+    problem: { id: problem.id, slug: "sum", title: problem.title },
+    language: "PYTHON",
+    status: "WRONG_ANSWER",
+    runtimeMs: 10,
+    memoryKb: 1000,
+    passedTestCases: 0,
+    totalTestCases: 2,
+    compileOutput: null,
+    judgeMessage: null,
+    sourceCode: "print(0)",
+    sampleTestCases: [{ testCase: 1, input: "1 2\n", expectedOutput: "3\n" }],
+    debugOutputs: [
+      {
+        testCase: 1,
+        stdout: "0\n",
+        stderr: "",
+        stdoutTruncated: false,
+        stderrTruncated: false,
+      },
+    ],
+    createdAt: "2026-09-01T00:00:00Z",
+    updatedAt: "2026-09-01T00:00:00Z",
+  };
+  await page.route("**/api/v1/problems/problem-id/submissions", (route) =>
+    route.fulfill({ status: 202, json: { ...rejected, status: "QUEUED" } }),
+  );
+  await page.route("**/api/v1/submissions/wrong-inline", (route) =>
+    route.fulfill({ json: rejected }),
+  );
+  await page.goto("/problems/view/sum");
+  await page.getByLabel("소스 코드").fill("print(0)");
+  await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
+  const panel = page.getByRole("region", { name: "채점 결과" });
+  await expect(panel.getByText("기대 출력과 달라요")).toBeVisible();
+  await expect(panel.locator(".io-block").nth(0)).toContainText("1 2");
+  await expect(panel.locator(".io-block").nth(1)).toContainText("3");
+  await expect(panel.locator(".io-block").nth(2)).toContainText("0");
+  await expect(page).toHaveURL(/\/problems\/view\/sum$/);
+  // 접고 닫을 수 있고, 코드는 그대로다.
+  await panel.getByRole("button", { name: "접기" }).click();
+  await expect(panel.locator(".case-result")).toHaveCount(0);
+  await panel.getByRole("button", { name: "닫기" }).click();
+  await expect(panel).toHaveCount(0);
+  await expect(page.getByLabel("소스 코드")).toHaveValue("print(0)");
+});
+
+test("lists show skeletons instead of zero placeholders while the server responds", async ({
+  page,
+}) => {
+  let release: () => void = () => undefined;
+  const gate = new Promise<void>((resolve) => (release = resolve));
+  await page.route("**/api/v1/problems?*", async (route) => {
+    await gate;
+    await route.fulfill({
+      json: { page: 1, limit: 100, total: 1, totalPages: 1, items: [problem] },
+    });
+  });
+  await page.goto("/problems");
+  await expect(page.locator(".skeleton-rows")).toBeVisible();
+  await expect(page.locator(".total-count")).not.toContainText("0문제");
+  await expect(page.locator(".toggle-count:not(.skeleton)")).toHaveCount(0);
+  release();
+  await expect(page.locator(".skeleton-rows")).toHaveCount(0);
+  await expect(page.locator(".total-count")).toContainText("1문제");
+  await expect(page.locator("a.problem-row")).toHaveCount(1);
+});
+
+test("Ctrl/⌘+Enter pressed twice creates only one submission", async ({
+  page,
+}) => {
+  await authenticate(page);
+  let posts = 0;
+  await page.route(
+    "**/api/v1/problems/problem-id/submissions",
+    async (route) => {
+      posts += 1;
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      await route.fulfill({
+        status: 429,
+        json: { message: "잠시 후 다시 제출하세요." },
+      });
+    },
+  );
+  await page.goto("/problems/view/sum");
+  const editor = page.getByLabel("소스 코드");
+  await editor.fill("print(1)");
+  await editor.press("ControlOrMeta+Enter");
+  await editor.press("ControlOrMeta+Enter");
+  await expect(page.getByRole("alert")).toHaveText("잠시 후 다시 제출하세요.");
+  expect(posts).toBe(1);
 });
 
 test("submission API errors preserve the source and re-enable submission", async ({

@@ -176,8 +176,29 @@ export class ProblemsService {
       skip: (query.page - 1) * query.limit,
       take: query.limit,
     });
+    // One indexed aggregate per page, not one submissions query per problem.
+    const stats = items.length
+      ? await this.dataSource.query<
+          { problemId: string; solverCount: number; acceptanceRate: number }[]
+        >(
+          `SELECT problem_id AS "problemId",
+             COUNT(DISTINCT user_id) FILTER (WHERE status = 'ACCEPTED')::int AS "solverCount",
+             ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'ACCEPTED') / COUNT(*), 1)::float8 AS "acceptanceRate"
+           FROM submissions
+           WHERE problem_id = ANY($1::uuid[])
+             AND status NOT IN ('QUEUED', 'JUDGING', 'SYSTEM_ERROR', 'CANCELLED')
+           GROUP BY problem_id`,
+          [items.map((problem) => problem.id)],
+        )
+      : [];
+    const byProblem = new Map(stats.map((item) => [item.problemId, item]));
     return {
-      items,
+      items: items.map((problem) =>
+        Object.assign(problem, {
+          solverCount: byProblem.get(problem.id)?.solverCount ?? 0,
+          acceptanceRate: byProblem.get(problem.id)?.acceptanceRate ?? null,
+        }),
+      ),
       page: query.page,
       limit: query.limit,
       total,

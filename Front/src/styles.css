@@ -334,7 +334,7 @@ p {
   justify-content: center;
   min-width: 65px;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 13px;
   font-weight: 700;
   background: var(--color-success-soft);
@@ -393,7 +393,7 @@ p {
 .pagination button {
   border: 1px solid var(--color-divider);
   background: var(--color-surface);
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 8px 15px;
   color: var(--color-ink-600);
   font-weight: var(--weight-label);
@@ -419,7 +419,7 @@ p {
   background: var(--color-danger-soft);
   border: 1px solid var(--color-danger-border);
   color: var(--color-danger);
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 11px 14px;
   font-size: 13px;
   line-height: 1.5;
@@ -730,7 +730,7 @@ textarea {
 .result-stats > div {
   background: var(--color-surface);
   border: 1px solid var(--color-divider);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 20px;
 }
 .result-stats small {
@@ -764,7 +764,7 @@ textarea {
 .source-code {
   background: var(--color-code);
   color: #dce8ff;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 25px;
   min-height: 180px;
   font-size: 13px;
@@ -879,7 +879,7 @@ textarea {
   align-items: center;
   gap: 12px;
   padding: 9px 8px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 13px;
 }
 .ranking-row.current {
@@ -1344,7 +1344,7 @@ textarea {
 }
 .solve-grid {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);
   gap: 16px;
   align-items: stretch;
   height: calc(100vh - 176px);
@@ -1604,7 +1604,7 @@ textarea {
   height: 24px;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   display: inline-block;
   background: var(--color-disabled);
 }
@@ -1724,18 +1724,7 @@ button.heat-cell.selected {
   flex: 1;
 }
 .search-field .search-input {
-  padding-right: 44px;
-}
-.search-field kbd {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-.search-field .search-input:focus + kbd,
-.search-field .search-input:not(:placeholder-shown) + kbd {
-  display: none;
+  padding-right: 14px;
 }
 .standing-card dl {
   display: grid;
@@ -1748,9 +1737,6 @@ button.heat-cell.selected {
 .account-actions .text-button,
 .inline-button {
   padding: 10px 8px;
-}
-.demo-banner .text-button {
-  padding: 6px 8px;
 }
 .heat-cell {
   background: var(--heat-0);
@@ -2058,7 +2044,7 @@ kbd {
   font: 12px var(--font-mono);
   background: var(--color-disabled);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 1px 6px;
 }
 .daily-card {
@@ -2197,52 +2183,7 @@ kbd {
     gap: 6px;
   }
 }
-.demo-banner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  background: var(--color-warning-soft);
-  color: var(--color-warning);
-  font-size: 13px;
-  padding: 8px 24px;
-  text-align: center;
-}
-.demo-banner .text-button {
-  color: var(--color-warning);
-  text-decoration: underline;
-  font-size: 13px;
-}
-.demo-hint {
-  background: var(--color-feature);
-  border-radius: var(--radius-control);
-  padding: 10px 14px;
-  font-size: 13px;
-  color: var(--color-ink-700);
-  margin: 0 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: flex-start;
-}
-.demo-hint code {
-  font-family: var(--font-mono);
-  font-size: 12px;
-}
 @media (max-width: 650px) {
-  .demo-banner {
-    justify-content: space-between;
-    gap: 8px;
-    padding: 6px 15px;
-    font-size: 13px;
-    text-align: left;
-    flex-wrap: nowrap;
-  }
-  .demo-banner .text-button {
-    flex: none;
-    font-size: 13px;
-  }
   .home-header .pill {
     align-self: flex-start;
   }
@@ -2486,7 +2427,7 @@ kbd {
   .heat-cell {
     width: 18px;
     height: 18px;
-    border-radius: 5px;
+    border-radius: 4px;
   }
   .heat-days span {
     height: 18px;
@@ -2821,7 +2762,7 @@ input,
   }
 }
 
-/* B6. 문제 목록 머리글: 진행률은 제목 줄 오른쪽으로 */
+/* 머리글 오른쪽 영역의 푼 문제 요약(.solved-summary) — 지금은 쓰는 화면이 없다 */
 .page-header-aside .solved-summary {
   margin: 0;
   min-width: 240px;
@@ -2847,9 +2788,6 @@ input,
 }
 :root[data-theme="dark"] .code-panel {
   border-color: var(--color-border);
-}
-:root[data-theme="dark"] .demo-banner {
-  background: var(--color-warning-soft);
 }
 
 /* 풀이 화면 머리글(모바일): 이동 경로는 한 줄을 차지하고, 제목·난이도는 그 아래에 놓는다 */
@@ -3052,7 +2990,7 @@ h3 {
   font-weight: var(--weight-title);
 }
 
-/* ===== 목록: 즐겨찾기 별 · 상태 칩 · URL 상태 ===== */
+/* ===== 문제 목록: 행 묶음(.problem-row-wrap) · 필터 줄 안의 작은 버튼 ===== */
 .problem-row-wrap {
   position: relative;
 }
@@ -3194,7 +3132,7 @@ h3 {
   }
 }
 
-/* ===== 문제 목록: 머리글 이어서 풀기 버튼, 비로그인 소개 카드 ===== */
+/* ===== 문제 목록: 비로그인 소개 카드(.brand-card). 머리글 버튼 영역(.header-actions)은 지금 쓰지 않는다 ===== */
 .header-actions {
   display: flex;
   align-items: center;
@@ -3491,7 +3429,7 @@ h3 {
   padding: 14px 20px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: 10px;
   transition: border-color 0.15s;
 }
 .post-row:hover {
@@ -3681,8 +3619,7 @@ h3 {
   gap: 24px;
   align-items: start;
 }
-.post-column,
-.post-side {
+.post-column {
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -3740,11 +3677,6 @@ h3 {
   font-size: 14px;
   font-weight: 700;
 }
-.post-avatar.large {
-  width: 56px;
-  height: 56px;
-  font-size: 24px;
-}
 .post-body,
 .answer-body {
   color: var(--color-ink-700);
@@ -3763,7 +3695,7 @@ h3 {
 .post-tags a {
   display: inline-block;
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-surface-muted);
   color: var(--color-ink-600);
   font-size: 13px;
@@ -3833,7 +3765,7 @@ h3 {
 .answer-vote {
   padding: 2px 8px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: inherit;
   font: inherit;
@@ -3859,36 +3791,11 @@ h3 {
   color: var(--color-primary);
   font-weight: var(--weight-label);
 }
-.author-card {
-  align-items: center;
-  text-align: center;
-  gap: 12px;
-}
-.author-card strong {
-  font: 700 18px var(--font-display);
-}
-.related-card h2 {
-  margin: 0;
-  font-size: 14px;
-}
-.related-card ul {
-  margin: 0;
-  padding-left: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  font-size: 13px;
-  font-weight: var(--weight-label);
-  color: var(--color-ink-700);
-}
-.related-card a:hover {
-  color: var(--color-primary);
-}
 .success-message {
   margin: 0 0 16px;
   padding: 11px 14px;
   border: 1px solid var(--color-success-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-success-soft);
   color: var(--color-success);
   font-size: 13px;
@@ -3963,7 +3870,7 @@ h3 {
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-primary-soft);
   color: var(--color-primary);
   font-size: 12px;
@@ -3980,7 +3887,7 @@ h3 {
   margin: 0 0 16px;
   padding: 10px 14px;
   border: 1px solid var(--color-feature-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-feature);
   font-size: 13px;
 }
@@ -4273,7 +4180,7 @@ h3 {
   justify-content: space-between;
   gap: 12px;
   padding: 9px 12px;
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--color-ink-700);
   font-size: 14px;
   font-weight: var(--weight-label);
@@ -4916,44 +4823,6 @@ h3 {
   gap: 20px;
   min-width: 0;
 }
-.profile-badges {
-  display: inline-flex;
-  gap: 6px;
-  margin-left: 12px;
-  vertical-align: middle;
-}
-.profile-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px 3px 4px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: var(--weight-label);
-  letter-spacing: 0;
-  line-height: 1.4;
-}
-.profile-badge > span {
-  display: inline-grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--color-surface);
-  font-size: 12px;
-}
-.profile-badge.success {
-  background: var(--color-success-soft);
-  color: var(--color-success);
-}
-.profile-badge.warning {
-  background: var(--color-warning-soft);
-  color: var(--color-warning);
-}
-.profile-badge.primary {
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-}
 
 /* 프로필: 작성한 글 · 추천한 글 세로 스크롤 카드 */
 .profile-post-pair {
@@ -4992,7 +4861,7 @@ h3 {
   height: 28px;
   padding: 0;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-ink-700);
   cursor: pointer;
@@ -5013,7 +4882,7 @@ h3 {
   scroll-snap-type: y mandatory;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 .scroller-view::-webkit-scrollbar {
   display: none;
@@ -5033,7 +4902,7 @@ h3 {
   scroll-snap-align: start;
   scroll-snap-stop: always;
   background: var(--color-surface-muted);
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid transparent;
   overflow: hidden;
 }
@@ -5223,7 +5092,7 @@ h3 {
   min-height: 36px;
   padding: 0 14px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: var(--color-ink-600);
   font: inherit;
@@ -5311,13 +5180,13 @@ h3 {
   gap: 2px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 6px;
 }
 .md-tabs button {
   min-height: 26px;
   padding: 0 12px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
   color: var(--color-ink-600);
   font: inherit;
@@ -5508,7 +5377,7 @@ h3 {
 .check-warnings {
   margin-top: 16px;
   padding: 12px 14px 12px 28px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-warning-soft);
   color: var(--color-warning);
   font-size: 13px;
@@ -5863,10 +5732,11 @@ h3 {
 }
 
 /* ===== 목록 통일 규격: 문제 목록 · 커뮤니티 글 목록 · 내 제출 =====
-   한 카드 안의 표: 머리글 44 · 행 72 · 안쪽 여백 24 · 칸 간격 16 · 모두 왼쪽 정렬 ·
-   제목 16/700 · 보조 13 · 배지는 높이 28의 알약 · 끝에 › 표시 */
+   한 카드 안의 표: 머리글 44 · 행 72 · 안쪽 여백 24 · 칸 간격 16 · 왼쪽 정렬(문제 목록의
+   난이도·푼 사람·정답률 열은 오른쪽 정렬) · 제목 16/700 · 보조 13 · 배지는 높이 28의 알약 ·
+   끝에 › 표시(문제 목록은 제외) */
 .data-list {
-  --cols: minmax(0, 1fr) 96px 96px 148px 16px;
+  --cols: minmax(0, 1fr) 96px 96px 96px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -5881,7 +5751,7 @@ h3 {
   --cols: minmax(0, 1fr) 176px 112px 148px 168px 16px;
 }
 .data-list.list-posts {
-  --cols: 96px minmax(0, 1fr) 72px 80px 16px;
+  --cols: 96px minmax(0, 1fr) 72px 80px;
 }
 .data-list .problem-head,
 .data-list .history-head,
@@ -6022,7 +5892,7 @@ h3 {
   background: var(--color-surface);
   border: 1px solid var(--color-feature-border);
 }
-/* 숫자·제한 칸: 같은 글꼴, 왼쪽 정렬 */
+/* 숫자 칸(문제 목록의 푼 사람·정답률, 내 제출·글 목록의 수치): 같은 글꼴, 기본은 왼쪽 정렬 */
 .data-list .problem-limit,
 .data-list .history-lang,
 .data-list .history-metrics,
@@ -6080,17 +5950,6 @@ h3 {
   .data-list .post-num {
     order: 3;
     font-size: 13px;
-  }
-  .data-list .post-num::before {
-    margin-right: 4px;
-    color: var(--color-ink-600);
-    font-weight: 400;
-  }
-  .data-list .post-num-up::before {
-    content: "추천";
-  }
-  .data-list .post-num-view::before {
-    content: "조회";
   }
   .data-list .row-arrow {
     position: absolute;
@@ -6205,7 +6064,7 @@ h3 {
   cursor: default;
 }
 
-/* 문제 목록: 정렬이 '무작위'일 때만 보이는 다시 섞기 아이콘 버튼(필터 줄 맨 오른쪽) — 다른 입력 칸과 같은 둥근 사각형 */
+/* 문제 목록 필터 줄 맨 오른쪽의 아이콘 버튼: 무작위일 때는 다시 섞기, 그 밖에는 순서 뒤집기 — 다른 입력 칸과 같은 둥근 사각형 */
 .filter-groups .shuffle-icon-button {
   display: inline-grid;
   place-items: center;
@@ -6283,7 +6142,7 @@ h3 {
   height: 28px;
   padding: 0 6px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: inherit;
   font-size: 12px;
@@ -6339,7 +6198,7 @@ h3 {
   list-style: none;
   background: #1b2636;
   border: 1px solid #3a4a62;
-  border-radius: 10px;
+  border-radius: 7px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   color: #e9f0f9;
   font: 12px/1.4 var(--font-sans);
@@ -6350,7 +6209,7 @@ h3 {
   justify-content: space-between;
   gap: 16px;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
 }
 .autocomplete li.active {
@@ -6364,6 +6223,838 @@ h3 {
   color: #9fb0c8;
   font-size: 11px;
   white-space: nowrap;
+}
+
+/* 난이도: 알약 대신 색을 입힌 일반 텍스트 (풀이 상태는 파일 끝에서 다시 알약으로 덮어씀) */
+.difficulty,
+.solve-badge,
+.data-list .solve-badge,
+.data-list .difficulty,
+.data-list .problem-row .solve-badge,
+.data-list .problem-row .difficulty {
+  display: inline;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  justify-self: start;
+}
+.solve-badge {
+  color: var(--color-ink-600);
+}
+.solve-solved {
+  color: var(--color-success);
+}
+.solve-attempted {
+  color: var(--color-primary);
+}
+.difficulty-expert {
+  background: none;
+}
+@media (max-width: 880px) {
+  .data-list.list-posts .post-row {
+    padding-right: 16px;
+  }
+}
+
+/* 회원가입: 입력 도중에 보이는 칸별 안내 */
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.auth-field [aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+.auth-field [aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px var(--color-danger-soft);
+}
+@media (max-width: 880px) {
+  .problem-row:not(.submission-row) .difficulty {
+    justify-self: end;
+  }
+}
+
+/* 풀이 화면: 코드 창 아래에서 바로 확인하는 채점 결과 */
+.judge-panel {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  max-height: 46%;
+  min-height: 0;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+.judge-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-divider);
+  font-size: 14px;
+}
+.judge-panel-actions {
+  display: inline-flex;
+  gap: 12px;
+  margin-left: auto;
+}
+.judge-panel-body {
+  overflow: auto;
+  padding: 14px 16px 16px;
+}
+.judge-panel-body .result-summary {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.judge-panel-body .result-summary .result-banner {
+  padding: 12px 18px;
+  border-radius: var(--radius-panel);
+}
+.judge-panel-body .result-banner strong {
+  font-size: 20px;
+  margin-top: 2px;
+}
+.judge-panel-body .result-symbol {
+  font-size: 28px;
+}
+.judge-panel-body .result-summary .result-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.judge-panel-body .result-summary .result-stats > div {
+  padding: 8px 12px;
+}
+.judge-panel-body .result-summary .result-stats strong {
+  font-size: 14px;
+}
+.judge-panel-body .source-section {
+  margin-top: 8px;
+}
+.judge-panel-body .source-section h2 {
+  font-size: 15px;
+}
+@media (max-width: 900px) {
+  .judge-panel {
+    max-height: none;
+  }
+  .judge-panel-body .result-summary .result-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 판정 문구는 한국어이므로 고정폭 영문 글꼴 대신 본문 글꼴을 쓴다 */
+.verdict,
+.data-list .verdict {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+.verdict-output_limit_exceeded,
+.verdict-cancelled {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+.verdict-cancelled {
+  background: var(--color-disabled);
+  color: var(--color-ink-600);
+}
+
+/* 로딩 표시(skeleton): 서버 값이 오기 전에 0 같은 임시 값을 보이지 않는다 */
+.skeleton {
+  display: block;
+  max-width: 100%;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--color-disabled) 0%,
+    var(--color-border) 50%,
+    var(--color-disabled) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+.skeleton-rows {
+  display: block;
+}
+.skeleton-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(3, 120px);
+  align-items: center;
+  column-gap: 16px;
+  min-height: 72px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.skeleton-row:last-child {
+  border-bottom: 0;
+}
+.skeleton-title {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toggle-count.skeleton {
+  display: inline-block;
+  vertical-align: middle;
+  min-width: 14px;
+}
+@media (max-width: 880px) {
+  .skeleton-row {
+    grid-template-columns: minmax(0, 1fr) 80px;
+    padding: 14px 16px;
+  }
+  .skeleton-row > .skeleton:nth-of-type(n + 2) {
+    display: none;
+  }
+}
+.skeleton-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+.ranking-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.slider-skeleton {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .slider-skeleton {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.profile-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.profile-skeleton-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+}
+.profile-skeleton-lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+}
+.profile-skeleton-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 20px;
+}
+@media (max-width: 900px) {
+  .profile-skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.result-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.solve-skeleton-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .result-skeleton-grid,
+  .solve-skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 점 세 개(⋮) 메뉴 */
+.action-menu {
+  position: relative;
+  flex: none;
+}
+.action-menu-button {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-ink-600);
+  cursor: pointer;
+}
+.action-menu-button:hover,
+.action-menu-button[aria-expanded="true"] {
+  background: var(--color-surface-muted);
+  color: var(--color-ink-900);
+}
+.action-menu-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  display: flex;
+  min-width: 132px;
+  flex-direction: column;
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 14%);
+}
+.action-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-ink-900);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.action-menu-item:hover,
+.action-menu-item:focus-visible {
+  background: var(--color-surface-muted);
+}
+.action-menu-item.danger {
+  color: var(--color-danger);
+}
+.post-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.icon-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 커뮤니티 목록의 추천·조회 수 칸: 행은 아이콘 + 숫자, 머리글은 '추천'·'조회 수' 텍스트 */
+.data-list .post-num,
+.data-list .post-head span:nth-child(n + 3) {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.data-list .post-num svg {
+  color: var(--color-ink-500);
+  flex: none;
+}
+
+/* 자동완성 목록(VS Code·IntelliJ 스타일): 종류 아이콘 · 일치 글자 강조 · 시그니처 · 설명 줄 */
+.autocomplete {
+  width: 340px;
+  max-width: calc(100% - 16px);
+  padding: 0;
+  overflow: hidden;
+}
+.autocomplete ul {
+  max-height: 224px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+}
+.autocomplete li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, auto) minmax(0, 1fr);
+  align-items: center;
+  justify-content: stretch;
+  gap: 8px;
+  height: 28px;
+  padding: 0 8px;
+}
+.suggestion-icon {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: rgba(159, 176, 200, 0.2);
+  color: #9fb0c8;
+  font: 700 11px/1 var(--font-mono);
+}
+.suggestion-icon.kind-function,
+.suggestion-icon.kind-method {
+  background: rgba(178, 140, 255, 0.22);
+  color: #c9b0ff;
+}
+.suggestion-icon.kind-variable {
+  background: rgba(110, 170, 255, 0.22);
+  color: #8fbcff;
+}
+.suggestion-icon.kind-class,
+.suggestion-icon.kind-module {
+  background: rgba(255, 190, 90, 0.22);
+  color: #ffc873;
+}
+.suggestion-icon.kind-property {
+  background: rgba(110, 215, 190, 0.2);
+  color: #7fe0c8;
+}
+.suggestion-icon.kind-snippet {
+  background: rgba(120, 220, 140, 0.2);
+  color: #8fe3a0;
+}
+.autocomplete .suggestion-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.suggestion-hit {
+  color: #6fb1ff;
+  font-weight: 700;
+}
+.autocomplete li.active .suggestion-hit {
+  color: #a9d0ff;
+}
+.autocomplete .suggestion-detail {
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  font-family: var(--font-mono);
+}
+.suggestion-doc {
+  margin: 0;
+  padding: 7px 12px;
+  border-top: 1px solid #3a4a62;
+  background: rgba(255, 255, 255, 0.04);
+  color: #c5d2e6;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 글 상단 작성자 줄: 아바타·이름·등급·시간·통계와 팔로우를 한곳에 */
+.post-layout.no-side {
+  grid-template-columns: minmax(0, 1fr);
+}
+.post-author-line {
+  gap: 12px;
+}
+.post-author-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.post-author-text strong {
+  color: var(--color-ink-900);
+  font-size: 15px;
+}
+.post-author-text small {
+  font-size: 12px;
+}
+.post-byline-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.post-avatar {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
+/* 문제 풀이 상태: 커뮤니티의 '채택 완료'와 같은 알약 표시 */
+.solve-badge,
+.data-list .solve-badge,
+.data-list .problem-row .solve-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: var(--weight-title);
+  white-space: nowrap;
+  background: var(--color-disabled);
+  color: var(--color-ink-600);
+}
+.solve-solved,
+.data-list .problem-row .solve-solved {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.solve-attempted,
+.data-list .problem-row .solve-attempted {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+/* 팔로우한 작성자의 글 표시(목록) */
+.post-follow-badge {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: var(--weight-title);
+  vertical-align: 1px;
+}
+
+/* 글 상세: 작성자 줄을 제목 위의 독립된 칸으로 */
+.post-card .post-byline {
+  padding: 16px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface-muted);
+}
+.post-card .post-avatar {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+}
+.post-card .post-author-text strong {
+  font-size: 18px;
+}
+.post-card .post-author-text .muted {
+  font-size: 14px;
+}
+.post-card .post-author-text small {
+  font-size: 13px;
+}
+.answer-write-card .answer-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 문제 목록: 풀이 상태는 제목 옆 알약, 푼 사람·정답률은 각자의 열 */
+.data-list.list-problems .post-title-line {
+  align-items: center;
+}
+.data-list.list-problems .solve-badge {
+  flex: none;
+  height: 22px;
+}
+/* 팔로잉 알약: 작성자 이름 바로 옆(간격 4px), 같은 높이 */
+.post-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.post-author .post-follow-badge {
+  margin-left: 0;
+}
+@media (max-width: 880px) {
+  /* 좁은 화면에는 열 머리글이 없으니 수치 앞에 이름을 붙인다 */
+  .data-list.list-problems .problem-row {
+    padding-right: 16px;
+  }
+  .data-list.list-problems .problem-limit::before {
+    content: attr(data-label) " ";
+    color: var(--color-ink-500);
+  }
+}
+
+/* 풀이 화면: 더 넓은 작업 영역, 채점 결과 높이 조절 */
+.solve-page {
+  width: min(1440px, calc(100% - 48px));
+}
+.solve-grid {
+  height: calc(100vh - 150px);
+  min-height: 680px;
+}
+.judge-panel {
+  position: relative;
+  max-height: none;
+}
+.judge-panel-body {
+  flex: 1;
+  min-height: 0;
+}
+.judge-resizer {
+  position: absolute;
+  top: -5px;
+  left: 0;
+  right: 0;
+  height: 10px;
+  z-index: 3;
+  cursor: row-resize;
+  touch-action: none;
+}
+.judge-resizer::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 40px;
+  height: 4px;
+  margin-left: -20px;
+  border-radius: 2px;
+  background: var(--color-border);
+  transition: background 0.15s ease;
+}
+.judge-resizer:hover::after,
+.judge-resizer:focus-visible::after {
+  background: var(--color-primary);
+}
+.judge-resizer:focus-visible {
+  outline: none;
+}
+@media (max-width: 900px) {
+  .judge-panel {
+    height: auto !important;
+  }
+  .judge-resizer {
+    display: none;
+  }
+}
+
+/* 순서 뒤집기 버튼: 눌린 상태(뒤집힌 순서)를 강조색으로 표시 */
+.reverse-icon-button[aria-pressed="true"] {
+  background: var(--color-primary-soft);
+  border-color: var(--color-feature-border);
+  color: var(--color-primary);
+}
+
+/* 순서 뒤집기: 위 화살표는 위로, 아래 화살표는 아래로 버튼 밖으로 나가 사라졌다가
+   반대편에서 다시 들어와 제자리에 선다(버튼 밖은 .shuffle-icon-button의 overflow로 잘린다).
+   36은 SVG 좌표 단위(1단위≈0.75px)로, 화살표가 버튼 가장자리를 완전히 벗어나는 거리다. */
+.reverse-icon {
+  overflow: visible;
+}
+.reverse-arrow-up {
+  animation: reverse-up 0.7s linear;
+}
+.reverse-arrow-down {
+  animation: reverse-down 0.7s linear;
+}
+@keyframes reverse-up {
+  0% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+  40% {
+    transform: translateY(-36px);
+  }
+  40.1% {
+    transform: translateY(36px);
+    animation-timing-function: cubic-bezier(0.1, 0.4, 0.3, 1);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes reverse-down {
+  0% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+  40% {
+    transform: translateY(36px);
+  }
+  40.1% {
+    transform: translateY(-36px);
+    animation-timing-function: cubic-bezier(0.1, 0.4, 0.3, 1);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reverse-arrow-up,
+  .reverse-arrow-down {
+    animation: none;
+  }
+}
+
+/* 문제 목록: 난이도·푼 사람·정답률 열을 모두 오른쪽 정렬해, 마지막 열 오른쪽에 빈 칸이 남지 않게 한다 */
+.data-list.list-problems .problem-head span:not(:first-child),
+.data-list.list-problems .problem-row .difficulty,
+.data-list.list-problems .problem-row .problem-limit {
+  justify-self: end;
+  text-align: right;
+}
+@media (max-width: 880px) {
+  /* 좁은 화면은 카드형 배치라 왼쪽 정렬을 유지한다 */
+  .data-list.list-problems .problem-row .difficulty,
+  .data-list.list-problems .problem-row .problem-limit {
+    justify-self: auto;
+    text-align: left;
+  }
+}
+
+/* ===== 입력을 받지 않는 곳에는 텍스트 커서(I빔)가 나오지 않게 한다 =====
+   화면 글자 위에서는 기본 화살표, 누를 수 있는 곳은 손가락, 글을 입력하는 칸만 텍스트 커서.
+   읽고 복사하는 본문(글 내용·문제 설명·코드 출력)은 드래그로 선택하기 쉽도록 텍스트 커서를 둔다. */
+body {
+  cursor: default;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([readonly]),
+textarea:not([readonly]) {
+  cursor: text;
+}
+input[readonly],
+textarea[readonly] {
+  cursor: default;
+  caret-color: transparent;
+}
+select,
+input[type="checkbox"],
+input[type="radio"],
+label[for],
+summary,
+button,
+[role="button"],
+[role="tab"],
+[role="radio"],
+[role="option"],
+a[href] {
+  cursor: pointer;
+}
+button:disabled,
+[aria-disabled="true"] {
+  cursor: default;
+}
+.markdown,
+.markdown *,
+pre,
+pre * {
+  cursor: text;
+}
+.markdown a,
+.markdown a * {
+  cursor: pointer;
+}
+
+/* 조작용 요소(버튼·탭·토글·배지·표 행·내비게이션)의 글자는 드래그로 선택되지 않게 한다 */
+button,
+[role="button"],
+[role="tab"],
+[role="radio"],
+[role="option"],
+summary,
+.site-header,
+.site-footer,
+.step-nav,
+.slide-toggle,
+.pagination,
+.pill,
+.difficulty,
+.solve-badge,
+.verdict,
+.post-chip,
+.post-category,
+.case-pill,
+.data-list,
+.filter-card .filter-label,
+.back-link {
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* 입력칸 안의 글은 언제나 선택·편집할 수 있어야 한다(사파리 포함) */
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* 커뮤니티 검색창: 고른 태그를 알약으로 안에 보여 주고, 같은 줄에서 이어서 입력한다 */
+.search-box {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 5px 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  cursor: text;
+}
+.search-box:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.search-box .search-input {
+  flex: 1 1 140px;
+  width: auto;
+  min-width: 120px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.search-box .search-input:focus {
+  border: 0;
+  box-shadow: none;
+}
+.search-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 26px;
+  padding: 0 4px 0 10px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: var(--weight-title);
+  white-space: nowrap;
+}
+.search-tag-remove {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.search-tag-remove:hover,
+.search-tag-remove:focus-visible {
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  outline: none;
 }
 
 /* ───── 코드 분석 (Figma 13~18) ───── */

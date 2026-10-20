@@ -14,10 +14,14 @@ import {
   solveState,
   type SolveState,
 } from "../components/ProblemStatus";
+import { Pagination } from "../components/Pagination";
+import { ReverseIcon } from "../components/ReverseIcon";
 import { Select } from "../components/Select";
+import { ShuffleIcon } from "../components/ShuffleIcon";
 import { SlideToggle } from "../components/SlideToggle";
-import { useDocumentTitle } from "../hooks";
+import { useDocumentTitle, useStickyTop } from "../hooks";
 import { analysisPath } from "../paths";
+import { newSeed, seededShuffle } from "../shuffle";
 import type { Difficulty } from "../types";
 import { difficultyLabel } from "./ProblemsPage";
 
@@ -33,11 +37,13 @@ const difficulties = difficultyOptions.filter((value) =>
   analysisQuestions.some((item) => item.difficulty === value),
 );
 
+const PAGE_SIZE = 20;
+
 const sorts = [
   { value: "default", label: "출제순" },
-  { value: "easy", label: "쉬운 난이도순" },
-  { value: "hard", label: "어려운 난이도순" },
+  { value: "difficulty", label: "난이도순" },
   { value: "title", label: "제목순" },
+  { value: "random", label: "무작위" },
 ];
 
 const statusChips: { value: "" | SolveState; label: string }[] = [
@@ -50,7 +56,7 @@ const statusChips: { value: "" | SolveState; label: string }[] = [
 const total = analysisQuestions.length;
 
 /**
- * 문제 목록과 같은 방식: 검색어·난이도·분류·상태·정렬을 URL에 저장해
+ * 문제 목록과 같은 방식: 검색어·난이도·분류·상태·정렬·순서 뒤집기·페이지를 URL에 저장해
  * 문제를 열었다가 뒤로 가도 같은 목록이 복원된다.
  */
 export function AnalysisPage() {
@@ -76,9 +82,22 @@ export function AnalysisPage() {
   const sort = sorts.some((item) => item.value === params.get("sort"))
     ? (params.get("sort") as string)
     : "default";
+  // 기본 순서(출제순, 쉬운 난이도 먼저, 제목 가나다순)를 뒤집은 상태
+  const reversed = params.get("rev") === "1";
+  const seed = Number(params.get("seed")) || 1;
+  const page = Math.max(1, Number(params.get("page")) || 1);
+  const [announce, setAnnounce] = useState("");
+  // 아이콘 애니메이션은 키가 바뀔 때마다 처음부터 다시 실행된다.
+  const [spinKey, setSpinKey] = useState(0);
+  const [reverseKey, setReverseKey] = useState(0);
+  const sideRef = useRef<HTMLElement>(null);
+  useStickyTop(sideRef);
 
   // 지연된 호출(검색어 디바운스)이 오래된 주소로 다른 필터를 덮어쓰지 않도록 최신 값에서 계산한다.
-  function update(patch: Record<string, string | null>) {
+  function update(
+    patch: Record<string, string | null>,
+    { resetPage = true }: { resetPage?: boolean } = {},
+  ) {
     setParams(
       (prev) => {
         const next = new URLSearchParams(prev);
@@ -86,6 +105,7 @@ export function AnalysisPage() {
           if (value === null || value === "") next.delete(key);
           else next.set(key, value);
         }
+        if (resetPage && !("page" in patch)) next.delete("page");
         return next;
       },
       { replace: true },
@@ -125,6 +145,8 @@ export function AnalysisPage() {
   }, []);
 
   const keyword = urlQuery.trim().toLowerCase();
+  const isSingle = (value: string) =>
+    selectedDifficulties.length === 1 && selectedDifficulties[0] === value;
   const stateOf = (item: AnalysisQuestion) =>
     solveState(item.id, solved, attempted);
   const searchable = (item: AnalysisQuestion) =>
@@ -149,25 +171,37 @@ export function AnalysisPage() {
     (!keyword || searchable(item).includes(keyword));
 
   const filtered = useMemo(() => {
-    const base = [...analysisQuestions];
-    if (sort === "easy" || sort === "hard")
+    // 무작위: 전체를 한 번 섞은 뒤 필터를 적용한다. 필터를 바꿔도 상대 순서가 유지된다.
+    const base =
+      sort === "random"
+        ? seededShuffle(analysisQuestions, seed)
+        : [...analysisQuestions];
+    const dir = reversed ? -1 : 1;
+    if (sort === "difficulty")
       base.sort(
         (a, b) =>
           (difficultyOptions.indexOf(a.difficulty) -
             difficultyOptions.indexOf(b.difficulty)) *
-          (sort === "easy" ? 1 : -1),
+          dir,
       );
     else if (sort === "title")
-      base.sort((a, b) => a.title.localeCompare(b.title, "ko"));
+      base.sort((a, b) => a.title.localeCompare(b.title, "ko") * dir);
+    else if (sort === "default" && reversed) base.reverse();
     return base.filter((item) => matches(item, null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sort, params, solved, attempted]);
+  }, [sort, reversed, seed, params, solved, attempted]);
 
   const count = (
     skip: "difficulty" | "topic" | "status",
     test: (item: AnalysisQuestion) => boolean,
   ) => analysisQuestions.filter((item) => matches(item, skip) && test(item)).length;
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const current = Math.min(page, totalPages);
+  const visible = filtered.slice(
+    (current - 1) * PAGE_SIZE,
+    current * PAGE_SIZE,
+  );
   const hasFilter = Boolean(
     selectedDifficulties.length ||
       selectedTopics.length ||
@@ -184,6 +218,32 @@ export function AnalysisPage() {
     analysisQuestions.find((item) => attempted.has(item.id) && !solved.has(item.id)) ??
     analysisQuestions.find((item) => !attempted.has(item.id));
   const resuming = next ? attempted.has(next.id) : false;
+
+  // 목록을 무작위 순서로 섞는다(이동하지 않는다). 선택한 조건 안에서 섞인다.
+  function shuffle() {
+    update({ sort: "random", seed: String(newSeed()) });
+    setAnnounce("문제 목록을 무작위로 섞었어요.");
+  }
+
+  // 현재 목록의 순서를 거꾸로 뒤집는다(같은 정렬 안에서의 방향만 바뀐다).
+  function reverseOrder() {
+    update({
+      sort: sort === "default" ? null : sort,
+      rev: reversed ? null : "1",
+    });
+    setAnnounce(
+      reversed ? "목록 순서를 원래대로 되돌렸어요." : "목록 순서를 뒤집었어요.",
+    );
+  }
+
+  function changeSort(value: string) {
+    update({
+      rev: null,
+      sort: value === "default" ? null : value,
+      // 무작위를 고를 때마다 새 순서를 만든다.
+      seed: value === "random" ? String(newSeed()) : null,
+    });
+  }
 
   return (
     <div className="page-width problems-page">
@@ -205,15 +265,12 @@ export function AnalysisPage() {
               value={queryText}
               onChange={(event) => setQueryText(event.target.value)}
             />
-            <kbd aria-hidden="true">/</kbd>
           </div>
           <Select
             ariaLabel="정렬"
             value={sort}
             options={sorts}
-            onChange={(value) =>
-              update({ sort: value === "default" ? null : value })
-            }
+            onChange={changeSort}
           />
         </div>
 
@@ -233,7 +290,7 @@ export function AnalysisPage() {
                 ),
               }))}
               defaultValue=""
-              onChangeValues={(next) => update({ s: next.join(",") || null })}
+              onChangeValues={(values) => update({ s: values.join(",") || null })}
             />
           </div>
           <div className="filter-bar">
@@ -255,7 +312,7 @@ export function AnalysisPage() {
                 })),
               ]}
               defaultValue=""
-              onChangeValues={(next) => update({ d: next.join(",") || null })}
+              onChangeValues={(values) => update({ d: values.join(",") || null })}
             />
           </div>
           <div className="filter-bar">
@@ -273,49 +330,99 @@ export function AnalysisPage() {
                 })),
               ]}
               defaultValue=""
-              onChangeValues={(next) => update({ t: next.join(",") || null })}
+              onChangeValues={(values) => update({ t: values.join(",") || null })}
             />
           </div>
+          {sort === "random" ? (
+            <button
+              type="button"
+              className="shuffle-icon-button"
+              aria-label="무작위로 다시 섞기"
+              title="무작위로 다시 섞기"
+              onClick={() => {
+                setSpinKey((key) => key + 1);
+                shuffle();
+              }}
+              disabled={filtered.length < 2}
+            >
+              <ShuffleIcon playKey={spinKey} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="shuffle-icon-button reverse-icon-button"
+              aria-label="목록 순서 뒤집기"
+              aria-pressed={reversed}
+              title="목록 순서 뒤집기"
+              onClick={() => {
+                setReverseKey((key) => key + 1);
+                reverseOrder();
+              }}
+              disabled={filtered.length < 2}
+            >
+              <ReverseIcon playKey={reverseKey} />
+            </button>
+          )}
         </div>
       </div>
 
+      <p className="sr-only" role="status" aria-live="polite">
+        {announce}
+      </p>
       <div className="list-layout">
         <section aria-label="코드 분석 문제 목록">
           <div className="section-heading compact">
             <div className="title-line">
               <h2>{hasFilter ? "검색 결과" : "전체 문제"}</h2>
+              {sort === "random" ? (
+                <>
+                  <span className="pill pill-primary">무작위 순서</span>
+                  <button
+                    type="button"
+                    className="inline-button"
+                    onClick={() => changeSort("default")}
+                  >
+                    기본 순서로
+                  </button>
+                </>
+              ) : null}
             </div>
             <span className="total-count">
-              {hasFilter ? `${total}문제 중 ` : ""}
               {filtered.length}문제
+              {filtered.length
+                ? ` 중 ${(current - 1) * PAGE_SIZE + 1}–${(current - 1) * PAGE_SIZE + visible.length}`
+                : ""}
             </span>
           </div>
-          {filtered.length ? (
+          {visible.length ? (
             <div className="problem-list data-list list-problems">
               <div className="problem-head" aria-hidden="true">
                 <span>문제</span>
-                <span>풀이 상태</span>
                 <span>난이도</span>
+                <span>분류</span>
                 <span>언어</span>
               </div>
-              {filtered.map((item) => (
+              {visible.map((item) => (
                 <div className="problem-row-wrap" key={item.id}>
                   <Link className="problem-row" to={analysisPath(item.id)}>
                     <span className="problem-title">
-                      <strong>{item.title}</strong>
-                      <small className="analysis-row-meta">
-                        {item.topic} · {item.concepts.join(" · ")}
-                      </small>
+                      <span className="post-title-line">
+                        <strong title={item.title}>{item.title}</strong>
+                        {stateOf(item) === "none" ? null : (
+                          <ProblemStatus state={stateOf(item)} />
+                        )}
+                      </span>
                     </span>
-                    <ProblemStatus state={stateOf(item)} />
                     <span
                       className={`difficulty difficulty-${item.difficulty.toLowerCase()}`}
                     >
                       {difficultyLabel(item.difficulty)}
                     </span>
-                    <span className="problem-limit">{item.language}</span>
-                    <span className="row-arrow" aria-hidden="true">
-                      ›
+                    <span className="problem-limit" data-label="분류">
+                      {item.topic}
+                    </span>
+                    <span className="problem-limit" data-label="언어">
+                      {item.language}
                     </span>
                   </Link>
                 </div>
@@ -340,9 +447,19 @@ export function AnalysisPage() {
               </button>
             </div>
           )}
+          <Pagination
+            page={current}
+            totalPages={totalPages}
+            onChange={(value) =>
+              update(
+                { page: value === 1 ? null : String(value) },
+                { resetPage: false },
+              )
+            }
+          />
         </section>
 
-        <aside className="side-stack">
+        <aside className="side-stack" ref={sideRef}>
           <div className="standing-card">
             <h2>내 학습</h2>
             <dl>
@@ -371,7 +488,11 @@ export function AnalysisPage() {
                     {difficultyLabel(next.difficulty)}
                   </span>
                 </div>
-                <Link className="button" to={analysisPath(next.id)}>
+                <Link
+                  className="button"
+                  to={analysisPath(next.id)}
+                  title={`${next.title} · ${resuming ? "이어서 풀기" : "다음 문제 풀기"}`}
+                >
                   {resuming ? "이어서 풀기" : "다음 문제 풀기"}{" "}
                   <span aria-hidden="true">→</span>
                 </Link>
@@ -383,23 +504,61 @@ export function AnalysisPage() {
             )}
           </div>
           <div className="guide-card">
-            <h2>이렇게 풀어요</h2>
-            <ol className="analysis-guide">
-              <li>코드를 읽고 실행했을 때 나오는 값을 보기에서 골라요.</li>
-              <li>정답을 확인하면 해설과 관련 개념이 열려요.</li>
+            <h2>나에게 맞는 문제 찾기</h2>
+            <ol>
               <li>
-                푼 기록은 이 브라우저에 저장되고, 오늘 푼 문제는 미션 ‘코드 분석
-                워밍업’에 반영돼요.
+                <button
+                  aria-pressed={isSingle("BEGINNER")}
+                  onClick={() => update({ d: "BEGINNER" })}
+                >
+                  <strong>쉬운 난이도로 시작하기</strong>
+                  <span>부담 없는 문제부터 차근차근</span>
+                  <i className="row-chevron" aria-hidden="true">
+                    ›
+                  </i>
+                </button>
+              </li>
+              <li>
+                <button
+                  aria-pressed={isSingle("MEDIUM")}
+                  onClick={() => update({ d: "MEDIUM" })}
+                >
+                  <strong>보통 난이도에 도전하기</strong>
+                  <span>익숙해졌다면 한 단계 위로</span>
+                  <i className="row-chevron" aria-hidden="true">
+                    ›
+                  </i>
+                </button>
+              </li>
+              <li>
+                <button
+                  aria-pressed={
+                    statuses.length === 1 &&
+                    statuses[0] === "none" &&
+                    !selectedDifficulties.length
+                  }
+                  onClick={() => update({ s: "none", d: null })}
+                >
+                  <strong>아직 안 푼 문제만 보기</strong>
+                  <span>새로운 문제에 집중해요</span>
+                  <i className="row-chevron" aria-hidden="true">
+                    ›
+                  </i>
+                </button>
               </li>
             </ol>
-            {session ? null : (
-              <p className="analysis-hint">
-                <Link to="/auth" state={{ from: "/analysis" }}>
-                  로그인
-                </Link>
-                하면 내 계정의 미션에 기록이 이어져요.
-              </p>
-            )}
+            <p className="analysis-hint">
+              푼 기록은 이 브라우저에 저장되고, 오늘 푼 문제는 미션 ‘코드 분석
+              워밍업’에 반영돼요.{" "}
+              {session ? null : (
+                <>
+                  <Link to="/auth" state={{ from: "/analysis" }}>
+                    로그인
+                  </Link>
+                  하면 내 계정의 미션에 이어져요.
+                </>
+              )}
+            </p>
           </div>
         </aside>
       </div>

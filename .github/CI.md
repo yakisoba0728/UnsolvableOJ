@@ -7,17 +7,20 @@ GitHub 제공 `ubuntu-24.04` 러너에서 **Node 24, 작업 1개**로 필요한 
 - BOJ HTML 변환 회귀 테스트
 - 프론트엔드 TypeScript 검사·프로덕션 빌드·브라우저 테스트 타입 검사
 - Chromium에서 UI·페이지네이션·제출 당시 예제·본문 렌더링 회귀 테스트
-- 채점 워커 빌드·Python 런타임 단위 테스트
-- 임시 PostgreSQL·Redis에서 마이그레이션 적용·API 통합 테스트
+- 별도 Compose 프로젝트에서 Chromium·Firefox·WebKit 회원가입→문제 게시→실제 제출/채점→XP→로그아웃 검증
+- 채점 워커 빌드·go-judge HTTP 계약 회귀 테스트
+- privileged Linux go-judge 이미지 빌드·8개 언어·실패 판정·자원 제한·격리·캐시 회수 시험
+- 임시 PostgreSQL·Redis에서 마이그레이션 적용·API 통합·실제 워커 채점 파이프라인 테스트
 
-전체 결과는 `CI required`에서 확인합니다. 시간 제한은 10분입니다.
-Node 버전 매트릭스, 채점 이미지 빌드, 전체 언어 smoke, Firefox·WebKit 브라우저 검사는 CI에서 실행하지 않습니다.
-확장 검사 스크립트(`test:migrations`, `test:pipeline`, 프론트 `test:e2e`, 채점기 `test:runtime`)는 필요할 때 로컬에서 실행할 수 있습니다.
+전체 결과는 `CI required`에서 확인합니다. 시간 제한은 20분입니다.
+Node 버전 매트릭스와 기존 모의 API 회귀 테스트의 Firefox·WebKit 실행은 CI에서 생략합니다. 실제 Compose 흐름은 세 브라우저에서 검사합니다.
+확장 검사 스크립트(`test:migrations`, 프론트 전체 브라우저 `test:e2e`)는 필요할 때 로컬에서 실행할 수 있습니다.
 
 ## 러너
 
 - GitHub-hosted Ubuntu 24.04 x64 가상 머신을 작업마다 새로 할당합니다.
 - Docker와 Python 3는 러너 기본 환경을 사용하고 Node 24는 `setup-node`로 설치합니다.
+- 일회용 러너에서만 `swapoff -a`를 실행합니다. 호스트 루트 cgroup에는 swap 제한을 쓸 수 없으므로 sandbox가 메모리 제한을 우회하지 못하도록 합니다. 개발/운영 서버의 swap을 자동으로 변경하지 않습니다.
 - 별도 러너 설치·등록·상시 서비스 운영은 필요하지 않습니다.
 - 실행 로그는 저장소의 Actions 탭에서 확인합니다.
 
@@ -34,11 +37,20 @@ npm ci --prefix Judge
 npm run check --prefix Back
 npm run build --prefix Front
 npm run check --prefix Judge
+docker compose up -d --build --wait go-judge
+# Judge/.env의 GO_JUDGE_TOKEN을 실행 서비스와 동일하게 설정한 뒤
+npm run test:runtime --prefix Judge
+node scripts/check-compose.mjs
 ```
+
+`check-compose.mjs`는 무작위 프로젝트명·localhost 임의 포트·메모리 파일시스템 DB/Redis와 일회용 인증키를 사용합니다. 기존 개발 서비스/볼륨을 재사용하지 않으며 성공·실패 모두 생성한 프로젝트만 정리합니다. Docker Compose 2.24.4 이상과 Playwright 세 브라우저가 필요합니다.
+
+macOS Firefox가 앱 접속 전 `Could not find profile folder`로 종료되는 환경에서는 `node scripts/check-compose.mjs --project=chromium --project=webkit`로 로컬 흐름을 확인하고 Linux CI의 Firefox 결과를 별도로 확인하세요. 브라우저 보안 설정을 끄거나 기존 개인 프로필을 재사용하지 않습니다. 실제 브라우저 결과물은 `Front/reports/live-browser*`에 저장해 모의 회귀 테스트 결과와 분리합니다.
 
 테스트용 DB/Redis의 `DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`를 지정한 뒤:
 
 ```sh
 npm run db:migration:run --prefix Back
 npm run test:e2e --prefix Back
+npm run test:pipeline --prefix Back
 ```

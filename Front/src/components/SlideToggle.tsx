@@ -6,6 +6,7 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
+import { Skeleton } from "./Skeleton";
 
 export interface ToggleOption {
   value: string;
@@ -20,6 +21,8 @@ interface BaseProps {
   defaultValue?: string;
   ariaLabel: string;
   className?: string;
+  /** 개수를 아직 서버에서 받지 못한 동안 숫자 대신 로딩 표시를 보인다 */
+  countsLoading?: boolean;
 }
 
 type SlideToggleProps = BaseProps &
@@ -66,7 +69,13 @@ let thumbCounter = 0;
  * 키보드: 단일 선택은 ←→ 로 옵션을 옮기며 선택하고(라디오 그룹), 다중 선택은 ←→ 로 포커스만 옮긴다.
  */
 export function SlideToggle(props: SlideToggleProps) {
-  const { options, defaultValue, ariaLabel, className = "" } = props;
+  const {
+    options,
+    defaultValue,
+    ariaLabel,
+    className = "",
+    countsLoading = false,
+  } = props;
   const multiple = props.multiple === true;
   const rootRef = useRef<HTMLDivElement>(null);
   const [thumbs, setThumbs] = useState<Thumb[]>([]);
@@ -313,7 +322,11 @@ export function SlideToggle(props: SlideToggleProps) {
           >
             {option.label}
             {option.count !== undefined ? (
-              <span className="toggle-count">{option.count}</span>
+              countsLoading ? (
+                <Skeleton className="toggle-count" width={16} height={12} />
+              ) : (
+                <span className="toggle-count">{option.count}</span>
+              )
             ) : null}
           </button>
         );

@@ -56,14 +56,19 @@ test.describe("code editing rules", () => {
     expect(handleBackspace(at("(a)", 2))).toBeNull();
   });
 
-  test("blank lines retain their indentation without opening a block", () => {
+  test("Enter on a whitespace-only line does not carry its indentation over", () => {
     for (const value of ["", "    ", "\t"]) {
       expect(handleEnter(at(value, value.length), "PYTHON")).toEqual({
-        value: `${value}\n${value}`,
-        start: value.length * 2 + 1,
-        end: value.length * 2 + 1,
+        value: `${value}\n`,
+        start: value.length + 1,
+        end: value.length + 1,
       });
     }
+    // 내용이 있는 줄 가운데에서 치면 뒤쪽 글자는 들여쓰기를 유지한다
+    expect(handleEnter(at("    foo", 4), "CPP")).toMatchObject({
+      value: "    \n    foo",
+      start: 9,
+    });
   });
 
   test("closing quotes skip the existing pair after string content", () => {

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { verdictLabel } from "../verdict";
 import { fetchAll, useDocumentTitle } from "../hooks";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
@@ -6,6 +7,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
+import { Skeleton, SkeletonRows } from "../components/Skeleton";
 import type { Submission } from "../types";
 
 const languageLabels: Record<string, string> = {
@@ -30,8 +32,8 @@ const groupOf = (status: string): StatusGroup =>
       : "wrong";
 const statusChips: { value: StatusGroup; label: string }[] = [
   { value: "", label: "전체" },
-  { value: "accepted", label: "정답" },
-  { value: "wrong", label: "오답·오류" },
+  { value: "accepted", label: "성공" },
+  { value: "wrong", label: "틀림·오류" },
   { value: "pending", label: "채점 중" },
 ];
 
@@ -154,7 +156,13 @@ export function SubmissionsPage() {
     <div className="page-width page-body">
       <PageHeader
         title="내 제출"
-        badge={<span className="pill">{filteredCount}건</span>}
+        badge={
+          loading ? (
+            <Skeleton width={48} height={24} radius={999} />
+          ) : (
+            <span className="pill">{filteredCount}건</span>
+          )
+        }
         description="제출한 코드와 판정을 확인하세요."
       />
       <div className="filter-card">
@@ -189,6 +197,7 @@ export function SubmissionsPage() {
             <SlideToggle
               multiple
               ariaLabel="판정 필터"
+              countsLoading={loading}
               values={statuses}
               options={statusChips.map((item) => ({
                 value: item.value,
@@ -223,7 +232,7 @@ export function SubmissionsPage() {
         </p>
       ) : null}
       {loading ? (
-        <div className="empty-state">제출을 불러오는 중입니다…</div>
+        <SkeletonRows count={8} columns={5} />
       ) : visible.length ? (
         <div className="problem-list data-list list-history">
           <div className="history-head" aria-hidden="true">
@@ -247,7 +256,7 @@ export function SubmissionsPage() {
                 </small>
               </span>
               <span className={`verdict verdict-${item.status.toLowerCase()}`}>
-                {item.status.replaceAll("_", " ")}
+                {verdictLabel(item.status)}
               </span>
               <span className="history-lang">
                 {languageLabels[item.language] ?? item.language}

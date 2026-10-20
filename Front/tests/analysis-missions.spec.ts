@@ -42,7 +42,7 @@ test("code analysis: the page lists every question like the problem list", async
   await expect(page.getByLabel("풀이 상태 필터")).toBeVisible();
   await expect(page.getByLabel("난이도 필터")).toBeVisible();
   await expect(page.getByLabel("분류 필터")).toBeVisible();
-  await expect(page.getByText("10문제", { exact: true })).toBeVisible();
+  await expect(page.getByText("10문제 중 1–10")).toBeVisible();
   await expect(page.locator(".standing-card")).toContainText("0 / 10");
   await expect(page.getByRole("link", { name: /로그인/ }).last()).toBeVisible();
 });
@@ -82,11 +82,21 @@ test("code analysis: search and filters narrow the list and are kept in the URL"
   await expect(rows(page)).toHaveCount(medium.length);
 });
 
-test("code analysis: sort by difficulty", async ({ page }) => {
-  await page.goto("/analysis?sort=hard");
-  await expect(rows(page).first()).toContainText("보통");
-  await page.goto("/analysis?sort=easy");
+test("code analysis: sort by difficulty and reverse the order", async ({ page }) => {
+  await page.goto("/analysis?sort=difficulty");
   await expect(rows(page).first()).toContainText("입문");
+  await page.getByRole("button", { name: "목록 순서 뒤집기" }).click();
+  await expect(page).toHaveURL(/rev=1/);
+  await expect(rows(page).first()).toContainText("보통");
+  await page.getByRole("button", { name: "목록 순서 뒤집기" }).click();
+  await expect(rows(page).first()).toContainText("입문");
+
+  // 무작위는 다시 섞기 버튼으로 바뀌고, 같은 주소는 같은 순서를 만든다.
+  await page.goto("/analysis?sort=random&seed=7");
+  const titles = await rows(page).locator("strong").allInnerTexts();
+  await expect(page.getByRole("button", { name: "무작위로 다시 섞기" })).toBeVisible();
+  await page.reload();
+  expect(await rows(page).locator("strong").allInnerTexts()).toEqual(titles);
 });
 
 test("code analysis: pick a question, confirm, read the explanation and move on", async ({
@@ -156,7 +166,7 @@ test("code analysis: coming back to a solved question keeps the result and allow
   await expect(page.getByRole("button", { name: "정답 확인" })).toBeDisabled();
 
   await page.goto("/analysis");
-  await expect(rows(page).first().locator(".solve-badge")).toHaveText("해결");
+  await expect(rows(page).first().locator(".solve-badge")).toContainText("해결");
   await expect(page.locator(".standing-card")).toContainText("1 / 10");
   await expect(page.getByLabel("풀이 상태 필터").getByRole("button", { name: /^미해결/ })).toContainText("9");
 });
@@ -183,7 +193,7 @@ test("code analysis: records are kept per user and counted once per question for
     route.fulfill({ json: { items: [], page: 1, limit: 1000, total: 0, totalPages: 1 } }),
   );
   await page.goto("/analysis");
-  await expect(rows(page).first().locator(".solve-badge")).toHaveText("미해결");
+  await expect(rows(page).first().locator(".solve-badge")).toHaveCount(0);
   await expect(page.locator(".standing-card")).toContainText("0 / 10");
 
   await page.goto(`/analysis/${second.id}`);

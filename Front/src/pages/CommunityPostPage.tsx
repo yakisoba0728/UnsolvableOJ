@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
+import {
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  Pencil,
+  ThumbsUp,
+  Trash2,
+} from "lucide-react";
+import { ActionMenu } from "../components/ActionMenu";
 import { useAuth } from "../auth";
 import {
   acceptedAnswerId,
@@ -76,15 +85,6 @@ export function CommunityPostPage() {
   const isMine = Boolean(me && post.author.name === me.name);
   const authorStats = statsOf(activity, post.author.name);
   const following = activity.followed.includes(post.author.name);
-  const related = allPosts(activity)
-    .filter(
-      (item) =>
-        item.id !== post.id &&
-        item.category !== "notice" &&
-        (item.category === post.category ||
-          item.tags.some((tag) => post.tags.includes(tag))),
-    )
-    .slice(0, 4);
 
   function requireLogin(action: () => void) {
     if (session) action();
@@ -146,28 +146,74 @@ export function CommunityPostPage() {
           {notice}
         </p>
       ) : null}
-      <div className="post-layout">
+      <div className="post-layout no-side">
         <div className="post-column">
           <article className="post-card">
-            <span className="post-chip">
-              {categoryLabel(post.category)}
-              {post.tags[0] ? ` · ${post.tags[0]}` : ""}
-            </span>
-            <h1>{post.title}</h1>
+            <div className="post-card-head">
+              <span className="post-chip">
+                {categoryLabel(post.category)}
+                {post.tags[0] ? ` · ${post.tags[0]}` : ""}
+              </span>
+              {isMine ? (
+                <ActionMenu
+                  label="글 관리"
+                  items={[
+                    {
+                      label: "수정",
+                      icon: <Pencil size={15} aria-hidden="true" />,
+                      onSelect: () => navigate(`/community/${post.id}/edit`),
+                    },
+                    {
+                      label: "삭제",
+                      icon: <Trash2 size={15} aria-hidden="true" />,
+                      danger: true,
+                      onSelect: deleteMyPost,
+                    },
+                  ]}
+                />
+              ) : null}
+            </div>
             <div className="post-byline">
               <div className="post-author-line">
                 <span className="post-avatar" aria-hidden="true">
                   {post.author.name.slice(0, 1)}
                 </span>
-                <span>
-                  {post.author.name} · {post.author.tier} ·{" "}
-                  {relativeTime(post.createdAt)}
+                <span className="post-author-text">
+                  <strong>{post.author.name}</strong>
+                  <span className="muted">
+                    {post.author.tier}
+                    {authorStats.reputation
+                      ? ` · 명성 ${authorStats.reputation.toLocaleString()}`
+                      : ""}{" "}
+                    · {relativeTime(post.createdAt)}
+                  </span>
+                  <small className="muted">
+                    채택 답변 {authorStats.acceptedAnswers} · 작성 글{" "}
+                    {authorStats.posts}
+                  </small>
                 </span>
               </div>
-              {acceptedId ? (
-                <span className="post-stats">채택 완료</span>
-              ) : null}
+              <div className="post-byline-side">
+                {acceptedId ? (
+                  <span className="post-stats">채택 완료</span>
+                ) : null}
+                {!isMine ? (
+                  <button
+                    type="button"
+                    className="button button-outline button-small"
+                    aria-pressed={following}
+                    onClick={() =>
+                      requireLogin(() =>
+                        communityActions.toggleFollow(post.author.name),
+                      )
+                    }
+                  >
+                    {following ? "✓ 팔로잉" : "+ 팔로우"}
+                  </button>
+                ) : null}
+              </div>
             </div>
+            <h1>{post.title}</h1>
             <div className="markdown post-body">
               <Markdown>{post.body}</Markdown>
             </div>
@@ -175,14 +221,21 @@ export function CommunityPostPage() {
               <ul className="post-tags" aria-label="태그">
                 {post.tags.map((tag) => (
                   <li key={tag}>
-                    <Link to={`/community?q=${encodeURIComponent(tag)}`}>
+                    <Link to={`/community?t=${encodeURIComponent(tag)}`}>
                       #{tag}
                     </Link>
                   </li>
                 ))}
               </ul>
             ) : null}
-            <p className="post-views">조회 {post.views.toLocaleString()}</p>
+            <p
+              className="post-views icon-count"
+              aria-label={`조회 ${post.views.toLocaleString()}`}
+              title="조회수"
+            >
+              <Eye size={15} aria-hidden="true" />
+              {post.views.toLocaleString()}
+            </p>
             <div className="post-actions">
               <button
                 type="button"
@@ -192,61 +245,51 @@ export function CommunityPostPage() {
                   requireLogin(() => communityActions.toggleUpvote(post.id))
                 }
               >
-                ▲ 추천 {upvoteCount(activity, post.id, post.upvotes)}
+                <ThumbsUp size={15} aria-hidden="true" /> 추천{" "}
+                {upvoteCount(activity, post.id, post.upvotes)}
               </button>
-              {isMine ? (
-                <button
-                  type="button"
-                  className="button button-danger-outline"
-                  onClick={deleteMyPost}
-                >
-                  글 삭제
-                </button>
-              ) : null}
             </div>
           </article>
 
-          <form
-            className="post-card answer-editor"
-            onSubmit={submit}
-            noValidate
-          >
-            <h2 className="post-section-title">답변 작성</h2>
-            <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
-            {session ? (
-              <>
-                <textarea
-                  ref={editorRef}
-                  rows={6}
-                  aria-label="답변 내용"
-                  aria-invalid={Boolean(error)}
-                  placeholder="답변을 입력하세요."
-                  value={draft}
-                  onChange={(event) => onDraftChange(event.target.value)}
-                />
-                {error ? (
-                  <p className="error-message" role="alert">
-                    {error}
-                  </p>
-                ) : null}
-                <div className="answer-footer">
-                  <span className="muted">
-                    등록 전까지 작성 내용을 유지합니다.
-                  </span>
-                  <button className="button" disabled={pending}>
-                    {pending ? "등록 중…" : "답변 등록"}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <p className="login-prompt">
-                답변을 남기려면 로그인해 주세요.{" "}
-                <Link to="/auth" state={{ from: `/community/${id}` }}>
-                  로그인하기
-                </Link>
-              </p>
-            )}
-          </form>
+          <section className="post-card answer-write-card" aria-label="답변 작성">
+            <form className="answer-editor" onSubmit={submit} noValidate>
+              <h3 className="answer-editor-title">답변 작성</h3>
+              <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
+              {session ? (
+                <>
+                  <textarea
+                    ref={editorRef}
+                    rows={6}
+                    aria-label="답변 내용"
+                    aria-invalid={Boolean(error)}
+                    placeholder="답변을 입력하세요."
+                    value={draft}
+                    onChange={(event) => onDraftChange(event.target.value)}
+                  />
+                  {error ? (
+                    <p className="error-message" role="alert">
+                      {error}
+                    </p>
+                  ) : null}
+                  <div className="answer-footer">
+                    <span className="muted">
+                      등록 전까지 작성 내용을 유지합니다.
+                    </span>
+                    <button className="button" disabled={pending}>
+                      {pending ? "등록 중…" : "답변 등록"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="login-prompt">
+                  답변을 남기려면 로그인해 주세요.{" "}
+                  <Link to="/auth" state={{ from: `/community/${id}` }}>
+                    로그인하기
+                  </Link>
+                </p>
+              )}
+            </form>
+          </section>
 
           <section className="post-card answers-card" aria-label="답변">
             <h2 className="post-section-title">
@@ -259,7 +302,11 @@ export function CommunityPostPage() {
               >
                 <span>답변 {answers.length}</span>
                 <span className="answers-chevron" aria-hidden="true">
-                  {answersOpen ? "▴" : "▾"}
+                  {answersOpen ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
                 </span>
               </button>
             </h2>
@@ -291,7 +338,8 @@ export function CommunityPostPage() {
                               )
                             }
                           >
-                            ▲ {upvoteCount(activity, answer.id, answer.upvotes)}
+                            <ThumbsUp size={13} aria-hidden="true" />{" "}
+                            {upvoteCount(activity, answer.id, answer.upvotes)}
                           </button>
                           {isMine && post.category === "question" ? (
                             <button
@@ -326,50 +374,6 @@ export function CommunityPostPage() {
             )}
           </section>
         </div>
-
-        <aside className="post-side">
-          <section className="post-card author-card" aria-label="작성자">
-            <span className="post-avatar large" aria-hidden="true">
-              {post.author.name.slice(0, 1)}
-            </span>
-            <strong>{post.author.name}</strong>
-            <span className="muted">
-              {post.author.tier}
-              {authorStats.reputation
-                ? ` · 명성 ${authorStats.reputation.toLocaleString()}`
-                : ""}
-            </span>
-            {!isMine ? (
-              <button
-                type="button"
-                className="button button-outline button-full"
-                onClick={() =>
-                  requireLogin(() =>
-                    communityActions.toggleFollow(post.author.name),
-                  )
-                }
-              >
-                {following ? "✓ 팔로잉" : "+ 팔로우"}
-              </button>
-            ) : null}
-            <small className="muted">
-              채택 답변 {authorStats.acceptedAnswers} · 작성 글{" "}
-              {authorStats.posts}
-            </small>
-          </section>
-          {related.length ? (
-            <section className="post-card related-card" aria-label="관련 글">
-              <h2>관련 질문</h2>
-              <ul>
-                {related.map((item) => (
-                  <li key={item.id}>
-                    <Link to={`/community/${item.id}`}>{item.title}</Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-        </aside>
       </div>
     </div>
   );
