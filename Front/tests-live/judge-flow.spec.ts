@@ -52,13 +52,15 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
   await page.getByRole("option", { name: "Python 3", exact: true }).click();
   await page.getByLabel("소스 코드").fill("print(sum(map(int,input().split())))");
   await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
-  await expect(page).toHaveURL(/\/submissions\/[a-f0-9-]+$/);
-  await expect(page.getByText("ACCEPTED", { exact: true })).toBeVisible({ timeout: 30_000 });
+  const panel = page.getByRole("region", { name: "채점 결과", exact: true });
+  await expect(panel.getByRole("status")).toHaveText("성공", { timeout: 30_000 });
   await expect(page.getByText("2 / 2", { exact: true })).toBeVisible();
   await expect(page.locator(".case-result")).toHaveCount(1);
   await expect(page.locator(".case-result")).not.toContainText("5 7");
+  await panel.getByRole("link", { name: "자세히 보기" }).click();
+  await expect(page).toHaveURL(/\/submissions\/[a-f0-9-]+$/);
   await page.reload();
-  await expect(page.getByText("ACCEPTED", { exact: true })).toBeVisible();
+  await expect(page.getByText("성공", { exact: true })).toBeVisible();
 
   await page.goto("/profile");
   await expect(page.getByText("10 / 100 XP", { exact: false })).toBeVisible();
@@ -66,7 +68,11 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
   await page.goto(`/problems/view/${slug}`);
   await page.getByLabel("소스 코드").fill("print(0)");
   await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
-  await expect(page.getByText("WRONG ANSWER", { exact: true })).toBeVisible({ timeout: 30_000 });
+  await expect(panel.getByRole("status")).toHaveText("틀림", { timeout: 30_000 });
+  await page.goto(`/problems?q=${slug}`);
+  const row = page.getByRole("link").filter({ hasText: title });
+  await expect(row).toContainText("1명");
+  await expect(row).toContainText("50%");
   await page.getByRole("button", { name: "로그아웃" }).click();
   await expect(page).toHaveURL(/\/$/);
   await page.goto("/submissions");

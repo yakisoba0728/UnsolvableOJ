@@ -76,6 +76,7 @@ jobs:
         env:
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: |
+          sudo swapoff -a
           docker compose up -d --build --wait --wait-timeout 180 go-judge
           npm run test:runtime --prefix Judge
       - name: Database migrations and API tests

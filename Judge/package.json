@@ -10,7 +10,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/worker.js",
     "start:dev": "npm run build && node dist/worker.js",
-    "check": "npm run build && node --test dist/judge.test.js",
+    "check": "npm run build && node --test dist/judge.test.js dist/start.test.js",
     "test:runtime": "npm run build && node --test dist/runtime.test.js"
   },
   "dependencies": {

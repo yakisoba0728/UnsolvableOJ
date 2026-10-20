@@ -9,7 +9,7 @@ NestJS, PostgreSQL, Redis로 구성한 UnsolvableOJ 웹 백엔드입니다. Post
 - 회원가입 및 로그인(JWT access token)
 - `USER`, `AUTHOR`, `ADMIN` 역할 기반 권한
 - 문제와 공개/비공개 테스트케이스 저장
-- 공개 문제 목록/상세 조회
+- 공개 문제 목록/상세 조회. 목록의 `solverCount`는 정답 사용자 중복 제거 수이며 `acceptanceRate`는 실제 채점 완료 제출의 정답 비율(소수 첫째 자리, 대상 없으면 `null`)입니다. 대기·채점 중·시스템 오류·취소는 비율에서 제외하며 페이지당 한 번에 집계합니다.
 - 코드 제출, 내 제출 목록/상세 조회
 - Redis 기반 비동기 채점 큐
 - 외부 채점 워커용 claim/result 내부 API

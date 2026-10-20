@@ -20,6 +20,7 @@ Node 버전 매트릭스와 기존 모의 API 회귀 테스트의 Firefox·WebKi
 
 - GitHub-hosted Ubuntu 24.04 x64 가상 머신을 작업마다 새로 할당합니다.
 - Docker와 Python 3는 러너 기본 환경을 사용하고 Node 24는 `setup-node`로 설치합니다.
+- 일회용 러너에서만 `swapoff -a`를 실행합니다. 호스트 루트 cgroup에는 swap 제한을 쓸 수 없으므로 sandbox가 메모리 제한을 우회하지 못하도록 합니다. 개발/운영 서버의 swap을 자동으로 변경하지 않습니다.
 - 별도 러너 설치·등록·상시 서비스 운영은 필요하지 않습니다.
 - 실행 로그는 저장소의 Actions 탭에서 확인합니다.
 

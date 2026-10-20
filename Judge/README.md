@@ -44,7 +44,7 @@ npm run start:dev
 
 - 서비스 API는 Bearer 인증을 사용하며 localhost 포트만 공개합니다. Compose에서는 워커만 애플리케이션·sandbox 두 네트워크에 연결합니다. 외부에 `/run`·`/file`을 공개하지 마세요.
 - `-no-fallback`, seccomp, cpu/memory/pids controller와 `/w`를 healthcheck 및 워커 시작 시 검사합니다. 잘못된 인증/격리 설정에서는 채점을 시작하지 않습니다. `-no-seccomp`, `-net-share`를 켜지 마세요.
-- cgroup v2는 서비스 상위 `memory.swap.max=0`을 설정해 자손도 swap을 사용하지 못하게 합니다. v1은 호스트 swap이 꺼져 있어야 시작합니다.
+- 호스트 swap이 꺼져 있으면 cgroup 루트 제한을 쓰지 않습니다. swap이 켜진 v2에서는 서비스 상위 `memory.swap.max=0` 설정에 성공해야 시작하며, v1은 호스트 swap이 꺼져 있어야 합니다. 실제 호스트 루트 cgroup은 제한할 수 없으므로 그런 환경에서는 관리자가 swap을 끄거나 위임된 cgroup을 제공해야 합니다.
 - 제출에는 해당 소스/산출물과 해당 테스트 입력만 전달합니다. 읽기 전용 도구·라이브러리와 임시 `/w`·`/tmp`만 mount하며, API/DB 비밀키·정답·호스트 디렉터리·Docker socket을 넣지 않습니다.
 - upstream은 시작 로그에 설정/인증 토큰을 기록할 수 있으므로 실행 노드 로그도 접근을 제한하세요. 이미지/호스트 패치와 실제 자원 제한 검증은 별도로 필요합니다.
 
