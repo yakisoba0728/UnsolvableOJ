@@ -2,22 +2,40 @@ import { Link } from "react-router-dom";
 import { useAnalysisAttempts } from "../analysis/progress";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
+import { SeasonRing } from "../components/SeasonRing";
+import { MissionBody } from "../components/MissionBody";
+import { WeekStrip } from "../components/WeekStrip";
+import { XpBoostCard } from "../components/XpBoostCard";
 import { useActivity } from "../community/store";
-import { dayKey, useDocumentTitle, useSubmissionHistory } from "../hooks";
+import { remainingText } from "../enterprise/model";
+import { useNow } from "../enterprise/useNow";
+import {
+  useDocumentTitle,
+  useSubmissionHistory,
+  submissionsByDay,
+} from "../hooks";
 import {
   buildMissions,
+  deadlineOf,
   seasonOf,
-  type MissionStatus,
+  type Mission,
+  type MissionPeriod,
 } from "../missions/catalog";
 
-const statusLabel: Record<MissionStatus, string> = {
-  idle: "시작 전",
-  active: "진행 중",
-  done: "달성",
+const deadlinePrefix: Record<MissionPeriod, string> = {
+  day: "자정까지",
+  week: "토요일 자정까지",
+  month: "이번 달 말까지",
+  streak: "",
 };
 
-const percent = (current: number, target: number) =>
-  `${Math.min(100, (current / target) * 100)}%`;
+function MissionCard({ mission }: { mission: Mission }) {
+  return (
+    <li className={`mission-card is-${mission.status}`}>
+      <MissionBody mission={mission} />
+    </li>
+  );
+}
 
 export function MissionsPage() {
   useDocumentTitle("미션");
@@ -25,46 +43,74 @@ export function MissionsPage() {
   const history = useSubmissionHistory(session);
   const attempts = useAnalysisAttempts();
   const activity = useActivity();
+  const tick = useNow();
 
-  const now = new Date();
+  const now = new Date(tick);
   const userId = session?.user.id;
-  // 같은 문제를 다시 풀어도 한 번만 센다.
-  const analysisToday = userId
-    ? new Set(
-        attempts
-          .filter(
-            (item) =>
-              item.userId === userId &&
-              dayKey(new Date(item.at)) === dayKey(now),
-          )
-          .map((item) => item.questionId),
-      ).size
-    : 0;
-  const communityPosts = session
-    ? activity.posts.filter((post) => {
-        const created = new Date(post.createdAt);
-        return (
-          post.category === "solution" &&
-          post.author.name === session.user.username &&
-          created.getFullYear() === now.getFullYear() &&
-          created.getMonth() === now.getMonth()
-        );
-      }).length
-    : 0;
-
-  const missions = buildMissions({
+  const input = {
     submissions: history.submissions,
-    analysisToday,
-    communityPosts,
+    analysis: userId ? attempts.filter((item) => item.userId === userId) : [],
+    posts: session
+      ? activity.posts
+          .filter(
+            (post) =>
+              post.category === "solution" &&
+              post.author.name === session.user.username,
+          )
+          .map((post) => post.createdAt)
+      : [],
     now,
-  });
-  const season = seasonOf(missions, now);
+  };
+  const missions = buildMissions(input);
+  const season = seasonOf(input);
+  const seasonDone = Math.min(season.done, season.total);
+  const solvedIds = new Set(
+    history.submissions
+      .filter((item) => item.status === "ACCEPTED")
+      .map((item) => item.problem.id),
+  );
+  const byId = (id: Mission["id"]) =>
+    missions.find((mission) => mission.id === id)!;
+  const streak = byId("streak");
+
+  const left = (period: MissionPeriod) => {
+    const end = deadlineOf(period, now);
+    return end ? `${deadlinePrefix[period]} ${remainingText(end.getTime() - tick)}` : "";
+  };
+
+  const groups: { period: MissionPeriod; title: string; items: Mission[] }[] = [
+    {
+      period: "day",
+      title: "오늘",
+      items: [byId("daily"), byId("analysis"), byId("night")],
+    },
+    { period: "week", title: "이번 주", items: [byId("weekly")] },
+    { period: "month", title: "이번 달", items: [byId("community")] },
+  ];
+
+  const section = (group: (typeof groups)[number]) => (
+    <section
+      key={group.period}
+      className={`mission-group mission-group-${group.period}`}
+      aria-labelledby={`mission-${group.period}`}
+    >
+      <div className="section-heading compact">
+        <h2 id={`mission-${group.period}`}>{group.title}</h2>
+        <span className="muted mission-deadline">{left(group.period)}</span>
+      </div>
+      <ul className="mission-grid">
+        {group.items.map((mission) => (
+          <MissionCard key={mission.id} mission={mission} />
+        ))}
+      </ul>
+    </section>
+  );
 
   return (
     <div className="page-width missions-page">
       <PageHeader
         title="오늘의 도전"
-        description="작은 목표를 완성하고 다음 실력으로 나아가세요."
+        description="오늘 풀 문제부터 이번 달 목표까지 한곳에서 확인하세요."
       />
 
       {history.error ? (
@@ -78,7 +124,7 @@ export function MissionsPage() {
           <Link to="/auth" state={{ from: "/missions" }}>
             로그인
           </Link>
-          하면 내 제출·학습 기록으로 미션 진행률이 집계됩니다.
+          하면 내 제출·학습 기록으로 진행률을 계산해 드려요.
         </p>
       )}
 
@@ -86,92 +132,37 @@ export function MissionsPage() {
         <div className="empty-state">미션 진행률을 불러오는 중입니다…</div>
       ) : (
         <>
-          <section className="season-card" aria-label="시즌 진행">
-            <div className="season-main">
-              <span className="pill pill-primary">{season.label}</span>
-              <h2>알고리즘 마스터</h2>
-              <p>
-                시즌 미션 {season.done} / {season.total} 완료 ·{" "}
-                {season.total - season.done}개 남음
-              </p>
-              <div
-                className="mission-track season-track"
-                role="progressbar"
-                aria-label="시즌 미션 진행률"
-                aria-valuemin={0}
-                aria-valuemax={season.total}
-                aria-valuenow={season.done}
-              >
-                <span style={{ width: percent(season.done, season.total) }} />
-              </div>
-            </div>
-            <div className="season-badge" aria-hidden="true">
-              {season.done} / {season.total}
-            </div>
-            <div className="season-dday">
-              <strong>D-{season.daysLeft}</strong>
-              <span>시즌 종료까지</span>
-            </div>
-          </section>
+          <div className="mission-top">
+            {/* 이전 시즌 카드는 components/SeasonBanner.tsx(SeasonBannerLegacy)에 보관 중 */}
+            <SeasonRing
+              title="알고리즘 마스터"
+              done={seasonDone}
+              total={season.total}
+              daysLeft={season.daysLeft}
+            />
 
-          <section aria-labelledby="my-missions">
-            <div className="section-heading compact">
-              <h2 id="my-missions">내 미션</h2>
-              {season.done > 0 ? (
-                <span className="pill pill-success">
-                  달성한 미션 {season.done}
-                </span>
-              ) : null}
-            </div>
-            <ul className="mission-grid">
-              {missions.map((mission) => (
-                <li
-                  key={mission.id}
-                  className={`mission-card is-${mission.status}`}
-                >
-                  <span className="mission-status">
-                    {statusLabel[mission.status]}
-                  </span>
-                  <h3>{mission.title}</h3>
-                  <div className="mission-line">
-                    <p>{mission.description}</p>
-                    <span className="mission-count">
-                      {mission.current} / {mission.target}
-                    </span>
-                  </div>
-                  <div
-                    className="mission-track"
-                    role="progressbar"
-                    aria-label={`${mission.title} 진행률`}
-                    aria-valuemin={0}
-                    aria-valuemax={mission.target}
-                    aria-valuenow={mission.current}
-                  >
-                    <span
-                      style={{ width: percent(mission.current, mission.target) }}
-                    />
-                  </div>
-                  <div className="mission-foot">
-                    <span className="mission-reward">{mission.reward}</span>
-                    {mission.status === "idle" ? (
-                      <Link className="mission-start" to={mission.action.to}>
-                        시작하기 <span aria-hidden="true">→</span>
-                      </Link>
-                    ) : null}
-                    {mission.status === "done" ? (
-                      <span className="mission-done">
-                        달성 <span aria-hidden="true">✓</span>
-                      </span>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
+            <section
+              className={`mission-card mission-streak is-${streak.status}`}
+              aria-label="연속 학습"
+            >
+              <div className="mission-streak-main">
+                <MissionBody mission={streak} />
+              </div>
+              <div className="mission-streak-week">
+                <WeekStrip counts={submissionsByDay(history.submissions)} />
+                <small>하루에 제출을 1회 이상 하면 연속 학습이 이어져요.</small>
+              </div>
+            </section>
+
+            <XpBoostCard solvedIds={solvedIds} />
+          </div>
+
+          {groups.map(section)}
 
           <p className="mission-note">
-            진행률은 내 제출·코드 분석·글 작성 기록으로 집계됩니다. 달성 보상(XP·배지)
-            지급은 서버 연동 후 열립니다.
+            진행률은 내 제출, 코드 분석, 글 기록으로 계산해요. 시즌 숫자는
+            미션을 달성할 때마다 1회씩 쌓이고, 일일 미션은 날마다 새로 세요.
+            보상(XP·배지) 지급은 서버 연동 후에 열려요.
           </p>
         </>
       )}

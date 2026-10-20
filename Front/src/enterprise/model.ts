@@ -50,10 +50,59 @@ export function periodProgress(
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
-/** 화면용 "09/25 14:00" (로컬 시간) */
-export function formatDateTime(iso: string) {
-  const date = new Date(iso);
-  return `${pad(date.getMonth() + 1)}/${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+type Period = Pick<EnterpriseTest, "startsAt" | "endsAt">;
+
+const sameDay = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
+const dateText = (date: Date) => `${date.getMonth() + 1}월${date.getDate()}일`;
+const timeText = (date: Date) => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+
+/** 시작과 마감이 같은 날이면 하루짜리 테스트다. */
+export const isSingleDay = (test: Period) =>
+  sameDay(new Date(test.startsAt), new Date(test.endsAt));
+
+/** 응시 기간 글자: 여러 날이면 "10월18일부터, 10월23일까지", 하루짜리면 "10월20일 14:00부터, 18:30까지" */
+export function formatPeriod(test: Period) {
+  const start = new Date(test.startsAt);
+  const end = new Date(test.endsAt);
+  return sameDay(start, end)
+    ? `${dateText(start)} ${timeText(start)}부터, ${timeText(end)}까지`
+    : `${dateText(start)}부터, ${dateText(end)}까지`;
+}
+
+/** "오후 2시", "오전 9시 30분" */
+function clockWords(date: Date) {
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+  return `${hour < 12 ? "오전" : "오후"} ${hour12}시${minute ? ` ${minute}분` : ""}`;
+}
+
+const startOfDay = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+
+/**
+ * 시작 시점 글자. 오늘·내일 시작하면 "오늘 오후 7시", "내일 오후 2시"처럼 말로 쓰고,
+ * 그 밖에는 날짜만(하루짜리 테스트는 시간까지) 보여 준다.
+ */
+export function formatStart(test: Period, now = Date.now()) {
+  const start = new Date(test.startsAt);
+  const days = Math.round(
+    (startOfDay(start) - startOfDay(new Date(now))) / 86_400_000,
+  );
+  if (days === 0) return `오늘 ${clockWords(start)}`;
+  if (days === 1) return `내일 ${clockWords(start)}`;
+  return isSingleDay(test)
+    ? `${dateText(start)} ${timeText(start)}`
+    : dateText(start);
+}
+
+/** 마감 시점 글자: 하루짜리만 시간을 붙인다. */
+export function formatEnd(test: Period) {
+  const end = new Date(test.endsAt);
+  return isSingleDay(test) ? `${dateText(end)} ${timeText(end)}` : dateText(end);
 }
 
 /** `<input type="datetime-local">` 값 */

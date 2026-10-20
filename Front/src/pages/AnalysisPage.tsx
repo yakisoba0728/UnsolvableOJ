@@ -149,10 +149,6 @@ export function AnalysisPage() {
     selectedDifficulties.length === 1 && selectedDifficulties[0] === value;
   const stateOf = (item: AnalysisQuestion) =>
     solveState(item.id, solved, attempted);
-  const searchable = (item: AnalysisQuestion) =>
-    [item.title, item.topic, item.code, ...item.concepts]
-      .join("\n")
-      .toLowerCase();
 
   // skip: 해당 그룹의 조건만 빼고 센다 → 칩의 숫자가 "그 칩을 눌렀을 때의 결과 수"가 된다
   const matches = (
@@ -168,7 +164,8 @@ export function AnalysisPage() {
     (skip === "status" ||
       !statuses.length ||
       statuses.includes(stateOf(item))) &&
-    (!keyword || searchable(item).includes(keyword));
+    // 검색어는 문제 목록·커뮤니티처럼 제목에서만 찾는다.
+    (!keyword || item.title.toLowerCase().includes(keyword));
 
   const filtered = useMemo(() => {
     // 무작위: 전체를 한 번 섞은 뒤 필터를 적용한다. 필터를 바꿔도 상대 순서가 유지된다.
@@ -259,7 +256,7 @@ export function AnalysisPage() {
               ref={searchRef}
               type="search"
               className="search-input"
-              placeholder="문제 제목·개념 검색"
+              placeholder="문제 제목 검색"
               aria-label="문제 검색"
               aria-keyshortcuts="/"
               value={queryText}

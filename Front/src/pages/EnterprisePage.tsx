@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import {
-  formatDateTime,
+  formatPeriod,
+  formatStart,
   metaLine,
-  periodProgress,
   sortTests,
   statusLabel,
   testStatus,
@@ -23,25 +23,8 @@ export const statusPillClass: Record<TestStatus, string> = {
 
 function periodCell(test: EnterpriseTest, status: TestStatus, now: number) {
   if (status === "scheduled")
-    return <span>{formatDateTime(test.startsAt)} 시작 예정</span>;
-  const progress = Math.round(periodProgress(test, now) * 100);
-  return (
-    <>
-      <span>
-        {formatDateTime(test.startsAt)} – {formatDateTime(test.endsAt)}
-      </span>
-      <div
-        className="progress ent-progress"
-        role="progressbar"
-        aria-label="응시 기간 진행률"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={progress}
-      >
-        <span style={{ width: `${progress}%` }} />
-      </div>
-    </>
-  );
+    return <span>{formatStart(test, now)} 시작 예정</span>;
+  return <span>{formatPeriod(test)}</span>;
 }
 
 export function EnterprisePage() {

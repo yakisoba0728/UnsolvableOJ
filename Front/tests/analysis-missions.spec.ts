@@ -56,9 +56,14 @@ test("code analysis: search and filters narrow the list and are kept in the URL"
   await expect(rows(page)).toHaveCount(1);
   await expect(rows(page).first()).toContainText("재귀 피보나치 값");
   await expect(page).toHaveURL(/q=/);
-  // 코드 안의 문구와 개념으로도 찾는다.
   await page.getByLabel("문제 검색").fill("슬라이싱");
   await expect(rows(page)).toHaveCount(1);
+  // 검색어는 제목에서만 찾는다. 개념(안정 정렬)이나 코드 안 문구(print)로는 찾지 않는다.
+  await expect(page.getByLabel("문제 검색")).toHaveAttribute("placeholder", "문제 제목 검색");
+  await page.getByLabel("문제 검색").fill("안정 정렬");
+  await expect(rows(page)).toHaveCount(0);
+  await page.getByLabel("문제 검색").fill("print");
+  await expect(rows(page)).toHaveCount(0);
   await page.getByLabel("문제 검색").fill("없는 검색어 zzz");
   await expect(rows(page)).toHaveCount(0);
   await expect(page.getByText("조건에 맞는 문제가 없어요.")).toBeVisible();
@@ -231,39 +236,90 @@ test("mission progress is computed from real submissions and learning records", 
     const submissions = [
       // 오늘 서로 다른 문제 6개 해결
       ...Array.from({ length: 6 }, (_, i) => make(`today${i}`, "ACCEPTED", now.toISOString())),
-      // 오늘 자정 이후(02시) 오답 제출 3회
-      ...Array.from({ length: 3 }, (_, i) => make(`night${i}`, "WRONG_ANSWER", day(0, 2))),
+      // 오늘 자정(00시) 오답 제출 3회
+      ...Array.from({ length: 3 }, (_, i) => make(`night${i}`, "WRONG_ANSWER", day(0, 0))),
       // 어제·그제도 학습
       make("y1", "WRONG_ANSWER", day(1, 12)),
       make("y2", "WRONG_ANSWER", day(2, 12)),
     ];
-    const missions = buildMissions({ submissions, analysisToday: 2, communityPosts: 0, now });
-    const season = seasonOf(missions, now);
-    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    // 같은 문제를 두 번 풀어도 한 번만 센다.
+    const analysis = [
+      { questionId: "a", at: now.toISOString() },
+      { questionId: "a", at: now.toISOString() },
+      { questionId: "b", at: now.toISOString() },
+    ];
+    const input = { submissions, analysis, posts: [], now };
+    const missions = buildMissions(input);
     return {
       byId: Object.fromEntries(
-        missions.map((m: { id: string; current: number; target: number; status: string }) => [
+        missions.map((m: { id: string; current: number; target: number; status: string; period: string }) => [
           m.id,
-          [m.current, m.target, m.status],
+          [m.current, m.target, m.status, m.period],
         ]),
       ),
-      season,
-      expectedDaysLeft: lastDay - now.getDate(),
+      season: seasonOf(input),
+      expectedDaysLeft:
+        new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate(),
     };
   });
 
-  expect(result.byId.daily).toEqual([5, 5, "done"]); // 6개 해결해도 목표(5)를 넘지 않는다
-  expect(result.byId.analysis).toEqual([2, 5, "active"]);
-  expect(result.byId.streak).toEqual([3, 7, "active"]);
-  expect(result.byId.weekly).toEqual([6, 10, "active"]);
-  expect(result.byId.night).toEqual([3, 3, "done"]);
-  expect(result.byId.community).toEqual([0, 2, "idle"]);
+  expect(result.byId.daily).toEqual([5, 5, "done", "day"]); // 6개 해결해도 목표(5)를 넘지 않는다
+  expect(result.byId.analysis).toEqual([2, 5, "active", "day"]);
+  expect(result.byId.night).toEqual([3, 3, "done", "day"]);
+  expect(result.byId.weekly).toEqual([6, 10, "active", "week"]);
+  expect(result.byId.community).toEqual([0, 2, "idle", "month"]);
+  expect(result.byId.streak).toEqual([3, 7, "active", "streak"]);
+  // 오늘 달성한 일일 미션 2개(일일·심야)가 이번 달 달성 횟수로 쌓인다.
   expect(result.season.done).toBe(2);
-  expect(result.season.total).toBe(6);
+  expect(result.season.total).toBe(15);
   expect(result.season.daysLeft).toBe(result.expectedDaysLeft);
 });
 
-test("missions page shows the signed-in user's progress", async ({ page }) => {
+test("season counts achievements cumulatively instead of today's snapshot", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const modulePath = "/src/missions/catalog.ts";
+    const { buildMissions, seasonOf } = await import(modulePath);
+    // 2026-06-20(토)은 일~토 주로 6월 14일에 시작해 20일에 끝난다. 오늘은 아무것도 하지 않았다.
+    const now = new Date(2026, 5, 20, 12, 0);
+    const at = (day: number) => new Date(2026, 5, day, 10, 0).toISOString();
+    const solved = (day: number, count: number, tag: string) =>
+      Array.from({ length: count }, (_, i) => ({
+        id: `s-${tag}-${i}`,
+        problem: { id: `p-${tag}-${i}`, slug: `${tag}${i}`, title: tag },
+        language: "PYTHON",
+        status: "ACCEPTED",
+        createdAt: at(day),
+      }));
+    const submissions = [
+      ...solved(3, 5, "d3"), // 일일 미션
+      ...solved(8, 5, "d8"), // 일일 미션 + 8~10일 주간 10문제의 절반
+      ...solved(10, 5, "d10"), // 일일 미션 + 주간 챌린지 달성
+    ];
+    const analysis = Array.from({ length: 5 }, (_, i) => ({
+      questionId: `q${i}`,
+      at: at(10),
+    }));
+    const input = { submissions, analysis, posts: [], now };
+    return {
+      today: buildMissions(input).map(
+        (m: { id: string; status: string }) => `${m.id}:${m.status}`,
+      ),
+      season: seasonOf(input),
+    };
+  });
+  // 오늘 기준으로는 모두 시작 전이지만, 이번 달에 달성한 기록은 시즌에 남는다.
+  expect(result.today.every((item: string) => item.endsWith(":idle"))).toBe(true);
+  // 3일 일일 + 8일 일일 + 10일 일일 + 10일 코드 분석 + 10일 주간 챌린지(한 번만) = 5회
+  expect(result.season.done).toBe(5);
+  expect(result.season.daysLeft).toBe(10);
+});
+
+test("missions page shows the signed-in user's progress by period", async ({
+  page,
+}) => {
   await authenticate(page);
   const at = new Date().toISOString();
   const items = Array.from({ length: 2 }, (_, i) => ({
@@ -287,15 +343,36 @@ test("missions page shows the signed-in user's progress", async ({ page }) => {
   );
   await page.goto("/missions");
 
+  // 주기별 묶음과 마감 시간
+  for (const heading of ["오늘", "이번 주", "이번 달"])
+    await expect(page.getByRole("heading", { name: heading, level: 2 })).toBeVisible();
+  await expect(page.locator(".mission-group-day .mission-deadline")).toContainText("자정까지");
+  await expect(page.locator(".mission-group-week .mission-deadline")).toContainText("토요일 자정까지");
+  await expect(page.locator(".mission-group-month .mission-deadline")).toContainText("이번 달 말까지");
+  await expect(page.locator(".mission-group-day .mission-card")).toHaveCount(3);
+
   const daily = page.locator(".mission-card", { hasText: "일일 미션" });
   await expect(daily).toContainText("2 / 5");
   await expect(daily).toContainText("진행 중");
+  // 진행 중인 미션에서도 바로 이어서 할 수 있다.
+  await expect(daily.getByRole("link", { name: /이어서 하기/ })).toHaveAttribute("href", "/problems");
   const community = page.locator(".mission-card", { hasText: "커뮤니티 기여" });
   await expect(community).toContainText("시작 전");
-  await expect(
-    community.getByRole("link", { name: /시작하기/ }),
-  ).toHaveAttribute("href", "/community/new");
-  await expect(page.getByText("보상(XP·배지) 지급은 서버 연동 후")).toBeVisible();
+  await expect(community.getByRole("link", { name: /시작하기/ })).toHaveAttribute("href", "/community/new");
+
+  // 연속 학습: 규칙 설명과 이번 주 기록
+  const streak = page.locator(".mission-streak");
+  await expect(streak).toContainText("1 / 7");
+  await expect(streak).toContainText("제출을 1회 이상 하면 연속 학습이 이어져요");
+  await expect(streak.getByRole("list", { name: "이번 주 학습 기록" })).toBeVisible();
+
+  // 시즌: 누적 달성 횟수와 규칙
+  await expect(page.getByRole("img", { name: "이번 달 미션 달성 0 / 15회" })).toBeVisible();
+  await expect(page.getByLabel("시즌 진행")).toContainText("0%");
+  await expect(page.getByLabel("시즌 진행")).toContainText("알고리즘 마스터");
+  await expect(page.getByLabel("시즌 진행")).toContainText("D-");
+  await expect(page.getByText("일일 미션은 날마다 새로 세요")).toBeVisible();
+  await expect(page.getByText("보상(XP·배지) 지급은 서버 연동 후에 열려요")).toBeVisible();
 });
 
 test("signed-out visitors can open missions and are asked to log in", async ({
@@ -304,7 +381,7 @@ test("signed-out visitors can open missions and are asked to log in", async ({
   await page.goto("/missions");
   await expect(page.getByRole("heading", { name: "오늘의 도전" })).toBeVisible();
   await expect(page.getByRole("link", { name: "로그인", exact: true }).first()).toBeVisible();
-  await expect(page.locator(".mission-card")).toHaveCount(6);
+  await expect(page.locator(".mission-card:not(.xp-boost-card)")).toHaveCount(6);
   await expect(
     page.locator(".mission-card", { hasText: "일일 미션" }),
   ).toContainText("0 / 5");

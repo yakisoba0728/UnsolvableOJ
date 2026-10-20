@@ -2,9 +2,9 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import {
-  formatDateTime,
+  formatEnd,
+  formatPeriod,
   metaLine,
-  periodProgress,
   remainingText,
   statusLabel,
   testStatus,
@@ -56,14 +56,13 @@ export function EnterpriseDetailPage() {
     );
 
   const status = testStatus(test, now);
-  const progress = Math.round(periodProgress(test, now) * 100);
   const byId = new Map(problems.map((problem) => [problem.id, problem]));
   const timeLine =
     status === "scheduled"
       ? `시작까지 ${remainingText(Date.parse(test.startsAt) - now)}`
       : status === "running"
         ? `마감까지 ${remainingText(Date.parse(test.endsAt) - now)}`
-        : `${formatDateTime(test.endsAt)}에 마감됐어요`;
+        : `${formatEnd(test)}에 마감됐어요`;
 
   function remove() {
     if (
@@ -81,7 +80,7 @@ export function EnterpriseDetailPage() {
       <PageHeader
         title={test.title}
         badge={<span className={statusPillClass[status]}>{statusLabel[status]}</span>}
-        description={`${metaLine(test)} · ${formatDateTime(test.startsAt)} – ${formatDateTime(test.endsAt)}`}
+        description={`${metaLine(test)} · ${formatPeriod(test)}`}
         back={{ to: "/enterprise", label: "기업 테스트" }}
         aside={
           <div className="ent-actions">
@@ -143,16 +142,6 @@ export function EnterpriseDetailPage() {
           <section className="form-card ent-card" aria-labelledby="ent-status-title">
             <h2 id="ent-status-title">응시 현황</h2>
             <p className="ent-time">{timeLine}</p>
-            <div
-              className="progress ent-progress"
-              role="progressbar"
-              aria-label="응시 기간 진행률"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={progress}
-            >
-              <span style={{ width: `${progress}%` }} />
-            </div>
             <p className="muted ent-note">
               응시자 수·점수·합격률은 응시 기능이 열린 뒤 이곳에 표시됩니다.
             </p>

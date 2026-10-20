@@ -100,7 +100,13 @@ test("dashboard groups tests by status and offers the right management action", 
   await expect(rows).toHaveCount(3);
   await expect(rows.nth(0)).toContainText("진행 중 공채");
   await expect(rows.nth(0)).toContainText("3문항 · 30분");
-  await expect(rows.nth(0).getByRole("progressbar")).toBeVisible();
+  // 응시 기간 줄에는 기간 글자만 있고 진행 막대는 없다.
+  await expect(rows.nth(0).locator(".ent-period")).toContainText(/\d+월\d+일부터, \d+월\d+일까지|부터, \d{2}:\d{2}까지/);
+  await expect(page.getByRole("progressbar")).toHaveCount(0);
+  // 하루 안에 끝나는 테스트(진행 중 공채)만 시간이 붙고, 여러 날에 걸친 테스트는 날짜만 보인다.
+  await expect(rows.nth(0).locator(".ent-period")).toContainText(/\d{2}:\d{2}부터, \d{2}:\d{2}까지/);
+  await expect(rows.nth(1).locator(".ent-period")).not.toContainText(/\d{2}:\d{2}/);
+  await expect(rows.nth(2).locator(".ent-period")).not.toContainText(/\d{2}:\d{2}/);
   await expect(rows.nth(0).getByRole("link", { name: /상세 보기/ })).toBeVisible();
   await expect(rows.nth(1)).toContainText("다음 주 공채");
   await expect(rows.nth(1)).toContainText("시작 예정");
@@ -222,4 +228,122 @@ test("test rules: status boundaries, validation and ordering", async ({ page }) 
   expect(result.tooMany).toContain("최대 20개");
   expect(result.remaining).toEqual(["2분", "5시간 7분", "2일 3시간"]);
   expect(result.sorted).toEqual(["live", "soon-early", "soon-late", "closed-new", "closed-old"]);
+});
+
+test("the test detail shows the remaining time as text without a progress bar", async ({
+  page,
+}) => {
+  const now = Date.now();
+  const day = 86_400_000;
+  await page.addInitScript(
+    ({ key, userKey, value, userId }) => {
+      localStorage.setItem(userKey, JSON.stringify(value.session));
+      localStorage.setItem(key, JSON.stringify({ [userId]: [value.test] }));
+    },
+    {
+      key: "unsolvable-oj-enterprise-v1",
+      userKey: "unsolvable-oj-session-v1",
+      userId: "solver",
+      value: {
+        session: {
+          session: {
+            accessToken: "t",
+            tokenType: "Bearer",
+            expiresIn: "15m",
+            user: { id: "solver", email: "s@e.c", username: "solver", role: "USER", level: 1, xp: 0, rating: 0 },
+          },
+          expiresAt: now + 900_000,
+        },
+        test: {
+          id: "t1",
+          title: "진행 중 공채",
+          description: "",
+          startsAt: new Date(now - day).toISOString(),
+          endsAt: new Date(now + 2 * day).toISOString(),
+          durationMin: 60,
+          problemIds: [],
+          createdAt: new Date(now - 2 * day).toISOString(),
+          updatedAt: new Date(now - 2 * day).toISOString(),
+        },
+      },
+    },
+  );
+  await page.route("**/api/v1/problems?*", (route) =>
+    route.fulfill({ json: { items: [], page: 1, limit: 1000, total: 0, totalPages: 1 } }),
+  );
+  await page.goto("/enterprise/t1");
+  await expect(page.getByRole("heading", { name: "응시 현황" })).toBeVisible();
+  await expect(page.locator(".ent-time")).toContainText("마감까지 2일");
+  await expect(page.getByRole("progressbar")).toHaveCount(0);
+});
+
+test("period text hides clock times unless the test fits within one day", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const modulePath = "/src/enterprise/model.ts";
+    const model = await import(modulePath);
+    const at = (month: number, day: number, hour: number, minute = 0) =>
+      new Date(2026, month - 1, day, hour, minute).toISOString();
+    const days = { startsAt: at(10, 18, 20, 51), endsAt: at(10, 23, 20, 51) };
+    const oneDay = { startsAt: at(10, 20, 14, 0), endsAt: at(10, 20, 18, 30) };
+    const overnight = { startsAt: at(10, 20, 22, 0), endsAt: at(10, 21, 2, 0) };
+    const now = new Date(2026, 9, 20, 9, 0).getTime();
+    const start = (month: number, day: number, hour: number, minute = 0) =>
+      model.formatStart({ startsAt: at(month, day, hour, minute), endsAt: at(month, 30, 23) }, now);
+    return {
+      relative: [start(10, 20, 19), start(10, 21, 14), start(10, 21, 9, 30), start(10, 21, 0), start(10, 21, 12), start(10, 22, 14)],
+      days: [model.formatPeriod(days), model.formatStart(days, now), model.formatEnd(days)],
+      oneDay: [model.formatPeriod(oneDay), model.formatStart(oneDay, now), model.formatEnd(oneDay)],
+      overnight: model.formatPeriod(overnight),
+    };
+  });
+  // 오늘·내일 시작하면 말로 쓰고, 그 뒤로는 날짜만 보인다.
+  expect(result.relative).toEqual([
+    "오늘 오후 7시",
+    "내일 오후 2시",
+    "내일 오전 9시 30분",
+    "내일 오전 12시",
+    "내일 오후 12시",
+    "10월22일",
+  ]);
+  // 여러 날에 걸친 테스트는 날짜만 보인다.
+  expect(result.days).toEqual(["10월18일부터, 10월23일까지", "10월18일", "10월23일"]);
+  // 같은 날 안에서 끝나는 테스트만 시간이 붙는다.
+  expect(result.oneDay).toEqual(["10월20일 14:00부터, 18:30까지", "오늘 오후 2시", "10월20일 18:30"]);
+  // 자정을 넘기면 하루짜리가 아니다.
+  expect(result.overnight).toBe("10월20일부터, 10월21일까지");
+});
+
+test("the list says when a scheduled test starts today or tomorrow", async ({
+  page,
+}) => {
+  // 로컬 시간 기준: 오늘 낮 12시를 현재로 고정한다.
+  await page.clock.install({ time: new Date(2026, 9, 20, 12, 0) });
+  const local = (day: number, hour: number) => new Date(2026, 9, day, hour, 0).toISOString();
+  const test = (id: string, title: string, start: string, end: string) => ({
+    id, title, description: "", startsAt: start, endsAt: end, durationMin: 60,
+    problemIds: ["p1"], createdAt: local(19, 9), updatedAt: local(19, 9),
+  });
+  await page.addInitScript(
+    ({ key, saved }) => localStorage.setItem(key, JSON.stringify(saved)),
+    {
+      key: testsKey,
+      saved: {
+        solver: [
+          test("t-today", "오늘 저녁 시작", local(20, 19), local(25, 19)),
+          test("t-tomorrow", "내일 오후 시작", local(21, 14), local(26, 14)),
+          test("t-later", "다음 주 시작", local(27, 9), local(30, 9)),
+        ],
+      },
+    },
+  );
+  await signIn(page);
+  await page.goto("/enterprise");
+  const period = (title: string) =>
+    page.locator(".ent-table tbody tr", { hasText: title }).locator(".ent-period");
+  await expect(period("오늘 저녁 시작")).toHaveText("오늘 오후 7시 시작 예정");
+  await expect(period("내일 오후 시작")).toHaveText("내일 오후 2시 시작 예정");
+  await expect(period("다음 주 시작")).toHaveText("10월27일 시작 예정");
 });
