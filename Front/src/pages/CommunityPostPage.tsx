@@ -85,15 +85,6 @@ export function CommunityPostPage() {
   const isMine = Boolean(me && post.author.name === me.name);
   const authorStats = statsOf(activity, post.author.name);
   const following = activity.followed.includes(post.author.name);
-  const related = allPosts(activity)
-    .filter(
-      (item) =>
-        item.id !== post.id &&
-        item.category !== "notice" &&
-        (item.category === post.category ||
-          item.tags.some((tag) => post.tags.includes(tag))),
-    )
-    .slice(0, 4);
 
   function requireLogin(action: () => void) {
     if (session) action();
@@ -155,7 +146,7 @@ export function CommunityPostPage() {
           {notice}
         </p>
       ) : null}
-      <div className={`post-layout ${related.length ? "" : "no-side"}`}>
+      <div className="post-layout no-side">
         <div className="post-column">
           <article className="post-card">
             <div className="post-card-head">
@@ -383,23 +374,6 @@ export function CommunityPostPage() {
             )}
           </section>
         </div>
-
-        {related.length ? (
-          <aside className="post-side">
-            {related.length ? (
-              <section className="post-card related-card" aria-label="관련 글">
-                <h2>관련 질문</h2>
-                <ul>
-                  {related.map((item) => (
-                    <li key={item.id}>
-                      <Link to={`/community/${item.id}`}>{item.title}</Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-          </aside>
-        ) : null}
       </div>
     </div>
   );

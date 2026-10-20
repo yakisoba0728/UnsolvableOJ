@@ -3792,23 +3792,6 @@ h3 {
   color: var(--color-primary);
   font-weight: var(--weight-label);
 }
-.related-card h2 {
-  margin: 0;
-  font-size: 14px;
-}
-.related-card ul {
-  margin: 0;
-  padding-left: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  font-size: 13px;
-  font-weight: var(--weight-label);
-  color: var(--color-ink-700);
-}
-.related-card a:hover {
-  color: var(--color-primary);
-}
 .success-message {
   margin: 0 0 16px;
   padding: 11px 14px;
