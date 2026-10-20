@@ -96,6 +96,18 @@ describe('AppController (e2e)', () => {
       .expect(200);
     expect(publicProblem.body.samples).toHaveLength(1);
     expect(JSON.stringify(publicProblem.body)).not.toContain('5 7');
+    const problemStats = async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/problems?limit=100')
+        .expect(200);
+      return response.body.items.find(
+        (item: { id: string }) => item.id === problemId,
+      );
+    };
+    expect(await problemStats()).toMatchObject({
+      solverCount: 0,
+      acceptanceRate: null,
+    });
 
     const submitted = await request(app.getHttpServer())
       .post(`/api/v1/problems/${problemId}/submissions`)
@@ -107,6 +119,10 @@ describe('AppController (e2e)', () => {
       .expect(202);
     expect(submitted.body.status).toBe('QUEUED');
     submissionId = submitted.body.id;
+    expect(await problemStats()).toMatchObject({
+      solverCount: 0,
+      acceptanceRate: null,
+    });
 
     await request(app.getHttpServer())
       .get(`/api/v1/submissions/${submitted.body.id}`)
@@ -150,6 +166,32 @@ describe('AppController (e2e)', () => {
       })
       .expect(200);
     expect(judged.body.status).toBe('ACCEPTED');
+    expect(await problemStats()).toMatchObject({
+      solverCount: 1,
+      acceptanceRate: 100,
+    });
+    // Repeated ACs count once per user; infrastructure errors and pending jobs do not lower the rate.
+    await dataSource.query(
+      `INSERT INTO submissions (user_id, problem_id, language, source_code, status)
+       SELECT $1, $2, 'PYTHON', 'print(0)', status::submission_status
+       FROM unnest($3::text[]) AS status`,
+      [
+        solver.user.id,
+        problemId,
+        [
+          'ACCEPTED',
+          'WRONG_ANSWER',
+          'QUEUED',
+          'JUDGING',
+          'SYSTEM_ERROR',
+          'CANCELLED',
+        ],
+      ],
+    );
+    expect(await problemStats()).toMatchObject({
+      solverCount: 1,
+      acceptanceRate: 66.7,
+    });
 
     await request(app.getHttpServer())
       .patch(`/api/v1/internal/judge/submissions/${submitted.body.id}/result`)
@@ -190,6 +232,10 @@ describe('AppController (e2e)', () => {
       .set('Authorization', `Bearer ${solver.accessToken}`)
       .expect(200);
     expect(requeued.body.debugOutputs).toEqual([]);
+    expect(await problemStats()).toMatchObject({
+      solverCount: 1,
+      acceptanceRate: 50,
+    });
   });
 
   afterAll(async () => {

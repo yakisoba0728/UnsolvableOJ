@@ -1,4 +1,4 @@
-// Requires migrated local PostgreSQL/Redis and the built judge Docker image.
+// Requires migrated local PostgreSQL/Redis and a running go-judge service.
 // Run after building Back and Judge. Uses Redis DB 2 and port 3100 by default.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
@@ -26,6 +26,9 @@ const env = {
   JWT_ACCESS_SECRET: randomUUID() + randomUUID(),
   JUDGE_SERVICE_TOKEN: randomUUID() + randomUUID(),
   API_BASE_URL: base,
+  GO_JUDGE_URL: process.env.GO_JUDGE_URL || 'http://127.0.0.1:5050',
+  GO_JUDGE_TOKEN:
+    process.env.GO_JUDGE_TOKEN || 'local-dev-only-go-judge-token-0123456789abcdef',
 };
 const database = new pg.Client({ connectionString: env.DATABASE_URL });
 const children = [];
@@ -187,7 +190,7 @@ try {
       ),
     );
     console.log(
-      `PASS real API -> queue -> Docker -> stored result: ${expected}`,
+      `PASS real API -> queue -> go-judge -> stored result: ${expected}`,
     );
   }
 } finally {

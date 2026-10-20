@@ -21,7 +21,7 @@ const sources = JSON.parse(
 const base = '/api/v1';
 const bearer = (token: string) => ({ Authorization: `Bearer ${token}` });
 
-describe('API → Redis → real worker → Docker → API', () => {
+describe('API → Redis → real worker → go-judge → API', () => {
   let app: NestExpressApplication;
   let db: DataSource;
   let worker: ChildProcess | undefined;
