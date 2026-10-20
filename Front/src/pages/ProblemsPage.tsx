@@ -380,7 +380,7 @@ export function ProblemsPage() {
                 <span>문제</span>
                 <span>풀이 상태</span>
                 <span>난이도</span>
-                <span>제한</span>
+                <span>푼 사람 · 정답률</span>
               </div>
               {visible.map((problem) => (
                 <div className="problem-row-wrap" key={problem.id}>
@@ -399,10 +399,10 @@ export function ProblemsPage() {
                       {difficultyLabel(problem.difficulty)}
                     </span>
                     <span className="problem-limit">
-                      {problem.timeLimitMs}ms · {problem.memoryLimitMb}MB
-                    </span>
-                    <span className="row-arrow" aria-hidden="true">
-                      ›
+                      {problem.solverCount ?? 0}명 ·{" "}
+                      {problem.acceptanceRate == null
+                        ? "—"
+                        : `${problem.acceptanceRate}%`}
                     </span>
                   </Link>
                 </div>

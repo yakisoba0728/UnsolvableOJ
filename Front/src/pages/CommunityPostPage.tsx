@@ -182,7 +182,6 @@ export function CommunityPostPage() {
                 />
               ) : null}
             </div>
-            <h1>{post.title}</h1>
             <div className="post-byline">
               <div className="post-author-line">
                 <span className="post-avatar" aria-hidden="true">
@@ -223,6 +222,7 @@ export function CommunityPostPage() {
                 ) : null}
               </div>
             </div>
+            <h1>{post.title}</h1>
             <div className="markdown post-body">
               <Markdown>{post.body}</Markdown>
             </div>
@@ -260,25 +260,7 @@ export function CommunityPostPage() {
             </div>
           </article>
 
-          <section className="post-card answers-card" aria-label="답변">
-            <h2 className="post-section-title">
-              <button
-                type="button"
-                className="answers-toggle"
-                aria-expanded={answersOpen}
-                aria-controls="answer-list"
-                onClick={() => setAnswersOpen((open) => !open)}
-              >
-                <span>답변 {answers.length}</span>
-                <span className="answers-chevron" aria-hidden="true">
-                  {answersOpen ? (
-                    <ChevronUp size={18} />
-                  ) : (
-                    <ChevronDown size={18} />
-                  )}
-                </span>
-              </button>
-            </h2>
+          <section className="post-card answer-write-card" aria-label="답변 작성">
             <form className="answer-editor" onSubmit={submit} noValidate>
               <h3 className="answer-editor-title">답변 작성</h3>
               <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
@@ -316,6 +298,27 @@ export function CommunityPostPage() {
                 </p>
               )}
             </form>
+          </section>
+
+          <section className="post-card answers-card" aria-label="답변">
+            <h2 className="post-section-title">
+              <button
+                type="button"
+                className="answers-toggle"
+                aria-expanded={answersOpen}
+                aria-controls="answer-list"
+                onClick={() => setAnswersOpen((open) => !open)}
+              >
+                <span>답변 {answers.length}</span>
+                <span className="answers-chevron" aria-hidden="true">
+                  {answersOpen ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
+                </span>
+              </button>
+            </h2>
             {shown.length ? (
               <ul className="answer-list" id="answer-list">
                 {shown.map((answer) => {

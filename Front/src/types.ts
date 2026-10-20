@@ -37,6 +37,10 @@ export interface ProblemSummary {
   timeLimitMs: number;
   memoryLimitMb: number;
   createdAt: string;
+  /** 정답을 받은 사용자 수 */
+  solverCount?: number;
+  /** 채점이 끝난 제출 중 정답 비율(0–100). 제출이 없으면 null */
+  acceptanceRate?: number | null;
 }
 
 export interface Problem extends ProblemSummary {

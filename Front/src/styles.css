@@ -5751,9 +5751,9 @@ h3 {
 
 /* ===== 목록 통일 규격: 문제 목록 · 커뮤니티 글 목록 · 내 제출 =====
    한 카드 안의 표: 머리글 44 · 행 72 · 안쪽 여백 24 · 칸 간격 16 · 모두 왼쪽 정렬 ·
-   제목 16/700 · 보조 13 · 배지는 높이 28의 알약 · 끝에 › 표시 */
+   제목 16/700 · 보조 13 · 배지는 높이 28의 알약 · 끝에 › 표시(문제 목록은 제외) */
 .data-list {
-  --cols: minmax(0, 1fr) 96px 96px 148px 16px;
+  --cols: minmax(0, 1fr) 96px 96px 148px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -6242,7 +6242,7 @@ h3 {
   white-space: nowrap;
 }
 
-/* 난이도·풀이 상태: 알약 대신 색을 입힌 일반 텍스트 */
+/* 난이도: 알약 대신 색을 입힌 일반 텍스트 (풀이 상태는 파일 끝에서 다시 알약으로 덮어씀) */
 .difficulty,
 .solve-badge,
 .data-list .solve-badge,
@@ -6704,4 +6704,74 @@ h3 {
   width: 40px;
   height: 40px;
   font-size: 16px;
+}
+
+/* 문제 풀이 상태: 커뮤니티의 '채택 완료'와 같은 알약 표시 */
+.solve-badge,
+.data-list .solve-badge,
+.data-list .problem-row .solve-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: var(--weight-title);
+  white-space: nowrap;
+  background: var(--color-disabled);
+  color: var(--color-ink-600);
+}
+.solve-solved,
+.data-list .problem-row .solve-solved {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.solve-attempted,
+.data-list .problem-row .solve-attempted {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+/* 팔로우한 작성자의 글 표시(목록) */
+.post-follow-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: var(--weight-title);
+  vertical-align: 1px;
+}
+
+/* 글 상세: 작성자 줄을 제목 위의 독립된 칸으로 */
+.post-card .post-byline {
+  padding: 16px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface-muted);
+}
+.post-card .post-avatar {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+}
+.post-card .post-author-text strong {
+  font-size: 18px;
+}
+.post-card .post-author-text .muted {
+  font-size: 14px;
+}
+.post-card .post-author-text small {
+  font-size: 13px;
+}
+.answer-write-card .answer-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }

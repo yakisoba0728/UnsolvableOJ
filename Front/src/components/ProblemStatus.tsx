@@ -16,5 +16,10 @@ export function solveState(
 
 /** 색만이 아니라 문구·아이콘으로도 상태를 구분한다. */
 export function ProblemStatus({ state }: { state: SolveState }) {
-  return <span className={`solve-badge solve-${state}`}>{labels[state]}</span>;
+  return (
+    <span className={`solve-badge solve-${state}`}>
+      {state === "solved" ? <span aria-hidden="true">✓ </span> : null}
+      {labels[state]}
+    </span>
+  );
 }
