@@ -2703,6 +2703,8 @@ input,
     border-bottom: 1px solid var(--color-border);
     box-shadow: 0 16px 24px rgba(0, 0, 0, 0.08);
     z-index: 19;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
   }
   .main-nav.open {
     display: flex;
@@ -3221,9 +3223,13 @@ h3 {
   }
 }
 
-/* 데스크톱 메뉴 표시선: 활성 메뉴로 미끄러져 이동 (움직임 줄이기 설정이면 즉시 이동) */
-.main-nav {
-  position: relative;
+/* 데스크톱 메뉴 표시선: 활성 메뉴로 미끄러져 이동 (움직임 줄이기 설정이면 즉시 이동)
+   표시선의 기준이 되도록 데스크톱에서만 relative로 둔다. 1100px 이하의 펼침 메뉴는 헤더 아래에
+   absolute로 펼쳐지므로 여기서 덮어쓰면 안 된다(덮어쓰면 메뉴가 헤더 줄 안에 끼어 좁게 밀린다). */
+@media (min-width: 1101px) {
+  .main-nav {
+    position: relative;
+  }
 }
 .nav-indicator {
   position: absolute;

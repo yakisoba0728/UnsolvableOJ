@@ -818,6 +818,38 @@ test("the home problem slider stays inside the page container and fades only on 
   await expect(area).not.toHaveClass(/can-forward/);
 });
 
+test("the collapsed menu opens as a full-width panel right under the header on narrow screens", async ({
+  page,
+}) => {
+  await authenticate(page, "AUTHOR");
+  for (const width of [390, 900]) {
+    await page.setViewportSize({ width, height: 760 });
+    await page.goto("/");
+    const nav = page.locator("#main-menu");
+    await expect(nav).toBeHidden();
+    await page.getByRole("button", { name: /메뉴/ }).first().click();
+    await expect(nav).toBeVisible();
+    const header = (await page.locator(".site-header").boundingBox())!;
+    const box = (await nav.boundingBox())!;
+    // 헤더 줄에 끼지 않고, 헤더 바로 아래에서 화면 전체 폭으로 펼쳐진다.
+    expect(Math.abs(box.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(box.width - width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(box.y - (header.y + header.height))).toBeLessThanOrEqual(2);
+    await expect(nav).toHaveCSS("position", "absolute");
+    // 항목은 한 줄에 하나씩 쌓인다.
+    const links = nav.locator("a");
+    const count = await links.count();
+    expect(count).toBeGreaterThanOrEqual(7);
+    let previousBottom = -1;
+    for (let index = 0; index < count; index += 1) {
+      const link = (await links.nth(index).boundingBox())!;
+      expect(link.y).toBeGreaterThanOrEqual(previousBottom - 1);
+      expect(link.width).toBeGreaterThan(width * 0.8);
+      previousBottom = link.y + link.height;
+    }
+  }
+});
+
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
   page,
 }) => {
