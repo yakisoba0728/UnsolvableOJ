@@ -11,6 +11,7 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
+import Markdown from "react-markdown";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
@@ -27,8 +28,26 @@ import { useDocumentTitle } from "../hooks";
 
 const MAX_TAGS = 5;
 const TITLE_MAX = 100;
+const TAG_MAX = 20;
 
-type FieldErrors = { title?: string; body?: string };
+type Field = "title" | "body" | "tag";
+
+/** 입력 규칙. 문제가 없으면 빈 문자열. 검색창의 '#단어' 태그와 맞게 태그는 띄어쓰기 없이 쓴다. */
+function fieldProblem(field: Field, value: string) {
+  if (field === "title") {
+    if (!value.trim()) return "제목을 입력해 주세요.";
+    if (value.length > TITLE_MAX)
+      return `제목은 ${TITLE_MAX}자 이하로 입력해 주세요.`;
+  } else if (field === "body") {
+    if (!value.trim()) return "본문을 입력해 주세요.";
+  } else {
+    const tag = value.trim().replace(/^#+/, "");
+    if (/\s/.test(tag)) return "태그는 띄어쓰기 없이 한 단어로 입력해 주세요.";
+    if (tag.length > TAG_MAX)
+      return `태그는 ${TAG_MAX}자 이하로 입력해 주세요.`;
+  }
+  return "";
+}
 
 export function CommunityWritePage() {
   const { id: editingId } = useParams();
@@ -71,7 +90,13 @@ export function CommunityWritePage() {
   );
   const [tagText, setTagText] = useState("");
   const [body, setBody] = useState(original?.body ?? restored?.body ?? "");
-  const [errors, setErrors] = useState<FieldErrors>({});
+  // 입력을 시작한 칸은 바로, 건드리고 떠난 칸은 비어 있어도 안내한다(회원가입과 같은 방식).
+  const [touched, setTouched] = useState<Record<Field, boolean>>({
+    title: false,
+    body: false,
+    tag: false,
+  });
+  const [bodyMode, setBodyMode] = useState<"write" | "preview">("write");
   const [pending, setPending] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saved" | "failed">(
     restored ? "saved" : "idle",
@@ -127,9 +152,20 @@ export function CommunityWritePage() {
       />
     );
 
+  const values: Record<Field, string> = { title, body, tag: tagText };
+  const problems: Record<Field, string> = {
+    title: fieldProblem("title", title),
+    body: fieldProblem("body", body),
+    tag: tagText ? fieldProblem("tag", tagText) : "",
+  };
+  const shown = (field: Field) =>
+    touched[field] || values[field] !== "" ? problems[field] : "";
+  const touch = (field: Field) =>
+    setTouched((previous) => ({ ...previous, [field]: true }));
+
   function addTag(raw: string) {
     const value = raw.trim().replace(/^#+/, "");
-    if (!value) return;
+    if (!value || fieldProblem("tag", raw)) return;
     setTags((previous) =>
       previous.includes(value) || previous.length >= MAX_TAGS
         ? previous
@@ -166,12 +202,14 @@ export function CommunityWritePage() {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending || !session) return;
-    const next: FieldErrors = {};
-    if (!title.trim()) next.title = "제목을 입력해 주세요.";
-    if (!body.trim()) next.body = "본문을 입력해 주세요.";
-    setErrors(next);
-    if (next.title) return titleRef.current?.focus();
-    if (next.body) return bodyRef.current?.focus();
+    setTouched({ title: true, body: true, tag: true });
+    if (problems.title) return titleRef.current?.focus();
+    if (problems.body) {
+      setBodyMode("write");
+      // 미리보기 탭에서 왔다면 입력 칸이 다시 나타난 뒤에 포커스를 준다.
+      return window.setTimeout(() => bodyRef.current?.focus(), 0);
+    }
+    if (problems.tag) return document.getElementById("tag-input")?.focus();
 
     setPending(true);
     if (editingId) {
@@ -249,17 +287,14 @@ export function CommunityWritePage() {
               value={title}
               maxLength={TITLE_MAX}
               placeholder="예: 다익스트라에서 방문 처리는 언제 하나요?"
-              aria-invalid={Boolean(errors.title)}
-              aria-describedby={errors.title ? "title-error" : undefined}
-              onChange={(event) => {
-                setTitle(event.target.value);
-                if (errors.title)
-                  setErrors((prev) => ({ ...prev, title: undefined }));
-              }}
+              aria-invalid={shown("title") ? true : undefined}
+              aria-describedby={shown("title") ? "title-error" : undefined}
+              onChange={(event) => setTitle(event.target.value)}
+              onBlur={() => touch("title")}
             />
-            {errors.title ? (
-              <span id="title-error" className="field-error" role="alert">
-                {errors.title}
+            {shown("title") ? (
+              <span id="title-error" className="field-error" aria-live="polite">
+                {shown("title")}
               </span>
             ) : null}
           </label>
@@ -268,6 +303,7 @@ export function CommunityWritePage() {
               <label htmlFor="tag-input">태그</label>
               <div
                 className="tag-input"
+                aria-invalid={shown("tag") ? true : undefined}
                 onClick={() => document.getElementById("tag-input")?.focus()}
               >
                 {tags.map((tag) => (
@@ -295,11 +331,20 @@ export function CommunityWritePage() {
                       ? `태그는 ${MAX_TAGS}개까지`
                       : "태그 입력 후 Enter"
                   }
+                  aria-describedby={shown("tag") ? "tag-error" : undefined}
                   onChange={(event) => setTagText(event.target.value)}
                   onKeyDown={onTagKeyDown}
-                  onBlur={() => addTag(tagText)}
+                  onBlur={() => {
+                    touch("tag");
+                    addTag(tagText);
+                  }}
                 />
               </div>
+              {shown("tag") ? (
+                <span id="tag-error" className="field-error" aria-live="polite">
+                  {shown("tag")}
+                </span>
+              ) : null}
             </div>
             <div className="field-group field-category">
               <span className="field-label" id="category-label">
@@ -316,31 +361,79 @@ export function CommunityWritePage() {
               />
             </div>
           </div>
-          <label>
-            <span className="label-row">
-              본문<span className="required-mark">필수</span>
-            </span>
-            <textarea
-              ref={bodyRef}
-              rows={10}
-              value={body}
-              placeholder={
-                "어떤 문제를 풀고 있나요?\n\n시도한 코드와 기대한 결과를 함께 적어주세요.\n코드는 ```로 감싸면 읽기 쉽습니다."
-              }
-              aria-invalid={Boolean(errors.body)}
-              aria-describedby={errors.body ? "body-error" : undefined}
-              onChange={(event) => {
-                setBody(event.target.value);
-                if (errors.body)
-                  setErrors((prev) => ({ ...prev, body: undefined }));
-              }}
-            />
-            {errors.body ? (
-              <span id="body-error" className="field-error" role="alert">
-                {errors.body}
+          <div className="md-field write-body">
+            <div className="md-field-head">
+              <div className="label-row">
+                <label htmlFor="body-input" className="field-label">
+                  본문
+                </label>
+                <span className="required-mark" aria-hidden="true">
+                  필수
+                </span>
+              </div>
+              <div
+                className="md-tabs"
+                role="tablist"
+                aria-label="작성·미리보기 전환"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={bodyMode === "write"}
+                  className={bodyMode === "write" ? "active" : ""}
+                  onClick={() => setBodyMode("write")}
+                >
+                  작성
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={bodyMode === "preview"}
+                  className={bodyMode === "preview" ? "active" : ""}
+                  onClick={() => {
+                    touch("body");
+                    setBodyMode("preview");
+                  }}
+                >
+                  미리보기
+                </button>
+              </div>
+            </div>
+            {bodyMode === "write" ? (
+              <textarea
+                id="body-input"
+                ref={bodyRef}
+                className="write-body-input"
+                value={body}
+                placeholder={
+                  "어떤 문제를 풀고 있나요?\n\n시도한 코드와 기대한 결과를 함께 적어주세요.\n코드는 ```로 감싸면 읽기 쉽습니다."
+                }
+                aria-required="true"
+                aria-invalid={shown("body") ? true : undefined}
+                aria-describedby={shown("body") ? "body-error" : undefined}
+                onChange={(event) => setBody(event.target.value)}
+                onBlur={() => touch("body")}
+              />
+            ) : (
+              // 글 상세 화면과 같은 방식(.markdown.post-body, react-markdown)으로 그려서, 올렸을 때의 모습을 그대로 보여 준다.
+              <div className="md-preview write-body-preview">
+                {body.trim() ? (
+                  <div className="markdown post-body">
+                    <Markdown>{body}</Markdown>
+                  </div>
+                ) : (
+                  <p className="muted">
+                    미리볼 내용이 없어요. 작성 탭에서 입력해 보세요.
+                  </p>
+                )}
+              </div>
+            )}
+            {shown("body") ? (
+              <span id="body-error" className="field-error" aria-live="polite">
+                {shown("body")}
               </span>
             ) : null}
-          </label>
+          </div>
         </div>
       </form>
       <div className="write-bar">

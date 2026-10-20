@@ -695,9 +695,7 @@ test("the write page puts tags and a narrow category on one row and the save hin
   const category = await box(".field-category .select-button");
   // 같은 행: 세로 위치(상·하)가 같고, 카테고리는 태그 오른쪽에서 훨씬 좁다.
   expect(Math.abs(tag.y - category.y)).toBeLessThanOrEqual(2);
-  expect(
-    Math.abs(tag.y + tag.height - (category.y + category.height)),
-  ).toBeLessThanOrEqual(2);
+  expect(Math.abs(tag.height - category.height)).toBeLessThanOrEqual(2);
   expect(category.x).toBeGreaterThan(tag.x + tag.width);
   expect(category.width).toBeLessThan(tag.width / 3);
 
@@ -714,6 +712,55 @@ test("the write page puts tags and a narrow category on one row and the save hin
       .boundingBox())!;
     expect(Math.abs(b.y + b.height / 2 - hint)).toBeLessThanOrEqual(2);
   }
+});
+
+test("the write page shows field problems while typing like sign-up, has a tall body and a markdown preview", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/community/new");
+  const title = page.locator('input[placeholder^="예:"]');
+  const body = page.locator("#body-input");
+  const tagInput = page.locator("#tag-input");
+
+  // 본문 칸은 기본으로 크다.
+  expect((await body.boundingBox())!.height).toBeGreaterThanOrEqual(450);
+
+  // 건드리기 전에는 안내가 없고, 비운 채 떠나면 안내가 뜬다(회원가입과 같은 방식).
+  await expect(page.getByText("제목을 입력해 주세요.")).toHaveCount(0);
+  await title.focus();
+  await title.blur();
+  await expect(page.getByText("제목을 입력해 주세요.")).toBeVisible();
+  await expect(title).toHaveAttribute("aria-invalid", "true");
+  await title.fill("제목");
+  await expect(page.getByText("제목을 입력해 주세요.")).toHaveCount(0);
+
+  // 태그는 띄어쓰기 없이 한 단어만: 어긋나면 안내하고 등록하지 않는다.
+  await tagInput.fill("a b");
+  await expect(
+    page.getByText("태그는 띄어쓰기 없이 한 단어로 입력해 주세요."),
+  ).toBeVisible();
+  await tagInput.press("Enter");
+  await expect(page.locator(".tag-chip")).toHaveCount(0);
+  await tagInput.fill("dp");
+  await tagInput.press("Enter");
+  await expect(page.locator(".tag-chip")).toHaveCount(1);
+
+  // 필수인 본문을 비운 채 등록하면 안내가 뜨고 본문으로 이동한다.
+  await page.getByRole("button", { name: "글 등록" }).click();
+  await expect(page.getByText("본문을 입력해 주세요.")).toBeVisible();
+  await expect(body).toBeFocused();
+
+  // 미리보기: 코드 블록과 굵은 글씨가 글 상세와 같은 방식으로 그려진다.
+  await body.fill("설명 **굵게**\n\n```js\nconst a = 1;\n```\n");
+  await expect(page.getByText("본문을 입력해 주세요.")).toHaveCount(0);
+  await page.getByRole("tab", { name: "미리보기" }).click();
+  const preview = page.locator(".write-body-preview .markdown");
+  await expect(preview.locator("strong")).toHaveText("굵게");
+  await expect(preview.locator("pre code")).toContainText("const a = 1;");
+  await page.getByRole("tab", { name: "작성" }).click();
+  await expect(body).toHaveValue(/const a = 1;/);
 });
 
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({

@@ -7098,7 +7098,7 @@ textarea {
 /* 글 작성: 태그 입력과 카테고리 선택을 한 줄에(카테고리는 좁게 오른쪽), 임시 저장 안내와 버튼을 한 줄에 */
 .write-form .field-row {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 16px;
 }
 .write-form .field-row > .field-group {
@@ -7144,4 +7144,23 @@ textarea {
   font-size: 13px;
   line-height: 20px;
   font-weight: var(--weight-title);
+}
+
+/* 글 작성: 본문 칸은 기본으로 크게(미리보기도 같은 높이), 입력 중 안내는 회원가입과 같은 방식 */
+.write-form .write-body-input,
+.write-form .write-body-preview {
+  min-height: 480px;
+}
+.write-form .write-body-preview {
+  box-sizing: border-box;
+}
+.write-form [aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px var(--color-danger-soft);
+}
+.write-form .tag-input[aria-invalid="true"]:focus-within {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px var(--color-danger-soft);
+}
+.write-form .md-field {
+  scroll-margin-top: 100px;
 }
