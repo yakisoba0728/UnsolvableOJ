@@ -67,8 +67,18 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
   await expect(page.locator(".profile-stats")).toContainText("해결한 문제");
   await page.goto(`/problems/view/${slug}`);
   await page.getByLabel("소스 코드").fill("print(0)");
+  const wrongRequest = page.waitForRequest((request) =>
+    request.method() === "POST" && new URL(request.url()).pathname.endsWith("/submissions"),
+  );
   await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
-  await expect(panel.getByRole("status")).toHaveText("틀림", { timeout: 30_000 });
+  expect((await wrongRequest).postDataJSON()).toEqual({ language: "PYTHON", sourceCode: "print(0)" });
+  try {
+    await expect(panel.getByRole("status")).toHaveText("틀림", { timeout: 30_000 });
+  } catch (error) {
+    // Only this disposable test's public outputs; never dump sessions or request headers.
+    console.error("Actual judging details:", await panel.innerText());
+    throw error;
+  }
   await page.goto(`/problems?q=${slug}`);
   const row = page.getByRole("link").filter({ hasText: title });
   await expect(row).toContainText("1명");
