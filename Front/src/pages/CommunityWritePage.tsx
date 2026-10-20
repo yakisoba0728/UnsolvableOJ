@@ -240,20 +240,6 @@ export function CommunityWritePage() {
       ) : null}
       <form className="form-card write-form" onSubmit={submit} noValidate>
         <div className="form-stack">
-          <div className="field-group">
-            <span className="field-label" id="category-label">
-              카테고리
-            </span>
-            <Select
-              ariaLabel="카테고리"
-              value={category}
-              options={options.map((item) => ({
-                value: item.key,
-                label: item.key === "question" ? "질문과 답변" : item.label,
-              }))}
-              onChange={(next) => setCategory(next as CategoryKey)}
-            />
-          </div>
           <label>
             <span className="label-row">
               제목<span className="required-mark">필수</span>
@@ -277,40 +263,56 @@ export function CommunityWritePage() {
               </span>
             ) : null}
           </label>
-          <div className="field-group">
-            <label htmlFor="tag-input">태그</label>
-            <div
-              className="tag-input"
-              onClick={() => document.getElementById("tag-input")?.focus()}
-            >
-              {tags.map((tag) => (
-                <span className="tag-chip" key={tag}>
-                  #{tag}
-                  <button
-                    type="button"
-                    aria-label={`${tag} 태그 삭제`}
-                    onClick={() =>
-                      setTags((previous) =>
-                        previous.filter((value) => value !== tag),
-                      )
-                    }
-                  >
-                    ✕
-                  </button>
-                </span>
-              ))}
-              <input
-                id="tag-input"
-                value={tagText}
-                disabled={tags.length >= MAX_TAGS}
-                placeholder={
-                  tags.length >= MAX_TAGS
-                    ? `태그는 ${MAX_TAGS}개까지`
-                    : "태그 입력 후 Enter"
-                }
-                onChange={(event) => setTagText(event.target.value)}
-                onKeyDown={onTagKeyDown}
-                onBlur={() => addTag(tagText)}
+          <div className="field-row">
+            <div className="field-group">
+              <label htmlFor="tag-input">태그</label>
+              <div
+                className="tag-input"
+                onClick={() => document.getElementById("tag-input")?.focus()}
+              >
+                {tags.map((tag) => (
+                  <span className="tag-chip" key={tag}>
+                    #{tag}
+                    <button
+                      type="button"
+                      aria-label={`${tag} 태그 삭제`}
+                      onClick={() =>
+                        setTags((previous) =>
+                          previous.filter((value) => value !== tag),
+                        )
+                      }
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ))}
+                <input
+                  id="tag-input"
+                  value={tagText}
+                  disabled={tags.length >= MAX_TAGS}
+                  placeholder={
+                    tags.length >= MAX_TAGS
+                      ? `태그는 ${MAX_TAGS}개까지`
+                      : "태그 입력 후 Enter"
+                  }
+                  onChange={(event) => setTagText(event.target.value)}
+                  onKeyDown={onTagKeyDown}
+                  onBlur={() => addTag(tagText)}
+                />
+              </div>
+            </div>
+            <div className="field-group field-category">
+              <span className="field-label" id="category-label">
+                카테고리
+              </span>
+              <Select
+                ariaLabel="카테고리"
+                value={category}
+                options={options.map((item) => ({
+                  value: item.key,
+                  label: item.key === "question" ? "질문과 답변" : item.label,
+                }))}
+                onChange={(next) => setCategory(next as CategoryKey)}
               />
             </div>
           </div>
@@ -341,44 +343,50 @@ export function CommunityWritePage() {
           </label>
         </div>
       </form>
-      <p className="write-hint" role="status" hidden={editing}>
-        {saveState === "failed"
-          ? "임시 저장에 실패했어요. 입력한 내용은 그대로 남아 있습니다."
-          : saveState === "saved" && savedAt
-            ? `임시 저장됨 · ${new Date(savedAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
-            : "작성한 내용은 임시 저장할 수 있습니다."}
-      </p>
-      <div className="write-footer">
-        <button type="button" className="button button-ghost" onClick={cancel}>
-          취소
-        </button>
-        {editing ? null : (
+      <div className="write-bar">
+        <p className="write-hint" role="status" hidden={editing}>
+          {saveState === "failed"
+            ? "임시 저장에 실패했어요. 입력한 내용은 그대로 남아 있습니다."
+            : saveState === "saved" && savedAt
+              ? `임시 저장됨 · ${new Date(savedAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
+              : "작성한 내용은 임시 저장할 수 있습니다."}
+        </p>
+        <div className="write-footer">
           <button
             type="button"
-            className="button button-outline"
-            onClick={saveDraft}
+            className="button button-ghost"
+            onClick={cancel}
           >
-            임시 저장
+            취소
           </button>
-        )}
-        <button
-          type="button"
-          className="button"
-          disabled={pending}
-          onClick={() =>
-            (
-              document.querySelector(".write-form") as HTMLFormElement | null
-            )?.requestSubmit()
-          }
-        >
-          {pending
-            ? editing
-              ? "저장 중…"
-              : "등록 중…"
-            : editing
-              ? "수정 저장"
-              : "글 등록"}
-        </button>
+          {editing ? null : (
+            <button
+              type="button"
+              className="button button-outline"
+              onClick={saveDraft}
+            >
+              임시 저장
+            </button>
+          )}
+          <button
+            type="button"
+            className="button"
+            disabled={pending}
+            onClick={() =>
+              (
+                document.querySelector(".write-form") as HTMLFormElement | null
+              )?.requestSubmit()
+            }
+          >
+            {pending
+              ? editing
+                ? "저장 중…"
+                : "등록 중…"
+              : editing
+                ? "수정 저장"
+                : "글 등록"}
+          </button>
+        </div>
       </div>
     </div>
   );

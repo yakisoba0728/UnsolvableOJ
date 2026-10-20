@@ -524,7 +524,9 @@ test("the home illustration shows the level badge only for a signed-in user, wit
       },
     }),
   );
-  await page.route("**/api/v1/rankings", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/rankings", (route) =>
+    route.fulfill({ json: [] }),
+  );
   await page.goto("/");
   const badge = page.locator(".brand-art");
   await expect(badge.getByText("Lv.4")).toBeAttached();
@@ -534,7 +536,12 @@ test("the home illustration shows the level badge only for a signed-in user, wit
 test("the problem list has a reverse-order button that is replaced by the shuffle button in random order", async ({
   page,
 }) => {
-  const make = (id: string, title: string, difficulty: Problem["difficulty"], at: string) => ({
+  const make = (
+    id: string,
+    title: string,
+    difficulty: Problem["difficulty"],
+    at: string,
+  ) => ({
     ...problem,
     id,
     slug: id,
@@ -604,21 +611,24 @@ test("typing #word and pressing Enter in the community search makes a tag pill t
     views: 1,
     upvotes: 0,
   });
-  await page.addInitScript((value) => {
-    localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
-  }, {
-    posts: [
-      post("t-1", "그리디 질문", ["greedy", "dp"], "2026-10-03T00:00:00Z"),
-      post("t-2", "다이나믹 질문", ["dp"], "2026-10-02T00:00:00Z"),
-      post("t-3", "태그 없는 질문", [], "2026-10-01T00:00:00Z"),
-    ],
-    answers: [],
-    upvoted: [],
-    saved: [],
-    followed: [],
-    accepted: {},
-    deleted: [],
-  });
+  await page.addInitScript(
+    (value) => {
+      localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
+    },
+    {
+      posts: [
+        post("t-1", "그리디 질문", ["greedy", "dp"], "2026-10-03T00:00:00Z"),
+        post("t-2", "다이나믹 질문", ["dp"], "2026-10-02T00:00:00Z"),
+        post("t-3", "태그 없는 질문", [], "2026-10-01T00:00:00Z"),
+      ],
+      answers: [],
+      upvoted: [],
+      saved: [],
+      followed: [],
+      accepted: {},
+      deleted: [],
+    },
+  );
   await page.goto("/community?q=");
   const search = page.getByRole("searchbox", { name: "게시글 검색" });
   const rows = page.locator(".post-row .post-title");
@@ -671,6 +681,39 @@ test("typing #word and pressing Enter in the community search makes a tag pill t
   await page.getByRole("button", { name: "태그 #dp 지우기" }).click();
   await expect(pills).toHaveCount(0);
   await expect(page).not.toHaveURL(/[?&]t=/);
+});
+
+test("the write page puts tags and a narrow category on one row and the save hint with the buttons on one line", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/community/new");
+  const box = async (selector: string) =>
+    (await page.locator(selector).first().boundingBox())!;
+  const tag = await box(".tag-input");
+  const category = await box(".field-category .select-button");
+  // 같은 행: 세로 위치(상·하)가 같고, 카테고리는 태그 오른쪽에서 훨씬 좁다.
+  expect(Math.abs(tag.y - category.y)).toBeLessThanOrEqual(2);
+  expect(
+    Math.abs(tag.y + tag.height - (category.y + category.height)),
+  ).toBeLessThanOrEqual(2);
+  expect(category.x).toBeGreaterThan(tag.x + tag.width);
+  expect(category.width).toBeLessThan(tag.width / 3);
+
+  // 임시 저장 안내와 취소·임시 저장·글 등록 버튼은 한 줄에서 세로 가운데가 같다.
+  const centerY = async (selector: string) => {
+    const b = await box(selector);
+    return b.y + b.height / 2;
+  };
+  const hint = await centerY(".write-hint");
+  for (const name of ["취소", "임시 저장", "글 등록"]) {
+    const b = (await page
+      .getByRole("button", { name, exact: true })
+      .last()
+      .boundingBox())!;
+    expect(Math.abs(b.y + b.height / 2 - hint)).toBeLessThanOrEqual(2);
+  }
 });
 
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
@@ -780,13 +823,20 @@ test("my submissions can be searched, filtered and grouped by problem", async ({
   await expect(page.getByText("통과", { exact: false })).toHaveCount(0);
   // 제목을 뺀 열은 모두 오른쪽 정렬이고, 오른쪽 끝(제출 시각)이 목록 안쪽 여백에 닿는다.
   const rightGap = async (selector: string) =>
-    page.locator(selector).first().evaluate((el) => {
-      const list = document.querySelector(".list-history")!.getBoundingClientRect();
-      const range = document.createRange();
-      range.selectNodeContents(el);
-      return Math.round(list.right - range.getBoundingClientRect().right);
-    });
-  expect(await rightGap(".history-head span:last-child")).toBeLessThanOrEqual(26);
+    page
+      .locator(selector)
+      .first()
+      .evaluate((el) => {
+        const list = document
+          .querySelector(".list-history")!
+          .getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        return Math.round(list.right - range.getBoundingClientRect().right);
+      });
+  expect(await rightGap(".history-head span:last-child")).toBeLessThanOrEqual(
+    26,
+  );
   expect(await rightGap(".history-row .history-time")).toBeLessThanOrEqual(26);
 
   const verdicts = page.getByRole("group", { name: "판정 필터" });

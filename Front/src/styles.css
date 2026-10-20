@@ -7094,3 +7094,54 @@ textarea {
     color: var(--color-ink-500);
   }
 }
+
+/* 글 작성: 태그 입력과 카테고리 선택을 한 줄에(카테고리는 좁게 오른쪽), 임시 저장 안내와 버튼을 한 줄에 */
+.write-form .field-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+.write-form .field-row > .field-group {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.write-form .field-row > .field-category {
+  flex: 0 0 150px;
+}
+.write-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin: 16px 0;
+}
+.write-bar .write-hint {
+  margin: 0;
+}
+.write-bar .write-footer {
+  margin-left: auto;
+}
+@media (max-width: 650px) {
+  .write-form .field-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .write-form .field-row > .field-category {
+    flex: none;
+  }
+  .write-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .write-bar .write-footer {
+    margin-left: 0;
+  }
+}
+/* 같은 줄의 두 라벨(태그·카테고리)은 높이와 위치를 똑같이 맞춘다 */
+.write-form .field-row .field-group > label,
+.write-form .field-row .field-label {
+  display: block;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: var(--weight-title);
+}
