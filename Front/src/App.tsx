@@ -31,6 +31,11 @@ const AnalysisPage = lazy(() =>
     default: module.AnalysisPage,
   })),
 );
+const AnalysisQuestionPage = lazy(() =>
+  import("./pages/AnalysisQuestionPage").then((module) => ({
+    default: module.AnalysisQuestionPage,
+  })),
+);
 const AuthPage = lazy(() =>
   import("./pages/AuthPage").then((module) => ({ default: module.AuthPage })),
 );
@@ -448,6 +453,7 @@ export function App() {
             />
             <Route path="/community/:id" element={<CommunityPostPage />} />
             <Route path="/analysis" element={<AnalysisPage />} />
+            <Route path="/analysis/:id" element={<AnalysisQuestionPage />} />
             <Route path="/missions" element={<MissionsPage />} />
             <Route path="/enterprise" element={<EnterprisePage />} />
             <Route path="/enterprise/new" element={<EnterpriseFormPage />} />

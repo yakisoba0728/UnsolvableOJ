@@ -1,435 +1,408 @@
-import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { analysisQuestions } from "../analysis/questions";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
-  loadAnalysisSession,
-  recordAnalysisAttempt,
-  saveAnalysisSession,
-  type AnalysisAnswer,
-} from "../analysis/progress";
+  analysisQuestions,
+  analysisTopics,
+  type AnalysisQuestion,
+  type AnalysisTopic,
+} from "../analysis/questions";
+import { analysisStatus, useAnalysisAttempts } from "../analysis/progress";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
+import {
+  ProblemStatus,
+  solveState,
+  type SolveState,
+} from "../components/ProblemStatus";
+import { Select } from "../components/Select";
+import { SlideToggle } from "../components/SlideToggle";
 import { useDocumentTitle } from "../hooks";
+import { analysisPath } from "../paths";
+import type { Difficulty } from "../types";
+import { difficultyLabel } from "./ProblemsPage";
 
-const LETTERS = ["A", "B", "C", "D"];
-const questions = analysisQuestions;
-const total = questions.length;
+const difficultyOptions: Difficulty[] = [
+  "BEGINNER",
+  "EASY",
+  "MEDIUM",
+  "HARD",
+  "EXPERT",
+];
+// 문제 은행에 실제로 있는 난이도만 필터에 보여 준다.
+const difficulties = difficultyOptions.filter((value) =>
+  analysisQuestions.some((item) => item.difficulty === value),
+);
 
-const clock = (seconds: number) =>
-  `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+const sorts = [
+  { value: "default", label: "출제순" },
+  { value: "easy", label: "쉬운 난이도순" },
+  { value: "hard", label: "어려운 난이도순" },
+  { value: "title", label: "제목순" },
+];
 
-const questionIds = questions.map((item) => item.id);
+const statusChips: { value: "" | SolveState; label: string }[] = [
+  { value: "", label: "전체" },
+  { value: "none", label: "미해결" },
+  { value: "attempted", label: "풀이 중" },
+  { value: "solved", label: "해결" },
+];
 
+const total = analysisQuestions.length;
+
+/**
+ * 문제 목록과 같은 방식: 검색어·난이도·분류·상태·정렬을 URL에 저장해
+ * 문제를 열었다가 뒤로 가도 같은 목록이 복원된다.
+ */
 export function AnalysisPage() {
+  useDocumentTitle("코드 분석");
   const { session } = useAuth();
   const userId = session?.user.id ?? "guest";
-  // 로그인·로그아웃으로 사용자가 바뀌면 그 사용자의 풀이로 새로 시작한다.
-  return <AnalysisQuiz key={userId} userId={userId} signedIn={Boolean(session)} />;
-}
-
-function AnalysisQuiz({
-  userId,
-  signedIn,
-}: {
-  userId: string;
-  signedIn: boolean;
-}) {
-  useDocumentTitle("코드 분석");
-  const [saved] = useState(() => loadAnalysisSession(userId, questionIds));
-  const [index, setIndex] = useState(saved?.index ?? 0);
-  const [picked, setPicked] = useState<number | null>(saved?.picked ?? null);
-  const [answers, setAnswers] = useState<(AnalysisAnswer | undefined)[]>(
-    () => saved?.answers ?? Array(total).fill(undefined),
+  const attempts = useAnalysisAttempts();
+  const { solved, attempted } = useMemo(
+    () => analysisStatus(attempts, userId),
+    [attempts, userId],
   );
-  const [finished, setFinished] = useState(saved?.finished ?? false);
-  const [elapsed, setElapsed] = useState(saved?.elapsed ?? 0);
-  // 들어오자마자 시간이 흐르지 않도록, 소개 화면에서 시작·계속하기를 눌러야 풀이가 열린다.
-  const [started, setStarted] = useState(false);
-  const questionRef = useRef<HTMLParagraphElement>(null);
-  const mounted = useRef(false);
+  const [params, setParams] = useSearchParams();
+  const searchRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (finished || !started) return;
-    const timer = setInterval(() => setElapsed((value) => value + 1), 1000);
-    return () => clearInterval(timer);
-  }, [finished, started]);
+  const urlQuery = params.get("q") ?? "";
+  const picked = <T extends string>(key: string, allowed: readonly T[]) =>
+    (params.get(key) ?? "")
+      .split(",")
+      .filter((value): value is T => allowed.includes(value as T));
+  const selectedDifficulties = picked<Difficulty>("d", difficulties);
+  const selectedTopics = picked<AnalysisTopic>("t", analysisTopics);
+  const statuses = picked<SolveState>("s", ["solved", "attempted", "none"]);
+  const sort = sorts.some((item) => item.value === params.get("sort"))
+    ? (params.get("sort") as string)
+    : "default";
 
-  useEffect(() => {
-    if (started) questionRef.current?.focus({ preventScroll: true });
-  }, [started]);
+  // 지연된 호출(검색어 디바운스)이 오래된 주소로 다른 필터를 덮어쓰지 않도록 최신 값에서 계산한다.
+  function update(patch: Record<string, string | null>) {
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        for (const [key, value] of Object.entries(patch)) {
+          if (value === null || value === "") next.delete(key);
+          else next.set(key, value);
+        }
+        return next;
+      },
+      { replace: true },
+    );
+  }
 
-  // 다른 메뉴에 다녀오거나 새로고침해도 이어 풀 수 있게 진행 상황을 저장한다.
+  // 검색어: 입력은 즉시 반영하고 URL에는 잠시 멈춘 뒤 저장한다(한글 입력 중 끊김 방지)
+  const [queryText, setQueryText] = useState(urlQuery);
+  const lastWritten = useRef(urlQuery);
   useEffect(() => {
-    saveAnalysisSession(userId, {
-      questionIds,
-      index,
-      picked,
-      answers,
-      finished,
-      elapsed,
-    });
-  }, [userId, index, picked, answers, finished, elapsed]);
-
-  // 문제가 바뀌면 키보드·스크린리더 사용자가 새 문제부터 읽도록 포커스를 옮긴다.
-  useEffect(() => {
-    if (!mounted.current) {
-      mounted.current = true;
-      return;
+    if (urlQuery !== lastWritten.current) {
+      lastWritten.current = urlQuery;
+      setQueryText(urlQuery);
     }
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-    questionRef.current?.focus({ preventScroll: true });
-  }, [index]);
+  }, [urlQuery]);
+  useEffect(() => {
+    if (queryText === urlQuery) return;
+    const timer = setTimeout(() => {
+      lastWritten.current = queryText;
+      update({ q: queryText || null });
+    }, 250);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryText, urlQuery]);
 
-  const question = questions[index];
-  const answer = answers[index];
-  const confirmed = answer !== undefined;
-  const selected = answer ? answer.selected : picked;
-  const answeredCount = answers.filter(Boolean).length;
-  const correctCount = answers.filter((item) => item?.correct).length;
-  const isLast = index === total - 1;
-  const rate = Math.round((correctCount / total) * 100);
-
-  function confirm() {
-    if (picked === null || confirmed) return;
-    const correct = picked === question.answer;
-    setAnswers((prev) =>
-      prev.map((item, i) => (i === index ? { selected: picked, correct } : item)),
-    );
-    recordAnalysisAttempt(userId, question.id, correct);
-  }
-
-  function goTo(next: number) {
-    setIndex(next);
-    setPicked(null);
-  }
-
-  function restart() {
-    setAnswers(Array(total).fill(undefined));
-    setFinished(false);
-    setElapsed(0);
-    goTo(0);
-    setStarted(true);
-  }
-
-  const hasProgress = answeredCount > 0 || index > 0 || picked !== null;
-
-  if (!started) {
-    return (
-      <AnalysisIntro
-        signedIn={signedIn}
-        finished={finished}
-        hasProgress={hasProgress}
-        index={index}
-        answeredCount={answeredCount}
-        correctCount={correctCount}
-        rate={rate}
-        elapsed={elapsed}
-        onStart={() => {
-          if (!hasProgress && !finished) setElapsed(0);
-          setStarted(true);
-        }}
-        onRestart={restart}
-      />
-    );
-  }
-
-  if (finished) {
-    const wrongConcepts = [
-      ...new Set(
-        questions.flatMap((item, i) =>
-          answers[i]?.correct ? [] : item.concepts,
-        ),
-      ),
-    ];
-    return (
-      <div className="analysis-page">
-        <div className="analysis-head">
-          <strong>코드 분석 · 학습 결과</strong>
-          <span>{clock(elapsed)} 소요</span>
-        </div>
-        <section className="analysis-result" aria-label="학습 결과">
-          <div className="analysis-score-big">
-            <strong>
-              {correctCount} / {total}
-            </strong>
-            <span>정답률 {rate}%</span>
-          </div>
-          <ol className="analysis-review" aria-label="문제별 결과">
-            {questions.map((item, i) => (
-              <li key={item.id}>
-                <span>문제 {i + 1}</span>
-                <span className="analysis-review-concepts">
-                  {item.concepts.join(" · ")}
-                </span>
-                <span
-                  className={`pill ${answers[i]?.correct ? "pill-success" : "pill-warning"}`}
-                >
-                  {answers[i]?.correct ? "정답" : "오답"}
-                </span>
-              </li>
-            ))}
-          </ol>
-          <div>
-            <h2>다시 볼 개념</h2>
-            {wrongConcepts.length ? (
-              <ul className="analysis-chips">
-                {wrongConcepts.map((concept) => (
-                  <li key={concept}>{concept}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted">모두 맞혔어요. 다음은 직접 코드를 짜 볼까요?</p>
-            )}
-          </div>
-          {signedIn ? null : (
-            <p className="analysis-hint">
-              <Link to="/auth">로그인</Link>하면 학습 기록이 미션 진행률에
-              반영됩니다.
-            </p>
-          )}
-          <div className="analysis-footer">
-            <Link className="button button-outline" to="/problems">
-              문제 풀러 가기
-            </Link>
-            <button className="button" onClick={restart}>
-              다시 풀기
-            </button>
-          </div>
-        </section>
-      </div>
-    );
-  }
-
-  const status = confirmed
-    ? isLast && answeredCount === total
-      ? "학습 완료"
-      : "확인 완료"
-    : clock(elapsed);
-  const lines = question.code.split("\n");
-  const rightLabel = (i: number) => {
-    if (!confirmed) return null;
-    if (i === question.answer)
-      return answer.selected === i ? "내 답 / 정답" : "정답";
-    return answer.selected === i ? "내 답 / 오답" : null;
-  };
-  const optionState = (i: number) => {
-    if (confirmed) {
-      if (i === question.answer) return "is-correct";
-      if (i === answer.selected) return "is-wrong";
-      return "";
+  // "/" 키로 검색창에 바로 이동
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      const target = event.target as HTMLElement;
+      if (event.key !== "/" || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))
+        return;
+      event.preventDefault();
+      searchRef.current?.focus();
     }
-    return selected === i ? "is-selected" : "";
-  };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const keyword = urlQuery.trim().toLowerCase();
+  const stateOf = (item: AnalysisQuestion) =>
+    solveState(item.id, solved, attempted);
+  const searchable = (item: AnalysisQuestion) =>
+    [item.title, item.topic, item.code, ...item.concepts]
+      .join("\n")
+      .toLowerCase();
+
+  // skip: 해당 그룹의 조건만 빼고 센다 → 칩의 숫자가 "그 칩을 눌렀을 때의 결과 수"가 된다
+  const matches = (
+    item: AnalysisQuestion,
+    skip: "difficulty" | "topic" | "status" | null,
+  ) =>
+    (skip === "difficulty" ||
+      !selectedDifficulties.length ||
+      selectedDifficulties.includes(item.difficulty)) &&
+    (skip === "topic" ||
+      !selectedTopics.length ||
+      selectedTopics.includes(item.topic)) &&
+    (skip === "status" ||
+      !statuses.length ||
+      statuses.includes(stateOf(item))) &&
+    (!keyword || searchable(item).includes(keyword));
+
+  const filtered = useMemo(() => {
+    const base = [...analysisQuestions];
+    if (sort === "easy" || sort === "hard")
+      base.sort(
+        (a, b) =>
+          (difficultyOptions.indexOf(a.difficulty) -
+            difficultyOptions.indexOf(b.difficulty)) *
+          (sort === "easy" ? 1 : -1),
+      );
+    else if (sort === "title")
+      base.sort((a, b) => a.title.localeCompare(b.title, "ko"));
+    return base.filter((item) => matches(item, null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sort, params, solved, attempted]);
+
+  const count = (
+    skip: "difficulty" | "topic" | "status",
+    test: (item: AnalysisQuestion) => boolean,
+  ) => analysisQuestions.filter((item) => matches(item, skip) && test(item)).length;
+
+  const hasFilter = Boolean(
+    selectedDifficulties.length ||
+      selectedTopics.length ||
+      statuses.length ||
+      keyword,
+  );
+
+  const mine = attempts.filter((item) => item.userId === userId);
+  const rate = mine.length
+    ? Math.round((mine.filter((item) => item.correct).length / mine.length) * 100)
+    : null;
+  // 이어 풀 문제(시도했지만 아직 못 맞힌 첫 문제). 없으면 아직 안 푼 첫 문제.
+  const next =
+    analysisQuestions.find((item) => attempted.has(item.id) && !solved.has(item.id)) ??
+    analysisQuestions.find((item) => !attempted.has(item.id));
+  const resuming = next ? attempted.has(next.id) : false;
 
   return (
-    <div className="analysis-page">
-      <div className="analysis-head">
-        <strong>코드 분석 · {question.kind}</strong>
-        <span>
-          문제 {index + 1} / {total} · {status}
-        </span>
-      </div>
-      <div
-        className="analysis-progress"
-        role="progressbar"
-        aria-label="코드 분석 진행률"
-        aria-valuemin={0}
-        aria-valuemax={total}
-        aria-valuenow={index + 1}
-      >
-        <span style={{ width: `${((index + 1) / total) * 100}%` }} />
-      </div>
-      <div className="analysis-code" role="group" aria-label="분석할 코드">
-        <span className="analysis-code-gutter" aria-hidden="true">
-          {lines.map((_, i) => (
-            <span key={i}>{i + 1}</span>
-          ))}
-        </span>
-        <pre>
-          <code>{question.code}</code>
-        </pre>
-      </div>
-      <div
-        role="radiogroup"
-        aria-labelledby="analysis-question"
-        className="analysis-choice"
-      >
-        <p
-          id="analysis-question"
-          className="analysis-question"
-          ref={questionRef}
-          tabIndex={-1}
-        >
-          Q. {question.prompt}
-        </p>
-        <div className="analysis-options">
-          {question.options.map((text, i) => {
-            const note = rightLabel(i);
-            return (
-              <label
-                key={`${question.id}-${i}`}
-                className={`analysis-option ${optionState(i)}`}
-              >
-                <input
-                  type="radio"
-                  className="sr-only"
-                  name={`analysis-${question.id}`}
-                  checked={selected === i}
-                  disabled={confirmed}
-                  onChange={() => setPicked(i)}
-                />
-                <span className="analysis-badge" aria-hidden="true">
-                  {LETTERS[i]}
-                </span>
-                <span className="analysis-option-text">{text}</span>
-                {note ? (
-                  <span className="analysis-option-note">· {note}</span>
-                ) : null}
-              </label>
-            );
-          })}
-        </div>
-      </div>
-      {confirmed ? (
-        <section className="analysis-explain" aria-live="polite">
-          <h2>
-            {answer.correct
-              ? "정답입니다"
-              : `정답은 ${question.options[question.answer]}입니다`}
-          </h2>
-          <h3>해설</h3>
-          <div className="analysis-explain-body">
-            {question.explanation.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
-          <ul className="analysis-chips" aria-label="관련 개념">
-            {question.concepts.map((concept) => (
-              <li key={concept}>{concept}</li>
-            ))}
-          </ul>
-          <p className="analysis-score">
-            {isLast && answeredCount === total
-              ? `${total}문제 중 ${correctCount}문제 정답 · 정답률 ${rate}%`
-              : `지금까지 ${answeredCount}문제 중 ${correctCount}문제 정답`}
-          </p>
-          <button
-            className="button button-full"
-            onClick={() => (isLast ? setFinished(true) : goTo(index + 1))}
-          >
-            {isLast ? "학습 결과 보기" : "다음 문제"}
-          </button>
-        </section>
-      ) : (
-        <>
-          <p className="analysis-hint">
-            답을 선택하면 정답을 확인할 수 있습니다.
-          </p>
-          <div className="analysis-footer">
-            <button
-              className="button button-outline"
-              disabled={index === 0}
-              onClick={() => goTo(index - 1)}
-            >
-              <span aria-hidden="true">←</span> 이전
-            </button>
-            <button
-              className="button analysis-confirm"
-              disabled={picked === null}
-              onClick={confirm}
-            >
-              정답 확인
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-interface IntroProps {
-  signedIn: boolean;
-  finished: boolean;
-  hasProgress: boolean;
-  index: number;
-  answeredCount: number;
-  correctCount: number;
-  rate: number;
-  elapsed: number;
-  onStart: () => void;
-  onRestart: () => void;
-}
-
-function AnalysisIntro({
-  signedIn,
-  finished,
-  hasProgress,
-  index,
-  answeredCount,
-  correctCount,
-  rate,
-  elapsed,
-  onStart,
-  onRestart,
-}: IntroProps) {
-  return (
-    <div className="analysis-page">
+    <div className="page-width problems-page">
       <PageHeader
         title="코드 분석"
-        description="모범 답안을 읽고 원리를 추론하는 학습 모드입니다."
+        description="코드를 읽고 실행 결과를 추론해 보세요. 풀면 바로 해설을 볼 수 있어요."
       />
-      <section
-        className="analysis-result analysis-intro"
-        aria-label="코드 분석 소개"
-      >
-        <ul className="analysis-chips" aria-label="구성">
-          <li>{total}문제</li>
-          <li>객관식</li>
-          <li>출력값 추론</li>
-        </ul>
-        <div>
-          <h2>이렇게 진행돼요</h2>
-          <ol className="analysis-intro-steps">
-            <li>코드를 읽고, 실행했을 때 나오는 값을 네 개의 보기에서 골라요.</li>
-            <li>정답을 확인하면 바로 해설과 관련 개념을 볼 수 있어요.</li>
-            <li>마지막에 정답률과 다시 볼 개념을 정리해 드려요.</li>
-          </ol>
+
+      <div className="filter-card">
+        <div className="filter-row">
+          <div className="search-field">
+            <input
+              ref={searchRef}
+              type="search"
+              className="search-input"
+              placeholder="문제 제목·개념 검색"
+              aria-label="문제 검색"
+              aria-keyshortcuts="/"
+              value={queryText}
+              onChange={(event) => setQueryText(event.target.value)}
+            />
+            <kbd aria-hidden="true">/</kbd>
+          </div>
+          <Select
+            ariaLabel="정렬"
+            value={sort}
+            options={sorts}
+            onChange={(value) =>
+              update({ sort: value === "default" ? null : value })
+            }
+          />
         </div>
-        <p className="analysis-hint">
-          시간은 시작한 뒤부터 재고, 다른 화면에 있는 동안에는 멈춰요.{" "}
-          {signedIn ? (
-            "오늘 푼 문제는 미션 ‘코드 분석 워밍업’에 반영돼요."
+
+        <div className="filter-groups">
+          <div className="filter-bar">
+            <span className="filter-label">상태</span>
+            <SlideToggle
+              multiple
+              ariaLabel="풀이 상태 필터"
+              values={statuses}
+              options={statusChips.map((item) => ({
+                value: item.value,
+                label: item.label,
+                count: count(
+                  "status",
+                  (q) => !item.value || stateOf(q) === item.value,
+                ),
+              }))}
+              defaultValue=""
+              onChangeValues={(next) => update({ s: next.join(",") || null })}
+            />
+          </div>
+          <div className="filter-bar">
+            <span className="filter-label">난이도</span>
+            <SlideToggle
+              multiple
+              ariaLabel="난이도 필터"
+              values={selectedDifficulties}
+              options={[
+                {
+                  value: "",
+                  label: "전체",
+                  count: count("difficulty", () => true),
+                },
+                ...difficulties.map((value) => ({
+                  value,
+                  label: difficultyLabel(value),
+                  count: count("difficulty", (q) => q.difficulty === value),
+                })),
+              ]}
+              defaultValue=""
+              onChangeValues={(next) => update({ d: next.join(",") || null })}
+            />
+          </div>
+          <div className="filter-bar">
+            <span className="filter-label">분류</span>
+            <SlideToggle
+              multiple
+              ariaLabel="분류 필터"
+              values={selectedTopics}
+              options={[
+                { value: "", label: "전체", count: count("topic", () => true) },
+                ...analysisTopics.map((value) => ({
+                  value,
+                  label: value,
+                  count: count("topic", (q) => q.topic === value),
+                })),
+              ]}
+              defaultValue=""
+              onChangeValues={(next) => update({ t: next.join(",") || null })}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="list-layout">
+        <section aria-label="코드 분석 문제 목록">
+          <div className="section-heading compact">
+            <div className="title-line">
+              <h2>{hasFilter ? "검색 결과" : "전체 문제"}</h2>
+            </div>
+            <span className="total-count">
+              {hasFilter ? `${total}문제 중 ` : ""}
+              {filtered.length}문제
+            </span>
+          </div>
+          {filtered.length ? (
+            <div className="problem-list data-list list-problems">
+              <div className="problem-head" aria-hidden="true">
+                <span>문제</span>
+                <span>풀이 상태</span>
+                <span>난이도</span>
+                <span>언어</span>
+              </div>
+              {filtered.map((item) => (
+                <div className="problem-row-wrap" key={item.id}>
+                  <Link className="problem-row" to={analysisPath(item.id)}>
+                    <span className="problem-title">
+                      <strong>{item.title}</strong>
+                      <small className="analysis-row-meta">
+                        {item.topic} · {item.concepts.join(" · ")}
+                      </small>
+                    </span>
+                    <ProblemStatus state={stateOf(item)} />
+                    <span
+                      className={`difficulty difficulty-${item.difficulty.toLowerCase()}`}
+                    >
+                      {difficultyLabel(item.difficulty)}
+                    </span>
+                    <span className="problem-limit">{item.language}</span>
+                    <span className="row-arrow" aria-hidden="true">
+                      ›
+                    </span>
+                  </Link>
+                </div>
+              ))}
+            </div>
           ) : (
-            <>
-              <Link to="/auth" state={{ from: "/analysis" }}>
-                로그인
-              </Link>
-              하면 푼 기록이 미션에 반영돼요.
-            </>
+            <div className="empty-state">
+              <strong>조건에 맞는 문제가 없어요.</strong>
+              <p>
+                {keyword ? `‘${urlQuery.trim()}’ 검색어와 ` : ""}선택한 필터를
+                유지한 채 결과가 없습니다. 조건을 줄여 다시 찾아보세요.
+              </p>
+              <button
+                type="button"
+                className="button button-outline"
+                onClick={() => {
+                  setQueryText("");
+                  update({ q: null, d: null, t: null, s: null });
+                }}
+              >
+                필터 모두 지우기
+              </button>
+            </div>
           )}
-        </p>
-        {finished ? (
-          <p className="analysis-intro-status">
-            지난 결과 · {correctCount} / {total} · 정답률 {rate}%
-          </p>
-        ) : hasProgress ? (
-          <p className="analysis-intro-status">
-            진행 중 · 문제 {index + 1} / {total} · {answeredCount}문제 확인 ·{" "}
-            {clock(elapsed)}
-          </p>
-        ) : null}
-        <div className="analysis-intro-actions">
-          <button className="button" onClick={onStart}>
-            {finished ? "결과 보기" : hasProgress ? "계속하기" : "시작하기"}{" "}
-            <span aria-hidden="true">→</span>
-          </button>
-          {finished || hasProgress ? (
-            <button className="button button-outline" onClick={onRestart}>
-              {finished ? "다시 풀기" : "처음부터 다시"}
-            </button>
-          ) : null}
-        </div>
-      </section>
+        </section>
+
+        <aside className="side-stack">
+          <div className="standing-card">
+            <h2>내 학습</h2>
+            <dl>
+              <div>
+                <dt>해결한 문제</dt>
+                <dd>
+                  {solved.size} / {total}
+                </dd>
+              </div>
+              <div>
+                <dt>풀어 본 문제</dt>
+                <dd>{attempted.size}개</dd>
+              </div>
+              <div>
+                <dt>정답률</dt>
+                <dd>{rate === null ? "—" : `${rate}%`}</dd>
+              </div>
+            </dl>
+            {next ? (
+              <div className="standing-continue">
+                <div className="standing-continue-title">
+                  <strong>{next.title}</strong>
+                  <span
+                    className={`difficulty difficulty-${next.difficulty.toLowerCase()}`}
+                  >
+                    {difficultyLabel(next.difficulty)}
+                  </span>
+                </div>
+                <Link className="button" to={analysisPath(next.id)}>
+                  {resuming ? "이어서 풀기" : "다음 문제 풀기"}{" "}
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+            ) : (
+              <p className="muted analysis-all-done">
+                모든 문제를 해결했어요. 이번에는 직접 코드를 짜 볼까요?
+              </p>
+            )}
+          </div>
+          <div className="guide-card">
+            <h2>이렇게 풀어요</h2>
+            <ol className="analysis-guide">
+              <li>코드를 읽고 실행했을 때 나오는 값을 보기에서 골라요.</li>
+              <li>정답을 확인하면 해설과 관련 개념이 열려요.</li>
+              <li>
+                푼 기록은 이 브라우저에 저장되고, 오늘 푼 문제는 미션 ‘코드 분석
+                워밍업’에 반영돼요.
+              </li>
+            </ol>
+            {session ? null : (
+              <p className="analysis-hint">
+                <Link to="/auth" state={{ from: "/analysis" }}>
+                  로그인
+                </Link>
+                하면 내 계정의 미션에 기록이 이어져요.
+              </p>
+            )}
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

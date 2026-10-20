@@ -28,11 +28,17 @@ export function MissionsPage() {
 
   const now = new Date();
   const userId = session?.user.id;
+  // 같은 문제를 다시 풀어도 한 번만 센다.
   const analysisToday = userId
-    ? attempts.filter(
-        (item) =>
-          item.userId === userId && dayKey(new Date(item.at)) === dayKey(now),
-      ).length
+    ? new Set(
+        attempts
+          .filter(
+            (item) =>
+              item.userId === userId &&
+              dayKey(new Date(item.at)) === dayKey(now),
+          )
+          .map((item) => item.questionId),
+      ).size
     : 0;
   const communityPosts = session
     ? activity.posts.filter((post) => {

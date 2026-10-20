@@ -6,6 +6,8 @@ export interface AnalysisAttempt {
   userId: string;
   questionId: string;
   correct: boolean;
+  /** 고른 보기의 번호. 다시 열었을 때 결과를 그대로 보여 주는 데 쓴다. */
+  selected?: number;
   at: string;
 }
 
@@ -47,10 +49,11 @@ export function recordAnalysisAttempt(
   userId: string,
   questionId: string,
   correct: boolean,
+  selected: number,
 ) {
   state = [
     ...state,
-    { userId, questionId, correct, at: new Date().toISOString() },
+    { userId, questionId, correct, selected, at: new Date().toISOString() },
   ].slice(-MAX_ATTEMPTS);
   try {
     localStorage.setItem(storageKey, JSON.stringify(state));
@@ -60,69 +63,16 @@ export function recordAnalysisAttempt(
   listeners.forEach((listener) => listener());
 }
 
-export interface AnalysisAnswer {
-  selected: number;
-  correct: boolean;
-}
-
-/** 진행 중인 풀이. 다른 메뉴에 다녀오거나 새로고침해도 이어 풀 수 있게 사용자별로 저장한다. */
-export interface AnalysisSession {
-  questionIds: string[];
-  index: number;
-  picked: number | null;
-  answers: (AnalysisAnswer | undefined)[];
-  finished: boolean;
-  /** 이 화면에 머문 시간(초). 화면을 떠나 있는 동안에는 늘지 않는다. */
-  elapsed: number;
-}
-
-const sessionKey = "unsolvable-oj-analysis-session-v1";
-
-function readSessions(): Record<string, AnalysisSession> {
-  try {
-    const raw = localStorage.getItem(sessionKey);
-    const parsed: unknown = raw ? JSON.parse(raw) : {};
-    return parsed && typeof parsed === "object"
-      ? (parsed as Record<string, AnalysisSession>)
-      : {};
-  } catch {
-    return {};
+/** 목록의 풀이 상태: 한 번이라도 맞혔으면 해결, 시도만 했으면 풀이 중. */
+export function analysisStatus(attempts: AnalysisAttempt[], userId: string) {
+  const solved = new Set<string>();
+  const attempted = new Set<string>();
+  const latest = new Map<string, AnalysisAttempt>();
+  for (const item of attempts) {
+    if (item.userId !== userId) continue;
+    attempted.add(item.questionId);
+    if (item.correct) solved.add(item.questionId);
+    latest.set(item.questionId, item);
   }
-}
-
-/** 저장된 풀이를 돌려준다. 문제 구성이 바뀌었거나 값이 깨졌으면 버린다. */
-export function loadAnalysisSession(
-  userId: string,
-  questionIds: string[],
-): AnalysisSession | null {
-  const saved = readSessions()[userId];
-  if (
-    !saved ||
-    !Array.isArray(saved.questionIds) ||
-    saved.questionIds.join() !== questionIds.join() ||
-    !Array.isArray(saved.answers) ||
-    saved.answers.length !== questionIds.length ||
-    !Number.isInteger(saved.index) ||
-    saved.index < 0 ||
-    saved.index >= questionIds.length ||
-    !Number.isFinite(saved.elapsed)
-  )
-    return null;
-  return {
-    ...saved,
-    picked: saved.picked ?? null,
-    // JSON 배열에서 빈 칸은 null로 저장되므로 되돌린다.
-    answers: saved.answers.map((answer) => answer ?? undefined),
-  };
-}
-
-export function saveAnalysisSession(userId: string, session: AnalysisSession) {
-  try {
-    localStorage.setItem(
-      sessionKey,
-      JSON.stringify({ ...readSessions(), [userId]: session }),
-    );
-  } catch {
-    /* 저장소를 쓸 수 없어도 이번 방문에는 계속 풀 수 있다 */
-  }
+  return { solved, attempted, latest };
 }

@@ -1,5 +1,15 @@
+import type { Difficulty } from "../types";
+
+export const analysisTopics = ["기초·제어문", "자료구조", "함수·재귀"] as const;
+export type AnalysisTopic = (typeof analysisTopics)[number];
+
 export interface AnalysisQuestion {
   id: string;
+  title: string;
+  difficulty: Difficulty;
+  /** 목록 필터용 분류 */
+  topic: AnalysisTopic;
+  language: string;
   /** 화면 머리글의 유형 이름 */
   kind: string;
   code: string;
@@ -19,6 +29,10 @@ const PROMPT = "위 코드를 실행했을 때 출력되는 값은?";
 export const analysisQuestions: AnalysisQuestion[] = [
   {
     id: "slice",
+    title: "리스트 슬라이싱 결과",
+    difficulty: "BEGINNER",
+    topic: "자료구조",
+    language: "Python",
     kind: "출력값 추론",
     code: "a = [1, 2, 3, 4, 5]\nprint(a[1:4])",
     prompt: PROMPT,
@@ -32,6 +46,10 @@ export const analysisQuestions: AnalysisQuestion[] = [
   },
   {
     id: "divmod",
+    title: "몫과 나머지 출력",
+    difficulty: "BEGINNER",
+    topic: "기초·제어문",
+    language: "Python",
     kind: "출력값 추론",
     code: "x = 17\nprint(x // 5, x % 5)",
     prompt: PROMPT,
@@ -45,6 +63,10 @@ export const analysisQuestions: AnalysisQuestion[] = [
   },
   {
     id: "sum35",
+    title: "3 또는 5의 배수 합",
+    difficulty: "EASY",
+    topic: "기초·제어문",
+    language: "Python",
     kind: "출력값 추론",
     code: "def solve(n):\n    r = 0\n    for i in range(1, n + 1):\n        if i % 3 == 0 or i % 5 == 0:\n            r += i\n    return r\n\nprint(solve(10))",
     prompt: PROMPT,
@@ -58,6 +80,10 @@ export const analysisQuestions: AnalysisQuestion[] = [
   },
   {
     id: "while",
+    title: "while 반복 횟수 세기",
+    difficulty: "EASY",
+    topic: "기초·제어문",
+    language: "Python",
     kind: "출력값 추론",
     code: "n = 1\ncount = 0\nwhile n < 50:\n    n *= 2\n    count += 1\nprint(count)",
     prompt: PROMPT,
@@ -71,6 +97,10 @@ export const analysisQuestions: AnalysisQuestion[] = [
   },
   {
     id: "dict",
+    title: "문자 빈도수 딕셔너리",
+    difficulty: "EASY",
+    topic: "자료구조",
+    language: "Python",
     kind: "출력값 추론",
     code: 's = "banana"\nd = {}\nfor ch in s:\n    d[ch] = d.get(ch, 0) + 1\nprint(d["a"])',
     prompt: PROMPT,
@@ -84,6 +114,10 @@ export const analysisQuestions: AnalysisQuestion[] = [
   },
   {
     id: "mutdef",
+    title: "기본 인자의 함정",
+    difficulty: "MEDIUM",
+    topic: "함수·재귀",
+    language: "Python",
     kind: "출력값 추론",
     code: "def add(x, acc=[]):\n    acc.append(x)\n    return len(acc)\n\nadd(1)\nadd(2)\nprint(add(3))",
     prompt: PROMPT,
@@ -97,6 +131,10 @@ export const analysisQuestions: AnalysisQuestion[] = [
   },
   {
     id: "fib",
+    title: "재귀 피보나치 값",
+    difficulty: "EASY",
+    topic: "함수·재귀",
+    language: "Python",
     kind: "출력값 추론",
     code: "def f(n):\n    if n <= 1:\n        return 1\n    return f(n - 1) + f(n - 2)\n\nprint(f(5))",
     prompt: PROMPT,
@@ -110,6 +148,10 @@ export const analysisQuestions: AnalysisQuestion[] = [
   },
   {
     id: "odd",
+    title: "홀수만 더하기",
+    difficulty: "BEGINNER",
+    topic: "기초·제어문",
+    language: "Python",
     kind: "출력값 추론",
     code: "nums = [3, 1, 4, 1, 5]\nprint(sum(x for x in nums if x % 2 == 1))",
     prompt: PROMPT,
@@ -123,6 +165,10 @@ export const analysisQuestions: AnalysisQuestion[] = [
   },
   {
     id: "nested",
+    title: "중첩 반복문 실행 횟수",
+    difficulty: "MEDIUM",
+    topic: "기초·제어문",
+    language: "Python",
     kind: "출력값 추론",
     code: "cnt = 0\nfor i in range(3):\n    for j in range(i, 3):\n        cnt += 1\nprint(cnt)",
     prompt: PROMPT,
@@ -136,6 +182,10 @@ export const analysisQuestions: AnalysisQuestion[] = [
   },
   {
     id: "sortkey",
+    title: "key로 정렬한 결과",
+    difficulty: "MEDIUM",
+    topic: "자료구조",
+    language: "Python",
     kind: "출력값 추론",
     code: 'words = ["pear", "fig", "apple", "kiwi"]\nwords.sort(key=len)\nprint(words[1])',
     prompt: PROMPT,

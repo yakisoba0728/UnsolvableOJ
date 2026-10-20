@@ -25,187 +25,177 @@ async function authenticate(page: Page) {
   );
 }
 
-const startButton = (page: Page) =>
-  page.getByRole("button", { name: /^(시작하기|계속하기|결과 보기)/ });
+const rows = (page: Page) => page.locator(".problem-row");
 
-/** 소개 화면에서 시작·계속하기를 눌러 풀이로 들어간다. */
-async function startAnalysis(page: Page) {
-  await startButton(page).click();
+async function solve(page: Page, option: number) {
+  await page.locator(".analysis-option").nth(option).click();
+  await page.getByRole("button", { name: "정답 확인" }).click();
 }
 
-async function clockSeconds(page: Page, locator: string) {
-  const text = await page.locator(locator).innerText();
-  const [, m, s] = /(\d{2}):(\d{2})/.exec(text) ?? [];
-  return Number(m) * 60 + Number(s);
-}
-
-test("code analysis: the intro explains the mode and the timer waits for the start button", async ({
+test("code analysis: the page lists every question like the problem list", async ({
   page,
 }) => {
   await page.goto("/analysis");
   await expect(page.getByRole("heading", { name: "코드 분석", level: 1 })).toBeVisible();
-  await expect(page.getByText("이렇게 진행돼요")).toBeVisible();
-  await expect(page.getByLabel("구성")).toContainText("10문제");
-  await expect(page.getByText("시간은 시작한 뒤부터 재고")).toBeVisible();
-  await expect(page.getByRole("link", { name: "로그인", exact: true }).last()).toBeVisible();
-  // 소개 화면에는 문제도 시간도 없다.
-  await expect(page.locator(".analysis-code")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: /처음부터 다시|다시 풀기/ })).toHaveCount(0);
-
-  await page.waitForTimeout(2200);
-  await startAnalysis(page);
-  await expect(page.getByText("문제 1 / 10")).toBeVisible();
-  expect(await clockSeconds(page, ".analysis-head span")).toBeLessThanOrEqual(1);
+  await expect(rows(page)).toHaveCount(analysisQuestions.length);
+  await expect(rows(page).first()).toContainText(analysisQuestions[0].title);
+  await expect(page.getByLabel("풀이 상태 필터")).toBeVisible();
+  await expect(page.getByLabel("난이도 필터")).toBeVisible();
+  await expect(page.getByLabel("분류 필터")).toBeVisible();
+  await expect(page.getByText("10문제", { exact: true })).toBeVisible();
+  await expect(page.locator(".standing-card")).toContainText("0 / 10");
+  await expect(page.getByRole("link", { name: /로그인/ }).last()).toBeVisible();
 });
 
-test("code analysis: select, confirm, read the explanation, finish with a result", async ({
+test("code analysis: search and filters narrow the list and are kept in the URL", async ({
   page,
 }) => {
   await page.goto("/analysis");
-  await startAnalysis(page);
+
+  await page.getByLabel("문제 검색").fill("피보나치");
+  await expect(rows(page)).toHaveCount(1);
+  await expect(rows(page).first()).toContainText("재귀 피보나치 값");
+  await expect(page).toHaveURL(/q=/);
+  // 코드 안의 문구와 개념으로도 찾는다.
+  await page.getByLabel("문제 검색").fill("슬라이싱");
+  await expect(rows(page)).toHaveCount(1);
+  await page.getByLabel("문제 검색").fill("없는 검색어 zzz");
+  await expect(rows(page)).toHaveCount(0);
+  await expect(page.getByText("조건에 맞는 문제가 없어요.")).toBeVisible();
+  await page.getByRole("button", { name: "필터 모두 지우기" }).click();
+  await expect(rows(page)).toHaveCount(analysisQuestions.length);
+
+  const topic = page.getByLabel("분류 필터");
+  await topic.getByRole("button", { name: /^자료구조/ }).click();
+  const dataStructures = analysisQuestions.filter((q) => q.topic === "자료구조");
+  await expect(rows(page)).toHaveCount(dataStructures.length);
+  await expect(page).toHaveURL(/t=/);
+
+  const difficulty = page.getByLabel("난이도 필터");
+  await difficulty.getByRole("button", { name: /^보통/ }).click();
+  const medium = dataStructures.filter((q) => q.difficulty === "MEDIUM");
+  await expect(rows(page)).toHaveCount(medium.length);
+  await expect(rows(page).first()).toContainText(medium[0].title);
+
+  // 주소를 그대로 열면 같은 목록이 복원된다.
+  await page.reload();
+  await expect(rows(page)).toHaveCount(medium.length);
+});
+
+test("code analysis: sort by difficulty", async ({ page }) => {
+  await page.goto("/analysis?sort=hard");
+  await expect(rows(page).first()).toContainText("보통");
+  await page.goto("/analysis?sort=easy");
+  await expect(rows(page).first()).toContainText("입문");
+});
+
+test("code analysis: pick a question, confirm, read the explanation and move on", async ({
+  page,
+}) => {
+  await page.goto("/analysis");
+  await rows(page).first().click();
+  const [first, second] = analysisQuestions;
+  await expect(page).toHaveURL(`/analysis/${first.id}`);
+  await expect(page.getByRole("heading", { name: first.title, level: 1 })).toBeVisible();
   const confirm = page.getByRole("button", { name: "정답 확인" });
-  await expect(page.getByText("문제 1 / 10")).toBeVisible();
   await expect(confirm).toBeDisabled();
-  await expect(page.getByRole("button", { name: /이전/ })).toBeDisabled();
 
-  for (const [index, question] of analysisQuestions.entries()) {
-    await expect(page.getByText(`문제 ${index + 1} / 10`)).toBeVisible();
-    await page.locator(".analysis-option").nth(question.answer).click();
-    await expect(confirm).toBeEnabled();
-    await confirm.click();
-    await expect(page.getByRole("heading", { name: "정답입니다" })).toBeVisible();
-    await expect(page.locator(".analysis-option.is-correct")).toContainText(
-      "내 답 / 정답",
-    );
-    const last = index === analysisQuestions.length - 1;
-    await page
-      .getByRole("button", { name: last ? "학습 결과 보기" : "다음 문제" })
-      .click();
-  }
-
-  await expect(page.getByText("10 / 10")).toBeVisible();
-  await expect(page.getByText("정답률 100%")).toBeVisible();
-  await expect(page.getByText("모두 맞혔어요")).toBeVisible();
-});
-
-test("code analysis: a wrong answer shows the right one and what to review", async ({
-  page,
-}) => {
-  await page.goto("/analysis");
-  await startAnalysis(page);
-  const [first] = analysisQuestions;
-  const wrong = (first.answer + 1) % first.options.length;
-  await page.locator(".analysis-option").nth(wrong).click();
-  await page.getByRole("button", { name: "정답 확인" }).click();
-  await expect(
-    page.getByRole("heading", {
-      name: `정답은 ${first.options[first.answer]}입니다`,
-    }),
-  ).toBeVisible();
-  await expect(page.locator(".analysis-option.is-wrong")).toContainText(
-    "내 답 / 오답",
-  );
-  await expect(page.locator(".analysis-option.is-correct")).toContainText(
-    "· 정답",
-  );
-  await expect(page.getByLabel("관련 개념")).toContainText(first.concepts[0]);
-});
-
-test("code analysis: leaving for another menu offers to continue with answers and time kept", async ({
-  page,
-}) => {
-  await page.goto("/analysis");
-  await startAnalysis(page);
-  const [first] = analysisQuestions;
   await page.locator(".analysis-option").nth(first.answer).click();
-  await page.getByRole("button", { name: "정답 확인" }).click();
-  await page.getByRole("button", { name: "다음 문제" }).click();
-  await expect(page.getByText("문제 2 / 10")).toBeVisible();
-  await page.locator(".analysis-option").nth(0).click();
+  await expect(confirm).toBeEnabled();
+  await confirm.click();
+  await expect(page.getByRole("heading", { name: "정답입니다" })).toBeVisible();
+  await expect(page.locator(".analysis-option.is-correct")).toContainText("내 답 / 정답");
+  await expect(page.getByLabel("관련 개념")).toContainText(first.concepts[0]);
 
-  const seconds = () => clockSeconds(page, ".analysis-head span");
-  await expect.poll(seconds).toBeGreaterThanOrEqual(2);
-  const before = await seconds();
+  await page.getByRole("link", { name: /다음 문제/ }).click();
+  await expect(page).toHaveURL(`/analysis/${second.id}`);
+  await expect(page.getByRole("heading", { name: second.title, level: 1 })).toBeVisible();
+  await expect(page.locator(".analysis-option.is-correct")).toHaveCount(0);
+});
 
+test("code analysis: a wrong answer shows the right one and the list marks it 풀이 중", async ({
+  page,
+}) => {
+  const [first] = analysisQuestions;
+  await page.goto(`/analysis/${first.id}`);
+  const wrong = (first.answer + 1) % first.options.length;
+  await solve(page, wrong);
+  await expect(
+    page.getByRole("heading", { name: `정답은 ${first.options[first.answer]}입니다` }),
+  ).toBeVisible();
+  await expect(page.locator(".analysis-option.is-wrong")).toContainText("내 답 / 오답");
+  await expect(page.locator(".analysis-option.is-correct")).toContainText("· 정답");
+
+  await page.getByRole("link", { name: "목록으로" }).click();
+  await expect(rows(page).first().locator(".solve-badge")).toHaveText("풀이 중");
+  await expect(page.getByLabel("풀이 상태 필터").getByRole("button", { name: /^풀이 중/ })).toContainText("1");
+  await expect(page.getByRole("link", { name: /이어서 풀기/ })).toHaveAttribute(
+    "href",
+    `/analysis/${first.id}`,
+  );
+});
+
+test("code analysis: coming back to a solved question keeps the result and allows solving again", async ({
+  page,
+}) => {
+  const [first] = analysisQuestions;
+  await page.goto(`/analysis/${first.id}`);
+  await solve(page, first.answer);
+  await expect(page.getByRole("heading", { name: "정답입니다" })).toBeVisible();
+
+  // 다른 메뉴에 다녀오거나 새로고침해도 결과가 그대로다.
   await page.getByRole("link", { name: "미션", exact: true }).click();
   await expect(page.getByRole("heading", { name: "오늘의 도전" })).toBeVisible();
-  await page.waitForTimeout(2500); // 떠나 있는 동안 시간은 흐르지 않는다
-  await page.getByRole("link", { name: "코드 분석", exact: true }).click();
-
-  // 돌아오면 바로 시간이 가지 않고, 이어서 풀지 선택하게 한다.
-  const status = page.locator(".analysis-intro-status");
-  await expect(status).toContainText("진행 중 · 문제 2 / 10 · 1문제 확인");
-  await page.waitForTimeout(1500);
-  const shown = await clockSeconds(page, ".analysis-intro-status");
-  expect(shown).toBeGreaterThanOrEqual(before);
-  expect(shown).toBeLessThanOrEqual(before + 1);
-  await expect(page.getByRole("button", { name: "처음부터 다시" })).toBeVisible();
-
-  await startButton(page).click();
-  await expect(page.getByText("문제 2 / 10")).toBeVisible();
-  await expect(page.locator(".analysis-option").nth(0)).toHaveClass(/is-selected/);
-
-  // 새로고침해도 같은 자리에서 이어지고, 이미 푼 문제는 그대로 확인된다.
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: "정답입니다" })).toBeVisible();
   await page.reload();
-  await expect(status).toContainText("문제 2 / 10");
-  await startButton(page).click();
-  await expect(page.locator(".analysis-option").nth(0)).toHaveClass(/is-selected/);
-  await page.getByRole("button", { name: /이전/ }).click();
-  await expect(page.getByText("문제 1 / 10")).toBeVisible();
-  await expect(page.locator(".analysis-option.is-correct")).toContainText(
-    "내 답 / 정답",
-  );
-});
+  await expect(page.locator(".analysis-option.is-correct")).toContainText("내 답 / 정답");
 
-test("code analysis: restarting from the intro clears the progress", async ({
-  page,
-}) => {
-  await page.goto("/analysis");
-  await startAnalysis(page);
-  await page.locator(".analysis-option").nth(0).click();
-  await page.getByRole("button", { name: "정답 확인" }).click();
-  await page.reload();
-  await page.getByRole("button", { name: "처음부터 다시" }).click();
-  await expect(page.getByText("문제 1 / 10")).toBeVisible();
-  await expect(page.locator(".analysis-option.is-selected, .analysis-option.is-correct, .analysis-option.is-wrong")).toHaveCount(0);
-  expect(await clockSeconds(page, ".analysis-head span")).toBeLessThanOrEqual(1);
-});
-
-test("code analysis: the finished result is offered again and progress is kept per user", async ({
-  page,
-}) => {
-  await page.goto("/analysis");
-  await startAnalysis(page);
-  for (const [index, question] of analysisQuestions.entries()) {
-    await page.locator(".analysis-option").nth(question.answer).click();
-    await page.getByRole("button", { name: "정답 확인" }).click();
-    await page
-      .getByRole("button", {
-        name: index === analysisQuestions.length - 1 ? "학습 결과 보기" : "다음 문제",
-      })
-      .click();
-  }
-  await expect(page.getByText("정답률 100%")).toBeVisible();
-  await page.reload();
-  await expect(page.locator(".analysis-intro-status")).toContainText(
-    "지난 결과 · 10 / 10 · 정답률 100%",
-  );
-  await page.getByRole("button", { name: "결과 보기" }).click();
-  await expect(page.getByText("정답률 100%")).toBeVisible();
   await page.getByRole("button", { name: "다시 풀기" }).click();
-  await expect(page.getByText("문제 1 / 10")).toBeVisible();
+  await expect(page.locator(".analysis-option.is-correct")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "정답 확인" })).toBeDisabled();
 
-  // 다른 사용자(로그인)는 비로그인 풀이와 섞이지 않는다.
+  await page.goto("/analysis");
+  await expect(rows(page).first().locator(".solve-badge")).toHaveText("해결");
+  await expect(page.locator(".standing-card")).toContainText("1 / 10");
+  await expect(page.getByLabel("풀이 상태 필터").getByRole("button", { name: /^미해결/ })).toContainText("9");
+});
+
+test("code analysis: unknown question ids show a way back", async ({ page }) => {
+  await page.goto("/analysis/not-a-question");
+  await expect(page.getByRole("heading", { name: "문제를 찾을 수 없어요" })).toBeVisible();
+  await page.getByRole("link", { name: /문제 목록으로/ }).click();
+  await expect(page).toHaveURL("/analysis");
+});
+
+test("code analysis: records are kept per user and counted once per question for missions", async ({
+  page,
+}) => {
+  const [first, second] = analysisQuestions;
+  await page.goto(`/analysis/${first.id}`);
+  await solve(page, first.answer);
+  await page.getByRole("button", { name: "다시 풀기" }).click();
+  await solve(page, first.answer);
+
+  // 로그인한 사용자는 비로그인 풀이와 섞이지 않는다.
   await authenticate(page);
   await page.route("**/api/v1/submissions?*", (route) =>
     route.fulfill({ json: { items: [], page: 1, limit: 1000, total: 0, totalPages: 1 } }),
   );
-  await page.reload();
-  await expect(page.getByRole("button", { name: "시작하기" })).toBeVisible();
-  await expect(page.getByText("오늘 푼 문제는 미션")).toBeVisible();
-  await startAnalysis(page);
-  await expect(page.getByText("문제 1 / 10")).toBeVisible();
-  await expect(page.locator(".analysis-option.is-selected")).toHaveCount(0);
+  await page.goto("/analysis");
+  await expect(rows(page).first().locator(".solve-badge")).toHaveText("미해결");
+  await expect(page.locator(".standing-card")).toContainText("0 / 10");
+
+  await page.goto(`/analysis/${second.id}`);
+  await solve(page, second.answer);
+  await page.goto(`/analysis/${second.id}`);
+  await page.getByRole("button", { name: "다시 풀기" }).click();
+  await solve(page, second.answer);
+  await page.goto("/missions");
+  // 같은 문제를 두 번 풀어도 오늘 푼 문제는 1개로 센다.
+  await expect(
+    page.locator(".mission-card", { hasText: "코드 분석 워밍업" }),
+  ).toContainText("1 / 5");
 });
 
 test("mission progress is computed from real submissions and learning records", async ({
