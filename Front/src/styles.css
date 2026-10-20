@@ -6841,3 +6841,10 @@ h3 {
     display: none;
   }
 }
+
+/* 순서 뒤집기 버튼: 눌린 상태(뒤집힌 순서)를 강조색으로 표시 */
+.reverse-icon-button[aria-pressed="true"] {
+  background: var(--color-primary-soft);
+  border-color: var(--color-feature-border);
+  color: var(--color-primary);
+}

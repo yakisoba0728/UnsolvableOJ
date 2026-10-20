@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowUpDown } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { BrandArt } from "../components/BrandArt";
@@ -43,15 +44,20 @@ const PAGE_SIZE = 20;
 
 const sorts = [
   { value: "latest", label: "최신순" },
-  { value: "easy", label: "쉬운 난이도순" },
-  { value: "hard", label: "어려운 난이도순" },
+  { value: "difficulty", label: "난이도순" },
   { value: "title", label: "제목순" },
-  { value: "solvers", label: "푼 사람 많은순" },
-  { value: "solvers-asc", label: "푼 사람 적은순" },
-  { value: "rate", label: "정답률 높은순" },
-  { value: "rate-asc", label: "정답률 낮은순" },
+  { value: "solvers", label: "푼 사람순" },
+  { value: "rate", label: "정답률순" },
   { value: "random", label: "무작위" },
 ];
+
+/** 옛 주소(sort=easy 등)도 열리도록 새 정렬 이름과 '뒤집기' 여부로 바꿔 읽는다. */
+const legacySorts: Record<string, { sort: string; reversed: boolean }> = {
+  easy: { sort: "difficulty", reversed: false },
+  hard: { sort: "difficulty", reversed: true },
+  "solvers-asc": { sort: "solvers", reversed: true },
+  "rate-asc": { sort: "rate", reversed: true },
+};
 
 const statusChips: { value: "" | SolveState; label: string }[] = [
   { value: "", label: "전체" },
@@ -89,7 +95,11 @@ export function ProblemsPage() {
     .filter((value): value is SolveState =>
       ["solved", "attempted", "none"].includes(value),
     );
-  const sort = params.get("sort") ?? "latest";
+  const rawSort = params.get("sort") ?? "latest";
+  const legacySort = legacySorts[rawSort];
+  const sort = legacySort?.sort ?? rawSort;
+  // 기본 순서(최신순=최신 먼저, 난이도순=쉬운 것 먼저, 푼 사람순=많은 순, 정답률순=높은 순)를 뒤집은 상태
+  const reversed = (params.get("rev") === "1") !== Boolean(legacySort?.reversed);
   const seed = Number(params.get("seed")) || 1;
   const page = Math.max(1, Number(params.get("page")) || 1);
 
@@ -172,36 +182,32 @@ export function ProblemsPage() {
     // 무작위: 전체를 한 번 섞은 뒤 필터를 적용한다. 필터를 바꿔도 상대 순서가 유지된다.
     const base =
       sort === "random" ? seededShuffle(problems, seed) : [...problems];
-    if (sort === "easy" || sort === "hard")
+    const dir = reversed ? -1 : 1;
+    if (sort === "difficulty")
       base.sort(
         (a, b) =>
-          (order.indexOf(a.difficulty) - order.indexOf(b.difficulty)) *
-          (sort === "easy" ? 1 : -1),
+          (order.indexOf(a.difficulty) - order.indexOf(b.difficulty)) * dir,
       );
     else if (sort === "title")
-      base.sort((a, b) => a.title.localeCompare(b.title, "ko"));
-    else if (sort === "solvers" || sort === "solvers-asc")
+      base.sort((a, b) => a.title.localeCompare(b.title, "ko") * dir);
+    else if (sort === "solvers")
       base.sort(
-        (a, b) =>
-          ((b.solverCount ?? 0) - (a.solverCount ?? 0)) *
-          (sort === "solvers" ? 1 : -1),
+        (a, b) => ((b.solverCount ?? 0) - (a.solverCount ?? 0)) * dir,
       );
-    else if (sort === "rate" || sort === "rate-asc")
-      // 정답률이 없는(제출 없는) 문제는 어느 방향이든 맨 뒤로 보낸다.
+    else if (sort === "rate")
+      // 정답률이 없는(제출 없는) 문제는 뒤집어도 맨 뒤에 둔다.
       base.sort((a, b) => {
         if (a.acceptanceRate == null || b.acceptanceRate == null)
           return (
             Number(a.acceptanceRate == null) - Number(b.acceptanceRate == null)
           );
-        return (
-          (b.acceptanceRate - a.acceptanceRate) * (sort === "rate" ? 1 : -1)
-        );
+        return (b.acceptanceRate - a.acceptanceRate) * dir;
       });
     else if (sort !== "random")
-      base.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      base.sort((a, b) => b.createdAt.localeCompare(a.createdAt) * dir);
     return base.filter((problem) => matches(problem, null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [problems, sort, seed, params, history.solved, history.attempted]);
+  }, [problems, sort, reversed, seed, params, history.solved, history.attempted]);
 
   const statusCount = (value: "" | SolveState) =>
     problems.filter(
@@ -250,8 +256,20 @@ export function ProblemsPage() {
     setAnnounce(`${scope}문제 목록을 무작위로 섞었어요.`);
   }
 
+  // 현재 목록의 순서를 거꾸로 뒤집는다(같은 정렬 안에서의 방향만 바뀐다).
+  function reverseOrder() {
+    update({
+      sort: sort === "latest" ? null : sort,
+      rev: reversed ? null : "1",
+    });
+    setAnnounce(
+      reversed ? "목록 순서를 원래대로 되돌렸어요." : "목록 순서를 뒤집었어요.",
+    );
+  }
+
   function changeSort(value: string) {
     update({
+      rev: null,
       sort: value === "latest" ? null : value,
       // 무작위를 고를 때마다 새 순서를 만든다.
       seed: value === "random" ? String(newSeed()) : null,
@@ -349,7 +367,19 @@ export function ProblemsPage() {
             >
               <ShuffleIcon playKey={spinKey} />
             </button>
-          ) : null}
+          ) : (
+            <button
+              type="button"
+              className="shuffle-icon-button reverse-icon-button"
+              aria-label="목록 순서 뒤집기"
+              aria-pressed={reversed}
+              title="목록 순서 뒤집기"
+              onClick={reverseOrder}
+              disabled={filtered.length < 2}
+            >
+              <ArrowUpDown size={18} aria-hidden="true" />
+            </button>
+          )}
         </div>
       </div>
 

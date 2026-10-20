@@ -388,7 +388,7 @@ test.describe("problem editor", () => {
 
 for (const slug of ["new", "mine"]) {
   test(`public slug ${slug} opens from the problem list`, async ({ page }) => {
-    await page.route("**/api/v1/problems?*", (route) =>
+    await page.route(/\/api\/v1\/problems(\?.*)?$/, (route) =>
       route.fulfill({
         json: {
           items: [{ ...problem, slug }],
@@ -529,6 +529,62 @@ test("the home illustration shows the level badge only for a signed-in user, wit
   const badge = page.locator(".brand-art");
   await expect(badge.getByText("Lv.4")).toBeAttached();
   await expect(badge.getByText("372 XP")).toBeAttached();
+});
+
+test("the problem list has a reverse-order button that is replaced by the shuffle button in random order", async ({
+  page,
+}) => {
+  const make = (id: string, title: string, difficulty: Problem["difficulty"], at: string) => ({
+    ...problem,
+    id,
+    slug: id,
+    title,
+    difficulty,
+    createdAt: at,
+  });
+  await page.route("**/api/v1/problems?*", (route) =>
+    route.fulfill({
+      json: {
+        items: [
+          make("p-a", "가 문제", "HARD", "2026-09-01T00:00:00Z"),
+          make("p-b", "나 문제", "BEGINNER", "2026-09-03T00:00:00Z"),
+          make("p-c", "다 문제", "MEDIUM", "2026-09-02T00:00:00Z"),
+        ],
+        page: 1,
+        limit: 100,
+        total: 3,
+        totalPages: 1,
+      },
+    }),
+  );
+  // 화면이 다시 그려질 때까지 자동으로 기다리며 순서를 확인한다.
+  const expectTitles = (expected: string[]) =>
+    expect(page.locator(".problem-row .problem-title strong")).toHaveText(
+      expected,
+    );
+  const reverse = page.getByRole("button", { name: "목록 순서 뒤집기" });
+
+  await page.goto("/problems");
+  await expectTitles(["나 문제", "다 문제", "가 문제"]); // 최신순
+  await reverse.click();
+  await expect(reverse).toHaveAttribute("aria-pressed", "true");
+  await expectTitles(["가 문제", "다 문제", "나 문제"]);
+  await reverse.click();
+  await expectTitles(["나 문제", "다 문제", "가 문제"]);
+
+  await page.goto("/problems?sort=difficulty");
+  await expectTitles(["나 문제", "다 문제", "가 문제"]); // 쉬운 순
+  await reverse.click();
+  await expectTitles(["가 문제", "다 문제", "나 문제"]);
+  // 옛 주소도 같은 목록을 보여 준다.
+  await page.goto("/problems?sort=hard");
+  await expectTitles(["가 문제", "다 문제", "나 문제"]);
+
+  await page.goto("/problems?sort=random&seed=3");
+  await expect(
+    page.getByRole("button", { name: "무작위로 다시 섞기" }),
+  ).toBeVisible();
+  await expect(reverse).toHaveCount(0);
 });
 
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
