@@ -1164,7 +1164,8 @@ textarea {
 }
 .list-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  /* 오른쪽 카드 열: 커뮤니티 사이드 배너와 같은 폭(262px)으로 줄여 목록에 더 많은 폭을 준다 */
+  grid-template-columns: minmax(0, 1fr) 262px;
   gap: 24px;
   align-items: start;
 }

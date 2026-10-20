@@ -904,6 +904,28 @@ test("community list: the vote and view columns are right-aligned like the probl
   expect(Math.abs(headVote - rowVote)).toBeLessThanOrEqual(2);
 });
 
+test("the problem list side cards are 262px wide and fit their content", async ({
+  page,
+}) => {
+  await authenticate(page, "AUTHOR");
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/problems");
+  await expect(page.locator(".problem-row")).toHaveCount(1);
+  const side = (await page.locator(".side-stack").boundingBox())!;
+  const list = (await page.locator(".list-layout > section").boundingBox())!;
+  // 오른쪽 카드 열은 커뮤니티 사이드 배너와 같은 262px이고, 그만큼 목록이 넓어진다.
+  expect(Math.round(side.width)).toBe(262);
+  expect(list.width).toBeGreaterThan(880);
+  // 카드 안의 어떤 요소도 카드 밖으로 넘치지 않는다.
+  const overflowing = await page.locator(".side-stack").evaluate((root) => {
+    const limit = root.getBoundingClientRect().right + 1;
+    return [...root.querySelectorAll("*")].filter(
+      (element) => element.getBoundingClientRect().right > limit,
+    ).length;
+  });
+  expect(overflowing).toBe(0);
+});
+
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
   page,
 }) => {
