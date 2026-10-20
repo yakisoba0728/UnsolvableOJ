@@ -63,18 +63,29 @@ services:
       retries: 10
       start_period: 15s
 
-  # Builds and tags the per-submission sandbox image used by `judge` below.
-  # Not a long-running service: it exits immediately once the image is built.
-  judge-runtime:
+  # Privileged nested sandbox: local development only. Production needs a
+  # dedicated Linux execution host; never expose this API to the public network.
+  go-judge:
     build:
       context: ./Judge/runtime
-    image: unsolvable-judge-runtime:local
-    entrypoint: ["true"]
+    image: unsolvable-go-judge:local
+    privileged: true
+    shm_size: 512m
+    environment:
+      ES_AUTH_TOKEN: ${GO_JUDGE_TOKEN:-local-dev-only-go-judge-token-0123456789abcdef}
+    command:
+      - -no-fallback
+      - -enable-cpu-rate
+      - -parallelism=2
+      - -file-timeout=15m
+      - -time-limit-checker-interval=2ms
+      - -output-limit=64m
+      - -copy-out-limit=64m
+    ports:
+      - "127.0.0.1:5050:5050"
+    networks: [sandbox]
 
-  # BullMQ worker. Shells out to the host Docker daemon (via the mounted
-  # socket) to run each submission in a locked-down unsolvable-judge-runtime
-  # container. Local/dev only — see Back/README.md and Judge/README.md:
-  # in production this worker should run on a host separate from the API.
+  # Only the worker can reach both the application and sandbox networks.
   judge:
     build:
       context: ./Judge
@@ -83,17 +94,17 @@ services:
       JUDGE_SERVICE_TOKEN: local-dev-only-judge-service-token-0123456789
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      JUDGE_RUNTIME_IMAGE: unsolvable-judge-runtime:local
+      GO_JUDGE_URL: http://go-judge:5050
+      GO_JUDGE_TOKEN: ${GO_JUDGE_TOKEN:-local-dev-only-go-judge-token-0123456789abcdef}
       JUDGE_CONCURRENCY: 2
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+    networks: [default, sandbox]
     depends_on:
       redis:
         condition: service_healthy
       back:
         condition: service_healthy
-      judge-runtime:
-        condition: service_completed_successfully
+      go-judge:
+        condition: service_healthy
 
   # React/Vite UI, built and served as static files through nginx, which
   # also reverse-proxies /api/ to the back service.
@@ -111,3 +122,6 @@ services:
 volumes:
   postgres-data:
   redis-data:
+
+networks:
+  sandbox: {}
