@@ -7164,3 +7164,8 @@ textarea {
 .write-form .md-field {
   scroll-margin-top: 100px;
 }
+
+/* 본문의 *기울임*: Pretendard에는 이탤릭 글자체가 없어서 전역 font-synthesis: none 때문에 똑바로 보였다. 기울임만 합성을 허용한다 */
+.markdown em {
+  font-synthesis: style;
+}

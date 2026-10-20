@@ -753,11 +753,14 @@ test("the write page shows field problems while typing like sign-up, has a tall 
   await expect(body).toBeFocused();
 
   // 미리보기: 코드 블록과 굵은 글씨가 글 상세와 같은 방식으로 그려진다.
-  await body.fill("설명 **굵게**\n\n```js\nconst a = 1;\n```\n");
+  await body.fill("설명 **굵게** 와 *기울임*\n\n```js\nconst a = 1;\n```\n");
   await expect(page.getByText("본문을 입력해 주세요.")).toHaveCount(0);
   await page.getByRole("tab", { name: "미리보기" }).click();
   const preview = page.locator(".write-body-preview .markdown");
   await expect(preview.locator("strong")).toHaveText("굵게");
+  // 기울임: 글꼴에 이탤릭이 없어도 비스듬히 그려지도록 합성을 허용한다(전역 설정은 none).
+  await expect(preview.locator("em")).toHaveCount(1);
+  await expect(preview.locator("em")).toHaveCSS("font-synthesis", /style/);
   await expect(preview.locator("pre code")).toContainText("const a = 1;");
   await page.getByRole("tab", { name: "작성" }).click();
   await expect(body).toHaveValue(/const a = 1;/);
