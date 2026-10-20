@@ -14,7 +14,7 @@ export function solveState(
   return solved.has(id) ? "solved" : attempted.has(id) ? "attempted" : "none";
 }
 
-/** 색만이 아니라 문구·아이콘으로도 상태를 구분한다. */
+/** 색만이 아니라 문구로도 상태를 구분한다(해결에는 ✓도 붙는다). */
 export function ProblemStatus({ state }: { state: SolveState }) {
   return (
     <span className={`solve-badge solve-${state}`}>

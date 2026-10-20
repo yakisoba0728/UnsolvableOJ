@@ -1030,6 +1030,42 @@ test.describe("community post: delete own post and answer layout", () => {
   });
 });
 
+test("only input fields show the text cursor; UI text uses the arrow and controls the pointer", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.goto("/problems/view/sum");
+  const cursorOf = (selector: string) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((el) => getComputedStyle(el).cursor);
+  const selectOf = (selector: string) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((el) => getComputedStyle(el).userSelect);
+
+  // 입력칸은 텍스트 커서
+  expect(await cursorOf("textarea.code-editor")).toBe("text");
+  // 제목·안내 문구는 화살표
+  expect(await cursorOf("h1")).toBe("default");
+  expect(await cursorOf(".editor-hints")).toBe("default");
+  // 누르는 곳은 손가락, 조작용 글자는 드래그 선택이 안 된다
+  expect(await cursorOf("button.text-button")).toBe("pointer");
+  expect(await selectOf("button.text-button")).toBe("none");
+  // 읽고 복사하는 본문은 텍스트 커서와 선택 가능
+  expect(await cursorOf(".markdown")).toBe("text");
+  expect(await selectOf(".markdown")).not.toBe("none");
+  // 입력칸 안의 글은 선택 가능
+  expect(await selectOf("textarea.code-editor")).toBe("text");
+
+  await page.goto("/problems");
+  expect(await cursorOf(".data-list .problem-title strong")).toBe("pointer");
+  expect(await selectOf(".data-list .problem-row")).toBe("none");
+  expect(await cursorOf(".total-count")).toBe("default");
+});
+
 test.describe("code editor basics on the solve page", () => {
   test("switching languages immediately keeps each language's latest draft", async ({
     page,

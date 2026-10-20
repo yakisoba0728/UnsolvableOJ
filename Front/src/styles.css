@@ -334,7 +334,7 @@ p {
   justify-content: center;
   min-width: 65px;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 13px;
   font-weight: 700;
   background: var(--color-success-soft);
@@ -393,7 +393,7 @@ p {
 .pagination button {
   border: 1px solid var(--color-divider);
   background: var(--color-surface);
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 8px 15px;
   color: var(--color-ink-600);
   font-weight: var(--weight-label);
@@ -419,7 +419,7 @@ p {
   background: var(--color-danger-soft);
   border: 1px solid var(--color-danger-border);
   color: var(--color-danger);
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 11px 14px;
   font-size: 13px;
   line-height: 1.5;
@@ -730,7 +730,7 @@ textarea {
 .result-stats > div {
   background: var(--color-surface);
   border: 1px solid var(--color-divider);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 20px;
 }
 .result-stats small {
@@ -764,7 +764,7 @@ textarea {
 .source-code {
   background: var(--color-code);
   color: #dce8ff;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 25px;
   min-height: 180px;
   font-size: 13px;
@@ -879,7 +879,7 @@ textarea {
   align-items: center;
   gap: 12px;
   padding: 9px 8px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 13px;
 }
 .ranking-row.current {
@@ -1604,7 +1604,7 @@ textarea {
   height: 24px;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   display: inline-block;
   background: var(--color-disabled);
 }
@@ -2044,7 +2044,7 @@ kbd {
   font: 12px var(--font-mono);
   background: var(--color-disabled);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 1px 6px;
 }
 .daily-card {
@@ -2427,7 +2427,7 @@ kbd {
   .heat-cell {
     width: 18px;
     height: 18px;
-    border-radius: 5px;
+    border-radius: 4px;
   }
   .heat-days span {
     height: 18px;
@@ -2762,7 +2762,7 @@ input,
   }
 }
 
-/* B6. 문제 목록 머리글: 진행률은 제목 줄 오른쪽으로 */
+/* 머리글 오른쪽 영역의 푼 문제 요약(.solved-summary) — 지금은 쓰는 화면이 없다 */
 .page-header-aside .solved-summary {
   margin: 0;
   min-width: 240px;
@@ -2990,7 +2990,7 @@ h3 {
   font-weight: var(--weight-title);
 }
 
-/* ===== 목록: 즐겨찾기 별 · 상태 칩 · URL 상태 ===== */
+/* ===== 문제 목록: 행 묶음(.problem-row-wrap) · 필터 줄 안의 작은 버튼 ===== */
 .problem-row-wrap {
   position: relative;
 }
@@ -3132,7 +3132,7 @@ h3 {
   }
 }
 
-/* ===== 문제 목록: 머리글 이어서 풀기 버튼, 비로그인 소개 카드 ===== */
+/* ===== 문제 목록: 비로그인 소개 카드(.brand-card). 머리글 버튼 영역(.header-actions)은 지금 쓰지 않는다 ===== */
 .header-actions {
   display: flex;
   align-items: center;
@@ -3429,7 +3429,7 @@ h3 {
   padding: 14px 20px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: 10px;
   transition: border-color 0.15s;
 }
 .post-row:hover {
@@ -3695,7 +3695,7 @@ h3 {
 .post-tags a {
   display: inline-block;
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-surface-muted);
   color: var(--color-ink-600);
   font-size: 13px;
@@ -3765,7 +3765,7 @@ h3 {
 .answer-vote {
   padding: 2px 8px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: inherit;
   font: inherit;
@@ -3795,7 +3795,7 @@ h3 {
   margin: 0 0 16px;
   padding: 11px 14px;
   border: 1px solid var(--color-success-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-success-soft);
   color: var(--color-success);
   font-size: 13px;
@@ -3870,7 +3870,7 @@ h3 {
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-primary-soft);
   color: var(--color-primary);
   font-size: 12px;
@@ -3887,7 +3887,7 @@ h3 {
   margin: 0 0 16px;
   padding: 10px 14px;
   border: 1px solid var(--color-feature-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-feature);
   font-size: 13px;
 }
@@ -4180,7 +4180,7 @@ h3 {
   justify-content: space-between;
   gap: 12px;
   padding: 9px 12px;
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--color-ink-700);
   font-size: 14px;
   font-weight: var(--weight-label);
@@ -4861,7 +4861,7 @@ h3 {
   height: 28px;
   padding: 0;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-ink-700);
   cursor: pointer;
@@ -4882,7 +4882,7 @@ h3 {
   scroll-snap-type: y mandatory;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 .scroller-view::-webkit-scrollbar {
   display: none;
@@ -4902,7 +4902,7 @@ h3 {
   scroll-snap-align: start;
   scroll-snap-stop: always;
   background: var(--color-surface-muted);
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid transparent;
   overflow: hidden;
 }
@@ -5092,7 +5092,7 @@ h3 {
   min-height: 36px;
   padding: 0 14px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: var(--color-ink-600);
   font: inherit;
@@ -5180,13 +5180,13 @@ h3 {
   gap: 2px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 6px;
 }
 .md-tabs button {
   min-height: 26px;
   padding: 0 12px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
   color: var(--color-ink-600);
   font: inherit;
@@ -5377,7 +5377,7 @@ h3 {
 .check-warnings {
   margin-top: 16px;
   padding: 12px 14px 12px 28px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-warning-soft);
   color: var(--color-warning);
   font-size: 13px;
@@ -5732,8 +5732,9 @@ h3 {
 }
 
 /* ===== 목록 통일 규격: 문제 목록 · 커뮤니티 글 목록 · 내 제출 =====
-   한 카드 안의 표: 머리글 44 · 행 72 · 안쪽 여백 24 · 칸 간격 16 · 모두 왼쪽 정렬 ·
-   제목 16/700 · 보조 13 · 배지는 높이 28의 알약 · 끝에 › 표시(문제 목록은 제외) */
+   한 카드 안의 표: 머리글 44 · 행 72 · 안쪽 여백 24 · 칸 간격 16 · 왼쪽 정렬(문제 목록의
+   난이도·푼 사람·정답률 열은 오른쪽 정렬) · 제목 16/700 · 보조 13 · 배지는 높이 28의 알약 ·
+   끝에 › 표시(문제 목록은 제외) */
 .data-list {
   --cols: minmax(0, 1fr) 96px 96px 96px;
   list-style: none;
@@ -5891,7 +5892,7 @@ h3 {
   background: var(--color-surface);
   border: 1px solid var(--color-feature-border);
 }
-/* 숫자·제한 칸: 같은 글꼴, 왼쪽 정렬 */
+/* 숫자 칸(문제 목록의 푼 사람·정답률, 내 제출·글 목록의 수치): 같은 글꼴, 기본은 왼쪽 정렬 */
 .data-list .problem-limit,
 .data-list .history-lang,
 .data-list .history-metrics,
@@ -6063,7 +6064,7 @@ h3 {
   cursor: default;
 }
 
-/* 문제 목록: 정렬이 '무작위'일 때만 보이는 다시 섞기 아이콘 버튼(필터 줄 맨 오른쪽) — 다른 입력 칸과 같은 둥근 사각형 */
+/* 문제 목록 필터 줄 맨 오른쪽의 아이콘 버튼: 무작위일 때는 다시 섞기, 그 밖에는 순서 뒤집기 — 다른 입력 칸과 같은 둥근 사각형 */
 .filter-groups .shuffle-icon-button {
   display: inline-grid;
   place-items: center;
@@ -6141,7 +6142,7 @@ h3 {
   height: 28px;
   padding: 0 6px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: inherit;
   font-size: 12px;
@@ -6197,7 +6198,7 @@ h3 {
   list-style: none;
   background: #1b2636;
   border: 1px solid #3a4a62;
-  border-radius: 10px;
+  border-radius: 7px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   color: #e9f0f9;
   font: 12px/1.4 var(--font-sans);
@@ -6208,7 +6209,7 @@ h3 {
   justify-content: space-between;
   gap: 16px;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
 }
 .autocomplete li.active {
@@ -6366,7 +6367,7 @@ h3 {
 .skeleton {
   display: block;
   max-width: 100%;
-  border-radius: 6px;
+  border-radius: 4px;
   background: linear-gradient(
     90deg,
     var(--color-disabled) 0%,
@@ -6559,7 +6560,7 @@ h3 {
   gap: 5px;
 }
 
-/* 추천·조회 수: 아이콘 + 숫자 */
+/* 커뮤니티 목록의 추천·조회 수 칸: 행은 아이콘 + 숫자, 머리글은 '추천'·'조회 수' 텍스트 */
 .data-list .post-num,
 .data-list .post-head span:nth-child(n + 3) {
   display: inline-flex;
@@ -6599,7 +6600,7 @@ h3 {
   place-items: center;
   width: 18px;
   height: 18px;
-  border-radius: 5px;
+  border-radius: 4px;
   background: rgba(159, 176, 200, 0.2);
   color: #9fb0c8;
   font: 700 11px/1 var(--font-mono);
@@ -6898,4 +6899,95 @@ h3 {
   .reverse-arrow-down {
     animation: none;
   }
+}
+
+/* 문제 목록: 난이도·푼 사람·정답률 열을 모두 오른쪽 정렬해, 마지막 열 오른쪽에 빈 칸이 남지 않게 한다 */
+.data-list.list-problems .problem-head span:not(:first-child),
+.data-list.list-problems .problem-row .difficulty,
+.data-list.list-problems .problem-row .problem-limit {
+  justify-self: end;
+  text-align: right;
+}
+@media (max-width: 880px) {
+  /* 좁은 화면은 카드형 배치라 왼쪽 정렬을 유지한다 */
+  .data-list.list-problems .problem-row .difficulty,
+  .data-list.list-problems .problem-row .problem-limit {
+    justify-self: auto;
+    text-align: left;
+  }
+}
+
+/* ===== 입력을 받지 않는 곳에는 텍스트 커서(I빔)가 나오지 않게 한다 =====
+   화면 글자 위에서는 기본 화살표, 누를 수 있는 곳은 손가락, 글을 입력하는 칸만 텍스트 커서.
+   읽고 복사하는 본문(글 내용·문제 설명·코드 출력)은 드래그로 선택하기 쉽도록 텍스트 커서를 둔다. */
+body {
+  cursor: default;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([readonly]),
+textarea:not([readonly]) {
+  cursor: text;
+}
+input[readonly],
+textarea[readonly] {
+  cursor: default;
+  caret-color: transparent;
+}
+select,
+input[type="checkbox"],
+input[type="radio"],
+label[for],
+summary,
+button,
+[role="button"],
+[role="tab"],
+[role="radio"],
+[role="option"],
+a[href] {
+  cursor: pointer;
+}
+button:disabled,
+[aria-disabled="true"] {
+  cursor: default;
+}
+.markdown,
+.markdown *,
+pre,
+pre * {
+  cursor: text;
+}
+.markdown a,
+.markdown a * {
+  cursor: pointer;
+}
+
+/* 조작용 요소(버튼·탭·토글·배지·표 행·내비게이션)의 글자는 드래그로 선택되지 않게 한다 */
+button,
+[role="button"],
+[role="tab"],
+[role="radio"],
+[role="option"],
+summary,
+.site-header,
+.site-footer,
+.step-nav,
+.slide-toggle,
+.pagination,
+.pill,
+.difficulty,
+.solve-badge,
+.verdict,
+.post-chip,
+.post-category,
+.case-pill,
+.data-list,
+.filter-card .filter-label,
+.back-link {
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* 입력칸 안의 글은 언제나 선택·편집할 수 있어야 한다(사파리 포함) */
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
 }
