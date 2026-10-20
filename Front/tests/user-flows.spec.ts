@@ -772,6 +772,23 @@ test("my submissions can be searched, filtered and grouped by problem", async ({
   const rows = page.locator(".history-row");
   await expect(rows).toHaveCount(4);
 
+  // 테스트 케이스 결과는 제목 아래가 아니라 '테스트' 열에 N/N 으로만 보이고, 끝 화살표는 없다.
+  await expect(page.locator(".history-head")).toContainText("테스트");
+  await expect(rows.first().locator(".history-tests")).toHaveText(/^\d+\/\d+$/);
+  await expect(rows.locator(".row-arrow")).toHaveCount(0);
+  await expect(page.locator(".history-title small")).toHaveCount(0);
+  await expect(page.getByText("통과", { exact: false })).toHaveCount(0);
+  // 제목을 뺀 열은 모두 오른쪽 정렬이고, 오른쪽 끝(제출 시각)이 목록 안쪽 여백에 닿는다.
+  const rightGap = async (selector: string) =>
+    page.locator(selector).first().evaluate((el) => {
+      const list = document.querySelector(".list-history")!.getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      return Math.round(list.right - range.getBoundingClientRect().right);
+    });
+  expect(await rightGap(".history-head span:last-child")).toBeLessThanOrEqual(26);
+  expect(await rightGap(".history-row .history-time")).toBeLessThanOrEqual(26);
+
   const verdicts = page.getByRole("group", { name: "판정 필터" });
   await verdicts.getByRole("button", { name: /^성공/ }).click();
   await expect(rows).toHaveCount(1);

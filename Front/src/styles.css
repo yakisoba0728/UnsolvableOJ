@@ -5748,7 +5748,7 @@ h3 {
   overflow: hidden;
 }
 .data-list.list-history {
-  --cols: minmax(0, 1fr) 176px 112px 148px 168px 16px;
+  --cols: minmax(0, 1fr) 144px 104px 96px 148px 168px;
 }
 .data-list.list-posts {
   --cols: 96px minmax(0, 1fr) 72px 80px;
@@ -7055,4 +7055,42 @@ textarea {
 .search-tag-remove:focus-visible {
   background: color-mix(in srgb, var(--color-primary) 20%, transparent);
   outline: none;
+}
+
+/* 내 제출 목록: 문제 제목을 뺀 나머지 열을 모두 오른쪽 정렬(문제 목록·커뮤니티 목록과 같게), 끝 화살표 없음 */
+.data-list.list-history .history-head span:not(:first-child),
+.data-list.list-history .history-row .verdict,
+.data-list.list-history .history-row .history-lang,
+.data-list.list-history .history-row .history-tests,
+.data-list.list-history .history-row .history-metrics,
+.data-list.list-history .history-row .history-time {
+  justify-self: end;
+  text-align: right;
+}
+.data-list .history-tests {
+  color: var(--color-ink-700);
+  font: 400 14px/1.4 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+@media (max-width: 880px) {
+  /* 좁은 화면은 카드형 배치라 왼쪽 정렬을 유지하고, 열 머리글이 없으니 테스트 수 앞에 이름을 붙인다 */
+  .data-list.list-history .history-row .verdict,
+  .data-list.list-history .history-row .history-lang,
+  .data-list.list-history .history-row .history-tests,
+  .data-list.list-history .history-row .history-metrics,
+  .data-list.list-history .history-row .history-time {
+    justify-self: auto;
+    text-align: left;
+  }
+  .data-list.list-history .history-row {
+    padding-right: 16px;
+  }
+  .data-list.list-history .history-row .history-tests {
+    order: 2;
+  }
+  .data-list.list-history .history-tests::before {
+    content: attr(data-label) " ";
+    color: var(--color-ink-500);
+  }
 }
