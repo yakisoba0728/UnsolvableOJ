@@ -904,7 +904,7 @@ test("community list: the vote and view columns are right-aligned like the probl
   expect(Math.abs(headVote - rowVote)).toBeLessThanOrEqual(2);
 });
 
-test("the problem list side cards are 262px wide and fit their content", async ({
+test("the problem list side cards are 291px wide and fit their content", async ({
   page,
 }) => {
   await authenticate(page, "AUTHOR");
@@ -913,9 +913,9 @@ test("the problem list side cards are 262px wide and fit their content", async (
   await expect(page.locator(".problem-row")).toHaveCount(1);
   const side = (await page.locator(".side-stack").boundingBox())!;
   const list = (await page.locator(".list-layout > section").boundingBox())!;
-  // 오른쪽 카드 열은 커뮤니티 사이드 배너와 같은 262px이고, 그만큼 목록이 넓어진다.
-  expect(Math.round(side.width)).toBe(262);
-  expect(list.width).toBeGreaterThan(880);
+  // 오른쪽 카드 열은 예전 320px과 줄였던 262px의 중간인 291px이고, 그만큼 목록이 넓어진다.
+  expect(Math.round(side.width)).toBe(291);
+  expect(list.width).toBeGreaterThan(850);
   // 카드 안의 어떤 요소도 카드 밖으로 넘치지 않는다.
   const overflowing = await page.locator(".side-stack").evaluate((root) => {
     const limit = root.getBoundingClientRect().right + 1;
