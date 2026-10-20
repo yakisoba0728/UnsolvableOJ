@@ -97,7 +97,7 @@ export function HomePage() {
 
       <div className="home-top-grid">
         <section className="continue-card with-art" aria-label="못풀준 소개">
-          <BrandArt />
+          <BrandArt standing={session ? profile : null} />
           <>
             <span className="pill pill-primary">못풀준과 함께</span>
             <h2>게임처럼 성장하는 온라인 저지</h2>

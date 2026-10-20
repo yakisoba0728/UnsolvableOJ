@@ -505,6 +505,32 @@ test("submission passes the source and polls through to the final verdict", asyn
   expect(reads).toBe(3);
 });
 
+test("the home illustration shows the level badge only for a signed-in user, with their own level and XP", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.locator(".brand-art").first()).toBeAttached();
+  await expect(page.locator(".brand-art text")).toHaveCount(0);
+
+  await authenticate(page);
+  await page.route("**/api/v1/users/me", (route) =>
+    route.fulfill({
+      json: {
+        ...session.user,
+        level: 4,
+        xp: 372,
+        createdAt: "2026-09-01T00:00:00Z",
+        solvedCount: 5,
+      },
+    }),
+  );
+  await page.route("**/api/v1/rankings", (route) => route.fulfill({ json: [] }));
+  await page.goto("/");
+  const badge = page.locator(".brand-art");
+  await expect(badge.getByText("Lv.4")).toBeAttached();
+  await expect(badge.getByText("372 XP")).toBeAttached();
+});
+
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
   page,
 }) => {
