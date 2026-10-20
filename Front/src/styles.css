@@ -6991,3 +6991,68 @@ textarea {
   -webkit-user-select: text;
   user-select: text;
 }
+
+/* 커뮤니티 검색창: 고른 태그를 알약으로 안에 보여 주고, 같은 줄에서 이어서 입력한다 */
+.search-box {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 5px 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  cursor: text;
+}
+.search-box:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.search-box .search-input {
+  flex: 1 1 140px;
+  width: auto;
+  min-width: 120px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.search-box .search-input:focus {
+  border: 0;
+  box-shadow: none;
+}
+.search-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 26px;
+  padding: 0 4px 0 10px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: var(--weight-title);
+  white-space: nowrap;
+}
+.search-tag-remove {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.search-tag-remove:hover,
+.search-tag-remove:focus-visible {
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  outline: none;
+}
