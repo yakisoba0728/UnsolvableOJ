@@ -46,6 +46,10 @@ const sorts = [
   { value: "easy", label: "쉬운 난이도순" },
   { value: "hard", label: "어려운 난이도순" },
   { value: "title", label: "제목순" },
+  { value: "solvers", label: "푼 사람 많은순" },
+  { value: "solvers-asc", label: "푼 사람 적은순" },
+  { value: "rate", label: "정답률 높은순" },
+  { value: "rate-asc", label: "정답률 낮은순" },
   { value: "random", label: "무작위" },
 ];
 
@@ -176,6 +180,23 @@ export function ProblemsPage() {
       );
     else if (sort === "title")
       base.sort((a, b) => a.title.localeCompare(b.title, "ko"));
+    else if (sort === "solvers" || sort === "solvers-asc")
+      base.sort(
+        (a, b) =>
+          ((b.solverCount ?? 0) - (a.solverCount ?? 0)) *
+          (sort === "solvers" ? 1 : -1),
+      );
+    else if (sort === "rate" || sort === "rate-asc")
+      // 정답률이 없는(제출 없는) 문제는 어느 방향이든 맨 뒤로 보낸다.
+      base.sort((a, b) => {
+        if (a.acceptanceRate == null || b.acceptanceRate == null)
+          return (
+            Number(a.acceptanceRate == null) - Number(b.acceptanceRate == null)
+          );
+        return (
+          (b.acceptanceRate - a.acceptanceRate) * (sort === "rate" ? 1 : -1)
+        );
+      });
     else if (sort !== "random")
       base.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     return base.filter((problem) => matches(problem, null));
@@ -378,28 +399,32 @@ export function ProblemsPage() {
             <div className="problem-list data-list list-problems">
               <div className="problem-head" aria-hidden="true">
                 <span>문제</span>
-                <span>풀이 상태</span>
                 <span>난이도</span>
-                <span>푼 사람 · 정답률</span>
+                <span>푼 사람</span>
+                <span>정답률</span>
               </div>
               {visible.map((problem) => (
                 <div className="problem-row-wrap" key={problem.id}>
                   <Link className="problem-row" to={problemPath(problem.slug)}>
                     <span className="problem-title">
-                      <strong>{problem.title}</strong>
+                      <span className="post-title-line">
+                        <strong title={problem.title}>{problem.title}</strong>
+                        {session && history.loading ? (
+                          <Skeleton width={48} height={16} />
+                        ) : stateOf(problem) === "none" ? null : (
+                          <ProblemStatus state={stateOf(problem)} />
+                        )}
+                      </span>
                     </span>
-                    {session && history.loading ? (
-                      <Skeleton width={48} height={16} />
-                    ) : (
-                      <ProblemStatus state={stateOf(problem)} />
-                    )}
                     <span
                       className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
                     >
                       {difficultyLabel(problem.difficulty)}
                     </span>
-                    <span className="problem-limit">
-                      {problem.solverCount ?? 0}명 ·{" "}
+                    <span className="problem-limit" data-label="푼 사람">
+                      {problem.solverCount ?? 0}명
+                    </span>
+                    <span className="problem-limit" data-label="정답률">
                       {problem.acceptanceRate == null
                         ? "—"
                         : `${problem.acceptanceRate}%`}

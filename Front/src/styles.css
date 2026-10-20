@@ -5753,7 +5753,7 @@ h3 {
    한 카드 안의 표: 머리글 44 · 행 72 · 안쪽 여백 24 · 칸 간격 16 · 모두 왼쪽 정렬 ·
    제목 16/700 · 보조 13 · 배지는 높이 28의 알약 · 끝에 › 표시(문제 목록은 제외) */
 .data-list {
-  --cols: minmax(0, 1fr) 96px 96px 148px;
+  --cols: minmax(0, 1fr) 96px 96px 96px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -6774,4 +6774,34 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* 문제 목록: 풀이 상태는 제목 옆 알약, 푼 사람·정답률은 각자의 열 */
+.data-list.list-problems .post-title-line {
+  align-items: center;
+}
+.data-list.list-problems .solve-badge {
+  flex: none;
+  height: 22px;
+}
+/* 팔로잉 알약: 작성자 이름과 같은 줄·같은 높이 */
+.data-list .post-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 4px;
+}
+.data-list .post-meta .post-follow-badge {
+  margin-left: 2px;
+  vertical-align: baseline;
+}
+@media (max-width: 880px) {
+  /* 좁은 화면에는 열 머리글이 없으니 수치 앞에 이름을 붙인다 */
+  .data-list.list-problems .problem-row {
+    padding-right: 16px;
+  }
+  .data-list.list-problems .problem-limit::before {
+    content: attr(data-label) " ";
+    color: var(--color-ink-500);
+  }
 }

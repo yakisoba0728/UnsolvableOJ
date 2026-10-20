@@ -774,7 +774,7 @@ test.describe("community post: delete own post and answer layout", () => {
     deleted: [],
   };
 
-  test("the answer editor and the answer list share one card, editor first, with no separate write-answer button", async ({
+  test("the answer editor and the answer list are separate cards, editor first, with no separate write-answer button", async ({
     page,
   }) => {
     await authenticate(page);
@@ -785,11 +785,13 @@ test.describe("community post: delete own post and answer layout", () => {
     await expect(
       page.getByRole("button", { name: "답변 작성", exact: true }),
     ).toHaveCount(0);
-    const card = page.locator(".answers-card");
-    await expect(card.locator(".answer-editor")).toBeVisible();
-    const editorTop = (await card.locator(".answer-editor").boundingBox())!.y;
-    const toggleTop = (await card.locator(".answers-toggle").boundingBox())!.y;
-    expect(toggleTop).toBeLessThan(editorTop);
+    const writeCard = page.locator(".answer-write-card");
+    const listCard = page.locator(".answers-card");
+    await expect(writeCard.locator(".answer-editor")).toBeVisible();
+    await expect(listCard.locator(".answer-editor")).toHaveCount(0);
+    const writeTop = (await writeCard.boundingBox())!.y;
+    const listTop = (await listCard.boundingBox())!.y;
+    expect(writeTop).toBeLessThan(listTop);
     // 남의 글에는 글 관리(⋮) 메뉴가 없다
     await expect(page.getByRole("button", { name: "글 관리" })).toHaveCount(0);
     // 조회수는 아이콘과 숫자로 보인다
