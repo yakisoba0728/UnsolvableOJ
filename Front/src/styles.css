@@ -6720,9 +6720,11 @@ h3 {
 .post-follow-badge {
   display: inline-flex;
   align-items: center;
+  box-sizing: border-box;
   height: 18px;
   margin-left: 6px;
-  padding: 0 7px;
+  padding: 0 6px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
   border-radius: 999px;
   background: var(--color-primary-soft);
   color: var(--color-primary);
