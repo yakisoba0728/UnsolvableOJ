@@ -176,54 +176,13 @@ export class ProblemsService {
       skip: (query.page - 1) * query.limit,
       take: query.limit,
     });
-    const stats = await this.solveStats(items.map((item) => item.id));
     return {
-      items: items.map((item) => ({
-        ...item,
-        solverCount: stats.get(item.id)?.solverCount ?? 0,
-        acceptanceRate: stats.get(item.id)?.acceptanceRate ?? null,
-      })),
+      items,
       page: query.page,
       limit: query.limit,
       total,
       totalPages: Math.ceil(total / query.limit),
     };
-  }
-
-  /**
-   * 문제별 푼 사람 수(정답을 받은 서로 다른 사용자)와 정답률(채점이 끝난 제출 중 ACCEPTED 비율, 0–100).
-   * 대기·채점 중·취소·시스템 오류 제출은 정답률 계산에서 뺀다. 채점 끝난 제출이 없으면 정답률은 null.
-   */
-  private async solveStats(problemIds: string[]) {
-    const stats = new Map<
-      string,
-      { solverCount: number; acceptanceRate: number | null }
-    >();
-    if (!problemIds.length) return stats;
-    const rows: {
-      problem_id: string;
-      solver_count: number;
-      judged: number;
-      accepted: number;
-    }[] = await this.dataSource.query(
-      `SELECT p.id AS problem_id,
-        (SELECT count(*)::integer FROM user_problem_solves s WHERE s.problem_id = p.id) AS solver_count,
-        count(sub.id) FILTER (WHERE sub.status NOT IN ('QUEUED', 'JUDGING', 'CANCELLED', 'SYSTEM_ERROR'))::integer AS judged,
-        count(sub.id) FILTER (WHERE sub.status = 'ACCEPTED')::integer AS accepted
-       FROM problems p
-       LEFT JOIN submissions sub ON sub.problem_id = p.id
-       WHERE p.id = ANY($1::uuid[])
-       GROUP BY p.id`,
-      [problemIds],
-    );
-    for (const row of rows)
-      stats.set(row.problem_id, {
-        solverCount: row.solver_count,
-        acceptanceRate: row.judged
-          ? Math.round((row.accepted / row.judged) * 100)
-          : null,
-      });
-    return stats;
   }
 
   async findMine(user: AuthenticatedUser) {
