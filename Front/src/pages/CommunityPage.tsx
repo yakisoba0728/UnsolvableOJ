@@ -294,12 +294,8 @@ export function CommunityPage() {
               <li className="post-head" aria-hidden="true">
                 <span>분류</span>
                 <span>제목</span>
-                <span>
-                  <ThumbsUp size={14} aria-label="추천" />
-                </span>
-                <span>
-                  <Eye size={14} aria-label="조회" />
-                </span>
+                <span>추천</span>
+                <span>조회 수</span>
               </li>
               {visible.map((post) => {
                 const count = answerCount(post);
