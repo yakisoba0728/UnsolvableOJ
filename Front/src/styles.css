@@ -6848,3 +6848,30 @@ h3 {
   border-color: var(--color-feature-border);
   color: var(--color-primary);
 }
+
+/* 순서 뒤집기: 위 화살표는 위로, 아래 화살표는 아래로 나갔다가 제자리로 돌아온다 */
+.reverse-icon {
+  overflow: visible;
+}
+.reverse-arrow-up {
+  animation: reverse-up 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reverse-arrow-down {
+  animation: reverse-down 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes reverse-up {
+  45% {
+    transform: translateY(-7px);
+  }
+}
+@keyframes reverse-down {
+  45% {
+    transform: translateY(7px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reverse-arrow-up,
+  .reverse-arrow-down {
+    animation: none;
+  }
+}

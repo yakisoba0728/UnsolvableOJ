@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUpDown } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { BrandArt } from "../components/BrandArt";
@@ -8,6 +7,7 @@ import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
 import { Pagination } from "../components/Pagination";
 import { Skeleton, SkeletonRegion, SkeletonRows } from "../components/Skeleton";
+import { ReverseIcon } from "../components/ReverseIcon";
 import { ShuffleIcon } from "../components/ShuffleIcon";
 import {
   ProblemStatus,
@@ -83,6 +83,8 @@ export function ProblemsPage() {
   const [announce, setAnnounce] = useState("");
   // 다시 섞기 아이콘을 누를 때마다 화살표가 오른쪽으로 빠져나갔다 왼쪽에서 다시 들어오게 한다(키가 바뀌면 애니메이션이 처음부터 다시 실행된다).
   const [spinKey, setSpinKey] = useState(0);
+  // 순서 뒤집기 아이콘: 누를 때마다 위·아래 화살표가 각자 방향으로 움직였다가 돌아온다.
+  const [reverseKey, setReverseKey] = useState(0);
 
   const urlQuery = params.get("q") ?? "";
   const selectedDifficulties = (params.get("d") ?? "")
@@ -374,10 +376,13 @@ export function ProblemsPage() {
               aria-label="목록 순서 뒤집기"
               aria-pressed={reversed}
               title="목록 순서 뒤집기"
-              onClick={reverseOrder}
+              onClick={() => {
+                setReverseKey((key) => key + 1);
+                reverseOrder();
+              }}
               disabled={filtered.length < 2}
             >
-              <ArrowUpDown size={18} aria-hidden="true" />
+              <ReverseIcon playKey={reverseKey} />
             </button>
           )}
         </div>

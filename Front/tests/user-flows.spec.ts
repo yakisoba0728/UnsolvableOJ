@@ -567,6 +567,9 @@ test("the problem list has a reverse-order button that is replaced by the shuffl
   await page.goto("/problems");
   await expectTitles(["나 문제", "다 문제", "가 문제"]); // 최신순
   await reverse.click();
+  // 위·아래 화살표가 각자 방향으로 움직이는 애니메이션이 실행된다.
+  await expect(reverse.locator(".reverse-arrow-up")).toHaveCount(1);
+  await expect(reverse.locator(".reverse-arrow-down")).toHaveCount(1);
   await expect(reverse).toHaveAttribute("aria-pressed", "true");
   await expectTitles(["가 문제", "다 문제", "나 문제"]);
   await reverse.click();
