@@ -1,42 +1,53 @@
-# Judge worker
+# Judge worker · go-judge
 
-BullMQ의 `judge-submissions` 큐를 소비합니다. `submissionId`로 API에서 소스 코드와 테스트케이스를 가져온 뒤, 일회용 Docker 컨테이너에서 컴파일·실행하고 판정을 기록합니다.
+TypeScript/BullMQ 워커가 제출을 claim하고 **go-judge v1.13.3의 HTTP API**로 컴파일·실행합니다. 정답 비교·테스트 집계·공개 예제 출력은 워커가 처리하고, 격리·자원 제한·자식 프로세스 정리는 go-judge가 담당합니다. 워커에는 Docker CLI/socket이 필요하지 않습니다.
+
+## 로컬 실행
+
+Linux Docker가 필요합니다. macOS에서는 Docker Desktop의 Linux VM을 사용하며 native macOS go-judge는 사용하지 않습니다.
 
 ```bash
 # 저장소 루트
-docker build -t unsolvable-judge-runtime:local Judge/runtime
+docker compose up -d --build --wait go-judge
 cp Judge/.env.example Judge/.env
 # JUDGE_SERVICE_TOKEN을 Back/.env의 값과 일치시키세요.
 cd Judge
 npm install
 npm run check
-npm run test:runtime  # Docker 이미지로 8개 언어 및 메모리/OOM 회귀 검사
+npm run test:runtime
 npm run start:dev
 ```
 
-작업당 컨테이너는 네트워크가 없고, 읽기 전용 루트 파일시스템, 제거된 Linux capabilities, 프로세스·CPU·메모리 제한으로 실행됩니다. 소스와 테스트케이스는 Docker 표준 입력으로 전송되며 호스트 볼륨에 저장되지 않습니다. 컨테이너에는 실행을 위한 임시 파일시스템만 있습니다.
+- `GO_JUDGE_URL`: 기본 `http://127.0.0.1:5050`; Compose 워커는 `http://go-judge:5050`.
+- `GO_JUDGE_TOKEN`: go-judge의 `ES_AUTH_TOKEN`과 같아야 합니다. 로컬 기본값은 `.env.example`과 Compose가 같습니다. 변경 시 루트 환경 변수와 `Judge/.env`를 모두 맞추세요. 운영에서는 무작위 비밀키를 사용하세요.
+- 기존 `Judge/.env`가 있다면 위 두 변수를 추가하세요. `JUDGE_RUNTIME_IMAGE`는 더 이상 사용하지 않습니다.
+- `JUDGE_CONCURRENCY`: 워커 동시 제출 수, 기본 2. Compose의 go-judge 실행 동시성도 2입니다.
 
-지원 언어: C 17, C++ 20, Java 21, Python 3, JavaScript, TypeScript, Go, Rust. Java는 `Main` 클래스를 사용합니다. 출력은 테스트당 1MB, 컴파일은 30초로 제한합니다. 실행 시간은 각 테스트의 경과 시간입니다.
+`npm run check`는 빌드와 모의 HTTP 서버 기반 회귀 테스트이며 외부 서비스가 필요하지 않습니다. `npm run test:runtime`은 실행 중인 go-judge에서 8개 언어, 실패 판정·메모리·PID·고아 프로세스·네트워크·파일 초기화·캐시 회수를 검사합니다. 다른 워커가 사용하지 않는 테스트용 go-judge에서 실행하세요.
 
-Linux 실행기는 약 2ms마다 제출 프로세스와 자식들의 RSS 합계를 확인하고 문제의 `memoryMb`를 넘으면 종료해 MEMORY_LIMIT_EXCEEDED를 반환합니다. `wait4`의 최대 RSS도 확인하므로 샘플 사이에 종료한 주 프로세스의 메모리 초과를 판정할 수 있습니다. 테스트 데이터를 보유한 감시기의 메모리가 제출에 상속되어 집계되지 않도록 작은 별도 실행기(`execute.py`)에서 프로그램을 시작합니다. `memoryKb`는 샘플링과 `wait4` 측정치 중 테스트 전체에서 가장 큰 값입니다. 샘플링이므로 짧게 생겼다 사라지는 여러 자식의 동시 메모리 피크까지 정확히 합산하는 방식은 아닙니다.
+## 채점 정책
 
-Docker 메모리 제한(`max(128, 문제 제한 + 96)MB`)은 컴파일러·감시기·파일 캐시 등을 포함한 컨테이너 전체의 별도 상한입니다. 자식만 OOM으로 종료되는 경우도 cgroup v2의 `memory.events` 또는 v1의 `memory.oom_control` 카운터로 감지합니다. 제출의 명시적인 SIGKILL은 메모리 초과로 오인하지 않습니다. 정상 종료·시간 초과·메모리 초과 모두 자식 프로세스를 정리하고 회수하며, Linux subreaper로 세션을 분리한 자식도 다음 테스트 전에 정리합니다.
+- C17, C++20, Java 21(`Main`), Python 3, JavaScript, TypeScript(esbuild), Go, Rust를 지원합니다. 도구는 `runtime/Dockerfile`에 설치합니다. Java는 모든 class 파일을 jar로 묶습니다.
+- 컴파일은 CPU/wall 각각 30초·메모리 1GiB입니다. 실행은 문제의 CPU/wall 시간과 메모리 제한, task 64개, CPU 1개분을 사용합니다. JVM·Node heap 상한은 문제 메모리 값으로 설정하되 전체 프로세스 메모리는 cgroup이 제한합니다.
+- REST에는 명령별 파일 크기 상한이 없어, 실행 명령에 표준 Linux `prlimit`을 붙여 stdout/stderr 및 생성 파일에 **정확히 1,000,000바이트 hard limit**을 적용합니다. 컴파일 산출물은 별도 상한 64MiB입니다.
+- 테스트는 공개 예제부터 순차 실행하고 첫 실패에서 중단합니다. 각 테스트는 새로 초기화된 환경에서 실행되므로 이전 테스트 파일을 읽을 수 없습니다. `Accepted` 응답도 출력 비교를 통과해야 정답입니다.
+- 출력은 바이트 기준으로 비교하며 끝의 ASCII 공백만 무시합니다. JSON의 UTF-8 치환이 판정을 바꾸지 않도록 캐시 출력을 원시 바이트로 다운로드합니다.
+- 공개 예제 최대 5개의 stdout/stderr 앞 1,000바이트와 잘림 여부를 보존합니다. 번호는 원래 테스트 순서입니다. 비공개 출력·오류 원문은 응답에 넣지 않습니다.
+- 실행 시간은 `runTime`(wall)을 ms로, 메모리는 bytes를 KiB로 바꾼 뒤 테스트별 최대값을 저장합니다. **이전 RSS 샘플러와 cgroup 메모리 측정은 동등하지 않습니다.** 검증 없이 기존 제출을 일괄 재채점하면 판정·XP가 바뀔 수 있습니다.
+- 컴파일 산출물과 출력 `fileIds`는 성공·실패·취소 경로에서 삭제합니다. 응답 유실로 ID를 얻지 못한 파일은 서비스의 15분 idle TTL이 보조 회수합니다. compile/run/delete는 같은 인스턴스로 보내세요.
 
-실행기를 수정한 뒤에는 Docker 이미지를 다시 빌드해야 합니다. `JUDGE_RUNTIME_IMAGE`를 지정하면 별도 이미지 태그로 smoke test를 실행할 수 있습니다. 로컬 단위 테스트에서 Linux 전용 검사는 생략되므로 다음 명령으로 컨테이너에서도 검증하세요.
+워커는 기존 generation/attempt·문제 스냅샷을 유지하고 워커·제출 heartbeat를 10초마다 전송합니다. 관리자 `/admin/ops`와 큐 복구·재채점 계약은 변경하지 않습니다.
 
-```bash
-# 저장소 루트; 테스트 파일만 읽기 전용으로 연결
-docker run --rm --network none --read-only --cap-drop ALL \
-  --security-opt no-new-privileges --pids-limit 64 --memory 352m \
-  --memory-swap 352m --cpus 1 \
-  --tmpfs /tmp:rw,exec,nosuid,size=128m,mode=1777 \
-  --mount "type=bind,source=$PWD/Judge/runtime/test_runner.py,target=/opt/judge/test_runner.py,readonly" \
-  --entrypoint python3 unsolvable-judge-runtime:local \
-  -m unittest discover -s /opt/judge -p 'test_*.py'
-```
+## 운영 격리
 
-공개 예제(`isSample: true`)는 최대 5개까지 `stdout`/`stderr` 앞 1,000바이트와 잘림 여부를 `debugOutputs`에 담아 API로 전송합니다. 예제 표시가 없는 테스트는 비공개로 취급합니다. 정답 비교는 자르기 전 출력으로 수행하며 표준 오류도 1MB 제한을 적용합니다. 첫 실패 시 채점을 중단하는 기존 동작은 유지합니다.
+**Compose는 로컬 개발용입니다.** go-judge는 중첩 격리를 위해 `privileged`로 실행하므로 운영에서는 API/DB와 분리된 전용 Linux 호스트/VM에 배치하세요. 제출 프로세스 자체는 별도 namespace·seccomp·제한된 권한으로 실행됩니다.
 
-공개 예제를 먼저 실행하고 각 그룹 안에서는 기존 순서를 유지합니다. 제출 코드가 파일에 남긴 비공개 입력을 이후 공개 예제에서 출력하는 것을 방지하기 위함입니다. 출력의 `testCase` 번호는 원래 순서를 기준으로 합니다.
+- 서비스 API는 Bearer 인증을 사용하며 localhost 포트만 공개합니다. Compose에서는 워커만 애플리케이션·sandbox 두 네트워크에 연결합니다. 외부에 `/run`·`/file`을 공개하지 마세요.
+- `-no-fallback`, seccomp, cpu/memory/pids controller와 `/w`를 healthcheck 및 워커 시작 시 검사합니다. 잘못된 인증/격리 설정에서는 채점을 시작하지 않습니다. `-no-seccomp`, `-net-share`를 켜지 마세요.
+- 호스트 swap이 꺼져 있으면 cgroup 루트 제한을 쓰지 않습니다. swap이 켜진 v2에서는 서비스 상위 `memory.swap.max=0` 설정에 성공해야 시작하며, v1은 호스트 swap이 꺼져 있어야 합니다. 실제 호스트 루트 cgroup은 제한할 수 없으므로 그런 환경에서는 관리자가 swap을 끄거나 위임된 cgroup을 제공해야 합니다.
+- 제출에는 해당 소스/산출물과 해당 테스트 입력만 전달합니다. 읽기 전용 도구·라이브러리와 임시 `/w`·`/tmp`만 mount하며, API/DB 비밀키·정답·호스트 디렉터리·Docker socket을 넣지 않습니다.
+- upstream은 시작 로그에 설정/인증 토큰을 기록할 수 있으므로 실행 노드 로그도 접근을 제한하세요. 이미지/호스트 패치와 실제 자원 제한 검증은 별도로 필요합니다.
 
-워커는 10초마다 API에 생존 신호를 보내고, 제출별 채점 lease도 10초마다 연장합니다. 운영 상태와 최근 실패 작업은 관리자 API `GET /api/v1/admin/ops`에서 확인할 수 있습니다. Docker 소켓에 접근할 수 있는 워커는 API와 분리된 호스트에서 운영해야 합니다.
+실행 이미지 변경 후 `docker compose up -d --build --wait go-judge`로 다시 빌드하세요. [공식 API](https://docs.goj.ac/api), [설계·제한](https://docs.goj.ac/design), [전환 조사](../docs/research/go-judge-migration.md)를 참고하세요.
+
+별도 승인 후 사용할 [전용 실행 노드 템플릿](./deploy/README.md)은 필수 비밀키가 없으면 시작하지 않으며 host port를 공개하지 않습니다. 전체 앱의 실제 브라우저 검사는 저장소 루트에서 `node scripts/check-compose.mjs`로 실행합니다. 기존 개발 DB와 서비스는 재사용하지 않습니다.

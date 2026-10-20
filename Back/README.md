@@ -9,11 +9,11 @@ NestJS, PostgreSQL, Redis로 구성한 UnsolvableOJ 웹 백엔드입니다. Post
 - 회원가입 및 로그인(JWT access token)
 - `USER`, `AUTHOR`, `ADMIN` 역할 기반 권한
 - 문제와 공개/비공개 테스트케이스 저장
-- 공개 문제 목록/상세 조회
+- 공개 문제 목록/상세 조회. 목록의 `solverCount`는 정답 사용자 중복 제거 수이며 `acceptanceRate`는 실제 채점 완료 제출의 정답 비율(소수 첫째 자리, 대상 없으면 `null`)입니다. 대기·채점 중·시스템 오류·취소는 비율에서 제외하며 페이지당 한 번에 집계합니다.
 - 코드 제출, 내 제출 목록/상세 조회
 - Redis 기반 비동기 채점 큐
 - 외부 채점 워커용 claim/result 내부 API
-- 별도 `Judge/` 워커의 Docker 격리 실행 및 결과 기록
+- 별도 `Judge/` 워커의 go-judge 격리 실행 및 결과 기록
 - 문제 수정 시 불변 버전 스냅샷 저장, 공개·보관 상태 관리
 - 채점 세대·시도 ID·lease 기반 중복 처리 방지와 재채점
 - 첫 정답 XP·레벨·랭킹, 재채점 결과에 따른 XP 정산
@@ -210,12 +210,12 @@ npm run db:migration:run      # migration 적용
 npm run db:migration:revert   # 최근 migration 되돌리기
 npm run check                 # lint + unit test + build
 npm run test:e2e              # compose 인프라가 실행 중일 때 E2E
-npm run test:judge-flow       # 실제 API → 큐 → Docker 채점 → DB 결과 검증
+npm run test:judge-flow       # 실제 API → 큐 → go-judge → DB 결과 검증
 ```
 
-`test:judge-flow`는 Back과 Judge 빌드, DB 마이그레이션, 채점 이미지 빌드 후 실행합니다.
+`test:judge-flow`는 Back과 Judge 빌드, DB 마이그레이션 후 `docker compose up -d --build --wait go-judge`로 실행 서비스를 준비한 다음 실행합니다. `GO_JUDGE_URL`·`GO_JUDGE_TOKEN`으로 대상 서비스를 지정하며 기본값은 로컬 Compose와 같습니다.
 로컬 PostgreSQL/Redis가 필요하며 테스트용 API(기본 3100번 포트)와 워커를 자동으로 시작하고 종료합니다.
 `REDIS_HOST`·`REDIS_PORT`로 테스트용 Redis를 지정할 수 있고, DB는 `PIPELINE_REDIS_DB`(기본 2)를 사용합니다. 해당 DB에 다른 워커를 연결하지 마세요. 생성한 테스트 계정·문제·제출은 종료 시 삭제합니다.
 정답, 오답, 실행 오류, 시간 초과, 출력 초과, 컴파일 오류, 비공개 오류 차단을 실제 실행으로 검증합니다.
 
-검증은 로컬에서 위 명령어와 `Judge/`의 `npm run check`, `npm run test:runtime`으로 실행합니다. 운영에서는 Docker 소켓 접근 권한을 가진 워커를 API 서버와 분리된 호스트에서 실행해야 합니다.
+검증은 로컬에서 위 명령어와 `Judge/`의 `npm run check`, `npm run test:runtime`으로 실행합니다. 워커는 Docker socket을 사용하지 않습니다. 운영에서는 privileged go-judge 실행 서비스를 API/DB와 분리된 전용 Linux 호스트에 배치해야 합니다.
