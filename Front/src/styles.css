@@ -6899,3 +6899,16 @@ h3 {
     animation: none;
   }
 }
+
+/* 문제 목록: 마지막 열(정답률)을 오른쪽 끝에 맞춰 오른쪽에 빈 칸이 남지 않게 한다 */
+.data-list.list-problems .problem-head span:last-child,
+.data-list.list-problems .problem-row .problem-limit:last-child {
+  justify-self: end;
+  text-align: right;
+}
+@media (max-width: 880px) {
+  .data-list.list-problems .problem-row .problem-limit:last-child {
+    justify-self: auto;
+    text-align: left;
+  }
+}
