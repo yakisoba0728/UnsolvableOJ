@@ -1,14 +1,27 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { verdictLabel } from "../verdict";
 import { useDocumentTitle } from "../hooks";
 import { Select } from "../components/Select";
 import { ProblemMarkdown } from "../components/ProblemMarkdown";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import {
+  CaseResults,
+  isJudging,
+  ResultNotices,
+  ResultSummary,
+  useSubmissionResult,
+} from "../components/JudgeResult";
+import {
   applySuggestion,
   currentWord,
+  moveStop,
+  reconcileSession,
+  recordAccepted,
   suggest,
+  type SnippetSession,
   type Suggestion,
 } from "../editor/autocomplete";
 import {
@@ -80,6 +93,11 @@ type Tab = "statement" | "history";
 const fontKey = "unsolvable-oj-editor-font-v1";
 const FONT_MIN = 11;
 const FONT_MAX = 20;
+// 채점 결과 패널의 높이(px): 위쪽 손잡이를 끌거나 ↑↓ 키로 조절하고, 마지막 값을 기억한다.
+const panelHeightKey = "unsolvable-oj-judge-height-v1";
+const PANEL_MIN = 120;
+const PANEL_DEFAULT = 260;
+const PANEL_KEY_STEP = 24;
 
 function draftKey(problemId: string, language: Language) {
   return `unsolvable-oj-draft-v1:${problemId}:${language}`;
@@ -93,6 +111,29 @@ function readDraft(problemId: string, language: Language) {
   }
 }
 
+const kindGlyph: Record<Suggestion["kind"], string> = {
+  snippet: "{}",
+  keyword: "k",
+  function: "ƒ",
+  method: "ƒ",
+  property: "p",
+  class: "C",
+  variable: "v",
+  module: "M",
+  word: "a",
+};
+const kindName: Record<Suggestion["kind"], string> = {
+  snippet: "스니펫",
+  keyword: "키워드",
+  function: "함수",
+  method: "메서드",
+  property: "속성",
+  class: "타입",
+  variable: "변수",
+  module: "모듈",
+  word: "",
+};
+
 export function ProblemPage() {
   const { slug } = useParams();
   const [problem, setProblem] = useState<Problem | null>(null);
@@ -103,6 +144,18 @@ export function ProblemPage() {
   const [source, setSource] = useState(languages[0].starter);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  // 이 화면에서 채점 중이거나 방금 채점한 제출(결과는 코드 창 아래에 바로 보여 준다)
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [panelOpen, setPanelOpen] = useState(true);
+  const panelRef = useRef<HTMLElement>(null);
+  const [panelHeight, setPanelHeight] = useState(() => {
+    try {
+      const saved = Number(localStorage.getItem(panelHeightKey));
+      return saved >= PANEL_MIN ? saved : PANEL_DEFAULT;
+    } catch {
+      return PANEL_DEFAULT;
+    }
+  });
   const [tab, setTab] = useState<Tab>("statement");
   const [history, setHistory] = useState<Submission[] | null>(null);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
@@ -117,6 +170,11 @@ export function ProblemPage() {
     top: number;
   } | null>(null);
   const suppressSuggest = useRef(false);
+  // 스니펫의 Tab 칸 이동 상태, 직전 입력창 값(칸 위치 보정용), 미러 동기화 중 표시
+  const sessionRef = useRef<SnippetSession | null>(null);
+  const lastValueRef = useRef("");
+  const syncingRef = useRef(false);
+  const listRef = useRef<HTMLUListElement>(null);
   // 글꼴 크기: 이 브라우저에 기억한다.
   const [fontSize, setFontSize] = useState(() => {
     try {
@@ -136,7 +194,18 @@ export function ProblemPage() {
     }
   }
   const { session } = useAuth();
-  const navigate = useNavigate();
+  const { submission: result, error: resultError } = useSubmissionResult(
+    submissionId,
+    session,
+  );
+  const submittingRef = useRef(false);
+  const currentProblemId = useRef<string | null>(null);
+  currentProblemId.current = problem?.id ?? null;
+  // 로그아웃·세션 만료 시 이전 채점 결과 패널을 닫는다.
+  useEffect(() => {
+    if (!session) setSubmissionId(null);
+  }, [session]);
+  const finishedId = result && !isJudging(result) ? result.id : null;
 
   const starter = (value: Language) =>
     languages.find((item) => item.value === value)?.starter ?? "";
@@ -163,6 +232,22 @@ export function ProblemPage() {
   }
 
   useEffect(() => {
+    lastValueRef.current = source;
+  }, [source]);
+
+  // 문제나 언어가 바뀌면 진행 중이던 스니펫 칸 이동을 끝낸다.
+  useEffect(() => {
+    sessionRef.current = null;
+  }, [problem?.id, language]);
+
+  // 방향키로 고른 제안이 목록 밖으로 나가지 않게 따라간다.
+  useEffect(() => {
+    listRef.current
+      ?.querySelector<HTMLElement>('[aria-selected="true"]')
+      ?.scrollIntoView({ block: "nearest" });
+  }, [popup?.index]);
+
+  useEffect(() => {
     if (tab !== "history" || !session || !problem) return;
     const controller = new AbortController();
     setHistory(null);
@@ -176,9 +261,10 @@ export function ProblemPage() {
         if (!controller.signal.aborted) setHistory([]);
       });
     return () => controller.abort();
-  }, [tab, session, problem]);
+  }, [tab, session, problem, finishedId]);
 
   useEffect(() => {
+    setSubmissionId(null);
     const controller = new AbortController();
     setError("");
     setProblem(null);
@@ -203,7 +289,10 @@ export function ProblemPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!problem || !session) return;
+    // Ctrl/⌘+Enter로도 제출되므로 버튼 비활성화만으로는 중복 제출을 막을 수 없다.
+    if (!problem || !session || submittingRef.current) return;
+    submittingRef.current = true;
+    const requestedFor = problem.id;
     setSubmitting(true);
     setSubmitError("");
     try {
@@ -215,19 +304,33 @@ export function ProblemPage() {
         },
         session.accessToken,
       );
-      navigate(`/submissions/${submitted.id}`);
+      // 응답을 기다리는 사이 다른 문제로 옮겼다면 그 화면에는 결과를 보이지 않는다.
+      if (currentProblemId.current === requestedFor) {
+        setSubmissionId(submitted.id);
+        setPanelOpen(true);
+      }
     } catch (cause) {
-      setSubmitError(
-        cause instanceof Error ? cause.message : "제출하지 못했습니다.",
-      );
+      if (currentProblemId.current === requestedFor)
+        setSubmitError(
+          cause instanceof Error ? cause.message : "제출하지 못했습니다.",
+        );
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   }
 
   if (loading)
     return (
-      <div className="page-width empty-state">문제를 불러오는 중입니다…</div>
+      <div className="solve-page">
+        <SkeletonRegion label="문제를 불러오는 중입니다">
+          <Skeleton width={320} height={34} style={{ margin: "16px 0 20px" }} />
+          <div className="solve-skeleton-grid">
+            <Skeleton height={520} radius={14} />
+            <Skeleton height={520} radius={14} />
+          </div>
+        </SkeletonRegion>
+      </div>
     );
   if (error || !problem)
     return (
@@ -246,6 +349,53 @@ export function ProblemPage() {
 
   const selectedLanguage = languages.find((item) => item.value === language);
   const lineCount = source.split("\n").length;
+
+  // 코드 입력 칸이 최소한 남도록, 결과 패널은 코드 패널 높이에서 일정 부분을 뺀 만큼까지만 키운다.
+  function clampPanelHeight(value: number) {
+    const room = panelRef.current?.parentElement?.clientHeight ?? 800;
+    return Math.round(Math.min(Math.max(PANEL_MIN, room - 200), Math.max(PANEL_MIN, value)));
+  }
+  function savePanelHeight(value: number) {
+    try {
+      localStorage.setItem(panelHeightKey, String(value));
+    } catch {
+      /* 저장할 수 없어도 화면은 그대로 동작한다 */
+    }
+  }
+  function startPanelResize(event: React.PointerEvent<HTMLDivElement>) {
+    event.preventDefault();
+    const handle = event.currentTarget;
+    handle.setPointerCapture(event.pointerId);
+    const startY = event.clientY;
+    const startHeight = panelRef.current?.offsetHeight ?? panelHeight;
+    let latest = startHeight;
+    const move = (moveEvent: PointerEvent) => {
+      latest = clampPanelHeight(startHeight + (startY - moveEvent.clientY));
+      setPanelHeight(latest);
+    };
+    const end = () => {
+      handle.removeEventListener("pointermove", move);
+      handle.removeEventListener("pointerup", end);
+      handle.removeEventListener("pointercancel", end);
+      savePanelHeight(latest);
+    };
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener("pointerup", end);
+    handle.addEventListener("pointercancel", end);
+  }
+  function resizePanelByKey(event: React.KeyboardEvent<HTMLDivElement>) {
+    const delta =
+      event.key === "ArrowUp"
+        ? PANEL_KEY_STEP
+        : event.key === "ArrowDown"
+          ? -PANEL_KEY_STEP
+          : 0;
+    if (!delta) return;
+    event.preventDefault();
+    const next = clampPanelHeight(panelHeight + delta);
+    setPanelHeight(next);
+    savePanelHeight(next);
+  }
   function updateCursor(target: HTMLTextAreaElement) {
     setCursor(cursorPosition(target.value, target.selectionStart));
   }
@@ -261,19 +411,36 @@ export function ProblemPage() {
     updateCursor(target);
   }
 
-  /** 입력 중인 단어에 맞는 제안을 계산해 커서 바로 아래에 띄운다. */
-  function refreshSuggest(target: HTMLTextAreaElement) {
+  /** 커서 자리에 맞는 제안을 계산해 커서 근처에 띄운다(공간이 모자라면 위쪽에). */
+  function refreshSuggest(target: HTMLTextAreaElement, manual = false) {
     if (target.selectionStart !== target.selectionEnd) return setPopup(null);
-    const items = suggest(target.value, target.selectionStart, language);
+    const items = suggest(target.value, target.selectionStart, language, {
+      manual,
+    });
     if (!items.length) return setPopup(null);
     const { line, column } = cursorPosition(
       target.value,
       target.selectionStart,
     );
-    const typed = currentWord(target.value, target.selectionStart)!.text.length;
+    const typed =
+      currentWord(target.value, target.selectionStart)?.text.length ?? 0;
     // 고정폭 글꼴이라 줄·열로 위치를 계산한다(글자 폭 0.6em, 줄 높이 1.6em).
     const frame = target.parentElement;
-    const maxLeft = Math.max(0, (frame?.clientWidth ?? 600) - 280);
+    const lineHeight = fontSize * 1.6;
+    const width = 340;
+    const maxLeft = Math.max(
+      0,
+      (frame?.clientWidth ?? 600) + (frame?.scrollLeft ?? 0) - width,
+    );
+    const below = target.offsetTop + 16 + line * lineHeight + 4;
+    // 목록(최대 8줄) + 설명 줄 높이를 어림해, 아래가 모자라면 커서 줄 위로 올린다.
+    const height = Math.min(items.length, 8) * 28 + 40;
+    const visibleBottom =
+      (frame?.scrollTop ?? 0) + (frame?.clientHeight ?? 400);
+    const top =
+      below + height > visibleBottom
+        ? Math.max(0, below - lineHeight - 8 - height)
+        : below;
     setPopup({
       items,
       index: 0,
@@ -282,18 +449,28 @@ export function ProblemPage() {
         maxLeft,
         target.offsetLeft + (column - 1 - typed) * fontSize * 0.6,
       ),
-      top: target.offsetTop + 16 + line * fontSize * 1.6 + 4,
+      top,
     });
   }
 
-  function acceptSuggestion(index: number) {
+  /** 제안을 적용한다. 글이 바뀌지 않으면(이미 완성된 단어) 아무것도 하지 않고 false를 돌려준다. */
+  function acceptSuggestion(index: number): boolean {
     const target = editorRef.current;
     const item = popup?.items[index];
-    if (!target || !item) return;
-    const next = applySuggestion(target.value, target.selectionStart, item);
+    if (!target || !item) return false;
+    const applied = applySuggestion(target.value, target.selectionStart, item);
+    if (applied.value === target.value) {
+      setPopup(null);
+      return false;
+    }
+    recordAccepted(item.label);
     suppressSuggest.current = true; // 적용 직후에는 다시 띄우지 않는다
+    sessionRef.current = null;
     setPopup(null);
-    applyEdit(target, next);
+    applyEdit(target, applied);
+    // 옮겨 다닐 칸이 있으면 이어서 Tab으로 이동할 수 있게 한다.
+    sessionRef.current = applied.session;
+    return true;
   }
 
   function onEditorKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -306,7 +483,17 @@ export function ProblemPage() {
       return;
     }
     // 한글 등 조합 입력 중에는 편집 규칙을 적용하지 않는다.
-    if (event.nativeEvent.isComposing) return;
+    if (event.nativeEvent.isComposing || event.keyCode === 229) return;
+    // 수동 호출: Ctrl+Space(VS Code·IntelliJ), ⌘I(VS Code Mac), Alt+/
+    if (
+      (event.ctrlKey && event.code === "Space") ||
+      (event.metaKey && event.key.toLowerCase() === "i") ||
+      (event.altKey && event.code === "Slash")
+    ) {
+      event.preventDefault();
+      refreshSuggest(target, true);
+      return;
+    }
     if (popup) {
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
@@ -317,19 +504,65 @@ export function ProblemPage() {
         });
         return;
       }
+      if (event.key === "PageDown" || event.key === "PageUp") {
+        event.preventDefault();
+        const step = event.key === "PageDown" ? 8 : -8;
+        setPopup({
+          ...popup,
+          index: Math.min(
+            popup.items.length - 1,
+            Math.max(0, popup.index + step),
+          ),
+        });
+        return;
+      }
       if (
         (event.key === "Enter" || event.key === "Tab") &&
         !modifier &&
         !event.shiftKey
       ) {
+        // 바뀌는 것이 없으면 Enter·Tab은 평소 동작(줄바꿈·들여쓰기)으로 넘긴다.
+        const before = popup.index;
         event.preventDefault();
-        acceptSuggestion(popup.index);
-        return;
+        if (acceptSuggestion(before)) return;
       }
       if (event.key === "Escape") {
         event.preventDefault();
         setPopup(null);
         return;
+      }
+    }
+    // 스니펫 칸 이동: Tab/Shift+Tab으로 다음·이전 칸, Esc나 Enter, 방향키 이동은 끝낸다.
+    if (sessionRef.current) {
+      if (event.key === "Tab" && !modifier && !event.altKey) {
+        const moved = moveStop(sessionRef.current, event.shiftKey);
+        if (moved) {
+          event.preventDefault();
+          sessionRef.current = moved.session;
+          target.setSelectionRange(moved.start, moved.end);
+          updateCursor(target);
+          return;
+        }
+        sessionRef.current = null;
+      } else if (
+        [
+          "Escape",
+          "Enter",
+          "ArrowLeft",
+          "ArrowRight",
+          "ArrowUp",
+          "ArrowDown",
+          "Home",
+          "End",
+          "PageUp",
+          "PageDown",
+        ].includes(event.key)
+      ) {
+        sessionRef.current = null;
+        if (event.key === "Escape") {
+          event.preventDefault();
+          return;
+        }
       }
     }
     const state: EditState = {
@@ -458,7 +691,11 @@ export function ProblemPage() {
                   로그인하면 이 문제의 제출 내역이 여기에 표시됩니다.
                 </p>
               ) : history === null ? (
-                <p className="muted">제출 내역을 불러오는 중입니다…</p>
+                <SkeletonRegion label="제출 내역을 불러오는 중입니다">
+                  <Skeleton height={40} style={{ marginBottom: 10 }} />
+                  <Skeleton height={40} style={{ marginBottom: 10 }} />
+                  <Skeleton height={40} />
+                </SkeletonRegion>
               ) : history.length ? (
                 <ul className="history-list">
                   {history.map((item) => (
@@ -467,7 +704,7 @@ export function ProblemPage() {
                         <span
                           className={`verdict verdict-${item.status.toLowerCase()}`}
                         >
-                          {item.status.replaceAll("_", " ")}
+                          {verdictLabel(item.status)}
                         </span>
                         <span>
                           {item.language} ·{" "}
@@ -537,6 +774,8 @@ export function ProblemPage() {
               type="button"
               className="text-button light"
               onClick={() => {
+                sessionRef.current = null;
+                setPopup(null);
                 setSource(starter(language));
                 try {
                   localStorage.removeItem(draftKey(problem.id, language));
@@ -570,16 +809,58 @@ export function ProblemPage() {
                 autoCorrect="off"
                 wrap="off"
                 value={source}
-                aria-autocomplete="list"
+                aria-autocomplete={popup ? "list" : undefined}
                 aria-controls={popup ? "editor-suggestions" : undefined}
                 aria-activedescendant={
                   popup ? `suggestion-${popup.index}` : undefined
                 }
                 onChange={(event) => {
-                  updateSource(event.target.value);
-                  updateCursor(event.currentTarget);
-                  if (suppressSuggest.current) suppressSuggest.current = false;
-                  else refreshSuggest(event.currentTarget);
+                  const target = event.currentTarget;
+                  const native = event.nativeEvent as InputEvent;
+                  // 한글 등 조합 중에는 값만 저장하고, 칸 보정·제안은 조합이 끝난 뒤에 한다.
+                  if (native.isComposing) {
+                    updateSource(target.value);
+                    updateCursor(target);
+                    return;
+                  }
+                  // 스니펫 칸 안에서 고친 글을 같은 번호의 다른 칸(미러)에도 반영한다.
+                  if (sessionRef.current && !syncingRef.current) {
+                    const synced = reconcileSession(
+                      sessionRef.current,
+                      lastValueRef.current,
+                      target.value,
+                      target.selectionStart,
+                    );
+                    sessionRef.current = synced.session;
+                    if (synced.session && synced.value !== target.value) {
+                      syncingRef.current = true;
+                      applyEdit(target, {
+                        value: synced.value,
+                        start: synced.caret,
+                        end: synced.caret,
+                      });
+                      syncingRef.current = false;
+                    }
+                  }
+                  updateSource(target.value);
+                  updateCursor(target);
+                  if (suppressSuggest.current) {
+                    suppressSuggest.current = false;
+                  } else if (syncingRef.current || sessionRef.current) {
+                    setPopup(null);
+                  } else if (
+                    // 붙여넣기·실행 취소·끌어다 놓기로 바뀐 글에는 띄우지 않고,
+                    // 지우는 중에는 이미 떠 있을 때만 갱신한다(VS Code와 같다).
+                    !/^(?:history|insertFromPaste|insertFromDrop)/.test(
+                      native.inputType ?? "",
+                    ) &&
+                    (!native.inputType?.startsWith("delete") || popup)
+                  ) {
+                    refreshSuggest(target);
+                  } else setPopup(null);
+                }}
+                onMouseDown={() => {
+                  sessionRef.current = null;
                 }}
                 onSelect={(event) => {
                   updateCursor(event.currentTarget);
@@ -599,35 +880,142 @@ export function ProblemPage() {
                 required
               />
               {popup ? (
-                <ul
+                <div
                   className="autocomplete"
-                  id="editor-suggestions"
-                  role="listbox"
-                  aria-label="자동완성 제안"
                   style={{ left: popup.left, top: popup.top }}
                 >
-                  {popup.items.map((item, index) => (
-                    <li
-                      key={`${item.kind}-${item.label}`}
-                      id={`suggestion-${index}`}
-                      role="option"
-                      aria-selected={index === popup.index}
-                      className={index === popup.index ? "active" : ""}
-                      onMouseDown={(event) => {
-                        event.preventDefault();
-                        acceptSuggestion(index);
-                      }}
-                    >
-                      <span className="suggestion-label">{item.label}</span>
-                      <span className="suggestion-detail">
-                        {item.detail ??
-                          (item.kind === "keyword" ? "키워드" : "")}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                  <ul
+                    ref={listRef}
+                    id="editor-suggestions"
+                    role="listbox"
+                    aria-label="자동완성 제안"
+                  >
+                    {popup.items.map((item, index) => (
+                      <li
+                        key={`${item.kind}-${item.label}`}
+                        id={`suggestion-${index}`}
+                        role="option"
+                        aria-selected={index === popup.index}
+                        className={index === popup.index ? "active" : ""}
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          acceptSuggestion(index);
+                        }}
+                      >
+                        <span
+                          className={`suggestion-icon kind-${item.kind}`}
+                          aria-hidden="true"
+                        >
+                          {kindGlyph[item.kind]}
+                        </span>
+                        <span className="suggestion-label">
+                          {Array.from(item.label).map((char, at) => (
+                            <span
+                              key={at}
+                              className={
+                                item.matches?.includes(at)
+                                  ? "suggestion-hit"
+                                  : undefined
+                              }
+                            >
+                              {char}
+                            </span>
+                          ))}
+                        </span>
+                        <span className="suggestion-detail">
+                          {item.detail ?? kindName[item.kind]}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="suggestion-doc" aria-hidden="true">
+                    {popup.items[popup.index].doc ??
+                      kindName[popup.items[popup.index].kind]}
+                  </p>
+                </div>
               ) : null}
             </div>
+            {submissionId ? (
+              <section
+                ref={panelRef}
+                className="judge-panel"
+                aria-label="채점 결과"
+                style={panelOpen ? { height: panelHeight } : undefined}
+              >
+                {panelOpen ? (
+                  <div
+                    className="judge-resizer"
+                    role="separator"
+                    aria-orientation="horizontal"
+                    aria-label="채점 결과 높이 조절"
+                    aria-valuemin={PANEL_MIN}
+                    aria-valuenow={panelHeight}
+                    tabIndex={0}
+                    title="위아래로 끌어 높이를 조절해요 (↑↓ 키도 가능)"
+                    onPointerDown={startPanelResize}
+                    onKeyDown={resizePanelByKey}
+                  />
+                ) : null}
+                <div className="judge-panel-head">
+                  <strong>채점 결과</strong>
+                  {result ? (
+                    <span
+                      role="status"
+                      className={`verdict verdict-${result.status.toLowerCase()}`}
+                    >
+                      {verdictLabel(result.status)}
+                    </span>
+                  ) : null}
+                  <span className="judge-panel-actions">
+                    {result ? (
+                      <Link
+                        className="text-button"
+                        to={`/submissions/${result.id}`}
+                      >
+                        자세히 보기
+                      </Link>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="text-button"
+                      aria-expanded={panelOpen}
+                      onClick={() => setPanelOpen((open) => !open)}
+                    >
+                      {panelOpen ? "접기" : "펼치기"}
+                    </button>
+                    <button
+                      type="button"
+                      className="text-button"
+                      onClick={() => setSubmissionId(null)}
+                    >
+                      닫기
+                    </button>
+                  </span>
+                </div>
+                {panelOpen ? (
+                  <div className="judge-panel-body">
+                    {resultError ? (
+                      <p className="error-message" role="alert">
+                        {resultError}
+                      </p>
+                    ) : !result ? (
+                      <p className="muted">채점을 시작하고 있어요…</p>
+                    ) : (
+                      <>
+                        {isJudging(result) ? (
+                          <p className="muted">
+                            채점 중이에요. 끝나면 이 자리에 결과가 나타납니다.
+                          </p>
+                        ) : null}
+                        <ResultSummary submission={result} />
+                        <ResultNotices submission={result} />
+                        <CaseResults submission={result} />
+                      </>
+                    )}
+                  </div>
+                ) : null}
+              </section>
+            ) : null}
             {submitError ? (
               <p className="error-message" role="alert">
                 {submitError}
@@ -635,7 +1023,8 @@ export function ProblemPage() {
             ) : null}
             <p className="editor-hints">
               Tab 들여쓰기 · Shift+Tab 내어쓰기 · <kbd>Ctrl/⌘ + /</kbd> 주석 ·
-              괄호·따옴표 자동 완성 · 제안 ↑↓ 선택, Enter/Tab 적용, Esc 닫기
+              괄호·따옴표 자동 완성 · <kbd>Ctrl + Space</kbd> 제안 · ↑↓ 선택,
+              Enter/Tab 적용, 스니펫은 Tab으로 다음 칸
             </p>
             <div className="code-actions">
               {session ? (

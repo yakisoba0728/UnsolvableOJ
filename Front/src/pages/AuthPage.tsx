@@ -1,9 +1,30 @@
 import { useState, type FormEvent } from "react";
 import { useDocumentTitle } from "../hooks";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { api, demoAccount, isDemo } from "../api";
+import { api } from "../api";
 import { useAuth } from "../auth";
 import type { Session } from "../types";
+
+type Field = "email" | "username" | "password";
+
+/** 회원가입 입력 규칙(서버 검증과 같다). 문제가 없으면 빈 문자열. */
+function registerProblem(field: Field, value: string) {
+  if (field === "email") {
+    if (!value.trim()) return "이메일을 입력해 주세요.";
+    if (value.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+      return "이메일 형식이 올바르지 않아요. 예: user@example.com";
+  } else if (field === "username") {
+    if (!value) return "사용자 이름을 입력해 주세요.";
+    if (!/^[A-Za-z0-9_]*$/.test(value))
+      return "영문, 숫자, 밑줄(_)만 사용할 수 있어요.";
+    if (value.length < 3 || value.length > 30) return "3~30자로 입력해 주세요.";
+  } else {
+    if (!value) return "비밀번호를 입력해 주세요.";
+    if (value.length < 10) return "10자 이상 입력해 주세요.";
+    if (value.length > 128) return "128자 이하로 입력해 주세요.";
+  }
+  return "";
+}
 
 export function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -11,16 +32,60 @@ export function AuthPage() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [touched, setTouched] = useState<Record<Field, boolean>>({
+    email: false,
+    username: false,
+    password: false,
+  });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const { setSession } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const destination =
-    (location.state as { from?: string } | null)?.from ?? "/";
+  const destination = (location.state as { from?: string } | null)?.from ?? "/";
+
+  const values: Record<Field, string> = { email, username, password };
+  const register = mode === "register";
+  // 입력을 시작한 칸은 바로, 건드리고 떠난 칸은 비어 있어도 안내한다.
+  const problems: Record<Field, string> = {
+    email: register ? registerProblem("email", email) : "",
+    username: register ? registerProblem("username", username) : "",
+    password: register ? registerProblem("password", password) : "",
+  };
+  const shown = (field: Field) =>
+    register && (touched[field] || values[field] !== "") ? problems[field] : "";
+
+  function fieldProps(field: Field) {
+    const message = shown(field);
+    return {
+      "aria-invalid": message ? true : undefined,
+      "aria-describedby": message ? `auth-${field}-error` : undefined,
+      onBlur: () => setTouched((previous) => ({ ...previous, [field]: true })),
+    };
+  }
+  const fieldError = (field: Field) =>
+    shown(field) ? (
+      <span
+        id={`auth-${field}-error`}
+        className="field-error"
+        aria-live="polite"
+      >
+        {shown(field)}
+      </span>
+    ) : null;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (register) {
+      const invalid = (["email", "username", "password"] as Field[]).find(
+        (field) => problems[field],
+      );
+      if (invalid) {
+        setTouched({ email: true, username: true, password: true });
+        document.getElementById(`auth-${invalid}`)?.focus();
+        return;
+      }
+    }
     setError("");
     setPending(true);
     try {
@@ -74,64 +139,59 @@ export function AuthPage() {
             ? "이메일과 비밀번호를 입력해 주세요."
             : "계정을 만들고 바로 문제를 풀 수 있습니다."}
         </p>
-        {isDemo && demoAccount ? (
-          <p className="demo-hint" role="note">
-            <span>
-              데모 모드입니다. 데모 계정 <code>{demoAccount.email}</code>로
-              로그인하거나(비밀번호는 아무 값이나 가능) 새로 가입할 수 있어요.
-            </span>
-            {mode === "login" ? (
-              <button
-                type="button"
-                className="text-button"
-                onClick={() => {
-                  setEmail(demoAccount.email);
-                  setPassword(demoAccount.password);
-                }}
-              >
-                데모 계정 채우기
-              </button>
-            ) : null}
-          </p>
-        ) : null}
-        <form onSubmit={submit} className="form-stack">
-          <label>
-            이메일
-            <input
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-            />
-          </label>
-          {mode === "register" ? (
+        <form onSubmit={submit} className="form-stack" noValidate={register}>
+          <div className="auth-field">
             <label>
-              사용자 이름
+              이메일
               <input
-                autoComplete="username"
-                minLength={3}
-                maxLength={30}
-                pattern="[A-Za-z0-9_]+"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
+                id="auth-email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 required
+                {...fieldProps("email")}
               />
             </label>
+            {fieldError("email")}
+          </div>
+          {register ? (
+            <div className="auth-field">
+              <label>
+                사용자 이름
+                <input
+                  id="auth-username"
+                  autoComplete="username"
+                  maxLength={30}
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  required
+                  {...fieldProps("username")}
+                />
+              </label>
+              {fieldError("username") ?? (
+                <span className="field-help">영문, 숫자, 밑줄(_) 3~30자</span>
+              )}
+            </div>
           ) : null}
-          <label>
-            비밀번호
-            <input
-              type="password"
-              autoComplete={
-                mode === "login" ? "current-password" : "new-password"
-              }
-              minLength={mode === "register" ? 10 : undefined}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-            />
-          </label>
+          <div className="auth-field">
+            <label>
+              비밀번호
+              <input
+                id="auth-password"
+                type="password"
+                autoComplete={
+                  mode === "login" ? "current-password" : "new-password"
+                }
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                {...fieldProps("password")}
+              />
+            </label>
+            {fieldError("password") ??
+              (register ? <span className="field-help">10자 이상</span> : null)}
+          </div>
           {error ? (
             <p className="error-message" role="alert">
               {error}
@@ -148,6 +208,7 @@ export function AuthPage() {
             onClick={() => {
               setMode(mode === "login" ? "register" : "login");
               setError("");
+              setTouched({ email: false, username: false, password: false });
             }}
           >
             {mode === "login" ? "회원가입" : "로그인"}

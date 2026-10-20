@@ -6,6 +6,8 @@ import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
 import { Pagination } from "../components/Pagination";
+import { Skeleton, SkeletonRegion, SkeletonRows } from "../components/Skeleton";
+import { ReverseIcon } from "../components/ReverseIcon";
 import { ShuffleIcon } from "../components/ShuffleIcon";
 import {
   ProblemStatus,
@@ -42,11 +44,20 @@ const PAGE_SIZE = 20;
 
 const sorts = [
   { value: "latest", label: "최신순" },
-  { value: "easy", label: "쉬운 난이도순" },
-  { value: "hard", label: "어려운 난이도순" },
+  { value: "difficulty", label: "난이도순" },
   { value: "title", label: "제목순" },
+  { value: "solvers", label: "푼 사람순" },
+  { value: "rate", label: "정답률순" },
   { value: "random", label: "무작위" },
 ];
+
+/** 옛 주소(sort=easy 등)도 열리도록 새 정렬 이름과 '뒤집기' 여부로 바꿔 읽는다. */
+const legacySorts: Record<string, { sort: string; reversed: boolean }> = {
+  easy: { sort: "difficulty", reversed: false },
+  hard: { sort: "difficulty", reversed: true },
+  "solvers-asc": { sort: "solvers", reversed: true },
+  "rate-asc": { sort: "rate", reversed: true },
+};
 
 const statusChips: { value: "" | SolveState; label: string }[] = [
   { value: "", label: "전체" },
@@ -72,6 +83,8 @@ export function ProblemsPage() {
   const [announce, setAnnounce] = useState("");
   // 다시 섞기 아이콘을 누를 때마다 화살표가 오른쪽으로 빠져나갔다 왼쪽에서 다시 들어오게 한다(키가 바뀌면 애니메이션이 처음부터 다시 실행된다).
   const [spinKey, setSpinKey] = useState(0);
+  // 순서 뒤집기 아이콘: 누를 때마다 위·아래 화살표가 각자 방향으로 움직였다가 돌아온다.
+  const [reverseKey, setReverseKey] = useState(0);
 
   const urlQuery = params.get("q") ?? "";
   const selectedDifficulties = (params.get("d") ?? "")
@@ -84,7 +97,11 @@ export function ProblemsPage() {
     .filter((value): value is SolveState =>
       ["solved", "attempted", "none"].includes(value),
     );
-  const sort = params.get("sort") ?? "latest";
+  const rawSort = params.get("sort") ?? "latest";
+  const legacySort = legacySorts[rawSort];
+  const sort = legacySort?.sort ?? rawSort;
+  // 기본 순서(최신순=최신 먼저, 난이도순=쉬운 것 먼저, 푼 사람순=많은 순, 정답률순=높은 순)를 뒤집은 상태
+  const reversed = (params.get("rev") === "1") !== Boolean(legacySort?.reversed);
   const seed = Number(params.get("seed")) || 1;
   const page = Math.max(1, Number(params.get("page")) || 1);
 
@@ -167,19 +184,32 @@ export function ProblemsPage() {
     // 무작위: 전체를 한 번 섞은 뒤 필터를 적용한다. 필터를 바꿔도 상대 순서가 유지된다.
     const base =
       sort === "random" ? seededShuffle(problems, seed) : [...problems];
-    if (sort === "easy" || sort === "hard")
+    const dir = reversed ? -1 : 1;
+    if (sort === "difficulty")
       base.sort(
         (a, b) =>
-          (order.indexOf(a.difficulty) - order.indexOf(b.difficulty)) *
-          (sort === "easy" ? 1 : -1),
+          (order.indexOf(a.difficulty) - order.indexOf(b.difficulty)) * dir,
       );
     else if (sort === "title")
-      base.sort((a, b) => a.title.localeCompare(b.title, "ko"));
+      base.sort((a, b) => a.title.localeCompare(b.title, "ko") * dir);
+    else if (sort === "solvers")
+      base.sort(
+        (a, b) => ((b.solverCount ?? 0) - (a.solverCount ?? 0)) * dir,
+      );
+    else if (sort === "rate")
+      // 정답률이 없는(제출 없는) 문제는 뒤집어도 맨 뒤에 둔다.
+      base.sort((a, b) => {
+        if (a.acceptanceRate == null || b.acceptanceRate == null)
+          return (
+            Number(a.acceptanceRate == null) - Number(b.acceptanceRate == null)
+          );
+        return (b.acceptanceRate - a.acceptanceRate) * dir;
+      });
     else if (sort !== "random")
-      base.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      base.sort((a, b) => b.createdAt.localeCompare(a.createdAt) * dir);
     return base.filter((problem) => matches(problem, null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [problems, sort, seed, params, history.solved, history.attempted]);
+  }, [problems, sort, reversed, seed, params, history.solved, history.attempted]);
 
   const statusCount = (value: "" | SolveState) =>
     problems.filter(
@@ -228,8 +258,20 @@ export function ProblemsPage() {
     setAnnounce(`${scope}문제 목록을 무작위로 섞었어요.`);
   }
 
+  // 현재 목록의 순서를 거꾸로 뒤집는다(같은 정렬 안에서의 방향만 바뀐다).
+  function reverseOrder() {
+    update({
+      sort: sort === "latest" ? null : sort,
+      rev: reversed ? null : "1",
+    });
+    setAnnounce(
+      reversed ? "목록 순서를 원래대로 되돌렸어요." : "목록 순서를 뒤집었어요.",
+    );
+  }
+
   function changeSort(value: string) {
     update({
+      rev: null,
       sort: value === "latest" ? null : value,
       // 무작위를 고를 때마다 새 순서를 만든다.
       seed: value === "random" ? String(newSeed()) : null,
@@ -256,7 +298,6 @@ export function ProblemsPage() {
               value={queryText}
               onChange={(event) => setQueryText(event.target.value)}
             />
-            <kbd aria-hidden="true">/</kbd>
           </div>
           <Select
             ariaLabel="정렬"
@@ -276,6 +317,7 @@ export function ProblemsPage() {
               <SlideToggle
                 multiple
                 ariaLabel="풀이 상태 필터"
+                countsLoading={loading || history.loading}
                 values={statuses}
                 options={statusChips.map((item) => ({
                   value: item.value,
@@ -299,6 +341,7 @@ export function ProblemsPage() {
             <SlideToggle
               multiple
               ariaLabel="난이도 필터"
+              countsLoading={loading}
               values={selectedDifficulties}
               options={[
                 { value: "", label: "전체", count: difficultyCount("") },
@@ -326,7 +369,22 @@ export function ProblemsPage() {
             >
               <ShuffleIcon playKey={spinKey} />
             </button>
-          ) : null}
+          ) : (
+            <button
+              type="button"
+              className="shuffle-icon-button reverse-icon-button"
+              aria-label="목록 순서 뒤집기"
+              aria-pressed={reversed}
+              title="목록 순서 뒤집기"
+              onClick={() => {
+                setReverseKey((key) => key + 1);
+                reverseOrder();
+              }}
+              disabled={filtered.length < 2}
+            >
+              <ReverseIcon playKey={reverseKey} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -358,39 +416,53 @@ export function ProblemsPage() {
               ) : null}
             </div>
             <span className="total-count">
-              {filtered.length}문제
-              {filtered.length
-                ? ` 중 ${(current - 1) * PAGE_SIZE + 1}–${(current - 1) * PAGE_SIZE + visible.length}`
-                : ""}
+              {loading ? (
+                <Skeleton width={80} height={14} />
+              ) : (
+                <>
+                  {filtered.length}문제
+                  {filtered.length
+                    ? ` 중 ${(current - 1) * PAGE_SIZE + 1}–${(current - 1) * PAGE_SIZE + visible.length}`
+                    : ""}
+                </>
+              )}
             </span>
           </div>
           {loading ? (
-            <div className="empty-state">문제를 불러오는 중입니다…</div>
+            <SkeletonRows count={8} />
           ) : visible.length ? (
             <div className="problem-list data-list list-problems">
               <div className="problem-head" aria-hidden="true">
                 <span>문제</span>
-                <span>풀이 상태</span>
                 <span>난이도</span>
-                <span>제한</span>
+                <span>푼 사람</span>
+                <span>정답률</span>
               </div>
               {visible.map((problem) => (
                 <div className="problem-row-wrap" key={problem.id}>
                   <Link className="problem-row" to={problemPath(problem.slug)}>
                     <span className="problem-title">
-                      <strong>{problem.title}</strong>
+                      <span className="post-title-line">
+                        <strong title={problem.title}>{problem.title}</strong>
+                        {session && history.loading ? (
+                          <Skeleton width={48} height={16} />
+                        ) : stateOf(problem) === "none" ? null : (
+                          <ProblemStatus state={stateOf(problem)} />
+                        )}
+                      </span>
                     </span>
-                    <ProblemStatus state={stateOf(problem)} />
                     <span
                       className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
                     >
                       {difficultyLabel(problem.difficulty)}
                     </span>
-                    <span className="problem-limit">
-                      {problem.timeLimitMs}ms · {problem.memoryLimitMb}MB
+                    <span className="problem-limit" data-label="푼 사람">
+                      {problem.solverCount ?? 0}명
                     </span>
-                    <span className="row-arrow" aria-hidden="true">
-                      ›
+                    <span className="problem-limit" data-label="정답률">
+                      {problem.acceptanceRate == null
+                        ? "—"
+                        : `${problem.acceptanceRate}%`}
                     </span>
                   </Link>
                 </div>
@@ -425,6 +497,20 @@ export function ProblemsPage() {
         </section>
 
         <aside className="side-stack" ref={sideRef}>
+          {session && !profile ? (
+            <SkeletonRegion
+              className="standing-card"
+              label="내 요약을 불러오는 중입니다"
+            >
+              <Skeleton width={90} height={18} />
+              <div className="skeleton-stats">
+                <Skeleton height={36} />
+                <Skeleton height={36} />
+                <Skeleton height={36} />
+              </div>
+              <Skeleton height={40} radius={10} />
+            </SkeletonRegion>
+          ) : null}
           {profile ? (
             <div className="standing-card">
               <Link to="/profile" className="standing-link">
