@@ -399,11 +399,22 @@ for (const slug of ["new", "mine"]) {
         },
       }),
     );
+    // 새 탭은 이 페이지에 건 모킹이 적용되지 않으므로 컨텍스트 단위로도 상세 응답을 준다.
+    await page
+      .context()
+      .route(`**/api/v1/problems/by-slug/${slug}`, (route) =>
+        route.fulfill({ json: { ...problem, slug } }),
+      );
     await page.goto("/problems");
-    await page.getByRole("link", { name: new RegExp(problem.title) }).click();
-    await expect(page).toHaveURL(new RegExp(`/problems/view/${slug}$`));
+    const [popup] = await Promise.all([
+      page.waitForEvent("popup"),
+      page.getByRole("link", { name: new RegExp(problem.title) }).click(),
+    ]);
+    // 목록은 그대로 두고 문제는 새 탭에서 열린다.
+    await expect(page).toHaveURL(/\/problems$/);
+    await expect(popup).toHaveURL(new RegExp(`/problems/view/${slug}$`));
     await expect(
-      page.getByRole("heading", { name: problem.title, exact: true }),
+      popup.getByRole("heading", { name: problem.title, exact: true }),
     ).toBeVisible();
   });
 }
@@ -1077,6 +1088,28 @@ test("the my-submissions title column stays readable between 881 and 1100px", as
   }
 });
 
+test("the solve page has no back-to-list breadcrumb and the list opens problems in a new tab", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.goto("/problems/view/sum");
+  await expect(
+    page.getByRole("heading", { name: problem.title, exact: true }),
+  ).toBeVisible();
+  // 문제는 새 탭에서 열리므로 풀이 화면 위에 '문제 목록 / 슬러그' 뒤로가기 경로를 두지 않는다.
+  await expect(page.locator(".solve-heading .breadcrumb")).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "현재 위치" })).toHaveCount(
+    0,
+  );
+
+  // 목록의 문제 링크는 새 탭 속성을 가진다(스크린리더에는 '새 탭에서 열려요'로 안내).
+  await page.goto("/problems");
+  const row = page.locator("a.problem-row").first();
+  await expect(row).toHaveAttribute("target", "_blank");
+  await expect(row).toHaveAttribute("rel", /noopener/);
+  await expect(row).toContainText("새 탭에서 열려요");
+});
+
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
   page,
 }) => {
@@ -1257,8 +1290,18 @@ test("list rows are whole-row links reachable and openable with the keyboard", a
   await expect(row).toBeFocused();
   const outline = await row.evaluate((el) => getComputedStyle(el).outlineStyle);
   expect(outline).toBe("solid");
-  await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/problems\/view\/sum$/);
+  // Enter로도 새 탭에서 열린다(목록 탭은 그대로 남는다).
+  await page
+    .context()
+    .route("**/api/v1/problems/by-slug/sum", (route) =>
+      route.fulfill({ json: problem }),
+    );
+  const [popup] = await Promise.all([
+    page.waitForEvent("popup"),
+    page.keyboard.press("Enter"),
+  ]);
+  await expect(popup).toHaveURL(/\/problems\/view\/sum$/);
+  await expect(page).toHaveURL(/\/problems$/);
 });
 
 test("filter toggles allow ⌘/Ctrl+click multi-select within one group only", async ({
@@ -1618,9 +1661,22 @@ test.describe("code editor basics on the solve page", () => {
     await page.clock.install();
     await page.goto("/problems/view/sum");
     await page.getByLabel("소스 코드").fill("print(333)");
-    await page.getByRole("link", { name: "문제 목록", exact: true }).click();
-    await page.getByRole("link", { name: new RegExp(problem.title) }).click();
-    await expect(page.getByLabel("소스 코드")).toHaveValue("print(333)");
+    // 풀이 화면에는 뒤로가기 링크가 없으니 머리글 메뉴의 '문제'로 목록에 돌아간다.
+    await page
+      .getByRole("navigation", { name: "주 메뉴" })
+      .getByRole("link", { name: "문제", exact: true })
+      .click();
+    // 목록의 문제는 새 탭에서 열리고, 같은 문제의 마지막 입력이 그대로 복원된다.
+    await page
+      .context()
+      .route("**/api/v1/problems/by-slug/sum", (route) =>
+        route.fulfill({ json: problem }),
+      );
+    const [popup] = await Promise.all([
+      page.waitForEvent("popup"),
+      page.getByRole("link", { name: new RegExp(problem.title) }).click(),
+    ]);
+    await expect(popup.getByLabel("소스 코드")).toHaveValue("print(333)");
   });
 
   test("reset removes the saved draft without restoring it on reload", async ({

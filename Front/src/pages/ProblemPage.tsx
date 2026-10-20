@@ -600,11 +600,6 @@ export function ProblemPage() {
   return (
     <div className="solve-page">
       <div className="solve-heading">
-        <nav className="breadcrumb" aria-label="현재 위치">
-          <Link to="/problems">문제 목록</Link>
-          <span aria-hidden="true">/</span>
-          <span>{problem.slug}</span>
-        </nav>
         <h1>{problem.title}</h1>
         <span
           className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}

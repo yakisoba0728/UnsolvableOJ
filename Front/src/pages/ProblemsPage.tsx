@@ -440,10 +440,17 @@ export function ProblemsPage() {
               </div>
               {visible.map((problem) => (
                 <div className="problem-row-wrap" key={problem.id}>
-                  <Link className="problem-row" to={problemPath(problem.slug)}>
+                  {/* 프로그래머스처럼 문제는 새 탭에서 열어, 목록의 검색·필터·쪽 위치를 그대로 둔다. */}
+                  <Link
+                    className="problem-row"
+                    to={problemPath(problem.slug)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <span className="problem-title">
                       <span className="post-title-line">
                         <strong title={problem.title}>{problem.title}</strong>
+                        <span className="sr-only">(새 탭에서 열려요)</span>
                         {session && history.loading ? (
                           <Skeleton width={48} height={16} />
                         ) : stateOf(problem) === "none" ? null : (
