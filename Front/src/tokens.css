@@ -97,11 +97,11 @@
   --space-3: 24px;
   --space-4: 32px;
 
-  /* Controls & radii: 버튼·입력 12 / 패널 16 / 팝업·강조 카드 20 */
+  /* Controls & radii: 버튼·입력 8 / 패널 10 / 팝업·강조 카드 14 */
   --control-height: 44px;
-  --radius-control: 12px;
-  --radius-panel: 16px;
-  --radius-feature: 20px;
+  --radius-control: 8px;
+  --radius-panel: 10px;
+  --radius-feature: 14px;
 }
 
 /* 다크: 밝은 면 대신 짙은 면, 파랑은 밝게(글자) / 진하게(흰 글자가 올라가는 면) */

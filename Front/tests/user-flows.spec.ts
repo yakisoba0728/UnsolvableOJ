@@ -590,6 +590,89 @@ test("the problem list has a reverse-order button that is replaced by the shuffl
   await expect(reverse).toHaveCount(0);
 });
 
+test("typing #word and pressing Enter in the community search makes a tag pill that filters posts", async ({
+  page,
+}) => {
+  const post = (id: string, title: string, tags: string[], at: string) => ({
+    id,
+    category: "question",
+    title,
+    body: `${title} 본문`,
+    author: { name: "other", tier: "Bronze I" },
+    tags,
+    createdAt: at,
+    views: 1,
+    upvotes: 0,
+  });
+  await page.addInitScript((value) => {
+    localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
+  }, {
+    posts: [
+      post("t-1", "그리디 질문", ["greedy", "dp"], "2026-10-03T00:00:00Z"),
+      post("t-2", "다이나믹 질문", ["dp"], "2026-10-02T00:00:00Z"),
+      post("t-3", "태그 없는 질문", [], "2026-10-01T00:00:00Z"),
+    ],
+    answers: [],
+    upvoted: [],
+    saved: [],
+    followed: [],
+    accepted: {},
+    deleted: [],
+  });
+  await page.goto("/community?q=");
+  const search = page.getByRole("searchbox", { name: "게시글 검색" });
+  const rows = page.locator(".post-row .post-title");
+  const pills = page.locator(".search-tag");
+
+  // 일반 검색어는 제목에서만 찾는다: 태그에만 있는 단어('greedy')나 본문에만 있는 단어는 걸리지 않는다.
+  await search.fill("greedy");
+  await expect(rows).toHaveCount(0);
+  await search.fill("본문");
+  await expect(rows).toHaveCount(0);
+  await search.fill("그리디");
+  await expect(rows).toHaveCount(1);
+  await search.fill("");
+  await expect(rows).toHaveCount(3);
+
+  // 띄어쓰기가 있으면 태그가 아니라 일반 검색어로 남는다.
+  await search.fill("#dp 질문");
+  await search.press("Enter");
+  await expect(pills).toHaveCount(0);
+
+  // '#' 만으로는 태그가 되지 않는다.
+  await search.fill("#");
+  await search.press("Enter");
+  await expect(pills).toHaveCount(0);
+
+  await search.fill("#dp");
+  await search.press("Enter");
+  await expect(pills).toHaveCount(1);
+  await expect(pills.first()).toHaveText("#dp");
+  await expect(search).toHaveValue("");
+  await expect(page).toHaveURL(/[?&]t=dp/);
+  await expect(rows.filter({ hasText: "태그 없는 질문" })).toHaveCount(0);
+  await expect(rows).toHaveCount(2);
+
+  // 태그를 하나 더 고르면 두 태그를 모두 가진 글만 남는다. 같은 태그는 중복되지 않는다.
+  await search.fill("#GREEDY");
+  await search.press("Enter");
+  await search.fill("#dp");
+  await search.press("Enter");
+  await expect(pills).toHaveCount(2);
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toHaveText("그리디 질문");
+
+  // 입력칸이 비어 있을 때 Backspace로 마지막 태그를 지운다.
+  await search.press("Backspace");
+  await expect(pills).toHaveCount(1);
+  await expect(rows).toHaveCount(2);
+
+  // × 버튼으로도 지울 수 있다.
+  await page.getByRole("button", { name: "태그 #dp 지우기" }).click();
+  await expect(pills).toHaveCount(0);
+  await expect(page).not.toHaveURL(/[?&]t=/);
+});
+
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
   page,
 }) => {
@@ -1028,6 +1111,43 @@ test.describe("community post: delete own post and answer layout", () => {
       page.getByRole("heading", { name: "고친 제목" }),
     ).toBeVisible();
   });
+});
+
+test("only input fields show the text cursor; UI text uses the arrow and controls the pointer", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.goto("/problems/view/sum");
+  const cursorOf = (selector: string) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((el) => getComputedStyle(el).cursor);
+  const selectOf = (selector: string) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((el) => getComputedStyle(el).userSelect);
+
+  // 입력칸은 텍스트 커서
+  expect(await cursorOf("textarea.code-editor")).toBe("text");
+  // 제목·안내 문구는 화살표
+  expect(await cursorOf("h1")).toBe("default");
+  expect(await cursorOf(".editor-hints")).toBe("default");
+  // 누르는 곳은 손가락, 조작용 글자는 드래그 선택이 안 된다
+  expect(await cursorOf("button.text-button")).toBe("pointer");
+  expect(await selectOf("button.text-button")).toBe("none");
+  // 읽고 복사하는 본문은 텍스트 커서와 선택 가능
+  expect(await cursorOf(".markdown")).toBe("text");
+  expect(await selectOf(".markdown")).not.toBe("none");
+  // 입력칸 안의 글은 선택 가능
+  expect(await selectOf("textarea.code-editor")).toBe("text");
+
+  await page.goto("/problems");
+  expect(await cursorOf(".data-list .problem-title strong")).toBe("pointer");
+  // WebKit reports auto on descendants: user-select is not an inherited property.
+  expect(await selectOf(".data-list")).toBe("none");
+  expect(await cursorOf(".total-count")).toBe("default");
 });
 
 test.describe("code editor basics on the solve page", () => {
