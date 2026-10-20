@@ -624,6 +624,16 @@ test("typing #word and pressing Enter in the community search makes a tag pill t
   const rows = page.locator(".post-row .post-title");
   const pills = page.locator(".search-tag");
 
+  // 일반 검색어는 제목에서만 찾는다: 태그에만 있는 단어('greedy')나 본문에만 있는 단어는 걸리지 않는다.
+  await search.fill("greedy");
+  await expect(rows).toHaveCount(0);
+  await search.fill("본문");
+  await expect(rows).toHaveCount(0);
+  await search.fill("그리디");
+  await expect(rows).toHaveCount(1);
+  await search.fill("");
+  await expect(rows).toHaveCount(3);
+
   // 띄어쓰기가 있으면 태그가 아니라 일반 검색어로 남는다.
   await search.fill("#dp 질문");
   await search.press("Enter");

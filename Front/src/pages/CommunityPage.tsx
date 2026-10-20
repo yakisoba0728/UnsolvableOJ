@@ -149,11 +149,8 @@ export function CommunityPage() {
     categoryFilter: CategoryKey[],
     statusFilter: string[],
   ) => {
-    const matchesKeyword =
-      !keyword ||
-      post.title.toLowerCase().includes(keyword) ||
-      post.body.toLowerCase().includes(keyword) ||
-      post.tags.some((tag) => tag.toLowerCase().includes(keyword));
+    // 일반 검색어는 제목에서만 찾는다. 태그는 '#단어' + Enter로 만든 태그 알약으로만 거른다.
+    const matchesKeyword = !keyword || post.title.toLowerCase().includes(keyword);
     // 고른 태그를 모두 가진 글만 보인다(대소문자 무시).
     const matchesTags = selectedTags.every((tag) =>
       post.tags.some((item) => item.toLowerCase() === tag.toLowerCase()),
