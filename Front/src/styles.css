@@ -334,7 +334,7 @@ p {
   justify-content: center;
   min-width: 65px;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 13px;
   font-weight: 700;
   background: var(--color-success-soft);
@@ -393,7 +393,7 @@ p {
 .pagination button {
   border: 1px solid var(--color-divider);
   background: var(--color-surface);
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 8px 15px;
   color: var(--color-ink-600);
   font-weight: var(--weight-label);
@@ -419,7 +419,7 @@ p {
   background: var(--color-danger-soft);
   border: 1px solid var(--color-danger-border);
   color: var(--color-danger);
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 11px 14px;
   font-size: 13px;
   line-height: 1.5;
@@ -730,7 +730,7 @@ textarea {
 .result-stats > div {
   background: var(--color-surface);
   border: 1px solid var(--color-divider);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 20px;
 }
 .result-stats small {
@@ -764,7 +764,7 @@ textarea {
 .source-code {
   background: var(--color-code);
   color: #dce8ff;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 25px;
   min-height: 180px;
   font-size: 13px;
@@ -879,7 +879,7 @@ textarea {
   align-items: center;
   gap: 12px;
   padding: 9px 8px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 13px;
 }
 .ranking-row.current {
@@ -1604,7 +1604,7 @@ textarea {
   height: 24px;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   display: inline-block;
   background: var(--color-disabled);
 }
@@ -2044,7 +2044,7 @@ kbd {
   font: 12px var(--font-mono);
   background: var(--color-disabled);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 1px 6px;
 }
 .daily-card {
@@ -2427,7 +2427,7 @@ kbd {
   .heat-cell {
     width: 18px;
     height: 18px;
-    border-radius: 5px;
+    border-radius: 4px;
   }
   .heat-days span {
     height: 18px;
@@ -3429,7 +3429,7 @@ h3 {
   padding: 14px 20px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: 10px;
   transition: border-color 0.15s;
 }
 .post-row:hover {
@@ -3695,7 +3695,7 @@ h3 {
 .post-tags a {
   display: inline-block;
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-surface-muted);
   color: var(--color-ink-600);
   font-size: 13px;
@@ -3765,7 +3765,7 @@ h3 {
 .answer-vote {
   padding: 2px 8px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: inherit;
   font: inherit;
@@ -3795,7 +3795,7 @@ h3 {
   margin: 0 0 16px;
   padding: 11px 14px;
   border: 1px solid var(--color-success-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-success-soft);
   color: var(--color-success);
   font-size: 13px;
@@ -3870,7 +3870,7 @@ h3 {
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-primary-soft);
   color: var(--color-primary);
   font-size: 12px;
@@ -3887,7 +3887,7 @@ h3 {
   margin: 0 0 16px;
   padding: 10px 14px;
   border: 1px solid var(--color-feature-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-feature);
   font-size: 13px;
 }
@@ -4180,7 +4180,7 @@ h3 {
   justify-content: space-between;
   gap: 12px;
   padding: 9px 12px;
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--color-ink-700);
   font-size: 14px;
   font-weight: var(--weight-label);
@@ -4861,7 +4861,7 @@ h3 {
   height: 28px;
   padding: 0;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-ink-700);
   cursor: pointer;
@@ -4882,7 +4882,7 @@ h3 {
   scroll-snap-type: y mandatory;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 .scroller-view::-webkit-scrollbar {
   display: none;
@@ -4902,7 +4902,7 @@ h3 {
   scroll-snap-align: start;
   scroll-snap-stop: always;
   background: var(--color-surface-muted);
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid transparent;
   overflow: hidden;
 }
@@ -5092,7 +5092,7 @@ h3 {
   min-height: 36px;
   padding: 0 14px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: var(--color-ink-600);
   font: inherit;
@@ -5180,13 +5180,13 @@ h3 {
   gap: 2px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 6px;
 }
 .md-tabs button {
   min-height: 26px;
   padding: 0 12px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
   color: var(--color-ink-600);
   font: inherit;
@@ -5377,7 +5377,7 @@ h3 {
 .check-warnings {
   margin-top: 16px;
   padding: 12px 14px 12px 28px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--color-warning-soft);
   color: var(--color-warning);
   font-size: 13px;
@@ -6141,7 +6141,7 @@ h3 {
   height: 28px;
   padding: 0 6px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: inherit;
   font-size: 12px;
@@ -6197,7 +6197,7 @@ h3 {
   list-style: none;
   background: #1b2636;
   border: 1px solid #3a4a62;
-  border-radius: 10px;
+  border-radius: 7px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   color: #e9f0f9;
   font: 12px/1.4 var(--font-sans);
@@ -6208,7 +6208,7 @@ h3 {
   justify-content: space-between;
   gap: 16px;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
 }
 .autocomplete li.active {
@@ -6366,7 +6366,7 @@ h3 {
 .skeleton {
   display: block;
   max-width: 100%;
-  border-radius: 6px;
+  border-radius: 4px;
   background: linear-gradient(
     90deg,
     var(--color-disabled) 0%,
@@ -6599,7 +6599,7 @@ h3 {
   place-items: center;
   width: 18px;
   height: 18px;
-  border-radius: 5px;
+  border-radius: 4px;
   background: rgba(159, 176, 200, 0.2);
   color: #9fb0c8;
   font: 700 11px/1 var(--font-mono);
