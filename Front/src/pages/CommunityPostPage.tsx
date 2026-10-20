@@ -221,7 +221,7 @@ export function CommunityPostPage() {
               <ul className="post-tags" aria-label="태그">
                 {post.tags.map((tag) => (
                   <li key={tag}>
-                    <Link to={`/community?q=${encodeURIComponent(tag)}`}>
+                    <Link to={`/community?t=${encodeURIComponent(tag)}`}>
                       #{tag}
                     </Link>
                   </li>
