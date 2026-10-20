@@ -1,43 +1,17 @@
 import "dotenv/config";
-import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { Worker } from "bullmq";
 import { Redis } from "ioredis";
-
-interface Claim {
-  submissionId: string;
-  language: string;
-  sourceCode: string;
-  limits: { timeMs: number; memoryMb: number };
-  testCases: {
-    id: string;
-    input: string;
-    expectedOutput: string;
-    isSample: boolean;
-    score: number;
-  }[];
-}
-
-interface JudgeResult {
-  debugOutputs?: {
-    testCase: number;
-    stdout: string;
-    stderr: string;
-    stdoutTruncated: boolean;
-    stderrTruncated: boolean;
-  }[];
-  status: string;
-  runtimeMs?: number;
-  memoryKb?: number;
-  passedTestCases: number;
-  totalTestCases: number;
-  compileOutput?: string;
-  judgeMessage?: string;
-}
+import { checkSandbox, judge, type Claim, type JudgeResult } from "./judge.js";
 
 const apiBaseUrl = process.env.API_BASE_URL ?? "http://localhost:3000/api/v1";
 const token = process.env.JUDGE_SERVICE_TOKEN;
 if (!token) throw new Error("JUDGE_SERVICE_TOKEN is required");
+const sandbox = {
+  url: process.env.GO_JUDGE_URL ?? "http://127.0.0.1:5050",
+  token: process.env.GO_JUDGE_TOKEN ?? "",
+};
+await checkSandbox(sandbox);
 
 async function callApi(path: string, method = "GET", body?: unknown, attempt?: { generation: number; attemptId: string }) {
   const response = await fetch(`${apiBaseUrl}${path}`, {
@@ -55,126 +29,6 @@ async function callApi(path: string, method = "GET", body?: unknown, attempt?: {
   if (!response.ok)
     throw new Error(`Judge API ${method} ${path}: HTTP ${response.status}`);
   return response.json();
-}
-
-function runContainer(claim: Claim): Promise<JudgeResult> {
-  const name = `unsolvable-judge-${randomUUID()}`;
-  const image =
-    process.env.JUDGE_RUNTIME_IMAGE ?? "unsolvable-judge-runtime:local";
-  const memoryMb = Math.max(128, claim.limits.memoryMb + 96);
-  const timeoutMs = Math.min(
-    600_000,
-    60_000 + claim.testCases.length * claim.limits.timeMs,
-  );
-
-  return new Promise((resolve, reject) => {
-    const child = spawn(
-      "docker",
-      [
-        "run",
-        "--rm",
-        "-i",
-        "--name",
-        name,
-        ...(process.env.JUDGE_RUN_ID
-          ? ["--label", `unsolvable.ci=${process.env.JUDGE_RUN_ID}`]
-          : []),
-        "--network",
-        "none",
-        "--read-only",
-        "--cap-drop",
-        "ALL",
-        "--security-opt",
-        "no-new-privileges",
-        "--pids-limit",
-        "64",
-        "--memory",
-        `${memoryMb}m`,
-        "--memory-swap",
-        `${memoryMb}m`,
-        "--cpus",
-        "1",
-        "--tmpfs",
-        "/workspace:rw,exec,nosuid,size=256m,mode=1777",
-        "--tmpfs",
-        "/tmp:rw,noexec,nosuid,size=16m,mode=1777",
-        "--env",
-        "HOME=/workspace",
-        "--env",
-        "GOCACHE=/workspace/go-cache",
-        "--env",
-        "GOPATH=/workspace/go",
-        "--env",
-        "TMPDIR=/workspace/tmp",
-        "--user",
-        "65534:65534",
-        "--workdir",
-        "/workspace",
-        image,
-      ],
-      { stdio: ["pipe", "pipe", "pipe"] },
-    );
-    const stdout: Buffer[] = [];
-    const stderr: Buffer[] = [];
-    let outputBytes = 0;
-    let stderrBytes = 0;
-    let timedOut = false;
-    let outputExceeded = false;
-    let spawnError: Error | undefined;
-    const stop = () => {
-      const removal = spawn("docker", ["rm", "-f", name], { stdio: "ignore" });
-      removal.on("error", () => undefined);
-      child.kill("SIGKILL");
-    };
-    const timer = setTimeout(() => {
-      timedOut = true;
-      stop();
-    }, timeoutMs);
-    child.on("error", (error) => {
-      spawnError = error;
-    });
-    child.stdout.on("data", (chunk: Buffer) => {
-      outputBytes += chunk.length;
-      if (outputBytes > 1_000_000 && !outputExceeded) {
-        outputExceeded = true;
-        stop();
-      } else stdout.push(chunk);
-    });
-    child.stderr.on("data", (chunk: Buffer) => {
-      if (stderrBytes < 16_000) {
-        stderr.push(chunk);
-        stderrBytes += chunk.length;
-      }
-    });
-    child.on("close", (code) => {
-      clearTimeout(timer);
-      if (spawnError) return reject(spawnError);
-      if (timedOut) return reject(new Error("Judge container timed out"));
-      if (outputExceeded)
-        return reject(new Error("Judge runner produced too much output"));
-      if (code === 137)
-        return resolve({
-          status: "MEMORY_LIMIT_EXCEEDED",
-          passedTestCases: 0,
-          totalTestCases: claim.testCases.length,
-        });
-      if (code !== 0)
-        return reject(
-          new Error(
-            `Judge container exited ${code}: ${Buffer.concat(stderr).toString("utf8").slice(0, 1000)}`,
-          ),
-        );
-      try {
-        resolve(
-          JSON.parse(Buffer.concat(stdout).toString("utf8")) as JudgeResult,
-        );
-      } catch {
-        reject(new Error("Judge runner returned invalid JSON"));
-      }
-    });
-    child.stdin.on("error", () => undefined);
-    child.stdin.end(JSON.stringify(claim));
-  });
 }
 
 const redis = new Redis({
@@ -209,12 +63,15 @@ const worker = new Worker<{ submissionId: string; generation?: number }>(
     leaseHeartbeat.unref();
     let result: JudgeResult;
     try {
-      result = await runContainer(claim);
+      result = await judge(claim, sandbox);
     } catch (error) {
       result = {
         status: "SYSTEM_ERROR",
+        runtimeMs: 0,
+        memoryKb: 0,
         passedTestCases: 0,
         totalTestCases: claim.testCases.length,
+        debugOutputs: [],
         judgeMessage:
           error instanceof Error
             ? error.message.slice(0, 1000)

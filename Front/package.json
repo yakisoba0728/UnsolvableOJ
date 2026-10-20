@@ -9,6 +9,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "check": "npm run build && npm run test:e2e:types",
     "test:e2e": "playwright test",
+    "test:live": "playwright test --config playwright.live.config.ts",
     "test:e2e:types": "tsc -p tsconfig.e2e.json"
   },
   "dependencies": {

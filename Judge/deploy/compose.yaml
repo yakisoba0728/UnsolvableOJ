@@ -1,0 +1,34 @@
+services:
+  go-judge:
+    build: ../runtime
+    image: unsolvable-go-judge:local
+    privileged: true
+    restart: unless-stopped
+    shm_size: 512m
+    environment:
+      ES_AUTH_TOKEN: ${GO_JUDGE_TOKEN:?Set a private GO_JUDGE_TOKEN}
+    command:
+      - -no-fallback
+      - -enable-cpu-rate
+      - -parallelism=2
+      - -file-timeout=15m
+      - -time-limit-checker-interval=2ms
+      - -output-limit=64m
+      - -copy-out-limit=64m
+  judge:
+    build: ..
+    restart: unless-stopped
+    environment:
+      API_BASE_URL: ${API_BASE_URL:?Set the application API URL}
+      JUDGE_SERVICE_TOKEN: ${JUDGE_SERVICE_TOKEN:?Match the application judge token}
+      REDIS_HOST: ${REDIS_HOST:?Set the private Redis address}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_USERNAME: ${REDIS_USERNAME:-}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Redis authentication is required}
+      REDIS_DB: ${REDIS_DB:-0}
+      GO_JUDGE_URL: http://go-judge:5050
+      GO_JUDGE_TOKEN: ${GO_JUDGE_TOKEN:?Set a private GO_JUDGE_TOKEN}
+      JUDGE_CONCURRENCY: ${JUDGE_CONCURRENCY:-2}
+    depends_on:
+      go-judge:
+        condition: service_healthy

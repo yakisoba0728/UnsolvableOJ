@@ -9,9 +9,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/worker.js",
-    "start:dev": "node --experimental-strip-types src/worker.ts",
-    "check": "npm run build && python3 -m unittest discover -s runtime -p 'test_*.py'",
-    "test:runtime": "python3 runtime/smoke.py"
+    "start:dev": "npm run build && node dist/worker.js",
+    "check": "npm run build && node --test dist/judge.test.js",
+    "test:runtime": "npm run build && node --test dist/runtime.test.js"
   },
   "dependencies": {
     "bullmq": "^6.3.8",
