@@ -1062,7 +1062,8 @@ test("only input fields show the text cursor; UI text uses the arrow and control
 
   await page.goto("/problems");
   expect(await cursorOf(".data-list .problem-title strong")).toBe("pointer");
-  expect(await selectOf(".data-list .problem-row")).toBe("none");
+  // WebKit reports auto on descendants: user-select is not an inherited property.
+  expect(await selectOf(".data-list")).toBe("none");
   expect(await cursorOf(".total-count")).toBe("default");
 });
 
