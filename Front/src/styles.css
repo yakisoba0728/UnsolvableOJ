@@ -1330,19 +1330,6 @@ textarea {
   flex: 1;
   min-width: 0;
 }
-.breadcrumb {
-  display: flex;
-  align-items: center; /* 링크에만 터치 영역 패딩이 있어도 글자 높이를 맞춘다 */
-  gap: 8px;
-  color: var(--color-ink-600);
-  font-size: 13px;
-}
-.breadcrumb a {
-  padding: 6px 2px;
-}
-.breadcrumb a:hover {
-  color: var(--color-primary);
-}
 .solve-grid {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);
@@ -2793,14 +2780,10 @@ input,
   border-color: var(--color-border);
 }
 
-/* 풀이 화면 머리글(모바일): 이동 경로는 한 줄을 차지하고, 제목·난이도는 그 아래에 놓는다 */
+/* 풀이 화면 머리글(모바일): 제목이 남는 폭을 차지하고 난이도는 그 옆(길면 아래)에 놓는다 */
 @media (max-width: 650px) {
   .solve-heading {
     row-gap: 4px;
-  }
-  .breadcrumb {
-    flex: 1 0 100%;
-    flex-wrap: wrap;
   }
   .solve-heading h1 {
     flex: 1 1 0;

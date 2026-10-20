@@ -220,6 +220,27 @@ export function ProblemPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [problem?.id, language]);
 
+  // 같은 문제를 다른 탭에서도 열어 둔 경우(문제는 새 탭으로 열린다), 그 탭이 저장한 최신 초안을 이어받는다.
+  // 그렇지 않으면 이 탭에서 키를 누르는 순간 처음 열 때의 오래된 내용으로 다른 탭의 초안을 덮어쓴다.
+  // storage 이벤트는 다른 탭에서 바뀐 때만 오므로 이 탭의 입력과 맞부딪치지 않는다.
+  useEffect(() => {
+    if (!problem) return;
+    const key = draftKey(problem.id, language);
+    function onStorage(event: StorageEvent) {
+      if (event.storageArea !== localStorage || event.key !== key) return;
+      // 다른 탭의 '초기화'(저장된 초안 삭제)는 처음 상태로 돌아간 것으로 받아들인다.
+      const next = event.newValue ?? starter(language);
+      // 진행 중이던 스니펫 칸 이동·자동완성 제안은 옛 글 기준이므로 끝낸다('초기화' 버튼과 같은 처리).
+      sessionRef.current = null;
+      setPopup(null);
+      setSource(next);
+      setCursor(cursorPosition(next, next.length));
+      setSavedAt(event.newValue === null ? null : new Date());
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [problem?.id, language]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // 전환·이탈 직전 입력도 남기고, 초안 복원은 다른 언어의 저장 내용을 덮어쓰지 않는다.
   function updateSource(next: string) {
     setSource(next);
