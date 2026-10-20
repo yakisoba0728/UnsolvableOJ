@@ -6849,24 +6849,48 @@ h3 {
   color: var(--color-primary);
 }
 
-/* 순서 뒤집기: 위 화살표는 위로, 아래 화살표는 아래로 나갔다가 제자리로 돌아온다 */
+/* 순서 뒤집기: 위 화살표는 위로, 아래 화살표는 아래로 버튼 밖으로 나가 사라졌다가
+   반대편에서 다시 들어와 제자리에 선다(버튼 밖은 .shuffle-icon-button의 overflow로 잘린다).
+   36은 SVG 좌표 단위(1단위≈0.75px)로, 화살표가 버튼 가장자리를 완전히 벗어나는 거리다. */
 .reverse-icon {
   overflow: visible;
 }
 .reverse-arrow-up {
-  animation: reverse-up 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: reverse-up 0.7s linear;
 }
 .reverse-arrow-down {
-  animation: reverse-down 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: reverse-down 0.7s linear;
 }
 @keyframes reverse-up {
-  45% {
-    transform: translateY(-7px);
+  0% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+  40% {
+    transform: translateY(-36px);
+  }
+  40.1% {
+    transform: translateY(36px);
+    animation-timing-function: cubic-bezier(0.1, 0.4, 0.3, 1);
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 @keyframes reverse-down {
-  45% {
-    transform: translateY(7px);
+  0% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+  40% {
+    transform: translateY(36px);
+  }
+  40.1% {
+    transform: translateY(-36px);
+    animation-timing-function: cubic-bezier(0.1, 0.4, 0.3, 1);
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 @media (prefers-reduced-motion: reduce) {
