@@ -7224,3 +7224,27 @@ textarea {
     text-align: left;
   }
 }
+
+/* 슬라이드 키보드 포커스 링: 트랙의 마스크(가장자리 흐림)가 트랙 밖에 그려지는 outline을 잘라 링이 안 보였다.
+   :has를 지원하면 마스크가 없는 바깥 영역에 링을 그리고, 지원하지 않으면 트랙 안쪽으로 그린다. */
+.slider-track:focus-visible {
+  outline-offset: -3px;
+}
+@supports selector(:has(*)) {
+  .slider-track:focus-visible {
+    outline: none;
+  }
+  .slider-area:has(> .slider-track:focus-visible) {
+    outline: 3px solid var(--color-ink-900);
+    outline-offset: 4px;
+    border-radius: var(--radius-panel);
+  }
+}
+
+/* 내 제출 목록: 881~1100px에서는 고정 열 폭 합이 커서 제목 열이 60~160px까지 줄어 말줄임이 심했다.
+   이 구간에서만 열 폭을 줄여 제목이 읽히게 한다(1100px 초과·880px 이하의 모양은 그대로). */
+@media (min-width: 881px) and (max-width: 1100px) {
+  .data-list.list-history {
+    --cols: minmax(0, 1fr) 112px 80px 72px 120px 140px;
+  }
+}

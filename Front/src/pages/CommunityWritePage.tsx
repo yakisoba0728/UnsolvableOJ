@@ -41,12 +41,32 @@ function fieldProblem(field: Field, value: string) {
   } else if (field === "body") {
     if (!value.trim()) return "본문을 입력해 주세요.";
   } else {
-    const tag = value.trim().replace(/^#+/, "");
-    if (/\s/.test(tag)) return "태그는 띄어쓰기 없이 한 단어로 입력해 주세요.";
-    if (tag.length > TAG_MAX)
-      return `태그는 ${TAG_MAX}자 이하로 입력해 주세요.`;
+    for (const tag of tagPieces(value)) {
+      if (/\s/.test(tag))
+        return "태그는 띄어쓰기 없이 한 단어로 입력해 주세요.";
+      if (tag.length > TAG_MAX)
+        return `태그는 ${TAG_MAX}자 이하로 입력해 주세요.`;
+    }
   }
   return "";
+}
+
+/** 입력한 글을 등록하면 태그가 최대 개수를 넘는지(이미 있는 태그는 세지 않는다) 확인한다. */
+function tagLimitProblem(value: string, existing: string[]) {
+  const added = new Set(
+    tagPieces(value).filter((tag) => !existing.includes(tag)),
+  );
+  return existing.length + added.size > MAX_TAGS
+    ? `태그는 최대 ${MAX_TAGS}개까지 넣을 수 있어요.`
+    : "";
+}
+
+/** 입력 칸의 글에서 태그 후보를 뽑는다. 쉼표로 나누고, 앞의 '#'과 앞뒤 공백을 떼며, 빈 조각은 버린다. */
+function tagPieces(value: string) {
+  return value
+    .split(",")
+    .map((piece) => piece.trim().replace(/^#+/, ""))
+    .filter(Boolean);
 }
 
 export function CommunityWritePage() {
@@ -97,6 +117,10 @@ export function CommunityWritePage() {
     tag: false,
   });
   const [bodyMode, setBodyMode] = useState<"write" | "preview">("write");
+  // 본문 오류로 입력 칸에 포커스를 주어야 하는데 미리보기 탭이 열려 있는 경우, 칸이 다시 나타난 뒤에 포커스한다.
+  const [focusBody, setFocusBody] = useState(false);
+  // 직전 렌더에서 내용이 있었는지(내용이 있다가 비워진 순간만 초안을 지우려고 기억한다).
+  const wasDirtyRef = useRef(false);
   const [pending, setPending] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saved" | "failed">(
     restored ? "saved" : "idle",
@@ -124,9 +148,26 @@ export function CommunityWritePage() {
     return ok;
   }
 
+  useEffect(() => {
+    if (!focusBody || bodyMode !== "write") return;
+    bodyRef.current?.focus();
+    setFocusBody(false);
+  }, [focusBody, bodyMode]);
+
   // 입력하면 잠시 뒤 자동으로 임시 저장한다.
   useEffect(() => {
-    if (!dirty) return;
+    const emptied = wasDirtyRef.current && !dirty;
+    wasDirtyRef.current = dirty;
+    if (!dirty) {
+      // 내용이 있다가 전부 지워졌다면 예전 임시 저장본이 다시 살아나지 않게 지운다.
+      // 처음부터 비어 있던 화면(복원 전·수동으로 빈 초안을 저장한 경우)은 건드리지 않고, 수정 모드는 새 글 초안을 건드리지 않는다.
+      if (emptied && !editing) {
+        clearDraft();
+        setSaveState("idle");
+        setSavedAt(null);
+      }
+      return;
+    }
     const timer = window.setTimeout(saveDraft, 1200);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -156,7 +197,9 @@ export function CommunityWritePage() {
   const problems: Record<Field, string> = {
     title: fieldProblem("title", title),
     body: fieldProblem("body", body),
-    tag: tagText ? fieldProblem("tag", tagText) : "",
+    tag: tagText
+      ? fieldProblem("tag", tagText) || tagLimitProblem(tagText, tags)
+      : "",
   };
   const shown = (field: Field) =>
     touched[field] || values[field] !== "" ? problems[field] : "";
@@ -164,19 +207,26 @@ export function CommunityWritePage() {
     setTouched((previous) => ({ ...previous, [field]: true }));
 
   function addTag(raw: string) {
-    const value = raw.trim().replace(/^#+/, "");
-    if (!value || fieldProblem("tag", raw)) return;
-    setTags((previous) =>
-      previous.includes(value) || previous.length >= MAX_TAGS
-        ? previous
-        : [...previous, value],
-    );
+    // 규칙에 어긋나면 입력은 그대로 두고(안내가 보인다) 등록하지 않는다.
+    if (fieldProblem("tag", raw) || tagLimitProblem(raw, tags)) return;
+    const pieces = tagPieces(raw);
+    if (pieces.length)
+      setTags((previous) => [
+        ...previous,
+        ...new Set(pieces.filter((piece) => !previous.includes(piece))),
+      ]);
+    // '#'만 입력했거나 이미 있는 태그라면 등록할 것이 없으니 입력 칸만 비운다.
     setTagText("");
   }
 
   function onTagKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     // 한국어 입력 조합 중의 Enter는 글자 확정이므로 태그로 등록하지 않는다.
-    if (event.nativeEvent.isComposing) return;
+    // (Safari는 조합이 끝난 뒤 Enter keydown을 isComposing=false, keyCode=229로 보낸다. 일반 입력까지 막지 않도록 Enter일 때만 본다.)
+    if (
+      event.nativeEvent.isComposing ||
+      (event.key === "Enter" && event.keyCode === 229)
+    )
+      return;
     if (event.key === "Enter" || event.key === ",") {
       event.preventDefault();
       addTag(tagText);
@@ -206,8 +256,7 @@ export function CommunityWritePage() {
     if (problems.title) return titleRef.current?.focus();
     if (problems.body) {
       setBodyMode("write");
-      // 미리보기 탭에서 왔다면 입력 칸이 다시 나타난 뒤에 포커스를 준다.
-      return window.setTimeout(() => bodyRef.current?.focus(), 0);
+      return setFocusBody(true);
     }
     if (problems.tag) return document.getElementById("tag-input")?.focus();
 

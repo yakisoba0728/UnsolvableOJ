@@ -272,7 +272,12 @@ export function CommunityPage() {
                 value={queryText}
                 onChange={(event) => setQueryText(event.target.value)}
                 onKeyDown={(event) => {
-                  if (event.nativeEvent.isComposing) return;
+                  // Safari는 한글 조합 확정 Enter를 isComposing=false, keyCode 229로 보낸다(Enter일 때만 막는다).
+                  if (
+                    event.nativeEvent.isComposing ||
+                    (event.key === "Enter" && event.keyCode === 229)
+                  )
+                    return;
                   if (event.key === "Enter" && commitTag(queryText)) {
                     event.preventDefault();
                   } else if (

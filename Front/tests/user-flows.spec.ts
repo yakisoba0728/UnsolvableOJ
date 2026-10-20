@@ -926,6 +926,157 @@ test("the problem list side cards are 291px wide and fit their content", async (
   expect(overflowing).toBe(0);
 });
 
+test("write page tags: commas split into separate tags, a lone # is dropped, an emptied form forgets its draft", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.goto("/community/new");
+  const tagInput = page.locator("#tag-input");
+  const title = page.locator('input[placeholder^="예:"]');
+
+  // 쉼표가 든 입력은 태그 하나가 아니라 여러 개로 나뉜다(쉼표는 검색 주소의 태그 구분자이기도 하다).
+  await tagInput.fill("a,b, #c");
+  await tagInput.press("Enter");
+  await expect(page.locator(".tag-chip")).toHaveText(["#a✕", "#b✕", "#c✕"]);
+  await expect(tagInput).toHaveValue("");
+
+  // 규칙에 어긋나는 조각이 하나라도 있으면 아무것도 등록하지 않고 안내한다.
+  await tagInput.fill("ok,two words");
+  await tagInput.press("Enter");
+  await expect(page.locator(".tag-chip")).toHaveCount(3);
+  await expect(
+    page.getByText("태그는 띄어쓰기 없이 한 단어로 입력해 주세요."),
+  ).toBeVisible();
+  await tagInput.fill("");
+
+  // 최대 개수(5개)를 넘기면 일부만 조용히 넣지 않고, 전부 거절하고 안내한다.
+  await tagInput.fill("d,e,f,g");
+  await tagInput.press("Enter");
+  await expect(page.locator(".tag-chip")).toHaveCount(3);
+  await expect(
+    page.getByText("태그는 최대 5개까지 넣을 수 있어요."),
+  ).toBeVisible();
+  await tagInput.fill("d,e,c");
+  await tagInput.press("Enter");
+  await expect(page.locator(".tag-chip")).toHaveCount(5);
+  for (let remaining = 5; remaining > 3; remaining -= 1) {
+    await page.locator(".tag-chip button").last().click();
+    await expect(page.locator(".tag-chip")).toHaveCount(remaining - 1);
+  }
+
+  // '#'만 입력하고 떠나면 입력 칸이 비워진다(안내 없이 남아 있지 않는다).
+  await tagInput.fill("#");
+  await title.click();
+  await expect(tagInput).toHaveValue("");
+
+  // 입력을 전부 지우면 이전에 자동 저장된 초안이 다시 살아나지 않는다.
+  await title.fill("임시 저장될 제목");
+  await expect(page.getByText(/임시 저장됨/)).toBeVisible({ timeout: 5000 });
+  // 제목을 지우기 전에 칩을 먼저 지운다(제목 칸을 떠나는 순간 오류 문구가 생겨 레이아웃이 밀리기 때문).
+  for (let remaining = 3; remaining > 0; remaining -= 1) {
+    await page.locator(".tag-chip button").first().click();
+    await expect(page.locator(".tag-chip")).toHaveCount(remaining - 1);
+  }
+  await title.fill("");
+  await expect(page.getByText(/임시 저장됨/)).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByText("작성 중이던 초안을 불러왔어요.")).toHaveCount(0);
+  await expect(title).toHaveValue("");
+});
+
+test("saving an empty form keeps a consistent state: the draft is not wiped on the next visit", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.goto("/community/new");
+  // 빈 폼에서 임시 저장을 눌러도 안내와 저장 상태가 어긋나지 않는다(다음 방문에서 초안이 조용히 지워지지 않는다).
+  await page.getByRole("button", { name: "임시 저장", exact: true }).click();
+  await expect(page.getByText(/임시 저장됨/)).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("작성 중이던 초안을 불러왔어요.")).toBeVisible();
+  await expect(page.getByText(/임시 저장됨/)).toBeVisible();
+  const stored = await page.evaluate(() =>
+    localStorage.getItem("unsolvable-oj-community-draft-v1"),
+  );
+  expect(stored).not.toBeNull();
+});
+
+test("the home slider shows a visible keyboard focus ring (the fade mask must not clip it)", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.setViewportSize({ width: 1280, height: 1400 });
+  await page.route(/\/api\/v1\/problems(\?.*)?$/, (route) =>
+    route.fulfill({
+      json: {
+        items: Array.from({ length: 8 }, (_, index) => ({
+          ...problem,
+          id: `p-${index}`,
+          slug: `p-${index}`,
+          title: `문제 ${index + 1}`,
+        })),
+        page: 1,
+        limit: 100,
+        total: 8,
+        totalPages: 1,
+      },
+    }),
+  );
+  await page.goto("/");
+  const area = page.locator(".slider-area");
+  await expect(area.locator(".problem-card").first()).toBeVisible();
+  await page.locator(".slider-track").focus();
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Tab");
+  await expect(page.locator(".slider-track")).toBeFocused();
+  // 링은 마스크가 없는 바깥 영역(.slider-area)에 그려진다.
+  await expect(area).toHaveCSS("outline-style", "solid");
+  await expect(area).toHaveCSS("outline-width", "3px");
+});
+
+test("the my-submissions title column stays readable between 881 and 1100px", async ({
+  page,
+}) => {
+  await authenticate(page);
+  const item = (id: string) => ({
+    id,
+    problem: {
+      id: `p-${id}`,
+      slug: `p-${id}`,
+      title: "최소 스패닝 트리와 위상 정렬",
+    },
+    language: "PYTHON",
+    status: "ACCEPTED",
+    runtimeMs: 12,
+    memoryKb: 8192,
+    passedTestCases: 5,
+    totalTestCases: 5,
+    compileOutput: null,
+    judgeMessage: null,
+    createdAt: "2026-10-18T03:00:00Z",
+    updatedAt: "2026-10-18T03:00:00Z",
+  });
+  await page.route("**/api/v1/submissions?*", (route) =>
+    route.fulfill({
+      json: {
+        items: [item("a"), item("b")],
+        total: 2,
+        page: 1,
+        limit: 100,
+        totalPages: 1,
+      },
+    }),
+  );
+  for (const width of [900, 1000, 1100]) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/submissions");
+    await expect(page.locator(".history-row")).toHaveCount(2);
+    const title = (await page.locator(".history-title").first().boundingBox())!;
+    // 이전에는 900px에서 60px대, 1000px에서 160px대까지 줄어 말줄임이 심했다.
+    expect(title.width).toBeGreaterThanOrEqual(190);
+  }
+});
+
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
   page,
 }) => {
