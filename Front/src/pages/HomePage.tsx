@@ -2,14 +2,12 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
-import {
-  ProblemStatus,
-  solveState,
-} from "../components/ProblemStatus";
+import { ProblemStatus, solveState } from "../components/ProblemStatus";
 import { PageHeader } from "../components/PageHeader";
 import { CardSlider } from "../components/CardSlider";
 import { BrandArt } from "../components/BrandArt";
 import { WeekStrip } from "../components/WeekStrip";
+import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import {
   solvedToday,
   streakDays,
@@ -18,7 +16,7 @@ import {
   useAllProblems,
   useSubmissionHistory,
 } from "../hooks";
-import type { RankingEntry, UserProfile } from "../types";
+import { LANGUAGES, type RankingEntry, type UserProfile } from "../types";
 import { problemPath } from "../paths";
 import { difficultyLabel } from "./ProblemsPage";
 
@@ -28,29 +26,44 @@ export function HomePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [rankings, setRankings] = useState<RankingEntry[]>([]);
   const [rankError, setRankError] = useState("");
+  const [rankLoading, setRankLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(Boolean(session));
   const { problems, loading, error } = useAllProblems();
   const history = useSubmissionHistory(session);
 
   useEffect(() => {
     const controller = new AbortController();
     setRankError("");
+    setRankLoading(true);
     api<RankingEntry[]>("/rankings", { signal: controller.signal })
       .then(setRankings)
       .catch((cause) => {
         if (!controller.signal.aborted)
           setRankError(
-            cause instanceof Error ? cause.message : "랭킹을 불러오지 못했습니다.",
+            cause instanceof Error
+              ? cause.message
+              : "랭킹을 불러오지 못했습니다.",
           );
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setRankLoading(false);
       });
-    if (session)
+    if (session) {
+      setProfileLoading(true);
       api<UserProfile>(
         "/users/me",
         { signal: controller.signal },
         session.accessToken,
       )
         .then(setProfile)
-        .catch(() => undefined);
-    else setProfile(null);
+        .catch(() => undefined)
+        .finally(() => {
+          if (!controller.signal.aborted) setProfileLoading(false);
+        });
+    } else {
+      setProfile(null);
+      setProfileLoading(false);
+    }
     return () => controller.abort();
   }, [session]);
 
@@ -83,32 +96,35 @@ export function HomePage() {
       ) : null}
 
       <div className="home-top-grid">
-                <section
-          className="continue-card with-art"
-          aria-label="못풀준 소개"
-        >
-          <BrandArt />
-            <>
-              <span className="pill pill-primary">못풀준과 함께</span>
-              <h2>게임처럼 성장하는 온라인 저지</h2>
-              <p className="muted">
-                문제를 풀고 채점받으며 레벨·랭킹·미션으로 꾸준히 성장해 보세요.
-              </p>
-              <ul className="highlight-stats" aria-label="서비스 현황">
-                <li>
-                  <strong>{problems.length}</strong>
-                  <span>공개 문제</span>
-                </li>
-                <li>
-                  <strong>8</strong>
-                  <span>지원 언어</span>
-                </li>
-                <li>
-                  <strong>실시간</strong>
-                  <span>자동 채점</span>
-                </li>
-              </ul>
-            </>
+        <section className="continue-card with-art" aria-label="못풀준 소개">
+          <BrandArt standing={session ? profile : null} />
+          <>
+            <span className="pill pill-primary">못풀준과 함께</span>
+            <h2>게임처럼 성장하는 온라인 저지</h2>
+            <p className="muted">
+              문제를 풀고 채점받으며 레벨·랭킹·미션으로 꾸준히 성장해 보세요.
+            </p>
+            <ul className="highlight-stats" aria-label="서비스 현황">
+              <li>
+                <strong>
+                  {loading ? (
+                    <Skeleton width={28} height={22} />
+                  ) : (
+                    problems.length
+                  )}
+                </strong>
+                <span>공개 문제</span>
+              </li>
+              <li>
+                <strong>{LANGUAGES.length}</strong>
+                <span>지원 언어</span>
+              </li>
+              <li>
+                <strong>실시간</strong>
+                <span>자동 채점</span>
+              </li>
+            </ul>
+          </>
         </section>
 
         <section className="ranking-card" aria-label="랭킹">
@@ -116,7 +132,16 @@ export function HomePage() {
             <h2>랭킹</h2>
             <span className="muted">XP 기준</span>
           </div>
-          {topRankings.length ? (
+          {rankLoading ? (
+            <SkeletonRegion
+              className="ranking-skeleton"
+              label="랭킹을 불러오는 중입니다"
+            >
+              {Array.from({ length: 6 }, (_, index) => (
+                <Skeleton key={index} height={28} />
+              ))}
+            </SkeletonRegion>
+          ) : topRankings.length ? (
             <ol className="ranking-list">
               {topRankings.map((entry, index) => (
                 <li
@@ -156,61 +181,92 @@ export function HomePage() {
         </section>
       </div>
 
-      {session ? (
+      {session && history.loading ? (
+        <SkeletonRegion
+          className="daily-card"
+          label="오늘의 목표를 불러오는 중입니다"
+        >
+          <div className="daily-goal">
+            <Skeleton width={110} height={20} />
+            <Skeleton width="70%" height={16} style={{ marginTop: 10 }} />
+            <Skeleton height={10} style={{ marginTop: 14 }} />
+          </div>
+          <Skeleton height={56} />
+        </SkeletonRegion>
+      ) : session ? (
         <section className="daily-card" aria-label="오늘의 목표">
-            <div className="daily-goal">
-              <h2>오늘의 목표</h2>
-              <p>
-                {todaySolved >= DAILY_GOAL
-                  ? "오늘 목표를 달성했어요. 한 문제 더 도전해 볼까요?"
-                  : `문제 ${DAILY_GOAL}개 해결하기`}
-              </p>
-              <div
-                className="progress"
-                role="progressbar"
-                aria-label="오늘의 목표 진행률"
-                aria-valuemin={0}
-                aria-valuemax={DAILY_GOAL}
-                aria-valuenow={Math.min(todaySolved, DAILY_GOAL)}
-              >
-                <span
-                  style={{
-                    width: `${(Math.min(todaySolved, DAILY_GOAL) / DAILY_GOAL) * 100}%`,
-                  }}
-                />
-              </div>
-              <small>
-                {Math.min(todaySolved, DAILY_GOAL)} / {DAILY_GOAL}
-              </small>
+          <div className="daily-goal">
+            <h2>오늘의 목표</h2>
+            <p>
+              {todaySolved >= DAILY_GOAL
+                ? "오늘 목표를 달성했어요. 한 문제 더 도전해 볼까요?"
+                : `문제 ${DAILY_GOAL}개 해결하기`}
+            </p>
+            <div
+              className="progress"
+              role="progressbar"
+              aria-label="오늘의 목표 진행률"
+              aria-valuemin={0}
+              aria-valuemax={DAILY_GOAL}
+              aria-valuenow={Math.min(todaySolved, DAILY_GOAL)}
+            >
+              <span
+                style={{
+                  width: `${(Math.min(todaySolved, DAILY_GOAL) / DAILY_GOAL) * 100}%`,
+                }}
+              />
             </div>
-            <WeekStrip counts={dayCounts} />
-          </section>
+            <small>
+              {Math.min(todaySolved, DAILY_GOAL)} / {DAILY_GOAL}
+            </small>
+          </div>
+          <WeekStrip counts={dayCounts} />
+        </section>
       ) : null}
 
-      {profile ? (
+      {session && (profileLoading || history.loading || rankLoading) ? (
+        <SkeletonRegion
+          className="stat-tiles"
+          label="내 기록을 불러오는 중입니다"
+        >
+          {Array.from({ length: 4 }, (_, index) => (
+            <div className="stat-tile" key={index}>
+              <Skeleton width={50} height={12} />
+              <Skeleton width={70} height={26} style={{ margin: "8px 0" }} />
+              <Skeleton width={90} height={12} />
+            </div>
+          ))}
+        </SkeletonRegion>
+      ) : profile ? (
         <div className="stat-tiles">
-            <Link to="/profile" className="stat-tile">
-              <small>레벨</small>
-              <strong>Lv.{profile.level}</strong>
-              <span>{profile.xp.toLocaleString()} XP</span>
-            </Link>
-            <Link to="/profile" className="stat-tile">
-              <small>해결한 문제</small>
-              <strong>{profile.solvedCount}</strong>
-              <span>
-                {myRank >= 0 ? `랭킹 ${myRank + 1}위` : "랭킹 집계 전"}
-              </span>
-            </Link>
-            <Link to="/profile" className="stat-tile">
-              <small>연속 학습</small>
-              <strong>{streak}일</strong>
-              <span>{streak > 0 ? "오늘도 이어가요" : "오늘 한 문제 풀어요"}</span>
-            </Link>
-            <Link to="/profile" className="stat-tile">
-              <small>레이팅</small>
-              <strong>{profile.rating.toLocaleString()}</strong>
-              <span>제출 {history.submissions.length}회</span>
-            </Link>
+          <Link to="/profile" className="stat-tile">
+            <small>레벨</small>
+            <strong>Lv.{profile.level}</strong>
+            <span>{profile.xp.toLocaleString()} XP</span>
+          </Link>
+          <Link to="/profile" className="stat-tile">
+            <small>해결한 문제</small>
+            <strong>{profile.solvedCount}</strong>
+            <span>{myRank >= 0 ? `랭킹 ${myRank + 1}위` : "랭킹 집계 전"}</span>
+          </Link>
+          <Link to="/profile" className="stat-tile">
+            <small>연속 학습</small>
+            <strong>{streak}일</strong>
+            <span>
+              {streak > 0 ? "오늘도 이어가요" : "오늘 한 문제 풀어요"}
+            </span>
+          </Link>
+          <Link to="/profile" className="stat-tile">
+            <small>레이팅</small>
+            <strong>{profile.rating.toLocaleString()}</strong>
+            <span>
+              {history.loading ? (
+                <Skeleton width={60} height={12} />
+              ) : (
+                `제출 ${history.submissions.length}회`
+              )}
+            </span>
+          </Link>
         </div>
       ) : null}
 
@@ -221,7 +277,14 @@ export function HomePage() {
               <h2>지금 풀기 좋은 문제</h2>
             </div>
           </div>
-          <div className="empty-state">불러오는 중입니다…</div>
+          <SkeletonRegion
+            className="slider-skeleton"
+            label="문제를 불러오는 중입니다"
+          >
+            {Array.from({ length: 4 }, (_, index) => (
+              <Skeleton key={index} height={150} radius={14} />
+            ))}
+          </SkeletonRegion>
         </section>
       ) : recommended.length ? (
         <CardSlider

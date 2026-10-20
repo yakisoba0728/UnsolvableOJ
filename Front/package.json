@@ -13,7 +13,9 @@
     "test:e2e:types": "tsc -p tsconfig.e2e.json"
   },
   "dependencies": {
+    "@sentry/react": "^11.8.0",
     "katex": "^0.18.9",
+    "lucide-react": "^1.59.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",

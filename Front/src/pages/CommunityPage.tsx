@@ -1,3 +1,4 @@
+import { Eye, ThumbsUp } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
@@ -220,7 +221,6 @@ export function CommunityPage() {
               value={queryText}
               onChange={(event) => setQueryText(event.target.value)}
             />
-            <kbd aria-hidden="true">/</kbd>
           </div>
           <Select
             ariaLabel="정렬"
@@ -295,8 +295,7 @@ export function CommunityPage() {
                 <span>분류</span>
                 <span>제목</span>
                 <span>추천</span>
-                <span>조회</span>
-                <span />
+                <span>조회 수</span>
               </li>
               {visible.map((post) => {
                 const count = answerCount(post);
@@ -336,7 +335,18 @@ export function CommunityPage() {
                           ) : null}
                         </span>
                         <span className="post-meta">
-                          {post.author.name} · {relativeTime(post.createdAt)}
+                          <span className="post-author">
+                            {post.author.name}
+                            {activity.followed.includes(post.author.name) ? (
+                              <span
+                                className="post-follow-badge"
+                                title="내가 팔로우한 사람이 쓴 글이에요"
+                              >
+                                팔로잉
+                              </span>
+                            ) : null}
+                          </span>{" "}
+                          · {relativeTime(post.createdAt)}
                           {post.pinned ? " · 고정" : ""}
                         </span>
                       </span>
@@ -344,16 +354,15 @@ export function CommunityPage() {
                         className="post-num post-num-up"
                         aria-label={`추천 ${upvoteCount(activity, post.id, post.upvotes)}`}
                       >
+                        <ThumbsUp size={14} aria-hidden="true" />
                         {upvoteCount(activity, post.id, post.upvotes)}
                       </span>
                       <span
                         className="post-num post-num-view"
                         aria-label={`조회 ${post.views.toLocaleString()}`}
                       >
+                        <Eye size={14} aria-hidden="true" />
                         {post.views.toLocaleString()}
-                      </span>
-                      <span className="row-arrow" aria-hidden="true">
-                        ›
                       </span>
                     </Link>
                   </li>

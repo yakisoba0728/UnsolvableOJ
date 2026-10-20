@@ -1,6 +1,15 @@
 export type Difficulty = "BEGINNER" | "EASY" | "MEDIUM" | "HARD" | "EXPERT";
-export type Language =
-  "C" | "CPP" | "JAVA" | "PYTHON" | "JAVASCRIPT" | "TYPESCRIPT" | "GO" | "RUST";
+export const LANGUAGES = [
+  "C",
+  "CPP",
+  "JAVA",
+  "PYTHON",
+  "JAVASCRIPT",
+  "TYPESCRIPT",
+  "GO",
+  "RUST",
+] as const;
+export type Language = (typeof LANGUAGES)[number];
 export type Role = "USER" | "AUTHOR" | "ADMIN";
 
 export interface User {
@@ -28,6 +37,10 @@ export interface ProblemSummary {
   timeLimitMs: number;
   memoryLimitMb: number;
   createdAt: string;
+  /** 정답을 받은 사용자 수 */
+  solverCount?: number;
+  /** 채점이 끝난 제출 중 정답 비율(0–100). 제출이 없으면 null */
+  acceptanceRate?: number | null;
 }
 
 export interface Problem extends ProblemSummary {

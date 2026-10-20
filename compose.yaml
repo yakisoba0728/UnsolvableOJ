@@ -113,6 +113,7 @@ services:
       context: ./Front
       args:
         VITE_API_BASE_URL: /api/v1
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
     ports:
       - "127.0.0.1:3001:80"
     depends_on:

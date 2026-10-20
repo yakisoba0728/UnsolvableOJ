@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { api, ApiError } from "../api";
 import { useAuth } from "../auth";
 import { MarkdownField } from "../components/MarkdownField";
@@ -450,7 +451,14 @@ export function CreateProblemPage() {
 
   if (loading)
     return (
-      <div className="page-width empty-state">문제를 불러오는 중입니다…</div>
+      <div className="page-width create-page">
+        <SkeletonRegion label="문제를 불러오는 중입니다">
+          <Skeleton width={220} height={32} style={{ margin: "8px 0 24px" }} />
+          <Skeleton height={56} radius={10} />
+          <Skeleton height={240} radius={10} style={{ marginTop: 16 }} />
+          <Skeleton height={160} radius={10} style={{ marginTop: 16 }} />
+        </SkeletonRegion>
+      </div>
     );
   if (loadError)
     return (

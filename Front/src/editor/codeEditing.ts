@@ -31,12 +31,15 @@ const lineEndOf = (value: string, start: number, end: number) => {
 const isWordChar = (char: string | undefined) =>
   Boolean(char && /[\p{L}\p{N}_]/u.test(char));
 
-/** Enter: 현재 줄의 들여쓰기를 이어 가고, 여는 괄호(파이썬은 ':') 뒤에서는 한 단계 더 들여쓴다. */
+/** Enter: 내용이 있는 줄의 들여쓰기를 이어 가고, 여는 괄호(파이썬은 ':') 뒤에서는 한 단계 더 들여쓴다. */
 export function handleEnter(state: EditState, language: Language): EditState {
   const { value, start, end } = state;
   const lineStart = lineStartOf(value, start);
   const before = value.slice(lineStart, start);
-  const indent = /^[ \t]*/.exec(before)![0];
+  // 공백만 있는 줄에서 Enter를 치면 들여쓰기를 이어 가지 않는다(블록을 여는 문자가 있을 때만 들여쓴다).
+  const lineEnd = value.indexOf("\n", end);
+  const wholeLine = value.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
+  const indent = wholeLine.trim() === "" ? "" : /^[ \t]*/.exec(before)![0];
   const last = before.trimEnd().slice(-1);
   const opensBlock =
     (last !== "" && "{([".includes(last)) ||
