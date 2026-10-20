@@ -1,4 +1,5 @@
 import { Eye, ThumbsUp } from "lucide-react";
+import { X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
@@ -70,6 +71,8 @@ export function CommunityPage() {
     .filter((value) => value === "unaccepted" || value === "accepted");
   const sort = params.get("sort") ?? "latest";
   const urlQuery = params.get("q") ?? "";
+  // 검색창에서 '#단어' + Enter로 만든 태그. 주소에는 t=a,b 로 저장해 새로고침·공유해도 유지된다.
+  const selectedTags = (params.get("t") ?? "").split(",").filter(Boolean);
   const page = Math.max(1, Number(params.get("page")) || 1);
   const size = PAGE_SIZE;
 
@@ -78,6 +81,8 @@ export function CommunityPage() {
   useEffect(() => setQueryText(urlQuery), [urlQuery]);
   useEffect(() => {
     if (queryText === urlQuery) return;
+    // '#단어'는 Enter를 눌러 태그가 되기 전까지 검색어로 쓰지 않는다(입력 중에 목록이 비는 것을 막는다).
+    if (/^#\S*$/.test(queryText)) return;
     const timer = window.setTimeout(() => {
       update({ q: queryText.trim() || null });
     }, 250);
@@ -96,6 +101,21 @@ export function CommunityPage() {
     }
     if (resetPage) next.delete("page");
     setParams(next, { replace: true });
+  }
+
+  function setTags(next: string[]) {
+    update({ t: next.join(",") || null });
+  }
+
+  /** '#단어'(띄어쓰기 없음)만 태그로 인식한다. 이미 있는 태그(대소문자 무시)는 다시 넣지 않는다. */
+  function commitTag(raw: string) {
+    const match = /^#([^\s#,]+)$/.exec(raw.trim());
+    if (!match) return false;
+    const tag = match[1];
+    if (!selectedTags.some((item) => item.toLowerCase() === tag.toLowerCase()))
+      setTags([...selectedTags, tag]);
+    setQueryText("");
+    return true;
   }
 
   const searchRef = useRef<HTMLInputElement>(null);
@@ -134,8 +154,12 @@ export function CommunityPage() {
       post.title.toLowerCase().includes(keyword) ||
       post.body.toLowerCase().includes(keyword) ||
       post.tags.some((tag) => tag.toLowerCase().includes(keyword));
-    // 고정 공지는 분류·상태 필터와 상관없이 항상 보인다(검색어는 그대로 적용)
-    if (post.pinned) return matchesKeyword;
+    // 고른 태그를 모두 가진 글만 보인다(대소문자 무시).
+    const matchesTags = selectedTags.every((tag) =>
+      post.tags.some((item) => item.toLowerCase() === tag.toLowerCase()),
+    );
+    // 고정 공지는 분류·상태 필터와 상관없이 항상 보인다(검색어·태그는 그대로 적용)
+    if (post.pinned) return matchesKeyword && matchesTags;
     if (categoryFilter.length && !categoryFilter.includes(post.category))
       return false;
     if (statusFilter.length) {
@@ -146,7 +170,7 @@ export function CommunityPage() {
       );
       if (!ok) return false;
     }
-    return matchesKeyword;
+    return matchesKeyword && matchesTags;
   };
   // 고정 공지는 어떤 필터에서도 항상 보이므로 칩·목록 개수에서는 빼서 합계가 맞게 한다.
   const categoryCount = (value: CategoryKey | "") =>
@@ -177,6 +201,7 @@ export function CommunityPage() {
     activity,
     selectedCategories.join(","),
     statuses.join(","),
+    selectedTags.join(","),
     sort,
     urlQuery,
   ]);
@@ -186,7 +211,10 @@ export function CommunityPage() {
   const first = (current - 1) * size;
   const visible = filtered.slice(first, first + size);
   const hasFilter = Boolean(
-    selectedCategories.length || statuses.length || urlQuery.trim(),
+    selectedCategories.length ||
+      statuses.length ||
+      selectedTags.length ||
+      urlQuery.trim(),
   );
 
   function write(initialCategory?: CategoryKey) {
@@ -211,16 +239,56 @@ export function CommunityPage() {
       <div className="filter-card">
         <div className="filter-row">
           <div className="search-field">
-            <input
-              ref={searchRef}
-              type="search"
-              className="search-input"
-              placeholder="질문이나 풀이를 검색해 보세요"
-              aria-label="게시글 검색"
-              aria-keyshortcuts="/"
-              value={queryText}
-              onChange={(event) => setQueryText(event.target.value)}
-            />
+            <div
+              className="search-box"
+              onClick={() => searchRef.current?.focus()}
+            >
+              {selectedTags.map((tag) => (
+                <span className="search-tag" key={tag}>
+                  <span aria-hidden="true">#</span>
+                  {tag}
+                  <button
+                    type="button"
+                    className="search-tag-remove"
+                    aria-label={`태그 #${tag} 지우기`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setTags(selectedTags.filter((item) => item !== tag));
+                      searchRef.current?.focus();
+                    }}
+                  >
+                    <X size={12} aria-hidden="true" />
+                  </button>
+                </span>
+              ))}
+              <input
+                ref={searchRef}
+                type="search"
+                className="search-input"
+                placeholder={
+                  selectedTags.length
+                    ? "더 검색하거나 #태그 추가"
+                    : "질문이나 풀이를 검색해 보세요 (#태그 + Enter)"
+                }
+                aria-label="게시글 검색"
+                aria-keyshortcuts="/"
+                value={queryText}
+                onChange={(event) => setQueryText(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.nativeEvent.isComposing) return;
+                  if (event.key === "Enter" && commitTag(queryText)) {
+                    event.preventDefault();
+                  } else if (
+                    event.key === "Backspace" &&
+                    !queryText &&
+                    selectedTags.length
+                  ) {
+                    // 입력칸이 비어 있을 때 Backspace로 마지막 태그를 지운다.
+                    setTags(selectedTags.slice(0, -1));
+                  }
+                }}
+              />
+            </div>
           </div>
           <Select
             ariaLabel="정렬"
