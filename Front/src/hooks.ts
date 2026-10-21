@@ -80,6 +80,10 @@ export function useSubmissionHistory(session: Session | null) {
   return { submissions, solved, attempted, loading, error };
 }
 
+/** 임시 저장 시각을 "오후 03:12"처럼 보여 준다. */
+export const savedTime = (at: Date | number) =>
+  new Date(at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+
 export function dayKey(date: Date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }

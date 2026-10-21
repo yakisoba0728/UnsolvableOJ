@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { verdictLabel } from "../verdict";
-import { useDocumentTitle } from "../hooks";
+import { savedTime, useDocumentTitle } from "../hooks";
 import { Select } from "../components/Select";
 import { ProblemMarkdown } from "../components/ProblemMarkdown";
 import { Link, useParams } from "react-router-dom";
@@ -987,7 +987,7 @@ export function ProblemPage() {
               {saveFailed
                 ? "초안을 읽거나 저장하지 못했어요. 현재 내용은 메모리에만 남아 새로고침 후 복구되지 않을 수 있어요."
                 : savedAt
-                  ? `초안 저장됨 · ${savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
+                  ? `초안 저장됨 · ${savedTime(savedAt)}`
                   : draftLoaded
                     ? "저장된 초안을 불러왔어요"
                     : "자동 저장 대기"}

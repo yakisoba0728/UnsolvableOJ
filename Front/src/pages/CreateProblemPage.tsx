@@ -14,7 +14,7 @@ import { MarkdownField } from "../components/MarkdownField";
 import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
-import { useDocumentTitle } from "../hooks";
+import { savedTime, useDocumentTitle } from "../hooks";
 import { useUnsavedChanges } from "../useUnsavedChanges";
 import { problemPath } from "../paths";
 import {
@@ -542,7 +542,7 @@ export function CreateProblemPage() {
   const statusText = saveFailed
     ? "임시 저장소를 읽거나 저장하지 못했어요. 현재 내용은 메모리에만 남아 있어 새로고침·탭 닫기 후 복구되지 않을 수 있어요."
     : savedAt
-      ? `이 탭에 임시 저장됨 · ${new Date(savedAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
+      ? `이 탭에 임시 저장됨 · ${savedTime(savedAt)}`
       : editing
         ? "변경 사항이 없어요."
         : "작성한 내용은 이 탭이 열려 있는 동안 임시 저장돼요.";

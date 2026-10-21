@@ -23,8 +23,12 @@ import {
   useActivity,
   writeDraft,
 } from "../community/store";
-import { categories, type CategoryKey } from "../community/types";
-import { useDocumentTitle } from "../hooks";
+import {
+  categories,
+  categoryLongLabel,
+  type CategoryKey,
+} from "../community/types";
+import { savedTime, useDocumentTitle } from "../hooks";
 import { useUnsavedChanges } from "../useUnsavedChanges";
 
 const MAX_TAGS = 5;
@@ -424,7 +428,7 @@ export function CommunityWritePage() {
                 value={category}
                 options={options.map((item) => ({
                   value: item.key,
-                  label: item.key === "question" ? "질문과 답변" : item.label,
+                  label: categoryLongLabel(item.key),
                 }))}
                 onChange={(next) => setCategory(next as CategoryKey)}
               />
@@ -510,7 +514,7 @@ export function CommunityWritePage() {
           {saveState === "failed"
             ? "임시 저장에 실패했어요. 입력한 내용은 그대로 남아 있습니다."
             : saveState === "saved" && savedAt
-              ? `임시 저장됨 · ${new Date(savedAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
+              ? `임시 저장됨 · ${savedTime(savedAt)}`
               : "작성한 내용은 임시 저장할 수 있습니다."}
         </p>
         <div className="write-footer">
