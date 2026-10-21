@@ -8,6 +8,7 @@ import type { Problem } from '../problems/problem.entity.js';
 import { UserRole } from '../users/user-role.enum.js';
 import { SubmissionLanguage, SubmissionStatus } from './submission.enums.js';
 import type { Submission } from './submission.entity.js';
+import { JudgeService } from './judge.service.js';
 import { SubmissionsService } from './submissions.service.js';
 
 describe('SubmissionsService queue failure', () => {
@@ -108,14 +109,13 @@ describe('SubmissionsService queue failure', () => {
           }),
         }),
       };
-      const service = new SubmissionsService(
+      const judge = new JudgeService(
         submissions as unknown as Repository<Submission>,
-        {} as Repository<Problem>,
         {} as DataSource,
         queue as unknown as Queue,
       );
 
-      await service['requeueMissingJobs']();
+      await judge['requeueMissingJobs']();
 
       expect(queue.getJob).toHaveBeenCalledWith(`${stored.id}-1`);
       expect(submissions.update).toHaveBeenCalledWith(
@@ -149,14 +149,13 @@ describe('SubmissionsService queue failure', () => {
       ),
       add: vi.fn(),
     };
-    const service = new SubmissionsService(
+    const judge = new JudgeService(
       submissions as unknown as Repository<Submission>,
-      {} as Repository<Problem>,
       {} as DataSource,
       queue as unknown as Queue,
     );
 
-    await service['requeueMissingJobs']();
+    await judge['requeueMissingJobs']();
 
     expect(submissions.find).toHaveBeenNthCalledWith(
       1,
@@ -222,8 +221,14 @@ describe('submission debug output lifecycle', () => {
       db as unknown as DataSource,
       queue as unknown as Queue,
     );
+    const judge = new JudgeService(
+      repository as unknown as Repository<Submission>,
+      db as unknown as DataSource,
+      queue as unknown as Queue,
+    );
     return {
       service,
+      judge,
       submission,
       manager,
       user,
@@ -236,8 +241,8 @@ describe('submission debug output lifecycle', () => {
   }
 
   it('persists output and returns it through the owner detail endpoint', async () => {
-    const { service, submission, manager, user, attemptId, output } = setup();
-    await service.recordJudgeResult(submission.id, 1, attemptId, {
+    const { service, judge, submission, manager, user, attemptId, output } = setup();
+    await judge.recordJudgeResult(submission.id, 1, attemptId, {
       status: SubmissionStatus.WRONG_ANSWER,
       passedTestCases: 0,
       totalTestCases: 1,
@@ -249,7 +254,7 @@ describe('submission debug output lifecycle', () => {
     expect(
       (await service.findMineById(submission.id, user)).debugOutputs,
     ).toEqual([output]);
-    await service.recordJudgeResult(submission.id, 1, attemptId, {
+    await judge.recordJudgeResult(submission.id, 1, attemptId, {
       status: SubmissionStatus.WRONG_ANSWER,
       passedTestCases: 0,
       totalTestCases: 1,
@@ -258,7 +263,7 @@ describe('submission debug output lifecycle', () => {
   });
 
   it('makes every persisted diagnostic PostgreSQL-safe without changing raw results or bounds', async () => {
-    const { service, submission, manager, attemptId, output } = setup();
+    const { judge, submission, manager, attemptId, output } = setup();
     const unsafe = '\0\uD800한글😀\uDC00\n\\u0000';
     const safe = '\uFFFD\uFFFD한글😀\uFFFD\n\\u0000';
     const dto = {
@@ -276,7 +281,7 @@ describe('submission debug output lifecycle', () => {
         },
       ],
     };
-    await service.recordJudgeResult(submission.id, 1, attemptId, dto);
+    await judge.recordJudgeResult(submission.id, 1, attemptId, dto);
     expect(manager.save).toHaveBeenCalledWith(
       expect.objectContaining({
         compileOutput: 'c'.repeat(65_536 - unsafe.length) + safe,
@@ -302,8 +307,8 @@ describe('submission debug output lifecycle', () => {
   });
 
   it('uses an exclusive non-key result lock while retaining claim and rejudge serialization', async () => {
-    const { service, submission, user, attemptId, findOne, manager } = setup();
-    await service.recordJudgeResult(submission.id, 1, attemptId, {
+    const { service, judge, submission, user, attemptId, findOne, manager } = setup();
+    await judge.recordJudgeResult(submission.id, 1, attemptId, {
       status: SubmissionStatus.WRONG_ANSWER,
       passedTestCases: 0,
       totalTestCases: 1,
@@ -320,7 +325,7 @@ describe('submission debug output lifecycle', () => {
     manager.query.mockResolvedValue([
       { snapshot: { timeLimitMs: 1000, memoryLimitMb: 256, testCases: [] } },
     ]);
-    await service.claimForJudge(submission.id, 2, randomUUID());
+    await judge.claimForJudge(submission.id, 2, randomUUID());
     expect(findOne).toHaveBeenNthCalledWith(3, {
       where: { id: submission.id },
       lock: { mode: 'pessimistic_write' },
@@ -329,13 +334,13 @@ describe('submission debug output lifecycle', () => {
   });
 
   it('clears previous output on rejudge and rejects stale results', async () => {
-    const { service, submission, user, attemptId, output } = setup();
+    const { service, judge, submission, user, attemptId, output } = setup();
     submission.debugOutputs = [output];
     await service.rejudge(submission.id, user);
     expect(submission.debugOutputs).toEqual([]);
     expect(submission.judgeGeneration).toBe(2);
     await expect(
-      service.recordJudgeResult(submission.id, 1, attemptId, {
+      judge.recordJudgeResult(submission.id, 1, attemptId, {
         status: SubmissionStatus.WRONG_ANSWER,
         passedTestCases: 0,
         totalTestCases: 1,
@@ -354,9 +359,9 @@ describe('submission debug output lifecycle', () => {
     [SubmissionStatus.COMPILE_ERROR, false],
     [SubmissionStatus.OUTPUT_LIMIT_EXCEEDED, false],
   ] as const)('records definitive XP evidence for %s', async (status, accepted) => {
-    const { service, submission, attemptId, manager } = setup();
+    const { judge, submission, attemptId, manager } = setup();
     submission.acceptedForXp = !accepted;
-    const result = await service.recordJudgeResult(submission.id, 1, attemptId, {
+    const result = await judge.recordJudgeResult(submission.id, 1, attemptId, {
       status,
       passedTestCases: accepted ? 1 : 0,
       totalTestCases: 1,
@@ -376,11 +381,11 @@ describe('submission debug output lifecycle', () => {
   ] as const)(
     '%s preserves XP evidence %s without reconciling or replaying writes',
     async (status, accepted) => {
-      const { service, submission, attemptId, manager } = setup();
+      const { judge, submission, attemptId, manager } = setup();
       submission.acceptedForXp = accepted;
       const dto = { status, passedTestCases: 0, totalTestCases: 1 };
-      await service.recordJudgeResult(submission.id, 1, attemptId, dto);
-      await service.recordJudgeResult(submission.id, 1, attemptId, dto);
+      await judge.recordJudgeResult(submission.id, 1, attemptId, dto);
+      await judge.recordJudgeResult(submission.id, 1, attemptId, dto);
       expect(submission.acceptedForXp).toBe(accepted);
       expect(manager.save).toHaveBeenCalledTimes(1);
       expect(manager.query).not.toHaveBeenCalled();
@@ -399,11 +404,11 @@ describe('submission debug output lifecycle', () => {
   });
 
   it('rejects a stale generation SYSTEM_ERROR without touching retained evidence', async () => {
-    const { service, submission, attemptId, manager } = setup();
+    const { judge, submission, attemptId, manager } = setup();
     submission.judgeGeneration = 2;
     submission.acceptedForXp = true;
     await expect(
-      service.recordJudgeResult(submission.id, 1, attemptId, {
+      judge.recordJudgeResult(submission.id, 1, attemptId, {
         status: SubmissionStatus.SYSTEM_ERROR,
         passedTestCases: 0,
         totalTestCases: 1,

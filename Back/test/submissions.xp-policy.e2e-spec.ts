@@ -10,23 +10,27 @@ import {
   SubmissionLanguage,
   SubmissionStatus,
 } from '../src/modules/submissions/submission.enums.js';
+import { JudgeService } from '../src/modules/submissions/judge.service.js';
 import { SubmissionsService } from '../src/modules/submissions/submissions.service.js';
 import { UserRole } from '../src/modules/users/user-role.enum.js';
 
 describe('submission XP evidence (PostgreSQL)', () => {
   let db: DataSource;
   let service: SubmissionsService;
+  let judge: JudgeService;
   let user: AuthenticatedUser;
   let problemId: string;
 
   beforeAll(async () => {
     db = await new DataSource(configured.options).initialize();
+    const queue = { add: async () => ({}) } as unknown as Queue;
     service = new SubmissionsService(
       db.getRepository(Submission),
       db.getRepository(Problem),
       db,
-      { add: async () => ({}) } as unknown as Queue,
+      queue,
     );
+    judge = new JudgeService(db.getRepository(Submission), db, queue);
   });
 
   beforeEach(async () => {
@@ -84,13 +88,13 @@ describe('submission XP evidence (PostgreSQL)', () => {
     const submission = await db.getRepository(Submission).findOneByOrFail({ id });
     const generation = submission.judgeGeneration;
     const attemptId = randomUUID();
-    await service.claimForJudge(id, generation, attemptId);
+    await judge.claimForJudge(id, generation, attemptId);
     const dto = {
       status,
       passedTestCases: status === SubmissionStatus.ACCEPTED ? 1 : 0,
       totalTestCases: 1,
     };
-    const result = await service.recordJudgeResult(id, generation, attemptId, dto);
+    const result = await judge.recordJudgeResult(id, generation, attemptId, dto);
     expect(result).not.toHaveProperty('acceptedForXp');
     return { generation, attemptId, dto };
   }
@@ -122,7 +126,7 @@ describe('submission XP evidence (PostgreSQL)', () => {
       SubmissionStatus.CANCELLED,
     ]) {
       const result = await finish(submission.id, status);
-      await service.recordJudgeResult(
+      await judge.recordJudgeResult(
         submission.id,
         result.generation,
         result.attemptId,
@@ -137,7 +141,7 @@ describe('submission XP evidence (PostgreSQL)', () => {
   it('preserves earned XP through errors/cancellation, then revokes once on definitive rejection', async () => {
     const submission = await createSubmission();
     const accepted = await finish(submission.id, SubmissionStatus.ACCEPTED);
-    await service.recordJudgeResult(
+    await judge.recordJudgeResult(
       submission.id,
       accepted.generation,
       accepted.attemptId,
@@ -154,7 +158,7 @@ describe('submission XP evidence (PostgreSQL)', () => {
       await service.rejudge(submission.id, user);
       expect(await evidence(submission.id)).toBe(true);
       await expect(
-        service.recordJudgeResult(
+        judge.recordJudgeResult(
           submission.id,
           accepted.generation,
           accepted.attemptId,
@@ -167,7 +171,7 @@ describe('submission XP evidence (PostgreSQL)', () => {
       ).rejects.toThrow('이전 채점 시도의 결과입니다.');
       await expectSolve(submission.id);
       const result = await finish(submission.id, status);
-      await service.recordJudgeResult(
+      await judge.recordJudgeResult(
         submission.id,
         result.generation,
         result.attemptId,
@@ -180,7 +184,7 @@ describe('submission XP evidence (PostgreSQL)', () => {
     for (let i = 0; i < 2; i++) {
       await service.rejudge(submission.id, user);
       const rejected = await finish(submission.id, SubmissionStatus.WRONG_ANSWER);
-      await service.recordJudgeResult(
+      await judge.recordJudgeResult(
         submission.id,
         rejected.generation,
         rejected.attemptId,
@@ -214,7 +218,7 @@ describe('submission XP evidence (PostgreSQL)', () => {
       } else {
         const queued = await service.rejudge(alternative.id, user);
         if (status === SubmissionStatus.JUDGING)
-          await service.claimForJudge(
+          await judge.claimForJudge(
             alternative.id,
             queued.judgeGeneration,
             randomUUID(),
@@ -232,7 +236,7 @@ describe('submission XP evidence (PostgreSQL)', () => {
       await service.rejudge(alternative.id, user);
       expect(await evidence(alternative.id)).toBe(true);
       const rejected = await finish(alternative.id, SubmissionStatus.WRONG_ANSWER);
-      await service.recordJudgeResult(
+      await judge.recordJudgeResult(
         alternative.id,
         rejected.generation,
         rejected.attemptId,
