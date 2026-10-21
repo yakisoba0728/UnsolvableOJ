@@ -1,75 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
-import type { Problem, Role, Session } from "../src/types";
+import type { Problem } from "../src/types";
+import { authenticate, mockProblemApi, problem, session, storageKey } from "./fixtures";
 
-const storageKey = "unsolvable-oj-session-v1";
-const session: Session = {
-  accessToken: "browser-test-token",
-  tokenType: "Bearer",
-  expiresIn: "15m",
-  user: {
-    id: "solver",
-    email: "solver@example.com",
-    username: "solver",
-    role: "USER",
-    level: 1,
-    xp: 0,
-    rating: 0,
-  },
-};
-const problem: Problem = {
-  id: "problem-id",
-  slug: "sum",
-  title: "두 수의 합",
-  difficulty: "BEGINNER",
-  timeLimitMs: 1000,
-  memoryLimitMb: 256,
-  status: "PUBLISHED",
-  statementMarkdown: "두 정수를 더하세요.",
-  inputDescriptionMarkdown: "두 정수",
-  outputDescriptionMarkdown: "합",
-  samples: [{ input: "1 2\n", expectedOutput: "3\n" }],
-  createdAt: "2026-09-01T00:00:00Z",
-  updatedAt: "2026-09-01T00:00:00Z",
-};
-
-async function authenticate(
-  page: Page,
-  role: Role = "USER",
-  expiresAt = Date.now() + 900_000,
-) {
-  await page.addInitScript(
-    ({ key, saved }) => {
-      localStorage.setItem(key, JSON.stringify(saved));
-    },
-    {
-      key: storageKey,
-      saved: {
-        session: { ...session, user: { ...session.user, role } },
-        expiresAt,
-      },
-    },
-  );
-}
-
-test.beforeEach(async ({ page }) => {
-  await page.route("**/api/v1/**", async (route) => {
-    const path = new URL(route.request().url()).pathname;
-    if (path === "/api/v1/problems") {
-      await route.fulfill({
-        json: { items: [problem], page: 1, limit: 20, total: 1, totalPages: 1 },
-      });
-    } else if (path.startsWith("/api/v1/problems/by-slug/")) {
-      await route.fulfill({
-        json: { ...problem, slug: path.split("/").at(-1) },
-      });
-    } else {
-      await route.fulfill({
-        status: 404,
-        json: { message: `Unexpected test request: ${path}` },
-      });
-    }
-  });
-});
+test.beforeEach(({ page }) => mockProblemApi(page));
 
 test("login returns to the problem and logout removes the saved session", async ({
   page,

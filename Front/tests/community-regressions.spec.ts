@@ -1,26 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { CommunityAnswer, CommunityPost } from "../src/community/types";
-import type { Session } from "../src/types";
+import { session, storageKey as sessionKey } from "./fixtures";
 
 const activityKey = "unsolvable-oj-community-v1";
-const sessionKey = "unsolvable-oj-session-v1";
 const postDraftKey = "unsolvable-oj-community-draft-v2:solver:new";
 const editDraftKey = "unsolvable-oj-community-draft-v2:solver:edit:mine";
 const answerDraftKey = "unsolvable-oj-community-answer-draft-v2:solver:mine";
-const session: Session = {
-  accessToken: "community-test-token",
-  tokenType: "Bearer",
-  expiresIn: "15m",
-  user: {
-    id: "solver",
-    username: "solver",
-    email: "solver@example.com",
-    role: "USER",
-    level: 1,
-    xp: 0,
-    rating: 0,
-  },
-};
 const mine: CommunityPost = {
   id: "mine",
   category: "question",

@@ -1,16 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-
-async function readAll(page: Page) {
-  return page.evaluate(async () => {
-    const modulePath = "/src/pagination.ts";
-    const { fetchAll } = await import(modulePath);
-    return fetchAll(
-      "/pagination-test",
-      new AbortController().signal,
-      "test-token",
-    );
-  });
-}
+import { expect, test } from "@playwright/test";
+import { readAll } from "./fixtures";
 
 test("all imported problems remain searchable beyond five pages", async ({
   page,
@@ -81,7 +70,7 @@ test("paginated history reads beyond page five with authentication", async ({
     });
   });
   await page.goto("/auth");
-  const items = await readAll(page);
+  const items = await readAll(page, "/pagination-test", "test-token");
   expect(items).toHaveLength(total);
   expect(items.at(-1)).toBe(6000);
 });
@@ -112,7 +101,7 @@ test("rate limits retry the same page without duplicating or dropping items", as
     });
   });
   await page.goto("/auth");
-  expect(await readAll(page)).toEqual([1, 2, 3]);
+  expect(await readAll(page, "/pagination-test", "test-token")).toEqual([1, 2, 3]);
   expect(requested).toEqual([1, 2, 2, 3]);
 });
 
@@ -164,5 +153,5 @@ test("a failed later page never returns an apparently complete partial list", as
         });
   });
   await page.goto("/auth");
-  await expect(readAll(page)).rejects.toThrow("history unavailable");
+  await expect(readAll(page, "/pagination-test", "test-token")).rejects.toThrow("history unavailable");
 });
