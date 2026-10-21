@@ -171,8 +171,7 @@ JSON 요청 전체 제한은 16MiB입니다. 각 필드의 길이 제한과 별�
   "runtimeMs": 12,
   "memoryKb": 20480,
   "passedTestCases": 10,
-  "totalTestCases": 10,
-  "judgeMessage": "all test cases passed"
+  "totalTestCases": 10
 }
 ```
 
@@ -202,12 +201,11 @@ Python `print`, C `printf`, Java `System.out`, JavaScript `console.log` 등
 - 공개 예제 중 실제 실행된 최대 5개만 저장합니다. `testCase`는 원래 테스트 순서의 1부터 시작하는 번호입니다.
 - 각 스트림의 앞 1,000바이트를 UTF-8로 변환합니다. 잘린 출력은 `*Truncated`로 표시합니다.
 - 출력 미리보기 제한은 정답 비교에 영향을 주지 않습니다. `stdout`에 추가한 디버깅 출력은 기존처럼 오답이 될 수 있으므로 진단용 메시지는 `stderr`를 사용하세요.
-- 공개 예제를 비공개 테스트보다 먼저 실행해 이전 실행에서 파일에 남은 비공개 입력이 예제 출력으로 유출되지 않도록 합니다. `testCase`는 원래 테스트 순서의 번호를 유지합니다.
+- 공개 예제를 비공개 테스트보다 먼저 실행해 비공개 테스트가 실패하더라도 예제 출력을 받을 수 있게 합니다. `testCase`는 원래 테스트 순서의 번호를 유지합니다.
 - 첫 실패에서 채점을 중단하므로 뒤쪽 예제는 실행되지 않을 수 있습니다. 빈 배열은 실행된 공개 예제가 없거나 이전 워커의 결과임을 뜻합니다.
 - 비공개 테스트의 출력과 오류 내용은 노출하지 않습니다. 컴파일 오류는 기존 `compileOutput`을 확인합니다.
 - 실행 오류·시간 초과·출력 초과에도 그때까지 수집된 공개 예제 출력을 반환합니다. 프로그램이 버퍼를 비우지 않은 출력은 남지 않을 수 있습니다.
 - 목록 API에는 출력을 포함하지 않고, 재채점 시 이전 출력은 초기화합니다.
-- 적용 전 `npm run db:migration:run`을 실행하고 채점 이미지를 다시 빌드하세요. 백엔드 마이그레이션 및 API를 먼저 반영한 뒤 새 워커/이미지를 적용합니다.
 
 ## 명령어
 
@@ -215,7 +213,7 @@ Python `print`, C `printf`, Java `System.out`, JavaScript `console.log` 등
 npm run start:dev             # 개발 서버
 npm run db:migration:run      # migration 적용
 npm run db:migration:revert   # 최근 migration 되돌리기
-npm run check                 # lint + unit test + build
+npm run check                 # lint + typecheck + unit test + build
 npm run test:e2e              # compose 인프라가 실행 중일 때 E2E
 npm run test:pipeline         # 임시 DB에서 API·워커 파이프라인 검사
 npm run test:migrations       # 새 빌드로 마이그레이션 왕복·롤백 안전장치 검사

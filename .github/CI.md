@@ -47,10 +47,9 @@ node scripts/check-compose.mjs
 
 macOS Firefox가 앱 접속 전 `Could not find profile folder`로 종료되는 환경에서는 `node scripts/check-compose.mjs --project=chromium --project=webkit`로 로컬 흐름을 확인하고 Linux CI의 Firefox 결과를 별도로 확인하세요. 브라우저 보안 설정을 끄거나 기존 개인 프로필을 재사용하지 않습니다. 실제 브라우저 결과물은 `Front/reports/live-browser*`에 저장해 모의 회귀 테스트 결과와 분리합니다.
 
-테스트용 DB/Redis의 `DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`를 지정한 뒤:
+테스트용 DB/Redis의 `DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`를 지정한 뒤 실행합니다. 각 명령이 일회용 DB를 만들어 마이그레이션하므로 지정한 DB는 마이그레이션하지 않습니다:
 
 ```sh
-npm run db:migration:run --prefix Back
 npm run test:e2e --prefix Back
 npm run test:pipeline --prefix Back
 ```
