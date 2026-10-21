@@ -74,7 +74,7 @@ export function MyProblemsPage() {
       setNotice(
         status === "PUBLISHED"
           ? "문제를 공개했어요."
-          : "문제를 초안으로 돌렸어요.",
+          : "문제를 비공개로 전환했어요.",
       );
     } catch (cause) {
       setError(

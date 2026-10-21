@@ -175,7 +175,7 @@ test.describe("problem editor", () => {
     await page.goto("/my-problems");
     await expect(page.getByRole("button", { name: "공개하기" })).toHaveCount(0);
     await page.getByRole("button", { name: "비공개로 전환" }).click();
-    await expect(page.getByRole("status")).toHaveText("문제를 초안으로 돌렸어요.");
+    await expect(page.getByRole("status")).toHaveText("문제를 비공개로 전환했어요.");
     expect(changed).toEqual({ status: "DRAFT" });
     await expect(page.getByRole("button", { name: "비공개로 전환" })).toHaveCount(0);
   });
