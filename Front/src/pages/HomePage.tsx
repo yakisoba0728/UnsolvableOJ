@@ -18,7 +18,7 @@ import {
 } from "../hooks";
 import { LANGUAGES, type RankingEntry, type UserProfile } from "../types";
 import { problemPath } from "../paths";
-import { difficultyLabel } from "./ProblemsPage";
+import { difficultyLabel } from "../difficulty";
 
 export function HomePage() {
   const { session } = useAuth();

@@ -16,6 +16,7 @@ import {
 import { PostScroller } from "../components/PostScroller";
 import { allPosts, useActivity } from "../community/store";
 import type { RankingEntry, UserProfile } from "../types";
+import { difficultyOptions } from "../difficulty";
 
 const WEEKS_WIDE = 16;
 const WEEKS_NARROW = 12;
@@ -41,13 +42,6 @@ const popularLanguages = [
   "RUST",
 ];
 const LANGUAGE_ROWS = 4;
-const difficultyRows = [
-  { value: "BEGINNER", label: "입문" },
-  { value: "EASY", label: "쉬움" },
-  { value: "MEDIUM", label: "보통" },
-  { value: "HARD", label: "어려움" },
-  { value: "EXPERT", label: "전문가" },
-];
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
 /** 서버 규칙: level = 1 + xp / 100 */
@@ -454,7 +448,7 @@ export function ProfilePage() {
               </div>
             </div>
             <ul className="lang-stats">
-              {difficultyRows.map((row) => {
+              {difficultyOptions.map((row) => {
                 const count = solvedByDifficulty.get(row.value) ?? 0;
                 const percent = solvedTotal
                   ? Math.round((count / solvedTotal) * 100)

@@ -27,19 +27,11 @@ import {
 import { problemPath } from "../paths";
 import { newSeed, seededShuffle } from "../shuffle";
 import type { Difficulty, ProblemSummary } from "../types";
-
-const difficultyOptions: { value: Difficulty; label: string }[] = [
-  { value: "BEGINNER", label: "입문" },
-  { value: "EASY", label: "쉬움" },
-  { value: "MEDIUM", label: "보통" },
-  { value: "HARD", label: "어려움" },
-  { value: "EXPERT", label: "전문가" },
-];
-const order = difficultyOptions.map((item) => item.value);
-
-export function difficultyLabel(value: Difficulty) {
-  return difficultyOptions.find((item) => item.value === value)?.label ?? value;
-}
+import {
+  DIFFICULTIES as order,
+  difficultyLabel,
+  difficultyOptions,
+} from "../difficulty";
 
 const PAGE_SIZE = 20;
 

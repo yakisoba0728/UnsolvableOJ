@@ -1,6 +1,7 @@
 import { useEffect, useState, type RefObject } from "react";
 import { api } from "./api";
 import { fetchAll } from "./pagination";
+import { DIFFICULTIES } from "./difficulty";
 export { fetchAll } from "./pagination";
 import type {
   ProblemSummary,
@@ -200,8 +201,6 @@ export function useDocumentTitle(title?: string) {
   }, [title]);
 }
 
-const difficultyRank = ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"];
-
 /** 공개 목록에 남아 있는 미해결 문제의 가장 최근 제출(이어서 풀 문제). */
 export function pickResume(
   submissions: Submission[],
@@ -228,8 +227,8 @@ export function pickNextProblem(
       .filter((problem) => !solved.has(problem.id))
       .sort(
         (a, b) =>
-          difficultyRank.indexOf(a.difficulty) -
-          difficultyRank.indexOf(b.difficulty),
+          DIFFICULTIES.indexOf(a.difficulty) -
+          DIFFICULTIES.indexOf(b.difficulty),
       )[0] ?? null
   );
 }

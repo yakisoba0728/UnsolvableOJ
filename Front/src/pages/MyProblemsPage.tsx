@@ -6,6 +6,7 @@ import { SkeletonRows } from "../components/Skeleton";
 import { PageHeader } from "../components/PageHeader";
 import { useDocumentTitle } from "../hooks";
 import { problemPath } from "../paths";
+import { difficultyLabel } from "../difficulty";
 
 interface MyProblem {
   id: string;
@@ -17,13 +18,6 @@ interface MyProblem {
   updatedAt: string;
 }
 
-const difficultyLabel: Record<string, string> = {
-  BEGINNER: "입문",
-  EASY: "쉬움",
-  MEDIUM: "보통",
-  HARD: "어려움",
-  EXPERT: "전문가",
-};
 const statusLabel: Record<MyProblem["status"], string> = {
   DRAFT: "초안 · 검수 대기",
   PUBLISHED: "공개 중",
@@ -139,7 +133,7 @@ export function MyProblemsPage() {
               <div className="my-problem-main">
                 <strong>{problem.title}</strong>
                 <span className="muted">
-                  {difficultyLabel[problem.difficulty] ?? problem.difficulty} ·
+                  {difficultyLabel(problem.difficulty)} ·
                   수정 {new Date(problem.updatedAt).toLocaleDateString("ko-KR")}{" "}
                   · /{problem.slug}
                 </span>

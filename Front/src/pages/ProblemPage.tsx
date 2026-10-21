@@ -55,7 +55,7 @@ import {
   type SplitMode,
   type SplitState,
 } from "../solveSplit";
-import { difficultyLabel } from "./ProblemsPage";
+import { difficultyLabel } from "../difficulty";
 
 const languages: { value: Language; label: string; starter: string }[] = [
   {

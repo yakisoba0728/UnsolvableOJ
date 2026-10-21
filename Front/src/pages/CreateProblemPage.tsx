@@ -36,6 +36,7 @@ import {
   type ProblemForm,
 } from "../problems/editor";
 import type { Difficulty, Problem } from "../types";
+import { difficultyOptions } from "../difficulty";
 
 interface ManagedProblem extends Problem {
   testCases: {
@@ -45,14 +46,6 @@ interface ManagedProblem extends Problem {
     score: number;
   }[];
 }
-
-const difficultyOptions = [
-  { value: "BEGINNER", label: "입문" },
-  { value: "EASY", label: "쉬움" },
-  { value: "MEDIUM", label: "보통" },
-  { value: "HARD", label: "어려움" },
-  { value: "EXPERT", label: "전문가" },
-];
 
 const caseKindOptions = [
   { value: "sample", label: "예제" },
