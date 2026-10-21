@@ -1,11 +1,7 @@
 import { Eye, ThumbsUp } from "lucide-react";
 import { X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Link,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { useEffect, useMemo, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth";
 import guideArt from "../assets/community-guide.png";
 import { PageHeader } from "../components/PageHeader";
@@ -26,7 +22,13 @@ import {
   type CategoryKey,
   type CommunityPost,
 } from "../community/types";
-import { useDocumentTitle, useFlashNotice, useStickyTop } from "../hooks";
+import {
+  useDocumentTitle,
+  useFlashNotice,
+  useSlashFocus,
+  useStickyTop,
+  useUrlFilters,
+} from "../hooks";
 import { pageRange, pageRangeTitle } from "../pageRange";
 
 const PAGE_SIZE = 10;
@@ -58,9 +60,9 @@ export function CommunityPage() {
     return () => window.clearTimeout(timer);
   }, [notice]);
   const activity = useActivity();
-  const [params, setParams] = useSearchParams();
-  const paramsRef = useRef(params);
-  paramsRef.current = params;
+  // '#단어'는 Enter를 눌러 태그가 되기 전까지 검색어로 쓰지 않는다(입력 중에 목록이 비는 것을 막는다).
+  const { params, update, urlQuery, queryText, setQueryText, page } =
+    useUrlFilters((text) => text.trim().startsWith("#"));
 
   const selectedCategories = (params.get("c") ?? "")
     .split(",")
@@ -69,7 +71,6 @@ export function CommunityPage() {
     .split(",")
     .filter((value) => value === "unaccepted" || value === "accepted");
   const sort = params.get("sort") ?? "latest";
-  const urlQuery = params.get("q") ?? "";
   // tag를 반복해 쉼표·공백이 든 태그도 보존한다. 기존 t=a,b 주소도 계속 읽는다.
   const selectedTags = [
     ...new Set([
@@ -77,38 +78,7 @@ export function CommunityPage() {
       ...(params.get("t") ?? "").split(","),
     ].filter(Boolean)),
   ];
-  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
   const size = PAGE_SIZE;
-
-  // 검색어는 입력 중에는 로컬 상태로 두고, 잠시 멈추면 주소에 반영한다.
-  const [queryText, setQueryText] = useState(urlQuery);
-  useEffect(() => setQueryText(urlQuery), [urlQuery]);
-  useEffect(() => {
-    if (queryText === urlQuery) return;
-    // '#단어'는 Enter를 눌러 태그가 되기 전까지 검색어로 쓰지 않는다(입력 중에 목록이 비는 것을 막는다).
-    if (queryText.trim().startsWith("#")) return;
-    // 다듬지 않고 저장한다: 주소 값이 입력칸으로 되돌아오므로 다듬으면 입력 중인 공백이 사라진다.
-    const timer = window.setTimeout(() => {
-      update({ q: queryText || null });
-    }, 250);
-    return () => window.clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryText]);
-
-  function update(
-    patch: Record<string, string | string[] | null>,
-    { resetPage = true }: { resetPage?: boolean } = {},
-  ) {
-    const next = new URLSearchParams(paramsRef.current);
-    for (const [key, value] of Object.entries(patch)) {
-      next.delete(key);
-      if (Array.isArray(value)) value.forEach((item) => next.append(key, item));
-      else if (value !== null && value !== "") next.set(key, value);
-    }
-    if (resetPage) next.delete("page");
-    paramsRef.current = next;
-    setParams(next, { replace: true });
-  }
 
   function setTags(next: string[]) {
     update({ t: null, tag: next });
@@ -130,24 +100,9 @@ export function CommunityPage() {
   }
 
   const searchRef = useRef<HTMLInputElement>(null);
+  useSlashFocus(searchRef);
   const sideRef = useRef<HTMLElement>(null);
   useStickyTop(sideRef);
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      const typing =
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        target instanceof HTMLSelectElement ||
-        target?.isContentEditable;
-      if (event.key === "/" && !typing && !event.metaKey && !event.ctrlKey) {
-        event.preventDefault();
-        searchRef.current?.focus();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, []);
 
   const posts = allPosts(activity);
   const answerCount = (post: CommunityPost) =>

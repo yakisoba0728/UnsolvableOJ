@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../auth";
 import { BrandArt } from "../components/BrandArt";
 import { PageHeader } from "../components/PageHeader";
@@ -21,8 +21,10 @@ import {
   pickNextProblem,
   pickResume,
   useMyStanding,
+  useSlashFocus,
   useStickyTop,
   useSubmissionHistory,
+  useUrlFilters,
 } from "../hooks";
 import { problemPath } from "../paths";
 import { newSeed, seededShuffle } from "../shuffle";
@@ -70,10 +72,10 @@ export function ProblemsPage() {
   const history = useSubmissionHistory(session);
   const { profile, rank, profileLoading, rankLoading, profileError, rankError } =
     useMyStanding(session);
-  const [params, setParams] = useSearchParams();
-  const paramsRef = useRef(params);
-  paramsRef.current = params;
+  const { params, update, urlQuery, queryText, setQueryText, page } =
+    useUrlFilters();
   const searchRef = useRef<HTMLInputElement>(null);
+  useSlashFocus(searchRef);
   const sideRef = useRef<HTMLElement>(null);
   useStickyTop(sideRef);
   const [announce, setAnnounce] = useState("");
@@ -82,7 +84,6 @@ export function ProblemsPage() {
   // 순서 뒤집기 아이콘: 누를 때마다 위·아래 화살표가 각자 방향으로 움직였다가 돌아온다.
   const [reverseKey, setReverseKey] = useState(0);
 
-  const urlQuery = params.get("q") ?? "";
   const selectedDifficulties = (params.get("d") ?? "")
     .split(",")
     .filter((value): value is Difficulty =>
@@ -100,53 +101,6 @@ export function ProblemsPage() {
   const reversed =
     (params.get("rev") === "1") !== Boolean(legacySort?.reversed);
   const seed = Number(params.get("seed")) || 1;
-  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
-
-  function update(
-    patch: Record<string, string | null>,
-    { resetPage = true }: { resetPage?: boolean } = {},
-  ) {
-    const next = new URLSearchParams(paramsRef.current);
-    for (const [key, value] of Object.entries(patch)) {
-      if (value === null || value === "") next.delete(key);
-      else next.set(key, value);
-    }
-    if (resetPage && !("page" in patch)) next.delete("page");
-    paramsRef.current = next;
-    setParams(next, { replace: true });
-  }
-
-  // 검색어: 입력은 즉시 반영하고 URL에는 잠시 멈춘 뒤 저장한다(한글 입력 중 끊김 방지)
-  const [queryText, setQueryText] = useState(urlQuery);
-  const lastWritten = useRef(urlQuery);
-  useEffect(() => {
-    if (urlQuery !== lastWritten.current) {
-      lastWritten.current = urlQuery;
-      setQueryText(urlQuery);
-    }
-  }, [urlQuery]);
-  useEffect(() => {
-    if (queryText === urlQuery) return;
-    const timer = setTimeout(() => {
-      lastWritten.current = queryText;
-      update({ q: queryText || null });
-    }, 250);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryText, urlQuery]);
-
-  // "/" 키로 검색창에 바로 이동 (LeetCode·GitHub 방식)
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      const target = event.target as HTMLElement;
-      if (event.key !== "/" || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))
-        return;
-      event.preventDefault();
-      searchRef.current?.focus();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
 
   const keyword = urlQuery.trim().toLowerCase();
   const isSingle = (value: string) =>

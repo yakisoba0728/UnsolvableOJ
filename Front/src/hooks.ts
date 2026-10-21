@@ -1,5 +1,11 @@
-import { useEffect, useState, type DependencyList, type RefObject } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type DependencyList,
+  type RefObject,
+} from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "./api";
 import { fetchAll } from "./pagination";
 import { DIFFICULTIES } from "./difficulty";
@@ -163,6 +169,74 @@ export function useFlashNotice() {
     });
   }, [state, location.pathname, location.search, location.hash, navigate]);
   return [notice, setNotice] as const;
+}
+
+/**
+ * 목록 조건(검색어 q·쪽 page 등)을 URL에 저장한다. 뒤로 가도 같은 목록이 복원되고 주소를 공유할 수 있다.
+ * 검색어는 입력은 즉시 반영하고 URL에는 잠시 멈춘 뒤 저장한다(한글 입력 중 끊김 방지).
+ * hold가 참을 돌려주는 입력은 아직 URL에 쓰지 않는다.
+ */
+export function useUrlFilters(hold?: (text: string) => boolean) {
+  const [params, setParams] = useSearchParams();
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
+  const urlQuery = params.get("q") ?? "";
+  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
+
+  /** 빈 값은 지우고, 배열은 같은 키를 반복해 쓴다. 조건이 바뀌면 첫 쪽으로 돌아간다. */
+  function update(
+    patch: Record<string, string | string[] | null>,
+    { resetPage = true }: { resetPage?: boolean } = {},
+  ) {
+    const next = new URLSearchParams(paramsRef.current);
+    for (const [key, value] of Object.entries(patch)) {
+      next.delete(key);
+      if (Array.isArray(value)) value.forEach((item) => next.append(key, item));
+      else if (value) next.set(key, value);
+    }
+    if (resetPage && !("page" in patch)) next.delete("page");
+    paramsRef.current = next;
+    setParams(next, { replace: true });
+  }
+
+  const [queryText, setQueryText] = useState(urlQuery);
+  const lastWritten = useRef(urlQuery);
+  useEffect(() => {
+    if (urlQuery !== lastWritten.current) {
+      lastWritten.current = urlQuery;
+      setQueryText(urlQuery);
+    }
+  }, [urlQuery]);
+  useEffect(() => {
+    if (queryText === urlQuery || hold?.(queryText)) return;
+    // 다듬지 않고 저장한다: 주소 값이 입력칸으로 되돌아오므로 다듬으면 입력 중인 공백이 사라진다.
+    const timer = setTimeout(() => {
+      lastWritten.current = queryText;
+      update({ q: queryText || null });
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [queryText, urlQuery]);
+
+  return { params, update, urlQuery, queryText, setQueryText, page };
+}
+
+/** "/" 키로 검색창에 바로 이동한다(LeetCode·GitHub 방식). 다른 칸에 입력 중일 때는 가로채지 않는다. */
+export function useSlashFocus(ref: RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const typing =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target?.isContentEditable;
+      if (event.key !== "/" || typing || event.metaKey || event.ctrlKey) return;
+      event.preventDefault();
+      ref.current?.focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [ref]);
 }
 
 /** 탭·히스토리·공유에서 화면을 구분하도록 페이지별 제목을 설정한다. 제목이 없으면 기본 제목. */
