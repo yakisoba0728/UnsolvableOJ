@@ -24,7 +24,7 @@ export class AdminService {
 
   async users() {
     return this.db.query(
-      'SELECT id, email, username, role, level, xp, rating, created_at FROM users ORDER BY created_at DESC LIMIT 100',
+      'SELECT id, email, username, role, level, xp, rating, created_at AS "createdAt" FROM users ORDER BY created_at DESC LIMIT 100',
     );
   }
 
@@ -59,7 +59,7 @@ export class AdminService {
 
   async audit() {
     return this.db.query(
-      'SELECT id, actor_id, action, target_type, target_id, details, created_at FROM audit_events ORDER BY created_at DESC LIMIT 100',
+      'SELECT id, actor_id AS "actorId", action, target_type AS "targetType", target_id AS "targetId", details, created_at AS "createdAt" FROM audit_events ORDER BY created_at DESC LIMIT 100',
     );
   }
 

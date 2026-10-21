@@ -308,10 +308,24 @@ describe('Backend features (e2e)', () => {
       .set(bearer(adminToken))
       .expect(200);
     expect(
-      audit.body.some(
-        (event: { action: string }) => event.action === 'user.role',
+      audit.body.find(
+        (event: { action: string; targetId: string }) =>
+          event.action === 'user.role' && event.targetId === solver.user.id,
       ),
-    ).toBe(true);
+    ).toMatchObject({
+      actorId: admin.user.id,
+      targetType: 'user',
+      createdAt: expect.any(String),
+    });
+    expect(audit.body[0]).not.toHaveProperty('created_at');
+    const users = await request(app.getHttpServer())
+      .get(`${base}/admin/users`)
+      .set(bearer(adminToken))
+      .expect(200);
+    expect(
+      users.body.find((item: { id: string }) => item.id === solver.user.id),
+    ).toMatchObject({ createdAt: expect.any(String) });
+    expect(users.body[0]).not.toHaveProperty('created_at');
     await request(app.getHttpServer())
       .patch(`${base}/problems/${problemId}/status`)
       .set(bearer(authorToken))
