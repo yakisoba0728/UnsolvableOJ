@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -79,7 +80,7 @@ export class ProblemsService {
 
   async update(id: string, dto: UpdateProblemDto, user: AuthenticatedUser) {
     if (!Object.keys(dto).length)
-      throw new ConflictException('변경할 필드가 없습니다.');
+      throw new BadRequestException('변경할 필드가 없습니다.');
     return this.dataSource.transaction(async (manager) => {
       const problem = await manager
         .getRepository(Problem)
@@ -270,12 +271,16 @@ export class ProblemsService {
   }
 
   async findPublishedBySlug(slug: string) {
-    const problem = await this.problems.findOne({
-      where: { slug: slug.toLowerCase(), status: ProblemStatus.PUBLISHED },
-      relations: { testCases: true },
-      order: { testCases: { order: 'ASC' } },
+    const problem = await this.problems.findOneBy({
+      slug: slug.toLowerCase(),
+      status: ProblemStatus.PUBLISHED,
     });
     if (!problem) throw new NotFoundException('문제를 찾을 수 없습니다.');
+    // Hidden cases can be megabytes each; the public view needs samples only.
+    problem.testCases = await this.dataSource.manager.find(TestCase, {
+      where: { problemId: problem.id, isSample: true },
+      order: { order: 'ASC' },
+    });
     return this.toDetail(problem);
   }
 

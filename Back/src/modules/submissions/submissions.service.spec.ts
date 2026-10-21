@@ -132,6 +132,46 @@ describe('SubmissionsService queue failure', () => {
       });
     },
   );
+
+  it('re-enqueues lost jobs behind a backlog, up to 100 per pass', async () => {
+    const queued = Array.from({ length: 250 }, () => ({
+      id: randomUUID(),
+      judgeGeneration: 1,
+    }));
+    const backlog = new Set(queued.slice(0, 120).map(({ id }) => `${id}-1`));
+    const submissions = {
+      find: vi.fn().mockResolvedValueOnce(queued).mockResolvedValue([]),
+      update: vi.fn(),
+    };
+    const queue = {
+      getJob: vi.fn(async (jobId: string) =>
+        backlog.has(jobId) ? { getState: async () => 'waiting' } : undefined,
+      ),
+      add: vi.fn(),
+    };
+    const service = new SubmissionsService(
+      submissions as unknown as Repository<Submission>,
+      {} as Repository<Problem>,
+      {} as DataSource,
+      queue as unknown as Queue,
+    );
+
+    await service['requeueMissingJobs']();
+
+    expect(submissions.find).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ take: 1000 }),
+    );
+    expect(queue.getJob).toHaveBeenCalledTimes(220);
+    expect(queue.add).toHaveBeenCalledTimes(100);
+    expect(queue.add).toHaveBeenNthCalledWith(
+      1,
+      'judge-submission',
+      { submissionId: queued[120].id, generation: 1 },
+      expect.objectContaining({ jobId: `${queued[120].id}-1` }),
+    );
+    expect(submissions.update).not.toHaveBeenCalled();
+  });
 });
 
 describe('submission debug output lifecycle', () => {

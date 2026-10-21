@@ -110,6 +110,13 @@ describe('Backend features (e2e)', () => {
       .expect(200);
     expect(JSON.stringify(publicView.body)).not.toContain('5 7');
     await request(app.getHttpServer())
+      .get(`${base}/problems?page=1000001`)
+      .expect(400);
+    await request(app.getHttpServer())
+      .get(`${base}/submissions?page=1000001`)
+      .set(bearer(solver.accessToken))
+      .expect(400);
+    await request(app.getHttpServer())
       .get(`${base}/problems/${problemId}/manage`)
       .set(bearer(solver.accessToken))
       .expect(403);
@@ -128,7 +135,7 @@ describe('Backend features (e2e)', () => {
       .patch(`${base}/problems/${problemId}`)
       .set(bearer(authorToken))
       .send({})
-      .expect(409);
+      .expect(400);
     await request(app.getHttpServer())
       .patch(`${base}/problems/${problemId}`)
       .set(bearer(authorToken))
@@ -150,6 +157,15 @@ describe('Backend features (e2e)', () => {
       timeLimitMs: 5000,
       memoryLimitMb: 512,
     });
+    await request(app.getHttpServer())
+      .patch(`${base}/problems/${problemId}/status`)
+      .set(bearer(adminToken))
+      .send({ status: 'PUBLISHED' })
+      .expect(200);
+    const hiddenOnly = await request(app.getHttpServer())
+      .get(`${base}/problems/version-${suffix}`)
+      .expect(200);
+    expect(hiddenOnly.body.samples).toEqual([]);
     const path = `${base}/internal/judge/submissions/${submissionId}`;
     const firstAttempt = randomUUID();
     const claim = await request(app.getHttpServer())
@@ -230,6 +246,9 @@ describe('Backend features (e2e)', () => {
 
     await request(app.getHttpServer())
       .post(`${base}/submissions/${submissionId}/rejudge`)
+      .expect(401);
+    await request(app.getHttpServer())
+      .post(`${base}/submissions/${submissionId}/rejudge`)
       .set(bearer(solver.accessToken))
       .expect(403);
     const rejudge = await request(app.getHttpServer())
@@ -292,10 +311,24 @@ describe('Backend features (e2e)', () => {
       .set(bearer(adminToken))
       .expect(200);
     expect(
-      audit.body.some(
-        (event: { action: string }) => event.action === 'user.role',
+      audit.body.find(
+        (event: { action: string; targetId: string }) =>
+          event.action === 'user.role' && event.targetId === solver.user.id,
       ),
-    ).toBe(true);
+    ).toMatchObject({
+      actorId: admin.user.id,
+      targetType: 'user',
+      createdAt: expect.any(String),
+    });
+    expect(audit.body[0]).not.toHaveProperty('created_at');
+    const users = await request(app.getHttpServer())
+      .get(`${base}/admin/users`)
+      .set(bearer(adminToken))
+      .expect(200);
+    expect(
+      users.body.find((item: { id: string }) => item.id === solver.user.id),
+    ).toMatchObject({ createdAt: expect.any(String) });
+    expect(users.body[0]).not.toHaveProperty('created_at');
     await request(app.getHttpServer())
       .patch(`${base}/problems/${problemId}/status`)
       .set(bearer(authorToken))

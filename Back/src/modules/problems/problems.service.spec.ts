@@ -5,6 +5,7 @@ import { ListProblemsQuery } from './dto/list-problems.query.js';
 import type { Problem } from './problem.entity.js';
 import { ProblemStatus } from './problem.enums.js';
 import { ProblemsService } from './problems.service.js';
+import { UserRole } from '../users/user-role.enum.js';
 
 const ids = [1, 2, 3].map(
   (value) => `10000000-0000-4000-8000-${String(value).padStart(12, '0')}`,
@@ -86,5 +87,45 @@ describe('public problem continuation', () => {
     expect(repository.find).not.toHaveBeenCalled();
     expect(repository.count).not.toHaveBeenCalled();
     expect(query).not.toHaveBeenCalled();
+  });
+});
+
+describe('public problem detail', () => {
+  it.each([
+    [[{ input: '1\n', expectedOutput: '1\n', isSample: true }]],
+    [[]],
+  ])('loads only sample cases and returns %j', async (samples) => {
+    const findOneBy = vi.fn().mockResolvedValue({ id: ids[0], slug: 'sum' });
+    const find = vi.fn().mockResolvedValue(samples);
+    const service = new ProblemsService(
+      { findOneBy } as unknown as Repository<Problem>,
+      { manager: { find } } as unknown as DataSource,
+    );
+    const result = await service.findPublishedBySlug('SUM');
+    expect(findOneBy).toHaveBeenCalledWith({
+      slug: 'sum',
+      status: ProblemStatus.PUBLISHED,
+    });
+    expect(find).toHaveBeenCalledWith(expect.anything(), {
+      where: { problemId: ids[0], isSample: true },
+      order: { order: 'ASC' },
+    });
+    expect(result.samples).toEqual(
+      samples.map(({ input, expectedOutput }) => ({ input, expectedOutput })),
+    );
+  });
+});
+
+describe('problem update', () => {
+  it('rejects an empty body as a bad request', async () => {
+    const { service } = fixture([]);
+    await expect(
+      service.update(ids[0], {}, {
+        id: ids[1],
+        email: 'author@example.com',
+        username: 'author',
+        role: UserRole.AUTHOR,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

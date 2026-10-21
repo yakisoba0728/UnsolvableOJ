@@ -20,6 +20,8 @@ import {
 import { createListCursor, readListCursor } from '../../common/list-cursor.js';
 import {
   JUDGE_QUEUE,
+  JUDGE_WORKER_PRUNE_MS,
+  JUDGE_WORKERS_KEY,
   type JudgeSubmissionJob,
 } from '../../common/queue.constants.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
@@ -423,12 +425,12 @@ export class SubmissionsService {
       throw new BadRequestException('워커 ID가 올바르지 않습니다.');
     const client = await this.judgeQueue.getBackend().client;
     const now = Date.now();
-    await client.hset('judge:workers', { [workerId]: now });
-    const workers = await client.hgetall('judge:workers');
+    await client.hset(JUDGE_WORKERS_KEY, { [workerId]: now });
+    const workers = await client.hgetall(JUDGE_WORKERS_KEY);
     const stale = Object.entries(workers)
-      .filter(([, lastSeen]) => now - Number(lastSeen) > 60_000)
+      .filter(([, lastSeen]) => now - Number(lastSeen) > JUDGE_WORKER_PRUNE_MS)
       .map(([id]) => id);
-    if (stale.length) await client.hdel('judge:workers', ...stale);
+    if (stale.length) await client.hdel(JUDGE_WORKERS_KEY, ...stale);
     return { ok: true };
   }
 
@@ -517,20 +519,25 @@ export class SubmissionsService {
   }
 
   private async requeueMissingJobs() {
+    // Look past a healthy backlog for lost jobs, bounded per pass.
     const queued = await this.submissions.find({
+      select: { id: true, judgeGeneration: true },
       where: {
         status: SubmissionStatus.QUEUED,
         updatedAt: LessThan(new Date(Date.now() - 10_000)),
       },
-      take: 100,
-      order: { updatedAt: 'ASC' },
+      take: 1000,
+      order: { updatedAt: 'ASC', id: 'ASC' },
     });
+    let requeued = 0;
     for (const submission of queued) {
       const job = await this.judgeQueue.getJob(
         `${submission.id}-${submission.judgeGeneration}`,
       );
-      if (!job) await this.enqueue(submission.id, submission.judgeGeneration);
-      else if (['failed', 'completed'].includes(await job.getState()))
+      if (!job) {
+        await this.enqueue(submission.id, submission.judgeGeneration);
+        if (++requeued === 100) break;
+      } else if (['failed', 'completed'].includes(await job.getState()))
         await this.submissions.update(
           {
             id: submission.id,

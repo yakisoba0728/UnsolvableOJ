@@ -241,4 +241,15 @@ describe('submission cursor query validation', () => {
       ).toBeGreaterThan(0);
     }
   });
+
+  it('bounds page so the offset stays a safe integer', async () => {
+    expect(
+      await validate(plainToInstance(ListSubmissionsQuery, { page: '1000000' })),
+    ).toEqual([]);
+    for (const page of ['1000001', '1e20']) {
+      expect(
+        (await validate(plainToInstance(ListSubmissionsQuery, { page }))).length,
+      ).toBeGreaterThan(0);
+    }
+  });
 });
