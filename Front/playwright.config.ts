@@ -6,6 +6,7 @@ const unitSpecs = [
   "code-editing.spec.ts",
   "editor-persistence.spec.ts",
   "page-range.spec.ts",
+  "problem-editor.spec.ts",
   "solve-split.spec.ts",
 ];
 
