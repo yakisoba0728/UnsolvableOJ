@@ -20,7 +20,6 @@ npm run start:dev
 
 - `GO_JUDGE_URL`: 기본 `http://127.0.0.1:5050`; Compose 워커는 `http://go-judge:5050`.
 - `GO_JUDGE_TOKEN`: go-judge의 `ES_AUTH_TOKEN`과 같아야 합니다. 로컬 기본값은 `.env.example`과 Compose가 같습니다. 변경 시 루트 환경 변수와 `Judge/.env`를 모두 맞추세요. 운영에서는 무작위 비밀키를 사용하세요.
-- 기존 `Judge/.env`가 있다면 위 두 변수를 추가하세요. `JUDGE_RUNTIME_IMAGE`는 더 이상 사용하지 않습니다.
 - `JUDGE_CONCURRENCY`: 워커 동시 제출 수, 기본 2. Compose의 go-judge 실행 동시성도 2입니다.
 
 `npm run check`는 빌드와 모의 HTTP 서버 기반 회귀 테스트이며 외부 서비스가 필요하지 않습니다. `npm run test:runtime`은 실행 중인 go-judge에서 8개 언어, 실패 판정·메모리·PID·고아 프로세스·네트워크·파일 초기화·캐시 회수를 검사합니다. 다른 워커가 사용하지 않는 테스트용 go-judge에서 실행하세요.
@@ -29,17 +28,17 @@ npm run start:dev
 
 - C17, C++20, Java 21(`Main`), Python 3, JavaScript, TypeScript(esbuild), Go, Rust를 지원합니다. 도구는 `runtime/Dockerfile`에 설치합니다. Java는 모든 class 파일을 jar로 묶습니다.
 - 컴파일은 CPU/wall 각각 30초·메모리 1GiB입니다. 실행은 문제의 CPU/wall 시간과 메모리 제한, task 64개, CPU 1개분을 사용합니다. JVM·Node heap 상한은 문제 메모리 값으로 설정하되 전체 프로세스 메모리는 cgroup이 제한합니다.
-- 제출 전체 deadline은 테스트 수 × 테스트별 시간 제한 + 컴파일·통신 여유 60초입니다. API의 최대 100개 × 60초 제한에서는 6,060초이며, 별도의 600초 상한으로 정상 실행을 중단하지 않습니다.
+- 제출 전체 deadline은 테스트 수 × 테스트별 시간 제한 + 컴파일·통신 여유 60초입니다. API의 최대 100개 × 60초 제한에서는 6,060초입니다.
 - REST에는 명령별 파일 크기 상한이 없어, 실행 명령에 표준 Linux `prlimit`을 붙여 stdout/stderr 및 생성 파일에 **정확히 1,000,000바이트 hard limit**을 적용합니다. 컴파일 산출물은 별도 상한 64MiB입니다.
 - 테스트는 공개 예제부터 순차 실행하고 첫 실패에서 중단합니다. 각 테스트는 새로 초기화된 환경에서 실행되므로 이전 테스트 파일을 읽을 수 없습니다. `Accepted` 응답도 출력 비교를 통과해야 정답입니다.
 - 출력은 바이트 기준으로 비교하며 끝의 ASCII 공백만 무시합니다. JSON의 UTF-8 치환이 판정을 바꾸지 않도록 캐시 출력을 원시 바이트로 다운로드합니다.
 - 공개 예제 최대 5개의 stdout/stderr 앞 1,000바이트와 잘림 여부를 보존합니다. 번호는 원래 테스트 순서입니다. 비공개 출력·오류 원문은 응답에 넣지 않습니다.
-- 실행 시간은 `runTime`(wall)을 ms로, 메모리는 bytes를 KiB로 바꾼 뒤 테스트별 최대값을 저장합니다. **이전 RSS 샘플러와 cgroup 메모리 측정은 동등하지 않습니다.** 검증 없이 기존 제출을 일괄 재채점하면 판정·XP가 바뀔 수 있습니다.
+- 실행 시간은 `runTime`(wall)을 ms로, 메모리는 bytes를 KiB로 바꾼 뒤 테스트별 최대값을 저장합니다.
 - 컴파일 산출물과 출력 `fileIds`는 성공·실패·취소 경로에서 삭제합니다. 응답 유실로 ID를 얻지 못한 파일은 서비스의 15분 idle TTL이 보조 회수합니다. compile/run/delete는 같은 인스턴스로 보내세요.
 
 워커는 sandbox 검사와 인증된 API heartbeat를 모두 통과한 뒤에만 Redis 연결·큐 소비를 시작합니다. 기존 generation/attempt·문제 스냅샷을 유지하고 워커·제출 heartbeat를 10초마다 전송합니다. 결과 PATCH의 네트워크 오류·429·5xx는 같은 payload/attempt로 최대 3회(1초·2초 간격) 전송하며, 응답을 확인할 때까지 제출 heartbeat를 유지합니다. lease heartbeat의 409는 현재 실행을 취소하고 이전 시도의 결과 전송을 중단하지만, 일시적인 통신 오류는 실행을 취소하지 않습니다.
 
-실행 중 API 401/403이 확인되면 해당 워커만 큐 소비를 pause하고 진행 중인 채점·결과 전송을 취소합니다. 자동 재개하지 않으므로 토큰을 수정한 뒤 워커를 재시작하세요. SIGINT/SIGTERM에서는 새 작업 소비를 중단하고 진행 중인 채점·결과 전송을 마친 뒤 Redis 연결을 닫습니다. 관리자 `/admin/ops`와 큐 복구·재채점 계약은 변경하지 않습니다.
+실행 중 API 401/403이 확인되면 해당 워커만 큐 소비를 pause하고 진행 중인 채점·결과 전송을 취소합니다. 자동 재개하지 않으므로 토큰을 수정한 뒤 워커를 재시작하세요. SIGINT/SIGTERM에서는 새 작업 소비를 중단하고 진행 중인 채점·결과 전송을 마친 뒤 Redis 연결을 닫습니다.
 
 ## 운영 격리
 
