@@ -6509,7 +6509,7 @@ textarea {
   right: -2px;
   transform: translateY(-50%) rotate(225deg);
 }
-/* 움직임 줄이기 설정: 전환·애니메이션을 끈다. 같은 명시도의 일반 규칙을 이기도록 그 규칙들보다 뒤에 둔다 */
+/* 움직임 줄이기 설정: 움직이는 전환·애니메이션을 끈다. 같은 명시도의 일반 규칙을 이기도록 그 규칙들보다 뒤에 둔다 */
 @media (prefers-reduced-motion: reduce) {
   .slider-fade,
   .slider-area,
