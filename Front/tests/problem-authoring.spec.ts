@@ -121,6 +121,19 @@ test.describe("problem editor", () => {
     await expect(page.getByText("숨김 1개", { exact: true })).toBeVisible();
   });
 
+  test("the form opens and autosaves without crypto.randomUUID (plain HTTP)", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      Reflect.deleteProperty(Crypto.prototype, "randomUUID");
+    });
+    await authenticate(page, "AUTHOR");
+    await page.goto("/problems/new");
+    await expect(page.getByLabel("제목", { exact: true })).toBeVisible();
+    await page.getByLabel("제목", { exact: true }).fill("HTTP에서 만든 문제");
+    await expect(page.getByText(/임시 저장됨/)).toBeVisible();
+  });
+
   test("an unsaved draft is restored after reload", async ({ page }) => {
     await authenticate(page, "AUTHOR");
     await page.goto("/problems/new");

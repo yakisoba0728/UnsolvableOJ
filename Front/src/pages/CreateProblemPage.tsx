@@ -148,7 +148,14 @@ export function CreateProblemPage() {
     ? snapshot(form) !== initialRef.current
     : !isPristine(form);
   const draft = useMemo(
-    () => ({ form, slugTouched, savedAt: Date.now(), revision: crypto.randomUUID() }),
+    () => ({
+      form,
+      slugTouched,
+      savedAt: Date.now(),
+      // randomUUID는 보안 컨텍스트(HTTPS·localhost)에만 있다. 사설 IP의 HTTP 접속에서도 열리게 한다.
+      revision:
+        crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    }),
     [form, slugTouched],
   );
   const latestRef = useRef({ draft, dirty, loading });
