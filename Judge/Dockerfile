@@ -6,7 +6,7 @@ RUN npm ci
 
 FROM deps AS build
 COPY . .
-RUN npm run build && rm dist/*.test.js
+RUN npm run build && rm -f dist/*.test.js
 
 FROM node:24-alpine AS runtime
 ENV NODE_ENV=production
