@@ -339,7 +339,7 @@ export function CommunityPostPage() {
                 type="button"
                 className="answers-toggle"
                 aria-expanded={answersOpen}
-                aria-controls="answer-list"
+                aria-controls={shown.length ? "answer-list" : undefined}
                 onClick={() => setAnswersOpen((open) => !open)}
               >
                 <span>답변 {answers.length}</span>

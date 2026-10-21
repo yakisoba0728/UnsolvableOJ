@@ -815,7 +815,9 @@ export function ProblemPage() {
           <div className="tab-list" role="tablist" aria-label="문제 보기">
             <button
               role="tab"
+              id="problem-tab-statement"
               aria-selected={tab === "statement"}
+              aria-controls={tab === "statement" ? "problem-tabpanel" : undefined}
               className={`tab-button ${tab === "statement" ? "active" : ""}`}
               onClick={() => setTab("statement")}
             >
@@ -823,7 +825,9 @@ export function ProblemPage() {
             </button>
             <button
               role="tab"
+              id="problem-tab-history"
               aria-selected={tab === "history"}
+              aria-controls={tab === "history" ? "problem-tabpanel" : undefined}
               className={`tab-button ${tab === "history" ? "active" : ""}`}
               onClick={() => setTab("history")}
             >
@@ -831,7 +835,12 @@ export function ProblemPage() {
             </button>
           </div>
           {tab === "statement" ? (
-            <article className="problem-content">
+            <article
+              className="problem-content"
+              role="tabpanel"
+              id="problem-tabpanel"
+              aria-labelledby="problem-tab-statement"
+            >
               <div className="meta-strip">
                 <span>
                   <strong>시간</strong> {problem.timeLimitMs}ms
@@ -886,7 +895,12 @@ export function ProblemPage() {
               ))}
             </article>
           ) : (
-            <div className="history-panel">
+            <div
+              className="history-panel"
+              role="tabpanel"
+              id="problem-tabpanel"
+              aria-labelledby="problem-tab-history"
+            >
               {!session ? (
                 <p className="muted">
                   로그인하면 이 문제의 제출 내역이 여기에 표시됩니다.

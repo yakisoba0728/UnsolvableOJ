@@ -436,6 +436,30 @@ test("a failed submission history load shows an error, not an empty history", as
   await expect(page.getByText("아직 이 문제를 제출하지 않았습니다")).toHaveCount(0);
 });
 
+test("solve page tabs control a labelled tabpanel and no aria-controls points at a missing element", async ({
+  page,
+}) => {
+  const dangling = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll("[aria-controls]")]
+        .flatMap((element) => element.getAttribute("aria-controls")!.split(/\s+/))
+        .filter((id) => !document.getElementById(id)),
+    );
+  await page.goto("/problems/view/sum");
+  await expect(page.getByRole("tabpanel", { name: "문제 설명" })).toBeVisible();
+  expect(await dangling()).toEqual([]);
+  await page.getByRole("tab", { name: "제출 내역" }).click();
+  await expect(page.getByRole("tabpanel", { name: "제출 내역" })).toBeVisible();
+  expect(await dangling()).toEqual([]);
+  await page.getByRole("combobox", { name: "언어" }).click();
+  await expect(page.getByRole("listbox")).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "언어" })).toHaveAttribute(
+    "aria-controls",
+    (await page.getByRole("listbox").getAttribute("id"))!,
+  );
+  expect(await dangling()).toEqual([]);
+});
+
 test.describe("code editor basics on the solve page", () => {
   test("switching languages immediately keeps each language's latest draft", async ({
     page,

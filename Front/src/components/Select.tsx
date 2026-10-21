@@ -122,7 +122,7 @@ export function Select({
         role="combobox"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-controls={`${id}-list`}
+        aria-controls={open ? `${id}-list` : undefined}
         aria-activedescendant={open ? `${id}-${active}` : undefined}
         aria-label={ariaLabel}
         disabled={disabled}

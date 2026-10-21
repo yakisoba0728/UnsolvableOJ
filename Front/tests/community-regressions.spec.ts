@@ -413,6 +413,17 @@ test("a notice passed on navigation shows once and does not return on reload or 
   expect(await notice.count()).toBe(0);
 });
 
+test("the collapsed answers toggle controls the answer list only while it is rendered", async ({ page }) => {
+  await seed(page);
+  await page.goto("/community/mine");
+  const toggle = page.getByRole("button", { name: /^답변 1/ });
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(toggle).not.toHaveAttribute("aria-controls", /.*/);
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-controls", "answer-list");
+  await expect(page.locator("#answer-list")).toBeVisible();
+});
+
 test("the profile post scroller counter stays in range when its list shrinks", async ({ page }) => {
   const posts = [1, 2, 3, 4].map((n) => ({ ...other, id: `liked-${n}`, title: `추천 글 ${n}` }));
   await seed(page, posts, posts.map((post) => post.id));
