@@ -88,3 +88,29 @@ describe('public problem continuation', () => {
     expect(query).not.toHaveBeenCalled();
   });
 });
+
+describe('public problem detail', () => {
+  it.each([
+    [[{ input: '1\n', expectedOutput: '1\n', isSample: true }]],
+    [[]],
+  ])('loads only sample cases and returns %j', async (samples) => {
+    const findOneBy = vi.fn().mockResolvedValue({ id: ids[0], slug: 'sum' });
+    const find = vi.fn().mockResolvedValue(samples);
+    const service = new ProblemsService(
+      { findOneBy } as unknown as Repository<Problem>,
+      { manager: { find } } as unknown as DataSource,
+    );
+    const result = await service.findPublishedBySlug('SUM');
+    expect(findOneBy).toHaveBeenCalledWith({
+      slug: 'sum',
+      status: ProblemStatus.PUBLISHED,
+    });
+    expect(find).toHaveBeenCalledWith(expect.anything(), {
+      where: { problemId: ids[0], isSample: true },
+      order: { order: 'ASC' },
+    });
+    expect(result.samples).toEqual(
+      samples.map(({ input, expectedOutput }) => ({ input, expectedOutput })),
+    );
+  });
+});

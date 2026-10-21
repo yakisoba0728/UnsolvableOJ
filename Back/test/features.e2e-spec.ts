@@ -157,6 +157,15 @@ describe('Backend features (e2e)', () => {
       timeLimitMs: 5000,
       memoryLimitMb: 512,
     });
+    await request(app.getHttpServer())
+      .patch(`${base}/problems/${problemId}/status`)
+      .set(bearer(adminToken))
+      .send({ status: 'PUBLISHED' })
+      .expect(200);
+    const hiddenOnly = await request(app.getHttpServer())
+      .get(`${base}/problems/version-${suffix}`)
+      .expect(200);
+    expect(hiddenOnly.body.samples).toEqual([]);
     const path = `${base}/internal/judge/submissions/${submissionId}`;
     const firstAttempt = randomUUID();
     const claim = await request(app.getHttpServer())

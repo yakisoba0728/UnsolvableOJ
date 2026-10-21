@@ -270,12 +270,16 @@ export class ProblemsService {
   }
 
   async findPublishedBySlug(slug: string) {
-    const problem = await this.problems.findOne({
-      where: { slug: slug.toLowerCase(), status: ProblemStatus.PUBLISHED },
-      relations: { testCases: true },
-      order: { testCases: { order: 'ASC' } },
+    const problem = await this.problems.findOneBy({
+      slug: slug.toLowerCase(),
+      status: ProblemStatus.PUBLISHED,
     });
     if (!problem) throw new NotFoundException('문제를 찾을 수 없습니다.');
+    // Hidden cases can be megabytes each; the public view needs samples only.
+    problem.testCases = await this.dataSource.manager.find(TestCase, {
+      where: { problemId: problem.id, isSample: true },
+      order: { order: 'ASC' },
+    });
     return this.toDetail(problem);
   }
 
