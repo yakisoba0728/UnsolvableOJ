@@ -217,14 +217,13 @@ npm run check                 # lint + typecheck + unit test + build
 npm run test:e2e              # compose 인프라가 실행 중일 때 E2E
 npm run test:pipeline         # 임시 DB에서 API·워커 파이프라인 검사
 npm run test:migrations       # 새 빌드로 마이그레이션 왕복·롤백 안전장치 검사
-npm run test:operations       # 통합 실행기·준비 완료 신호 회귀 검사
-npm run test:judge-flow       # 실제 API → 큐 → go-judge → DB 결과 검증
+npm run test:operations       # 통합 실행기·nginx 설정 회귀 검사
 ```
 
-`test:e2e`·`test:pipeline`·`test:judge-flow`는 Back을 새로 빌드한 뒤 실행마다 일회용 PostgreSQL DB를 생성·마이그레이션합니다. `DATABASE_URL` 계정에는 `CREATEDB` 권한이 필요하며 지정된 기존 DB를 마이그레이션하지 않습니다. 직접 Vitest 통합 설정이나 judge-flow 스크립트를 실행하면 거절합니다. 종료 시 소유한 프로세스를 먼저 중단하고 생성한 DB만 삭제하며, 프로세스 종료를 확인하지 못하면 안전을 위해 DB를 남깁니다.
-`test:judge-flow`는 Judge 빌드와 `docker compose up -d --build --wait go-judge`로 실행 서비스를 준비한 다음 실행합니다. `GO_JUDGE_URL`·`GO_JUDGE_TOKEN`으로 대상 서비스를 지정하며 기본값은 로컬 Compose와 같습니다.
-로컬 PostgreSQL/Redis가 필요하며 테스트 API는 임시 포트에서 시작합니다(`JUDGE_TEST_PORT`로 지정 가능). 실행기가 소유한 API의 준비 완료 신호를 확인한 후에만 요청하고, 워커도 자동으로 시작·종료합니다.
-`REDIS_HOST`·`REDIS_PORT`로 테스트용 Redis를 지정할 수 있습니다. E2E는 `REDIS_DB`(기본 1), 파이프라인·judge-flow는 `PIPELINE_REDIS_DB`(기본 2)를 사용합니다. 해당 Redis DB에 다른 워커를 연결하지 마세요.
+`test:e2e`·`test:pipeline`은 Back을 새로 빌드한 뒤 실행마다 일회용 PostgreSQL DB를 생성·마이그레이션합니다. `DATABASE_URL` 계정에는 `CREATEDB` 권한이 필요하며 지정된 기존 DB를 마이그레이션하지 않습니다. 직접 Vitest 통합 설정을 실행하면 거절합니다. 종료 시 소유한 프로세스를 먼저 중단하고 생성한 DB만 삭제하며, 프로세스 종료를 확인하지 못하면 안전을 위해 DB를 남깁니다.
+`test:pipeline`은 Judge 빌드와 `docker compose up -d --build --wait go-judge`로 실행 서비스를 준비한 다음 실행합니다. `GO_JUDGE_URL`·`GO_JUDGE_TOKEN`으로 대상 서비스를 지정하며 기본값은 로컬 Compose와 같습니다.
+로컬 PostgreSQL/Redis가 필요하며 테스트 API는 임시 포트에서 시작하고, 워커도 자동으로 시작·종료합니다.
+`REDIS_HOST`·`REDIS_PORT`로 테스트용 Redis를 지정할 수 있습니다. E2E는 `REDIS_DB`(기본 1), 파이프라인은 `PIPELINE_REDIS_DB`(기본 2)를 사용합니다. 해당 Redis DB에 다른 워커를 연결하지 마세요.
 XP 획득 원장이 남아 있는 foundations 마이그레이션의 롤백은 중단됩니다. XP 중복 지급을 막기 위한 제한이며, 운영 데이터는 검증된 복구 절차 없이 강제 롤백하지 마세요.
 정답, 오답, 실행 오류, 시간 초과, 출력 초과, 컴파일 오류, 비공개 오류 차단을 실제 실행으로 검증합니다.
 

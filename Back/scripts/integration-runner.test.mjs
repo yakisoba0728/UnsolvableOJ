@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import { execFile as execFileCallback, spawn } from 'node:child_process';
-import { EventEmitter, once } from 'node:events';
+import { once } from 'node:events';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { integrationDatabaseUrl, stopChild, waitForApiListening } from './run-integration.mjs';
+import { integrationDatabaseUrl, stopChild } from './run-integration.mjs';
 
 const read = (path) => readFile(new URL(path, import.meta.url), 'utf8');
 const execFile = promisify(execFileCallback);
@@ -37,52 +37,19 @@ test('the child database URL keeps certificate paths and PostgreSQL options', ()
   );
 });
 
-test('direct native configs and judge-flow abort without the runner marker', async () => {
+test('direct native configs abort without the runner marker', async () => {
   const env = { ...process.env, DATABASE_URL: 'postgresql://unused:unused@127.0.0.1/unsolvable_oj' };
   delete env.UNSOLVABLE_TEST_DATABASE;
-  for (const script of ['vitest.config.e2e.ts', 'scripts/check-judge-flow.mjs']) {
-    await assert.rejects(
-      execFile(process.execPath, [script], {
-        cwd: fileURLToPath(new URL('../', import.meta.url)),
-        env,
-      }),
-      (error) => {
-        assert.match(error.stderr, /disposable database/);
-        return true;
-      },
-    );
-  }
-});
-
-function childEmitter() {
-  return Object.assign(new EventEmitter(), { exitCode: null, signalCode: null });
-}
-
-test('API readiness requires the owned child listening message and actual bound port', async () => {
-  const child = childEmitter();
-  const ready = waitForApiListening(child);
-  child.emit('message', { type: 'unrelated', port: 3100 });
-  assert.equal(child.listenerCount('message'), 1);
-  child.emit('message', { type: 'unsolvable-api-listening', address: { address: '127.0.0.1', port: 43210 } });
-  assert.deepEqual(await ready, { address: '127.0.0.1', port: 43210 });
-  assert.equal(child.listenerCount('exit'), 0);
-  assert.equal(child.listenerCount('message'), 0);
-});
-
-test('API startup failure, invalid messages and already-exited children fail closed', async () => {
-  const exited = childEmitter();
-  const ready = waitForApiListening(exited);
-  exited.emit('exit', 1, null);
-  await assert.rejects(ready, /exited before listening/);
-  const failed = childEmitter();
-  const failure = waitForApiListening(failed);
-  failed.emit('error', new Error('spawn failed'));
-  await assert.rejects(failure, /spawn failed/);
-  const invalid = childEmitter();
-  const invalidReady = waitForApiListening(invalid);
-  invalid.emit('message', { type: 'unsolvable-api-listening', address: { address: '0.0.0.0', port: 3100 } });
-  await assert.rejects(invalidReady, /invalid listening address/);
-  await assert.rejects(waitForApiListening(Object.assign(childEmitter(), { signalCode: 'SIGTERM' })), /exited before listening/);
+  await assert.rejects(
+    execFile(process.execPath, ['vitest.config.e2e.ts'], {
+      cwd: fileURLToPath(new URL('../', import.meta.url)),
+      env,
+    }),
+    (error) => {
+      assert.match(error.stderr, /disposable database/);
+      return true;
+    },
+  );
 });
 
 test('cleanup waits for the owned child process group to stop', async () => {
@@ -102,7 +69,7 @@ test('cleanup waits for the owned child process group to stop', async () => {
 
 test('project commands build fresh and provision before spawning; only the created DB is dropped', async () => {
   const { scripts } = JSON.parse(await read('../package.json'));
-  for (const mode of ['e2e', 'pipeline', 'judge-flow'])
+  for (const mode of ['e2e', 'pipeline'])
     assert.equal(scripts[`test:${mode}`], `npm run build && node scripts/run-integration.mjs ${mode}`);
   assert.equal(scripts['test:migrations'], 'npm run build && node scripts/check-migrations.mjs');
   const runner = await read('./run-integration.mjs');

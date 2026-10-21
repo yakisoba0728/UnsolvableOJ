@@ -32,8 +32,7 @@
     "test:pipeline": "npm run build && node scripts/run-integration.mjs pipeline",
     "test:migrations": "npm run build && node scripts/check-migrations.mjs",
     "test:operations": "node --test scripts/integration-runner.test.mjs",
-    "typecheck": "tsc --noEmit --incremental false",
-    "test:judge-flow": "npm run build && node scripts/run-integration.mjs judge-flow"
+    "typecheck": "tsc --noEmit --incremental false"
   },
   "dependencies": {
     "@nestjs/bullmq": "^12.0.0",

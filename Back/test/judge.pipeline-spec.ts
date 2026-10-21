@@ -131,6 +131,7 @@ describe('API → Redis → real worker → go-judge → API', () => {
         status: 'ACCEPTED',
         passedTestCases: 2,
         totalTestCases: 2,
+        debugOutputs: [{ testCase: 1, stdout: '3\n' }],
       });
       expect(judged.runtimeMs).toBeGreaterThanOrEqual(0);
       expect(judged.memoryKb).toBeGreaterThan(0);
@@ -138,27 +139,61 @@ describe('API → Redis → real worker → go-judge → API', () => {
     },
   );
 
+  // Sample-case output written before the failure is kept for the user.
   it.each([
-    ['WRONG_ANSWER', 'PYTHON', 'print(0)'],
-    ['TIME_LIMIT_EXCEEDED', 'PYTHON', 'while True: pass'],
+    ['WRONG_ANSWER', 'PYTHON', 'print(0)', [{ stdout: '0\n' }]],
+    [
+      'TIME_LIMIT_EXCEEDED',
+      'PYTHON',
+      'print("before timeout", flush=True)\nwhile True: pass',
+      [{ stdout: 'before timeout\n' }],
+    ],
     [
       'MEMORY_LIMIT_EXCEEDED',
       'PYTHON',
       'data = bytearray(512 * 1024 * 1024); print(3)',
+      expect.any(Array),
     ],
-    ['RUNTIME_ERROR', 'PYTHON', 'raise RuntimeError("intentional")'],
-    ['OUTPUT_LIMIT_EXCEEDED', 'PYTHON', 'while True: print("x" * 65536)'],
-    ['COMPILE_ERROR', 'C', 'this is not valid C'],
+    [
+      'RUNTIME_ERROR',
+      'PYTHON',
+      'print("before error", flush=True)\nraise RuntimeError("intentional")',
+      [{ stdout: 'before error\n' }],
+    ],
+    [
+      'OUTPUT_LIMIT_EXCEEDED',
+      'PYTHON',
+      'while True: print("x" * 65536)',
+      [{ stdout: 'x'.repeat(1000), stdoutTruncated: true }],
+    ],
+    ['COMPILE_ERROR', 'C', 'this is not valid C', []],
   ])(
     'persists %s from the actual runtime',
-    async (status, language, source) => {
+    async (status, language, source, debugOutputs) => {
       expect(await submit(language, source), workerLog).toMatchObject({
         status,
         passedTestCases: 0,
         totalTestCases: 2,
+        debugOutputs,
       });
     },
   );
+
+  it('shows sample-case stdout/stderr but never hidden-case diagnostics', async () => {
+    const judged = await submit(
+      'PYTHON',
+      'import sys\na,b=map(int,input().split())\nprint("debug", file=sys.stderr)\nif a==5: raise RuntimeError("hidden-secret")\nprint(a+b)',
+    );
+    expect(judged, workerLog).toMatchObject({
+      status: 'RUNTIME_ERROR',
+      passedTestCases: 1,
+      totalTestCases: 2,
+      debugOutputs: [{ testCase: 1, stdout: '3\n', stderr: 'debug\n' }],
+    });
+    expect(
+      JSON.stringify([judged.debugOutputs, judged.judgeMessage]),
+    ).not.toContain('hidden-secret');
+  });
 
   it('rejudges with a new generation, awards XP once, and reports worker health', async () => {
     expect(acceptedId).toBeTruthy();
