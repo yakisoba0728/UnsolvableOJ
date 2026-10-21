@@ -1332,11 +1332,25 @@ textarea {
 }
 .solve-grid {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);
-  gap: 16px;
+  /* 문제 설명 | 크기 조절 손잡이 | 코드 작성. 열 크기는 화면 코드가 --solve-columns로 정한다(기본은 3:5) */
+  grid-template-columns: var(
+    --solve-columns,
+    minmax(0, 3fr) 16px minmax(0, 5fr)
+  );
+  column-gap: 0;
+  row-gap: 16px;
   align-items: stretch;
   height: calc(100vh - 176px);
   min-height: 560px;
+}
+.solve-grid > .statement-panel {
+  grid-column: 1;
+}
+.solve-grid > .solve-resizer {
+  grid-column: 2;
+}
+.solve-grid > .code-panel {
+  grid-column: 3;
 }
 .solve-panel {
   background: var(--color-surface);
@@ -1789,6 +1803,14 @@ button.heat-cell.selected {
   .solve-grid {
     grid-template-columns: 1fr;
     height: auto;
+  }
+  /* 위아래로 쌓이는 배치에서는 크기 조절 손잡이도, 패널 숨김도 쓰지 않는다 */
+  .solve-grid > .statement-panel,
+  .solve-grid > .code-panel {
+    grid-column: 1;
+  }
+  .solve-grid > .solve-resizer {
+    display: none;
   }
   .statement-panel .problem-content {
     max-height: 60vh;
@@ -7269,5 +7291,78 @@ textarea {
 @media (min-width: 881px) and (max-width: 1100px) {
   .data-list.list-history {
     --cols: minmax(0, 1fr) 112px 80px 72px 120px 140px;
+  }
+}
+
+/* 풀이 화면: 문제 설명과 코드 작성 사이의 가로 크기 조절 손잡이(프로그래머스처럼 끌어서 조절) */
+.solve-resizer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+.solve-resizer-grip {
+  width: 4px;
+  height: 56px;
+  border-radius: 999px;
+  background: var(--color-border-strong);
+  transition:
+    background 0.15s ease,
+    height 0.15s ease;
+}
+.solve-resizer:hover .solve-resizer-grip,
+.solve-resizer:focus-visible .solve-resizer-grip,
+.solve-grid.is-dragging .solve-resizer-grip {
+  height: 96px;
+  background: var(--color-primary);
+}
+.solve-resizer:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-control);
+}
+/* 한쪽 패널이 너무 좁아져 사라진 상태: 사라진 패널은 숨기고(입력 중인 코드와 선택한 탭은 그대로 보존), 손잡이는 남긴다 */
+.solve-grid > .solve-panel.is-hidden {
+  display: none;
+}
+/* 세로로 쌓이는 폭에서는 손잡이가 없으므로 저장된 숨김 상태를 무시하고 둘 다 보여 준다 */
+@media (max-width: 1100px) {
+  .solve-grid > .solve-panel.is-hidden {
+    display: flex;
+  }
+}
+.solve-grid.is-dragging {
+  user-select: none;
+  cursor: col-resize;
+}
+.solve-grid.is-dragging iframe,
+.solve-grid.is-dragging textarea {
+  pointer-events: none;
+}
+.solve-grid.is-code .solve-resizer-grip::before,
+.solve-grid.is-statement .solve-resizer-grip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid var(--color-ink-600);
+  border-right: 2px solid var(--color-ink-600);
+  transform: translateY(-50%) rotate(45deg);
+}
+/* 문제 설명이 숨겨졌으면 손잡이 왼쪽 가장자리에서 오른쪽(열기) 방향, 코드 작성이 숨겨졌으면 반대 방향의 화살표를 보인다 */
+.solve-grid.is-code .solve-resizer-grip::before {
+  left: -2px;
+}
+.solve-grid.is-statement .solve-resizer-grip::before {
+  right: -2px;
+  transform: translateY(-50%) rotate(225deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .solve-resizer-grip {
+    transition: none;
   }
 }

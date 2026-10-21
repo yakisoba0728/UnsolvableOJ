@@ -25,17 +25,32 @@ import {
   type Suggestion,
 } from "../editor/autocomplete";
 import {
+  addUnits,
   applyToTextarea,
+  backspaceUnit,
   cursorPosition,
+  deleteUnit,
   handleBackspace,
   handleCharacter,
   handleEnter,
   handleTab,
+  remapUnits,
   toggleComment,
+  type EditResult,
   type EditState,
 } from "../editor/codeEditing";
 import type { Language, Page, Problem, Submission } from "../types";
 import { problemPath } from "../paths";
+import {
+  DEFAULT_SPLIT,
+  HANDLE_WIDTH,
+  parseSplit,
+  resolveSplit,
+  splitFromKey,
+  splitFromPointer,
+  type SplitMode,
+  type SplitState,
+} from "../solveSplit";
 import { difficultyLabel } from "./ProblemsPage";
 
 const languages: { value: Language; label: string; starter: string }[] = [
@@ -96,6 +111,8 @@ const FONT_MIN = 11;
 const FONT_MAX = 20;
 // 채점 결과 패널의 높이(px): 위쪽 손잡이를 끌거나 ↑↓ 키로 조절하고, 마지막 값을 기억한다.
 const panelHeightKey = "unsolvable-oj-judge-height-v1";
+// 문제 설명과 코드 작성 사이의 가로 분할(비율과 닫힘)을 기억한다.
+const splitKey = "unsolvable-oj-solve-split-v1";
 const PANEL_MIN = 120;
 const PANEL_DEFAULT = 260;
 const PANEL_KEY_STEP = 24;
@@ -109,6 +126,24 @@ function readDraft(problemId: string, language: Language) {
     return localStorage.getItem(draftKey(problemId, language));
   } catch {
     return null;
+  }
+}
+
+/** Tab으로 넣은 들여쓰기 한 단계의 위치 목록(초안 옆에 저장해, 새로고침 뒤에도 Backspace가 한 단계씩 지운다). */
+function unitsKey(problemId: string, language: Language) {
+  return `unsolvable-oj-draft-units-v1:${problemId}:${language}`;
+}
+
+function readUnits(problemId: string, language: Language): number[] {
+  try {
+    const parsed: unknown = JSON.parse(
+      localStorage.getItem(unitsKey(problemId, language)) ?? "[]",
+    );
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is number => typeof item === "number")
+      : [];
+  } catch {
+    return [];
   }
 }
 
@@ -148,6 +183,17 @@ export function ProblemPage() {
   // 이 화면에서 채점 중이거나 방금 채점한 제출(결과는 코드 창 아래에 바로 보여 준다)
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(true);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [split, setSplit] = useState<SplitState>(() => {
+    try {
+      return parseSplit(localStorage.getItem(splitKey));
+    } catch {
+      return DEFAULT_SPLIT;
+    }
+  });
+  const splitRef = useRef(split);
+  const [gridWidth, setGridWidth] = useState(0);
+  const [dragging, setDragging] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   const [panelHeight, setPanelHeight] = useState(() => {
     try {
@@ -173,6 +219,10 @@ export function ProblemPage() {
   const suppressSuggest = useRef(false);
   // 스니펫의 Tab 칸 이동 상태, 직전 입력창 값(칸 위치 보정용), 미러 동기화 중 표시
   const sessionRef = useRef<SnippetSession | null>(null);
+  // Tab으로 넣은 들여쓰기 한 단계(공백 네 칸)의 시작 위치. 공백만으로는 직접 친 공백과 구분할 수 없어 따로 기억하고,
+  // 값이 바뀔 때마다(입력·붙여넣기·실행 취소 포함) 따라 움직이게 하며, Backspace·Delete가 한 단계씩 지우는 데 쓴다.
+  const unitsRef = useRef<number[]>([]);
+  const unitsBaseRef = useRef("");
   const lastValueRef = useRef("");
   const syncingRef = useRef(false);
   const listRef = useRef<HTMLUListElement>(null);
@@ -211,12 +261,31 @@ export function ProblemPage() {
   const starter = (value: Language) =>
     languages.find((item) => item.value === value)?.starter ?? "";
 
+  // 두 패널을 담은 영역의 폭을 지켜봐서, 창이 줄어 한쪽이 너무 좁아지면 그 패널을 숨긴다.
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const update = () => setGridWidth(grid.getBoundingClientRect().width);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(grid);
+    return () => observer.disconnect();
+  }, [problem?.id]);
+
   // 문제가 바뀌거나 불러와지면 저장된 초안을 복원한다.
   useEffect(() => {
     if (!problem) return;
     const draft = readDraft(problem.id, language);
-    setSource(draft ?? starter(language));
+    const restored = draft ?? starter(language);
+    setSource(restored);
     setSavedAt(draft ? new Date() : null);
+    // 복원한 글에 맞는 Tab 단위만 이어받는다(글자가 공백 네 칸이 아니면 버려진다). 시작 코드의 들여쓰기는 기억하지 않는다.
+    unitsRef.current = remapUnits(
+      draft === null ? [] : readUnits(problem.id, language),
+      restored,
+      restored,
+    );
+    unitsBaseRef.current = restored;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [problem?.id, language]);
 
@@ -237,6 +306,31 @@ export function ProblemPage() {
 
   useEffect(() => {
     lastValueRef.current = source;
+  }, [source]);
+
+  /** 값이 바뀐 만큼 기억한 Tab 단위를 옮기고, 이번 편집으로 새로 들어간 단위를 더한다. */
+  function syncUnits(value: string, added: readonly number[] = []) {
+    unitsRef.current = addUnits(
+      remapUnits(unitsRef.current, unitsBaseRef.current, value),
+      added,
+      value,
+    );
+    unitsBaseRef.current = value;
+  }
+
+  // 어떤 경로로 값이 바뀌어도(입력·붙여넣기·실행 취소·초기화) 기억한 단위가 글자와 어긋나지 않게 맞추고 저장한다.
+  useEffect(() => {
+    syncUnits(source);
+    if (!problem) return;
+    try {
+      localStorage.setItem(
+        unitsKey(problem.id, language),
+        JSON.stringify(unitsRef.current),
+      );
+    } catch {
+      /* 저장할 수 없어도 편집은 그대로 동작한다 */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source]);
 
   // 문제나 언어가 바뀌면 진행 중이던 스니펫 칸 이동을 끝낸다.
@@ -354,6 +448,29 @@ export function ProblemPage() {
   const selectedLanguage = languages.find((item) => item.value === language);
   const lineCount = source.split("\n").length;
 
+  // 지금 화면 폭에서 실제로 보이는 모습(둘 다 / 문제 설명만 / 코드 작성만)과 그에 맞는 열 크기.
+  // 열 크기는 CSS 변수로 넘기고, 1100px 이하의 위아래 쌓이는 배치에서는 CSS가 이 값을 무시한다.
+  const splitMode: SplitMode =
+    gridWidth > 0
+      ? resolveSplit(split, gridWidth)
+      : split.collapsed === "statement"
+        ? "code"
+        : split.collapsed === "code"
+          ? "statement"
+          : "split";
+  const splitColumns =
+    splitMode === "code"
+      ? `0px ${HANDLE_WIDTH}px minmax(0, 1fr)`
+      : splitMode === "statement"
+        ? `minmax(0, 1fr) ${HANDLE_WIDTH}px 0px`
+        : `minmax(0, ${Math.round(split.ratio * 1000)}fr) ${HANDLE_WIDTH}px minmax(0, ${Math.round((1 - split.ratio) * 1000)}fr)`;
+  const splitPercent =
+    splitMode === "code"
+      ? 0
+      : splitMode === "statement"
+        ? 100
+        : Math.round(split.ratio * 100);
+
   // 코드 입력 칸이 최소한 남도록, 결과 패널은 코드 패널 높이에서 일정 부분을 뺀 만큼까지만 키운다.
   function clampPanelHeight(value: number) {
     const room = panelRef.current?.parentElement?.clientHeight ?? 800;
@@ -368,6 +485,56 @@ export function ProblemPage() {
       /* 저장할 수 없어도 화면은 그대로 동작한다 */
     }
   }
+  /** 분할 상태를 적용하고(끄는 중에는 저장하지 않고) 필요하면 저장한다. */
+  function applySplit(next: SplitState, persist: boolean) {
+    splitRef.current = next;
+    setSplit(next);
+    if (!persist) return;
+    try {
+      localStorage.setItem(splitKey, JSON.stringify(next));
+    } catch {
+      /* 저장할 수 없어도 이번 화면의 크기는 그대로 적용된다 */
+    }
+  }
+
+  function startSplitDrag(event: React.PointerEvent<HTMLDivElement>) {
+    const grid = gridRef.current;
+    if (!grid || event.button !== 0) return;
+    event.preventDefault();
+    const handle = event.currentTarget;
+    handle.setPointerCapture(event.pointerId);
+    setDragging(true);
+    const move = (moveEvent: PointerEvent) => {
+      const rect = grid.getBoundingClientRect();
+      applySplit(
+        splitFromPointer(
+          moveEvent.clientX - rect.left,
+          rect.width,
+          splitRef.current,
+        ),
+        false,
+      );
+    };
+    const end = () => {
+      handle.removeEventListener("pointermove", move);
+      handle.removeEventListener("pointerup", end);
+      handle.removeEventListener("pointercancel", end);
+      setDragging(false);
+      applySplit(splitRef.current, true);
+    };
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener("pointerup", end);
+    handle.addEventListener("pointercancel", end);
+  }
+
+  function onSplitKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    const next = splitFromKey(event.key, gridWidth || 1, splitRef.current);
+    if (!next) return;
+    event.preventDefault();
+    applySplit(next, true);
+  }
+
   function startPanelResize(event: React.PointerEvent<HTMLDivElement>) {
     event.preventDefault();
     const handle = event.currentTarget;
@@ -576,20 +743,37 @@ export function ProblemPage() {
       start: target.selectionStart,
       end: target.selectionEnd,
     };
+    // 키를 처리하기 전에 기억한 Tab 단위를 지금 글에 맞춘다.
+    syncUnits(target.value);
+    /** 편집을 적용하고, 기억한 단위를 옮긴 뒤 이번 편집으로 새로 들어간 단위를 더한다. */
+    const run = (next: EditResult) => {
+      applyEdit(target, next);
+      syncUnits(next.value, next.units);
+    };
     if (modifier && event.key === "/") {
       event.preventDefault();
       applyEdit(target, toggleComment(state, language));
     } else if (event.key === "Tab" && !modifier && !event.altKey) {
       event.preventDefault();
-      applyEdit(target, handleTab(state, event.shiftKey));
+      run(handleTab(state, event.shiftKey));
     } else if (event.key === "Enter" && !modifier && !event.shiftKey) {
       event.preventDefault();
-      applyEdit(target, handleEnter(state, language));
-    } else if (event.key === "Backspace" && !modifier && !event.altKey) {
-      const next = handleBackspace(state);
+      run(handleEnter(state, language, unitsRef.current));
+    } else if (
+      (event.key === "Backspace" || event.key === "Delete") &&
+      !modifier &&
+      !event.altKey
+    ) {
+      // Tab으로 넣은 들여쓰기 한 단계는 한 번에 지우고, 직접 친 공백은 기본 동작(한 글자씩)을 따른다.
+      const unitEdit =
+        event.key === "Backspace"
+          ? backspaceUnit(state, unitsRef.current)
+          : deleteUnit(state, unitsRef.current);
+      const next =
+        unitEdit ?? (event.key === "Backspace" ? handleBackspace(state) : null);
       if (next) {
         event.preventDefault();
-        applyEdit(target, next);
+        run(next);
       }
     } else if (event.key.length === 1 && !modifier && !event.altKey) {
       const next = handleCharacter(state, event.key);
@@ -610,8 +794,14 @@ export function ProblemPage() {
           {difficultyLabel(problem.difficulty)}
         </span>
       </div>
-      <div className="solve-grid">
-        <section className="solve-panel statement-panel">
+      <div
+        ref={gridRef}
+        className={`solve-grid is-${splitMode}${dragging ? " is-dragging" : ""}`}
+        style={{ "--solve-columns": splitColumns } as React.CSSProperties}
+      >
+        <section
+          className={`solve-panel statement-panel${splitMode === "code" ? " is-hidden" : ""}`}
+        >
           <div className="tab-list" role="tablist" aria-label="문제 보기">
             <button
               role="tab"
@@ -728,7 +918,26 @@ export function ProblemPage() {
           )}
         </section>
 
-        <section className="solve-panel code-panel" aria-label="코드 작성">
+        <div
+          className="solve-resizer"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="문제 설명과 코드 작성 크기 조절"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={splitPercent}
+          tabIndex={0}
+          title="좌우로 끌어 크기를 조절해요. 너무 줄이면 그 쪽이 사라지고, 끌어서 다시 열 수 있어요. (←→ 키, 더블클릭으로 원래대로)"
+          onPointerDown={startSplitDrag}
+          onKeyDown={onSplitKeyDown}
+          onDoubleClick={() => applySplit(DEFAULT_SPLIT, true)}
+        >
+          <span className="solve-resizer-grip" aria-hidden="true" />
+        </div>
+        <section
+          className={`solve-panel code-panel${splitMode === "statement" ? " is-hidden" : ""}`}
+          aria-label="코드 작성"
+        >
           <div className="code-toolbar">
             <Select
               className="language-select"
@@ -777,6 +986,9 @@ export function ProblemPage() {
               onClick={() => {
                 sessionRef.current = null;
                 setPopup(null);
+                // 처음 상태로 돌아가므로 기억한 Tab 단위도 비운다.
+                unitsRef.current = [];
+                unitsBaseRef.current = starter(language);
                 setSource(starter(language));
                 try {
                   localStorage.removeItem(draftKey(problem.id, language));

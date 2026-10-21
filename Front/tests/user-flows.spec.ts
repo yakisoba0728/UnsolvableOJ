@@ -1339,6 +1339,248 @@ test("the font-size and reset buttons in the editor toolbar stay visible, readab
   expect(Number(await size())).toBe(20);
 });
 
+test.describe("Tab indentation is removed one level at a time, typed spaces one at a time", () => {
+  const SP4 = "    ";
+  type Editor = import("@playwright/test").Locator;
+  const open = async (page: import("@playwright/test").Page) => {
+    await authenticate(page);
+    await page.goto("/problems/view/sum");
+    const editor = page.getByLabel("소스 코드");
+    await editor.fill("");
+    await editor.focus();
+    return editor;
+  };
+  // Home/End/Ctrl+End는 운영체제마다 커서를 옮기지 않는 경우가 있어(macOS), 커서 위치를 직접 지정한다.
+  const caretAt = (editor: Editor, index: number) =>
+    editor.evaluate((el: HTMLTextAreaElement, position: number) => {
+      el.focus();
+      el.setSelectionRange(position, position);
+    }, index);
+  const caretEnd = (editor: Editor) =>
+    editor.evaluate((el: HTMLTextAreaElement) => {
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+    });
+  const spaces = async (editor: Editor, count: number) => {
+    for (let index = 0; index < count; index += 1) await editor.press("Space");
+  };
+
+  test("a Tab-made level goes with one Backspace; four typed spaces need four", async ({
+    page,
+  }) => {
+    const editor = await open(page);
+    await editor.press("Tab");
+    await expect(editor).toHaveValue(SP4);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue("");
+
+    // 같은 네 칸이라도 직접 친 공백은 한 글자씩 지워진다
+    await spaces(editor, 4);
+    await expect(editor).toHaveValue(SP4);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue("   ");
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue("  ");
+
+    // Tab으로 넣은 단계 뒤에 글자를 쓰면: 글자는 한 글자, 그다음 단계는 한 번에
+    await editor.fill("");
+    await editor.press("Tab");
+    await editor.pressSequentially("x");
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue(SP4);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue("");
+  });
+
+  test("levels are separated even when spaces typed by hand sit next to them", async ({
+    page,
+  }) => {
+    const editor = await open(page);
+    // Tab 한 단계 뒤에 직접 친 공백 네 칸: 뒤의 네 칸은 한 글자씩, 그다음 Tab 단계는 한 번에
+    await editor.press("Tab");
+    await spaces(editor, 4);
+    await expect(editor).toHaveValue(SP4 + SP4);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue(SP4 + "   ");
+    for (let index = 0; index < 3; index += 1) await editor.press("Backspace");
+    await expect(editor).toHaveValue(SP4);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue("");
+
+    // Tab 두 번: 한 번 누를 때마다 한 단계씩
+    await editor.press("Tab");
+    await editor.press("Tab");
+    await expect(editor).toHaveValue(SP4 + SP4);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue(SP4);
+  });
+
+  test("the remembered level follows edits made before it and stays in sync with the text", async ({
+    page,
+  }) => {
+    const editor = await open(page);
+    await editor.press("Tab");
+    await editor.pressSequentially("y");
+    await caretAt(editor, 0);
+    await editor.pressSequentially("Q");
+    await expect(editor).toHaveValue(`Q${SP4}y`);
+    // 단계 바로 뒤(y 앞)에서 지우면 앞에 글자가 생겼어도 한 단계가 한 번에 지워진다
+    await caretAt(editor, 5);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue("Qy");
+
+    // 단계의 가운데 글자를 지우면 더는 한 단계가 아니다: 남은 공백은 한 글자씩
+    await editor.fill("");
+    await editor.press("Tab");
+    await caretAt(editor, 2);
+    await editor.press("Delete"); // 가운데 공백 하나를 직접 지움(단위가 깨진다)
+    await expect(editor).toHaveValue("   ");
+    await caretEnd(editor);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue("  ");
+  });
+
+  test("Delete removes a whole level that starts at the caret", async ({
+    page,
+  }) => {
+    const editor = await open(page);
+    await editor.press("Tab");
+    await editor.pressSequentially("z");
+    await caretAt(editor, 0);
+    await editor.press("Delete");
+    await expect(editor).toHaveValue("z");
+    // 직접 친 공백은 Delete도 한 글자씩
+    await editor.fill("");
+    await spaces(editor, 4);
+    await caretAt(editor, 0);
+    await editor.press("Delete");
+    await expect(editor).toHaveValue("   ");
+  });
+
+  test("auto-indent after an opening bracket and carried indentation are levels too", async ({
+    page,
+  }) => {
+    const editor = await open(page);
+    // '{'를 치면 '}'가 같이 들어가므로, Enter는 닫는 괄호를 아래 줄로 내리고 안쪽 줄에 한 단계를 만든다
+    await editor.pressSequentially("if (x) {");
+    await editor.press("Enter");
+    await expect(editor).toHaveValue(`if (x) {\n${SP4}\n}`);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue("if (x) {\n\n}");
+
+    // (글자를 치면 자동완성 제안이 떠서 Enter가 제안 선택이 되므로, 제안이 뜨지 않는 숫자를 쓴다)
+    // Tab으로 들여쓴 줄에서 Enter: 새 줄이 이어받은 들여쓰기도 한 단계씩 지워진다
+    await editor.fill("");
+    await editor.press("Tab");
+    await editor.press("Tab");
+    await editor.pressSequentially("1");
+    await editor.press("Enter");
+    await expect(editor).toHaveValue(`${SP4}${SP4}1\n${SP4}${SP4}`);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue(`${SP4}${SP4}1\n${SP4}`);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue(`${SP4}${SP4}1\n`);
+
+    // 직접 친 공백으로 들여쓴 줄에서 Enter: 이어받은 들여쓰기는 한 글자씩
+    await editor.fill("");
+    await spaces(editor, 4);
+    await editor.pressSequentially("2");
+    await editor.press("Enter");
+    await expect(editor).toHaveValue(`${SP4}2\n${SP4}`);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue(`${SP4}2\n   `);
+  });
+
+  test("indenting several selected lines marks every line, and outdenting forgets them", async ({
+    page,
+  }) => {
+    const editor = await open(page);
+    await editor.fill("a\n\nb");
+    await editor.press("ControlOrMeta+a");
+    await editor.press("Tab");
+    await expect(editor).toHaveValue(`${SP4}a\n\n${SP4}b`);
+    // 마지막 줄의 한 단계(7~11번 칸) 바로 뒤에서 지운다
+    await caretAt(editor, 11);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue(`${SP4}a\n\nb`);
+    // 첫 줄의 한 단계도 같다
+    await caretAt(editor, 4);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue("a\n\nb");
+
+    // 다시 들여쓴 뒤 Shift+Tab으로 내어쓰면 단계가 사라지고 글은 원래대로
+    await editor.press("ControlOrMeta+a");
+    await editor.press("Tab");
+    await editor.press("ControlOrMeta+a");
+    await editor.press("Shift+Tab");
+    await expect(editor).toHaveValue("a\n\nb");
+  });
+
+  test("the remembered levels survive a reload together with the draft", async ({
+    page,
+  }) => {
+    const editor = await open(page);
+    await editor.press("Tab");
+    await editor.pressSequentially("q");
+    await page.reload();
+    const again = page.getByLabel("소스 코드");
+    await expect(again).toHaveValue(`${SP4}q`);
+    await caretEnd(again);
+    await again.press("Backspace");
+    await again.press("Backspace");
+    await expect(again).toHaveValue("");
+
+    // 직접 친 공백은 새로고침 뒤에도 한 글자씩
+    await spaces(again, 4);
+    await page.reload();
+    const typed = page.getByLabel("소스 코드");
+    await expect(typed).toHaveValue(SP4);
+    await caretEnd(typed);
+    await typed.press("Backspace");
+    await expect(typed).toHaveValue("   ");
+  });
+
+  test("many levels, undo, pasted text and tab characters never corrupt the text", async ({
+    page,
+  }) => {
+    const editor = await open(page);
+    // 100번 Tab → 100번 Backspace로 정확히 비워진다
+    for (let index = 0; index < 100; index += 1) await editor.press("Tab");
+    await expect(editor).toHaveValue(SP4.repeat(100));
+    for (let index = 0; index < 100; index += 1)
+      await editor.press("Backspace");
+    await expect(editor).toHaveValue("");
+
+    // 실행 취소 뒤에도 글이 망가지지 않고 Backspace가 정상 동작한다
+    await editor.press("Tab");
+    await editor.press("Backspace");
+    await editor.press("ControlOrMeta+z");
+    await editor.press("Backspace");
+    expect((await editor.inputValue()).trim()).toBe("");
+
+    // 진짜 탭 문자(붙여넣기)는 한 글자로 지워진다
+    await editor.fill("\t\t");
+    await caretEnd(editor);
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue("\t");
+
+    // 아주 긴 값 뒤에서도 기억이 어긋나지 않는다
+    await editor.fill("x".repeat(50_000));
+    await caretEnd(editor);
+    await editor.press("Tab");
+    await editor.press("Backspace");
+    expect((await editor.inputValue()).length).toBe(50_000);
+
+    // 이모지·한글·HTML 사이에서도 한 단계 단위가 지켜진다
+    await editor.fill("😀한글<b>");
+    await caretEnd(editor);
+    await editor.press("Tab");
+    await editor.pressSequentially("끝");
+    await editor.press("Backspace");
+    await editor.press("Backspace");
+    await expect(editor).toHaveValue("😀한글<b>");
+  });
+});
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
   page,
 }) => {
@@ -2303,3 +2545,173 @@ for (const path of [
     ).toBeVisible();
   });
 }
+
+test.describe("solve page: resizable statement | code split", () => {
+  const SPLIT_KEY = "unsolvable-oj-solve-split-v1";
+  type Page = import("@playwright/test").Page;
+  const open = async (page: Page, stored?: string) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await authenticate(page);
+    if (stored !== undefined)
+      await page.addInitScript(
+        ([key, value]) => window.localStorage.setItem(key, value),
+        [SPLIT_KEY, stored],
+      );
+    await page.goto("/problems/view/sum");
+    await expect(page.locator(".solve-grid")).toBeVisible();
+  };
+  const widths = (page: Page) =>
+    page.evaluate(() => {
+      const width = (selector: string) => {
+        const el = document.querySelector<HTMLElement>(selector)!;
+        return el.offsetParent === null
+          ? 0
+          : Math.round(el.getBoundingClientRect().width);
+      };
+      return {
+        statement: width(".statement-panel"),
+        code: width(".code-panel"),
+        grid: width(".solve-grid"),
+      };
+    });
+  const handle = (page: Page) =>
+    page.getByRole("separator", { name: "문제 설명과 코드 작성 크기 조절" });
+  const dragTo = async (page: Page, x: number) => {
+    const box = (await handle(page).boundingBox())!;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width / 2, y);
+    await page.mouse.down();
+    await page.mouse.move(x, y, { steps: 8 });
+    await page.mouse.up();
+  };
+
+  test("dragging the handle resizes both panels and the size is remembered after reload", async ({
+    page,
+  }) => {
+    await open(page);
+    const before = await widths(page);
+    await dragTo(page, 800);
+    const after = await widths(page);
+    expect(after.statement).toBeGreaterThan(before.statement + 100);
+    expect(after.code).toBeLessThan(before.code - 100);
+    await page.reload();
+    await expect(page.getByLabel("소스 코드")).toBeVisible();
+    expect(
+      Math.abs((await widths(page)).statement - after.statement),
+    ).toBeLessThan(3);
+  });
+
+  test("dragging far left hides the statement, far right hides the code, and typed code survives both", async ({
+    page,
+  }) => {
+    await open(page);
+    const editor = page.getByLabel("소스 코드");
+    await editor.fill("12345");
+    await dragTo(page, 2);
+    let now = await widths(page);
+    expect(now.statement).toBe(0);
+    expect(now.code).toBeGreaterThan(1300);
+    await expect(editor).toHaveValue("12345");
+
+    await dragTo(page, 700);
+    now = await widths(page);
+    expect(now.statement).toBeGreaterThan(200);
+    await dragTo(page, 1438);
+    now = await widths(page);
+    expect(now.code).toBe(0);
+    expect(now.statement).toBeGreaterThan(1300);
+    await dragTo(page, 700);
+    await expect(editor).toHaveValue("12345");
+    expect((await widths(page)).code).toBeGreaterThan(300);
+  });
+
+  test("keyboard: arrows, Home/End and Enter; double-click resets", async ({
+    page,
+  }) => {
+    await open(page);
+    const start = (await widths(page)).statement;
+    await handle(page).focus();
+    await page.keyboard.press("ArrowRight");
+    expect((await widths(page)).statement).toBeGreaterThan(start);
+    await page.keyboard.press("Home");
+    expect((await widths(page)).statement).toBe(0);
+    await page.keyboard.press("ArrowRight");
+    expect((await widths(page)).statement).toBeGreaterThan(200);
+    await page.keyboard.press("End");
+    expect((await widths(page)).code).toBe(0);
+    await page.keyboard.press("ArrowLeft");
+    expect((await widths(page)).code).toBeGreaterThan(300);
+    await page.keyboard.press("Home");
+    await handle(page).dblclick();
+    expect(Math.abs((await widths(page)).statement - start)).toBeLessThan(3);
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("a");
+    expect(Math.abs((await widths(page)).statement - start)).toBeLessThan(3);
+  });
+
+  test("hidden panel is not focusable or visible", async ({ page }) => {
+    await open(page);
+    await dragTo(page, 2);
+    await expect(page.locator(".statement-panel")).toBeHidden();
+    await dragTo(page, 1438);
+    await expect(page.locator(".code-panel")).toBeHidden();
+    await expect(page.getByLabel("소스 코드")).toBeHidden();
+  });
+
+  test("corrupted or extreme saved values fall back to a usable layout", async ({
+    page,
+  }) => {
+    for (const bad of [
+      "not json",
+      "null",
+      "{}",
+      '{"ratio":"x"}',
+      '{"ratio":-9}',
+      '{"ratio":99}',
+      '{"ratio":1e999}',
+      '{"collapsed":"both"}',
+      "<script>alert(1)</script>",
+      "😀".repeat(2000),
+    ]) {
+      await open(page, bad);
+      const now = await widths(page);
+      expect(now.statement + now.code).toBeGreaterThan(now.grid - 40);
+      await expect(page.getByLabel("소스 코드"))
+        .toBeVisible()
+        .catch(() => {});
+      await expect(page.locator(".solve-grid")).toBeVisible();
+    }
+  });
+
+  test("a saved collapsed state is restored, and a narrower window hides the narrow panel", async ({
+    page,
+  }) => {
+    await open(page, JSON.stringify({ ratio: 0.4, collapsed: "statement" }));
+    expect((await widths(page)).statement).toBe(0);
+    await open(page, JSON.stringify({ ratio: 0.66, collapsed: "none" }));
+    expect((await widths(page)).code).toBeGreaterThan(380);
+    await page.setViewportSize({ width: 1110, height: 900 });
+    await expect.poll(async () => (await widths(page)).code).toBe(0);
+  });
+
+  test("stacked layout (<=1100px) shows both panels and no handle", async ({
+    page,
+  }) => {
+    await open(page, JSON.stringify({ ratio: 0.4, collapsed: "statement" }));
+    await page.setViewportSize({ width: 900, height: 900 });
+    await expect(handle(page)).toBeHidden();
+    await expect(page.locator(".statement-panel")).toBeVisible();
+    await expect(page.locator(".code-panel")).toBeVisible();
+  });
+
+  test("releasing the pointer outside the grid still ends the drag", async ({
+    page,
+  }) => {
+    await open(page);
+    await dragTo(page, 800);
+    await page.mouse.move(100, 400);
+    const stable = await widths(page);
+    await page.mouse.move(1000, 400);
+    expect(await widths(page)).toEqual(stable);
+  });
+});
