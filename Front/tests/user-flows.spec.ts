@@ -511,6 +511,16 @@ test("submission passes the source and polls through to the final verdict", asyn
     timeout: 10_000,
   });
   await expect(panel.getByText("2 / 2", { exact: true })).toBeVisible();
+  // 내 제출 목록과 달리 풀이 화면의 채점 결과 판정은 알약 모양이 그대로다.
+  const pill = await panel
+    .locator(".verdict")
+    .first()
+    .evaluate((el) => {
+      const style = getComputedStyle(el);
+      return { radius: style.borderRadius, background: style.backgroundColor };
+    });
+  expect(pill.radius).toBe("999px");
+  expect(pill.background).not.toBe("rgba(0, 0, 0, 0)");
   await expect(page.getByLabel("소스 코드")).toHaveValue(source);
   await page.waitForTimeout(2200); // One full polling period after the terminal response.
   expect(reads).toBe(3);
@@ -2964,5 +2974,78 @@ test("the home problem slider does not snap cards into place after scrolling", a
         Math.abs((await track.evaluate((el) => el.scrollLeft)) - target),
       ).toBeLessThanOrEqual(1);
     }
+  }
+});
+
+test("the verdict in the my-submissions list is plain coloured text, not a pill", async ({
+  page,
+}) => {
+  await authenticate(page);
+  const statuses = [
+    "ACCEPTED",
+    "WRONG_ANSWER",
+    "RUNTIME_ERROR",
+    "COMPILE_ERROR",
+    "TIME_LIMIT_EXCEEDED",
+    "MEMORY_LIMIT_EXCEEDED",
+    "OUTPUT_LIMIT_EXCEEDED",
+    "SYSTEM_ERROR",
+    "QUEUED",
+    "JUDGING",
+    "CANCELLED",
+  ];
+  const items = statuses.map((status, index) => ({
+    id: `s${index}`,
+    problem: { id: `p${index}`, slug: `p${index}`, title: `문제 ${index}` },
+    language: "PYTHON",
+    status,
+    runtimeMs: 10,
+    memoryKb: 2048,
+    passedTestCases: status === "ACCEPTED" ? 2 : 0,
+    totalTestCases: 2,
+    compileOutput: null,
+    judgeMessage: null,
+    createdAt: "2026-10-04T00:00:00Z",
+    updatedAt: "2026-10-04T00:00:00Z",
+  }));
+  await page.route("**/api/v1/submissions?*", (route) =>
+    route.fulfill({
+      json: { items, total: items.length, page: 1, limit: 100, totalPages: 1 },
+    }),
+  );
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/submissions");
+    const verdicts = page.locator(".history-row .verdict");
+    await expect(verdicts).toHaveCount(statuses.length);
+    const styles = await verdicts.evaluateAll((elements) =>
+      elements.map((el) => {
+        const style = getComputedStyle(el);
+        return {
+          status: el.className,
+          background: style.backgroundColor,
+          radius: style.borderRadius,
+          paddingLeft: style.paddingLeft,
+          height: el.getBoundingClientRect().height,
+          color: style.color,
+        };
+      }),
+    );
+    for (const style of styles) {
+      expect(style.background).toBe("rgba(0, 0, 0, 0)");
+      expect(style.radius).toBe("0px");
+      expect(style.paddingLeft).toBe("0px");
+      expect(style.height).toBeLessThan(28); // 알약의 높이(28px)보다 낮은 글줄 높이
+    }
+    // 색은 그대로 판정마다 다르게 입혀진다(성공은 초록 계열, 오답·오류는 빨강 계열)
+    const colorOf = (name: string) =>
+      styles.find((style) => style.status.includes(name))!.color;
+    expect(colorOf("verdict-accepted")).not.toBe(
+      colorOf("verdict-wrong_answer"),
+    );
+    expect(colorOf("verdict-wrong_answer")).toBe(
+      colorOf("verdict-runtime_error"),
+    );
+    expect(colorOf("verdict-queued")).not.toBe(colorOf("verdict-wrong_answer"));
   }
 });

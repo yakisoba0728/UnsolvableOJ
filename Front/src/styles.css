@@ -7363,3 +7363,13 @@ textarea {
     transition: none;
   }
 }
+
+/* 내 제출 목록의 판정은 알약 대신 색만 입힌 일반 글씨로 보인다(풀이 화면·제출 상세의 판정 알약은 그대로) */
+.data-list.list-history .history-row .verdict {
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font: 400 14px/1.4 var(--font-sans);
+  letter-spacing: 0;
+}
