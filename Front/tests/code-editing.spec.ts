@@ -331,3 +331,23 @@ test.describe("tab-unit indentation tracking", () => {
     expect(deleteUnit(at("abc", -3), [0])).toBeNull();
   });
 });
+
+test("remapUnits stays fast and correct with very many lines and units", () => {
+  const lines = 20_000;
+  const value = Array.from({ length: lines }, () => "    x").join("\n");
+  const units = Array.from({ length: lines }, (_, line) => line * 6);
+  const edited = "y" + value; // 첫 줄 앞에 글자 하나: 줄 수는 그대로
+  const started = performance.now();
+  const next = remapUnits(units, value, edited);
+  const elapsed = performance.now() - started;
+  // 모든 단위가 남고(첫 줄의 공백 네 칸은 "y" 뒤로 한 칸 밀린다) 나머지도 한 글자씩 밀린다
+  expect(next.length).toBe(lines);
+  expect(next[0]).toBe(1);
+  expect(next[1]).toBe(7);
+  expect(next.at(-1)).toBe((lines - 1) * 6 + 1);
+  expect(elapsed).toBeLessThan(250);
+  // 정렬되지 않거나 중복된 입력도 같은 결과
+  expect(remapUnits([...units].reverse().concat(units), value, edited)).toEqual(
+    next,
+  );
+});

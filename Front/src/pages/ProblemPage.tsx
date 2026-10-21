@@ -186,6 +186,8 @@ export function ProblemPage() {
   const splitRef = useRef(split);
   const [gridWidth, setGridWidth] = useState(0);
   const [dragging, setDragging] = useState(false);
+  // 끌던 중 손잡이가 사라져도(다른 문제로 이동 등) 끌기 상태가 남지 않게 정리하는 함수
+  const endDragRef = useRef<(() => void) | null>(null);
   const panelRef = useRef<HTMLElement>(null);
   const [panelHeight, setPanelHeight] = useState(() => {
     try {
@@ -262,6 +264,14 @@ export function ProblemPage() {
     const observer = new ResizeObserver(update);
     observer.observe(grid);
     return () => observer.disconnect();
+  }, [problem?.id]);
+
+  // 다른 문제로 옮겨 가면 폭을 기본으로 되돌리고, 끌던 중이었다면 끌기를 끝낸다.
+  useEffect(() => {
+    endDragRef.current?.();
+    splitRef.current = DEFAULT_SPLIT;
+    setSplit(DEFAULT_SPLIT);
+    return () => endDragRef.current?.();
   }, [problem?.id]);
 
   // 문제가 바뀌거나 불러와지면 저장된 초안을 복원한다.
@@ -484,12 +494,18 @@ export function ProblemPage() {
 
   function startSplitDrag(event: React.PointerEvent<HTMLDivElement>) {
     const grid = gridRef.current;
-    if (!grid || event.button !== 0) return;
+    // 보조 버튼·두 번째 손가락·이미 끌고 있는 중의 입력은 무시한다
+    if (!grid || event.button !== 0 || !event.isPrimary || endDragRef.current)
+      return;
     event.preventDefault();
     const handle = event.currentTarget;
-    handle.setPointerCapture(event.pointerId);
+    const pointerId = event.pointerId;
+    handle.setPointerCapture(pointerId);
+    // 끌기를 시작해도 키보드로 이어서 조절할 수 있게 손잡이가 초점을 받는다
+    handle.focus({ preventScroll: true });
     setDragging(true);
     const move = (moveEvent: PointerEvent) => {
+      if (moveEvent.pointerId !== pointerId) return;
       const rect = grid.getBoundingClientRect();
       applySplit(
         splitFromPointer(
@@ -503,11 +519,15 @@ export function ProblemPage() {
       handle.removeEventListener("pointermove", move);
       handle.removeEventListener("pointerup", end);
       handle.removeEventListener("pointercancel", end);
+      handle.removeEventListener("lostpointercapture", end);
+      endDragRef.current = null;
       setDragging(false);
     };
     handle.addEventListener("pointermove", move);
     handle.addEventListener("pointerup", end);
     handle.addEventListener("pointercancel", end);
+    handle.addEventListener("lostpointercapture", end);
+    endDragRef.current = end;
   }
 
   function onSplitKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {

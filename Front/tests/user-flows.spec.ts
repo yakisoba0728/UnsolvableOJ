@@ -2719,6 +2719,74 @@ test.describe("solve page: resizable statement | code split", () => {
     await expect.poll(async () => (await widths(page)).code).toBe(0);
   });
 
+  // 실제 서버처럼 문제마다 id가 다르게 내려오도록 한다
+  const distinctProblems = (page: Page) =>
+    page.route("**/api/v1/problems/by-slug/*", async (route) => {
+      const slug = new URL(route.request().url()).pathname.split("/").at(-1)!;
+      await route.fulfill({
+        json: { ...problem, id: `id-${slug}`, slug, title: `문제 ${slug}` },
+      });
+    });
+  const goInApp = (page: Page, path: string) =>
+    page.evaluate((to) => {
+      window.history.pushState({}, "", to);
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    }, path);
+
+  test("moving to another problem starts again from the default size", async ({
+    page,
+  }) => {
+    await distinctProblems(page);
+    await open(page);
+    const base = await widths(page);
+    await dragTo(page, 1438); // 코드 작성을 숨긴다
+    expect((await widths(page)).code).toBe(0);
+    await goInApp(page, "/problems/view/other");
+    await expect(
+      page.getByRole("heading", { name: "문제 other" }),
+    ).toBeVisible();
+    await expect
+      .poll(async () =>
+        Math.abs((await widths(page)).statement - base.statement),
+      )
+      .toBeLessThan(3);
+    expect((await widths(page)).code).toBeGreaterThan(300);
+  });
+
+  test("leaving the problem in the middle of a drag leaves no stuck drag state", async ({
+    page,
+  }) => {
+    await distinctProblems(page);
+    await open(page);
+    const box = (await handle(page).boundingBox())!;
+    await page.mouse.move(box.x + 8, box.y + 40);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 120, box.y + 40, { steps: 4 });
+    await goInApp(page, "/problems/view/other");
+    await expect(
+      page.getByRole("heading", { name: "문제 other" }),
+    ).toBeVisible();
+    await page.mouse.up();
+    await expect(page.locator(".solve-grid")).not.toHaveClass(/is-dragging/);
+    // 코드 입력창이 다시 눌리고 입력된다
+    const editor = page.getByLabel("소스 코드");
+    await editor.click();
+    await editor.fill("12345");
+    await expect(editor).toHaveValue("12345");
+  });
+
+  test("grabbing the handle focuses it, so the arrow keys work right after a drag", async ({
+    page,
+  }) => {
+    await open(page);
+    await page.getByLabel("소스 코드").click();
+    await dragTo(page, 700);
+    await expect(handle(page)).toBeFocused();
+    const before = (await widths(page)).statement;
+    await page.keyboard.press("ArrowRight");
+    expect((await widths(page)).statement).toBeGreaterThan(before);
+  });
+
   test("releasing the pointer outside the grid still ends the drag", async ({
     page,
   }) => {

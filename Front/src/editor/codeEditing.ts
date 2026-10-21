@@ -231,16 +231,24 @@ export function remapUnits(
   let mapped: number[];
   if (before.length === after.length) {
     mapped = [];
+    // 위치 순으로 한 번만 훑어 줄마다 단위를 나눈다(줄·단위가 아주 많아도 입력마다 느려지지 않게)
+    const sorted = units.filter(Number.isInteger).sort((a, b) => a - b);
+    let cursor = 0;
     let from = 0;
     let to = 0;
     for (let line = 0; line < before.length; line += 1) {
       const a = before[line];
       const b = after[line];
-      const inLine = units
-        .filter((unit) => unit >= from && unit < from + a.length + 1)
-        .map((unit) => unit - from);
-      for (const unit of remapSpan(inLine, a, b)) mapped.push(unit + to);
-      from += a.length + 1;
+      const end = from + a.length + 1;
+      const inLine: number[] = [];
+      while (cursor < sorted.length && sorted[cursor] < end) {
+        if (sorted[cursor] >= from) inLine.push(sorted[cursor] - from);
+        cursor += 1;
+      }
+      // 바뀌지 않은 줄은 위치만 옮긴다
+      const kept = a === b ? inLine : remapSpan(inLine, a, b);
+      for (const unit of kept) mapped.push(unit + to);
+      from = end;
       to += b.length + 1;
     }
   } else {
