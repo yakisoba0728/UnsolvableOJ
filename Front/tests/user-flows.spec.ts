@@ -2800,6 +2800,7 @@ test.describe("solve page: resizable statement | code split", () => {
 });
 
 test.describe("community filter counts include pinned notices where they belong", () => {
+  // 배포용 저장소에는 화면 구동용 샘플 글이 섞이므로, 이 테스트가 넣은 글만 걸러 보도록 제목에 "ZZ"를 붙이고 검색한다.
   const author = { name: "tester", tier: "브론즈" };
   const post = (
     id: string,
@@ -2818,7 +2819,7 @@ test.describe("community filter counts include pinned notices where they belong"
     views: 10,
     ...(pinned ? { pinned: true } : {}),
   });
-  const open = async (page: import("@playwright/test").Page) => {
+  const open = async (page: import("@playwright/test").Page, query = "ZZ") => {
     await page.addInitScript(
       (posts) =>
         localStorage.setItem(
@@ -2834,14 +2835,14 @@ test.describe("community filter counts include pinned notices where they belong"
           }),
         ),
       [
-        post("n-1", "notice", "고정 공지", true),
-        post("n-2", "notice", "일반 공지"),
-        post("q-1", "question", "질문 하나"),
-        post("q-2", "question", "질문 둘"),
-        post("f-1", "free", "자유 글"),
+        post("n-1", "notice", "ZZ고정 공지", true),
+        post("n-2", "notice", "ZZ일반 공지"),
+        post("q-1", "question", "ZZ질문 하나"),
+        post("q-2", "question", "ZZ질문 둘"),
+        post("f-1", "free", "ZZ자유 글"),
       ],
     );
-    await page.goto("/community");
+    await page.goto(`/community?q=${encodeURIComponent(query)}`);
   };
   const count = async (
     page: import("@playwright/test").Page,
@@ -2879,16 +2880,15 @@ test.describe("community filter counts include pinned notices where they belong"
     await expect(page.locator(".post-row.pinned")).toHaveCount(1);
   });
 
-  test("the pinned notice follows keyword and tag searches in the counts but ignores the category/status filters", async ({
+  test("the pinned notice follows keyword searches in the counts", async ({
     page,
   }) => {
-    await open(page);
-    await page.goto("/community?q=%EA%B3%A0%EC%A0%95"); // "고정"
+    await open(page, "ZZ고정");
     await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(1);
     await expect.poll(() => count(page, "분류 필터", /^전체/)).toBe(1);
     await expect(total(page)).toHaveText("1개");
-    // 아무 글도 맞지 않는 검색어: 모든 개수가 0
-    await page.goto("/community?q=zzzzzz%F0%9F%98%80");
+    // 아무 글도 맞지 않는 검색어(이모지 포함): 모든 개수가 0
+    await page.goto("/community?q=ZZzzzzzz%F0%9F%98%80");
     await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(0);
     await expect.poll(() => count(page, "분류 필터", /^전체/)).toBe(0);
     await expect(total(page)).toHaveText("0개");
