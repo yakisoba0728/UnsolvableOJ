@@ -6156,27 +6156,29 @@ h3 {
 .font-controls {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  color: #b9c7db;
+  gap: 6px;
+  color: var(--color-code-ink);
 }
+/* 글꼴 크기 버튼: 어두운 툴바에서도 버튼으로 보이도록 테두리와 옅은 배경, 밝은 글자를 쓴다 */
 .font-button {
-  min-width: 30px;
-  height: 28px;
-  padding: 0 6px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: transparent;
+  min-width: 34px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid rgba(233, 240, 249, 0.4);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.1);
   color: inherit;
-  font-size: 12px;
-  font-weight: var(--weight-label);
+  font-size: 13px;
+  font-weight: var(--weight-title);
   cursor: pointer;
 }
 .font-button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.7);
   color: #fff;
 }
 .font-button:disabled {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: default;
 }
 .font-button:focus-visible {
@@ -6184,10 +6186,48 @@ h3 {
   outline-offset: 1px;
 }
 .font-size {
-  min-width: 22px;
+  min-width: 26px;
   text-align: center;
-  font-size: 12px;
+  color: var(--color-code-ink);
+  font-size: 13px;
+  font-weight: var(--weight-label);
   font-variant-numeric: tabular-nums;
+}
+/* 초기화 버튼: 글꼴 크기 버튼과 같은 모양의 외곽선 버튼 */
+.text-button.light.reset-button {
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid rgba(233, 240, 249, 0.4);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-code-ink);
+  font-size: 13px;
+  font-weight: var(--weight-title);
+}
+.text-button.light.reset-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.7);
+  color: #fff;
+}
+.text-button.light.reset-button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+.font-button,
+.text-button.light.reset-button {
+  white-space: nowrap;
+}
+@media (max-width: 650px) {
+  /* 좁은 화면: 언어 선택·글꼴 크기·초기화를 한 줄에 두고, 저장 상태 문구는 아래 줄로 내려 글자가 세로로 쪼개지지 않게 한다 */
+  .code-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .code-toolbar .save-state {
+    order: 3;
+    flex: 1 0 100%;
+    min-width: 0;
+  }
 }
 .editor-hints {
   margin: 0;

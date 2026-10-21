@@ -1282,6 +1282,63 @@ test("every language starter is tidy: no input-example comment, consistent inden
   }
 });
 
+test("the font-size and reset buttons in the editor toolbar stay visible, readable and unbroken at every width", async ({
+  page,
+}) => {
+  await authenticate(page);
+  for (const width of [320, 360, 390, 650, 651, 900, 1280]) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/problems/view/sum");
+    const toolbar = page.locator(".code-toolbar");
+    await expect(toolbar).toBeVisible();
+    const buttons = [
+      page.getByRole("button", { name: "글꼴 작게" }),
+      page.getByRole("button", { name: "글꼴 크게" }),
+      page.getByRole("button", { name: "초기화", exact: true }),
+    ];
+    for (const button of buttons) {
+      // 버튼으로 보이도록 테두리가 있고, 글자가 한 줄로 유지되며(높이 30px), 누르기 쉬운 크기다.
+      await expect(button).toHaveCSS("border-top-width", "1px");
+      await expect(button).toHaveCSS("white-space", "nowrap");
+      const box = (await button.boundingBox())!;
+      expect(box.height, `${width}px`).toBeGreaterThanOrEqual(30);
+      expect(box.height, `${width}px`).toBeLessThanOrEqual(32);
+      expect(box.width, `${width}px`).toBeGreaterThanOrEqual(34);
+    }
+    // 툴바가 가로로 넘치지 않고, 저장 상태 문구가 글자 하나씩 세로로 쪼개지지 않는다.
+    const overflow = await toolbar.evaluate(
+      (el) => el.scrollWidth - el.clientWidth,
+    );
+    expect(overflow, `${width}px`).toBeLessThanOrEqual(0);
+    const saveState = (await page.locator(".save-state").boundingBox())!;
+    expect(saveState.height, `${width}px`).toBeLessThan(24);
+    // 글자색은 툴바 바탕과 충분히 대비된다(밝은 글자).
+    const color = await buttons[0].evaluate((el) => getComputedStyle(el).color);
+    const [r, g, b] = color.match(/\d+/g)!.map(Number);
+    expect(r + g + b, color).toBeGreaterThan(600);
+  }
+
+  // 글꼴 크기 한계: 최소·최대에서 해당 버튼이 비활성이 되고 숫자가 한계를 넘지 않는다.
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/problems/view/sum");
+  const smaller = page.getByRole("button", { name: "글꼴 작게" });
+  const larger = page.getByRole("button", { name: "글꼴 크게" });
+  const size = () => page.locator(".font-size").innerText();
+  for (let index = 0; index < 20; index += 1) {
+    if (await smaller.isDisabled()) break;
+    await smaller.click();
+  }
+  await expect(smaller).toBeDisabled();
+  await expect(smaller).toHaveCSS("opacity", "0.4");
+  expect(Number(await size())).toBe(11);
+  for (let index = 0; index < 20; index += 1) {
+    if (await larger.isDisabled()) break;
+    await larger.click();
+  }
+  await expect(larger).toBeDisabled();
+  expect(Number(await size())).toBe(20);
+});
+
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
   page,
 }) => {

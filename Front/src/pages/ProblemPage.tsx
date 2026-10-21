@@ -773,7 +773,7 @@ export function ProblemPage() {
             </span>
             <button
               type="button"
-              className="text-button light"
+              className="text-button light reset-button"
               onClick={() => {
                 sessionRef.current = null;
                 setPopup(null);
