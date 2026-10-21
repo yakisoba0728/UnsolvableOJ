@@ -5,6 +5,14 @@ import { gfm } from 'turndown-plugin-gfm';
 
 export const normalizeNewlines = (value) => value.replace(/\r\n?/g, '\n');
 
+export function assertNoNul(value, slug) {
+  if (typeof value === 'string') {
+    if (value.includes('\u0000')) throw new Error(`NUL in ${slug}`);
+  } else if (value && typeof value === 'object') {
+    for (const child of Object.values(value)) assertNoNul(child, slug);
+  }
+}
+
 export function mapDifficulty(level) {
   if (!level) return 'MEDIUM';
   if (level <= 5) return 'BEGINNER';
@@ -167,11 +175,16 @@ export function htmlToMarkdown(html, baseUrl, warnings = []) {
     replacement: (_, node) => rawWithMath(node.outerHTML),
   });
   // HTML tables retain merged cells, captions, line breaks and image cells.
-  // They are sanitized again by the frontend before rendering.
+  // Character references keep PRE whitespace without ending Markdown's raw HTML block.
+  // Double an initial LF because the HTML parser ignores one after <pre>.
   converter.addRule('tables', {
     filter: 'table',
     replacement: (_, node) =>
-      `\n\n${rawWithMath(node.outerHTML).replace(/\n/g, ' ')}\n\n`,
+      `\n\n${rawWithMath(node.outerHTML)
+        .replace(/(<pre\b[^>]*>)([\s\S]*?)(<\/pre>)/gi, (_, open, text, close) =>
+          `${open}${text.replace(/^\n/, '\n\n').replace(/\n/g, '&#10;')}${close}`,
+        )
+        .replace(/\n/g, ' ')}\n\n`,
   });
   let markdown = converter.turndown(body);
   for (const [token, value] of math)

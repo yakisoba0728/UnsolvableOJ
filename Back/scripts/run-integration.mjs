@@ -1,0 +1,173 @@
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
+import { resolve } from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
+import { fileURLToPath } from 'node:url';
+
+export function integrationDatabaseUrl(env = process.env) {
+  const name = env.UNSOLVABLE_TEST_DATABASE;
+  assert.ok(
+    name &&
+      /^unsolvable_integration_[a-f0-9]{32}$/.test(name) &&
+      env.DATABASE_URL &&
+      new URL(env.DATABASE_URL).pathname === `/${name}`,
+    'Use the project integration command to create a disposable database.',
+  );
+  return env.DATABASE_URL;
+}
+
+export function waitForApiListening(child) {
+  return new Promise((resolve, reject) => {
+    const finish = (error, address) => {
+      clearTimeout(timeout);
+      child.off('message', message);
+      child.off('error', failed);
+      child.off('exit', exited);
+      if (error) reject(error);
+      else resolve(address);
+    };
+    const failed = (error) => finish(error);
+    const exited = (code, signal) =>
+      finish(new Error(`Test API exited before listening: ${signal ?? code}`));
+    const message = (value) => {
+      if (value?.type !== 'unsolvable-api-listening') return;
+      const address = value.address;
+      if (
+        address?.address !== '127.0.0.1' ||
+        !Number.isInteger(address.port) ||
+        address.port < 1 || address.port > 65535
+      ) {
+        finish(new Error('Test API reported an invalid listening address'));
+      } else finish(undefined, address);
+    };
+    const timeout = setTimeout(
+      () => finish(new Error('Test API did not report its listening address')),
+      30_000,
+    );
+    child.on('message', message);
+    child.once('error', failed);
+    child.once('exit', exited);
+    if (child.exitCode !== null || child.signalCode !== null)
+      exited(child.exitCode, child.signalCode);
+  });
+}
+
+export async function stopChild(child, group = false) {
+  if (!child?.pid) return;
+  const signal = (value) => {
+    if (!group && (child.exitCode !== null || child.signalCode !== null))
+      return false;
+    try {
+      process.kill(group ? -child.pid : child.pid, value);
+      return true;
+    } catch (error) {
+      if (error.code === 'ESRCH') return false;
+      throw error;
+    }
+  };
+  if (!signal('SIGTERM')) return;
+  for (let i = 0; i < 50 && signal(0); i++) await delay(100);
+  if (signal(0)) {
+    signal('SIGKILL');
+    for (let i = 0; i < 50 && signal(0); i++) await delay(100);
+  }
+  assert.ok(
+    !signal(0),
+    'Test children are still running; retaining the disposable database.',
+  );
+}
+
+async function runIntegration() {
+  const [mode, ...args] = process.argv.slice(2);
+  assert.ok(
+    ['e2e', 'pipeline', 'judge-flow'].includes(mode),
+    'Expected e2e, pipeline or judge-flow.',
+  );
+  // Capture the test DB before dotenv can supply the development Redis DB (usually 0).
+  const redisDb = mode === 'e2e'
+    ? process.env.REDIS_DB ?? '1'
+    : process.env.PIPELINE_REDIS_DB ?? '2';
+  await import('reflect-metadata');
+  const [{ DataSource }, { default: configured }] = await Promise.all([
+    import('typeorm'),
+    import('../dist/database/data-source.js'),
+  ]);
+  const name = `unsolvable_integration_${randomUUID().replaceAll('-', '')}`;
+  const url = new URL(configured.options.url);
+  url.pathname = `/${name}`;
+  // Children must re-read URL certificate paths consumed by the parent's SSL options.
+  const childUrl = new URL(process.env.DATABASE_URL);
+  childUrl.pathname = url.pathname;
+  const admin = new DataSource({
+    ...configured.options,
+    entities: [],
+    migrations: [],
+  });
+  let db;
+  let created = false;
+  let child;
+  let interrupted = false;
+  const interrupt = (signal) => {
+    interrupted = true;
+    process.exitCode = signal === 'SIGINT' ? 130 : 143;
+    if (child?.pid) {
+      try {
+        process.kill(-child.pid, 'SIGTERM');
+      } catch (error) {
+        if (error.code !== 'ESRCH') throw error;
+      }
+    }
+  };
+  process.on('SIGINT', interrupt);
+  process.on('SIGTERM', interrupt);
+  try {
+    await admin.initialize();
+    if (interrupted) return;
+    // The configured database only grants CREATE/DROP access; it is never migrated.
+    await admin.query(`CREATE DATABASE "${name}"`);
+    created = true;
+    db = await new DataSource({ ...configured.options, url: url.href }).initialize();
+    assert.equal((await db.query('SELECT current_database() AS name'))[0].name, name);
+    await db.runMigrations();
+    await db.destroy();
+    if (interrupted) return;
+    const command = mode === 'judge-flow'
+      ? ['scripts/check-judge-flow.mjs', ...args]
+      : [
+          'node_modules/vitest/vitest.mjs', 'run', '--config',
+          `./vitest.config.${mode}.ts`, ...args,
+        ];
+    child = spawn(process.execPath, command, {
+      cwd: fileURLToPath(new URL('../', import.meta.url)),
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+        DATABASE_URL: childUrl.href,
+        UNSOLVABLE_TEST_DATABASE: name,
+        REDIS_DB: redisDb,
+      },
+      // One owned POSIX process group includes Vitest's workers and the judge child.
+      detached: true,
+      stdio: 'inherit',
+    });
+    const code = await new Promise((resolve, reject) => {
+      child.once('error', reject);
+      child.once('exit', (code) => resolve(code ?? 1));
+    });
+    if (!interrupted) process.exitCode = code;
+  } finally {
+    try {
+      await stopChild(child, true);
+      if (db?.isInitialized) await db.destroy();
+      if (created) await admin.query(`DROP DATABASE "${name}" WITH (FORCE)`);
+    } finally {
+      if (admin.isInitialized) await admin.destroy();
+      process.off('SIGINT', interrupt);
+      process.off('SIGTERM', interrupt);
+    }
+  }
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url))
+  await runIntegration();

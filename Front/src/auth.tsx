@@ -1,7 +1,9 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -14,12 +16,20 @@ interface SavedSession {
   expiresAt: number;
 }
 
+// Reads cannot safely delete an expired value: another tab may replace it mid-read.
 function storedSession(): SavedSession | null {
   try {
     const raw = localStorage.getItem(storageKey);
     const saved = raw ? (JSON.parse(raw) as SavedSession) : null;
-    if (saved && saved.expiresAt > Date.now()) return saved;
-    localStorage.removeItem(storageKey);
+    if (
+      saved &&
+      Number.isFinite(saved.expiresAt) &&
+      saved.expiresAt > Date.now() &&
+      typeof saved.session?.accessToken === "string" &&
+      typeof saved.session.user?.id === "string" &&
+      typeof saved.session.user.username === "string"
+    )
+      return saved;
     return null;
   } catch {
     return null;
@@ -38,32 +48,56 @@ function expiryTime(session: Session): number {
 interface AuthContextValue {
   session: Session | null;
   setSession: (session: Session | null) => void;
+  getSessionVersion: () => number;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [saved, update] = useState<SavedSession | null>(storedSession);
+  const current = useRef(saved);
+  const sessionVersion = useRef(0);
+  const getSessionVersion = useCallback(() => sessionVersion.current, []);
+  const updateSession = useCallback((next: SavedSession | null) => {
+    if (JSON.stringify(current.current) === JSON.stringify(next)) return;
+    current.current = next;
+    sessionVersion.current += 1;
+    update(next);
+  }, []);
   const setSession = (next: Session | null) => {
     const value = next ? { session: next, expiresAt: expiryTime(next) } : null;
     if (value) localStorage.setItem(storageKey, JSON.stringify(value));
     else localStorage.removeItem(storageKey);
-    update(value);
+    updateSession(value);
   };
+  useEffect(() => {
+    const synchronize = (event?: StorageEvent) => {
+      if (
+        event &&
+        (event.storageArea !== localStorage ||
+          (event.key !== storageKey && event.key !== null))
+      )
+        return;
+      updateSession(storedSession());
+    };
+    window.addEventListener("storage", synchronize);
+    synchronize();
+    return () => window.removeEventListener("storage", synchronize);
+  }, [updateSession]);
   useEffect(() => {
     if (!saved) return;
     const timer = setTimeout(
       () => {
-        localStorage.removeItem(storageKey);
-        update(null);
+        // A newer tab may have replaced this session before its storage event arrives.
+        updateSession(storedSession());
       },
-      Math.max(0, saved.expiresAt - Date.now()),
+      Math.min(2_147_483_647, Math.max(0, saved.expiresAt - Date.now())),
     );
     return () => clearTimeout(timer);
-  }, [saved]);
+  }, [saved, updateSession]);
   return (
     <AuthContext.Provider
-      value={{ session: saved?.session ?? null, setSession }}
+      value={{ session: saved?.session ?? null, setSession, getSessionVersion }}
     >
       {children}
     </AuthContext.Provider>

@@ -101,4 +101,6 @@ export interface Page<T> {
   limit: number;
   total: number;
   totalPages: number;
+  /** Opaque continuation; null marks the end. Absent on legacy offset pages. */
+  nextCursor?: string | null;
 }

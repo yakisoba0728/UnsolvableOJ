@@ -1,5 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export class ListSubmissionsQuery {
   @IsOptional()
@@ -14,6 +22,11 @@ export class ListSubmissionsQuery {
   @Min(1)
   @Max(1000)
   limit = 20;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(256)
+  cursor?: string;
 
   @IsOptional()
   @IsUUID()

@@ -25,6 +25,9 @@ export async function fetchAll<T>(
   token?: string,
 ): Promise<T[]> {
   const items: T[] = [];
+  const seenIds = new Set<string | number>();
+  const seenCursors = new Set<string>();
+  let cursor: string | undefined;
   const separator = path.includes("?") ? "&" : "?";
   for (let page = 1; ; page += 1) {
     let data: Page<T>;
@@ -32,7 +35,7 @@ export async function fetchAll<T>(
       signal.throwIfAborted();
       try {
         data = await api<Page<T>>(
-          `${path}${separator}page=${page}&limit=${PAGE_LIMIT}`,
+          `${path}${separator}${cursor === undefined ? `page=${page}` : `cursor=${encodeURIComponent(cursor)}`}&limit=${PAGE_LIMIT}`,
           { signal },
           token,
         );
@@ -43,15 +46,40 @@ export async function fetchAll<T>(
         await wait(error.retryAfterMs ?? 60_000, signal);
       }
     }
+    signal.throwIfAborted();
     if (
       !Array.isArray(data.items) ||
       !Number.isSafeInteger(data.totalPages) ||
       data.totalPages < 0
     )
       throw new Error("목록 페이지 정보를 확인할 수 없습니다.");
+    for (const item of data.items) {
+      const id =
+        item && typeof item === "object" && "id" in item ? item.id : undefined;
+      if (typeof id === "string" || typeof id === "number") {
+        if (seenIds.has(id)) continue;
+        seenIds.add(id);
+      }
+      items.push(item);
+    }
+    if (data.nextCursor !== undefined) {
+      if (data.nextCursor === null) return items;
+      if (
+        typeof data.nextCursor !== "string" ||
+        !data.nextCursor ||
+        seenCursors.has(data.nextCursor) ||
+        data.items.length === 0
+      )
+        throw new Error("목록 커서가 진행되지 않습니다. 다시 시도해 주세요.");
+      seenCursors.add(data.nextCursor);
+      cursor = data.nextCursor;
+      continue;
+    }
+    if (cursor !== undefined)
+      throw new Error("목록 커서 정보를 확인할 수 없습니다.");
+    // shortcut: offset pages can shift during writes; stable traversal needs backend cursors.
     if (data.items.length === 0 && page < data.totalPages)
       throw new Error("목록 일부를 불러오지 못했습니다. 다시 시도해 주세요.");
-    items.push(...data.items);
     if (page >= data.totalPages) return items;
   }
 }

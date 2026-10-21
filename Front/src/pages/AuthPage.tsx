@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useDocumentTitle } from "../hooks";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api";
@@ -26,7 +26,7 @@ function registerProblem(field: Field, value: string) {
   return "";
 }
 
-export function AuthPage() {
+export function AuthPage({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const [mode, setMode] = useState<"login" | "register">("login");
   useDocumentTitle(mode === "login" ? "로그인" : "회원가입");
   const [email, setEmail] = useState("");
@@ -39,10 +39,19 @@ export function AuthPage() {
   });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-  const { setSession } = useAuth();
+  const { session, setSession, getSessionVersion } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const destination = (location.state as { from?: string } | null)?.from ?? "/";
+  const request = useRef<AbortController | null>(null);
+  const navigationVersion = getNavigationVersion();
+  useEffect(() => {
+    setPending(false);
+    return () => {
+      request.current?.abort();
+      request.current = null;
+    };
+  }, [mode, location.key, session?.accessToken, navigationVersion]);
 
   const values: Record<Field, string> = { email, username, password };
   const register = mode === "register";
@@ -76,6 +85,7 @@ export function AuthPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (request.current) return;
     if (register) {
       const invalid = (["email", "username", "password"] as Field[]).find(
         (field) => problems[field],
@@ -88,23 +98,36 @@ export function AuthPage() {
     }
     setError("");
     setPending(true);
+    const controller = new AbortController();
+    request.current = controller;
+    const requestNavigationVersion = getNavigationVersion();
+    const sessionVersion = getSessionVersion();
+    const ownsRequest = () =>
+      !controller.signal.aborted && request.current === controller &&
+      getNavigationVersion() === requestNavigationVersion && getSessionVersion() === sessionVersion;
     try {
       const session = await api<Session>(`/auth/${mode}`, {
         method: "POST",
+        signal: controller.signal,
         body: JSON.stringify(
           mode === "register"
             ? { email, username, password }
             : { email, password },
         ),
       });
+      if (!ownsRequest()) return;
       setSession(session);
       navigate(destination, { replace: true });
     } catch (cause) {
+      if (!ownsRequest()) return;
       setError(
         cause instanceof Error ? cause.message : "잠시 후 다시 시도해 주세요.",
       );
     } finally {
-      setPending(false);
+      if (request.current === controller) {
+        request.current = null;
+        setPending(false);
+      }
     }
   }
 
@@ -206,6 +229,9 @@ export function AuthPage() {
           <button
             className="inline-button"
             onClick={() => {
+              request.current?.abort();
+              request.current = null;
+              setPending(false);
               setMode(mode === "login" ? "register" : "login");
               setError("");
               setTouched({ email: false, username: false, password: false });

@@ -53,13 +53,16 @@ go-judge는 privileged Linux 서비스입니다. 운영에서는 API/DB와 분�
 
 백엔드에는 문제 수정·검수·버전 보존, 재채점·큐 복구, 첫 정답 XP·레벨·랭킹, 관리자 역할 변경·감사 로그·운영 조회가 구현되어 있습니다. 웹에는 문제 관리·수정·공개 전환, 홈 랭킹과 학습 기록 화면이 있으며, 커뮤니티는 브라우저 localStorage에만 저장됩니다. 재채점과 관리자 운영의 전용 화면은 아직 없습니다. API·권한·제한을 포함한 전체 목록은 [백엔드 기능 목록](./Back/FEATURES.md)을 참고하세요.
 
+출제 화면의 자동 복구는 계정·문제·탭 세션별이며, 탭 종료 뒤의 영구 보관을 대신하지 않습니다. 소유자를 알 수 없는 기존 로컬 초안은 자동으로 불러오거나 삭제하지 않습니다.
+
 ```bash
 (cd Back && npm run check)
 (cd Judge && npm run check)
 (cd Front && npm run check)
 # 세 Playwright 브라우저 설치 후; 기존 개발 DB를 사용하지 않는 실제 전체 Compose 검사
 node scripts/check-compose.mjs
-# PostgreSQL/Redis 실행 중에만
+# PostgreSQL/Redis 실행 중에만; CREATEDB 권한·별도 테스트 Redis DB 필요
+# 실행마다 일회용 PostgreSQL DB를 생성하고 종료 후 삭제
 (cd Back && npm run test:e2e)
 ```
 

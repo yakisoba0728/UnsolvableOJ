@@ -27,12 +27,13 @@
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
-    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+    "test:e2e": "npm run build && node scripts/run-integration.mjs e2e",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build",
-    "test:pipeline": "vitest run --config ./vitest.config.pipeline.ts",
-    "test:migrations": "node scripts/check-migrations.mjs",
+    "test:pipeline": "npm run build && node scripts/run-integration.mjs pipeline",
+    "test:migrations": "npm run build && node scripts/check-migrations.mjs",
+    "test:operations": "node --test scripts/integration-runner.test.mjs",
     "typecheck": "tsc --noEmit --incremental false",
-    "test:judge-flow": "node scripts/check-judge-flow.mjs"
+    "test:judge-flow": "npm run build && node scripts/run-integration.mjs judge-flow"
   },
   "dependencies": {
     "@nestjs/bullmq": "^12.0.0",

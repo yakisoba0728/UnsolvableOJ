@@ -26,5 +26,11 @@ async function bootstrap() {
     config.get<number>('PORT', 3000),
     config.get<string>('HOST', '127.0.0.1'),
   );
+  if (process.connected) {
+    process.send?.({
+      type: 'unsolvable-api-listening',
+      address: app.getHttpServer().address(),
+    });
+  }
 }
 await bootstrap();

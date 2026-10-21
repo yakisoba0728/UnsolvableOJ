@@ -134,6 +134,25 @@ test("normal exit is compared with the expected output and preserves units and l
   assert.equal(s.files.size, 0);
 });
 
+for (const [count, timeMs, expected] of [[1, 100, 60_100], [100, 60_000, 6_060_000]]) {
+  test(`aggregate deadline allows all ${count} per-test budgets of ${timeMs}ms plus overhead`, async (t) => {
+    const timeout = t.mock.method(AbortSignal, "timeout");
+    const s = await sandbox(t, [{ status: "Time Limit Exceeded" }]);
+    const input = claim({ limits: { timeMs, memoryMb: 256 } });
+    input.testCases = Array.from({ length: count }, (_, i) => ({ ...input.testCases[0], id: String(i) }));
+    assert.equal((await judge(input, s.config)).status, "TIME_LIMIT_EXCEEDED");
+    assert.equal(timeout.mock.calls[0].arguments[0], expected);
+    assert.ok(Number.isFinite(expected));
+    assert.equal(s.files.size, 0);
+  });
+}
+
+test("a non-finite workload cannot create an infinite deadline", async () => {
+  await assert.rejects(judge(claim({ limits: { timeMs: Infinity, memoryMb: 256 } }), {
+    url: "http://sandbox.invalid", token: "unit-token",
+  }), RangeError);
+});
+
 for (const [name, stdout, expected, status] of [
   ["trailing ASCII whitespace", "3\t\r\n ", "3\n", "ACCEPTED"],
   ["internal whitespace", "3 \n4\n", "3\n4\n", "WRONG_ANSWER"],

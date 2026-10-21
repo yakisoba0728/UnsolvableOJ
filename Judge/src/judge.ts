@@ -149,7 +149,7 @@ export async function judge(claim: Claim, config: SandboxConfig, cancellation?: 
   };
   const language = Object.hasOwn(LANGUAGES, claim.language) ? LANGUAGES[claim.language] : undefined;
   if (!language) return { ...verdict, judgeMessage: "Unsupported language" };
-  const deadline = AbortSignal.timeout(Math.min(600_000, 60_000 + claim.testCases.length * claim.limits.timeMs));
+  const deadline = AbortSignal.timeout(60_000 + claim.testCases.length * claim.limits.timeMs);
   const signal = cancellation ? AbortSignal.any([deadline, cancellation]) : deadline;
   const cached = new Set<string>();
 

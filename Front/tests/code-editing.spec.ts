@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import {
+  applyToTextarea,
   cursorPosition,
   handleBackspace,
   handleCharacter,
@@ -15,6 +16,27 @@ const at = (value: string, start: number, end = start) => ({
 });
 
 test.describe("code editing rules", () => {
+  test("a successful execCommand return without the requested DOM edit still needs fallback", () => {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "document");
+    const selection: number[][] = [];
+    const el = {
+      value: "i < n; i++",
+      setSelectionRange: (start: number, end: number) => selection.push([start, end]),
+    } as unknown as HTMLTextAreaElement;
+    Object.defineProperty(globalThis, "document", {
+      configurable: true,
+      value: { execCommand: () => true },
+    });
+    try {
+      expect(applyToTextarea(el, at("j < n; j++", 1))).toBe(false);
+      expect(el.value).toBe("i < n; i++");
+      expect(selection).toHaveLength(1);
+    } finally {
+      if (descriptor) Object.defineProperty(globalThis, "document", descriptor);
+      else Reflect.deleteProperty(globalThis, "document");
+    }
+  });
+
   test("Enter keeps the indentation and adds one level after an opening bracket or a Python colon", () => {
     expect(handleEnter(at("  foo", 5), "CPP")).toMatchObject({
       value: "  foo\n  ",

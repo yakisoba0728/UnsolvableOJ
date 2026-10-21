@@ -66,6 +66,12 @@ export class BackendFoundations1790550000000 implements MigrationInterface {
 
   async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
+      LOCK TABLE user_problem_solves IN ACCESS EXCLUSIVE MODE;
+      DO $$ BEGIN
+        IF EXISTS (SELECT 1 FROM user_problem_solves) THEN
+          RAISE EXCEPTION 'Cannot roll back backend foundations with a populated solve ledger; preserve XP and solve history.';
+        END IF;
+      END $$;
       DROP TABLE audit_events;
       DROP TABLE user_problem_solves;
       DROP TABLE problem_versions;

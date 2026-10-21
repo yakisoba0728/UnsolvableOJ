@@ -1,6 +1,50 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { htmlToMarkdown, prepareProblem } from './boj-content.mjs';
+import domino from '@mixmark-io/domino';
+import { assertNoNul, htmlToMarkdown, prepareProblem } from './boj-content.mjs';
+
+test('preserves nested table PRE line breaks, blank lines and indentation in raw HTML', () => {
+  const text = '  first\\line\n\n    second < third\n  last\n';
+  const result = htmlToMarkdown(
+    '<table>\n<tr><td><pre>  first\\line\n\n    second &lt; third\n  last\n</pre></td><td>옆 칸</td></tr>\n</table>',
+    'https://www.acmicpc.net/problem/1000',
+  );
+  assert.equal(
+    domino.createDocument(result).querySelector('td pre').textContent,
+    text,
+  );
+  assert.match(result, /&#10;&#10;    second/);
+  assert.doesNotMatch(result.match(/<table>[\s\S]*<\/table>/)[0], /\n/);
+});
+
+test('retains leading blank lines in nested PRE with or without CODE children', () => {
+  for (const html of [
+    '<table><tr><td><pre>\n\n  first\n\n    last\n</pre></td></tr></table>',
+    '<table><tr><td><pre><code>\n  first\n\n    last\n</code></pre></td></tr></table>',
+  ]) {
+    const result = htmlToMarkdown(html, 'https://www.acmicpc.net/problem/1000');
+    assert.equal(
+      domino.createDocument(result).querySelector('td pre').textContent,
+      '\n  first\n\n    last\n',
+    );
+  }
+});
+
+test('the import NUL guard accepts printable escapes but rejects actual nested NUL values', () => {
+  const item = {
+    dto: {
+      slug: 'boj-1000',
+      testCases: [{ input: String.raw`\u0000`, expectedOutput: 'ok' }],
+    },
+    provenance: { originalLabels: [String.raw`literal \u0000`] },
+  };
+  assert.doesNotThrow(() => assertNoNul(item, item.dto.slug));
+  item.dto.testCases[0].input = 'actual\u0000NUL';
+  assert.throws(() => assertNoNul(item, item.dto.slug), /NUL in boj-1000/);
+  item.dto.testCases[0].input = 'ok';
+  item.provenance.originalLabels = ['actual\u0000NUL'];
+  assert.throws(() => assertNoNul(item, item.dto.slug), /NUL in boj-1000/);
+});
 
 test('preserves math, merged table cells, superscripts, code spacing and relative images', () => {
   const result = htmlToMarkdown(

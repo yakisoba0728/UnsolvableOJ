@@ -28,10 +28,12 @@ export function SubmissionPage() {
   );
   const history = useSubmissionHistory(session);
 
-  if (error)
+  if (error && !submission)
     return (
       <div className="page-width empty-state">
-        <p className="error-message">{error}</p>
+        <p className="error-message" role="alert">
+          {error}
+        </p>
         <Link to="/submissions">내 제출로</Link>
       </div>
     );
@@ -55,6 +57,11 @@ export function SubmissionPage() {
         title={submission.problem.title ?? "제출 결과"}
         description={`제출 ${submission.id.slice(0, 8).toUpperCase()} · ${new Date(submission.createdAt).toLocaleString("ko-KR")}`}
       />
+      {error ? (
+        <p className="error-message" role="alert">
+          {error}
+        </p>
+      ) : null}
       <ResultSummary submission={submission} />
       {submission.status === "ACCEPTED" && !history.loading ? (
         <section className="streak-card" aria-label="연속 학습">

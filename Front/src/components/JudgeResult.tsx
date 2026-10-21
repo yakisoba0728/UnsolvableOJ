@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { verdictLabel } from "../verdict";
-import { api } from "../api";
+import { api, ApiError } from "../api";
 import type { Session, Submission } from "../types";
 
 /** Match the runner's bytes.rstrip(): only trailing ASCII whitespace is ignored. */
@@ -26,7 +26,7 @@ function IoBlock({
   );
 }
 
-/** 제출 하나의 채점 상태를 가져오고, 채점이 끝날 때까지 2초마다 다시 확인한다. */
+/** 채점 중에는 폴링하고, 일시적인 실패는 최대 5회까지 간격을 늘려 재시도한다. */
 export function useSubmissionResult(
   id: string | null,
   session: Session | null,
@@ -40,6 +40,18 @@ export function useSubmissionResult(
     if (!session || !id) return;
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let failures = 0;
+    function schedule(delay: number) {
+      const due = Date.now() + delay;
+      const tick = () => {
+        if (controller.signal.aborted) return;
+        const remaining = due - Date.now();
+        if (remaining > 0)
+          timer = setTimeout(tick, Math.min(remaining, 2_147_483_647));
+        else void load();
+      };
+      timer = setTimeout(tick, Math.min(delay, 2_147_483_647));
+    }
     async function load() {
       try {
         const next = await api<Submission>(
@@ -48,24 +60,43 @@ export function useSubmissionResult(
           session!.accessToken,
         );
         if (controller.signal.aborted) return;
+        failures = 0;
+        setError("");
         setSubmission(next);
-        if (next.status === "QUEUED" || next.status === "JUDGING")
-          timer = setTimeout(() => {
-            void load();
-          }, 2000);
+        if (isJudging(next)) schedule(2000);
       } catch (cause) {
-        if (!controller.signal.aborted)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "결과를 불러오지 못했습니다.",
+        if (
+          controller.signal.aborted ||
+          (cause instanceof Error && cause.name === "AbortError")
+        )
+          return;
+        const transient =
+          cause instanceof TypeError ||
+          (cause instanceof ApiError &&
+            (cause.status === 429 ||
+              (cause.status >= 500 && cause.status <= 599)));
+        const retry = transient && failures < 5;
+        setError(
+          (cause instanceof Error
+            ? cause.message
+            : "결과를 불러오지 못했습니다.") +
+            (retry ? " 잠시 후 다시 확인합니다." : ""),
+        );
+        if (retry) {
+          failures += 1;
+          schedule(
+            Math.max(
+              Math.min(30_000, 2000 * 2 ** (failures - 1)),
+              cause instanceof ApiError ? cause.retryAfterMs ?? 0 : 0,
+            ),
           );
+        }
       }
     }
     void load();
     return () => {
       controller.abort();
-      if (timer) clearTimeout(timer);
+      if (timer !== undefined) clearTimeout(timer);
     };
   }, [id, session]);
 

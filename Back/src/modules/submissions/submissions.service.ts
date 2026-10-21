@@ -13,9 +13,11 @@ import { isUUID } from 'class-validator';
 import {
   DataSource,
   LessThan,
+  Raw,
   Repository,
   type FindOptionsWhere,
 } from 'typeorm';
+import { createListCursor, readListCursor } from '../../common/list-cursor.js';
 import {
   JUDGE_QUEUE,
   type JudgeSubmissionJob,
@@ -48,6 +50,14 @@ const FINAL_STATUSES = new Set<SubmissionStatus>([
   SubmissionStatus.OUTPUT_LIMIT_EXCEEDED,
   SubmissionStatus.SYSTEM_ERROR,
   SubmissionStatus.CANCELLED,
+]);
+const REJECTED_STATUSES = new Set<SubmissionStatus>([
+  SubmissionStatus.WRONG_ANSWER,
+  SubmissionStatus.TIME_LIMIT_EXCEEDED,
+  SubmissionStatus.MEMORY_LIMIT_EXCEEDED,
+  SubmissionStatus.RUNTIME_ERROR,
+  SubmissionStatus.COMPILE_ERROR,
+  SubmissionStatus.OUTPUT_LIMIT_EXCEEDED,
 ]);
 interface ProblemSnapshot {
   difficulty: ProblemDifficulty;
@@ -112,10 +122,17 @@ export class SubmissionsService {
     try {
       await this.enqueue(submission.id, 1);
     } catch {
-      await this.submissions.update(submission.id, {
-        status: SubmissionStatus.SYSTEM_ERROR,
-        judgeMessage: '채점 큐에 연결할 수 없습니다.',
-      });
+      await this.submissions.update(
+        {
+          id: submission.id,
+          judgeGeneration: 1,
+          status: SubmissionStatus.QUEUED,
+        },
+        {
+          status: SubmissionStatus.SYSTEM_ERROR,
+          judgeMessage: '채점 큐에 연결할 수 없습니다.',
+        },
+      );
       throw new ServiceUnavailableException('채점 요청을 등록할 수 없습니다.');
     }
     return this.toResponse(submission);
@@ -124,37 +141,64 @@ export class SubmissionsService {
   async findMine(user: AuthenticatedUser, query: ListSubmissionsQuery) {
     const where: FindOptionsWhere<Submission> = { userId: user.id };
     if (query.problemId) where.problemId = query.problemId;
-    const [items, total] = await this.submissions.findAndCount({
-      where,
-      relations: { problem: true },
-      // Lists must not load large source files or debug output into memory.
-      select: {
-        id: true,
-        problemId: true,
-        language: true,
-        status: true,
-        problemVersion: true,
-        judgeGeneration: true,
-        runtimeMs: true,
-        memoryKb: true,
-        passedTestCases: true,
-        totalTestCases: true,
-        compileOutput: true,
-        judgeMessage: true,
-        createdAt: true,
-        updatedAt: true,
-        problem: { id: true, slug: true, title: true },
-      },
-      order: { createdAt: 'DESC', id: 'DESC' },
-      skip: (query.page - 1) * query.limit,
-      take: query.limit,
-    });
+    const cursor = readListCursor(query.cursor);
+    const pageWhere = cursor
+      ? [
+          {
+            ...where,
+            createdAt: Raw((alias) => `${alias} < :cursorTime::timestamptz`, {
+              cursorTime: cursor.createdAt,
+            }),
+          },
+          {
+            ...where,
+            createdAt: Raw((alias) => `${alias} = :cursorTime::timestamptz`, {
+              cursorTime: cursor.createdAt,
+            }),
+            id: LessThan(cursor.id),
+          },
+        ]
+      : where;
+    const [rows, total] = await Promise.all([
+      this.submissions.find({
+        where: pageWhere,
+        relations: { problem: true },
+        // Lists must not load large source files or debug output into memory.
+        select: {
+          id: true,
+          problemId: true,
+          language: true,
+          status: true,
+          problemVersion: true,
+          judgeGeneration: true,
+          runtimeMs: true,
+          memoryKb: true,
+          passedTestCases: true,
+          totalTestCases: true,
+          compileOutput: true,
+          judgeMessage: true,
+          createdAt: true,
+          updatedAt: true,
+          problem: { id: true, slug: true, title: true },
+        },
+        order: { createdAt: 'DESC', id: 'DESC' },
+        skip: cursor ? 0 : (query.page - 1) * query.limit,
+        take: query.limit + 1,
+      }),
+      this.submissions.count({ where }),
+    ]);
+    const items = rows.slice(0, query.limit);
+    const nextCursor =
+      rows.length > query.limit
+        ? await createListCursor(this.dataSource, 'submissions', items.at(-1)!.id)
+        : null;
     return {
       items: items.map((item) => this.toResponse(item)),
       page: query.page,
       limit: query.limit,
       total,
       totalPages: Math.ceil(total / query.limit),
+      nextCursor,
     };
   }
   async findMineById(id: string, user: AuthenticatedUser) {
@@ -210,6 +254,8 @@ export class SubmissionsService {
       current.judgeGeneration += 1;
       current.judgeAttemptId = null;
       current.judgeLeaseExpiresAt = null;
+      if (current.status === SubmissionStatus.ACCEPTED)
+        current.acceptedForXp = true;
       current.status = SubmissionStatus.QUEUED;
       current.runtimeMs = null;
       current.memoryKb = null;
@@ -326,9 +372,10 @@ export class SubmissionsService {
         '통과한 테스트 수가 전체 테스트 수보다 많습니다.',
       );
     return this.dataSource.transaction(async (manager) => {
+      // Serialize result/claim writes without blocking solve foreign-key checks.
       const submission = await manager
         .getRepository(Submission)
-        .findOne({ where: { id }, lock: { mode: 'pessimistic_write' } });
+        .findOne({ where: { id }, lock: { mode: 'for_no_key_update' } });
       if (!submission) throw new NotFoundException('제출을 찾을 수 없습니다.');
       if (
         submission.judgeGeneration !== generation ||
@@ -342,14 +389,28 @@ export class SubmissionsService {
       }
       if (submission.status !== SubmissionStatus.JUDGING)
         throw new ConflictException('채점 중인 제출이 아닙니다.');
+      if (dto.status === SubmissionStatus.ACCEPTED)
+        submission.acceptedForXp = true;
+      else if (REJECTED_STATUSES.has(dto.status))
+        submission.acceptedForXp = false;
       submission.status = dto.status;
       submission.runtimeMs = dto.runtimeMs ?? null;
       submission.memoryKb = dto.memoryKb ?? null;
       submission.passedTestCases = dto.passedTestCases;
       submission.totalTestCases = dto.totalTestCases;
-      submission.compileOutput = dto.compileOutput ?? null;
-      submission.debugOutputs = dto.debugOutputs ?? [];
-      submission.judgeMessage = dto.judgeMessage ?? null;
+      submission.compileOutput =
+        dto.compileOutput == null
+          ? null
+          : this.safeDiagnosticText(dto.compileOutput);
+      submission.debugOutputs = (dto.debugOutputs ?? []).map((output) => ({
+        ...output,
+        stdout: this.safeDiagnosticText(output.stdout),
+        stderr: this.safeDiagnosticText(output.stderr),
+      }));
+      submission.judgeMessage =
+        dto.judgeMessage == null
+          ? null
+          : this.safeDiagnosticText(dto.judgeMessage);
       submission.judgeLeaseExpiresAt = null;
       await manager.save(submission);
       await this.reconcileSolve(manager, submission);
@@ -375,6 +436,11 @@ export class SubmissionsService {
     manager: DataSource['manager'],
     submission: Submission,
   ) {
+    if (
+      submission.status !== SubmissionStatus.ACCEPTED &&
+      !REJECTED_STATUSES.has(submission.status)
+    )
+      return;
     const rows: { accepted_submission_id: string; awarded_xp: number }[] =
       await manager.query(
         'SELECT accepted_submission_id, awarded_xp FROM user_problem_solves WHERE user_id = $1 AND problem_id = $2 FOR UPDATE',
@@ -401,7 +467,7 @@ export class SubmissionsService {
     }
     if (rows[0]?.accepted_submission_id !== submission.id) return;
     const alternatives: { id: string }[] = await manager.query(
-      "SELECT id FROM submissions WHERE user_id = $1 AND problem_id = $2 AND status = 'ACCEPTED' ORDER BY created_at, id LIMIT 1",
+      "SELECT id FROM submissions WHERE user_id = $1 AND problem_id = $2 AND (accepted_for_xp = true OR status = 'ACCEPTED') ORDER BY created_at, id LIMIT 1",
       [submission.userId, submission.problemId],
     );
     if (alternatives[0])
@@ -419,6 +485,11 @@ export class SubmissionsService {
         [rows[0].awarded_xp, submission.userId],
       );
     }
+  }
+
+  private safeDiagnosticText(value: string) {
+    // PostgreSQL text/jsonb reject NUL and unpaired UTF-16 surrogates.
+    return Buffer.from(value, 'utf8').toString('utf8').replaceAll('\0', '\uFFFD');
   }
 
   private validateAttempt(generation: number, attemptId: string) {
@@ -461,7 +532,11 @@ export class SubmissionsService {
       if (!job) await this.enqueue(submission.id, submission.judgeGeneration);
       else if (['failed', 'completed'].includes(await job.getState()))
         await this.submissions.update(
-          { id: submission.id, status: SubmissionStatus.QUEUED },
+          {
+            id: submission.id,
+            judgeGeneration: submission.judgeGeneration,
+            status: SubmissionStatus.QUEUED,
+          },
           {
             status: SubmissionStatus.SYSTEM_ERROR,
             judgeMessage: '채점 작업이 실패했습니다.',

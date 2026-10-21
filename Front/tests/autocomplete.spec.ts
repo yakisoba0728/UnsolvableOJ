@@ -299,6 +299,18 @@ test.describe("applying", () => {
 });
 
 test.describe("regressions found in review", () => {
+  test("JavaScript constructors never insert TypeScript type arguments", () => {
+    for (const name of ["Map", "Set", "Promise"]) {
+      const text = `new ${name.slice(0, -1)}`;
+      const js = pick(at(text, "JAVASCRIPT"), name);
+      const ts = pick(at(text, "TYPESCRIPT"), name);
+      expect(js.insert).toBe(name);
+      expect(applySuggestion(text, text.length, js).value).toBe(`new ${name}`);
+      expect(ts.insert).toBe(`${name}<$0>`);
+      expect(applySuggestion(text, text.length, ts).value).toBe(`new ${name}<>`);
+    }
+  });
+
   test("a number-literal suffix is not a word", () => {
     expect(at("long x = 10L", "JAVA")).toEqual([]);
     expect(at("double y = 1.5f", "CPP")).toEqual([]);
