@@ -2917,3 +2917,52 @@ test.describe("community filter counts include pinned notices where they belong"
     await expect(page.locator(".post-row.pinned")).toHaveCount(1);
   });
 });
+
+test("the home problem slider does not snap cards into place after scrolling", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.route(/\/api\/v1\/problems(\?.*)?$/, (route) =>
+    route.fulfill({
+      json: {
+        items: Array.from({ length: 12 }, (_, index) => ({
+          ...problem,
+          id: `p-${index}`,
+          slug: `p-${index}`,
+          title: `문제 ${index + 1}`,
+        })),
+        page: 1,
+        limit: 100,
+        total: 12,
+        totalPages: 1,
+      },
+    }),
+  );
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto("/");
+    const track = page.locator(".slider-track");
+    await expect(track.locator(".problem-card").first()).toBeVisible();
+    // 위치 맞춤 규칙이 트랙에도 카드에도 없다
+    const rules = await track.evaluate((el) => {
+      const card = el.querySelector(".problem-card")!;
+      return {
+        type: getComputedStyle(el).scrollSnapType,
+        align: getComputedStyle(card).scrollSnapAlign,
+      };
+    });
+    expect(rules.type).toBe("none");
+    expect(rules.align).toBe("none");
+    // 카드 경계가 아닌 곳에 멈추면 그 자리에 그대로 있다(카드 시작 위치로 되돌려지지 않는다)
+    for (const target of [37, 150, 301, 500]) {
+      await track.evaluate((el, left) => {
+        el.scrollLeft = left;
+      }, target);
+      await page.waitForTimeout(400);
+      expect(
+        Math.abs((await track.evaluate((el) => el.scrollLeft)) - target),
+      ).toBeLessThanOrEqual(1);
+    }
+  }
+});

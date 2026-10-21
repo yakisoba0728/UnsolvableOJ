@@ -2882,8 +2882,6 @@ input,
   gap: 16px;
   padding: 2px 2px 4px;
   overflow-x: auto;
-  scroll-snap-type: x proximity;
-  scroll-padding-left: 2px;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
   -webkit-mask-image: linear-gradient(
@@ -2906,7 +2904,6 @@ input,
 }
 .slider-track > .problem-card {
   flex: 0 0 340px;
-  scroll-snap-align: start;
 }
 .problem-card-more {
   align-items: center;
