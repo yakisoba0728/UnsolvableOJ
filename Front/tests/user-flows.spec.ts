@@ -186,13 +186,27 @@ test("invalid credentials show the API error and allow retry", async ({
   ).toBeEnabled();
 });
 
-test("expired sessions cannot access submissions", async ({ page }) => {
-  await authenticate(page, "USER", Date.now() - 1000);
+test("expired sessions stay signed out without deleting the retained record", async ({ page }) => {
+  const expiresAt = Date.now() - 1000;
+  const authorizationHeaders: string[] = [];
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname.startsWith("/api/") && request.headers().authorization)
+      authorizationHeaders.push(request.headers().authorization);
+  });
+  await authenticate(page, "USER", expiresAt);
   await page.goto("/submissions");
   await expect(page).toHaveURL(/\/auth$/);
+  await expect(page.getByRole("button", { name: "로그아웃" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "로그인", exact: true })).toBeVisible();
+  await page.goto("/problems");
+  await expect(page.locator("a.problem-row")).toHaveCount(1);
+  await page.reload();
+  await expect(page.locator("a.problem-row")).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "로그아웃" })).toHaveCount(0);
+  expect(authorizationHeaders).toEqual([]);
   expect(
     await page.evaluate((key) => localStorage.getItem(key), storageKey),
-  ).toBeNull();
+  ).toBe(JSON.stringify({ session, expiresAt }));
 });
 
 test("regular users cannot open the author form", async ({ page }) => {
@@ -273,7 +287,7 @@ test.describe("problem editor", () => {
     await expect(page.getByText("제목을 입력해 주세요.")).toBeVisible();
     await expect(page.getByText("문제 본문을 입력해 주세요.")).toBeVisible();
     await expect(page.getByText("출력 형식을 설명해 주세요.")).toBeVisible();
-    await expect(page.getByText("기대 출력을 입력해 주세요.")).toBeVisible();
+    await expect(page.getByText("기대 출력을 입력해 주세요.")).toHaveCount(0);
     expect(posted).toBe(false);
   });
 
@@ -634,9 +648,12 @@ test("typing #word and pressing Enter in the community search makes a tag pill t
   await search.fill("");
   await expect(rows).toHaveCount(3);
 
-  // 띄어쓰기가 있으면 태그가 아니라 일반 검색어로 남는다.
+  // 공백이 있는 태그도 한 개로 보존한다.
   await search.fill("#dp 질문");
   await search.press("Enter");
+  await expect(pills).toHaveCount(1);
+  await expect(pills.first()).toHaveText("#dp 질문");
+  await page.getByRole("button", { name: "태그 #dp 질문 지우기" }).click();
   await expect(pills).toHaveCount(0);
 
   // '#' 만으로는 태그가 되지 않는다.
@@ -649,7 +666,7 @@ test("typing #word and pressing Enter in the community search makes a tag pill t
   await expect(pills).toHaveCount(1);
   await expect(pills.first()).toHaveText("#dp");
   await expect(search).toHaveValue("");
-  await expect(page).toHaveURL(/[?&]t=dp/);
+  await expect(page).toHaveURL(/[?&]tag=dp/);
   await expect(rows.filter({ hasText: "태그 없는 질문" })).toHaveCount(0);
   await expect(rows).toHaveCount(2);
 
@@ -670,7 +687,7 @@ test("typing #word and pressing Enter in the community search makes a tag pill t
   // × 버튼으로도 지울 수 있다.
   await page.getByRole("button", { name: "태그 #dp 지우기" }).click();
   await expect(pills).toHaveCount(0);
-  await expect(page).not.toHaveURL(/[?&]t=/);
+  await expect(page).not.toHaveURL(/[?&]tag=/);
 });
 
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({

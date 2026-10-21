@@ -25,7 +25,7 @@ export class AdminService {
   }
 
   async changeRole(id: string, role: UserRole, actor: AuthenticatedUser) {
-    if (id === actor.id && role !== UserRole.ADMIN)
+    if (id.toLowerCase() === actor.id.toLowerCase() && role !== UserRole.ADMIN)
       throw new ConflictException('자신의 관리자 권한을 해제할 수 없습니다.');
     return this.db.transaction(async (manager) => {
       const rows: { role: UserRole }[] = await manager.query(

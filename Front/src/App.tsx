@@ -140,15 +140,17 @@ const upcoming = [
   },
 ];
 
-/** 글 수정 화면: 글이 바뀌면 폼 상태도 새로 시작하도록 id를 key로 쓴다. */
+/** 계정이나 글이 바뀌면 이전 작성자의 폼 상태를 재사용하지 않는다. */
 function CommunityEditRoute() {
   const { id } = useParams();
-  return <CommunityWritePage key={id} />;
+  const { session } = useAuth();
+  const { pathname } = useLocation();
+  return <CommunityWritePage key={`${session?.user.id}:${pathname}:${id}`} />;
 }
 
-export function App() {
+export function App({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { session, setSession } = useAuth();
-  const { pathname } = useLocation();
+  const { pathname, search, hash } = useLocation();
   const navigationType = useNavigationType();
   // 다른 화면으로 이동하면 스크롤을 맨 위로 올린다(뒤로 가기는 브라우저 동작에 맡기고,
   // 같은 화면에서 필터·검색 주소만 바뀔 때는 위치를 유지한다).
@@ -163,12 +165,18 @@ export function App() {
     if (session) signedOutRef.current = false;
   }, [session]);
   const loginRedirect = (
-    <Navigate to={signedOutRef.current ? "/" : "/auth"} replace />
+    <Navigate
+      to={signedOutRef.current ? "/" : "/auth"}
+      replace
+      state={signedOutRef.current ? undefined : { from: pathname + search + hash }}
+    />
   );
-  /** 작성자·관리자 전용 화면: 그 외에는 문제 목록(로그아웃 직후에는 홈)으로 보낸다 */
+  /** 비로그인은 로그인으로, 권한이 없는 로그인 사용자는 문제 목록으로 보낸다. */
   const authorOnly = (element: ReactElement) =>
     session?.user.role === "AUTHOR" || session?.user.role === "ADMIN" ? (
       element
+    ) : !session ? (
+      loginRedirect
     ) : (
       <Navigate to={signedOutRef.current ? "/" : "/problems"} replace />
     );
@@ -359,41 +367,42 @@ export function App() {
           }
         >
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/auth" element={<AuthPage />} />
+            <Route
+              path="/"
+              element={<HomePage key={session ? `user:${session.user.id}` : "guest"} />}
+            />
+            <Route path="/auth" element={<AuthPage getNavigationVersion={getNavigationVersion} />} />
             <Route path="/problems" element={<ProblemsPage />} />
             <Route
               path="/problems/new"
-              element={authorOnly(<CreateProblemPage />)}
+              element={authorOnly(
+                <CreateProblemPage key={`${session?.user.id}:${pathname}`} />,
+              )}
             />
             <Route
               path="/my-problems"
-              element={authorOnly(<MyProblemsPage />)}
+              element={authorOnly(<MyProblemsPage key={session?.user.id} />)}
             />
             <Route
               path="/my-problems/:id/edit"
-              element={authorOnly(<CreateProblemPage />)}
+              element={authorOnly(
+                <CreateProblemPage key={`${session?.user.id}:${pathname}`} />,
+              )}
             />
             <Route path="/problems/view/:slug" element={<ProblemPage />} />
             <Route path="/problems/:slug" element={<ProblemPage />} />
             <Route
               path="/profile"
-              element={session ? <ProfilePage /> : loginRedirect}
+              element={session ? <ProfilePage key={session.user.id} /> : loginRedirect}
             />
             <Route path="/community" element={<CommunityPage />} />
             <Route
               path="/community/new"
               element={
                 session ? (
-                  <CommunityWritePage />
-                ) : signedOutRef.current ? (
-                  loginRedirect
+                  <CommunityWritePage key={`${session.user.id}:${pathname}`} />
                 ) : (
-                  <Navigate
-                    to="/auth"
-                    replace
-                    state={{ from: "/community/new" }}
-                  />
+                  loginRedirect
                 )
               }
             />
@@ -403,7 +412,7 @@ export function App() {
                 session ? (
                   <CommunityEditRoute />
                 ) : (
-                  <Navigate to="/auth" replace state={{ from: pathname }} />
+                  loginRedirect
                 )
               }
             />
@@ -420,11 +429,11 @@ export function App() {
               ))}
             <Route
               path="/submissions"
-              element={session ? <SubmissionsPage /> : loginRedirect}
+              element={session ? <SubmissionsPage key={session.user.id} /> : loginRedirect}
             />
             <Route
               path="/submissions/:id"
-              element={session ? <SubmissionPage /> : loginRedirect}
+              element={session ? <SubmissionPage key={session.user.id} /> : loginRedirect}
             />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

@@ -27,5 +27,18 @@ describe.each([ListProblemsQuery, ListSubmissionsQuery])(
         ).rejects.toThrow();
       },
     );
+
+    it('keeps bounded string cursors and rejects arrays or oversized values', async () => {
+      expect(
+        await pipe.transform(
+          { cursor: 'opaque-cursor' },
+          { type: 'query', metatype },
+        ),
+      ).toMatchObject({ cursor: 'opaque-cursor' });
+      for (const cursor of [['duplicate', 'parameters'], 'x'.repeat(257)])
+        await expect(
+          pipe.transform({ cursor }, { type: 'query', metatype }),
+        ).rejects.toThrow();
+    });
   },
 );

@@ -21,7 +21,9 @@ export function useAllProblems() {
     setLoading(true);
     setError("");
     fetchAll<ProblemSummary>("/problems", controller.signal)
-      .then(setProblems)
+      .then((items) => {
+        if (!controller.signal.aborted) setProblems(items);
+      })
       .catch((cause) => {
         if (!controller.signal.aborted)
           setError(
@@ -57,7 +59,9 @@ export function useSubmissionHistory(session: Session | null) {
     setSubmissions([]);
     setError("");
     fetchAll<Submission>("/submissions", controller.signal, session.accessToken)
-      .then(setSubmissions)
+      .then((items) => {
+        if (!controller.signal.aborted) setSubmissions(items);
+      })
       .catch((cause) => {
         if (!controller.signal.aborted)
           setError(
@@ -132,31 +136,61 @@ export function solvedToday(submissions: Submission[]) {
 export function useMyStanding(session: Session | null) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [rank, setRank] = useState(-1);
+  const [profileLoading, setProfileLoading] = useState(Boolean(session));
+  const [rankLoading, setRankLoading] = useState(Boolean(session));
+  const [profileError, setProfileError] = useState("");
+  const [rankError, setRankError] = useState("");
 
   useEffect(() => {
+    setProfile(null);
+    setRank(-1);
+    setProfileError("");
+    setRankError("");
+    setProfileLoading(Boolean(session));
+    setRankLoading(Boolean(session));
     if (!session) {
-      setProfile(null);
-      setRank(-1);
       return;
     }
     const controller = new AbortController();
-    Promise.all([
-      api<UserProfile>(
-        "/users/me",
-        { signal: controller.signal },
-        session.accessToken,
-      ),
-      api<RankingEntry[]>("/rankings", { signal: controller.signal }),
-    ])
-      .then(([me, rankings]) => {
-        setProfile(me);
-        setRank(rankings.findIndex((entry) => entry.id === me.id));
+    api<UserProfile>(
+      "/users/me",
+      { signal: controller.signal },
+      session.accessToken,
+    )
+      .then((me) => {
+        if (!controller.signal.aborted) setProfile(me);
       })
-      .catch(() => undefined);
+      .catch((cause) => {
+        if (!controller.signal.aborted)
+          setProfileError(
+            cause instanceof Error
+              ? cause.message
+              : "프로필을 불러오지 못했습니다.",
+          );
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setProfileLoading(false);
+      });
+    api<RankingEntry[]>("/rankings", { signal: controller.signal })
+      .then((rankings) => {
+        if (!controller.signal.aborted)
+          setRank(rankings.findIndex((entry) => entry.id === session.user.id));
+      })
+      .catch((cause) => {
+        if (!controller.signal.aborted)
+          setRankError(
+            cause instanceof Error
+              ? cause.message
+              : "순위를 불러오지 못했습니다.",
+          );
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setRankLoading(false);
+      });
     return () => controller.abort();
   }, [session]);
 
-  return { profile, rank };
+  return { profile, rank, profileLoading, rankLoading, profileError, rankError };
 }
 
 /** 탭·히스토리·공유에서 화면을 구분하도록 페이지별 제목을 설정한다. 제목이 없으면 기본 제목. */
@@ -168,11 +202,18 @@ export function useDocumentTitle(title?: string) {
 
 const difficultyRank = ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"];
 
-/** 시도했지만 아직 해결하지 못한 가장 최근 문제(이어서 풀 문제). */
-export function pickResume(submissions: Submission[], solved: Set<string>) {
+/** 공개 목록에 남아 있는 미해결 문제의 가장 최근 제출(이어서 풀 문제). */
+export function pickResume(
+  submissions: Submission[],
+  solved: Set<string>,
+  problems: ProblemSummary[],
+) {
+  const published = new Set(problems.map((problem) => problem.id));
   return (
     submissions.find(
-      (item) => !solved.has(item.problem.id) && item.problem.slug,
+      (item) =>
+        !solved.has(item.problem.id) &&
+        published.has(item.problem.id),
     ) ?? null
   );
 }

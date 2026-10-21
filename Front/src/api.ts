@@ -34,7 +34,7 @@ export async function api<T>(
     const detail = data?.message;
     const retryAfter = response.headers.get("Retry-After");
     const seconds = retryAfter === null ? NaN : Number(retryAfter);
-    const retryAfterMs = Number.isFinite(seconds)
+    const retryAfterMs = Number.isFinite(seconds * 1000)
       ? Math.max(0, seconds * 1000)
       : retryAfter && Number.isFinite(Date.parse(retryAfter))
         ? Math.max(0, Date.parse(retryAfter) - Date.now())

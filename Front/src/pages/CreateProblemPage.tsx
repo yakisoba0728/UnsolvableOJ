@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { api, ApiError } from "../api";
@@ -8,6 +15,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
 import { useDocumentTitle } from "../hooks";
+import { useUnsavedChanges } from "../useUnsavedChanges";
 import { problemPath } from "../paths";
 import {
   SLUG_PATTERN,
@@ -17,6 +25,7 @@ import {
   composeStatement,
   hasErrors,
   isPristine,
+  problemDraftScope,
   readProblemDraft,
   slugify,
   splitStatement,
@@ -109,7 +118,9 @@ export function CreateProblemPage() {
   const navigate = useNavigate();
   const canPublish = session?.user.role === "ADMIN";
 
-  const [restored] = useState(() => (id ? null : readProblemDraft()));
+  const [draftScope] = useState(() => problemDraftScope(session!.user.id, id));
+  const [recovery] = useState(() => readProblemDraft(draftScope));
+  const restored = recovery.draft;
   const [form, setForm] = useState<ProblemForm>(restored?.form ?? blankForm());
   const [slugTouched, setSlugTouched] = useState(
     restored?.slugTouched ?? false,
@@ -127,10 +138,13 @@ export function CreateProblemPage() {
   const [savedAt, setSavedAt] = useState<number | null>(
     restored?.savedAt ?? null,
   );
-  const [saveFailed, setSaveFailed] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(recovery.failed);
   const [activeSection, setActiveSection] = useState(sections[0].id);
   const initialRef = useRef(snapshot(form));
+  const initialFormRef = useRef(form);
   const doneRef = useRef(false);
+  const mountedRef = useRef(false);
+  const pendingRef = useRef(false);
 
   const errors: FormErrors = useMemo(
     () => validate(form, !editing),
@@ -140,8 +154,26 @@ export function CreateProblemPage() {
   const dirty = editing
     ? snapshot(form) !== initialRef.current
     : !isPristine(form);
+  const draft = useMemo(
+    () => ({ form, slugTouched, savedAt: Date.now(), revision: crypto.randomUUID() }),
+    [form, slugTouched],
+  );
+  const latestRef = useRef({ draft, dirty, loading });
+  latestRef.current = { draft, dirty, loading };
+  useUnsavedChanges(dirty && !loading, doneRef);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      const latest = latestRef.current;
+      if (!doneRef.current && latest.dirty && !latest.loading)
+        writeProblemDraft(draftScope, latest.draft);
+    };
+  }, [draftScope]);
 
   function patch(next: Partial<ProblemForm>) {
+    doneRef.current = false;
     setForm((previous) => ({ ...previous, ...next }));
   }
 
@@ -154,7 +186,8 @@ export function CreateProblemPage() {
         if (cancelled) return;
         const loaded = toForm(problem);
         initialRef.current = snapshot(loaded);
-        setForm(loaded);
+        initialFormRef.current = loaded;
+        setForm(restored?.form ?? loaded);
         setLoadedStatus(problem.status);
       })
       .catch((cause) => {
@@ -171,33 +204,28 @@ export function CreateProblemPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, session]);
+  }, [id, session?.user.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 새 문제: 입력하면 잠시 뒤 자동으로 임시 저장한다.
+  // Store committed work immediately; unmount recovery must not depend on a debounce.
   function saveDraft() {
-    if (editing) return;
-    const now = Date.now();
-    const ok = writeProblemDraft({ form, slugTouched, savedAt: now });
+    if (doneRef.current || loading) return;
+    const ok = writeProblemDraft(draftScope, draft);
     setSaveFailed(!ok);
-    if (ok) setSavedAt(now);
+    setSavedAt(ok ? draft.savedAt : null);
   }
-  useEffect(() => {
-    if (editing || isPristine(form) || doneRef.current) return;
-    const timer = window.setTimeout(saveDraft, 1200);
-    return () => window.clearTimeout(timer);
+  useLayoutEffect(() => {
+    if (loading || doneRef.current) return;
+    if (!dirty) {
+      const previous = readProblemDraft(draftScope).draft;
+      if (previous) {
+        setSaveFailed(!clearProblemDraft(draftScope, previous));
+        setSavedAt(null);
+      }
+      return;
+    }
+    saveDraft();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, slugTouched]);
-
-  // 작성 중에 탭을 닫거나 새로고침하면 브라우저가 확인한다.
-  useEffect(() => {
-    if (!dirty) return;
-    const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (doneRef.current) return;
-      event.preventDefault();
-    };
-    window.addEventListener("beforeunload", onBeforeUnload);
-    return () => window.removeEventListener("beforeunload", onBeforeUnload);
-  }, [dirty]);
+  }, [draft, dirty, loading]);
 
   // 이미 공개된 주소인지 잠시 뒤에 확인한다(초안 주소는 저장할 때 서버가 알려 준다).
   useEffect(() => {
@@ -236,6 +264,7 @@ export function CreateProblemPage() {
 
   // ---- 테스트케이스 편집 ----
   function updateCase(key: string, change: Partial<CaseForm>) {
+    doneRef.current = false;
     setForm((previous) => ({
       ...previous,
       cases: previous.cases.map((item) =>
@@ -244,12 +273,14 @@ export function CreateProblemPage() {
     }));
   }
   function addCase(isSample: boolean) {
+    doneRef.current = false;
     setForm((previous) => ({
       ...previous,
       cases: [...previous.cases, blankCase(isSample)],
     }));
   }
   function duplicateCase(key: string) {
+    doneRef.current = false;
     setForm((previous) => {
       const at = previous.cases.findIndex((item) => item.key === key);
       if (at === -1) return previous;
@@ -264,6 +295,7 @@ export function CreateProblemPage() {
     });
   }
   function moveCase(key: string, step: -1 | 1) {
+    doneRef.current = false;
     setForm((previous) => {
       const at = previous.cases.findIndex((item) => item.key === key);
       const to = at + step;
@@ -274,6 +306,7 @@ export function CreateProblemPage() {
     });
   }
   function removeCase(key: string) {
+    doneRef.current = false;
     setForm((previous) =>
       previous.cases.length > 1
         ? {
@@ -283,11 +316,13 @@ export function CreateProblemPage() {
         : previous,
     );
   }
-  const setAllCollapsed = (collapsed: boolean) =>
+  const setAllCollapsed = (collapsed: boolean) => {
+    doneRef.current = false;
     setForm((previous) => ({
       ...previous,
       cases: previous.cases.map((item) => ({ ...item, collapsed })),
     }));
+  };
 
   const sampleCount = form.cases.filter((item) => item.isSample).length;
   const hiddenCount = form.cases.length - sampleCount;
@@ -317,14 +352,16 @@ export function CreateProblemPage() {
       ok: !errors.outputDescription,
       target: "output-desc",
     },
-    { label: "예제 1개 이상", ok: !errors.samples, target: "cases" },
+    { label: "테스트케이스 1개 이상", ok: !errors.testCases, target: "cases" },
     {
-      label: "모든 테스트케이스의 기대 출력",
+      label: "테스트케이스 확인 (빈 기대 출력도 허용)",
       ok: !firstCaseError,
       target: firstCaseError ? `case-${firstCaseError}` : "cases",
     },
   ];
   const warnings: string[] = [];
+  if (sampleCount === 0)
+    warnings.push("공개 예제가 없어요. 풀이에 도움이 되도록 예제를 추가하는 것을 권장해요.");
   if (hiddenCount === 0)
     warnings.push(
       "숨김 테스트케이스가 없어요. 예제만으로 채점하면 예제에 맞춘 풀이도 통과할 수 있어요.",
@@ -344,7 +381,7 @@ export function CreateProblemPage() {
       !errors.statement &&
       !errors.inputDescription &&
       !errors.outputDescription,
-    "sec-cases": !errors.samples && !firstCaseError,
+    "sec-cases": !errors.testCases && !firstCaseError,
     "sec-review": !hasErrors(errors) && !slugTaken,
   };
 
@@ -356,14 +393,14 @@ export function CreateProblemPage() {
     if (next.statement) return "statement";
     if (next.inputDescription) return "input-desc";
     if (next.outputDescription) return "output-desc";
-    if (next.samples) return "cases";
+    if (next.testCases) return "cases";
     const key = Object.keys(next.cases)[0];
     return key ? `case-${key}` : null;
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!session) return;
+    if (!session || pendingRef.current || doneRef.current) return;
     setShowErrors(true);
     setError("");
     const target = firstErrorTarget(errors);
@@ -379,7 +416,10 @@ export function CreateProblemPage() {
       window.setTimeout(() => jumpTo(target), 50);
       return;
     }
+    pendingRef.current = true;
     setPending(true);
+    saveDraft();
+    const submittedDraft = draft;
     const content = {
       title: form.title.trim(),
       statementMarkdown: composeStatement(form),
@@ -404,7 +444,12 @@ export function CreateProblemPage() {
           { method: "PATCH", body: JSON.stringify(content) },
           session.accessToken,
         );
+        if (
+          !mountedRef.current ||
+          latestRef.current.draft.revision !== submittedDraft.revision
+        ) return;
         doneRef.current = true;
+        clearProblemDraft(draftScope, submittedDraft);
         navigate("/my-problems", {
           state: {
             notice:
@@ -427,11 +472,16 @@ export function CreateProblemPage() {
         },
         session.accessToken,
       );
+      if (
+        !mountedRef.current ||
+        latestRef.current.draft.revision !== submittedDraft.revision
+      ) return;
       doneRef.current = true;
-      clearProblemDraft();
+      clearProblemDraft(draftScope, submittedDraft);
       if (problem.status === "PUBLISHED") navigate(problemPath(problem.slug));
       else setCreatedDraft(problem);
     } catch (cause) {
+      if (!mountedRef.current) return;
       const message =
         cause instanceof Error ? cause.message : "문제를 저장하지 못했습니다.";
       if (cause instanceof ApiError && cause.status === 409) {
@@ -439,13 +489,12 @@ export function CreateProblemPage() {
         window.setTimeout(() => jumpTo("slug"), 50);
       } else setError(message);
     } finally {
-      setPending(false);
+      pendingRef.current = false;
+      if (mountedRef.current) setPending(false);
     }
   }
 
   function cancel() {
-    if (dirty && !window.confirm("저장하지 않은 내용이 있어요. 나갈까요?"))
-      return;
     navigate(editing ? "/my-problems" : "/problems");
   }
 
@@ -490,15 +539,13 @@ export function CreateProblemPage() {
       </div>
     );
 
-  const statusText = editing
-    ? dirty
-      ? "저장하지 않은 변경 사항이 있어요."
-      : "변경 사항이 없어요."
-    : saveFailed
-      ? "임시 저장에 실패했어요. 입력한 내용은 그대로 남아 있습니다."
-      : savedAt
-        ? `임시 저장됨 · ${new Date(savedAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
-        : "작성한 내용은 자동으로 임시 저장돼요.";
+  const statusText = saveFailed
+    ? "임시 저장소를 읽거나 저장하지 못했어요. 현재 내용은 메모리에만 남아 있어 새로고침·탭 닫기 후 복구되지 않을 수 있어요."
+    : savedAt
+      ? `이 탭에 임시 저장됨 · ${new Date(savedAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
+      : editing
+        ? "변경 사항이 없어요."
+        : "작성한 내용은 이 탭이 열려 있는 동안 임시 저장돼요.";
 
   const slugError =
     shown.slug ||
@@ -538,15 +585,18 @@ export function CreateProblemPage() {
           <button
             type="button"
             className="inline-button"
+            disabled={pending}
             onClick={() => {
-              clearProblemDraft();
-              setForm(blankForm());
+              doneRef.current = true;
+              const previous = readProblemDraft(draftScope).draft;
+              if (previous) setSaveFailed(!clearProblemDraft(draftScope, previous));
+              setForm(editing ? initialFormRef.current : blankForm());
               setSlugTouched(false);
               setSavedAt(null);
               setShowRestored(false);
             }}
           >
-            지우고 새로 시작
+            {editing ? "복구 내용 버리기" : "지우고 새로 시작"}
           </button>
         </p>
       ) : null}
@@ -569,6 +619,7 @@ export function CreateProblemPage() {
       </nav>
 
       <form onSubmit={submit} className="create-form" noValidate>
+        <fieldset disabled={pending} style={{ display: "contents" }}>
         <section className="form-card" id="sec-basic">
           <h2>
             <span className="step-num" aria-hidden="true">
@@ -803,9 +854,9 @@ export function CreateProblemPage() {
               </button>
             </div>
           </div>
-          {shown.samples ? (
+          {shown.testCases ? (
             <p className="field-error" role="alert">
-              {shown.samples}
+              {shown.testCases}
             </p>
           ) : null}
           {form.cases.map((testCase, index) => {
@@ -1018,15 +1069,13 @@ export function CreateProblemPage() {
             >
               취소
             </button>
-            {!editing ? (
-              <button
-                type="button"
-                className="button button-outline"
-                onClick={saveDraft}
-              >
-                임시 저장
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className="button button-outline"
+              onClick={saveDraft}
+            >
+              임시 저장
+            </button>
             <button className="button" disabled={pending}>
               {pending
                 ? "저장 중…"
@@ -1038,6 +1087,7 @@ export function CreateProblemPage() {
             </button>
           </div>
         </div>
+        </fieldset>
       </form>
     </div>
   );

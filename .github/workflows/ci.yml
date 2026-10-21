@@ -22,7 +22,7 @@ jobs:
   check:
     name: CI required
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 40
     services:
       postgres:
         image: postgres:17
@@ -63,13 +63,14 @@ jobs:
         run: |
           npm run check --prefix Back
           npm run test:boj-import --prefix Back
+          npm run test:operations --prefix Back
       - name: Frontend build and test types
         run: npm run check --prefix Front
       - name: Browser regression tests
         working-directory: Front
         run: |
           npx --no-install playwright install --with-deps chromium firefox webkit
-          npm run test:e2e -- --project=chromium
+          npm run test:e2e -- --workers=1
       - name: Worker build and protocol regression tests
         run: |
           npm run check --prefix Judge
@@ -93,7 +94,7 @@ jobs:
           JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: |
-          npx --no-install typeorm migration:run -d dist/database/data-source.js
+          npm run test:migrations
           npm run test:e2e
           npm run test:pipeline
       - name: Full Compose browser flow

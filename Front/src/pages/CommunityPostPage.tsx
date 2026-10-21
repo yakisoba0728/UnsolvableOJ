@@ -15,6 +15,7 @@ import {
   acceptedAnswerId,
   allPosts,
   answersOf,
+  clearDraft,
   communityActions,
   readAnswerDraft,
   relativeTime,
@@ -31,14 +32,24 @@ const MIN_ANSWER = 5;
 export function CommunityPostPage() {
   const { id = "" } = useParams();
   const { session } = useAuth();
+  const ownerId = session?.user.id ?? "";
   const navigate = useNavigate();
   const location = useLocation();
   const activity = useActivity();
   const post = allPosts(activity).find((item) => item.id === id);
   useDocumentTitle(post ? post.title : "커뮤니티");
 
-  const [draft, setDraft] = useState(() => readAnswerDraft(id));
+  const [answerDraft, setAnswerDraft] = useState(() => ({
+    ownerId,
+    postId: id,
+    text: readAnswerDraft(ownerId, id),
+  }));
+  const draft =
+    answerDraft.ownerId === ownerId && answerDraft.postId === id
+      ? answerDraft.text
+      : "";
   const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState(
     (location.state as { notice?: string } | null)?.notice ?? "",
@@ -48,10 +59,11 @@ export function CommunityPostPage() {
 
   // 다른 글로 옮기면 그 글의 작성 중 답변을 불러온다.
   useEffect(() => {
-    setDraft(readAnswerDraft(id));
+    setAnswerDraft({ ownerId, postId: id, text: readAnswerDraft(ownerId, id) });
     setError("");
+    setActionError("");
     setAnswersOpen(false);
-  }, [id]);
+  }, [id, ownerId]);
 
   useEffect(() => {
     if (!notice) return;
@@ -87,8 +99,17 @@ export function CommunityPostPage() {
   const following = activity.followed.includes(post.author.name);
 
   function requireLogin(action: () => void) {
-    if (session) action();
-    else navigate("/auth", { state: { from: `/community/${id}` } });
+    if (!session) {
+      navigate("/auth", { state: { from: `/community/${id}` } });
+      return;
+    }
+    setActionError("");
+    try {
+      action();
+    } catch {
+      setNotice("");
+      setActionError("변경 내용을 저장하지 못했어요. 다시 시도해 주세요.");
+    }
   }
 
   function deleteMyPost() {
@@ -99,18 +120,25 @@ export function CommunityPostPage() {
       )
     )
       return;
-    writeAnswerDraft(id, "");
-    // 먼저 목록으로 이동시킨 뒤 지워서, 지워진 글 화면이 잠깐 보이지 않게 한다.
-    navigate(`/community${listSearch}`, {
-      state: { notice: "글을 삭제했어요." },
+    requireLogin(() => {
+      communityActions.deletePost(post!.id);
+      const answerCleared = writeAnswerDraft(ownerId, id, "");
+      const editCleared = clearDraft(ownerId, id);
+      navigate(`/community${listSearch}`, {
+        state: {
+          notice: `글을 삭제했어요.${answerCleared && editCleared ? "" : " 임시 초안을 지우지 못했어요."}`,
+        },
+      });
     });
-    communityActions.deletePost(post!.id);
   }
 
   function onDraftChange(value: string) {
-    setDraft(value);
-    setError("");
-    writeAnswerDraft(id, value);
+    setAnswerDraft({ ownerId, postId: id, text: value });
+    setError(
+      writeAnswerDraft(ownerId, id, value)
+        ? ""
+        : "답변을 임시 저장하지 못했어요. 입력한 내용은 그대로 남아 있습니다.",
+    );
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -123,17 +151,28 @@ export function CommunityPostPage() {
       return;
     }
     setPending(true);
-    const answer = communityActions.addAnswer(post!.id, body, me);
-    writeAnswerDraft(id, "");
-    setDraft("");
-    setPending(false);
-    setNotice("답변을 등록했어요.");
-    setAnswersOpen(true);
-    window.setTimeout(() => {
-      document
-        .getElementById(answer.id)
-        ?.scrollIntoView({ block: "center", behavior: "smooth" });
-    }, 50);
+    setError("");
+    try {
+      const answer = communityActions.addAnswer(post!.id, body, me);
+      const cleared = writeAnswerDraft(ownerId, id, "");
+      setAnswerDraft({ ownerId, postId: id, text: "" });
+      setNotice(
+        `답변을 등록했어요.${cleared ? "" : " 임시 초안을 지우지 못했어요."}`,
+      );
+      setAnswersOpen(true);
+      window.setTimeout(() => {
+        document
+          .getElementById(answer.id)
+          ?.scrollIntoView({ block: "center", behavior: "smooth" });
+      }, 50);
+    } catch {
+      setNotice("");
+      setError(
+        "답변을 저장하지 못했어요. 입력한 내용과 초안을 유지했으니 다시 시도해 주세요.",
+      );
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -144,6 +183,11 @@ export function CommunityPostPage() {
       {notice ? (
         <p className="success-message" role="status">
           {notice}
+        </p>
+      ) : null}
+      {actionError ? (
+        <p className="error-message" role="alert">
+          {actionError}
         </p>
       ) : null}
       <div className="post-layout no-side">
@@ -221,7 +265,7 @@ export function CommunityPostPage() {
               <ul className="post-tags" aria-label="태그">
                 {post.tags.map((tag) => (
                   <li key={tag}>
-                    <Link to={`/community?t=${encodeURIComponent(tag)}`}>
+                    <Link to={`/community?${new URLSearchParams({ tag })}`}>
                       #{tag}
                     </Link>
                   </li>
@@ -346,9 +390,11 @@ export function CommunityPostPage() {
                               type="button"
                               className="inline-button"
                               onClick={() =>
-                                communityActions.setAccepted(
-                                  post.id,
-                                  accepted ? null : answer.id,
+                                requireLogin(() =>
+                                  communityActions.setAccepted(
+                                    post.id,
+                                    accepted ? null : answer.id,
+                                  ),
                                 )
                               }
                             >

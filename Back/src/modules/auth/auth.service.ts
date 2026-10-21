@@ -24,9 +24,16 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
+    const email = dto.email.trim().toLowerCase();
+    const username = dto.username.trim();
+    if (email === 'boj-import@unsolvable.local' || username === 'boj_import') {
+      throw new ConflictException(
+        '이미 사용 중인 이메일 또는 사용자 이름입니다.',
+      );
+    }
     const user = this.users.create({
-      email: dto.email.trim().toLowerCase(),
-      username: dto.username.trim(),
+      email,
+      username,
       passwordHash: await this.passwordHasher.hash(dto.password),
     });
 

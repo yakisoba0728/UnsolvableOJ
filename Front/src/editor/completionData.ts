@@ -100,7 +100,7 @@ export const KEYWORDS: Record<Language, string[]> = {
 
 // ───────────────────────── 전역 함수·타입 ─────────────────────────
 
-function jsGlobals() {
+function jsGlobals(typed = false) {
   return [
     "console|콘솔",
     "c:Math|수학",
@@ -109,9 +109,9 @@ function jsGlobals() {
     "c:Array|배열",
     "c:Number|숫자",
     "c:String|문자열",
-    "c:Map<K, V>|맵",
-    "c:Set<T>|집합",
-    "c:Promise<T>|프로미스",
+    typed ? "c:Map<K, V>|맵" : "c:Map|맵",
+    typed ? "c:Set<T>|집합" : "c:Set|집합",
+    typed ? "c:Promise<T>|프로미스" : "c:Promise|프로미스",
     "parseInt(string, radix)|정수 변환",
     "parseFloat(string)|실수 변환",
     "require(module)|모듈 불러오기",
@@ -246,7 +246,7 @@ export const GLOBALS: Record<Language, Suggestion[]> = {
     "function",
   ),
   JAVASCRIPT: list(undefined, jsGlobals(), "function"),
-  TYPESCRIPT: list(undefined, jsGlobals(), "function"),
+  TYPESCRIPT: list(undefined, jsGlobals(true), "function"),
   GO: list(
     undefined,
     [

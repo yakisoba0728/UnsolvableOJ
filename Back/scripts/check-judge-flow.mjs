@@ -1,5 +1,5 @@
-// Requires migrated local PostgreSQL/Redis and a running go-judge service.
-// Run after building Back and Judge. Uses Redis DB 2 and port 3100 by default.
+// Run through test:judge-flow after building Judge, with Redis and go-judge running.
+// The integration runner owns PostgreSQL; Redis DB 2 and an ephemeral API port are defaults.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
@@ -7,46 +7,49 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import { Queue } from 'bullmq';
+import { integrationDatabaseUrl, stopChild, waitForApiListening } from './run-integration.mjs';
 
 const back = fileURLToPath(new URL('../', import.meta.url));
 const judge = fileURLToPath(new URL('../../Judge/', import.meta.url));
-const port = process.env.JUDGE_TEST_PORT || '3100';
-const base = `http://127.0.0.1:${port}/api/v1`;
+const port = process.env.JUDGE_TEST_PORT || '0';
+let base;
 const env = {
   ...process.env,
   NODE_ENV: 'test',
   HOST: '127.0.0.1',
   PORT: port,
-  DATABASE_URL:
-    process.env.DATABASE_URL ||
-    'postgresql://unsolvable:local_password@localhost:5432/unsolvable_oj',
+  DATABASE_URL: integrationDatabaseUrl(),
   REDIS_HOST: process.env.REDIS_HOST || '127.0.0.1',
   REDIS_PORT: process.env.REDIS_PORT || '6379',
   REDIS_DB: process.env.PIPELINE_REDIS_DB || '2',
   JWT_ACCESS_SECRET: randomUUID() + randomUUID(),
   JUDGE_SERVICE_TOKEN: randomUUID() + randomUUID(),
-  API_BASE_URL: base,
   GO_JUDGE_URL: process.env.GO_JUDGE_URL || 'http://127.0.0.1:5050',
   GO_JUDGE_TOKEN:
     process.env.GO_JUDGE_TOKEN || 'local-dev-only-go-judge-token-0123456789abcdef',
 };
-const database = new pg.Client({ connectionString: env.DATABASE_URL });
+const { databaseConnectionOptions } = await import('../dist/config/env.validation.js');
+const databaseOptions = databaseConnectionOptions(env.DATABASE_URL, env.DATABASE_SSL === 'true');
+const database = new pg.Client({
+  connectionString: databaseOptions.url,
+  ssl: databaseOptions.ssl,
+});
 const children = [];
 const submissions = [];
-let problemId;
-let userId;
 let queue;
 
-function start(cwd, script) {
+function start(cwd, script, ipc = false) {
   const child = spawn(process.execPath, [script], {
     cwd,
     env,
-    stdio: 'inherit',
+    stdio: ipc ? ['inherit', 'inherit', 'inherit', 'ipc'] : ['ignore', 'pipe', 'inherit'],
   });
   children.push(child);
   return child;
 }
 async function api(path, method = 'GET', body, token) {
+  for (const child of children)
+    assert.ok(child.exitCode === null && child.signalCode === null, 'Test child exited');
   const response = await fetch(base + path, {
     method,
     headers: {
@@ -63,29 +66,25 @@ async function api(path, method = 'GET', body, token) {
   );
   return result;
 }
-async function stop(child) {
-  if (child.exitCode !== null) return;
-  const closed = new Promise((resolve) => child.once('exit', resolve));
-  child.kill('SIGTERM');
-  await Promise.race([closed, delay(5000)]);
-  if (child.exitCode === null) child.kill('SIGKILL');
-}
-
 try {
-  await database.connect();
-  start(back, 'dist/main.js');
-  let healthy = false;
-  for (let retry = 0; retry < 60; retry++) {
-    try {
-      await api('/health');
-      healthy = true;
-      break;
-    } catch {
-      await delay(500);
-    }
+  const server = start(back, 'dist/main.js', true);
+  const address = await waitForApiListening(server);
+  if (Number(port) !== 0) assert.equal(address.port, Number(port));
+  base = `http://127.0.0.1:${address.port}/api/v1`;
+  env.API_BASE_URL = base;
+  await api('/health');
+  const worker = start(judge, 'dist/worker.js');
+  let workerLog = '';
+  worker.stdout.on('data', (chunk) => {
+    workerLog = (workerLog + chunk.toString()).slice(-10_000);
+    process.stdout.write(chunk);
+  });
+  for (let retry = 0; retry < 60 && !workerLog.includes('Judge worker ready'); retry++) {
+    assert.ok(worker.exitCode === null && worker.signalCode === null, 'Test worker exited during startup');
+    await delay(500);
   }
-  assert.ok(healthy, 'Test API did not become healthy');
-  start(judge, 'dist/worker.js');
+  assert.ok(workerLog.includes('Judge worker ready'), 'Test worker did not become ready');
+  await database.connect();
   queue = new Queue('judge-submissions', {
     connection: {
       host: env.REDIS_HOST,
@@ -103,9 +102,8 @@ try {
     password,
     username: `flow_${suffix}`,
   });
-  userId = registered.user.id;
   await database.query("UPDATE users SET role = 'ADMIN' WHERE id = $1", [
-    userId,
+    registered.user.id,
   ]);
   const { accessToken: token } = await api('/auth/login', 'POST', {
     email,
@@ -131,7 +129,7 @@ try {
     },
     token,
   );
-  problemId = problem.id;
+  const problemId = problem.id;
   const checks = [
     [
       'ACCEPTED',
@@ -194,20 +192,19 @@ try {
     );
   }
 } finally {
-  for (const child of [...children].reverse()) await stop(child);
-  if (queue) {
-    for (const id of submissions) {
-      const job = await queue.getJob(`${id}-1`);
-      if (job) await job.remove();
+  try {
+    for (const child of [...children].reverse()) await stopChild(child);
+    if (queue) {
+      try {
+        for (const id of submissions) {
+          const job = await queue.getJob(`${id}-1`);
+          if (job) await job.remove();
+        }
+      } finally {
+        await queue.close();
+      }
     }
-    await queue.close();
+  } finally {
+    await database.end();
   }
-  if (problemId) {
-    await database.query('DELETE FROM submissions WHERE problem_id = $1', [
-      problemId,
-    ]);
-    await database.query('DELETE FROM problems WHERE id = $1', [problemId]);
-  }
-  if (userId) await database.query('DELETE FROM users WHERE id = $1', [userId]);
-  await database.end();
 }

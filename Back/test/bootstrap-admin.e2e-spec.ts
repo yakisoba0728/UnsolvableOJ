@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { DataSource } from 'typeorm';
+import { databaseConnectionOptions } from '../src/config/env.validation.js';
 
 const execFile = promisify(execFileCallback);
 const script = resolve('scripts/bootstrap-admin.mjs');
@@ -15,7 +16,7 @@ describe('Administrator bootstrap CLI (e2e)', () => {
   beforeAll(async () => {
     db = await new DataSource({
       type: 'postgres',
-      url: process.env.DATABASE_URL,
+      ...databaseConnectionOptions(process.env.DATABASE_URL!, process.env.DATABASE_SSL === 'true'),
     }).initialize();
     await db.query(
       'INSERT INTO users (id, email, username, password_hash) VALUES ($1, $2, $3, $4)',

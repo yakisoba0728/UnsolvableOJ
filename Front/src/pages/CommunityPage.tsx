@@ -62,6 +62,8 @@ export function CommunityPage() {
   }, [notice]);
   const activity = useActivity();
   const [params, setParams] = useSearchParams();
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
 
   const selectedCategories = (params.get("c") ?? "")
     .split(",")
@@ -71,8 +73,13 @@ export function CommunityPage() {
     .filter((value) => value === "unaccepted" || value === "accepted");
   const sort = params.get("sort") ?? "latest";
   const urlQuery = params.get("q") ?? "";
-  // 검색창에서 '#단어' + Enter로 만든 태그. 주소에는 t=a,b 로 저장해 새로고침·공유해도 유지된다.
-  const selectedTags = (params.get("t") ?? "").split(",").filter(Boolean);
+  // tag를 반복해 쉼표·공백이 든 태그도 보존한다. 기존 t=a,b 주소도 계속 읽는다.
+  const selectedTags = [
+    ...new Set([
+      ...params.getAll("tag"),
+      ...(params.get("t") ?? "").split(","),
+    ].filter(Boolean)),
+  ];
   const page = Math.max(1, Number(params.get("page")) || 1);
   const size = PAGE_SIZE;
 
@@ -82,7 +89,7 @@ export function CommunityPage() {
   useEffect(() => {
     if (queryText === urlQuery) return;
     // '#단어'는 Enter를 눌러 태그가 되기 전까지 검색어로 쓰지 않는다(입력 중에 목록이 비는 것을 막는다).
-    if (/^#\S*$/.test(queryText)) return;
+    if (queryText.trim().startsWith("#")) return;
     const timer = window.setTimeout(() => {
       update({ q: queryText.trim() || null });
     }, 250);
@@ -91,29 +98,35 @@ export function CommunityPage() {
   }, [queryText]);
 
   function update(
-    patch: Record<string, string | null>,
+    patch: Record<string, string | string[] | null>,
     { resetPage = true }: { resetPage?: boolean } = {},
   ) {
-    const next = new URLSearchParams(params);
+    const next = new URLSearchParams(paramsRef.current);
     for (const [key, value] of Object.entries(patch)) {
-      if (value === null || value === "") next.delete(key);
-      else next.set(key, value);
+      next.delete(key);
+      if (Array.isArray(value)) value.forEach((item) => next.append(key, item));
+      else if (value !== null && value !== "") next.set(key, value);
     }
     if (resetPage) next.delete("page");
+    paramsRef.current = next;
     setParams(next, { replace: true });
   }
 
   function setTags(next: string[]) {
-    update({ t: next.join(",") || null });
+    update({ t: null, tag: next });
   }
 
-  /** '#단어'(띄어쓰기 없음)만 태그로 인식한다. 이미 있는 태그(대소문자 무시)는 다시 넣지 않는다. */
+  /** 작성 화면처럼 Enter로 태그를 확정한다. 쉼표와 공백은 태그의 일부다. */
   function commitTag(raw: string) {
-    const match = /^#([^\s#,]+)$/.exec(raw.trim());
-    if (!match) return false;
-    const tag = match[1];
-    if (!selectedTags.some((item) => item.toLowerCase() === tag.toLowerCase()))
-      setTags([...selectedTags, tag]);
+    if (!raw.trim().startsWith("#")) return false;
+    const tag = raw.trim().replace(/^#+/, "").trim();
+    if (!tag) return false;
+    const next = selectedTags.some(
+      (item) => item.toLowerCase() === tag.toLowerCase(),
+    )
+      ? selectedTags
+      : [...selectedTags, tag];
+    update({ t: null, tag: next, q: null });
     setQueryText("");
     return true;
   }
@@ -188,7 +201,11 @@ export function CommunityPage() {
       // 고정 공지는 항상 맨 위
       if (Boolean(a.pinned) !== Boolean(b.pinned)) return a.pinned ? -1 : 1;
       if (sort === "views") return b.views - a.views;
-      if (sort === "votes") return b.upvotes - a.upvotes;
+      if (sort === "votes")
+        return (
+          upvoteCount(activity, b.id, b.upvotes) -
+          upvoteCount(activity, a.id, a.upvotes)
+        );
       if (sort === "answers") return answerCount(b) - answerCount(a);
       return b.createdAt.localeCompare(a.createdAt);
     });
@@ -198,7 +215,7 @@ export function CommunityPage() {
     activity,
     selectedCategories.join(","),
     statuses.join(","),
-    selectedTags.join(","),
+    JSON.stringify(selectedTags),
     sort,
     urlQuery,
   ]);

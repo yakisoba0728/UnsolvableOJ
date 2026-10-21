@@ -1,5 +1,18 @@
 import { defineConfig } from 'vitest/config';
 
+const databaseUrl = process.env.DATABASE_URL;
+const databaseName = process.env.UNSOLVABLE_TEST_DATABASE;
+if (
+  !databaseUrl ||
+  !databaseName ||
+  !/^unsolvable_integration_[a-f0-9]{32}$/.test(databaseName) ||
+  new URL(databaseUrl).pathname !== `/${databaseName}`
+) {
+  throw new Error(
+    'Use npm run test:e2e or test:pipeline to create a disposable database.',
+  );
+}
+
 export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
@@ -8,9 +21,7 @@ export default defineConfig({
     include: ['**/*.e2e-spec.ts'],
     env: {
       NODE_ENV: 'test',
-      DATABASE_URL:
-        process.env.DATABASE_URL ??
-        'postgresql://unsolvable:local_password@localhost:5432/unsolvable_oj',
+      DATABASE_URL: databaseUrl,
       REDIS_HOST: process.env.REDIS_HOST ?? 'localhost',
       REDIS_PORT: process.env.REDIS_PORT ?? '6379',
       REDIS_DB: process.env.REDIS_DB ?? '1',

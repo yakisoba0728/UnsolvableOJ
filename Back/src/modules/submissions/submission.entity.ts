@@ -62,6 +62,9 @@ export class Submission {
   })
   status: SubmissionStatus;
 
+  @Column({ name: 'accepted_for_xp', type: 'boolean', default: false })
+  acceptedForXp: boolean;
+
   @Column({ name: 'runtime_ms', type: 'integer', nullable: true })
   runtimeMs: number | null;
 

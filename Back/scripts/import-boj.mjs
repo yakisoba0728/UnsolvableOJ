@@ -11,7 +11,8 @@ import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { CreateProblemDto } from '../dist/modules/problems/dto/create-problem.dto.js';
 import { PasswordHasher } from '../dist/modules/auth/password-hasher.service.js';
-import { prepareProblem } from './boj-content.mjs';
+import { databaseConnectionOptions } from '../dist/config/env.validation.js';
+import { assertNoNul, prepareProblem } from './boj-content.mjs';
 
 const { values } = parseArgs({
   options: {
@@ -80,8 +81,7 @@ for await (const line of createInterface({
     throw new Error(
       `Invalid ${item.dto.slug}: ${JSON.stringify(errors.map(({ property, constraints, children }) => ({ property, constraints, children })))}`,
     );
-  if (JSON.stringify(item).includes('\\u0000'))
-    throw new Error(`NUL in ${item.dto.slug}`);
+  assertNoNul(item, item.dto.slug);
   prepared.push(item);
   difficulties[item.dto.difficulty] =
     (difficulties[item.dto.difficulty] || 0) + 1;
@@ -136,10 +136,13 @@ console.log(
 );
 if (!values.apply && !values['rollback-check']) process.exit(0);
 
+const databaseOptions = databaseConnectionOptions(
+  process.env.DATABASE_URL,
+  process.env.DATABASE_SSL === 'true',
+);
 const client = new pg.Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl:
-    process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  connectionString: databaseOptions.url,
+  ssl: databaseOptions.ssl,
 });
 await client.connect();
 const runId = randomUUID();
@@ -175,7 +178,12 @@ try {
   if (pending.length) {
     const authors = (
       await client.query(
-        'SELECT id,username,email,role FROM users WHERE username=$1 OR email=$2',
+        `SELECT u.id,u.username,u.email,u.role,EXISTS (
+          SELECT 1 FROM audit_events a WHERE a.actor_id IS NULL
+          AND a.action='service_account.provision.boj' AND a.target_type='user' AND a.target_id=u.id
+          AND a.details->>'provisioner'='scripts/import-boj.mjs' AND a.details->>'version'='1'
+          AND a.details->>'passwordHashSha256'=encode(sha256(convert_to(u.password_hash,'UTF8')),'hex')
+        ) AS provisioned FROM users u WHERE u.username=$1 OR u.email=$2 FOR UPDATE OF u`,
         ['boj_import', 'boj-import@unsolvable.local'],
       )
     ).rows;
@@ -184,9 +192,12 @@ try {
         authors.length !== 1 ||
         authors[0].username !== 'boj_import' ||
         authors[0].email !== 'boj-import@unsolvable.local' ||
-        authors[0].role !== 'AUTHOR'
+        authors[0].role !== 'AUTHOR' ||
+        !authors[0].provisioned
       )
-        throw new Error('Import author identity conflict');
+        throw new Error(
+          'Import author identity is not a verified CLI-provisioned service account. Operator verification is required for legacy or conflicting accounts; no credentials, roles, ownership or existing problems were changed.',
+        );
       author = authors[0];
     } else {
       const hash = await new PasswordHasher().hash(
@@ -198,6 +209,18 @@ try {
           ['boj-import@unsolvable.local', 'boj_import', hash],
         )
       ).rows[0];
+      await client.query(
+        `INSERT INTO audit_events (actor_id,action,target_type,target_id,details)
+        VALUES (NULL,'service_account.provision.boj','user',$1,$2::jsonb)`,
+        [
+          author.id,
+          JSON.stringify({
+            provisioner: 'scripts/import-boj.mjs',
+            version: 1,
+            passwordHashSha256: createHash('sha256').update(hash).digest('hex'),
+          }),
+        ],
+      );
     }
   }
   for (let start = 0; start < pending.length; start += 200) {
