@@ -6,7 +6,7 @@ import {
   KEY_STEP,
   MIN_CODE,
   MIN_STATEMENT,
-  parseSplit,
+  SNAP,
   resolveSplit,
   splitFromKey,
   splitFromPointer,
@@ -31,28 +31,41 @@ test.describe("solve page split rules", () => {
     expect(resolveSplit(next, TOTAL)).toBe("split");
   });
 
-  test("the statement panel vanishes below its minimum width and the code panel below its own", () => {
-    // 경계: 문제 설명 폭이 정확히 최소면 아직 보인다, 1px 모자라면 사라진다
+  test("just before vanishing the panel stops at its minimum; only past the margin does it vanish", () => {
+    // 문제 설명: 최소 폭 아래로 끌어도 SNAP까지는 최소 폭에 멈춰 있다
     const edge = MIN_STATEMENT + HANDLE_WIDTH / 2;
-    expect(splitFromPointer(edge, TOTAL, DEFAULT_SPLIT).collapsed).toBe("none");
-    expect(splitFromPointer(edge - 1, TOTAL, DEFAULT_SPLIT).collapsed).toBe(
-      "statement",
-    );
-    expect(
-      resolveSplit(splitFromPointer(edge - 1, TOTAL, DEFAULT_SPLIT), TOTAL),
-    ).toBe("code");
+    const atMin = splitFromPointer(edge, TOTAL, DEFAULT_SPLIT);
+    expect(atMin.collapsed).toBe("none");
+    expect(atMin.ratio * AVAILABLE).toBeCloseTo(MIN_STATEMENT, 6);
+    for (const dx of [1, SNAP / 2, SNAP]) {
+      const held = splitFromPointer(edge - dx, TOTAL, DEFAULT_SPLIT);
+      expect(held.collapsed).toBe("none");
+      expect(held.ratio).toBeCloseTo(atMin.ratio, 9);
+    }
+    const gone = splitFromPointer(edge - SNAP - 1, TOTAL, DEFAULT_SPLIT);
+    expect(gone.collapsed).toBe("statement");
+    expect(resolveSplit(gone, TOTAL)).toBe("code");
+    // 최소 폭에 멈춘 상태가 부동소수점 오차 때문에 사라져 보이면 안 된다
+    expect(resolveSplit(atMin, TOTAL)).toBe("split");
 
-    // 코드 작성 폭이 정확히 최소면 보이고, 모자라면 사라진다
+    // 코드 작성도 같은 규칙
     const codeEdge = AVAILABLE - MIN_CODE + HANDLE_WIDTH / 2;
-    expect(splitFromPointer(codeEdge, TOTAL, DEFAULT_SPLIT).collapsed).toBe(
-      "none",
+    const codeMin = splitFromPointer(codeEdge, TOTAL, DEFAULT_SPLIT);
+    expect(codeMin.collapsed).toBe("none");
+    expect((1 - codeMin.ratio) * AVAILABLE).toBeCloseTo(MIN_CODE, 6);
+    for (const dx of [1, SNAP / 2, SNAP]) {
+      const held = splitFromPointer(codeEdge + dx, TOTAL, DEFAULT_SPLIT);
+      expect(held.collapsed).toBe("none");
+      expect(held.ratio).toBeCloseTo(codeMin.ratio, 9);
+    }
+    const codeGone = splitFromPointer(
+      codeEdge + SNAP + 1,
+      TOTAL,
+      DEFAULT_SPLIT,
     );
-    expect(splitFromPointer(codeEdge + 1, TOTAL, DEFAULT_SPLIT).collapsed).toBe(
-      "code",
-    );
-    expect(
-      resolveSplit(splitFromPointer(codeEdge + 1, TOTAL, DEFAULT_SPLIT), TOTAL),
-    ).toBe("statement");
+    expect(codeGone.collapsed).toBe("code");
+    expect(resolveSplit(codeGone, TOTAL)).toBe("statement");
+    expect(resolveSplit(codeMin, TOTAL)).toBe("split");
   });
 
   test("a hidden panel keeps the last ratio so dragging back restores a sensible size", () => {
@@ -101,44 +114,6 @@ test.describe("solve page split rules", () => {
     // 닫아 둔 패널은 폭과 상관없이 닫혀 있다
     expect(resolveSplit(state(0.4, "statement"), 5000)).toBe("code");
     expect(resolveSplit(state(0.4, "code"), 5000)).toBe("statement");
-  });
-
-  test("saved values are read defensively", () => {
-    expect(parseSplit(null)).toEqual(DEFAULT_SPLIT);
-    expect(parseSplit("")).toEqual(DEFAULT_SPLIT);
-    for (const bad of [
-      "not json",
-      "null",
-      "[]",
-      "42",
-      '"text"',
-      "{",
-      "{}",
-      '{"ratio":"a"}',
-      '{"ratio":null}',
-      "\u0000",
-      "x".repeat(100_000),
-    ]) {
-      const parsed = parseSplit(bad);
-      expect(parsed.ratio).toBeGreaterThanOrEqual(0.05);
-      expect(parsed.ratio).toBeLessThanOrEqual(0.95);
-      expect(parsed.collapsed).toBe("none");
-    }
-    // 범위를 벗어난 비율은 범위 안으로 맞춘다
-    expect(parseSplit('{"ratio":-5}').ratio).toBe(0.05);
-    expect(parseSplit('{"ratio":7}').ratio).toBe(0.95);
-    // 1e999는 JSON.parse가 Infinity로 읽는다: 유한한 숫자가 아니므로 기본값
-    expect(parseSplit('{"ratio":1e999}').ratio).toBe(DEFAULT_RATIO);
-    // 올바른 값은 그대로, 알 수 없는 닫힘 값은 none
-    expect(parseSplit('{"ratio":0.5,"collapsed":"code"}')).toEqual(
-      state(0.5, "code"),
-    );
-    expect(parseSplit('{"ratio":0.5,"collapsed":"both"}')).toEqual(
-      state(0.5, "none"),
-    );
-    expect(parseSplit('{"ratio":0.5,"collapsed":{"a":1}}')).toEqual(
-      state(0.5, "none"),
-    );
   });
 
   test("keyboard: arrows step, Home/End leave one panel, arrows bring a hidden panel back, Enter resets", () => {

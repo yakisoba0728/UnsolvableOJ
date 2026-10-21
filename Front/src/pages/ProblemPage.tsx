@@ -44,7 +44,6 @@ import { problemPath } from "../paths";
 import {
   DEFAULT_SPLIT,
   HANDLE_WIDTH,
-  parseSplit,
   resolveSplit,
   splitFromKey,
   splitFromPointer,
@@ -111,8 +110,6 @@ const FONT_MIN = 11;
 const FONT_MAX = 20;
 // 채점 결과 패널의 높이(px): 위쪽 손잡이를 끌거나 ↑↓ 키로 조절하고, 마지막 값을 기억한다.
 const panelHeightKey = "unsolvable-oj-judge-height-v1";
-// 문제 설명과 코드 작성 사이의 가로 분할(비율과 닫힘)을 기억한다.
-const splitKey = "unsolvable-oj-solve-split-v1";
 const PANEL_MIN = 120;
 const PANEL_DEFAULT = 260;
 const PANEL_KEY_STEP = 24;
@@ -184,13 +181,8 @@ export function ProblemPage() {
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(true);
   const gridRef = useRef<HTMLDivElement>(null);
-  const [split, setSplit] = useState<SplitState>(() => {
-    try {
-      return parseSplit(localStorage.getItem(splitKey));
-    } catch {
-      return DEFAULT_SPLIT;
-    }
-  });
+  // 문제 설명·코드 작성 폭은 저장하지 않는다: 화면을 열 때마다 기본 비율로 시작한다.
+  const [split, setSplit] = useState<SplitState>(DEFAULT_SPLIT);
   const splitRef = useRef(split);
   const [gridWidth, setGridWidth] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -485,16 +477,9 @@ export function ProblemPage() {
       /* 저장할 수 없어도 화면은 그대로 동작한다 */
     }
   }
-  /** 분할 상태를 적용하고(끄는 중에는 저장하지 않고) 필요하면 저장한다. */
-  function applySplit(next: SplitState, persist: boolean) {
+  function applySplit(next: SplitState) {
     splitRef.current = next;
     setSplit(next);
-    if (!persist) return;
-    try {
-      localStorage.setItem(splitKey, JSON.stringify(next));
-    } catch {
-      /* 저장할 수 없어도 이번 화면의 크기는 그대로 적용된다 */
-    }
   }
 
   function startSplitDrag(event: React.PointerEvent<HTMLDivElement>) {
@@ -512,7 +497,6 @@ export function ProblemPage() {
           rect.width,
           splitRef.current,
         ),
-        false,
       );
     };
     const end = () => {
@@ -520,7 +504,6 @@ export function ProblemPage() {
       handle.removeEventListener("pointerup", end);
       handle.removeEventListener("pointercancel", end);
       setDragging(false);
-      applySplit(splitRef.current, true);
     };
     handle.addEventListener("pointermove", move);
     handle.addEventListener("pointerup", end);
@@ -532,7 +515,7 @@ export function ProblemPage() {
     const next = splitFromKey(event.key, gridWidth || 1, splitRef.current);
     if (!next) return;
     event.preventDefault();
-    applySplit(next, true);
+    applySplit(next);
   }
 
   function startPanelResize(event: React.PointerEvent<HTMLDivElement>) {
@@ -930,7 +913,7 @@ export function ProblemPage() {
           title="좌우로 끌어 크기를 조절해요. 너무 줄이면 그 쪽이 사라지고, 끌어서 다시 열 수 있어요. (←→ 키, 더블클릭으로 원래대로)"
           onPointerDown={startSplitDrag}
           onKeyDown={onSplitKeyDown}
-          onDoubleClick={() => applySplit(DEFAULT_SPLIT, true)}
+          onDoubleClick={() => applySplit(DEFAULT_SPLIT)}
         >
           <span className="solve-resizer-grip" aria-hidden="true" />
         </div>

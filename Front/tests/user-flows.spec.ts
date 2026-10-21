@@ -2585,7 +2585,7 @@ test.describe("solve page: resizable statement | code split", () => {
     await page.mouse.up();
   };
 
-  test("dragging the handle resizes both panels and the size is remembered after reload", async ({
+  test("dragging the handle resizes both panels, and a reload starts from the default again", async ({
     page,
   }) => {
     await open(page);
@@ -2597,8 +2597,39 @@ test.describe("solve page: resizable statement | code split", () => {
     await page.reload();
     await expect(page.getByLabel("소스 코드")).toBeVisible();
     expect(
-      Math.abs((await widths(page)).statement - after.statement),
+      Math.abs((await widths(page)).statement - before.statement),
     ).toBeLessThan(3);
+    // 아무것도 저장하지 않는다
+    expect(
+      await page.evaluate((key) => window.localStorage.getItem(key), SPLIT_KEY),
+    ).toBeNull();
+  });
+
+  test("just before a panel vanishes it stops at its minimum width; only a further drag removes it", async ({
+    page,
+  }) => {
+    await open(page);
+    // 격자는 페이지 왼쪽에서 24px, 손잡이 중심은 문제 설명 폭 + 8px 지점
+    await dragTo(page, 24 + 260 + 8); // 최소 폭에 딱 맞는 위치
+    const atMin = (await widths(page)).statement;
+    expect(atMin).toBeGreaterThanOrEqual(255);
+    expect(atMin).toBeLessThanOrEqual(265);
+    await dragTo(page, 24 + 260 + 8 - 50); // 여유 구간 안: 최소 폭에서 멈춘다
+    expect(Math.abs((await widths(page)).statement - atMin)).toBeLessThan(3);
+    await dragTo(page, 24 + 260 + 8 - 100); // 여유 구간을 넘으면 사라진다
+    expect((await widths(page)).statement).toBe(0);
+
+    // 코드 작성 쪽도 같다(격자 폭 1392, 손잡이 16, 코드 최소 380)
+    await dragTo(page, 700);
+    const codeEdge = 24 + (1392 - 16 - 380) + 8;
+    await dragTo(page, codeEdge + 30);
+    const codeAtMin = (await widths(page)).code;
+    expect(codeAtMin).toBeGreaterThanOrEqual(375);
+    expect(codeAtMin).toBeLessThanOrEqual(385);
+    await dragTo(page, codeEdge + 60);
+    expect(Math.abs((await widths(page)).code - codeAtMin)).toBeLessThan(3);
+    await dragTo(page, codeEdge + 110);
+    expect((await widths(page)).code).toBe(0);
   });
 
   test("dragging far left hides the statement, far right hides the code, and typed code survives both", async ({
@@ -2658,50 +2689,34 @@ test.describe("solve page: resizable statement | code split", () => {
     await expect(page.getByLabel("소스 코드")).toBeHidden();
   });
 
-  test("corrupted or extreme saved values fall back to a usable layout", async ({
+  test("old or odd saved values are ignored: the page always opens at the default", async ({
     page,
   }) => {
+    await open(page);
+    const base = await widths(page);
     for (const bad of [
+      JSON.stringify({ ratio: 0.7, collapsed: "statement" }),
+      JSON.stringify({ ratio: 0.2, collapsed: "code" }),
       "not json",
-      "null",
-      "{}",
-      '{"ratio":"x"}',
-      '{"ratio":-9}',
-      '{"ratio":99}',
       '{"ratio":1e999}',
-      '{"collapsed":"both"}',
       "<script>alert(1)</script>",
       "😀".repeat(2000),
     ]) {
       await open(page, bad);
       const now = await widths(page);
-      expect(now.statement + now.code).toBeGreaterThan(now.grid - 40);
-      await expect(page.getByLabel("소스 코드"))
-        .toBeVisible()
-        .catch(() => {});
-      await expect(page.locator(".solve-grid")).toBeVisible();
+      expect(Math.abs(now.statement - base.statement)).toBeLessThan(3);
+      expect(Math.abs(now.code - base.code)).toBeLessThan(3);
     }
   });
 
-  test("a saved collapsed state is restored, and a narrower window hides the narrow panel", async ({
+  test("a narrower window hides a panel that no longer fits", async ({
     page,
   }) => {
-    await open(page, JSON.stringify({ ratio: 0.4, collapsed: "statement" }));
-    expect((await widths(page)).statement).toBe(0);
-    await open(page, JSON.stringify({ ratio: 0.66, collapsed: "none" }));
-    expect((await widths(page)).code).toBeGreaterThan(380);
+    await open(page);
+    await dragTo(page, 1058); // 코드 작성을 최소 폭(380)까지 줄인다
+    expect((await widths(page)).code).toBeGreaterThan(370);
     await page.setViewportSize({ width: 1110, height: 900 });
     await expect.poll(async () => (await widths(page)).code).toBe(0);
-  });
-
-  test("stacked layout (<=1100px) shows both panels and no handle", async ({
-    page,
-  }) => {
-    await open(page, JSON.stringify({ ratio: 0.4, collapsed: "statement" }));
-    await page.setViewportSize({ width: 900, height: 900 });
-    await expect(handle(page)).toBeHidden();
-    await expect(page.locator(".statement-panel")).toBeVisible();
-    await expect(page.locator(".code-panel")).toBeVisible();
   });
 
   test("releasing the pointer outside the grid still ends the drag", async ({
