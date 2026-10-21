@@ -4,10 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import {
-  databaseConnectionOptions,
-  envValidationSchema,
-} from './config/env.validation.js';
+import { databaseConnectionOptions } from './config/database.config.js';
+import { envValidationSchema } from './config/env.validation.js';
 import { redisConnection } from './config/redis.config.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { HealthModule } from './modules/health/health.module.js';

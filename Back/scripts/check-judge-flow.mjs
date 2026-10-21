@@ -28,7 +28,7 @@ const env = {
   GO_JUDGE_TOKEN:
     process.env.GO_JUDGE_TOKEN || 'local-dev-only-go-judge-token-0123456789abcdef',
 };
-const { databaseConnectionOptions } = await import('../dist/config/env.validation.js');
+const { databaseConnectionOptions } = await import('../dist/config/database.config.js');
 const databaseOptions = databaseConnectionOptions(env.DATABASE_URL, env.DATABASE_SSL === 'true');
 const database = new pg.Client({
   connectionString: databaseOptions.url,

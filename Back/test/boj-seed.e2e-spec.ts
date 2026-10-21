@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { DataSource } from 'typeorm';
-import { databaseConnectionOptions } from '../src/config/env.validation.js';
+import { databaseConnectionOptions } from '../src/config/database.config.js';
 import { InitialSchema1726916400000 } from '../src/database/migrations/1726916400000-initial-schema.js';
 import { BackendFoundations1790550000000 } from '../src/database/migrations/1790550000000-backend-foundations.js';
 import { DebugOutputs1790552000000 } from '../src/database/migrations/1790552000000-debug-outputs.js';

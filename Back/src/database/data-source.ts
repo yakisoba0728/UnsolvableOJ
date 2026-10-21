@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { DebugOutputs1790552000000 } from './migrations/1790552000000-debug-outputs.js';
 import { DataSource } from 'typeorm';
-import { databaseConnectionOptions } from '../config/env.validation.js';
+import { databaseConnectionOptions } from '../config/database.config.js';
 import { User } from '../modules/users/user.entity.js';
 import { Problem } from '../modules/problems/problem.entity.js';
 import { TestCase } from '../modules/problems/test-case.entity.js';

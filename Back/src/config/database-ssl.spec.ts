@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { databaseConnectionOptions } from '../../config/env.validation.js';
+import { databaseConnectionOptions } from './database.config.js';
 
 const { Client } = createRequire(import.meta.url)('pg') as {
   Client: new (options: { connectionString: string; ssl: unknown }) => {

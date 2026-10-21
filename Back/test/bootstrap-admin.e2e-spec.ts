@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { DataSource } from 'typeorm';
-import { databaseConnectionOptions } from '../src/config/env.validation.js';
+import { databaseConnectionOptions } from '../src/config/database.config.js';
 
 const execFile = promisify(execFileCallback);
 const script = resolve('scripts/bootstrap-admin.mjs');

@@ -12,12 +12,12 @@ import {
   type Repository,
 } from 'typeorm';
 import { describe, expect, it, vi } from 'vitest';
-import type { Problem } from '../src/modules/problems/problem.entity.js';
-import { ListSubmissionsQuery } from '../src/modules/submissions/dto/list-submissions.query.js';
-import { SubmissionStatus } from '../src/modules/submissions/submission.enums.js';
-import type { Submission } from '../src/modules/submissions/submission.entity.js';
-import { SubmissionsService } from '../src/modules/submissions/submissions.service.js';
-import { UserRole } from '../src/modules/users/user-role.enum.js';
+import type { Problem } from '../problems/problem.entity.js';
+import { ListSubmissionsQuery } from './dto/list-submissions.query.js';
+import { SubmissionStatus } from './submission.enums.js';
+import type { Submission } from './submission.entity.js';
+import { SubmissionsService } from './submissions.service.js';
+import { UserRole } from '../users/user-role.enum.js';
 
 // Hydrated entity dates lose microseconds; cursor reads must use the stored value.
 type StoredSubmission = Submission & { pgCreatedAt: string };
