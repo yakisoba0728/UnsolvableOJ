@@ -2798,3 +2798,113 @@ test.describe("solve page: resizable statement | code split", () => {
     expect(await widths(page)).toEqual(stable);
   });
 });
+
+test.describe("community filter counts include pinned notices where they belong", () => {
+  const author = { name: "tester", tier: "브론즈" };
+  const post = (
+    id: string,
+    category: string,
+    title: string,
+    pinned = false,
+  ) => ({
+    id,
+    category,
+    title,
+    body: "본문",
+    tags: [] as string[],
+    author,
+    createdAt: "2026-10-01T00:00:00Z",
+    upvotes: 1,
+    views: 10,
+    ...(pinned ? { pinned: true } : {}),
+  });
+  const open = async (page: import("@playwright/test").Page) => {
+    await page.addInitScript(
+      (posts) =>
+        localStorage.setItem(
+          "unsolvable-oj-community-v1",
+          JSON.stringify({
+            posts,
+            answers: [],
+            upvoted: [],
+            saved: [],
+            followed: [],
+            accepted: {},
+            deleted: [],
+          }),
+        ),
+      [
+        post("n-1", "notice", "고정 공지", true),
+        post("n-2", "notice", "일반 공지"),
+        post("q-1", "question", "질문 하나"),
+        post("q-2", "question", "질문 둘"),
+        post("f-1", "free", "자유 글"),
+      ],
+    );
+    await page.goto("/community");
+  };
+  const count = async (
+    page: import("@playwright/test").Page,
+    group: string,
+    name: RegExp,
+  ) => {
+    const text =
+      (await page
+        .getByRole("group", { name: group })
+        .getByRole("button", { name })
+        .textContent()) ?? "";
+    return Number(text.replace(/\D/g, ""));
+  };
+  const total = (page: import("@playwright/test").Page) =>
+    page.locator(".total-count");
+
+  test("the notice chip counts the pinned notice, the all chip and total match, other chips do not", async ({
+    page,
+  }) => {
+    await open(page);
+    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(2); // 고정 1 + 일반 1
+    await expect.poll(() => count(page, "분류 필터", /^질문/)).toBe(2);
+    await expect.poll(() => count(page, "분류 필터", /^자유/)).toBe(1);
+    await expect.poll(() => count(page, "분류 필터", /^전체/)).toBe(5);
+    await expect(total(page)).toHaveText("5개");
+
+    // 질문만 고르면 공지 칩 개수는 그대로이고(칩은 눌렀을 때의 결과 수), 목록 합계는 질문 글만 센다
+    await page
+      .getByRole("group", { name: "분류 필터" })
+      .getByRole("button", { name: /^질문/ })
+      .click();
+    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(2);
+    await expect(total(page)).toHaveText("2개");
+    // 고정 공지는 그대로 목록 맨 위에 보인다
+    await expect(page.locator(".post-row.pinned")).toHaveCount(1);
+  });
+
+  test("the pinned notice follows keyword and tag searches in the counts but ignores the category/status filters", async ({
+    page,
+  }) => {
+    await open(page);
+    await page.goto("/community?q=%EA%B3%A0%EC%A0%95"); // "고정"
+    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(1);
+    await expect.poll(() => count(page, "분류 필터", /^전체/)).toBe(1);
+    await expect(total(page)).toHaveText("1개");
+    // 아무 글도 맞지 않는 검색어: 모든 개수가 0
+    await page.goto("/community?q=zzzzzz%F0%9F%98%80");
+    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(0);
+    await expect.poll(() => count(page, "분류 필터", /^전체/)).toBe(0);
+    await expect(total(page)).toHaveText("0개");
+  });
+
+  test("a status filter never counts notices, because they have no accepted state", async ({
+    page,
+  }) => {
+    await open(page);
+    await page
+      .getByRole("group", { name: "채택 상태 필터" })
+      .getByRole("button", { name: /^채택 전/ })
+      .click();
+    // 공지 칩은 "채택 전"인 공지 수: 고정 공지는 제외, 일반 공지 1개만
+    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(1);
+    await expect(total(page)).toHaveText("4개"); // 일반 공지 + 질문 2 + 자유 1
+    await expect(page.locator(".post-row.pinned")).toHaveCount(1); // 하지만 고정 공지는 여전히 보인다
+  });
+});

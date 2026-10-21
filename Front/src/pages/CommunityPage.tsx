@@ -150,7 +150,8 @@ export function CommunityPage() {
     statusFilter: string[],
   ) => {
     // 일반 검색어는 제목에서만 찾는다. 태그는 '#단어' + Enter로 만든 태그 알약으로만 거른다.
-    const matchesKeyword = !keyword || post.title.toLowerCase().includes(keyword);
+    const matchesKeyword =
+      !keyword || post.title.toLowerCase().includes(keyword);
     // 고른 태그를 모두 가진 글만 보인다(대소문자 무시).
     const matchesTags = selectedTags.every((tag) =>
       post.tags.some((item) => item.toLowerCase() === tag.toLowerCase()),
@@ -169,15 +170,25 @@ export function CommunityPage() {
     }
     return matchesKeyword && matchesTags;
   };
-  // 고정 공지는 어떤 필터에서도 항상 보이므로 칩·목록 개수에서는 빼서 합계가 맞게 한다.
+  // 고정 공지는 어떤 필터에서도 목록에 항상 보이지만, 개수는 "그 칩에 실제로 속하는 글"만 센다:
+  // 공지 칩과 전체 칩에는 들어가고(검색어·태그는 그대로 적용), 다른 분류 칩과 채택 상태 칩에는 들어가지 않는다.
+  const belongs = (
+    post: CommunityPost,
+    categoryFilter: CategoryKey[],
+    statusFilter: string[],
+  ) => {
+    if (!post.pinned) return matches(post, categoryFilter, statusFilter);
+    if (statusFilter.length) return false;
+    if (categoryFilter.length && !categoryFilter.includes(post.category))
+      return false;
+    return matches(post, [], []);
+  };
   const categoryCount = (value: CategoryKey | "") =>
-    posts.filter(
-      (post) => !post.pinned && matches(post, value ? [value] : [], statuses),
-    ).length;
+    posts.filter((post) => belongs(post, value ? [value] : [], statuses))
+      .length;
   const statusCount = (value: string) =>
-    posts.filter(
-      (post) =>
-        !post.pinned && matches(post, selectedCategories, value ? [value] : []),
+    posts.filter((post) =>
+      belongs(post, selectedCategories, value ? [value] : []),
     ).length;
 
   const filtered = useMemo(() => {
@@ -209,9 +220,9 @@ export function CommunityPage() {
   const visible = filtered.slice(first, first + size);
   const hasFilter = Boolean(
     selectedCategories.length ||
-      statuses.length ||
-      selectedTags.length ||
-      urlQuery.trim(),
+    statuses.length ||
+    selectedTags.length ||
+    urlQuery.trim(),
   );
 
   function write(initialCategory?: CategoryKey) {
@@ -356,7 +367,12 @@ export function CommunityPage() {
               ) : null}
             </div>
             <span className="total-count">
-              {filtered.filter((post) => !post.pinned).length}개
+              {
+                filtered.filter((post) =>
+                  belongs(post, selectedCategories, statuses),
+                ).length
+              }
+              개
             </span>
           </div>
           {visible.length ? (
