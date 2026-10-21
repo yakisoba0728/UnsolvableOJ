@@ -162,14 +162,15 @@ export function MyProblemsPage() {
                     공개하기
                   </button>
                 ) : null}
-                {isAdmin && problem.status === "PUBLISHED" ? (
+                {/* 공개는 관리자 검수가 필요하지만 비공개 전환은 작성자도 할 수 있다(서버 규칙). */}
+                {problem.status === "PUBLISHED" ? (
                   <button
                     type="button"
                     className="text-button"
                     disabled={busyId === problem.id}
                     onClick={() => changeStatus(problem, "DRAFT")}
                   >
-                    초안으로
+                    비공개로 전환
                   </button>
                 ) : null}
               </div>

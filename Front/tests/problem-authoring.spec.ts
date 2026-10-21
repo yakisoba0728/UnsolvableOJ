@@ -148,6 +148,38 @@ test.describe("problem editor", () => {
     );
   });
 
+  test("an author can unpublish their own problem but not publish a draft", async ({
+    page,
+  }) => {
+    await authenticate(page, "AUTHOR");
+    const row = {
+      slug: problem.slug,
+      title: problem.title,
+      difficulty: problem.difficulty,
+      currentVersion: 1,
+      updatedAt: problem.updatedAt,
+    };
+    await page.route("**/api/v1/problems/mine", (route) =>
+      route.fulfill({
+        json: [
+          { ...row, id: "live", status: "PUBLISHED" },
+          { ...row, id: "draft", slug: "draft", status: "DRAFT" },
+        ],
+      }),
+    );
+    let changed: unknown;
+    await page.route("**/api/v1/problems/live/status", async (route) => {
+      changed = route.request().postDataJSON();
+      await route.fulfill({ json: { id: "live", status: "DRAFT", currentVersion: 1 } });
+    });
+    await page.goto("/my-problems");
+    await expect(page.getByRole("button", { name: "공개하기" })).toHaveCount(0);
+    await page.getByRole("button", { name: "비공개로 전환" }).click();
+    await expect(page.getByRole("status")).toHaveText("문제를 초안으로 돌렸어요.");
+    expect(changed).toEqual({ status: "DRAFT" });
+    await expect(page.getByRole("button", { name: "비공개로 전환" })).toHaveCount(0);
+  });
+
   test("author edits an existing problem from the my problems list", async ({
     page,
   }) => {
