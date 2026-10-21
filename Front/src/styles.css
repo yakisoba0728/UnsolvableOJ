@@ -2711,13 +2711,6 @@ input,
     flex-basis: min(280px, 78%);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .slider-fade,
-  .slider-area,
-  .arrow-button {
-    transition: none;
-  }
-}
 
 .stat-tile strong {
   line-height: 1.2; /* 한글/숫자 폰트 차이로 타일마다 글자 높이가 달라지지 않게 */
@@ -2850,12 +2843,6 @@ h3 {
     transform: scale(1.1);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .brand-art .float,
-  .brand-art .twinkle {
-    animation: none;
-  }
-}
 
 /* 홈 카드의 사이트 소개 그림: 카드 자체 폭을 기준으로 배치한다(컨테이너 쿼리) */
 .continue-card .brand-art {
@@ -2943,11 +2930,6 @@ h3 {
     display: none;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .nav-indicator.ready {
-    transition: none;
-  }
-}
 
 /* 데스크톱 메뉴: 마우스를 올리면 글자가 10% 커진다 (레이아웃은 밀리지 않도록 transform 사용) */
 @media (min-width: 1101px) and (hover: hover) {
@@ -2958,11 +2940,6 @@ h3 {
   }
   .main-nav a:hover {
     transform: scale(1.1);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .main-nav a {
-    transition: color 150ms ease;
   }
 }
 
@@ -3568,11 +3545,6 @@ h3 {
     padding: 0 8px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .post-row {
-    transition: none;
-  }
-}
 .write-form input,
 .write-form select,
 .write-form textarea {
@@ -3787,14 +3759,6 @@ h3 {
     width: 100%;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .select-list {
-    animation: none;
-  }
-  .select-button svg {
-    transition: none;
-  }
-}
 
 /* ===== 풀이 화면 ===== */
 /* 찾을 수 없음·불러오는 중 같은 단독 상태는 가운데 정렬 */
@@ -3858,11 +3822,6 @@ h3 {
 .toggle-thumb.leaving {
   opacity: 0;
 }
-@media (prefers-reduced-motion: reduce) {
-  .toggle-thumb.ready {
-    transition: none;
-  }
-}
 .toggle-option {
   position: relative;
   z-index: 1;
@@ -3912,11 +3871,6 @@ h3 {
     padding: 0 9px;
     gap: 4px;
     font-size: 12px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .toggle-option {
-    transition: none;
   }
 }
 @media (max-width: 650px) {
@@ -4826,11 +4780,6 @@ h3 {
   align-items: center;
   gap: 10px;
 }
-@media (prefers-reduced-motion: reduce) {
-  .step-nav button {
-    transition: none;
-  }
-}
 @media (max-width: 720px) {
   .create-page .form-card {
     padding: 20px;
@@ -5058,12 +5007,6 @@ h3 {
   outline: 2px solid var(--color-primary);
   outline-offset: 1px;
 }
-@media (prefers-reduced-motion: reduce) {
-  .guide-card button,
-  .guide-card .row-chevron {
-    transition: none;
-  }
-}
 
 /* ===== 목록 통일 규격: 문제 목록 · 커뮤니티 글 목록 · 내 제출 =====
    한 카드 안의 표: 머리글 44 · 행 72 · 안쪽 여백 24 · 칸 간격 16 · 왼쪽 정렬(문제 목록의
@@ -5276,13 +5219,6 @@ h3 {
     font-size: 13px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .data-list .problem-row,
-  .data-list .history-row,
-  .data-list .post-row {
-    transition: none;
-  }
-}
 .data-list .problem-row .problem-limit,
 .data-list .history-row .history-lang,
 .data-list .history-row .history-metrics,
@@ -5409,11 +5345,6 @@ h3 {
 }
 .shuffle-icon-button .shuffle-icon {
   overflow: visible;
-}
-@media (prefers-reduced-motion: reduce) {
-  .shuffle-icon-button {
-    transition: none;
-  }
 }
 
 /* 풀이 화면 에디터: 글꼴 크기·커서 위치·단축키 안내 */
@@ -5725,11 +5656,6 @@ h3 {
   }
   to {
     background-position: -100% 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .skeleton {
-    animation: none;
   }
 }
 .skeleton-rows {
@@ -6209,12 +6135,6 @@ h3 {
     transform: translateY(0);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .reverse-arrow-up,
-  .reverse-arrow-down {
-    animation: none;
-  }
-}
 
 /* 문제 목록: 난이도·푼 사람·정답률 열을 모두 오른쪽 정렬해, 마지막 열 오른쪽에 빈 칸이 남지 않게 한다 */
 .data-list.list-problems .problem-head span:not(:first-child),
@@ -6589,7 +6509,60 @@ textarea {
   right: -2px;
   transform: translateY(-50%) rotate(225deg);
 }
+/* 움직임 줄이기 설정: 전환·애니메이션을 끈다. 같은 명시도의 일반 규칙을 이기도록 그 규칙들보다 뒤에 둔다 */
 @media (prefers-reduced-motion: reduce) {
+  .slider-fade,
+  .slider-area,
+  .arrow-button {
+    transition: none;
+  }
+  .brand-art .float,
+  .brand-art .twinkle {
+    animation: none;
+  }
+  .nav-indicator.ready {
+    transition: none;
+  }
+  .main-nav a {
+    transition: color 150ms ease;
+  }
+  .post-row {
+    transition: none;
+  }
+  .select-list {
+    animation: none;
+  }
+  .select-button svg {
+    transition: none;
+  }
+  .toggle-thumb.ready {
+    transition: none;
+  }
+  .toggle-option {
+    transition: none;
+  }
+  .step-nav button {
+    transition: none;
+  }
+  .guide-card button,
+  .guide-card .row-chevron {
+    transition: none;
+  }
+  .data-list .problem-row,
+  .data-list .history-row,
+  .data-list .post-row {
+    transition: none;
+  }
+  .shuffle-icon-button {
+    transition: none;
+  }
+  .skeleton {
+    animation: none;
+  }
+  .reverse-arrow-up,
+  .reverse-arrow-down {
+    animation: none;
+  }
   .solve-resizer-grip {
     transition: none;
   }
