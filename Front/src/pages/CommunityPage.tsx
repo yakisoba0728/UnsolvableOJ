@@ -171,15 +171,19 @@ export function CommunityPage() {
     return matchesKeyword && matchesTags;
   };
   // 고정 공지는 어떤 필터에서도 목록에 항상 보이지만, 개수는 "그 칩에 실제로 속하는 글"만 센다:
-  // 공지 칩과 전체 칩에는 들어가고(검색어·태그는 그대로 적용), 다른 분류 칩과 채택 상태 칩에는 들어가지 않는다.
+  // 분류는 공지 칩과 전체 칩에만 들어가고, 상태는 채택된 답변이 없으므로 "채택 전"과 전체에 들어간다(검색어·태그는 그대로 적용).
   const belongs = (
     post: CommunityPost,
     categoryFilter: CategoryKey[],
     statusFilter: string[],
   ) => {
     if (!post.pinned) return matches(post, categoryFilter, statusFilter);
-    if (statusFilter.length) return false;
     if (categoryFilter.length && !categoryFilter.includes(post.category))
+      return false;
+    if (
+      statusFilter.length &&
+      !statusFilter.some((state) => state !== "accepted")
+    )
       return false;
     return matches(post, [], []);
   };

@@ -2894,17 +2894,26 @@ test.describe("community filter counts include pinned notices where they belong"
     await expect(total(page)).toHaveText("0개");
   });
 
-  test("a status filter never counts notices, because they have no accepted state", async ({
+  test("notices count as not accepted in the status chips, and the pinned one stays visible under every status", async ({
     page,
   }) => {
     await open(page);
-    await page
-      .getByRole("group", { name: "채택 상태 필터" })
-      .getByRole("button", { name: /^채택 전/ })
-      .click();
-    // 공지 칩은 "채택 전"인 공지 수: 고정 공지는 제외, 일반 공지 1개만
-    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(1);
-    await expect(total(page)).toHaveText("4개"); // 일반 공지 + 질문 2 + 자유 1
-    await expect(page.locator(".post-row.pinned")).toHaveCount(1); // 하지만 고정 공지는 여전히 보인다
+    const status = (name: RegExp) => count(page, "채택 상태 필터", name);
+    // 필터를 걸기 전: 공지도 글이므로 전체에 들어가고, 채택된 답변이 없으니 "채택 전"에 들어간다
+    await expect.poll(() => status(/^전체/)).toBe(5);
+    await expect.poll(() => status(/^채택 전/)).toBe(5);
+    await expect.poll(() => status(/^채택 완료/)).toBe(0);
+
+    const statusGroup = page.getByRole("group", { name: "채택 상태 필터" });
+    await statusGroup.getByRole("button", { name: /^채택 전/ }).click();
+    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(2);
+    await expect(total(page)).toHaveText("5개");
+    await expect(page.locator(".post-row.pinned")).toHaveCount(1);
+
+    // 채택 완료만 고르면 맞는 글이 없어 개수는 0이지만, 고정 공지는 여전히 맨 위에 보인다
+    await statusGroup.getByRole("button", { name: /^채택 완료/ }).click();
+    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(0);
+    await expect(total(page)).toHaveText("0개");
+    await expect(page.locator(".post-row.pinned")).toHaveCount(1);
   });
 });
