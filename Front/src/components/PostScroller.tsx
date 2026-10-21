@@ -30,9 +30,11 @@ export function PostScroller({
   emptyAction,
 }: PostScrollerProps) {
   const viewRef = useRef<HTMLDivElement>(null);
-  const [index, setIndex] = useState(0);
+  const [rawIndex, setIndex] = useState(0);
   const VISIBLE = 2;
   const maxIndex = Math.max(0, posts.length - VISIBLE);
+  // 목록이 줄면 스크롤 이벤트가 오기 전에도 범위를 넘지 않게 한다.
+  const index = Math.min(rawIndex, maxIndex);
 
   useEffect(() => {
     const view = viewRef.current;

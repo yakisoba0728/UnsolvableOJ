@@ -413,6 +413,44 @@ test("a notice passed on navigation shows once and does not return on reload or 
   expect(await notice.count()).toBe(0);
 });
 
+test("the profile post scroller counter stays in range when its list shrinks", async ({ page }) => {
+  const posts = [1, 2, 3, 4].map((n) => ({ ...other, id: `liked-${n}`, title: `추천 글 ${n}` }));
+  await seed(page, posts, posts.map((post) => post.id));
+  await page.route("**/api/v1/users/me", (route) => route.fulfill({
+    json: { ...session.user, solvedCount: 0, createdAt: "2026-09-01T00:00:00Z" },
+  }));
+  await page.route("**/api/v1/rankings", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/submissions?**", (route) => route.fulfill({
+    json: { items: [], page: 1, limit: 100, total: 0, totalPages: 1 },
+  }));
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/profile");
+  const scroller = page.getByRole("region", { name: "추천한 글" });
+  const count = scroller.locator(".scroller-count");
+  await expect(count).toHaveText("1–2 / 4");
+  await scroller.getByRole("button", { name: "다음 글" }).click();
+  await expect(count).toHaveText("2–3 / 4");
+  await scroller.getByRole("button", { name: "다음 글" }).click();
+  await expect(count).toHaveText("3–4 / 4");
+  // 스크롤 위치가 줄어든 목록에 맞춰지면 곧 바로잡히므로, 그 전에 그려진 값까지 모두 기록한다.
+  const shown = await page.evaluate(async (key) => {
+    const counter = document.querySelector('[aria-label="추천한 글"] .scroller-count')!;
+    const texts: string[] = [];
+    const observer = new MutationObserver(() => texts.push(counter.textContent ?? ""));
+    observer.observe(counter, { subtree: true, childList: true, characterData: true });
+    const activity = JSON.parse(localStorage.getItem(key)!);
+    activity.upvoted = activity.upvoted.slice(1);
+    localStorage.setItem(key, JSON.stringify(activity));
+    window.dispatchEvent(new StorageEvent("storage", { key }));
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    observer.disconnect();
+    return texts;
+  }, activityKey);
+  expect(shown).not.toContain("3–4 / 3");
+  await expect(count).toHaveText("2–3 / 3");
+  await expect(scroller.getByRole("button", { name: "다음 글" })).toBeDisabled();
+});
+
 test("K11: draft helpers isolate owners and posts, preserve ownerless legacy data and keep public posts shared", async ({ page }) => {
   await seed(page);
   await page.goto("/community");
