@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { verdictLabel } from "../verdict";
-import { fetchAll, useDocumentTitle } from "../hooks";
+import { useDocumentTitle, useSubmissionHistory } from "../hooks";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
@@ -32,9 +32,8 @@ export function SubmissionsPage() {
   const [params, setParams] = useSearchParams();
   const paramsRef = useRef(params);
   paramsRef.current = params;
-  const [all, setAll] = useState<Submission[]>([]);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  // 서버가 문제명·판정·언어 검색을 지원하지 않아, 전체 이력을 받아 이 화면에서 거른다.
+  const { submissions: all, loading, error } = useSubmissionHistory(session);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const urlQuery = params.get("q") ?? "";
@@ -79,31 +78,6 @@ export function SubmissionsPage() {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryText, urlQuery]);
-
-  // 서버가 문제명·판정·언어 검색을 지원하지 않아, 전체 이력을 받아 이 화면에서 거른다.
-  useEffect(() => {
-    if (!session) return;
-    const controller = new AbortController();
-    setLoading(true);
-    setAll([]);
-    setError("");
-    fetchAll<Submission>("/submissions", controller.signal, session.accessToken)
-      .then((items) => {
-        if (!controller.signal.aborted) setAll(items);
-      })
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "제출을 불러오지 못했습니다.",
-          );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, [session]);
 
   const keyword = urlQuery.trim().toLowerCase();
   const matchesBase = (item: Submission) =>

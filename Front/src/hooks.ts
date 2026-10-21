@@ -1,9 +1,8 @@
-import { useEffect, useState, type RefObject } from "react";
+import { useEffect, useState, type DependencyList, type RefObject } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "./api";
 import { fetchAll } from "./pagination";
 import { DIFFICULTIES } from "./difficulty";
-export { fetchAll } from "./pagination";
 import type {
   ProblemSummary,
   RankingEntry,
@@ -12,86 +11,67 @@ import type {
   UserProfile,
 } from "./types";
 
-/** 공개 문제 전체. 서버에 검색 API가 없어 목록·검색·필터를 클라이언트에서 처리한다. */
-export function useAllProblems() {
-  const [problems, setProblems] = useState<ProblemSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+/** load가 있으면 요청해 결과·로딩·오류를 돌려준다. deps가 바뀌면 이전 요청을 취소하고 다시 받는다. */
+function useRequest<T>(
+  load: ((signal: AbortSignal) => Promise<T>) | null,
+  initial: T,
+  failure: string,
+  deps: DependencyList,
+) {
+  const [data, setData] = useState(initial);
+  const [loading, setLoading] = useState(Boolean(load));
   const [error, setError] = useState("");
-
   useEffect(() => {
-    const controller = new AbortController();
-    setLoading(true);
+    setData(initial);
     setError("");
-    fetchAll<ProblemSummary>("/problems", controller.signal)
-      .then((items) => {
-        if (!controller.signal.aborted) setProblems(items);
+    setLoading(Boolean(load));
+    if (!load) return;
+    const controller = new AbortController();
+    load(controller.signal)
+      .then((value) => {
+        if (!controller.signal.aborted) setData(value);
       })
       .catch((cause) => {
         if (!controller.signal.aborted)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "문제를 불러오지 못했습니다.",
-          );
+          setError(cause instanceof Error ? cause.message : failure);
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, []);
+  }, deps);
+  return { data, loading, error };
+}
 
+/** 공개 문제 전체. 서버에 검색 API가 없어 목록·검색·필터를 클라이언트에서 처리한다. */
+export function useAllProblems() {
+  const { data: problems, loading, error } = useRequest(
+    (signal) => fetchAll<ProblemSummary>("/problems", signal),
+    [],
+    "문제를 불러오지 못했습니다.",
+    [],
+  );
   return { problems, loading, error };
 }
 
-/** 내 제출 기록에서 해결/시도한 문제와 마지막 제출을 계산한다. */
+/** 내 제출 기록에서 해결/시도한 문제를 계산한다. */
 export function useSubmissionHistory(session: Session | null) {
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [loading, setLoading] = useState(Boolean(session));
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!session) {
-      setSubmissions([]);
-      setLoading(false);
-      setError("");
-      return;
-    }
-    const controller = new AbortController();
-    setLoading(true);
-    setSubmissions([]);
-    setError("");
-    fetchAll<Submission>("/submissions", controller.signal, session.accessToken)
-      .then((items) => {
-        if (!controller.signal.aborted) setSubmissions(items);
-      })
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "제출 기록을 불러오지 못했습니다.",
-          );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, [session]);
-
+  const { data: submissions, loading, error } = useRequest(
+    session
+      ? (signal) =>
+          fetchAll<Submission>("/submissions", signal, session.accessToken)
+      : null,
+    [],
+    "제출 기록을 불러오지 못했습니다.",
+    [session],
+  );
   const solved = new Set<string>();
   const attempted = new Set<string>();
   for (const item of submissions) {
     attempted.add(item.problem.id);
     if (item.status === "ACCEPTED") solved.add(item.problem.id);
   }
-  return {
-    submissions,
-    solved,
-    attempted,
-    latest: submissions[0] ?? null,
-    loading,
-    error,
-  };
+  return { submissions, solved, attempted, loading, error };
 }
 
 export function dayKey(date: Date) {
@@ -134,65 +114,34 @@ export function solvedToday(submissions: Submission[]) {
   ).size;
 }
 
-/** 내 프로필과 전체 랭킹 순위. */
+/** 내 프로필과 전체 랭킹·내 순위. 랭킹은 홈의 랭킹 카드를 위해 로그인하지 않아도 받는다. */
 export function useMyStanding(session: Session | null) {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [rank, setRank] = useState(-1);
-  const [profileLoading, setProfileLoading] = useState(Boolean(session));
-  const [rankLoading, setRankLoading] = useState(Boolean(session));
-  const [profileError, setProfileError] = useState("");
-  const [rankError, setRankError] = useState("");
-
-  useEffect(() => {
-    setProfile(null);
-    setRank(-1);
-    setProfileError("");
-    setRankError("");
-    setProfileLoading(Boolean(session));
-    setRankLoading(Boolean(session));
-    if (!session) {
-      return;
-    }
-    const controller = new AbortController();
-    api<UserProfile>(
-      "/users/me",
-      { signal: controller.signal },
-      session.accessToken,
-    )
-      .then((me) => {
-        if (!controller.signal.aborted) setProfile(me);
-      })
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setProfileError(
-            cause instanceof Error
-              ? cause.message
-              : "프로필을 불러오지 못했습니다.",
-          );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setProfileLoading(false);
-      });
-    api<RankingEntry[]>("/rankings", { signal: controller.signal })
-      .then((rankings) => {
-        if (!controller.signal.aborted)
-          setRank(rankings.findIndex((entry) => entry.id === session.user.id));
-      })
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setRankError(
-            cause instanceof Error
-              ? cause.message
-              : "순위를 불러오지 못했습니다.",
-          );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setRankLoading(false);
-      });
-    return () => controller.abort();
-  }, [session]);
-
-  return { profile, rank, profileLoading, rankLoading, profileError, rankError };
+  const profile = useRequest(
+    session
+      ? (signal) =>
+          api<UserProfile>("/users/me", { signal }, session.accessToken)
+      : null,
+    null,
+    "프로필을 불러오지 못했습니다.",
+    [session],
+  );
+  const rankings = useRequest(
+    (signal) => api<RankingEntry[]>("/rankings", { signal }),
+    [],
+    "랭킹을 불러오지 못했습니다.",
+    [session],
+  );
+  return {
+    profile: profile.data,
+    rankings: rankings.data,
+    rank: session
+      ? rankings.data.findIndex((entry) => entry.id === session.user.id)
+      : -1,
+    profileLoading: profile.loading,
+    rankLoading: rankings.loading,
+    profileError: profile.error,
+    rankError: rankings.error,
+  };
 }
 
 /**

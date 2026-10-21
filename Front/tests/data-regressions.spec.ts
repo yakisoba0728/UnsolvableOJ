@@ -721,6 +721,7 @@ for (const path of ["/my-problems", "/profile", "/"] as const) {
       await expect(page.locator(".profile-card")).toHaveCount(0);
       await expect(page.getByText(`@${privateName}`, { exact: true })).toHaveCount(0);
     } else {
+      await expect(page.getByRole("alert")).toHaveText(message);
       await expect(page.locator('.stat-tiles[aria-busy="true"]')).toHaveCount(0);
       await expect(page.locator(".stat-tile")).toHaveCount(0);
       await expect(page.locator(".brand-art text")).toHaveCount(0);

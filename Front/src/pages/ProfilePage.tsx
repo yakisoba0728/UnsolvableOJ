@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { verdictLabel } from "../verdict";
 import { Link } from "react-router-dom";
-import { api } from "../api";
 import { useAuth } from "../auth";
 import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { PageHeader } from "../components/PageHeader";
@@ -10,16 +9,13 @@ import {
   streakDays,
   submissionsByDay,
   useAllProblems,
+  useMyStanding,
   useSubmissionHistory,
   useDocumentTitle,
 } from "../hooks";
 import { PostScroller } from "../components/PostScroller";
 import { allPosts, useActivity } from "../community/store";
-import {
-  LANGUAGE_LABELS,
-  type RankingEntry,
-  type UserProfile,
-} from "../types";
+import { LANGUAGE_LABELS } from "../types";
 import { difficultyOptions } from "../difficulty";
 
 const WEEKS_WIDE = 16;
@@ -48,9 +44,8 @@ function heatLevel(count: number) {
 export function ProfilePage() {
   useDocumentTitle("내 학습 기록");
   const { session } = useAuth();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [rankings, setRankings] = useState<RankingEntry[]>([]);
-  const [error, setError] = useState("");
+  const { profile, rank, rankLoading, profileError, rankError } =
+    useMyStanding(session);
   const activity = useActivity();
   const myPosts = allPosts(activity).filter(
     (post) => post.author.name === session?.user.username,
@@ -65,7 +60,6 @@ export function ProfilePage() {
     loading: problemsLoading,
     error: problemsError,
   } = useAllProblems();
-  const [ready, setReady] = useState(false);
   // 넓은 화면에서는 폭을 채우도록 주 수를 늘리고, 좁은 화면에서는 가로 스크롤이 생기지 않게 줄인다.
   const [weeks, setWeeks] = useState(() =>
     window.matchMedia("(max-width: 650px)").matches ? WEEKS_NARROW : WEEKS_WIDE,
@@ -77,38 +71,8 @@ export function ProfilePage() {
     return () => media.removeEventListener("change", update);
   }, []);
 
-  useEffect(() => {
-    if (!session) return;
-    const controller = new AbortController();
-    setError("");
-    Promise.all([
-      api<UserProfile>(
-        "/users/me",
-        { signal: controller.signal },
-        session.accessToken,
-      ).then(setProfile),
-      api<RankingEntry[]>("/rankings", { signal: controller.signal }).then(
-        setRankings,
-      ),
-    ])
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "정보를 불러오지 못했습니다.",
-          );
-      })
-      .finally(() => {
-        // 실패해도 로딩 표시가 끝나도록 한다(오류는 아래에서 안내).
-        if (!controller.signal.aborted) setReady(true);
-      });
-    return () => controller.abort();
-  }, [session]);
-
   const counts = submissionsByDay(history.submissions);
   const streak = streakDays(counts);
-  const rank = rankings.findIndex((entry) => entry.id === session?.user.id);
 
   // 오늘이 속한 주를 마지막 열로, 일요일 시작 12주 격자
   const today = new Date();
@@ -166,16 +130,16 @@ export function ProfilePage() {
     (item) => dayKey(new Date(item.createdAt)) === selected,
   );
 
-  if (error && !profile)
+  if (profileError)
     return (
       <div className="page-width standalone-section">
         <p className="error-message" role="alert">
-          {error}
+          {profileError}
         </p>
       </div>
     );
   // 프로필·랭킹·제출 기록·문제 목록이 모두 도착하기 전에는 0 같은 임시 값을 보이지 않는다.
-  if (!profile || !ready || history.loading || problemsLoading)
+  if (!profile || rankLoading || history.loading || problemsLoading)
     return (
       <div className="page-width profile-page">
         <PageHeader
@@ -211,9 +175,9 @@ export function ProfilePage() {
         title="내 학습 기록"
         description="쌓아 온 실력과 꾸준함을 한눈에 확인하세요."
       />
-      {error || history.error || problemsError ? (
+      {rankError || history.error || problemsError ? (
         <p className="error-message" role="alert">
-          {error || history.error || problemsError}
+          {rankError || history.error || problemsError}
         </p>
       ) : null}
 
