@@ -1,20 +1,7 @@
-import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
+import { IsOptional, IsUUID } from 'class-validator';
+import { ListQuery } from '../../../common/list-query.js';
 
-export class ListSubmissionsQuery {
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  page = 1;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(1000)
-  limit = 20;
-
+export class ListSubmissionsQuery extends ListQuery {
   @IsOptional()
   @IsUUID()
   problemId?: string;

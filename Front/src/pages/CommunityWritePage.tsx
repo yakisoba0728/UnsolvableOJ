@@ -25,6 +25,7 @@ import {
 } from "../community/store";
 import { categories, type CategoryKey } from "../community/types";
 import { useDocumentTitle } from "../hooks";
+import { useUnsavedChanges } from "../useUnsavedChanges";
 
 const MAX_TAGS = 5;
 const TITLE_MAX = 100;
@@ -32,7 +33,7 @@ const TAG_MAX = 20;
 
 type Field = "title" | "body" | "tag";
 
-/** 입력 규칙. 문제가 없으면 빈 문자열. 검색창의 '#단어' 태그와 맞게 태그는 띄어쓰기 없이 쓴다. */
+/** 입력 규칙. 문제가 없으면 빈 문자열. 태그는 Enter로 확정하며 쉼표와 공백도 태그의 일부다. */
 function fieldProblem(field: Field, value: string) {
   if (field === "title") {
     if (!value.trim()) return "제목을 입력해 주세요.";
@@ -40,33 +41,15 @@ function fieldProblem(field: Field, value: string) {
       return `제목은 ${TITLE_MAX}자 이하로 입력해 주세요.`;
   } else if (field === "body") {
     if (!value.trim()) return "본문을 입력해 주세요.";
-  } else {
-    for (const tag of tagPieces(value)) {
-      if (/\s/.test(tag))
-        return "태그는 띄어쓰기 없이 한 단어로 입력해 주세요.";
-      if (tag.length > TAG_MAX)
-        return `태그는 ${TAG_MAX}자 이하로 입력해 주세요.`;
-    }
+  } else if (tagValue(value).length > TAG_MAX) {
+    return `태그는 ${TAG_MAX}자 이하로 입력해 주세요.`;
   }
   return "";
 }
 
-/** 입력한 글을 등록하면 태그가 최대 개수를 넘는지(이미 있는 태그는 세지 않는다) 확인한다. */
-function tagLimitProblem(value: string, existing: string[]) {
-  const added = new Set(
-    tagPieces(value).filter((tag) => !existing.includes(tag)),
-  );
-  return existing.length + added.size > MAX_TAGS
-    ? `태그는 최대 ${MAX_TAGS}개까지 넣을 수 있어요.`
-    : "";
-}
-
-/** 입력 칸의 글에서 태그 후보를 뽑는다. 쉼표로 나누고, 앞의 '#'과 앞뒤 공백을 떼며, 빈 조각은 버린다. */
-function tagPieces(value: string) {
-  return value
-    .split(",")
-    .map((piece) => piece.trim().replace(/^#+/, ""))
-    .filter(Boolean);
+/** 입력 칸의 글에서 앞의 '#'과 앞뒤 공백을 뗀 태그. */
+function tagValue(value: string) {
+  return value.trim().replace(/^#+/, "").trim();
 }
 
 export function CommunityWritePage() {
@@ -74,6 +57,7 @@ export function CommunityWritePage() {
   const editing = Boolean(editingId);
   useDocumentTitle(editing ? "글 수정" : "글 작성");
   const { session } = useAuth();
+  const ownerId = session?.user.id ?? "";
   const activity = useActivity();
   // 수정 모드: 내가 쓴 글만 열 수 있다.
   const original = editingId
@@ -90,26 +74,30 @@ export function CommunityWritePage() {
       item.key !== "notice" || isAdmin || item.key === original?.category,
   );
 
-  // 이전에 임시 저장한 초안이 있으면 한 번만 복원한다.
-  // (수정 모드에서는 새 글 초안을 건드리지 않는다.)
-  const [restored] = useState(() => (editing ? null : readDraft()));
+  // 새 글과 각 글의 수정 초안은 계정별로 따로 복원한다.
+  const [restored] = useState(() =>
+    !editing || original?.author.name === session?.user.username
+      ? readDraft(ownerId, editingId)
+      : null,
+  );
   // 배너에서 "풀이 공유하기"로 들어오면 그 카테고리로 시작한다.
   const [category, setCategory] = useState<CategoryKey>(
-    original && options.some((item) => item.key === original.category)
-      ? original.category
-      : requestedCategory &&
+    restored && options.some((item) => item.key === restored.category)
+      ? restored.category
+      : original && options.some((item) => item.key === original.category)
+        ? original.category
+        : requestedCategory &&
           options.some((item) => item.key === requestedCategory)
-        ? requestedCategory
-        : restored && options.some((item) => item.key === restored.category)
-          ? restored.category
+          ? requestedCategory
           : "question",
   );
-  const [title, setTitle] = useState(original?.title ?? restored?.title ?? "");
+  const [title, setTitle] = useState(restored?.title ?? original?.title ?? "");
   const [tags, setTags] = useState<string[]>(
-    original?.tags ?? restored?.tags ?? [],
+    restored?.tags ?? original?.tags ?? [],
   );
-  const [tagText, setTagText] = useState("");
-  const [body, setBody] = useState(original?.body ?? restored?.body ?? "");
+  const [tagText, setTagText] = useState(restored?.tagText ?? "");
+  const [body, setBody] = useState(restored?.body ?? original?.body ?? "");
+  const [submitError, setSubmitError] = useState("");
   // 입력을 시작한 칸은 바로, 건드리고 떠난 칸은 비어 있어도 안내한다(회원가입과 같은 방식).
   const [touched, setTouched] = useState<Record<Field, boolean>>({
     title: false,
@@ -131,18 +119,27 @@ export function CommunityWritePage() {
   const [showRestored, setShowRestored] = useState(Boolean(restored));
   const titleRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const bypass = useRef(false);
 
   const dirty = original
     ? title !== original.title ||
       body !== original.body ||
       category !== original.category ||
-      tags.join("\n") !== original.tags.join("\n")
-    : Boolean(title.trim() || body.trim() || tags.length);
+      JSON.stringify(tags) !== JSON.stringify(original.tags) ||
+      Boolean(tagText.trim())
+    : Boolean(title.trim() || body.trim() || tags.length || tagText.trim());
+  useUnsavedChanges(dirty && Boolean(session), bypass);
+  const latest = useRef({ category, title, tags, tagText, body, dirty });
+  latest.current = { category, title, tags, tagText, body, dirty };
 
   function saveDraft() {
-    if (editing) return false;
+    if (bypass.current) return false;
     const now = Date.now();
-    const ok = writeDraft({ category, title, tags, body, savedAt: now });
+    const ok = writeDraft(
+      ownerId,
+      { category, title, tags, tagText, body, savedAt: now },
+      editingId,
+    );
     setSaveState(ok ? "saved" : "failed");
     if (ok) setSavedAt(now);
     return ok;
@@ -156,32 +153,36 @@ export function CommunityWritePage() {
 
   // 입력하면 잠시 뒤 자동으로 임시 저장한다.
   useEffect(() => {
+    if (!ownerId || bypass.current) return;
     const emptied = wasDirtyRef.current && !dirty;
     wasDirtyRef.current = dirty;
     if (!dirty) {
-      // 내용이 있다가 전부 지워졌다면 예전 임시 저장본이 다시 살아나지 않게 지운다.
-      // 처음부터 비어 있던 화면(복원 전·수동으로 빈 초안을 저장한 경우)은 건드리지 않고, 수정 모드는 새 글 초안을 건드리지 않는다.
-      if (emptied && !editing) {
-        clearDraft();
-        setSaveState("idle");
-        setSavedAt(null);
+      // 내용이 있다가 전부 지워졌을 때만 지운다. 처음부터 비어 있던 화면(빈 초안을 직접 저장한 경우 포함)은 건드리지 않는다.
+      if (emptied) {
+        const cleared = clearDraft(ownerId, editingId);
+        setSaveState(cleared ? "idle" : "failed");
+        if (cleared) setSavedAt(null);
       }
       return;
     }
     const timer = window.setTimeout(saveDraft, 1200);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, title, tags, body]);
+  }, [category, title, tags, tagText, body, dirty, ownerId, editingId]);
 
-  // 작성 중에 탭을 닫거나 새로고침하면 브라우저가 확인한다.
+  // 자동 저장을 기다리지 않고 이탈·세션 만료 직전의 입력까지 보관한다.
   useEffect(() => {
-    if (!dirty) return;
-    const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
+    const persistLatest = () => {
+      if (bypass.current || !ownerId || !latest.current.dirty) return;
+      const { dirty: _dirty, ...draft } = latest.current;
+      writeDraft(ownerId, { ...draft, savedAt: Date.now() }, editingId);
     };
-    window.addEventListener("beforeunload", onBeforeUnload);
-    return () => window.removeEventListener("beforeunload", onBeforeUnload);
-  }, [dirty]);
+    window.addEventListener("beforeunload", persistLatest);
+    return () => {
+      window.removeEventListener("beforeunload", persistLatest);
+      persistLatest();
+    };
+  }, [ownerId, editingId]);
 
   // 비로그인 접근은 App의 라우트에서 로그인 화면(또는 로그아웃 직후 홈)으로 보낸다.
   if (!session) return null;
@@ -197,9 +198,7 @@ export function CommunityWritePage() {
   const problems: Record<Field, string> = {
     title: fieldProblem("title", title),
     body: fieldProblem("body", body),
-    tag: tagText
-      ? fieldProblem("tag", tagText) || tagLimitProblem(tagText, tags)
-      : "",
+    tag: tagText ? fieldProblem("tag", tagText) : "",
   };
   const shown = (field: Field) =>
     touched[field] || values[field] !== "" ? problems[field] : "";
@@ -208,13 +207,15 @@ export function CommunityWritePage() {
 
   function addTag(raw: string) {
     // 규칙에 어긋나면 입력은 그대로 두고(안내가 보인다) 등록하지 않는다.
-    if (fieldProblem("tag", raw) || tagLimitProblem(raw, tags)) return;
-    const pieces = tagPieces(raw);
-    if (pieces.length)
-      setTags((previous) => [
-        ...previous,
-        ...new Set(pieces.filter((piece) => !previous.includes(piece))),
-      ]);
+    if (fieldProblem("tag", raw)) return;
+    const value = tagValue(raw);
+    if (value)
+      setTags((previous) =>
+        previous.some((tag) => tag.toLowerCase() === value.toLowerCase()) ||
+        previous.length >= MAX_TAGS
+          ? previous
+          : [...previous, value],
+      );
     // '#'만 입력했거나 이미 있는 태그라면 등록할 것이 없으니 입력 칸만 비운다.
     setTagText("");
   }
@@ -227,7 +228,7 @@ export function CommunityWritePage() {
       (event.key === "Enter" && event.keyCode === 229)
     )
       return;
-    if (event.key === "Enter" || event.key === ",") {
+    if (event.key === "Enter") {
       event.preventDefault();
       addTag(tagText);
     } else if (event.key === "Backspace" && !tagText && tags.length) {
@@ -236,22 +237,30 @@ export function CommunityWritePage() {
   }
 
   function cancel() {
+    if (bypass.current) return;
     if (
       dirty &&
       !window.confirm(
         editing
           ? "수정한 내용이 저장되지 않아요. 나갈까요?"
-          : "작성 중인 내용이 임시 저장되지 않은 채로 사라질 수 있어요. 나갈까요?",
+          : "작성 중인 초안을 버리고 나갈까요?",
       )
     ) {
       return;
     }
+    if (!clearDraft(ownerId, editingId)) {
+      setSubmitError(
+        "초안을 지우지 못했어요. 내용을 유지했으니 다시 시도해 주세요.",
+      );
+      return;
+    }
+    bypass.current = true;
     navigate(editingId ? `/community/${editingId}` : "/community");
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending || !session) return;
+    if (bypass.current || pending || !session) return;
     setTouched({ title: true, body: true, tag: true });
     if (problems.title) return titleRef.current?.focus();
     if (problems.body) {
@@ -260,35 +269,33 @@ export function CommunityWritePage() {
     }
     if (problems.tag) return document.getElementById("tag-input")?.focus();
 
+    saveDraft();
     setPending(true);
-    if (editingId) {
-      communityActions.updatePost(editingId, {
-        category,
-        title: title.trim(),
-        body: body.trim(),
-        tags,
+    setSubmitError("");
+    try {
+      const input = { category, title: title.trim(), body: body.trim(), tags };
+      let postId = editingId;
+      if (postId) communityActions.updatePost(postId, input);
+      else {
+        postId = communityActions.addPost({
+          ...input,
+          author: { name: session.user.username, tier: "Bronze I" },
+        }).id;
+      }
+      const cleared = clearDraft(ownerId, editingId);
+      bypass.current = true;
+      navigate(`/community/${postId}`, {
+        state: {
+          notice: `${editing ? "글을 수정했어요." : "글을 등록했어요."}${cleared ? "" : " 임시 초안을 지우지 못했어요."}`,
+        },
       });
-      setPending(false);
-      navigate(`/community/${editingId}`, {
-        state: { notice: "글을 수정했어요." },
-      });
-      return;
+    } catch {
+      setSubmitError(
+        "글을 저장하지 못했어요. 입력한 내용과 초안을 유지했으니 다시 시도해 주세요.",
+      );
+    } finally {
+      if (!bypass.current) setPending(false);
     }
-    const post = communityActions.addPost({
-      category,
-      title: title.trim(),
-      body: body.trim(),
-      tags,
-      author: { name: session.user.username, tier: "Bronze I" },
-    });
-    clearDraft();
-    // 입력 중이던 내용은 등록과 함께 비우므로 이탈 경고가 뜨지 않게 한다.
-    setTitle("");
-    setBody("");
-    setTags([]);
-    navigate(`/community/${post.id}`, {
-      state: { notice: "글을 등록했어요." },
-    });
   }
 
   return (
@@ -312,17 +319,30 @@ export function CommunityWritePage() {
             type="button"
             className="inline-button"
             onClick={() => {
-              clearDraft();
-              setTitle("");
-              setBody("");
-              setTags([]);
+              if (!clearDraft(ownerId, editingId)) {
+                setSubmitError(
+                  "초안을 지우지 못했어요. 입력한 내용은 그대로 남아 있습니다.",
+                );
+                return;
+              }
+              setCategory(original?.category ?? "question");
+              setTitle(original?.title ?? "");
+              setBody(original?.body ?? "");
+              setTags(original?.tags ?? []);
+              setTagText("");
               setShowRestored(false);
               setSaveState("idle");
               setSavedAt(null);
+              setSubmitError("");
             }}
           >
             초안 지우기
           </button>
+        </p>
+      ) : null}
+      {submitError ? (
+        <p className="error-message" role="alert">
+          {submitError}
         </p>
       ) : null}
       <form className="form-card write-form" onSubmit={submit} noValidate>
@@ -486,7 +506,7 @@ export function CommunityWritePage() {
         </div>
       </form>
       <div className="write-bar">
-        <p className="write-hint" role="status" hidden={editing}>
+        <p className="write-hint" role="status">
           {saveState === "failed"
             ? "임시 저장에 실패했어요. 입력한 내용은 그대로 남아 있습니다."
             : saveState === "saved" && savedAt
@@ -501,15 +521,13 @@ export function CommunityWritePage() {
           >
             취소
           </button>
-          {editing ? null : (
-            <button
-              type="button"
-              className="button button-outline"
-              onClick={saveDraft}
-            >
-              임시 저장
-            </button>
-          )}
+          <button
+            type="button"
+            className="button button-outline"
+            onClick={saveDraft}
+          >
+            임시 저장
+          </button>
           <button
             type="button"
             className="button"

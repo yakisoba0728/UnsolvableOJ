@@ -1,16 +1,14 @@
 import { defineConfig } from 'vitest/config';
+import { integrationDatabaseUrl } from './scripts/run-integration.mjs';
 
 export default defineConfig({
-  resolve: { tsconfigPaths: true },
   test: {
     globals: true,
     root: './',
     include: ['**/*.e2e-spec.ts'],
     env: {
       NODE_ENV: 'test',
-      DATABASE_URL:
-        process.env.DATABASE_URL ??
-        'postgresql://unsolvable:local_password@localhost:5432/unsolvable_oj',
+      DATABASE_URL: integrationDatabaseUrl(),
       REDIS_HOST: process.env.REDIS_HOST ?? 'localhost',
       REDIS_PORT: process.env.REDIS_PORT ?? '6379',
       REDIS_DB: process.env.REDIS_DB ?? '1',

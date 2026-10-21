@@ -57,7 +57,7 @@ export class SubmissionsController {
   }
 
   @Post('submissions/:id/rejudge')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   @Roles(UserRole.AUTHOR, UserRole.ADMIN)
   @HttpCode(HttpStatus.ACCEPTED)
   rejudge(

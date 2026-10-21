@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RolesGuard } from '../../common/guards/roles.guard.js';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { Problem } from './problem.entity.js';
 import { ProblemsController } from './problems.controller.js';
 import { ProblemsService } from './problems.service.js';
@@ -14,6 +12,6 @@ import { TestCase } from './test-case.entity.js';
     TypeOrmModule.forFeature([Problem, TestCase]),
   ],
   controllers: [ProblemsController],
-  providers: [ProblemsService, JwtAuthGuard, RolesGuard],
+  providers: [ProblemsService],
 })
 export class ProblemsModule {}

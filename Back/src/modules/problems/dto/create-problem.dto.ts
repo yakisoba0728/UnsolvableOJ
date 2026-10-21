@@ -14,9 +14,11 @@ import {
   Max,
   MaxLength,
   Min,
+  Validate,
   ValidateNested,
 } from 'class-validator';
 import { ProblemDifficulty, ProblemStatus } from '../problem.enums.js';
+import { ExpectedOutputValidator } from './expected-output.validator.js';
 
 export class CreateTestCaseDto {
   @IsString()
@@ -25,6 +27,7 @@ export class CreateTestCaseDto {
 
   @IsString()
   @MaxLength(1_000_000)
+  @Validate(ExpectedOutputValidator)
   expectedOutput: string;
 
   @IsBoolean()

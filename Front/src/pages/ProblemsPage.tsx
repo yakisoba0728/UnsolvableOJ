@@ -76,8 +76,11 @@ export function ProblemsPage() {
   useDocumentTitle("문제 목록");
   const { problems, loading, error } = useAllProblems();
   const history = useSubmissionHistory(session);
-  const { profile, rank } = useMyStanding(session);
+  const { profile, rank, profileLoading, rankLoading, profileError, rankError } =
+    useMyStanding(session);
   const [params, setParams] = useSearchParams();
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
   const searchRef = useRef<HTMLInputElement>(null);
   const sideRef = useRef<HTMLElement>(null);
   useStickyTop(sideRef);
@@ -111,12 +114,13 @@ export function ProblemsPage() {
     patch: Record<string, string | null>,
     { resetPage = true }: { resetPage?: boolean } = {},
   ) {
-    const next = new URLSearchParams(params);
+    const next = new URLSearchParams(paramsRef.current);
     for (const [key, value] of Object.entries(patch)) {
       if (value === null || value === "") next.delete(key);
       else next.set(key, value);
     }
     if (resetPage && !("page" in patch)) next.delete("page");
+    paramsRef.current = next;
     setParams(next, { replace: true });
   }
 
@@ -137,7 +141,7 @@ export function ProblemsPage() {
     }, 250);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryText]);
+  }, [queryText, urlQuery]);
 
   // "/" 키로 검색창에 바로 이동 (LeetCode·GitHub 방식)
   useEffect(() => {
@@ -240,12 +244,22 @@ export function ProblemsPage() {
   const solvedCount = problems.filter((p) => history.solved.has(p.id)).length;
 
   // 이어 풀 문제(시도했지만 못 푼 가장 최근 문제). 없으면 가장 쉬운 안 푼 문제.
-  const resume = pickResume(history.submissions, history.solved);
-  const next = resume ? null : pickNextProblem(problems, history.solved);
-  const continueTarget = resume
+  const recommendationsReady =
+    !loading && !error && !history.loading && !history.error;
+  const resume = recommendationsReady
+    ? pickResume(history.submissions, history.solved, problems)
+    : null;
+  const resumeProblem = resume
+    ? problems.find((problem) => problem.id === resume.problem.id)
+    : undefined;
+  const next =
+    recommendationsReady && !resume
+      ? pickNextProblem(problems, history.solved)
+      : null;
+  const continueTarget = resumeProblem
     ? {
-        slug: resume.problem.slug as string,
-        title: resume.problem.title ?? "문제",
+        slug: resumeProblem.slug,
+        title: resumeProblem.title,
         label: "이어서 풀기",
       }
     : next
@@ -523,7 +537,7 @@ export function ProblemsPage() {
         </section>
 
         <aside className="side-stack" ref={sideRef}>
-          {session && !profile ? (
+          {session && profileLoading ? (
             <SkeletonRegion
               className="standing-card"
               label="내 요약을 불러오는 중입니다"
@@ -536,6 +550,16 @@ export function ProblemsPage() {
               </div>
               <Skeleton height={40} radius={10} />
             </SkeletonRegion>
+          ) : null}
+          {session && profileError ? (
+            <p className="error-message" role="alert">
+              {profileError}
+            </p>
+          ) : null}
+          {session && rankError ? (
+            <p className="error-message" role="alert">
+              {rankError}
+            </p>
           ) : null}
           {profile ? (
             <div className="standing-card">
@@ -550,7 +574,15 @@ export function ProblemsPage() {
               <dl>
                 <div>
                   <dt>순위</dt>
-                  <dd>{rank >= 0 ? `${rank + 1}위` : "—"}</dd>
+                  <dd>
+                    {rankLoading ? (
+                      <Skeleton width={36} height={20} />
+                    ) : rank >= 0 ? (
+                      `${rank + 1}위`
+                    ) : (
+                      "—"
+                    )}
+                  </dd>
                 </div>
                 <div>
                   <dt>XP</dt>

@@ -1,6 +1,8 @@
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class DebugOutputs1790552000000 implements MigrationInterface {
+  name = 'DebugOutputs1790552000000';
+
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
       `ALTER TABLE submissions ADD COLUMN debug_outputs jsonb NOT NULL DEFAULT '[]'::jsonb`,

@@ -86,6 +86,145 @@ try {
     await runner.release();
   }
   assert.deepEqual(await db.runMigrations(), []);
+  const acceptedEvidence = await db.query(
+    "SELECT id, accepted_for_xp FROM submissions WHERE status = 'ACCEPTED'",
+  );
+  assert.equal(acceptedEvidence.length, 2);
+  assert.ok(acceptedEvidence.every((row) => row.accepted_for_xp));
+
+  // Simulate the pre-evidence schema with both known and unknowable past verdicts.
+  await db.undoLastMigration();
+  const evidenceFixtures = [];
+  for (const [status, anchored, accepted] of [
+    ['ACCEPTED', false, true],
+    ['QUEUED', true, true],
+    ['JUDGING', true, true],
+    ['SYSTEM_ERROR', true, true],
+    ['CANCELLED', true, true],
+    ['SYSTEM_ERROR', false, false],
+    ['WRONG_ANSWER', true, false],
+    ['TIME_LIMIT_EXCEEDED', true, false],
+    ['MEMORY_LIMIT_EXCEEDED', true, false],
+    ['RUNTIME_ERROR', true, false],
+    ['COMPILE_ERROR', true, false],
+    ['OUTPUT_LIMIT_EXCEEDED', true, false],
+  ]) {
+    const suffix = randomUUID();
+    const [solver] = await db.query(
+      `INSERT INTO users (email, username, password_hash, xp)
+       VALUES ($1, $2, 'unused', 37) RETURNING id`,
+      [`evidence-${suffix}@example.com`, `evidence_${suffix.slice(0, 8)}`],
+    );
+    const [submission] = await db.query(
+      `INSERT INTO submissions (user_id, problem_id, language, source_code, status)
+       VALUES ($1, $2, 'PYTHON', 'print(3)', $3) RETURNING id`,
+      [solver.id, problem.id, status],
+    );
+    if (anchored)
+      await db.query(
+        `INSERT INTO user_problem_solves (user_id, problem_id, accepted_submission_id, awarded_xp)
+         VALUES ($1, $2, $3, 10)`,
+        [solver.id, problem.id, submission.id],
+      );
+    evidenceFixtures.push({ userId: solver.id, id: submission.id, accepted });
+  }
+  const xpBeforeEvidence = await db.query(
+    'SELECT id, xp, level FROM users ORDER BY id',
+  );
+  const solvesBeforeEvidence = await db.query(
+    'SELECT * FROM user_problem_solves ORDER BY user_id, problem_id',
+  );
+  assert.equal((await db.runMigrations()).length, 1);
+  for (const fixture of evidenceFixtures)
+    assert.equal(
+      (await db.query('SELECT accepted_for_xp FROM submissions WHERE id = $1', [
+        fixture.id,
+      ]))[0].accepted_for_xp,
+      fixture.accepted,
+    );
+  assert.deepEqual(
+    await db.query('SELECT id, xp, level FROM users ORDER BY id'),
+    xpBeforeEvidence,
+  );
+  assert.deepEqual(
+    await db.query('SELECT * FROM user_problem_solves ORDER BY user_id, problem_id'),
+    solvesBeforeEvidence,
+  );
+  const [fresh] = await db.query(
+    `INSERT INTO submissions (user_id, problem_id, language, source_code)
+     VALUES ($1, $2, 'PYTHON', 'print(3)') RETURNING accepted_for_xp`,
+    [evidenceFixtures[0].userId, problem.id],
+  );
+  assert.equal(fresh.accepted_for_xp, false);
+  await db.query('DELETE FROM users WHERE id = ANY($1::uuid[])', [
+    evidenceFixtures.map((fixture) => fixture.userId),
+  ]);
+  // Even a non-ledger-anchor AC must retain its evidence across a downgrade refusal.
+  const [solve] = await db.query(
+    'SELECT accepted_submission_id FROM user_problem_solves',
+  );
+  const alternative = acceptedEvidence.find(
+    (row) => row.id !== solve.accepted_submission_id,
+  );
+  assert.ok(alternative);
+  const beforeEvidenceRefusal = await db.query(
+    'SELECT name FROM migrations ORDER BY id',
+  );
+  for (const status of ['QUEUED', 'JUDGING', 'SYSTEM_ERROR', 'CANCELLED']) {
+    await db.query('UPDATE submissions SET status = $2 WHERE id = $1', [
+      alternative.id,
+      status,
+    ]);
+    await assert.rejects(
+      db.undoLastMigration(),
+      /Cannot roll back submission XP evidence with retained acceptance outside ACCEPTED/,
+    );
+    assert.deepEqual(
+      await db.query('SELECT name FROM migrations ORDER BY id'),
+      beforeEvidenceRefusal,
+    );
+    assert.deepEqual(
+      (await db.query(
+        'SELECT status, accepted_for_xp FROM submissions WHERE id = $1',
+        [alternative.id],
+      ))[0],
+      { status, accepted_for_xp: true },
+    );
+  }
+  await db.query("UPDATE submissions SET status = 'ACCEPTED' WHERE id = $1", [
+    alternative.id,
+  ]);
+  await verifyBackfill();
+
+  // Backfill rollback keeps its ledger, so reapplying it cannot award XP twice.
+  await db.undoLastMigration();
+  await db.undoLastMigration();
+  await db.undoLastMigration();
+  await verifyBackfill();
+  const beforeRefusal = await db.query('SELECT name FROM migrations ORDER BY id');
+  await assert.rejects(
+    db.undoLastMigration(),
+    /Cannot roll back backend foundations with a populated solve ledger/,
+  );
+  assert.deepEqual(await db.query('SELECT name FROM migrations ORDER BY id'), beforeRefusal);
+  for (const table of ['audit_events', 'user_problem_solves', 'problem_versions']) {
+    assert.equal(
+      (await db.query('SELECT to_regclass($1)::text AS name', [`public.${table}`]))[0].name,
+      table,
+    );
+  }
+  await verifyBackfill();
+  assert.equal((await db.runMigrations()).length, 3);
+  await verifyBackfill();
+
+  // A full rollback is only valid for an empty ledger: use a genuinely fresh DB.
+  await db.destroy();
+  await admin.query(`DROP DATABASE "${name}" WITH (FORCE)`);
+  created = false;
+  await admin.query(`CREATE DATABASE "${name}"`);
+  created = true;
+  db = await new DataSource(options).initialize();
+  assert.equal((await db.runMigrations()).length, configured.options.migrations.length);
   for (let i = 0; i < configured.options.migrations.length; i++)
     await db.undoLastMigration();
   assert.equal(
@@ -99,7 +238,7 @@ try {
   );
   assert.equal(await db.showMigrations(), false);
   console.log(
-    'Migrations: legacy upgrade, ordered snapshots, solve/XP backfill, expired leases, idempotency, rollback and fresh install passed.',
+    'Migrations: legacy upgrade, snapshots, solve/XP idempotency, acceptance evidence backfill/refusal, partial rollback, populated-ledger refusal and fresh install/rollback/reapply passed.',
   );
 } finally {
   if (db?.isInitialized) await db.destroy();

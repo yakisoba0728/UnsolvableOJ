@@ -41,6 +41,8 @@ export function SubmissionsPage() {
   useDocumentTitle("내 제출");
   const { session } = useAuth();
   const [params, setParams] = useSearchParams();
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
   const [all, setAll] = useState<Submission[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -60,12 +62,13 @@ export function SubmissionsPage() {
     patch: Record<string, string | null>,
     { resetPage = true }: { resetPage?: boolean } = {},
   ) {
-    const next = new URLSearchParams(params);
+    const next = new URLSearchParams(paramsRef.current);
     for (const [key, value] of Object.entries(patch)) {
       if (value === null || value === "") next.delete(key);
       else next.set(key, value);
     }
     if (resetPage && !("page" in patch)) next.delete("page");
+    paramsRef.current = next;
     setParams(next, { replace: true });
   }
 
@@ -86,16 +89,19 @@ export function SubmissionsPage() {
     }, 250);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryText]);
+  }, [queryText, urlQuery]);
 
   // 서버가 문제명·판정·언어 검색을 지원하지 않아, 전체 이력을 받아 이 화면에서 거른다.
   useEffect(() => {
     if (!session) return;
     const controller = new AbortController();
     setLoading(true);
+    setAll([]);
     setError("");
     fetchAll<Submission>("/submissions", controller.signal, session.accessToken)
-      .then(setAll)
+      .then((items) => {
+        if (!controller.signal.aborted) setAll(items);
+      })
       .catch((cause) => {
         if (!controller.signal.aborted)
           setError(

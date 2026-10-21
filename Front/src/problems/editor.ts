@@ -105,8 +105,7 @@ export interface FormErrors {
   statement?: string;
   inputDescription?: string;
   outputDescription?: string;
-  /** 예제가 하나도 없을 때 */
-  samples?: string;
+  testCases?: string;
   /** 케이스 key → 메시지 */
   cases: Record<string, string>;
 }
@@ -138,11 +137,8 @@ export function validate(form: ProblemForm, needsSlug: boolean): FormErrors {
       "입력 형식을 설명해 주세요. 입력이 없다면 “입력은 없다.”라고 적어 주세요.";
   if (!form.outputDescription.trim())
     errors.outputDescription = "출력 형식을 설명해 주세요.";
-  if (!form.cases.some((item) => item.isSample))
-    errors.samples = "문제 화면에 보일 예제를 하나 이상 만들어 주세요.";
-  for (const item of form.cases)
-    if (!item.expectedOutput.trim())
-      errors.cases[item.key] = "기대 출력을 입력해 주세요.";
+  if (!form.cases.length)
+    errors.testCases = "테스트케이스를 하나 이상 만들어 주세요.";
   return errors;
 }
 
@@ -151,44 +147,98 @@ export const hasErrors = (errors: FormErrors) =>
     name === "cases" ? Object.keys(value as object).length > 0 : Boolean(value),
   );
 
-// ---- 작성 중 임시 저장 (새 문제 전용) ----
-const draftKey = "unsolvable-oj-problem-draft-v1";
+// sessionStorage provides tab isolation, including tabs duplicated by the browser.
+// shortcut: recovery lasts for this tab's session, add an explicit export for closed-tab recovery.
+const draftKey = (scope: string) => `unsolvable-oj-problem-draft-v2:${scope}`;
 
 export interface ProblemDraft {
   form: ProblemForm;
   slugTouched: boolean;
   savedAt: number;
+  revision: string;
 }
 
-export function readProblemDraft(): ProblemDraft | null {
+interface DraftRead {
+  draft: ProblemDraft | null;
+  failed: boolean;
+}
+
+const drafts = new Map<string, DraftRead>();
+
+export const problemDraftScope = (owner: string, problemId?: string) =>
+  JSON.stringify([owner, problemId ?? "new"]);
+
+function isDraft(value: unknown): value is ProblemDraft {
+  if (!value || typeof value !== "object") return false;
+  const draft = value as ProblemDraft;
+  const form = draft.form;
+  return Boolean(
+    form &&
+      typeof draft.revision === "string" &&
+      typeof draft.savedAt === "number" &&
+      typeof draft.slugTouched === "boolean" &&
+      [
+        "title", "slug", "statement", "inputDescription",
+        "outputDescription", "hint", "source",
+      ].every((key) => typeof form[key as keyof ProblemForm] === "string") &&
+      ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"].includes(form.difficulty) &&
+      typeof form.timeLimitMs === "number" &&
+      typeof form.memoryLimitMb === "number" &&
+      Array.isArray(form.cases) &&
+      form.cases.every(
+        (item) => item &&
+          typeof item.key === "string" &&
+          typeof item.input === "string" &&
+          typeof item.expectedOutput === "string" &&
+          typeof item.isSample === "boolean" &&
+          typeof item.score === "number" &&
+          typeof item.collapsed === "boolean",
+      ),
+  );
+}
+
+export function readProblemDraft(scope: string): DraftRead {
+  const cached = drafts.get(scope);
+  if (cached) return cached;
   try {
-    const raw = localStorage.getItem(draftKey);
-    if (!raw) return null;
-    const draft = JSON.parse(raw) as ProblemDraft;
-    return draft?.form &&
-      Array.isArray(draft.form.cases) &&
-      draft.form.cases.length
-      ? draft
-      : null;
+    // Never adopt or delete the ownerless v1 localStorage record.
+    const raw = sessionStorage.getItem(draftKey(scope));
+    if (!raw || raw === "null") return { draft: null, failed: false };
+    const value: unknown = JSON.parse(raw);
+    if (!isDraft(value)) return { draft: null, failed: true };
+    const result = { draft: value, failed: false };
+    drafts.set(scope, result);
+    return result;
   } catch {
-    return null;
+    return { draft: null, failed: true };
   }
 }
 
-export function writeProblemDraft(draft: ProblemDraft): boolean {
+export function writeProblemDraft(scope: string, draft: ProblemDraft): boolean {
+  drafts.set(scope, { draft, failed: true });
   try {
-    localStorage.setItem(draftKey, JSON.stringify(draft));
+    sessionStorage.setItem(draftKey(scope), JSON.stringify(draft));
+    drafts.set(scope, { draft, failed: false });
     return true;
   } catch {
     return false;
   }
 }
 
-export function clearProblemDraft() {
+export function clearProblemDraft(scope: string, submitted: ProblemDraft) {
+  const current = readProblemDraft(scope).draft;
+  if (current?.revision !== submitted.revision) return false;
+  drafts.set(scope, { draft: null, failed: false });
   try {
-    localStorage.removeItem(draftKey);
+    sessionStorage.removeItem(draftKey(scope));
+    return true;
   } catch {
-    /* 무시 */
+    try {
+      sessionStorage.setItem(draftKey(scope), "null");
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 
@@ -202,6 +252,12 @@ export function isPristine(form: ProblemForm) {
     !form.outputDescription.trim() &&
     !form.hint.trim() &&
     !form.source.trim() &&
-    form.cases.every((item) => !item.input && !item.expectedOutput)
+    form.difficulty === "BEGINNER" &&
+    form.timeLimitMs === 1000 &&
+    form.memoryLimitMb === 256 &&
+    form.cases.length === 1 &&
+    form.cases.every(
+      (item) => !item.input && !item.expectedOutput && item.isSample && item.score === 1,
+    )
   );
 }

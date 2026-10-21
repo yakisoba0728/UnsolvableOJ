@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -6,6 +7,8 @@ import {
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, type FindOptionsWhere } from 'typeorm';
+import { isUniqueViolation, recordAudit } from '../../common/database.js';
+import { findListPage } from '../../common/list-cursor.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { UserRole } from '../users/user-role.enum.js';
 import type { CreateProblemDto } from './dto/create-problem.dto.js';
@@ -58,13 +61,18 @@ export class ProblemsService {
           'INSERT INTO problem_versions (problem_id, version, snapshot) VALUES ($1, 1, $2::jsonb)',
           [saved.id, JSON.stringify(this.snapshot(saved))],
         );
-        await this.audit(manager, user.id, 'problem.create', saved.id, {
-          version: 1,
-        });
+        await recordAudit(
+          manager,
+          user.id,
+          'problem.create',
+          'problem',
+          saved.id,
+          { version: 1 },
+        );
         return this.toDetail(saved);
       });
     } catch (error: unknown) {
-      if (this.isUniqueViolation(error))
+      if (isUniqueViolation(error))
         throw new ConflictException('이미 사용 중인 문제 slug입니다.');
       throw error;
     }
@@ -72,7 +80,7 @@ export class ProblemsService {
 
   async update(id: string, dto: UpdateProblemDto, user: AuthenticatedUser) {
     if (!Object.keys(dto).length)
-      throw new ConflictException('변경할 필드가 없습니다.');
+      throw new BadRequestException('변경할 필드가 없습니다.');
     return this.dataSource.transaction(async (manager) => {
       const problem = await manager
         .getRepository(Problem)
@@ -122,7 +130,7 @@ export class ProblemsService {
         'INSERT INTO problem_versions (problem_id, version, snapshot) VALUES ($1, $2, $3::jsonb)',
         [id, problem.currentVersion, JSON.stringify(this.snapshot(problem))],
       );
-      await this.audit(manager, user.id, 'problem.update', id, {
+      await recordAudit(manager, user.id, 'problem.update', 'problem', id, {
         version: problem.currentVersion,
         status: problem.status,
       });
@@ -147,7 +155,7 @@ export class ProblemsService {
       const oldStatus = problem.status;
       problem.status = status;
       await manager.save(problem);
-      await this.audit(manager, user.id, 'problem.status', id, {
+      await recordAudit(manager, user.id, 'problem.status', 'problem', id, {
         from: oldStatus,
         to: status,
       });
@@ -160,24 +168,27 @@ export class ProblemsService {
       status: ProblemStatus.PUBLISHED,
     };
     if (query.difficulty) where.difficulty = query.difficulty;
-    const [items, total] = await this.problems.findAndCount({
+    const page = await findListPage(
+      this.problems,
+      this.dataSource,
+      'problems',
+      query,
       where,
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        difficulty: true,
-        timeLimitMs: true,
-        memoryLimitMb: true,
-        currentVersion: true,
-        createdAt: true,
+      {
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          difficulty: true,
+          timeLimitMs: true,
+          memoryLimitMb: true,
+          currentVersion: true,
+          createdAt: true,
+        },
       },
-      order: { createdAt: 'DESC', id: 'DESC' },
-      skip: (query.page - 1) * query.limit,
-      take: query.limit,
-    });
+    );
     // One indexed aggregate per page, not one submissions query per problem.
-    const stats = items.length
+    const stats = page.items.length
       ? await this.dataSource.query<
           { problemId: string; solverCount: number; acceptanceRate: number }[]
         >(
@@ -188,21 +199,18 @@ export class ProblemsService {
            WHERE problem_id = ANY($1::uuid[])
              AND status NOT IN ('QUEUED', 'JUDGING', 'SYSTEM_ERROR', 'CANCELLED')
            GROUP BY problem_id`,
-          [items.map((problem) => problem.id)],
+          [page.items.map((problem) => problem.id)],
         )
       : [];
     const byProblem = new Map(stats.map((item) => [item.problemId, item]));
     return {
-      items: items.map((problem) =>
+      ...page,
+      items: page.items.map((problem) =>
         Object.assign(problem, {
           solverCount: byProblem.get(problem.id)?.solverCount ?? 0,
           acceptanceRate: byProblem.get(problem.id)?.acceptanceRate ?? null,
         }),
       ),
-      page: query.page,
-      limit: query.limit,
-      total,
-      totalPages: Math.ceil(total / query.limit),
     };
   }
 
@@ -236,12 +244,16 @@ export class ProblemsService {
   }
 
   async findPublishedBySlug(slug: string) {
-    const problem = await this.problems.findOne({
-      where: { slug: slug.toLowerCase(), status: ProblemStatus.PUBLISHED },
-      relations: { testCases: true },
-      order: { testCases: { order: 'ASC' } },
+    const problem = await this.problems.findOneBy({
+      slug: slug.toLowerCase(),
+      status: ProblemStatus.PUBLISHED,
     });
     if (!problem) throw new NotFoundException('문제를 찾을 수 없습니다.');
+    // Hidden cases can be megabytes each; the public view needs samples only.
+    problem.testCases = await this.dataSource.manager.find(TestCase, {
+      where: { problemId: problem.id, isSample: true },
+      order: { order: 'ASC' },
+    });
     return this.toDetail(problem);
   }
 
@@ -296,27 +308,5 @@ export class ProblemsService {
       ...this.toDetail(problem),
       testCases: this.snapshot(problem).testCases,
     };
-  }
-
-  private audit(
-    manager: DataSource['manager'],
-    actorId: string,
-    action: string,
-    targetId: string,
-    details: object,
-  ) {
-    return manager.query(
-      'INSERT INTO audit_events (actor_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5::jsonb)',
-      [actorId, action, 'problem', targetId, JSON.stringify(details)],
-    );
-  }
-
-  private isUniqueViolation(error: unknown): boolean {
-    return (
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      error.code === '23505'
-    );
   }
 }

@@ -39,6 +39,11 @@ import {
   type EditResult,
   type EditState,
 } from "../editor/codeEditing";
+import {
+  readSourceDraft,
+  resetSourceDraft,
+  writeSourceDraft,
+} from "../editor/sourceDrafts";
 import type { Language, Page, Problem, Submission } from "../types";
 import { problemPath } from "../paths";
 import {
@@ -114,18 +119,6 @@ const PANEL_MIN = 120;
 const PANEL_DEFAULT = 260;
 const PANEL_KEY_STEP = 24;
 
-function draftKey(problemId: string, language: Language) {
-  return `unsolvable-oj-draft-v1:${problemId}:${language}`;
-}
-
-function readDraft(problemId: string, language: Language) {
-  try {
-    return localStorage.getItem(draftKey(problemId, language));
-  } catch {
-    return null;
-  }
-}
-
 /** Tab으로 넣은 들여쓰기 한 단계의 위치 목록(초안 옆에 저장해, 새로고침 뒤에도 Backspace가 한 단계씩 지운다). */
 function unitsKey(problemId: string, language: Language) {
   return `unsolvable-oj-draft-units-v1:${problemId}:${language}`;
@@ -200,6 +193,7 @@ export function ProblemPage() {
   const [tab, setTab] = useState<Tab>("statement");
   const [history, setHistory] = useState<Submission[] | null>(null);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const [cursor, setCursor] = useState({ line: 1, column: 1 });
   // 자동완성 제안 목록(커서 아래에 표시)
@@ -211,6 +205,7 @@ export function ProblemPage() {
     top: number;
   } | null>(null);
   const suppressSuggest = useRef(false);
+  const tabMovesFocus = useRef(false);
   // 스니펫의 Tab 칸 이동 상태, 직전 입력창 값(칸 위치 보정용), 미러 동기화 중 표시
   const sessionRef = useRef<SnippetSession | null>(null);
   // Tab으로 넣은 들여쓰기 한 단계(공백 네 칸)의 시작 위치. 공백만으로는 직접 친 공백과 구분할 수 없어 따로 기억하고,
@@ -277,13 +272,14 @@ export function ProblemPage() {
   // 문제가 바뀌거나 불러와지면 저장된 초안을 복원한다.
   useEffect(() => {
     if (!problem) return;
-    const draft = readDraft(problem.id, language);
-    const restored = draft ?? starter(language);
+    const draft = readSourceDraft(problem.id, language);
+    const restored = draft.value ?? starter(language);
     setSource(restored);
-    setSavedAt(draft ? new Date() : null);
+    setSavedAt(draft.savedAt);
+    setSaveFailed(draft.failed);
     // 복원한 글에 맞는 Tab 단위만 이어받는다(글자가 공백 네 칸이 아니면 버려진다). 시작 코드의 들여쓰기는 기억하지 않는다.
     unitsRef.current = remapUnits(
-      draft === null ? [] : readUnits(problem.id, language),
+      draft.value === null ? [] : readUnits(problem.id, language),
       restored,
       restored,
     );
@@ -296,14 +292,12 @@ export function ProblemPage() {
 
   // 전환·이탈 직전 입력도 남기고, 초안 복원은 다른 언어의 저장 내용을 덮어쓰지 않는다.
   function updateSource(next: string) {
+    lastValueRef.current = next;
     setSource(next);
     if (!problem) return;
-    try {
-      localStorage.setItem(draftKey(problem.id, language), next);
-      setSavedAt(new Date());
-    } catch {
-      setSavedAt(null);
-    }
+    const draft = writeSourceDraft(problem.id, language, next);
+    setSavedAt(draft.savedAt);
+    setSaveFailed(draft.failed);
   }
 
   useEffect(() => {
@@ -580,10 +574,10 @@ export function ProblemPage() {
   /** 계산한 편집 결과를 입력창에 적용한다(실행 취소가 유지되도록 브라우저 편집 명령을 우선 쓴다). */
   function applyEdit(target: HTMLTextAreaElement, next: EditState) {
     if (!applyToTextarea(target, next)) {
+      // Mirror reconciliation reads the DOM again in the same input event.
+      target.value = next.value;
+      target.setSelectionRange(next.start, next.end);
       updateSource(next.value);
-      requestAnimationFrame(() =>
-        target.setSelectionRange(next.start, next.end),
-      );
     }
     updateCursor(target);
   }
@@ -653,6 +647,8 @@ export function ProblemPage() {
   function onEditorKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     const target = event.currentTarget;
     const modifier = event.metaKey || event.ctrlKey;
+    if (event.key !== "Shift" && event.key !== "Tab")
+      tabMovesFocus.current = false;
     // Ctrl/⌘ + Enter 로 바로 제출 (LeetCode·HackerRank 방식)
     if (event.key === "Enter" && modifier) {
       event.preventDefault();
@@ -661,6 +657,17 @@ export function ProblemPage() {
     }
     // 한글 등 조합 입력 중에는 편집 규칙을 적용하지 않는다.
     if (event.nativeEvent.isComposing || event.keyCode === 229) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setPopup(null);
+      sessionRef.current = null;
+      tabMovesFocus.current = true;
+      return;
+    }
+    if (event.key === "Tab" && tabMovesFocus.current) {
+      tabMovesFocus.current = false;
+      return;
+    }
     // 수동 호출: Ctrl+Space(VS Code·IntelliJ), ⌘I(VS Code Mac), Alt+/
     if (
       (event.ctrlKey && event.code === "Space") ||
@@ -703,11 +710,6 @@ export function ProblemPage() {
         event.preventDefault();
         if (acceptSuggestion(before)) return;
       }
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setPopup(null);
-        return;
-      }
     }
     // 스니펫 칸 이동: Tab/Shift+Tab으로 다음·이전 칸, Esc나 Enter, 방향키 이동은 끝낸다.
     if (sessionRef.current) {
@@ -723,7 +725,6 @@ export function ProblemPage() {
         sessionRef.current = null;
       } else if (
         [
-          "Escape",
           "Enter",
           "ArrowLeft",
           "ArrowRight",
@@ -736,10 +737,6 @@ export function ProblemPage() {
         ].includes(event.key)
       ) {
         sessionRef.current = null;
-        if (event.key === "Escape") {
-          event.preventDefault();
-          return;
-        }
       }
     }
     const state: EditState = {
@@ -954,9 +951,11 @@ export function ProblemPage() {
               onChange={(next) => setLanguage(next as Language)}
             />
             <span className="save-state" role="status">
-              {savedAt
-                ? `초안 저장됨 · ${savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
-                : "자동 저장 대기"}
+              {saveFailed
+                ? "초안을 읽거나 저장하지 못했어요. 현재 내용은 메모리에만 남아 새로고침 후 복구되지 않을 수 있어요."
+                : savedAt
+                  ? `초안 저장됨 · ${savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
+                  : "자동 저장 대기"}
             </span>
             <span className="cursor-info" aria-live="off">
               줄 {cursor.line}, 열 {cursor.column}
@@ -994,11 +993,8 @@ export function ProblemPage() {
                 unitsRef.current = [];
                 unitsBaseRef.current = starter(language);
                 setSource(starter(language));
-                try {
-                  localStorage.removeItem(draftKey(problem.id, language));
-                } catch {
-                  /* 저장소를 쓸 수 없어도 초기화는 진행한다 */
-                }
+                lastValueRef.current = starter(language);
+                setSaveFailed(!resetSourceDraft(problem.id, language, starter(language)));
                 setSavedAt(null);
               }}
             >
@@ -1021,6 +1017,7 @@ export function ProblemPage() {
                 ref={editorRef}
                 className="code-editor"
                 aria-label={`${selectedLanguage?.label ?? ""} 소스 코드`}
+                aria-describedby="editor-shortcuts"
                 spellCheck={false}
                 autoCapitalize="off"
                 autoCorrect="off"
@@ -1032,6 +1029,7 @@ export function ProblemPage() {
                   popup ? `suggestion-${popup.index}` : undefined
                 }
                 onChange={(event) => {
+                  tabMovesFocus.current = false;
                   const target = event.currentTarget;
                   const native = event.nativeEvent as InputEvent;
                   // 한글 등 조합 중에는 값만 저장하고, 칸 보정·제안은 조합이 끝난 뒤에 한다.
@@ -1092,7 +1090,10 @@ export function ProblemPage() {
                       : current,
                   );
                 }}
-                onBlur={() => setPopup(null)}
+                onBlur={() => {
+                  tabMovesFocus.current = false;
+                  setPopup(null);
+                }}
                 onKeyDown={onEditorKeyDown}
                 required
               />
@@ -1215,7 +1216,8 @@ export function ProblemPage() {
                       <p className="error-message" role="alert">
                         {resultError}
                       </p>
-                    ) : !result ? (
+                    ) : null}
+                    {!result ? (
                       <p className="muted">채점을 시작하고 있어요…</p>
                     ) : (
                       <>
@@ -1238,10 +1240,11 @@ export function ProblemPage() {
                 {submitError}
               </p>
             ) : null}
-            <p className="editor-hints">
+            <p className="editor-hints" id="editor-shortcuts">
               Tab 들여쓰기 · Shift+Tab 내어쓰기 · <kbd>Ctrl/⌘ + /</kbd> 주석 ·
               괄호·따옴표 자동 완성 · <kbd>Ctrl + Space</kbd> 제안 · ↑↓ 선택,
-              Enter/Tab 적용, 스니펫은 Tab으로 다음 칸
+              Enter/Tab 적용, 스니펫은 Tab으로 다음 칸 · Esc 다음 Tab 또는
+              Shift+Tab으로 편집기 밖 이동
             </p>
             <div className="code-actions">
               {session ? (

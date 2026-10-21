@@ -1,14 +1,11 @@
 export interface Claim {
-  submissionId: string;
   language: string;
   sourceCode: string;
   limits: { timeMs: number; memoryMb: number };
   testCases: {
-    id: string;
     input: string;
     expectedOutput: string;
     isSample: boolean;
-    score: number;
   }[];
 }
 
@@ -148,8 +145,8 @@ export async function judge(claim: Claim, config: SandboxConfig, cancellation?: 
     passedTestCases: 0, totalTestCases: claim.testCases.length, debugOutputs: [],
   };
   const language = Object.hasOwn(LANGUAGES, claim.language) ? LANGUAGES[claim.language] : undefined;
-  if (!language) return { ...verdict, judgeMessage: "Unsupported language" };
-  const deadline = AbortSignal.timeout(Math.min(600_000, 60_000 + claim.testCases.length * claim.limits.timeMs));
+  if (!language) return { ...verdict, judgeMessage: "지원하지 않는 언어입니다." };
+  const deadline = AbortSignal.timeout(60_000 + claim.testCases.length * claim.limits.timeMs);
   const signal = cancellation ? AbortSignal.any([deadline, cancellation]) : deadline;
   const cached = new Set<string>();
 
@@ -204,7 +201,7 @@ export async function judge(claim: Claim, config: SandboxConfig, cancellation?: 
       throw new Error("go-judge did not return output files");
     }
     try {
-      // JSON strings replace invalid UTF-8; download bytes for the existing exact comparison.
+      // JSON strings replace invalid UTF-8; download raw bytes for exact comparison.
       const stdout = await readOutput(await request(config, `/file/${encodeURIComponent(stdoutId)}`, signal));
       const stderr = await readOutput(await request(config, `/file/${encodeURIComponent(stderrId)}`, signal));
       return { execution, stdout, stderr };
@@ -218,7 +215,7 @@ export async function judge(claim: Claim, config: SandboxConfig, cancellation?: 
     if (language.compile) {
       const { execution, stdout, stderr } = await execute(language.compile, copyIn, 30_000, 1024, "", language.artifact);
       if (execution.status !== "Accepted") {
-        return { ...verdict, status: "COMPILE_ERROR", compileOutput: Buffer.concat([stdout, stderr]).subarray(0, 65_536).toString("utf8") || "Compilation failed or exceeded its resource limit" };
+        return { ...verdict, status: "COMPILE_ERROR", compileOutput: Buffer.concat([stdout, stderr]).subarray(0, 65_536).toString("utf8") || "컴파일에 실패했거나 자원 제한을 초과했습니다." };
       }
       if (!language.artifact || typeof execution.fileIds?.[language.artifact] !== "string" || !execution.fileIds[language.artifact]) {
         throw new Error("go-judge did not return a compiled artifact");
@@ -231,7 +228,7 @@ export async function judge(claim: Claim, config: SandboxConfig, cancellation?: 
     const cases = claim.testCases.map((testCase, index) => ({ ...testCase, index: index + 1 }))
       .sort((left, right) => Number(right.isSample === true) - Number(left.isSample === true));
     for (const testCase of cases) {
-      // REST has no per-command RLIMIT_FSIZE; prlimit preserves the exact 1MB hard limit without limiting compiler artifacts.
+      // REST has no per-command RLIMIT_FSIZE; prlimit enforces the exact 1MB hard limit without limiting compiler artifacts.
       const { execution, stdout, stderr } = await execute(
         ["/usr/bin/prlimit", `--fsize=${OUTPUT_LIMIT}:${OUTPUT_LIMIT}`, "--", ...args],
         copyIn, claim.limits.timeMs, claim.limits.memoryMb, testCase.input,
@@ -249,7 +246,7 @@ export async function judge(claim: Claim, config: SandboxConfig, cancellation?: 
       if (!["MEMORY_LIMIT_EXCEEDED", "TIME_LIMIT_EXCEEDED"].includes(status) &&
           (stdout.length >= OUTPUT_LIMIT || stderr.length >= OUTPUT_LIMIT)) status = "OUTPUT_LIMIT_EXCEEDED";
       if (status === "RUNTIME_ERROR") verdict.judgeMessage = testCase.isSample === true
-        ? stderr.subarray(0, 1000).toString("utf8") : "Runtime error on a private test case";
+        ? stderr.subarray(0, 1000).toString("utf8") : "비공개 테스트에서 런타임 에러가 발생했습니다.";
       if (status !== "ACCEPTED") return { ...verdict, status };
       if (!rstrip(stdout).equals(rstrip(Buffer.from(testCase.expectedOutput)))) return { ...verdict, status: "WRONG_ANSWER" };
       verdict.passedTestCases++;

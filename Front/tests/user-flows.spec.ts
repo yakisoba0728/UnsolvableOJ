@@ -186,13 +186,27 @@ test("invalid credentials show the API error and allow retry", async ({
   ).toBeEnabled();
 });
 
-test("expired sessions cannot access submissions", async ({ page }) => {
-  await authenticate(page, "USER", Date.now() - 1000);
+test("expired sessions stay signed out without deleting the retained record", async ({ page }) => {
+  const expiresAt = Date.now() - 1000;
+  const authorizationHeaders: string[] = [];
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname.startsWith("/api/") && request.headers().authorization)
+      authorizationHeaders.push(request.headers().authorization);
+  });
+  await authenticate(page, "USER", expiresAt);
   await page.goto("/submissions");
   await expect(page).toHaveURL(/\/auth$/);
+  await expect(page.getByRole("button", { name: "로그아웃" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "로그인", exact: true })).toBeVisible();
+  await page.goto("/problems");
+  await expect(page.locator("a.problem-row")).toHaveCount(1);
+  await page.reload();
+  await expect(page.locator("a.problem-row")).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "로그아웃" })).toHaveCount(0);
+  expect(authorizationHeaders).toEqual([]);
   expect(
     await page.evaluate((key) => localStorage.getItem(key), storageKey),
-  ).toBeNull();
+  ).toBe(JSON.stringify({ session, expiresAt }));
 });
 
 test("regular users cannot open the author form", async ({ page }) => {
@@ -273,7 +287,7 @@ test.describe("problem editor", () => {
     await expect(page.getByText("제목을 입력해 주세요.")).toBeVisible();
     await expect(page.getByText("문제 본문을 입력해 주세요.")).toBeVisible();
     await expect(page.getByText("출력 형식을 설명해 주세요.")).toBeVisible();
-    await expect(page.getByText("기대 출력을 입력해 주세요.")).toBeVisible();
+    await expect(page.getByText("기대 출력을 입력해 주세요.")).toHaveCount(0);
     expect(posted).toBe(false);
   });
 
@@ -665,9 +679,12 @@ test("typing #word and pressing Enter in the community search makes a tag pill t
   await search.fill("");
   await expect(rows).toHaveCount(3);
 
-  // 띄어쓰기가 있으면 태그가 아니라 일반 검색어로 남는다.
+  // 공백이 있는 태그도 한 개로 보존한다.
   await search.fill("#dp 질문");
   await search.press("Enter");
+  await expect(pills).toHaveCount(1);
+  await expect(pills.first()).toHaveText("#dp 질문");
+  await page.getByRole("button", { name: "태그 #dp 질문 지우기" }).click();
   await expect(pills).toHaveCount(0);
 
   // '#' 만으로는 태그가 되지 않는다.
@@ -680,7 +697,7 @@ test("typing #word and pressing Enter in the community search makes a tag pill t
   await expect(pills).toHaveCount(1);
   await expect(pills.first()).toHaveText("#dp");
   await expect(search).toHaveValue("");
-  await expect(page).toHaveURL(/[?&]t=dp/);
+  await expect(page).toHaveURL(/[?&]tag=dp/);
   await expect(rows.filter({ hasText: "태그 없는 질문" })).toHaveCount(0);
   await expect(rows).toHaveCount(2);
 
@@ -701,7 +718,7 @@ test("typing #word and pressing Enter in the community search makes a tag pill t
   // × 버튼으로도 지울 수 있다.
   await page.getByRole("button", { name: "태그 #dp 지우기" }).click();
   await expect(pills).toHaveCount(0);
-  await expect(page).not.toHaveURL(/[?&]t=/);
+  await expect(page).not.toHaveURL(/[?&]tag=/);
 });
 
 test("the write page puts tags and a narrow category on one row and the save hint with the buttons on one line", async ({
@@ -761,11 +778,9 @@ test("the write page shows field problems while typing like sign-up, has a tall 
   await title.fill("제목");
   await expect(page.getByText("제목을 입력해 주세요.")).toHaveCount(0);
 
-  // 태그는 띄어쓰기 없이 한 단어만: 어긋나면 안내하고 등록하지 않는다.
-  await tagInput.fill("a b");
-  await expect(
-    page.getByText("태그는 띄어쓰기 없이 한 단어로 입력해 주세요."),
-  ).toBeVisible();
+  // 태그가 20자를 넘으면 안내하고 등록하지 않는다.
+  await tagInput.fill("a".repeat(21));
+  await expect(page.getByText("태그는 20자 이하로 입력해 주세요.")).toBeVisible();
   await tagInput.press("Enter");
   await expect(page.locator(".tag-chip")).toHaveCount(0);
   await tagInput.fill("dp");
@@ -947,7 +962,7 @@ test("the problem list side cards are 291px wide and fit their content", async (
   expect(overflowing).toBe(0);
 });
 
-test("write page tags: commas split into separate tags, a lone # is dropped, an emptied form forgets its draft", async ({
+test("write page tags: commas and spaces stay inside one tag, a full list locks the input, a lone # is dropped, an emptied form forgets its draft", async ({
   page,
 }) => {
   await authenticate(page);
@@ -955,31 +970,26 @@ test("write page tags: commas split into separate tags, a lone # is dropped, an 
   const tagInput = page.locator("#tag-input");
   const title = page.locator('input[placeholder^="예:"]');
 
-  // 쉼표가 든 입력은 태그 하나가 아니라 여러 개로 나뉜다(쉼표는 검색 주소의 태그 구분자이기도 하다).
-  await tagInput.fill("a,b, #c");
+  // 쉼표와 공백도 태그의 일부이며 Enter로 확정한다. 대소문자만 다른 태그는 다시 넣지 않는다.
+  await tagInput.fill("a,b");
   await tagInput.press("Enter");
-  await expect(page.locator(".tag-chip")).toHaveText(["#a✕", "#b✕", "#c✕"]);
+  await tagInput.fill("#dynamic programming");
+  await tagInput.press("Enter");
+  await tagInput.fill("A,B");
+  await tagInput.press("Enter");
+  await expect(page.locator(".tag-chip")).toHaveText([
+    "#a,b✕",
+    "#dynamic programming✕",
+  ]);
   await expect(tagInput).toHaveValue("");
 
-  // 규칙에 어긋나는 조각이 하나라도 있으면 아무것도 등록하지 않고 안내한다.
-  await tagInput.fill("ok,two words");
-  await tagInput.press("Enter");
-  await expect(page.locator(".tag-chip")).toHaveCount(3);
-  await expect(
-    page.getByText("태그는 띄어쓰기 없이 한 단어로 입력해 주세요."),
-  ).toBeVisible();
-  await tagInput.fill("");
-
-  // 최대 개수(5개)를 넘기면 일부만 조용히 넣지 않고, 전부 거절하고 안내한다.
-  await tagInput.fill("d,e,f,g");
-  await tagInput.press("Enter");
-  await expect(page.locator(".tag-chip")).toHaveCount(3);
-  await expect(
-    page.getByText("태그는 최대 5개까지 넣을 수 있어요."),
-  ).toBeVisible();
-  await tagInput.fill("d,e,c");
-  await tagInput.press("Enter");
+  // 최대 개수(5개)를 채우면 입력 칸이 잠긴다.
+  for (const tag of ["c", "d", "e"]) {
+    await tagInput.fill(tag);
+    await tagInput.press("Enter");
+  }
   await expect(page.locator(".tag-chip")).toHaveCount(5);
+  await expect(tagInput).toBeDisabled();
   for (let remaining = 5; remaining > 3; remaining -= 1) {
     await page.locator(".tag-chip button").last().click();
     await expect(page.locator(".tag-chip")).toHaveCount(remaining - 1);
@@ -1017,7 +1027,7 @@ test("saving an empty form keeps a consistent state: the draft is not wiped on t
   await expect(page.getByText("작성 중이던 초안을 불러왔어요.")).toBeVisible();
   await expect(page.getByText(/임시 저장됨/)).toBeVisible();
   const stored = await page.evaluate(() =>
-    localStorage.getItem("unsolvable-oj-community-draft-v1"),
+    localStorage.getItem("unsolvable-oj-community-draft-v2:solver:new"),
   );
   expect(stored).not.toBeNull();
 });

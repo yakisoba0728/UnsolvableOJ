@@ -12,10 +12,10 @@ const sources: Record<string, string> = JSON.parse(await readFile(new URL("../ru
 
 function input(sourceCode: string, language = "PYTHON", memoryMb = 256, timeMs = 1000): Claim {
   return {
-    submissionId: "runtime-smoke", sourceCode, language, limits: { timeMs, memoryMb },
+    sourceCode, language, limits: { timeMs, memoryMb },
     testCases: [
-      { id: "sample", input: "5 7\n", expectedOutput: "12\n", isSample: true, score: 1 },
-      { id: "private", input: "1 2\n", expectedOutput: "3\n", isSample: false, score: 1 },
+      { input: "5 7\n", expectedOutput: "12\n", isSample: true },
+      { input: "1 2\n", expectedOutput: "3\n", isSample: false },
     ],
   };
 }

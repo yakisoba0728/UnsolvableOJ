@@ -7,7 +7,12 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { InjectDataSource } from '@nestjs/typeorm';
 import type { Queue } from 'bullmq';
 import { DataSource } from 'typeorm';
-import { JUDGE_QUEUE } from '../../common/queue.constants.js';
+import { recordAudit } from '../../common/database.js';
+import {
+  JUDGE_QUEUE,
+  JUDGE_WORKER_ONLINE_MS,
+  JUDGE_WORKERS_KEY,
+} from '../../common/queue.constants.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { UserRole } from '../users/user-role.enum.js';
 
@@ -20,12 +25,12 @@ export class AdminService {
 
   async users() {
     return this.db.query(
-      'SELECT id, email, username, role, level, xp, rating, created_at FROM users ORDER BY created_at DESC LIMIT 100',
+      'SELECT id, email, username, role, level, xp, rating, created_at AS "createdAt" FROM users ORDER BY created_at DESC LIMIT 100',
     );
   }
 
   async changeRole(id: string, role: UserRole, actor: AuthenticatedUser) {
-    if (id === actor.id && role !== UserRole.ADMIN)
+    if (id.toLowerCase() === actor.id.toLowerCase() && role !== UserRole.ADMIN)
       throw new ConflictException('자신의 관리자 권한을 해제할 수 없습니다.');
     return this.db.transaction(async (manager) => {
       const rows: { role: UserRole }[] = await manager.query(
@@ -38,16 +43,10 @@ export class AdminService {
           'UPDATE users SET role = $1, token_version = token_version + 1, updated_at = now() WHERE id = $2',
           [role, id],
         );
-        await manager.query(
-          'INSERT INTO audit_events (actor_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5::jsonb)',
-          [
-            actor.id,
-            'user.role',
-            'user',
-            id,
-            JSON.stringify({ from: rows[0].role, to: role }),
-          ],
-        );
+        await recordAudit(manager, actor.id, 'user.role', 'user', id, {
+          from: rows[0].role,
+          to: role,
+        });
       }
       return { id, role };
     });
@@ -55,7 +54,7 @@ export class AdminService {
 
   async audit() {
     return this.db.query(
-      'SELECT id, actor_id, action, target_type, target_id, details, created_at FROM audit_events ORDER BY created_at DESC LIMIT 100',
+      'SELECT id, actor_id AS "actorId", action, target_type AS "targetType", target_id AS "targetId", details, created_at AS "createdAt" FROM audit_events ORDER BY created_at DESC LIMIT 100',
     );
   }
 
@@ -73,7 +72,7 @@ export class AdminService {
       ),
       this.queue
         .getBackend()
-        .client.then((client) => client.hgetall('judge:workers')),
+        .client.then((client) => client.hgetall(JUDGE_WORKERS_KEY)),
       this.queue.getJobs(['failed'], 0, 9),
     ]);
     const now = Date.now();
@@ -81,7 +80,7 @@ export class AdminService {
       queue,
       submissions,
       workers: Object.entries(workerMap)
-        .filter(([, seen]) => now - Number(seen) < 30_000)
+        .filter(([, seen]) => now - Number(seen) < JUDGE_WORKER_ONLINE_MS)
         .map(([id, seen]) => ({
           id,
           lastSeenAt: new Date(Number(seen)).toISOString(),

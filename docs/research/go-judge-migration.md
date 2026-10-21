@@ -1,10 +1,12 @@
 # go-judge 전환 타당성 조사
 
+> 상태: 전환은 완료됐다. `Judge/src/judge.ts`가 go-judge HTTP API로 채점하고 기존 Python 실행기는 삭제됐으며, CI가 Linux에서 실제 go-judge로 `test:runtime`을 실행한다. 아래는 조사 당시 기록이며 현재 실행 절차와 제한은 `Judge/README.md`를 기준으로 한다.
+
 조사일: 2026-10-20. **구현이 아닌 조건부 타당성 검토**다. 공식 문서와 공식 저장소의 최신 릴리스 `v1.13.3` 소스를 대조했다. 조사 당시 `master`도 `4ebd2ffe9474639c665fa21cfb438f68820fe77c`였다. Context7에서 `/criyle/go-judge`를 조회했지만, 최종 사실 확인은 아래 일차 자료를 기준으로 했다. 바이너리 설치·실행, Docker 채점·DB 변경은 하지 않았다.[^release][^commits]
 
 ## 결론
 
-> 후속 구현: `Judge/src/judge.ts`의 HTTP 연동과 Compose 실행 서비스를 추가했다. macOS arm64의 Linux/cgroup v2 Docker에서 프로토콜 회귀 34개, 실제 실행 24개(8개 언어 포함), 별도 임시 PostgreSQL/Redis의 API 통합 5개·전체 채점 파이프라인 15개·출력 흐름 7개가 통과했다. 기존 개발 DB는 변경하지 않았다. 아래 본문은 구현 전 조사 기록이며, 현재 실행 절차와 제한은 `Judge/README.md`를 기준으로 한다. Linux amd64·cgroup v1 및 원격 CI 실행은 아직 확인하지 않았다.
+> 후속 구현: `Judge/src/judge.ts`의 HTTP 연동과 Compose 실행 서비스를 추가했다. 구현 당시 macOS arm64의 Linux/cgroup v2 Docker에서 프로토콜 회귀 34개, 실제 실행 24개(8개 언어 포함), 별도 임시 PostgreSQL/Redis의 API 통합 5개·전체 채점 파이프라인 15개·출력 흐름 7개가 통과했다. 기존 개발 DB는 변경하지 않았다. Linux x64 실행은 이후 CI(GitHub-hosted Ubuntu 24.04)의 `test:runtime`으로 확인한다. cgroup v1은 아직 확인하지 않았다.
 
 **실행기 교체는 가능성이 높지만, 채점 시스템 전체의 대체품은 아니다.** HTTP `POST /run`으로 컴파일과 제한된 프로그램 실행을 맡기고, 기존 TypeScript worker가 제출 소유권·heartbeat·테스트 순서·정답 비교·결과 보고를 계속 담당하는 경계가 가장 작다. `/run`의 `Accepted`는 **프로그램이 정상 종료했다는 뜻이지 정답이라는 뜻이 아니다**. `expectedOutput`, 언어 선택, 제출/테스트 식별자나 채점 점수는 API 스키마에 없다.[^api][^design][^model]
 
@@ -17,9 +19,11 @@
 
 이 조건이 충족되지 않으면 전환을 보류하는 편이 맞다. 속도 향상·격리 완전성·현재 결과와의 호환성은 이번 정적 조사로 입증하지 않았다.
 
-## 현재 코드에서 남겨야 하는 책임
+## 전환 전 코드에서 남겨야 했던 책임
 
-| 위치 | 확인한 현재 동작 | 전환 경계에 대한 판단 |
+표의 경로와 줄 번호는 전환 전 커밋 `545eb9d` 기준이다. `runner.py`·`execute.py`는 전환 커밋 `564f7b5`에서 삭제됐다.
+
+| 위치 | 확인한 동작 | 전환 경계에 대한 판단 |
 | --- | --- | --- |
 | `Judge/src/worker.ts:42–57, 180–249` | BullMQ 소비, claim/generation/attempt, worker/lease heartbeat, 결과 PATCH, 동시성 | 그대로 유지하는 것이 최소 변경. go-judge의 내부 실행 대기열은 이 제출 프로토콜을 대체하지 않는다. |
 | `Judge/src/worker.ts:60–177` | 제출마다 Docker 생성·강제 제거, 네트워크 차단, 읽기 전용 rootfs, capability 제거, PID 64, CPU 1, 메모리/스왑, 출력·전체 timeout | 외부 실행 서비스 호출로 교체 가능한 부분. 기존 전체 작업 deadline과 장애의 `SYSTEM_ERROR` 변환은 여전히 필요하다. |
@@ -110,7 +114,7 @@ go-judge는 명령 배열을 실행한다. 언어 ID를 받아 컴파일 명령�
 
 **악의적 제출용으로 설계된 제한 실행 서비스라는 근거는 있지만 “임의 적대 코드에 완전히 안전”하다는 보장은 없다.** 특히 privileged 배포에 대해 upstream 스스로 dedicated/trusted host, 네트워크 통제, 인증을 명시하고 cgroup fallback·seccomp 해제·macOS 운영의 위험을 경고한다. 전용 Linux 실행 노드/VM, 최신 보안 패치, 제한된 내부 API, 요청 상한·동시성·shm/캐시 관리가 전제라는 평가가 타당하다. 이것은 보안 인증이나 침투 테스트 결과가 아니다.[^api][^design][^seccomp]
 
-## 최소 연동 경계 — 제안이며 미구현
+## 최소 연동 경계
 
 ```text
 기존 BullMQ / claim / lease heartbeat
@@ -124,14 +128,14 @@ go-judge는 명령 배열을 실행한다. 언어 ID를 받아 컴파일 명령�
 
 - go-judge에 expected output이나 다른 테스트 전체를 넘길 이유가 없다. 컴파일/실행·파일·계측·프로세스 정리만 위임한다. 첫 실패 중단·sample 노출 정책을 유지하려면 처음에는 테스트를 순차 HTTP 호출하는 방식이 가장 작다. `cmd[]` 병렬화는 현재 정책과 메모리/동시성 의미를 바꾸므로 범위 밖이다.[^api][^group]
 - worker가 go-judge를 직접 HTTP 호출하면 Python 실행기 두 파일은 대체 후보가 되지만, `runner.py`의 비교·집계 로직까지 자동으로 사라지지는 않는다. **HTTP 모드는 OS 실행 오케스트레이션은 대체하지만 OJ 제출/채점 오케스트레이션은 대체하지 않는다.**
-- 구현 시 영향 범위는 `worker.ts`의 실행 호출 및 언어/판정 어댑터, runtime image/배포·인증 설정, 기존 judge 회귀 테스트·fixture다. 연동 코드와 배포 설정은 수정하지 않았다.
+- 구현 시 영향 범위는 `worker.ts`의 실행 호출 및 언어/판정 어댑터, runtime image/배포·인증 설정, 기존 judge 회귀 테스트·fixture다.
 
 ### 로컬 연동부 추가 확인
 
 - `Back/src/common/queue.constants.ts`의 큐 payload는 `submissionId`, `generation`뿐이다. `Back/src/modules/submissions/judge-internal.controller.ts`의 claim/heartbeat/result와 `dto/judge-result.dto.ts` 계약을 유지하면 백엔드·DB·프론트를 변경하지 않는 전환이 가능하다.
 - 공개 출력은 최대 5개, 스트림별 앞 1,000바이트와 잘림 여부를 유지해야 한다. 원래 테스트 번호·제출 버전의 예제를 연결하는 `Back/src/modules/submissions/submissions.service.ts:160–193`과 후행 ASCII 공백만 무시하는 `Front/src/pages/SubmissionPage.tsx:16–17`도 호환 대상이다.
 - 배포 변경은 `Judge/Dockerfile`, `Judge/.env.example`, `Judge/runtime/Dockerfile`, `compose.yaml`에 집중된다. HTTP 연동 시 워커의 Docker CLI/socket 의존은 제거 후보지만 go-judge 실행 노드의 높은 권한은 별도로 남는다. 루트·Back·Judge README의 실행 절차도 함께 갱신해야 한다.
-- 기존 검증 재료는 `Judge/runtime/smoke-sources.json`의 8개 언어, `Judge/runtime/test_runner.py`의 자원·비공개 출력 회귀, `Back/test/judge.pipeline-spec.ts`, `Back/scripts/check-judge-flow.mjs`다. 실행 방식 변경에 맞춰 `Judge/package.json`의 검사 명령도 갱신해야 한다. 이번 조사에서는 이 테스트들을 재실행하지 않았다.
+- 기존 검증 재료는 `Judge/runtime/smoke-sources.json`의 8개 언어, `Judge/runtime/test_runner.py`(전환 후 삭제)의 자원·비공개 출력 회귀, `Back/test/judge.pipeline-spec.ts`, `Back/scripts/check-judge-flow.mjs`다. 실행 방식 변경에 맞춰 `Judge/package.json`의 검사 명령도 갱신해야 한다. 이번 조사에서는 이 테스트들을 재실행하지 않았다.
 - 재채점 결과가 달라지면 `Back/src/modules/submissions/submissions.service.ts:374–421`에서 XP·해결 기록도 정산된다. 엔진의 시간·메모리 차이를 확인하기 전 기존 제출을 일괄 재채점하지 않는 것이 제안이다.
 - 현재 개발 호스트는 macOS arm64다(`uname -m`). `docker info`는 Docker socket 부재로 연결에 실패했으므로 Linux VM의 cgroup/실행 권한과 실제 언어 호환성은 확인하지 못했다.
 

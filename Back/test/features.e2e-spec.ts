@@ -1,16 +1,16 @@
-import { Test } from '@nestjs/testing';
-import type { NestExpressApplication } from '@nestjs/platform-express';
-import { configureHttp } from '../src/configure-http.js';
 import { randomUUID } from 'node:crypto';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DataSource } from 'typeorm';
-import { getQueueToken } from '@nestjs/bullmq';
-import type { Queue } from 'bullmq';
-import { JUDGE_QUEUE } from '../src/common/queue.constants.js';
 import request from 'supertest';
-import { AppModule } from '../src/app.module.js';
+import {
+  base,
+  bearer,
+  closeApp,
+  createApp,
+  login,
+  register,
+} from './helpers.js';
 
-const base = '/api/v1';
-const bearer = (token: string) => ({ Authorization: `Bearer ${token}` });
 const judge = (generation: number, attempt: string) => ({
   'X-Judge-Token': 'test-judge-token-with-at-least-32-characters',
   'X-Judge-Generation': String(generation),
@@ -20,39 +20,19 @@ const judge = (generation: number, attempt: string) => ({
 describe('Backend features (e2e)', () => {
   let app: NestExpressApplication;
   let db: DataSource;
-  const userIds: string[] = [];
-  let problemId: string | undefined;
   let submissionId: string | undefined;
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = module.createNestApplication<NestExpressApplication>({
-      bodyParser: false,
-    });
-    configureHttp(app);
+    app = await createApp();
     await app.init();
     db = app.get(DataSource);
   });
 
   it('keeps a submission on its problem version, fences attempts, and reconciles XP', async () => {
     const suffix = randomUUID().slice(0, 8);
-    const register = async (name: string) => {
-      const response = await request(app.getHttpServer())
-        .post(`${base}/auth/register`)
-        .send({
-          email: `${name}-${suffix}@example.com`,
-          username: `${name}_${suffix}`,
-          password: 'test-password-123',
-        })
-        .expect(201);
-      userIds.push(response.body.user.id);
-      return response.body;
-    };
-    const author = await register('author');
-    const solver = await register('solver');
-    const admin = await register('admin');
+    const author = await register(app, 'author', suffix);
+    const solver = await register(app, 'solver', suffix);
+    const admin = await register(app, 'admin', suffix);
     await db.query(
       "UPDATE users SET role = 'AUTHOR', token_version = token_version + 1 WHERE id = $1",
       [author.user.id],
@@ -61,15 +41,8 @@ describe('Backend features (e2e)', () => {
       "UPDATE users SET role = 'ADMIN', token_version = token_version + 1 WHERE id = $1",
       [admin.user.id],
     );
-    const login = async (email: string) =>
-      (
-        await request(app.getHttpServer())
-          .post(`${base}/auth/login`)
-          .send({ email, password: 'test-password-123' })
-          .expect(200)
-      ).body;
-    const authorToken = (await login(author.user.email)).accessToken;
-    const adminToken = (await login(admin.user.email)).accessToken;
+    const authorToken = (await login(app, author.user.email)).accessToken;
+    const adminToken = (await login(app, admin.user.email)).accessToken;
     await request(app.getHttpServer())
       .get(`${base}/users/me`)
       .set(bearer(author.accessToken))
@@ -94,7 +67,7 @@ describe('Backend features (e2e)', () => {
         ],
       })
       .expect(201);
-    problemId = created.body.id;
+    const problemId = created.body.id;
     await request(app.getHttpServer())
       .patch(`${base}/problems/${problemId}/status`)
       .set(bearer(authorToken))
@@ -109,6 +82,13 @@ describe('Backend features (e2e)', () => {
       .get(`${base}/problems/version-${suffix}`)
       .expect(200);
     expect(JSON.stringify(publicView.body)).not.toContain('5 7');
+    await request(app.getHttpServer())
+      .get(`${base}/problems?page=1000001`)
+      .expect(400);
+    await request(app.getHttpServer())
+      .get(`${base}/submissions?page=1000001`)
+      .set(bearer(solver.accessToken))
+      .expect(400);
     await request(app.getHttpServer())
       .get(`${base}/problems/${problemId}/manage`)
       .set(bearer(solver.accessToken))
@@ -128,7 +108,7 @@ describe('Backend features (e2e)', () => {
       .patch(`${base}/problems/${problemId}`)
       .set(bearer(authorToken))
       .send({})
-      .expect(409);
+      .expect(400);
     await request(app.getHttpServer())
       .patch(`${base}/problems/${problemId}`)
       .set(bearer(authorToken))
@@ -150,6 +130,15 @@ describe('Backend features (e2e)', () => {
       timeLimitMs: 5000,
       memoryLimitMb: 512,
     });
+    await request(app.getHttpServer())
+      .patch(`${base}/problems/${problemId}/status`)
+      .set(bearer(adminToken))
+      .send({ status: 'PUBLISHED' })
+      .expect(200);
+    const hiddenOnly = await request(app.getHttpServer())
+      .get(`${base}/problems/version-${suffix}`)
+      .expect(200);
+    expect(hiddenOnly.body.samples).toEqual([]);
     const path = `${base}/internal/judge/submissions/${submissionId}`;
     const firstAttempt = randomUUID();
     const claim = await request(app.getHttpServer())
@@ -230,6 +219,9 @@ describe('Backend features (e2e)', () => {
 
     await request(app.getHttpServer())
       .post(`${base}/submissions/${submissionId}/rejudge`)
+      .expect(401);
+    await request(app.getHttpServer())
+      .post(`${base}/submissions/${submissionId}/rejudge`)
       .set(bearer(solver.accessToken))
       .expect(403);
     const rejudge = await request(app.getHttpServer())
@@ -292,10 +284,24 @@ describe('Backend features (e2e)', () => {
       .set(bearer(adminToken))
       .expect(200);
     expect(
-      audit.body.some(
-        (event: { action: string }) => event.action === 'user.role',
+      audit.body.find(
+        (event: { action: string; targetId: string }) =>
+          event.action === 'user.role' && event.targetId === solver.user.id,
       ),
-    ).toBe(true);
+    ).toMatchObject({
+      actorId: admin.user.id,
+      targetType: 'user',
+      createdAt: expect.any(String),
+    });
+    expect(audit.body[0]).not.toHaveProperty('created_at');
+    const users = await request(app.getHttpServer())
+      .get(`${base}/admin/users`)
+      .set(bearer(adminToken))
+      .expect(200);
+    expect(
+      users.body.find((item: { id: string }) => item.id === solver.user.id),
+    ).toMatchObject({ createdAt: expect.any(String) });
+    expect(users.body[0]).not.toHaveProperty('created_at');
     await request(app.getHttpServer())
       .patch(`${base}/problems/${problemId}/status`)
       .set(bearer(authorToken))
@@ -307,21 +313,9 @@ describe('Backend features (e2e)', () => {
   });
 
   afterAll(async () => {
-    if (app && submissionId) {
-      const queue = app.get<Queue>(getQueueToken(JUDGE_QUEUE));
-      for (const generation of [1, 2]) {
-        const job = await queue.getJob(`${submissionId}-${generation}`);
-        if (job) await job.remove();
-      }
-    }
-    if (problemId) {
-      await db.query('DELETE FROM submissions WHERE problem_id = $1', [
-        problemId,
-      ]);
-      await db.query('DELETE FROM problems WHERE id = $1', [problemId]);
-    }
-    if (userIds.length)
-      await db.query('DELETE FROM users WHERE id = ANY($1::uuid[])', [userIds]);
-    if (app) await app.close();
+    await closeApp(
+      app,
+      submissionId ? [`${submissionId}-1`, `${submissionId}-2`] : [],
+    );
   });
 });

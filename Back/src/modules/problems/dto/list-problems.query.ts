@@ -1,21 +1,8 @@
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsEnum, IsOptional } from 'class-validator';
+import { ListQuery } from '../../../common/list-query.js';
 import { ProblemDifficulty } from '../problem.enums.js';
 
-export class ListProblemsQuery {
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  page = 1;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(1000)
-  limit = 20;
-
+export class ListProblemsQuery extends ListQuery {
   @IsOptional()
   @IsEnum(ProblemDifficulty)
   difficulty?: ProblemDifficulty;
