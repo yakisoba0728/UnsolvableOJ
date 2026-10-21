@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { delimiter, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,9 +10,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const project = `unsolvable-e2e-${randomBytes(6).toString('hex')}`;
-const parent = join(tmpdir(), 'opencode');
-await mkdir(parent, { recursive: true });
-const temporary = await mkdtemp(join(parent, `${project}-`));
+const temporary = await mkdtemp(join(tmpdir(), `${project}-`));
 const override = join(temporary, 'compose.yaml');
 const env = {
   ...process.env,
