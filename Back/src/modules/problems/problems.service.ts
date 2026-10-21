@@ -6,14 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import {
-  DataSource,
-  LessThan,
-  Raw,
-  Repository,
-  type FindOptionsWhere,
-} from 'typeorm';
-import { createListCursor, readListCursor } from '../../common/list-cursor.js';
+import { DataSource, Repository, type FindOptionsWhere } from 'typeorm';
+import { findListPage } from '../../common/list-cursor.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { UserRole } from '../users/user-role.enum.js';
 import type { CreateProblemDto } from './dto/create-problem.dto.js';
@@ -168,27 +162,13 @@ export class ProblemsService {
       status: ProblemStatus.PUBLISHED,
     };
     if (query.difficulty) where.difficulty = query.difficulty;
-    const cursor = readListCursor(query.cursor);
-    const pageWhere = cursor
-      ? [
-          {
-            ...where,
-            createdAt: Raw((alias) => `${alias} < :cursorTime::timestamptz`, {
-              cursorTime: cursor.createdAt,
-            }),
-          },
-          {
-            ...where,
-            createdAt: Raw((alias) => `${alias} = :cursorTime::timestamptz`, {
-              cursorTime: cursor.createdAt,
-            }),
-            id: LessThan(cursor.id),
-          },
-        ]
-      : where;
-    const [rows, total] = await Promise.all([
-      this.problems.find({
-        where: pageWhere,
+    const page = await findListPage(
+      this.problems,
+      this.dataSource,
+      'problems',
+      query,
+      where,
+      {
         select: {
           id: true,
           slug: true,
@@ -199,19 +179,10 @@ export class ProblemsService {
           currentVersion: true,
           createdAt: true,
         },
-        order: { createdAt: 'DESC', id: 'DESC' },
-        skip: cursor ? 0 : (query.page - 1) * query.limit,
-        take: query.limit + 1,
-      }),
-      this.problems.count({ where }),
-    ]);
-    const items = rows.slice(0, query.limit);
-    const nextCursor =
-      rows.length > query.limit
-        ? await createListCursor(this.dataSource, 'problems', items.at(-1)!.id)
-        : null;
+      },
+    );
     // One indexed aggregate per page, not one submissions query per problem.
-    const stats = items.length
+    const stats = page.items.length
       ? await this.dataSource.query<
           { problemId: string; solverCount: number; acceptanceRate: number }[]
         >(
@@ -222,22 +193,18 @@ export class ProblemsService {
            WHERE problem_id = ANY($1::uuid[])
              AND status NOT IN ('QUEUED', 'JUDGING', 'SYSTEM_ERROR', 'CANCELLED')
            GROUP BY problem_id`,
-          [items.map((problem) => problem.id)],
+          [page.items.map((problem) => problem.id)],
         )
       : [];
     const byProblem = new Map(stats.map((item) => [item.problemId, item]));
     return {
-      items: items.map((problem) =>
+      ...page,
+      items: page.items.map((problem) =>
         Object.assign(problem, {
           solverCount: byProblem.get(problem.id)?.solverCount ?? 0,
           acceptanceRate: byProblem.get(problem.id)?.acceptanceRate ?? null,
         }),
       ),
-      page: query.page,
-      limit: query.limit,
-      total,
-      totalPages: Math.ceil(total / query.limit),
-      nextCursor,
     };
   }
 

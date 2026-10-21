@@ -13,11 +13,10 @@ import { isUUID } from 'class-validator';
 import {
   DataSource,
   LessThan,
-  Raw,
   Repository,
   type FindOptionsWhere,
 } from 'typeorm';
-import { createListCursor, readListCursor } from '../../common/list-cursor.js';
+import { findListPage } from '../../common/list-cursor.js';
 import {
   JUDGE_QUEUE,
   JUDGE_WORKER_PRUNE_MS,
@@ -143,27 +142,13 @@ export class SubmissionsService {
   async findMine(user: AuthenticatedUser, query: ListSubmissionsQuery) {
     const where: FindOptionsWhere<Submission> = { userId: user.id };
     if (query.problemId) where.problemId = query.problemId;
-    const cursor = readListCursor(query.cursor);
-    const pageWhere = cursor
-      ? [
-          {
-            ...where,
-            createdAt: Raw((alias) => `${alias} < :cursorTime::timestamptz`, {
-              cursorTime: cursor.createdAt,
-            }),
-          },
-          {
-            ...where,
-            createdAt: Raw((alias) => `${alias} = :cursorTime::timestamptz`, {
-              cursorTime: cursor.createdAt,
-            }),
-            id: LessThan(cursor.id),
-          },
-        ]
-      : where;
-    const [rows, total] = await Promise.all([
-      this.submissions.find({
-        where: pageWhere,
+    const page = await findListPage(
+      this.submissions,
+      this.dataSource,
+      'submissions',
+      query,
+      where,
+      {
         relations: { problem: true },
         // Lists must not load large source files or debug output into memory.
         select: {
@@ -183,25 +168,9 @@ export class SubmissionsService {
           updatedAt: true,
           problem: { id: true, slug: true, title: true },
         },
-        order: { createdAt: 'DESC', id: 'DESC' },
-        skip: cursor ? 0 : (query.page - 1) * query.limit,
-        take: query.limit + 1,
-      }),
-      this.submissions.count({ where }),
-    ]);
-    const items = rows.slice(0, query.limit);
-    const nextCursor =
-      rows.length > query.limit
-        ? await createListCursor(this.dataSource, 'submissions', items.at(-1)!.id)
-        : null;
-    return {
-      items: items.map((item) => this.toResponse(item)),
-      page: query.page,
-      limit: query.limit,
-      total,
-      totalPages: Math.ceil(total / query.limit),
-      nextCursor,
-    };
+      },
+    );
+    return { ...page, items: page.items.map((item) => this.toResponse(item)) };
   }
   async findMineById(id: string, user: AuthenticatedUser) {
     const submission = await this.submissions.findOne({

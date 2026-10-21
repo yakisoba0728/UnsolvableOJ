@@ -1,6 +1,15 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { isISO8601, isUUID } from 'class-validator';
-import type { DataSource } from 'typeorm';
+import {
+  LessThan,
+  Raw,
+  type DataSource,
+  type FindManyOptions,
+  type FindOptionsOrder,
+  type FindOptionsWhere,
+  type Repository,
+} from 'typeorm';
+import type { ListQuery } from './list-query.js';
 
 export function readListCursor(value?: string) {
   if (value === undefined) return undefined;
@@ -41,4 +50,55 @@ export async function createListCursor(
   return Buffer.from(JSON.stringify([rows[0].createdAt, id])).toString(
     'base64url',
   );
+}
+
+export async function findListPage<T extends { id: string; createdAt: Date }>(
+  repository: Repository<T>,
+  db: DataSource,
+  table: 'problems' | 'submissions',
+  query: ListQuery,
+  where: FindOptionsWhere<T>,
+  options: Pick<FindManyOptions<T>, 'select' | 'relations'>,
+) {
+  const cursor = readListCursor(query.cursor);
+  const pageWhere = cursor
+    ? ([
+        {
+          ...where,
+          createdAt: Raw((alias) => `${alias} < :cursorTime::timestamptz`, {
+            cursorTime: cursor.createdAt,
+          }),
+        },
+        {
+          ...where,
+          createdAt: Raw((alias) => `${alias} = :cursorTime::timestamptz`, {
+            cursorTime: cursor.createdAt,
+          }),
+          id: LessThan(cursor.id),
+        },
+      ] as FindOptionsWhere<T>[])
+    : where;
+  const [rows, total] = await Promise.all([
+    repository.find({
+      ...options,
+      where: pageWhere,
+      order: { createdAt: 'DESC', id: 'DESC' } as FindOptionsOrder<T>,
+      skip: cursor ? 0 : (query.page - 1) * query.limit,
+      take: query.limit + 1,
+    }),
+    repository.count({ where }),
+  ]);
+  const items = rows.slice(0, query.limit);
+  const nextCursor =
+    rows.length > query.limit
+      ? await createListCursor(db, table, items.at(-1)!.id)
+      : null;
+  return {
+    items,
+    page: query.page,
+    limit: query.limit,
+    total,
+    totalPages: Math.ceil(total / query.limit),
+    nextCursor,
+  };
 }
