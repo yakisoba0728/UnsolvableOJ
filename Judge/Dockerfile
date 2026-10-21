@@ -6,7 +6,7 @@ RUN npm ci
 
 FROM deps AS build
 COPY . .
-RUN npm run build
+RUN npm run build && rm -f dist/*.test.js
 
 FROM node:24-alpine AS runtime
 ENV NODE_ENV=production
@@ -14,4 +14,5 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
+USER node
 CMD ["node", "dist/worker.js"]
