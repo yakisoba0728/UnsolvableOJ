@@ -394,6 +394,25 @@ test("K13: failed deletion stays on the post and does not clear answer or edit d
   expect(await readStored(page, editDraftKey)).toBeNull();
 });
 
+test("a notice passed on navigation shows once and does not return on reload or Back/Forward", async ({ page }) => {
+  await seed(page);
+  await page.goto("/community/mine");
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "글 관리" }).click();
+  await page.getByRole("menuitem", { name: "삭제", exact: true }).click();
+  await expect(page).toHaveURL(/\/community$/);
+  const notice = page.getByRole("status").filter({ hasText: "글을 삭제했어요." });
+  await expect(notice).toBeVisible();
+  // 안내는 4초 뒤 저절로 사라지므로, 목록이 그려진 그 순간에 바로 센다(재시도하지 않음).
+  await page.reload();
+  await expect(page.getByRole("searchbox", { name: "게시글 검색" })).toBeVisible();
+  expect(await notice.count()).toBe(0);
+  await page.goBack();
+  await page.goForward();
+  await expect(page.getByRole("searchbox", { name: "게시글 검색" })).toBeVisible();
+  expect(await notice.count()).toBe(0);
+});
+
 test("K11: draft helpers isolate owners and posts, preserve ownerless legacy data and keep public posts shared", async ({ page }) => {
   await seed(page);
   await page.goto("/community");

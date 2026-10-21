@@ -3,7 +3,6 @@ import { X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
-  useLocation,
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
@@ -27,7 +26,7 @@ import {
   type CategoryKey,
   type CommunityPost,
 } from "../community/types";
-import { useDocumentTitle, useStickyTop } from "../hooks";
+import { useDocumentTitle, useFlashNotice, useStickyTop } from "../hooks";
 import { pageRange, pageRangeTitle } from "../pageRange";
 
 const PAGE_SIZE = 10;
@@ -52,10 +51,7 @@ export function CommunityPage() {
   useDocumentTitle("커뮤니티");
   const { session } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [notice, setNotice] = useState(
-    (location.state as { notice?: string } | null)?.notice ?? "",
-  );
+  const [notice, setNotice] = useFlashNotice();
   useEffect(() => {
     if (!notice) return;
     const timer = window.setTimeout(() => setNotice(""), 4000);

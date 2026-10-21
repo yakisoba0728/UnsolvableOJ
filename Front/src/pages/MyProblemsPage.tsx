@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { SkeletonRows } from "../components/Skeleton";
 import { PageHeader } from "../components/PageHeader";
-import { useDocumentTitle } from "../hooks";
+import { useDocumentTitle, useFlashNotice } from "../hooks";
 import { problemPath } from "../paths";
 import { difficultyLabel } from "../difficulty";
 
@@ -27,14 +27,11 @@ const statusLabel: Record<MyProblem["status"], string> = {
 export function MyProblemsPage() {
   useDocumentTitle("내 문제");
   const { session } = useAuth();
-  const location = useLocation();
   const isAdmin = session?.user.role === "ADMIN";
   const [problems, setProblems] = useState<MyProblem[] | null>(null);
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState("");
-  const [notice, setNotice] = useState(
-    (location.state as { notice?: string } | null)?.notice ?? "",
-  );
+  const [notice, setNotice] = useFlashNotice();
 
   useEffect(() => {
     if (!session) return;
