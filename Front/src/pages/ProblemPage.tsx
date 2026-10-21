@@ -43,49 +43,49 @@ const languages: { value: Language; label: string; starter: string }[] = [
     value: "PYTHON",
     label: "Python 3",
     starter:
-      "def solution():\n    answer = 0\n    # 입력 예시: n = int(input())  /  a, b = map(int, input().split())\n    # 여기에 코드를 작성하세요.\n    return answer\n\n\nprint(solution())\n",
+      "def solution():\n    answer = 0\n    # 여기에 코드를 작성하세요.\n    return answer\n\n\nprint(solution())\n",
   },
   {
     value: "CPP",
     label: "C++ 20",
     starter:
-      '#include <iostream>\n#include <string>\n#include <vector>\nusing namespace std;\n\nint solution() {\n    int answer = 0;\n    // 입력 예시: int n; cin >> n;\n    // 여기에 코드를 작성하세요.\n    return answer;\n}\n\nint main() {\n    cout << solution() << "\\n";\n    return 0;\n}\n',
+      '#include <iostream>\n#include <string>\n#include <vector>\nusing namespace std;\n\nint solution() {\n    int answer = 0;\n    // 여기에 코드를 작성하세요.\n    return answer;\n}\n\nint main() {\n    cout << solution() << "\\n";\n    return 0;\n}\n',
   },
   {
     value: "C",
     label: "C 17",
     starter:
-      '#include <stdio.h>\n\nint solution(void) {\n    int answer = 0;\n    // 입력 예시: int n; scanf("%d", &n);\n    // 여기에 코드를 작성하세요.\n    return answer;\n}\n\nint main(void) {\n    printf("%d\\n", solution());\n    return 0;\n}\n',
+      '#include <stdio.h>\n\nint solution(void) {\n    int answer = 0;\n    // 여기에 코드를 작성하세요.\n    return answer;\n}\n\nint main(void) {\n    printf("%d\\n", solution());\n    return 0;\n}\n',
   },
   {
     value: "JAVA",
     label: "Java 21",
     starter:
-      "import java.util.*;\n\npublic class Main {\n    static int solution(Scanner sc) {\n        int answer = 0;\n        // 입력 예시: int n = sc.nextInt();\n        // 여기에 코드를 작성하세요.\n        return answer;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        System.out.println(solution(sc));\n    }\n}\n",
+      "import java.util.*;\n\npublic class Main {\n    static int solution(Scanner sc) {\n        int answer = 0;\n            // 여기에 코드를 작성하세요.\n        return answer;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        System.out.println(solution(sc));\n    }\n}\n",
   },
   {
     value: "JAVASCRIPT",
     label: "JavaScript",
     starter:
-      'const lines = require("fs").readFileSync(0, "utf8").trim().split("\\n");\n\nfunction solution() {\n  let answer = 0;\n  // 입력 예시: const n = Number(lines[0]);\n  // 여기에 코드를 작성하세요.\n  return answer;\n}\n\nconsole.log(solution());\n',
+      'const lines = require("fs").readFileSync(0, "utf8").trim().split("\\n");\n\nfunction solution() {\n  let answer = 0;\n  // 여기에 코드를 작성하세요.\n  return answer;\n}\n\nconsole.log(solution());\n',
   },
   {
     value: "TYPESCRIPT",
     label: "TypeScript",
     starter:
-      'import * as fs from "fs";\nconst lines: string[] = fs.readFileSync(0, "utf8").trim().split("\\n");\n\nfunction solution(): number {\n  let answer = 0;\n  // 입력 예시: const n = Number(lines[0]);\n  // 여기에 코드를 작성하세요.\n  return answer;\n}\n\nconsole.log(solution());\n',
+      'import * as fs from "fs";\nconst lines: string[] = fs.readFileSync(0, "utf8").trim().split("\\n");\n\nfunction solution(): number {\n  let answer = 0;\n  // 여기에 코드를 작성하세요.\n  return answer;\n}\n\nconsole.log(solution());\n',
   },
   {
     value: "GO",
     label: "Go",
     starter:
-      'package main\n\nimport (\n    "bufio"\n    "fmt"\n    "os"\n)\n\nfunc solution(reader *bufio.Reader) int {\n    answer := 0\n    // 입력 예시: var n int; fmt.Fscan(reader, &n)\n    // 여기에 코드를 작성하세요.\n    return answer\n}\n\nfunc main() {\n    reader := bufio.NewReader(os.Stdin)\n    fmt.Println(solution(reader))\n}\n',
+      'package main\n\nimport (\n    "bufio"\n    "fmt"\n    "os"\n)\n\nfunc solution(reader *bufio.Reader) int {\n    answer := 0\n    // 여기에 코드를 작성하세요.\n    return answer\n}\n\nfunc main() {\n    reader := bufio.NewReader(os.Stdin)\n    fmt.Println(solution(reader))\n}\n',
   },
   {
     value: "RUST",
     label: "Rust",
     starter:
-      'use std::io::{self, Read};\n\nfn solution(input: &str) -> i64 {\n    let answer: i64 = 0;\n    // 입력 예시: let n: i64 = input.split_whitespace().next().unwrap().parse().unwrap();\n    // 여기에 코드를 작성하세요.  (값을 바꾸려면 answer를 mut로 선언하세요)\n    let _ = input;\n    answer\n}\n\nfn main() {\n    let mut input = String::new();\n    io::stdin().read_to_string(&mut input).unwrap();\n    println!("{}", solution(&input));\n}\n',
+      'use std::io::{self, Read};\n\nfn solution(input: &str) -> i64 {\n    let answer: i64 = 0;\n    // 여기에 코드를 작성하세요.  (값을 바꾸려면 answer를 mut로 선언하세요)\n    let _ = input;\n    answer\n}\n\nfn main() {\n    let mut input = String::new();\n    io::stdin().read_to_string(&mut input).unwrap();\n    println!("{}", solution(&input));\n}\n',
   },
 ];
 
@@ -220,26 +220,8 @@ export function ProblemPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [problem?.id, language]);
 
-  // 같은 문제를 다른 탭에서도 열어 둔 경우(문제는 새 탭으로 열린다), 그 탭이 저장한 최신 초안을 이어받는다.
-  // 그렇지 않으면 이 탭에서 키를 누르는 순간 처음 열 때의 오래된 내용으로 다른 탭의 초안을 덮어쓴다.
-  // storage 이벤트는 다른 탭에서 바뀐 때만 오므로 이 탭의 입력과 맞부딪치지 않는다.
-  useEffect(() => {
-    if (!problem) return;
-    const key = draftKey(problem.id, language);
-    function onStorage(event: StorageEvent) {
-      if (event.storageArea !== localStorage || event.key !== key) return;
-      // 다른 탭의 '초기화'(저장된 초안 삭제)는 처음 상태로 돌아간 것으로 받아들인다.
-      const next = event.newValue ?? starter(language);
-      // 진행 중이던 스니펫 칸 이동·자동완성 제안은 옛 글 기준이므로 끝낸다('초기화' 버튼과 같은 처리).
-      sessionRef.current = null;
-      setPopup(null);
-      setSource(next);
-      setCursor(cursorPosition(next, next.length));
-      setSavedAt(event.newValue === null ? null : new Date());
-    }
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, [problem?.id, language]); // eslint-disable-line react-hooks/exhaustive-deps
+  // 문제는 새 탭으로 열린다. 각 탭은 열린 시점의 초안만 가져오고, 같은 문제의 다른 탭과 실시간으로 동기화하지 않는다.
+  // (다른 탭이 나중에 저장한 내용은 이 탭을 새로고침하거나 새 탭으로 열 때 반영된다.)
 
   // 전환·이탈 직전 입력도 남기고, 초안 복원은 다른 언어의 저장 내용을 덮어쓰지 않는다.
   function updateSource(next: string) {

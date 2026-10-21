@@ -1179,7 +1179,7 @@ test("problem links open in a new tab for unusual slugs: encoded, never dropped 
   }
 });
 
-test("two tabs on the same problem share the latest draft instead of overwriting each other", async ({
+test("each tab takes the draft from the moment it opened and does not sync live with other tabs of the same problem", async ({
   page,
 }) => {
   await authenticate(page);
@@ -1192,58 +1192,45 @@ test("two tabs on the same problem share the latest draft instead of overwriting
   const first = page.getByLabel("소스 코드");
   await first.fill("print(1)");
 
-  // 같은 문제를 두 번째 탭에서 열면 첫 탭의 초안이 보인다.
+  // 두 번째 탭은 열린 시점의 초안(첫 탭이 그때까지 쓴 내용)을 가져온다.
   const second = await page.context().newPage();
   await second.goto("/problems/view/sum");
   const secondEditor = second.getByLabel("소스 코드");
   await expect(secondEditor).toHaveValue("print(1)");
 
-  // 첫 탭에서 더 쓰면 두 번째 탭이 이어받는다(별도 조작 없이).
+  // 그 뒤의 변경은 서로에게 실시간으로 전해지지 않는다(저장 이벤트가 도착할 시간을 충분히 준다).
+  const settle = () => page.waitForTimeout(400);
   await first.fill("print(2)");
-  await expect(secondEditor).toHaveValue("print(2)");
-  // 이어받은 뒤에는 하단의 '줄·열' 표시도 새 글 기준으로 바뀐다.
-  await expect(second.locator(".cursor-info")).toHaveText("줄 1, 열 9");
+  await settle();
+  await expect(secondEditor).toHaveValue("print(1)");
+  await secondEditor.fill("print('B')");
+  await settle();
+  await expect(first).toHaveValue("print(2)");
 
-  // 두 번째 탭에서 이어 쓰면 첫 탭의 최신 내용 위에 쌓이고, 오래된 내용으로 덮어쓰지 않는다.
-  await secondEditor.press("End");
-  await secondEditor.pressSequentially("  # 둘째 탭");
-  await expect(first).toHaveValue("print(2)  # 둘째 탭");
-  const stored = () =>
-    page.evaluate(() =>
-      localStorage.getItem("unsolvable-oj-draft-v1:problem-id:PYTHON"),
-    );
-  expect(await stored()).toBe("print(2)  # 둘째 탭");
-
-  // 극단적인 값도 그대로 옮겨진다: 빈 값, 아주 긴 값, 이모지, HTML·따옴표·널 문자에 가까운 제어 문자.
+  // 극단적인 값(빈 값, 아주 긴 값, 이모지, HTML·따옴표·제어 문자)도 다른 탭을 바꾸지 않는다.
   const extremes = [
     "",
     "x".repeat(60_000),
     "😀 한글 \u202e RTL ✓",
     '</textarea><script>alert("x")</script>\n\'quote\' "double" `tick`\t\\',
-    "\n\n\n",
   ];
   for (const value of extremes) {
     await first.fill(value);
-    await expect(secondEditor).toHaveValue(value);
+    await settle();
+    await expect(secondEditor).toHaveValue("print('B')");
   }
 
-  // 첫 탭에서 '초기화'를 누르면 두 번째 탭도 처음 상태로 돌아가고, 오래된 글이 되살아나지 않는다.
-  const starterText = await (async () => {
-    await page.getByRole("button", { name: "초기화", exact: true }).click();
-    return first.inputValue();
-  })();
-  expect(starterText).toContain("solution");
-  await expect(secondEditor).toHaveValue(starterText);
-  expect(await stored()).toBeNull();
+  // 새로고침하면 그 시점에 저장돼 있던 초안(마지막으로 저장한 첫 탭의 값)을 가져온다.
+  const last = extremes[extremes.length - 1];
+  await second.reload();
+  await expect(second.getByLabel("소스 코드")).toHaveValue(last);
 
-  // 언어별 초안은 서로 섞이지 않는다: 첫 탭에서 다른 언어에 쓴 내용이 두 번째 탭(파이썬)에 새지 않는다.
-  await first.fill("print('py')");
-  await expect(secondEditor).toHaveValue("print('py')");
-  await page.getByRole("combobox", { name: "언어", exact: true }).click();
-  await page.getByRole("option", { name: "C++ 20", exact: true }).click();
-  const cppEditor = page.getByRole("textbox", { name: "C++ 20 소스 코드" });
-  await cppEditor.fill("int main(){}");
-  await expect(secondEditor).toHaveValue("print('py')");
+  // 첫 탭의 '초기화'는 열려 있는 두 번째 탭에는 영향을 주지 않고, 새로 열면 초기 코드로 시작한다.
+  await page.getByRole("button", { name: "초기화", exact: true }).click();
+  await settle();
+  await expect(second.getByLabel("소스 코드")).toHaveValue(last);
+  await second.reload();
+  await expect(second.getByLabel("소스 코드")).toHaveValue(/def solution\(\):/);
   await second.close();
 });
 
