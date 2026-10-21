@@ -148,6 +148,150 @@ export const hasErrors = (errors: FormErrors) =>
     name === "cases" ? Object.keys(value as object).length > 0 : Boolean(value),
   );
 
+// ---- 테스트케이스 목록 편집 ----
+export type CaseAction =
+  | { type: "update"; key: string; change: Partial<CaseForm> }
+  | { type: "add"; isSample: boolean }
+  | { type: "duplicate"; key: string }
+  | { type: "move"; key: string; step: -1 | 1 }
+  | { type: "remove"; key: string }
+  | { type: "collapseAll"; collapsed: boolean }
+  | { type: "reveal"; errors: Record<string, string> };
+
+/** 바뀐 것이 없으면 받은 배열을 그대로 돌려준다: 폼을 새로 만들면 임시 저장이 다시 일어난다. */
+export function editCases(cases: CaseForm[], action: CaseAction): CaseForm[] {
+  switch (action.type) {
+    case "update":
+      return cases.map((item) =>
+        item.key === action.key ? { ...item, ...action.change } : item,
+      );
+    case "add":
+      return [...cases, blankCase(action.isSample)];
+    case "duplicate": {
+      const at = cases.findIndex((item) => item.key === action.key);
+      if (at === -1) return cases;
+      const copy = {
+        ...cases[at],
+        key: blankCase().key,
+        collapsed: false,
+      };
+      const next = [...cases];
+      next.splice(at + 1, 0, copy);
+      return next;
+    }
+    case "move": {
+      const at = cases.findIndex((item) => item.key === action.key);
+      const to = at + action.step;
+      if (at === -1 || to < 0 || to >= cases.length) return cases;
+      const next = [...cases];
+      [next[at], next[to]] = [next[to], next[at]];
+      return next;
+    }
+    case "remove":
+      return cases.length > 1
+        ? cases.filter((item) => item.key !== action.key)
+        : cases;
+    case "collapseAll":
+      return cases.map((item) => ({ ...item, collapsed: action.collapsed }));
+    case "reveal":
+      return cases.map((item) =>
+        action.errors[item.key] ? { ...item, collapsed: false } : item,
+      );
+  }
+}
+
+// ---- 저장 전 확인 ----
+/** 화면 위에서 아래 순서로 처음 만나는 오류 칸 */
+function firstErrorTarget(next: FormErrors, slugTaken: boolean) {
+  if (next.title) return "title";
+  if (next.slug || slugTaken) return "slug";
+  if (next.timeLimitMs || next.memoryLimitMb) return "limits";
+  if (next.statement) return "statement";
+  if (next.inputDescription) return "input-desc";
+  if (next.outputDescription) return "output-desc";
+  if (next.testCases) return "cases";
+  const key = Object.keys(next.cases)[0];
+  return key ? `case-${key}` : null;
+}
+
+/** 확인 목록·권장 사항·단계 완료 표시와 저장할 때 먼저 보여 줄 오류 칸 */
+export function reviewForm(
+  form: ProblemForm,
+  errors: FormErrors,
+  editing: boolean,
+  slugTaken: boolean,
+) {
+  const sampleCount = form.cases.filter((item) => item.isSample).length;
+  const hiddenCount = form.cases.length - sampleCount;
+  const firstCaseError = Object.keys(errors.cases)[0];
+
+  const checklist = [
+    { label: "제목", ok: !errors.title, target: "title" },
+    ...(editing
+      ? []
+      : [
+          {
+            label: "주소(slug)",
+            ok: !errors.slug && !slugTaken,
+            target: "slug",
+          },
+        ]),
+    {
+      label: "시간·메모리 제한",
+      ok: !errors.timeLimitMs && !errors.memoryLimitMb,
+      target: "limits",
+    },
+    { label: "문제 본문", ok: !errors.statement, target: "statement" },
+    { label: "입력 설명", ok: !errors.inputDescription, target: "input-desc" },
+    {
+      label: "출력 설명",
+      ok: !errors.outputDescription,
+      target: "output-desc",
+    },
+    { label: "테스트케이스 1개 이상", ok: !errors.testCases, target: "cases" },
+    {
+      label: "테스트케이스 확인 (빈 기대 출력도 허용)",
+      ok: !firstCaseError,
+      target: firstCaseError ? `case-${firstCaseError}` : "cases",
+    },
+  ];
+  const warnings: string[] = [];
+  if (sampleCount === 0)
+    warnings.push("공개 예제가 없어요. 풀이에 도움이 되도록 예제를 추가하는 것을 권장해요.");
+  if (hiddenCount === 0)
+    warnings.push(
+      "숨김 테스트케이스가 없어요. 예제만으로 채점하면 예제에 맞춘 풀이도 통과할 수 있어요.",
+    );
+  if (form.cases.length === 1)
+    warnings.push(
+      "테스트케이스가 하나뿐이에요. 경계값(가장 작은 값·가장 큰 값)도 추가해 보세요.",
+    );
+  const basicOk =
+    !errors.title &&
+    (editing || (!errors.slug && !slugTaken)) &&
+    !errors.timeLimitMs &&
+    !errors.memoryLimitMb;
+  const stepDone: Record<string, boolean> = {
+    "sec-basic": basicOk,
+    "sec-statement":
+      !errors.statement &&
+      !errors.inputDescription &&
+      !errors.outputDescription,
+    "sec-cases": !errors.testCases && !firstCaseError,
+    "sec-review": !hasErrors(errors) && !slugTaken,
+  };
+
+  return {
+    sampleCount,
+    hiddenCount,
+    firstCaseError,
+    checklist,
+    warnings,
+    stepDone,
+    firstErrorTarget: firstErrorTarget(errors, slugTaken),
+  };
+}
+
 // sessionStorage라서 탭마다 따로 저장된다(브라우저가 복제한 탭도 분리된다).
 // 주인을 알 수 없는 옛 v1(localStorage) 초안은 가져오지도 지우지도 않는다.
 // shortcut: 이 탭이 열려 있는 동안만 복구된다. 닫은 탭까지 복구하려면 명시적인 내보내기를 추가한다.
