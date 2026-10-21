@@ -262,10 +262,6 @@ export function ProfilePage() {
             <dt>연속 학습</dt>
             <dd>{streak}일</dd>
           </div>
-          <div>
-            <dt>레이팅</dt>
-            <dd>{profile.rating.toLocaleString()}</dd>
-          </div>
         </dl>
       </section>
 

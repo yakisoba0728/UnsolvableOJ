@@ -31,6 +31,26 @@ test("the home illustration shows the level badge only for a signed-in user, wit
   await expect(badge.getByText("372 XP")).toBeAttached();
 });
 
+test("home and profile do not show the never-computed rating", async ({ page }) => {
+  await authenticate(page);
+  await page.route("**/api/v1/users/me", (route) =>
+    route.fulfill({
+      json: { ...session.user, createdAt: "2026-09-01T00:00:00Z", solvedCount: 0 },
+    }),
+  );
+  await page.route("**/api/v1/rankings", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/submissions?**", (route) =>
+    route.fulfill({ json: { items: [], page: 1, limit: 100, total: 0, totalPages: 1 } }),
+  );
+  await page.goto("/");
+  await expect(page.locator(".stat-tile")).toHaveCount(4);
+  await expect(page.locator(".stat-tiles")).not.toContainText("레이팅");
+  await expect(page.locator(".stat-tile").last()).toContainText("제출0회");
+  await page.goto("/profile");
+  await expect(page.locator(".profile-stats")).toContainText("해결한 문제");
+  await expect(page.locator(".profile-stats")).not.toContainText("레이팅");
+});
+
 test("the home problem slider stays inside the page container and fades only on the side that has more cards", async ({
   page,
 }) => {

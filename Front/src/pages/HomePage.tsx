@@ -256,15 +256,17 @@ export function HomePage() {
               {streak > 0 ? "오늘도 이어가요" : "오늘 한 문제 풀어요"}
             </span>
           </Link>
+          {/* 서버가 레이팅을 계산하지 않아(항상 0) 그 자리에 제출 횟수를 보여 준다. */}
           <Link to="/profile" className="stat-tile">
-            <small>레이팅</small>
-            <strong>{profile.rating.toLocaleString()}</strong>
+            <small>제출</small>
+            <strong>{history.submissions.length}회</strong>
             <span>
-              {history.loading ? (
-                <Skeleton width={60} height={12} />
-              ) : (
-                `제출 ${history.submissions.length}회`
-              )}
+              정답{" "}
+              {
+                history.submissions.filter((item) => item.status === "ACCEPTED")
+                  .length
+              }
+              회
             </span>
           </Link>
         </div>
