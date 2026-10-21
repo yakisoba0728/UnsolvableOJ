@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JUDGE_QUEUE } from '../../common/queue.constants.js';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { Problem } from '../problems/problem.entity.js';
 import { JudgeInternalController } from './judge-internal.controller.js';
 import { JudgeService } from './judge.service.js';
@@ -19,6 +18,6 @@ import { SubmissionsService } from './submissions.service.js';
     BullModule.registerQueue({ name: JUDGE_QUEUE }),
   ],
   controllers: [SubmissionsController, JudgeInternalController],
-  providers: [SubmissionsService, JudgeService, JwtAuthGuard, JudgeTokenGuard],
+  providers: [SubmissionsService, JudgeService, JudgeTokenGuard],
 })
 export class SubmissionsModule {}
