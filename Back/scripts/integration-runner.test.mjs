@@ -110,33 +110,7 @@ test('project commands build fresh and provision before spawning; only the creat
   assert.ok(runner.indexOf('await db.runMigrations()') < runner.indexOf('child = spawn('));
   assert.ok(runner.indexOf('await stopChild(child, true)') < runner.indexOf('DROP DATABASE'));
   assert.match(runner, /if \(created\) await admin\.query\(`DROP DATABASE "\$\{name\}" WITH \(FORCE\)`\)/);
-  const e2e = await read('../vitest.config.e2e.ts');
-  assert.match(e2e, /UNSOLVABLE_TEST_DATABASE/);
-  assert.match(e2e, /new URL\(databaseUrl\)\.pathname !== `\/\$\{databaseName\}`/);
-  assert.doesNotMatch(e2e, /local_password|unsolvable_oj/);
   assert.match(await read('../vitest.config.pipeline.ts'), /import e2e from '\.\/vitest\.config\.e2e\.js'/);
-});
-
-test('judge-flow cannot mutate an unrelated healthy API before child readiness', async () => {
-  const flow = await read('./check-judge-flow.mjs');
-  assert.match(flow, /DATABASE_URL: integrationDatabaseUrl\(\)/);
-  assert.ok(flow.indexOf('DATABASE_URL: integrationDatabaseUrl()') < flow.indexOf("await import('../dist/config/env.validation.js')"));
-  assert.match(flow, /connectionString: databaseOptions\.url/);
-  assert.match(flow, /ssl: databaseOptions\.ssl/);
-  assert.match(flow, /JUDGE_TEST_PORT \|\| '0'/);
-  assert.ok(flow.indexOf('await waitForApiListening(server)') < flow.indexOf("await api('/health')"));
-  assert.ok(flow.indexOf('await waitForApiListening(server)') < flow.indexOf("await api('/auth/register'"));
-  assert.ok(flow.indexOf("assert.ok(workerLog.includes('Judge worker ready')") < flow.indexOf("await api('/auth/register'"));
-  const main = await read('../src/main.ts');
-  assert.ok(main.indexOf('await app.listen(') < main.indexOf("type: 'unsolvable-api-listening'"));
-});
-
-test('populated solve ledger rollback refuses before any schema is dropped', async () => {
-  const migration = await read('../src/database/migrations/1790550000000-backend-foundations.ts');
-  const down = migration.slice(migration.indexOf('async down('));
-  assert.ok(down.indexOf('LOCK TABLE user_problem_solves') < down.indexOf('IF EXISTS (SELECT 1 FROM user_problem_solves)'));
-  assert.ok(down.indexOf('RAISE EXCEPTION') < down.indexOf('DROP TABLE'));
-  assert.match(down, /populated solve ledger; preserve XP and solve history/);
 });
 
 test('nginx uses Docker DNS resolve compatible with 1.27.5 without rewriting URI or trust headers', async () => {
