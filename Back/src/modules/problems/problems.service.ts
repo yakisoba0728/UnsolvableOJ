@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, type FindOptionsWhere } from 'typeorm';
+import { isUniqueViolation, recordAudit } from '../../common/database.js';
 import { findListPage } from '../../common/list-cursor.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { UserRole } from '../users/user-role.enum.js';
@@ -60,13 +61,18 @@ export class ProblemsService {
           'INSERT INTO problem_versions (problem_id, version, snapshot) VALUES ($1, 1, $2::jsonb)',
           [saved.id, JSON.stringify(this.snapshot(saved))],
         );
-        await this.audit(manager, user.id, 'problem.create', saved.id, {
-          version: 1,
-        });
+        await recordAudit(
+          manager,
+          user.id,
+          'problem.create',
+          'problem',
+          saved.id,
+          { version: 1 },
+        );
         return this.toDetail(saved);
       });
     } catch (error: unknown) {
-      if (this.isUniqueViolation(error))
+      if (isUniqueViolation(error))
         throw new ConflictException('이미 사용 중인 문제 slug입니다.');
       throw error;
     }
@@ -124,7 +130,7 @@ export class ProblemsService {
         'INSERT INTO problem_versions (problem_id, version, snapshot) VALUES ($1, $2, $3::jsonb)',
         [id, problem.currentVersion, JSON.stringify(this.snapshot(problem))],
       );
-      await this.audit(manager, user.id, 'problem.update', id, {
+      await recordAudit(manager, user.id, 'problem.update', 'problem', id, {
         version: problem.currentVersion,
         status: problem.status,
       });
@@ -149,7 +155,7 @@ export class ProblemsService {
       const oldStatus = problem.status;
       problem.status = status;
       await manager.save(problem);
-      await this.audit(manager, user.id, 'problem.status', id, {
+      await recordAudit(manager, user.id, 'problem.status', 'problem', id, {
         from: oldStatus,
         to: status,
       });
@@ -302,27 +308,5 @@ export class ProblemsService {
       ...this.toDetail(problem),
       testCases: this.snapshot(problem).testCases,
     };
-  }
-
-  private audit(
-    manager: DataSource['manager'],
-    actorId: string,
-    action: string,
-    targetId: string,
-    details: object,
-  ) {
-    return manager.query(
-      'INSERT INTO audit_events (actor_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5::jsonb)',
-      [actorId, action, 'problem', targetId, JSON.stringify(details)],
-    );
-  }
-
-  private isUniqueViolation(error: unknown): boolean {
-    return (
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      error.code === '23505'
-    );
   }
 }

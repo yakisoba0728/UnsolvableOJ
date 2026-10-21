@@ -14,8 +14,10 @@ import {
   DataSource,
   LessThan,
   Repository,
+  type EntityManager,
   type FindOptionsWhere,
 } from 'typeorm';
+import { recordAudit } from '../../common/database.js';
 import { findListPage } from '../../common/list-cursor.js';
 import {
   JUDGE_QUEUE,
@@ -72,6 +74,17 @@ interface ProblemSnapshot {
     score: number;
     order: number;
   }[];
+}
+
+async function findProblemSnapshot(
+  db: Pick<EntityManager, 'query'>,
+  submission: Submission,
+) {
+  const rows: { snapshot: ProblemSnapshot }[] = await db.query(
+    'SELECT snapshot FROM problem_versions WHERE problem_id = $1 AND version = $2',
+    [submission.problemId, submission.problemVersion],
+  );
+  return rows[0]?.snapshot;
 }
 
 @Injectable()
@@ -184,14 +197,11 @@ export class SubmissionsService {
       expectedOutput: string;
     }[] = [];
     if (submission.debugOutputs?.length) {
-      const rows: { snapshot: ProblemSnapshot }[] = await this.dataSource.query(
-        'SELECT snapshot FROM problem_versions WHERE problem_id = $1 AND version = $2',
-        [submission.problemId, submission.problemVersion],
-      );
+      const snapshot = await findProblemSnapshot(this.dataSource, submission);
       const visible = new Set(
         submission.debugOutputs.map((item) => item.testCase),
       );
-      const cases = [...(rows[0]?.snapshot.testCases ?? [])].sort(
+      const cases = [...(snapshot?.testCases ?? [])].sort(
         (left, right) => left.order - right.order,
       );
       cases.forEach((testCase, index) => {
@@ -236,15 +246,13 @@ export class SubmissionsService {
       current.debugOutputs = [];
       current.judgeMessage = null;
       await manager.save(current);
-      await manager.query(
-        'INSERT INTO audit_events (actor_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5::jsonb)',
-        [
-          user.id,
-          'submission.rejudge',
-          'submission',
-          id,
-          JSON.stringify({ generation: current.judgeGeneration }),
-        ],
+      await recordAudit(
+        manager,
+        user.id,
+        'submission.rejudge',
+        'submission',
+        id,
+        { generation: current.judgeGeneration },
       );
       return current;
     });
@@ -283,13 +291,9 @@ export class SubmissionsService {
       submission.judgeAttemptId = attemptId;
       submission.judgeLeaseExpiresAt = new Date(Date.now() + LEASE_MS);
       await manager.save(submission);
-      const rows: { snapshot: ProblemSnapshot }[] = await manager.query(
-        'SELECT snapshot FROM problem_versions WHERE problem_id = $1 AND version = $2',
-        [submission.problemId, submission.problemVersion],
-      );
-      if (!rows[0])
+      const snapshot = await findProblemSnapshot(manager, submission);
+      if (!snapshot)
         throw new NotFoundException('문제 버전을 찾을 수 없습니다.');
-      const snapshot = rows[0].snapshot;
       return {
         submissionId: id,
         generation,
@@ -419,12 +423,8 @@ export class SubmissionsService {
       );
     if (submission.status === SubmissionStatus.ACCEPTED) {
       if (rows.length) return;
-      const versions: { snapshot: ProblemSnapshot }[] = await manager.query(
-        'SELECT snapshot FROM problem_versions WHERE problem_id = $1 AND version = $2',
-        [submission.problemId, submission.problemVersion],
-      );
-      const awarded =
-        XP[versions[0]?.snapshot.difficulty ?? ProblemDifficulty.BEGINNER];
+      const snapshot = await findProblemSnapshot(manager, submission);
+      const awarded = XP[snapshot?.difficulty ?? ProblemDifficulty.BEGINNER];
       const inserted: { user_id: string }[] = await manager.query(
         'INSERT INTO user_problem_solves (user_id, problem_id, accepted_submission_id, awarded_xp) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING RETURNING user_id',
         [submission.userId, submission.problemId, submission.id, awarded],
