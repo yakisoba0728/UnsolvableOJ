@@ -5,9 +5,9 @@ import type { Claim, JudgeResult, judge } from "./judge.js";
 import { startWorker } from "./worker.js";
 
 const claim: Claim = {
-  submissionId: "submission", language: "PYTHON", sourceCode: "print(3)",
+  language: "PYTHON", sourceCode: "print(3)",
   limits: { timeMs: 1000, memoryMb: 256 },
-  testCases: [{ id: "sample", input: "", expectedOutput: "3\n", isSample: true, score: 1 }],
+  testCases: [{ input: "", expectedOutput: "3\n", isSample: true }],
 };
 const result: JudgeResult = {
   status: "ACCEPTED", runtimeMs: 2, memoryKb: 1000,
@@ -346,7 +346,7 @@ test("transient worker presence failures neither pause consumption nor abort act
   assert.equal(h.requests.filter((request) => request.path.endsWith("/result")).length, 1);
 });
 
-test("an ordinary judge failure still reports SYSTEM_ERROR with the existing bounded message", async (t) => {
+test("an ordinary judge failure reports SYSTEM_ERROR without exposing internal details", async (t) => {
   const h = harness(t, undefined, async () => { throw new Error("e".repeat(1500)); });
   const running = await h.start();
   t.after(() => running.close());
@@ -355,8 +355,10 @@ test("an ordinary judge failure still reports SYSTEM_ERROR with the existing bou
   assert.ok(report && typeof report.body === "string");
   assert.deepEqual(JSON.parse(report.body), {
     status: "SYSTEM_ERROR", runtimeMs: 0, memoryKb: 0,
-    passedTestCases: 0, totalTestCases: 1, debugOutputs: [], judgeMessage: "e".repeat(1000),
+    passedTestCases: 0, totalTestCases: 1, debugOutputs: [], judgeMessage: "채점 중 시스템 오류가 발생했습니다.",
   });
+  assert.equal(h.errors.mock.callCount(), 1);
+  assert.match(String(h.errors.mock.calls[0].arguments[1]), /e{1500}/);
 });
 
 test("the consuming worker is constructed only after an authenticated API heartbeat", async (t) => {

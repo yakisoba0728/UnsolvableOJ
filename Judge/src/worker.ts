@@ -6,7 +6,7 @@ import { Redis } from "ioredis";
 import { checkSandbox, judge, type Claim, type JudgeResult, type SandboxConfig } from "./judge.js";
 
 interface JudgeJob {
-  data: { submissionId: string; generation?: number };
+  data: { submissionId: string; generation: number };
 }
 
 class JudgeApiError extends Error {
@@ -62,7 +62,7 @@ export async function startWorker(
   await callApi("/internal/judge/heartbeat", "POST");
   worker = consume(async (job) => {
     const path = `/internal/judge/submissions/${job.data.submissionId}`;
-    const attempt = { generation: job.data.generation ?? 1, attemptId: randomUUID() };
+    const attempt = { generation: job.data.generation, attemptId: randomUUID() };
     const cancellation = new AbortController();
     active.add(cancellation);
     let leaseHeartbeat: ReturnType<typeof setInterval> | undefined;
@@ -84,6 +84,7 @@ export async function startWorker(
         result = await runJudge(claim, sandbox, cancellation.signal);
       } catch (error) {
         if (cancellation.signal.aborted) return;
+        console.error(`Judge failed for ${job.data.submissionId}:`, error);
         result = {
           status: "SYSTEM_ERROR",
           runtimeMs: 0,
@@ -91,7 +92,7 @@ export async function startWorker(
           passedTestCases: 0,
           totalTestCases: claim.testCases.length,
           debugOutputs: [],
-          judgeMessage: error instanceof Error ? error.message.slice(0, 1000) : "Judge failed",
+          judgeMessage: "채점 중 시스템 오류가 발생했습니다.",
         };
       }
       // Replay this attempt's result: a new BullMQ invocation cannot reclaim its live lease.

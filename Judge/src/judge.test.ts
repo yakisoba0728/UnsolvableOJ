@@ -90,9 +90,9 @@ async function sandbox(t: TestContext, steps: Step[] = []) {
 
 function claim(overrides: Partial<Claim> = {}): Claim {
   return {
-    submissionId: "test", language: "PYTHON", sourceCode: "print(3)",
+    language: "PYTHON", sourceCode: "print(3)",
     limits: { timeMs: 1000, memoryMb: 256 },
-    testCases: [{ id: "sample", input: "1 2\n", expectedOutput: "3\n", isSample: true, score: 1 }],
+    testCases: [{ input: "1 2\n", expectedOutput: "3\n", isSample: true }],
     ...overrides,
   };
 }
@@ -139,7 +139,7 @@ for (const [count, timeMs, expected] of [[1, 100, 60_100], [100, 60_000, 6_060_0
     const timeout = t.mock.method(AbortSignal, "timeout");
     const s = await sandbox(t, [{ status: "Time Limit Exceeded" }]);
     const input = claim({ limits: { timeMs, memoryMb: 256 } });
-    input.testCases = Array.from({ length: count }, (_, i) => ({ ...input.testCases[0], id: String(i) }));
+    input.testCases = Array.from({ length: count }, () => ({ ...input.testCases[0] }));
     assert.equal((await judge(input, s.config)).status, "TIME_LIMIT_EXCEEDED");
     assert.equal(timeout.mock.calls[0].arguments[0], expected);
     assert.ok(Number.isFinite(expected));
@@ -176,8 +176,8 @@ test("samples run first with original case numbers; hidden outputs never escape"
     { status: "Nonzero Exit Status", exitStatus: 1, stderr: "hidden-secret" },
   ]);
   const input = claim({ testCases: [
-    { id: "private", input: "secret-input", expectedOutput: "secret-answer", isSample: false, score: 1 },
-    { id: "public", input: "public-input", expectedOutput: "public\n", isSample: true, score: 1 },
+    { input: "secret-input", expectedOutput: "secret-answer", isSample: false },
+    { input: "public-input", expectedOutput: "public\n", isSample: true },
   ] });
   const result = await judge(input, s.config);
   assert.equal(result.status, "RUNTIME_ERROR");
@@ -195,7 +195,7 @@ test("preview truncation does not affect comparison and only five samples are ex
   const stdout = "가".repeat(700) + "\n";
   const s = await sandbox(t, Array.from({ length: 7 }, () => ({ stdout })));
   const input = claim();
-  input.testCases = Array.from({ length: 7 }, (_, i) => ({ ...input.testCases[0], id: String(i), expectedOutput: stdout }));
+  input.testCases = Array.from({ length: 7 }, () => ({ ...input.testCases[0], expectedOutput: stdout }));
   const result = await judge(input, s.config);
   assert.equal(result.status, "ACCEPTED");
   assert.equal(result.passedTestCases, 7);
@@ -213,7 +213,7 @@ for (const [upstream, expected] of [
   test(`maps ${upstream}, retains flushed sample output and stops at the first failure`, async (t) => {
     const s = await sandbox(t, [{ status: upstream, stdout: "before failure", exitStatus: 1 }]);
     const input = claim();
-    input.testCases.push({ ...input.testCases[0], id: "unexecuted" });
+    input.testCases.push({ ...input.testCases[0] });
     const result = await judge(input, s.config);
     assert.equal(result.status, expected);
     assert.equal(result.passedTestCases, 0);
@@ -240,7 +240,7 @@ for (const stream of ["stdout", "stderr"]) {
 test("compiles once, reuses only the artifact and cleans it after all tests", async (t) => {
   const s = await sandbox(t, [{}, { stdout: "3\n", memory: 9000 }, { stdout: "3\n", runTime: 6_000_000 }]);
   const input = claim({ language: "CPP" });
-  input.testCases.push({ ...input.testCases[0], id: "second" });
+  input.testCases.push({ ...input.testCases[0] });
   const result = await judge(input, s.config);
   assert.equal(result.status, "ACCEPTED");
   assert.equal(result.runtimeMs, 6);
