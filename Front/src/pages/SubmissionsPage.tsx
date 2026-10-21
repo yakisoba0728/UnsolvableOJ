@@ -54,7 +54,7 @@ export function SubmissionsPage() {
     );
   const language = params.get("l") ?? "";
   const grouped = params.get("g") === "problem";
-  const page = Math.max(1, Number(params.get("page")) || 1);
+  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
 
   function update(
     patch: Record<string, string | null>,

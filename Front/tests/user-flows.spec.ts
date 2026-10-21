@@ -3150,3 +3150,59 @@ test("the problem list and the community list show the page range the same way",
   // 글씨 모양도 같다
   expect(communityLook).toEqual(problemLook);
 });
+
+test("an odd page number in the address never shifts the list off a page boundary, and the range has a spoken form", async ({
+  page,
+}) => {
+  await authenticate(page);
+  const posts = Array.from({ length: 16 }, (_, index) => ({
+    id: `o-${index}`,
+    category: "free",
+    title: `ZZ홀수 ${index}`,
+    body: "본문",
+    tags: [] as string[],
+    author: { name: "tester", tier: "브론즈" },
+    createdAt: `2026-10-${String(index + 1).padStart(2, "0")}T00:00:00Z`,
+    upvotes: 0,
+    views: 1,
+  }));
+  await page.addInitScript((value) => {
+    localStorage.setItem(
+      "unsolvable-oj-community-v1",
+      JSON.stringify({
+        posts: value,
+        answers: [],
+        upvoted: [],
+        saved: [],
+        followed: [],
+        accepted: {},
+        deleted: [],
+      }),
+    );
+  }, posts);
+  const label = page.locator(".total-count");
+  // 소수·0·음수·글자·아주 큰 수: 어느 쪽이든 쪽 경계에 맞는 범위가 나온다
+  const expected: Record<string, string> = {
+    "1.5": "1 - 10/16",
+    "2.9": "11 - 16/16",
+    "0": "1 - 10/16",
+    "-3": "1 - 10/16",
+    abc: "1 - 10/16",
+    "99": "11 - 16/16",
+    "1e9": "11 - 16/16",
+  };
+  for (const [value, text] of Object.entries(expected)) {
+    await page.goto(`/community?q=ZZ&page=${encodeURIComponent(value)}`);
+    await expect(label, `page=${value}`).toHaveText(text);
+  }
+  // 보이는 글씨는 스크린리더에서 가리고, 풀어쓴 문장을 따로 읽어 준다("1 빼기 10 슬래시 16"로 읽히지 않게)
+  await page.goto("/community?q=ZZ");
+  await expect(label).toHaveAttribute("aria-hidden", "true");
+  await expect(page.locator(".total-count + .sr-only")).toHaveText(
+    "전체 16개 중 1번부터 10번째까지",
+  );
+  await page.goto("/community?q=ZZzzzzzz%F0%9F%98%80");
+  await expect(page.locator(".total-count + .sr-only")).toHaveText(
+    "표시할 항목이 없어요",
+  );
+});

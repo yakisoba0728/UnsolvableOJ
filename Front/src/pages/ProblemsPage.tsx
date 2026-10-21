@@ -105,7 +105,7 @@ export function ProblemsPage() {
   const reversed =
     (params.get("rev") === "1") !== Boolean(legacySort?.reversed);
   const seed = Number(params.get("seed")) || 1;
-  const page = Math.max(1, Number(params.get("page")) || 1);
+  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
 
   function update(
     patch: Record<string, string | null>,
@@ -425,15 +425,7 @@ export function ProblemsPage() {
             </div>
             <span
               className="total-count"
-              title={
-                loading
-                  ? undefined
-                  : pageRangeTitle(
-                      (current - 1) * PAGE_SIZE,
-                      visible.length,
-                      filtered.length,
-                    )
-              }
+              aria-hidden={loading ? undefined : true}
             >
               {loading ? (
                 <Skeleton width={80} height={14} />
@@ -445,6 +437,15 @@ export function ProblemsPage() {
                 )
               )}
             </span>
+            {loading ? null : (
+              <span className="sr-only">
+                {pageRangeTitle(
+                  (current - 1) * PAGE_SIZE,
+                  visible.length,
+                  filtered.length,
+                )}
+              </span>
+            )}
           </div>
           {loading ? (
             <SkeletonRows count={8} />

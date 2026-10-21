@@ -74,7 +74,7 @@ export function CommunityPage() {
   const urlQuery = params.get("q") ?? "";
   // 검색창에서 '#단어' + Enter로 만든 태그. 주소에는 t=a,b 로 저장해 새로고침·공유해도 유지된다.
   const selectedTags = (params.get("t") ?? "").split(",").filter(Boolean);
-  const page = Math.max(1, Number(params.get("page")) || 1);
+  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
   const size = PAGE_SIZE;
 
   // 검색어는 입력 중에는 로컬 상태로 두고, 잠시 멈추면 주소에 반영한다.
@@ -373,9 +373,13 @@ export function CommunityPage() {
             </div>
             <span
               className="total-count"
+              aria-hidden="true"
               title={pageRangeTitle(first, visible.length, filtered.length)}
             >
               {pageRange(first, visible.length, filtered.length)}
+            </span>
+            <span className="sr-only">
+              {pageRangeTitle(first, visible.length, filtered.length)}
             </span>
           </div>
           {visible.length ? (
