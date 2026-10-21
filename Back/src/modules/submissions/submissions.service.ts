@@ -517,20 +517,25 @@ export class SubmissionsService {
   }
 
   private async requeueMissingJobs() {
+    // Look past a healthy backlog for lost jobs, bounded per pass.
     const queued = await this.submissions.find({
+      select: { id: true, judgeGeneration: true },
       where: {
         status: SubmissionStatus.QUEUED,
         updatedAt: LessThan(new Date(Date.now() - 10_000)),
       },
-      take: 100,
-      order: { updatedAt: 'ASC' },
+      take: 1000,
+      order: { updatedAt: 'ASC', id: 'ASC' },
     });
+    let requeued = 0;
     for (const submission of queued) {
       const job = await this.judgeQueue.getJob(
         `${submission.id}-${submission.judgeGeneration}`,
       );
-      if (!job) await this.enqueue(submission.id, submission.judgeGeneration);
-      else if (['failed', 'completed'].includes(await job.getState()))
+      if (!job) {
+        await this.enqueue(submission.id, submission.judgeGeneration);
+        if (++requeued === 100) break;
+      } else if (['failed', 'completed'].includes(await job.getState()))
         await this.submissions.update(
           {
             id: submission.id,
