@@ -158,7 +158,7 @@ export type CaseAction =
   | { type: "collapseAll"; collapsed: boolean }
   | { type: "reveal"; errors: Record<string, string> };
 
-/** 바뀐 것이 없으면 받은 배열을 그대로 돌려준다: 폼을 새로 만들면 임시 저장이 다시 일어난다. */
+/** 삭제·이동·복제가 아무것도 바꾸지 않으면 받은 배열을 그대로 돌려준다: 폼을 새로 만들면 임시 저장이 다시 일어난다. */
 export function editCases(cases: CaseForm[], action: CaseAction): CaseForm[] {
   switch (action.type) {
     case "update":

@@ -277,15 +277,14 @@ export function CreateProblemPage() {
     if (!session || pendingRef.current || doneRef.current) return;
     setShowErrors(true);
     setError("");
-    const target = firstErrorTarget;
-    if (target) {
+    if (firstErrorTarget) {
       // 접혀 있던 케이스는 펼쳐서 오류 칸이 보이게 한다.
       if (firstCaseError)
         setForm((previous) => ({
           ...previous,
           cases: editCases(previous.cases, { type: "reveal", errors: errors.cases }),
         }));
-      window.setTimeout(() => jumpTo(target), 50);
+      window.setTimeout(() => jumpTo(firstErrorTarget), 50);
       return;
     }
     pendingRef.current = true;
