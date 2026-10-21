@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { Problem, Session, Submission } from "../src/types";
+import { readAll, storageKey } from "./fixtures";
 
-const storageKey = "unsolvable-oj-session-v1";
 const session: Session = {
   accessToken: "data-test-token",
   tokenType: "Bearer",
@@ -71,14 +71,6 @@ async function freeze(page: Page) {
 async function pauseClock(page: Page) {
   // HTTP-date Retry-After has whole-second precision.
   await page.clock.pauseAt(Math.ceil(await page.evaluate(() => Date.now() + 60_000) / 1000) * 1000);
-}
-
-async function readAll(page: Page) {
-  return page.evaluate(async () => {
-    const modulePath = "/src/pagination.ts";
-    const { fetchAll } = await import(modulePath);
-    return fetchAll("/data-pagination", new AbortController().signal);
-  });
 }
 
 test.beforeEach(async ({ context }) => {
@@ -572,7 +564,7 @@ test("K19: opaque cursors take precedence over changing page counts and deduplic
     return route.fulfill({ json: { ...list([{ id: "b" }, { id: "c" }]), totalPages: 99, nextCursor: null } });
   });
   await page.goto("/auth");
-  expect(await readAll(page)).toEqual([{ id: "a" }, { id: "b" }, { id: "c" }]);
+  expect(await readAll(page, "/data-pagination")).toEqual([{ id: "a" }, { id: "b" }, { id: "c" }]);
   expect(cursors).toEqual([null, "opaque +/&="]);
 });
 
@@ -587,7 +579,7 @@ for (const brokenCursor of ["repeat", "missing", "empty"] as const) {
         : { ...response, nextCursor: brokenCursor === "empty" ? "" : "one" } });
     });
     await page.goto("/auth");
-    await expect(readAll(page)).rejects.toThrow(/커서/);
+    await expect(readAll(page, "/data-pagination")).rejects.toThrow(/커서/);
     expect(calls).toBe(2);
   });
 }
@@ -598,7 +590,7 @@ test("K19: legacy offset responses still deduplicate IDs without pretending to b
     return route.fulfill({ json: { ...list(current === 1 ? [{ id: "a" }, { id: "b" }] : [{ id: "b" }, { id: "c" }]), page: current, totalPages: 2 } });
   });
   await page.goto("/auth");
-  expect(await readAll(page)).toEqual([{ id: "a" }, { id: "b" }, { id: "c" }]);
+  expect(await readAll(page, "/data-pagination")).toEqual([{ id: "a" }, { id: "b" }, { id: "c" }]);
 });
 
 for (const failed of ["profile", "rank"] as const) {

@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { Problem, Session } from "../src/types";
+import { storageKey as sessionKey } from "./fixtures";
 
-const sessionKey = "unsolvable-oj-session-v1";
 const author: Session = {
   accessToken: "editor-token", tokenType: "Bearer", expiresIn: "15m",
   user: { id: "author-a", email: "author@example.com", username: "author", role: "AUTHOR", level: 1, xp: 0, rating: 0 },

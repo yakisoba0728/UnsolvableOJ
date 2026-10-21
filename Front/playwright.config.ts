@@ -1,5 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// 브라우저 없이 src 모듈만 검사하는 스펙은 브라우저마다 반복하지 않는다.
+const unitSpecs = [
+  "autocomplete.spec.ts",
+  "code-editing.spec.ts",
+  "editor-persistence.spec.ts",
+  "page-range.spec.ts",
+  "solve-split.spec.ts",
+];
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
@@ -17,9 +26,10 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    { name: "firefox", use: { ...devices["Desktop Firefox"] } },
-    { name: "webkit", use: { ...devices["Desktop Safari"] } },
+    { name: "unit", testMatch: unitSpecs },
+    { name: "chromium", testIgnore: unitSpecs, use: { ...devices["Desktop Chrome"] } },
+    { name: "firefox", testIgnore: unitSpecs, use: { ...devices["Desktop Firefox"] } },
+    { name: "webkit", testIgnore: unitSpecs, use: { ...devices["Desktop Safari"] } },
   ],
   webServer: {
     command: "npm run dev -- --port 4173 --strictPort",
