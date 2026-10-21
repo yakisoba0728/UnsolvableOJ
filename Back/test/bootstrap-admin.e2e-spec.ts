@@ -25,10 +25,7 @@ describe('Administrator bootstrap CLI (e2e)', () => {
   });
 
   afterAll(async () => {
-    if (db?.isInitialized) {
-      await db.query('DELETE FROM users WHERE id = $1', [id]);
-      await db.destroy();
-    }
+    if (db?.isInitialized) await db.destroy();
   });
 
   it('promotes the matched user and reports their email', async () => {

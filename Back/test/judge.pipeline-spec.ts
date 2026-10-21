@@ -1,16 +1,18 @@
-import { Test } from '@nestjs/testing';
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { getQueueToken } from '@nestjs/bullmq';
-import type { Queue } from 'bullmq';
 import { DataSource } from 'typeorm';
 import request from 'supertest';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
-import { AppModule } from '../src/app.module.js';
-import { configureHttp } from '../src/configure-http.js';
-import { JUDGE_QUEUE } from '../src/common/queue.constants.js';
+import {
+  base,
+  bearer,
+  closeApp,
+  createApp,
+  login,
+  register,
+} from './helpers.js';
 
 const sources = JSON.parse(
   await readFile(
@@ -18,8 +20,6 @@ const sources = JSON.parse(
     'utf8',
   ),
 ) as Record<string, string>;
-const base = '/api/v1';
-const bearer = (token: string) => ({ Authorization: `Bearer ${token}` });
 
 describe('API → Redis → real worker → go-judge → API', () => {
   let app: NestExpressApplication;
@@ -31,43 +31,20 @@ describe('API → Redis → real worker → go-judge → API', () => {
   let adminToken: string;
   let solverToken: string;
   let acceptedId: string;
-  const userIds: string[] = [];
   const jobs: string[] = [];
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = module.createNestApplication<NestExpressApplication>({
-      bodyParser: false,
-    });
-    configureHttp(app);
+    app = await createApp();
     await app.listen(0, '127.0.0.1');
     db = app.get(DataSource);
     const suffix = randomUUID().slice(0, 8);
-    const register = async (name: string) => {
-      const { body } = await request(app.getHttpServer())
-        .post(`${base}/auth/register`)
-        .send({
-          email: `${name}-${suffix}@example.com`,
-          username: `${name}_${suffix}`,
-          password: 'pipeline-password-123',
-        })
-        .expect(201);
-      userIds.push(body.user.id);
-      return body;
-    };
-    const admin = await register('pipeline_admin');
-    const solver = await register('pipeline_solver');
+    const admin = await register(app, 'pipeline_admin', suffix);
+    const solver = await register(app, 'pipeline_solver', suffix);
     solverToken = solver.accessToken;
     await db.query("UPDATE users SET role = 'ADMIN' WHERE id = $1", [
       admin.user.id,
     ]);
-    const login = await request(app.getHttpServer())
-      .post(`${base}/auth/login`)
-      .send({ email: admin.user.email, password: 'pipeline-password-123' })
-      .expect(200);
-    adminToken = login.body.accessToken;
+    adminToken = (await login(app, admin.user.email)).accessToken;
     const created = await request(app.getHttpServer())
       .post(`${base}/problems`)
       .set(bearer(adminToken))
@@ -225,23 +202,6 @@ describe('API → Redis → real worker → go-judge → API', () => {
     }
     await mkdir('reports', { recursive: true });
     await writeFile('reports/pipeline-worker.log', workerLog);
-    try {
-      if (app) {
-        const queue = app.get<Queue>(getQueueToken(JUDGE_QUEUE));
-        for (const id of jobs) await (await queue.getJob(id))?.remove();
-      }
-      if (problemId) {
-        await db.query('DELETE FROM submissions WHERE problem_id = $1', [
-          problemId,
-        ]);
-        await db.query('DELETE FROM problems WHERE id = $1', [problemId]);
-      }
-      if (userIds.length)
-        await db.query('DELETE FROM users WHERE id = ANY($1::uuid[])', [
-          userIds,
-        ]);
-    } finally {
-      if (app) await app.close();
-    }
+    await closeApp(app, jobs);
   });
 });

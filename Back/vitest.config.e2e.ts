@@ -1,17 +1,5 @@
 import { defineConfig } from 'vitest/config';
-
-const databaseUrl = process.env.DATABASE_URL;
-const databaseName = process.env.UNSOLVABLE_TEST_DATABASE;
-if (
-  !databaseUrl ||
-  !databaseName ||
-  !/^unsolvable_integration_[a-f0-9]{32}$/.test(databaseName) ||
-  new URL(databaseUrl).pathname !== `/${databaseName}`
-) {
-  throw new Error(
-    'Use npm run test:e2e or test:pipeline to create a disposable database.',
-  );
-}
+import { integrationDatabaseUrl } from './scripts/run-integration.mjs';
 
 export default defineConfig({
   resolve: { tsconfigPaths: true },
@@ -21,7 +9,7 @@ export default defineConfig({
     include: ['**/*.e2e-spec.ts'],
     env: {
       NODE_ENV: 'test',
-      DATABASE_URL: databaseUrl,
+      DATABASE_URL: integrationDatabaseUrl(),
       REDIS_HOST: process.env.REDIS_HOST ?? 'localhost',
       REDIS_PORT: process.env.REDIS_PORT ?? '6379',
       REDIS_DB: process.env.REDIS_DB ?? '1',

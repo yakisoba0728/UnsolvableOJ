@@ -6,10 +6,7 @@ import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { DataSource } from 'typeorm';
 import { databaseConnectionOptions } from '../src/config/database.config.js';
-import { InitialSchema1726916400000 } from '../src/database/migrations/1726916400000-initial-schema.js';
-import { BackendFoundations1790550000000 } from '../src/database/migrations/1790550000000-backend-foundations.js';
-import { DebugOutputs1790552000000 } from '../src/database/migrations/1790552000000-debug-outputs.js';
-import { SubmissionXpEvidence1790553000000 } from '../src/database/migrations/1790553000000-submission-xp-evidence.js';
+import configured from '../src/database/data-source.js';
 import { PasswordHasher } from '../src/modules/auth/password-hasher.service.js';
 
 const execFile = promisify(execFileCallback);
@@ -46,7 +43,7 @@ describe('BOJ import and demo seed CLIs (isolated schema)', () => {
       type: 'postgres',
       ...databaseConnectionOptions(url.href, process.env.DATABASE_SSL === 'true'),
       schema,
-      migrations: [InitialSchema1726916400000, BackendFoundations1790550000000, DebugOutputs1790552000000, SubmissionXpEvidence1790553000000],
+      migrations: configured.options.migrations,
     }).initialize();
     expect((await db.query('SELECT current_schema() AS name'))[0].name).toBe(schema);
     await db.runMigrations();
