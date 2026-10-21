@@ -13,12 +13,9 @@ interface Activity {
   answers: CommunityAnswer[];
   /** 추천한 글·답변 id */
   upvoted: string[];
-  saved: string[];
   followed: string[];
   /** 게시글 id → 채택한 답변 id (사용자가 바꾼 값만) */
   accepted: Record<string, string | null>;
-  /** 삭제한 글 id (샘플 글처럼 저장소에 없는 글을 숨기는 데도 쓴다) */
-  deleted: string[];
 }
 
 const storageKey = "unsolvable-oj-community-v1";
@@ -29,12 +26,11 @@ const empty: Activity = {
   posts: [],
   answers: [],
   upvoted: [],
-  saved: [],
   followed: [],
   accepted: {},
-  deleted: [],
 };
 
+// 예전 기록에 남은 saved·deleted 키는 읽어도 쓰지 않는다.
 function load(strict = false, raw?: string | null): Activity {
   try {
     const saved = raw === undefined ? localStorage.getItem(storageKey) : raw;
@@ -97,12 +93,8 @@ const toggle = (list: string[], id: string) =>
   list.includes(id) ? list.filter((value) => value !== id) : [...list, id];
 
 function requirePost(activity: Activity, postId: string) {
-  if (
-    activity.deleted.includes(postId) ||
-    !activity.posts.some((post) => post.id === postId)
-  ) {
+  if (!activity.posts.some((post) => post.id === postId))
     throw new Error("글이 삭제되었거나 존재하지 않아요.");
-  }
 }
 
 export const communityActions = {
@@ -180,17 +172,11 @@ export const communityActions = {
         upvoted: current.upvoted.filter(
           (id) => id !== postId && !answerIds.includes(id),
         ),
-        saved: current.saved.filter((id) => id !== postId),
-        deleted: current.deleted.includes(postId)
-          ? current.deleted
-          : [...current.deleted, postId],
       };
     });
   },
   toggleUpvote: (id: string) =>
     commit((current) => ({ ...current, upvoted: toggle(current.upvoted, id) })),
-  toggleSaved: (id: string) =>
-    commit((current) => ({ ...current, saved: toggle(current.saved, id) })),
   toggleFollow: (name: string) =>
     commit((current) => ({ ...current, followed: toggle(current.followed, name) })),
   setAccepted: (postId: string, answerId: string | null) =>
@@ -200,8 +186,7 @@ export const communityActions = {
     })),
 };
 
-export const allPosts = (activity: Activity) =>
-  activity.posts.filter((post) => !activity.deleted.includes(post.id));
+export const allPosts = (activity: Activity) => activity.posts;
 
 export const answersOf = (activity: Activity, postId: string) =>
   activity.answers.filter((answer) => answer.postId === postId);
@@ -216,7 +201,6 @@ export const upvoteCount = (activity: Activity, id: string, base: number) =>
 
 export function statsOf(activity: Activity, name: string): AuthorStats {
   return {
-    reputation: 0,
     acceptedAnswers: activity.answers.filter(
       (answer) =>
         answer.author.name === name &&
@@ -239,66 +223,46 @@ export interface PostDraft {
 const postDraftKey = (ownerId: string, postId?: string) =>
   `${draftKey}:${encodeURIComponent(ownerId)}:${postId ? `edit:${encodeURIComponent(postId)}` : "new"}`;
 
-export function readDraft(ownerId: string, postId?: string): PostDraft | null {
-  if (!ownerId) return null;
+/** 계정이 없거나 저장소를 쓸 수 없으면(쿠키 차단·용량 초과) fallback을 돌려준다. */
+function ownedStorage<T>(ownerId: string, fallback: T, run: () => T): T {
+  if (!ownerId) return fallback;
   try {
+    return run();
+  } catch {
+    return fallback;
+  }
+}
+
+export const readDraft = (ownerId: string, postId?: string) =>
+  ownedStorage<PostDraft | null>(ownerId, null, () => {
     const raw = localStorage.getItem(postDraftKey(ownerId, postId));
     return raw ? (JSON.parse(raw) as PostDraft) : null;
-  } catch {
-    return null;
-  }
-}
+  });
 
-export function writeDraft(
-  ownerId: string,
-  draft: PostDraft,
-  postId?: string,
-): boolean {
-  if (!ownerId) return false;
-  try {
+export const writeDraft = (ownerId: string, draft: PostDraft, postId?: string) =>
+  ownedStorage(ownerId, false, () => {
     localStorage.setItem(postDraftKey(ownerId, postId), JSON.stringify(draft));
     return true;
-  } catch {
-    return false;
-  }
-}
+  });
 
-export function clearDraft(ownerId: string, postId?: string): boolean {
-  if (!ownerId) return false;
-  try {
+export const clearDraft = (ownerId: string, postId?: string) =>
+  ownedStorage(ownerId, false, () => {
     localStorage.removeItem(postDraftKey(ownerId, postId));
     return true;
-  } catch {
-    return false;
-  }
-}
+  });
 
 const answerDraftKey = (ownerId: string, postId: string) =>
   `unsolvable-oj-community-answer-draft-v2:${encodeURIComponent(ownerId)}:${encodeURIComponent(postId)}`;
 
-export function readAnswerDraft(ownerId: string, postId: string): string {
-  if (!ownerId) return "";
-  try {
-    return localStorage.getItem(answerDraftKey(ownerId, postId)) ?? "";
-  } catch {
-    return "";
-  }
-}
+export const readAnswerDraft = (ownerId: string, postId: string) =>
+  ownedStorage(ownerId, "", () => localStorage.getItem(answerDraftKey(ownerId, postId)) ?? "");
 
-export function writeAnswerDraft(
-  ownerId: string,
-  postId: string,
-  text: string,
-): boolean {
-  if (!ownerId) return false;
-  try {
+export const writeAnswerDraft = (ownerId: string, postId: string, text: string) =>
+  ownedStorage(ownerId, false, () => {
     if (text) localStorage.setItem(answerDraftKey(ownerId, postId), text);
     else localStorage.removeItem(answerDraftKey(ownerId, postId));
     return true;
-  } catch {
-    return false;
-  }
-}
+  });
 
 /** "2시간 전" · "어제" · "3개월 전" 같은 상대 시각(항상 상대 표기로 통일) */
 export function relativeTime(iso: string) {
