@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { verdictLabel } from "../verdict";
 import { api, ApiError } from "../api";
-import type { Session, Submission } from "../types";
+import { LANGUAGE_LABELS, type Session, type Submission } from "../types";
 
 /** Match the runner's bytes.rstrip(): only trailing ASCII whitespace is ignored. */
 const normalizeOutput = (text: string) => text.replace(/[\t\n\v\f\r ]+$/, "");
@@ -128,7 +128,7 @@ export function ResultSummary({ submission }: { submission: Submission }) {
       <div className="result-stats">
         <div>
           <small>언어</small>
-          <strong>{submission.language}</strong>
+          <strong>{LANGUAGE_LABELS[submission.language] ?? submission.language}</strong>
         </div>
         <div>
           <small>실행 시간</small>

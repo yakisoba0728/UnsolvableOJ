@@ -44,7 +44,13 @@ import {
   resetSourceDraft,
   writeSourceDraft,
 } from "../editor/sourceDrafts";
-import type { Language, Page, Problem, Submission } from "../types";
+import {
+  LANGUAGE_LABELS,
+  type Language,
+  type Page,
+  type Problem,
+  type Submission,
+} from "../types";
 import { problemPath } from "../paths";
 import {
   DEFAULT_SPLIT,
@@ -926,7 +932,7 @@ export function ProblemPage() {
                           {verdictLabel(item.status)}
                         </span>
                         <span>
-                          {item.language} ·{" "}
+                          {LANGUAGE_LABELS[item.language] ?? item.language} ·{" "}
                           {new Date(item.createdAt).toLocaleString("ko-KR")}
                         </span>
                         <span className="muted">

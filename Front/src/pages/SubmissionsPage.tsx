@@ -8,18 +8,7 @@ import { Pagination } from "../components/Pagination";
 import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
 import { Skeleton, SkeletonRows } from "../components/Skeleton";
-import type { Submission } from "../types";
-
-const languageLabels: Record<string, string> = {
-  C: "C",
-  CPP: "C++",
-  JAVA: "Java",
-  PYTHON: "Python",
-  JAVASCRIPT: "JavaScript",
-  TYPESCRIPT: "TypeScript",
-  GO: "Go",
-  RUST: "Rust",
-};
+import { LANGUAGE_LABELS, type Submission } from "../types";
 
 const PAGE_SIZE = 20;
 
@@ -191,7 +180,7 @@ export function SubmissionsPage() {
               { value: "", label: "모든 언어" },
               ...languages.map((value) => ({
                 value,
-                label: languageLabels[value] ?? value,
+                label: LANGUAGE_LABELS[value] ?? value,
               })),
             ]}
             onChange={(next) => update({ l: next || null })}
@@ -263,7 +252,7 @@ export function SubmissionsPage() {
                 {verdictLabel(item.status)}
               </span>
               <span className="history-lang">
-                {languageLabels[item.language] ?? item.language}
+                {LANGUAGE_LABELS[item.language] ?? item.language}
               </span>
               <span className="history-tests" data-label="테스트">
                 {item.passedTestCases}/{item.totalTestCases}

@@ -15,21 +15,15 @@ import {
 } from "../hooks";
 import { PostScroller } from "../components/PostScroller";
 import { allPosts, useActivity } from "../community/store";
-import type { RankingEntry, UserProfile } from "../types";
+import {
+  LANGUAGE_LABELS,
+  type RankingEntry,
+  type UserProfile,
+} from "../types";
 import { difficultyOptions } from "../difficulty";
 
 const WEEKS_WIDE = 16;
 const WEEKS_NARROW = 12;
-const languageLabels: Record<string, string> = {
-  C: "C",
-  CPP: "C++",
-  JAVA: "Java",
-  PYTHON: "Python",
-  JAVASCRIPT: "JavaScript",
-  TYPESCRIPT: "TypeScript",
-  GO: "Go",
-  RUST: "Rust",
-};
 /** 다른 사용자들이 많이 쓰는 순서. 내가 쓰지 않은 언어는 이 순서로 0%를 채운다. */
 const popularLanguages = [
   "PYTHON",
@@ -425,7 +419,7 @@ export function ProfilePage() {
                   <li key={language}>
                     <div className="lang-row">
                       <span className="lang-name">
-                        {languageLabels[language] ?? language}
+                        {LANGUAGE_LABELS[language] ?? language}
                       </span>
                       <span className="muted">{percent}%</span>
                     </div>

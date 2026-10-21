@@ -417,6 +417,39 @@ test("Ctrl/⌘+Enter pressed twice creates only one submission", async ({
   expect(posts).toBe(1);
 });
 
+test("the solve page history and the result summary show language names, not codes", async ({
+  page,
+}) => {
+  await authenticate(page);
+  const submission = {
+    id: "cpp-result",
+    problem: { id: problem.id, slug: problem.slug, title: problem.title },
+    language: "CPP",
+    status: "ACCEPTED",
+    runtimeMs: 3,
+    memoryKb: 1024,
+    passedTestCases: 1,
+    totalTestCases: 1,
+    compileOutput: null,
+    judgeMessage: null,
+    createdAt: problem.createdAt,
+    updatedAt: problem.createdAt,
+  };
+  await page.route("**/api/v1/submissions?**", (route) =>
+    route.fulfill({ json: { items: [submission], page: 1, limit: 20, total: 1, totalPages: 1 } }),
+  );
+  await page.route("**/api/v1/submissions/cpp-result", (route) =>
+    route.fulfill({ json: submission }),
+  );
+  await page.goto("/problems/view/sum");
+  await page.getByRole("tab", { name: "제출 내역" }).click();
+  await expect(page.locator(".history-list")).toContainText("C++ ·");
+  await expect(page.locator(".history-list")).not.toContainText("CPP");
+  await page.goto("/submissions/cpp-result");
+  await expect(page.locator(".result-stats")).toContainText("C++");
+  await expect(page.locator(".result-stats")).not.toContainText("CPP");
+});
+
 test("Ctrl/⌘+Enter does not submit whitespace-only code", async ({ page }) => {
   await authenticate(page);
   let posts = 0;

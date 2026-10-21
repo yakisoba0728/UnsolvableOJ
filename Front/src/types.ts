@@ -10,6 +10,17 @@ export const LANGUAGES = [
   "RUST",
 ] as const;
 export type Language = (typeof LANGUAGES)[number];
+/** 언어 코드(서버 값)를 화면 이름으로. 모르는 코드는 호출하는 쪽에서 그대로 보여 준다. */
+export const LANGUAGE_LABELS: Record<string, string> = {
+  C: "C",
+  CPP: "C++",
+  JAVA: "Java",
+  PYTHON: "Python",
+  JAVASCRIPT: "JavaScript",
+  TYPESCRIPT: "TypeScript",
+  GO: "Go",
+  RUST: "Rust",
+};
 export type Role = "USER" | "AUTHOR" | "ADMIN";
 
 export interface User {
