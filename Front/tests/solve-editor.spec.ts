@@ -406,6 +406,36 @@ test.describe("Tab indentation is removed one level at a time, typed spaces one 
   });
 });
 
+test("a server failure is not reported as a missing problem; only 404 is", async ({
+  page,
+}) => {
+  await page.route("**/api/v1/problems/by-slug/down", (route) =>
+    route.fulfill({ status: 503, json: { message: "점검 중입니다." } }),
+  );
+  await page.route("**/api/v1/problems/by-slug/gone", (route) =>
+    route.fulfill({ status: 404, json: { message: "Not Found" } }),
+  );
+  await page.goto("/problems/view/down");
+  await expect(page.getByRole("alert")).toContainText("문제를 불러오지 못했어요");
+  await expect(page.getByRole("alert")).toContainText("점검 중입니다.");
+  await page.goto("/problems/view/gone");
+  await expect(page.getByRole("alert")).toContainText("문제를 찾을 수 없어요");
+  await expect(page.getByRole("alert")).not.toContainText("Not Found");
+});
+
+test("a failed submission history load shows an error, not an empty history", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.route("**/api/v1/submissions?**", (route) =>
+    route.fulfill({ status: 500, json: { message: "Internal" } }),
+  );
+  await page.goto("/problems/view/sum");
+  await page.getByRole("tab", { name: "제출 내역" }).click();
+  await expect(page.getByRole("alert")).toContainText("제출 내역을 불러오지 못했어요");
+  await expect(page.getByText("아직 이 문제를 제출하지 않았습니다")).toHaveCount(0);
+});
+
 test.describe("code editor basics on the solve page", () => {
   test("switching languages immediately keeps each language's latest draft", async ({
     page,

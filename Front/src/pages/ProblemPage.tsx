@@ -5,7 +5,7 @@ import { Select } from "../components/Select";
 import { ProblemMarkdown } from "../components/ProblemMarkdown";
 import { Link, useParams } from "react-router-dom";
 import { Skeleton, SkeletonRegion } from "../components/Skeleton";
-import { api } from "../api";
+import { api, ApiError } from "../api";
 import { useAuth } from "../auth";
 import {
   CaseResults,
@@ -192,6 +192,7 @@ export function ProblemPage() {
   });
   const [tab, setTab] = useState<Tab>("statement");
   const [history, setHistory] = useState<Submission[] | null>(null);
+  const [historyFailed, setHistoryFailed] = useState(false);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   // 불러온 초안은 저장 시각을 모른다(이번에 저장하기 전까지 시각 없이 표시).
   const [draftLoaded, setDraftLoaded] = useState(false);
@@ -348,6 +349,7 @@ export function ProblemPage() {
     if (tab !== "history" || !session || !problem) return;
     const controller = new AbortController();
     setHistory(null);
+    setHistoryFailed(false);
     api<Page<Submission>>(
       `/submissions?problemId=${problem.id}&page=1&limit=20`,
       { signal: controller.signal },
@@ -355,7 +357,7 @@ export function ProblemPage() {
     )
       .then((data) => setHistory(data.items))
       .catch(() => {
-        if (!controller.signal.aborted) setHistory([]);
+        if (!controller.signal.aborted) setHistoryFailed(true);
       });
     return () => controller.abort();
   }, [tab, session, problem, finishedId]);
@@ -371,7 +373,11 @@ export function ProblemPage() {
     })
       .then(setProblem)
       .catch((cause) => {
-        if (!controller.signal.aborted)
+        // 404만 '없는 문제'(오류 없이 빈 문제)로 두고, 나머지 실패는 이유를 보여 준다.
+        if (
+          !controller.signal.aborted &&
+          !(cause instanceof ApiError && cause.status === 404)
+        )
           setError(
             cause instanceof Error
               ? cause.message
@@ -432,11 +438,11 @@ export function ProblemPage() {
   if (error || !problem)
     return (
       <div className="page-width empty-state not-found-state" role="alert">
-        <strong>문제를 찾을 수 없어요</strong>
+        <strong>
+          {error ? "문제를 불러오지 못했어요" : "문제를 찾을 수 없어요"}
+        </strong>
         <p>
-          {error && !error.includes("찾을 수 없")
-            ? error
-            : "주소가 바뀌었거나 아직 공개되지 않은 문제일 수 있어요."}
+          {error || "주소가 바뀌었거나 아직 공개되지 않은 문제일 수 있어요."}
         </p>
         <Link className="button" to="/problems">
           문제 목록으로
@@ -884,6 +890,10 @@ export function ProblemPage() {
               {!session ? (
                 <p className="muted">
                   로그인하면 이 문제의 제출 내역이 여기에 표시됩니다.
+                </p>
+              ) : historyFailed ? (
+                <p className="error-message" role="alert">
+                  제출 내역을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
                 </p>
               ) : history === null ? (
                 <SkeletonRegion label="제출 내역을 불러오는 중입니다">
