@@ -18,7 +18,7 @@ function wait(ms: number, signal: AbortSignal): Promise<void> {
   });
 }
 
-/** Read every advertised page; never report a truncated list as complete. */
+/** 서버가 알려 준 모든 페이지를 읽는다. 일부만 받은 목록을 전체인 것처럼 돌려주지 않는다. */
 export async function fetchAll<T>(
   path: string,
   signal: AbortSignal,
@@ -77,7 +77,7 @@ export async function fetchAll<T>(
     }
     if (cursor !== undefined)
       throw new Error("목록 커서 정보를 확인할 수 없습니다.");
-    // shortcut: offset pages can shift during writes; stable traversal needs backend cursors.
+    // shortcut: 오프셋 페이지는 읽는 사이 항목이 추가·삭제되면 밀릴 수 있다. 안정적으로 순회하려면 백엔드 커서가 필요하다.
     if (data.items.length === 0 && page < data.totalPages)
       throw new Error("목록 일부를 불러오지 못했습니다. 다시 시도해 주세요.");
     if (page >= data.totalPages) return items;

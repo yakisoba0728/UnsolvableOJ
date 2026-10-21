@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { verdictLabel } from "../verdict";
-import { useDocumentTitle } from "../hooks";
+import { savedTime, useDocumentTitle } from "../hooks";
 import { Select } from "../components/Select";
 import { ProblemMarkdown } from "../components/ProblemMarkdown";
 import { Link, useParams } from "react-router-dom";
@@ -294,7 +294,6 @@ export function ProblemPage() {
       restored,
     );
     unitsBaseRef.current = restored;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [problem?.id, language]);
 
   // 문제는 새 탭으로 열린다. 각 탭은 열린 시점의 초안만 가져오고, 같은 문제의 다른 탭과 실시간으로 동기화하지 않는다.
@@ -336,7 +335,6 @@ export function ProblemPage() {
     } catch {
       /* 저장할 수 없어도 편집은 그대로 동작한다 */
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source]);
 
   // 문제나 언어가 바뀌면 진행 중이던 스니펫 칸 이동을 끝낸다.
@@ -589,7 +587,7 @@ export function ProblemPage() {
   /** 계산한 편집 결과를 입력창에 적용한다(실행 취소가 유지되도록 브라우저 편집 명령을 우선 쓴다). */
   function applyEdit(target: HTMLTextAreaElement, next: EditState) {
     if (!applyToTextarea(target, next)) {
-      // Mirror reconciliation reads the DOM again in the same input event.
+      // 미러 칸 맞추기가 같은 입력 이벤트 안에서 DOM을 다시 읽으므로 값을 바로 넣는다.
       target.value = next.value;
       target.setSelectionRange(next.start, next.end);
       updateSource(next.value);
@@ -987,7 +985,7 @@ export function ProblemPage() {
               {saveFailed
                 ? "초안을 읽거나 저장하지 못했어요. 현재 내용은 메모리에만 남아 새로고침 후 복구되지 않을 수 있어요."
                 : savedAt
-                  ? `초안 저장됨 · ${savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
+                  ? `초안 저장됨 · ${savedTime(savedAt)}`
                   : draftLoaded
                     ? "저장된 초안을 불러왔어요"
                     : "자동 저장 대기"}

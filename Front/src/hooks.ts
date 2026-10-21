@@ -1,9 +1,14 @@
-import { useEffect, useState, type RefObject } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type DependencyList,
+  type RefObject,
+} from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "./api";
 import { fetchAll } from "./pagination";
 import { DIFFICULTIES } from "./difficulty";
-export { fetchAll } from "./pagination";
 import type {
   ProblemSummary,
   RankingEntry,
@@ -12,87 +17,72 @@ import type {
   UserProfile,
 } from "./types";
 
-/** 공개 문제 전체. 서버에 검색 API가 없어 목록·검색·필터를 클라이언트에서 처리한다. */
-export function useAllProblems() {
-  const [problems, setProblems] = useState<ProblemSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+/** load가 있으면 요청해 결과·로딩·오류를 돌려준다. deps가 바뀌면 이전 요청을 취소하고 다시 받는다. */
+function useRequest<T>(
+  load: ((signal: AbortSignal) => Promise<T>) | null,
+  initial: T,
+  failure: string,
+  deps: DependencyList,
+) {
+  const [data, setData] = useState(initial);
+  const [loading, setLoading] = useState(Boolean(load));
   const [error, setError] = useState("");
-
   useEffect(() => {
-    const controller = new AbortController();
-    setLoading(true);
+    setData(initial);
     setError("");
-    fetchAll<ProblemSummary>("/problems", controller.signal)
-      .then((items) => {
-        if (!controller.signal.aborted) setProblems(items);
+    setLoading(Boolean(load));
+    if (!load) return;
+    const controller = new AbortController();
+    load(controller.signal)
+      .then((value) => {
+        if (!controller.signal.aborted) setData(value);
       })
       .catch((cause) => {
         if (!controller.signal.aborted)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "문제를 불러오지 못했습니다.",
-          );
+          setError(cause instanceof Error ? cause.message : failure);
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, []);
+  }, deps);
+  return { data, loading, error };
+}
 
+/** 공개 문제 전체. 서버에 검색 API가 없어 목록·검색·필터를 클라이언트에서 처리한다. */
+export function useAllProblems() {
+  const { data: problems, loading, error } = useRequest(
+    (signal) => fetchAll<ProblemSummary>("/problems", signal),
+    [],
+    "문제를 불러오지 못했습니다.",
+    [],
+  );
   return { problems, loading, error };
 }
 
-/** 내 제출 기록에서 해결/시도한 문제와 마지막 제출을 계산한다. */
+/** 내 제출 기록에서 해결/시도한 문제를 계산한다. */
 export function useSubmissionHistory(session: Session | null) {
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [loading, setLoading] = useState(Boolean(session));
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!session) {
-      setSubmissions([]);
-      setLoading(false);
-      setError("");
-      return;
-    }
-    const controller = new AbortController();
-    setLoading(true);
-    setSubmissions([]);
-    setError("");
-    fetchAll<Submission>("/submissions", controller.signal, session.accessToken)
-      .then((items) => {
-        if (!controller.signal.aborted) setSubmissions(items);
-      })
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "제출 기록을 불러오지 못했습니다.",
-          );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, [session]);
-
+  const { data: submissions, loading, error } = useRequest(
+    session
+      ? (signal) =>
+          fetchAll<Submission>("/submissions", signal, session.accessToken)
+      : null,
+    [],
+    "제출 기록을 불러오지 못했습니다.",
+    [session],
+  );
   const solved = new Set<string>();
   const attempted = new Set<string>();
   for (const item of submissions) {
     attempted.add(item.problem.id);
     if (item.status === "ACCEPTED") solved.add(item.problem.id);
   }
-  return {
-    submissions,
-    solved,
-    attempted,
-    latest: submissions[0] ?? null,
-    loading,
-    error,
-  };
+  return { submissions, solved, attempted, loading, error };
 }
+
+/** 임시 저장 시각을 "오후 03:12"처럼 보여 준다. */
+export const savedTime = (at: Date | number) =>
+  new Date(at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
 
 export function dayKey(date: Date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
@@ -134,65 +124,34 @@ export function solvedToday(submissions: Submission[]) {
   ).size;
 }
 
-/** 내 프로필과 전체 랭킹 순위. */
+/** 내 프로필과 전체 랭킹·내 순위. 랭킹은 홈의 랭킹 카드를 위해 로그인하지 않아도 받는다. */
 export function useMyStanding(session: Session | null) {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [rank, setRank] = useState(-1);
-  const [profileLoading, setProfileLoading] = useState(Boolean(session));
-  const [rankLoading, setRankLoading] = useState(Boolean(session));
-  const [profileError, setProfileError] = useState("");
-  const [rankError, setRankError] = useState("");
-
-  useEffect(() => {
-    setProfile(null);
-    setRank(-1);
-    setProfileError("");
-    setRankError("");
-    setProfileLoading(Boolean(session));
-    setRankLoading(Boolean(session));
-    if (!session) {
-      return;
-    }
-    const controller = new AbortController();
-    api<UserProfile>(
-      "/users/me",
-      { signal: controller.signal },
-      session.accessToken,
-    )
-      .then((me) => {
-        if (!controller.signal.aborted) setProfile(me);
-      })
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setProfileError(
-            cause instanceof Error
-              ? cause.message
-              : "프로필을 불러오지 못했습니다.",
-          );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setProfileLoading(false);
-      });
-    api<RankingEntry[]>("/rankings", { signal: controller.signal })
-      .then((rankings) => {
-        if (!controller.signal.aborted)
-          setRank(rankings.findIndex((entry) => entry.id === session.user.id));
-      })
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setRankError(
-            cause instanceof Error
-              ? cause.message
-              : "순위를 불러오지 못했습니다.",
-          );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setRankLoading(false);
-      });
-    return () => controller.abort();
-  }, [session]);
-
-  return { profile, rank, profileLoading, rankLoading, profileError, rankError };
+  const profile = useRequest(
+    session
+      ? (signal) =>
+          api<UserProfile>("/users/me", { signal }, session.accessToken)
+      : null,
+    null,
+    "프로필을 불러오지 못했습니다.",
+    [session],
+  );
+  const rankings = useRequest(
+    (signal) => api<RankingEntry[]>("/rankings", { signal }),
+    [],
+    "랭킹을 불러오지 못했습니다.",
+    [session],
+  );
+  return {
+    profile: profile.data,
+    rankings: rankings.data,
+    rank: session
+      ? rankings.data.findIndex((entry) => entry.id === session.user.id)
+      : -1,
+    profileLoading: profile.loading,
+    rankLoading: rankings.loading,
+    profileError: profile.error,
+    rankError: rankings.error,
+  };
 }
 
 /**
@@ -214,6 +173,74 @@ export function useFlashNotice() {
     });
   }, [state, location.pathname, location.search, location.hash, navigate]);
   return [notice, setNotice] as const;
+}
+
+/**
+ * 목록 조건(검색어 q·쪽 page 등)을 URL에 저장한다. 뒤로 가도 같은 목록이 복원되고 주소를 공유할 수 있다.
+ * 검색어는 입력은 즉시 반영하고 URL에는 잠시 멈춘 뒤 저장한다(한글 입력 중 끊김 방지).
+ * hold가 참을 돌려주는 입력은 아직 URL에 쓰지 않는다.
+ */
+export function useUrlFilters(hold?: (text: string) => boolean) {
+  const [params, setParams] = useSearchParams();
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
+  const urlQuery = params.get("q") ?? "";
+  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
+
+  /** 빈 값은 지우고, 배열은 같은 키를 반복해 쓴다. 조건이 바뀌면 첫 쪽으로 돌아간다. */
+  function update(
+    patch: Record<string, string | string[] | null>,
+    { resetPage = true }: { resetPage?: boolean } = {},
+  ) {
+    const next = new URLSearchParams(paramsRef.current);
+    for (const [key, value] of Object.entries(patch)) {
+      next.delete(key);
+      if (Array.isArray(value)) value.forEach((item) => next.append(key, item));
+      else if (value) next.set(key, value);
+    }
+    if (resetPage && !("page" in patch)) next.delete("page");
+    paramsRef.current = next;
+    setParams(next, { replace: true });
+  }
+
+  const [queryText, setQueryText] = useState(urlQuery);
+  const lastWritten = useRef(urlQuery);
+  useEffect(() => {
+    if (urlQuery !== lastWritten.current) {
+      lastWritten.current = urlQuery;
+      setQueryText(urlQuery);
+    }
+  }, [urlQuery]);
+  useEffect(() => {
+    if (queryText === urlQuery || hold?.(queryText)) return;
+    // 다듬지 않고 저장한다: 주소 값이 입력칸으로 되돌아오므로 다듬으면 입력 중인 공백이 사라진다.
+    const timer = setTimeout(() => {
+      lastWritten.current = queryText;
+      update({ q: queryText || null });
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [queryText, urlQuery]);
+
+  return { params, update, urlQuery, queryText, setQueryText, page };
+}
+
+/** "/" 키로 검색창에 바로 이동한다(LeetCode·GitHub 방식). 다른 칸에 입력 중일 때는 가로채지 않는다. */
+export function useSlashFocus(ref: RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const typing =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target?.isContentEditable;
+      if (event.key !== "/" || typing || event.metaKey || event.ctrlKey) return;
+      event.preventDefault();
+      ref.current?.focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [ref]);
 }
 
 /** 탭·히스토리·공유에서 화면을 구분하도록 페이지별 제목을 설정한다. 제목이 없으면 기본 제목. */

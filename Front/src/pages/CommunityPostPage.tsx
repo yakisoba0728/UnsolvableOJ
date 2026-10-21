@@ -50,7 +50,6 @@ export function CommunityPostPage() {
       : "";
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
-  const [pending, setPending] = useState(false);
   const [notice, setNotice] = useFlashNotice();
   const [answersOpen, setAnswersOpen] = useState(false);
   const editorRef = useRef<HTMLTextAreaElement>(null);
@@ -141,14 +140,13 @@ export function CommunityPostPage() {
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending || !me) return;
+    if (!me) return;
     const body = draft.trim();
     if (body.length < MIN_ANSWER) {
       setError(`답변을 ${MIN_ANSWER}자 이상 입력해 주세요.`);
       editorRef.current?.focus();
       return;
     }
-    setPending(true);
     setError("");
     try {
       const answer = communityActions.addAnswer(post!.id, body, me);
@@ -168,8 +166,6 @@ export function CommunityPostPage() {
       setError(
         "답변을 저장하지 못했어요. 입력한 내용과 초안을 유지했으니 다시 시도해 주세요.",
       );
-    } finally {
-      setPending(false);
     }
   }
 
@@ -223,11 +219,7 @@ export function CommunityPostPage() {
                 <span className="post-author-text">
                   <strong>{post.author.name}</strong>
                   <span className="muted">
-                    {post.author.tier}
-                    {authorStats.reputation
-                      ? ` · 명성 ${authorStats.reputation.toLocaleString()}`
-                      : ""}{" "}
-                    · {relativeTime(post.createdAt)}
+                    {post.author.tier} · {relativeTime(post.createdAt)}
                   </span>
                   <small className="muted">
                     채택 답변 {authorStats.acceptedAnswers} · 작성 글{" "}
@@ -317,9 +309,7 @@ export function CommunityPostPage() {
                     <span className="muted">
                       등록 전까지 작성 내용을 유지합니다.
                     </span>
-                    <button className="button" disabled={pending}>
-                      {pending ? "등록 중…" : "답변 등록"}
-                    </button>
+                    <button className="button">답변 등록</button>
                   </div>
                 </>
               ) : (

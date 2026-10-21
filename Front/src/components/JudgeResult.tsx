@@ -3,7 +3,7 @@ import { verdictLabel } from "../verdict";
 import { api, ApiError } from "../api";
 import { LANGUAGE_LABELS, type Session, type Submission } from "../types";
 
-/** Match the runner's bytes.rstrip(): only trailing ASCII whitespace is ignored. */
+/** 채점기의 bytes.rstrip()과 맞춘다: 끝에 붙은 ASCII 공백만 무시한다. */
 const normalizeOutput = (text: string) => text.replace(/[\t\n\v\f\r ]+$/, "");
 
 function IoBlock({

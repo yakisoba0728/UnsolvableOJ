@@ -16,7 +16,7 @@ interface SavedSession {
   expiresAt: number;
 }
 
-// Reads cannot safely delete an expired value: another tab may replace it mid-read.
+// 읽는 쪽에서 만료된 값을 지우지 않는다: 읽는 사이 다른 탭이 새 값으로 바꿨을 수 있다.
 function storedSession(): SavedSession | null {
   try {
     const raw = localStorage.getItem(storageKey);
@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!saved) return;
     const timer = setTimeout(
       () => {
-        // A newer tab may have replaced this session before its storage event arrives.
+        // storage 이벤트가 오기 전에 다른 탭이 새 세션으로 바꿨을 수 있어 저장소를 다시 읽는다.
         updateSession(storedSession());
       },
       Math.min(2_147_483_647, Math.max(0, saved.expiresAt - Date.now())),
@@ -107,6 +107,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     </AuthContext.Provider>
   );
 }
+
+/** 문제를 만들고 고칠 수 있는 계정(작성자·관리자)인지. */
+export const canAuthor = (session: Session | null) =>
+  session?.user.role === "AUTHOR" || session?.user.role === "ADMIN";
 
 export function useAuth() {
   const context = useContext(AuthContext);

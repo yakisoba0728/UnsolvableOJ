@@ -210,6 +210,14 @@ test("my submissions can be searched, filtered and grouped by problem", async ({
   const rows = page.locator(".history-row");
   await expect(rows).toHaveCount(4);
 
+  // 다른 목록처럼 "/"로 검색창에 들어가고, 입력 중인 "/"는 글자로 남는다.
+  await page.keyboard.press("/");
+  const search = page.getByLabel("제출한 문제 검색");
+  await expect(search).toBeFocused();
+  await page.keyboard.press("/");
+  await expect(search).toHaveValue("/");
+  await search.fill("");
+
   // 테스트 케이스 결과는 제목 아래가 아니라 '테스트' 열에 N/N 으로만 보이고, 끝 화살표는 없다.
   await expect(page.locator(".history-head")).toContainText("테스트");
   await expect(rows.first().locator(".history-tests")).toHaveText(/^\d+\/\d+$/);

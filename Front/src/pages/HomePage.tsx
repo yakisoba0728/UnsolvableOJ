@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { api } from "../api";
 import { useAuth } from "../auth";
 import { ProblemStatus, solveState } from "../components/ProblemStatus";
 import { PageHeader } from "../components/PageHeader";
@@ -14,66 +12,32 @@ import {
   submissionsByDay,
   useDocumentTitle,
   useAllProblems,
+  useMyStanding,
   useSubmissionHistory,
 } from "../hooks";
-import { LANGUAGES, type RankingEntry, type UserProfile } from "../types";
+import { LANGUAGES } from "../types";
 import { problemPath } from "../paths";
 import { difficultyLabel } from "../difficulty";
 
 export function HomePage() {
   const { session } = useAuth();
   useDocumentTitle();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [rankings, setRankings] = useState<RankingEntry[]>([]);
-  const [rankError, setRankError] = useState("");
-  const [rankLoading, setRankLoading] = useState(true);
-  const [profileLoading, setProfileLoading] = useState(Boolean(session));
+  const {
+    profile,
+    rankings,
+    rank: myRank,
+    profileLoading,
+    rankLoading,
+    profileError,
+    rankError,
+  } = useMyStanding(session);
   const { problems, loading, error } = useAllProblems();
   const history = useSubmissionHistory(session);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    setRankError("");
-    setRankLoading(true);
-    api<RankingEntry[]>("/rankings", { signal: controller.signal })
-      .then(setRankings)
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setRankError(
-            cause instanceof Error
-              ? cause.message
-              : "랭킹을 불러오지 못했습니다.",
-          );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setRankLoading(false);
-      });
-    if (session) {
-      setProfileLoading(true);
-      api<UserProfile>(
-        "/users/me",
-        { signal: controller.signal },
-        session.accessToken,
-      )
-        .then(setProfile)
-        .catch(() => undefined)
-        .finally(() => {
-          if (!controller.signal.aborted) setProfileLoading(false);
-        });
-    } else {
-      setProfile(null);
-      setProfileLoading(false);
-    }
-    return () => controller.abort();
-  }, [session]);
 
   const dayCounts = submissionsByDay(history.submissions);
   const streak = streakDays(dayCounts);
   const todaySolved = solvedToday(history.submissions);
   const DAILY_GOAL = 1;
-  const myRank = session
-    ? rankings.findIndex((entry) => entry.id === session.user.id)
-    : -1;
   // 내가 6위 밖이면 상위 5명 + 내 순위, 그 외에는 상위 6명 (어느 쪽이든 6줄로 카드 높이를 맞춘다)
   const topRankings = rankings.slice(0, myRank >= 5 ? 5 : 6);
 
@@ -89,9 +53,9 @@ export function HomePage() {
         description="어제의 고민을 오늘의 실력으로 이어가세요."
       />
 
-      {error || rankError || history.error ? (
+      {error || profileError || rankError || history.error ? (
         <p className="error-message" role="alert">
-          {error || rankError || history.error}
+          {error || profileError || rankError || history.error}
         </p>
       ) : null}
 

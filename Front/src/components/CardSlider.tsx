@@ -5,7 +5,7 @@ interface CardSliderProps {
   description: string;
   /** 스크린리더용 슬라이더 이름 */
   label: string;
-  /** 화살표 버튼이 이동할 때마다 몇 장을 넘길지 정하는 데 쓰는 개수(카드 수가 바뀌면 다시 계산) */
+  /** 카드 수. 바뀌면 양 끝 흐림 표시를 다시 계산한다. */
   count: number;
   children: ReactNode;
 }

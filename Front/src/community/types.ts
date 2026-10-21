@@ -42,7 +42,6 @@ export interface CommunityAnswer {
 }
 
 export interface AuthorStats {
-  reputation: number;
   acceptedAnswers: number;
   posts: number;
 }

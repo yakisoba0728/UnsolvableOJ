@@ -1,4 +1,3 @@
-/** 채점 상태(서버 값)를 화면에 보여 줄 한국어 문구로 바꾼다. */
 const labels: Record<string, string> = {
   QUEUED: "채점 대기",
   JUDGING: "채점 중",

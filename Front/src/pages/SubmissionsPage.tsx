@@ -1,7 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { verdictLabel } from "../verdict";
-import { fetchAll, useDocumentTitle } from "../hooks";
-import { Link, useSearchParams } from "react-router-dom";
+import {
+  useDocumentTitle,
+  useSlashFocus,
+  useSubmissionHistory,
+  useUrlFilters,
+} from "../hooks";
+import { Link } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
@@ -29,15 +34,13 @@ const statusChips: { value: StatusGroup; label: string }[] = [
 export function SubmissionsPage() {
   useDocumentTitle("내 제출");
   const { session } = useAuth();
-  const [params, setParams] = useSearchParams();
-  const paramsRef = useRef(params);
-  paramsRef.current = params;
-  const [all, setAll] = useState<Submission[]>([]);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const { params, update, urlQuery, queryText, setQueryText, page } =
+    useUrlFilters();
+  // 서버가 문제명·판정·언어 검색을 지원하지 않아, 전체 이력을 받아 이 화면에서 거른다.
+  const { submissions: all, loading, error } = useSubmissionHistory(session);
   const searchRef = useRef<HTMLInputElement>(null);
+  useSlashFocus(searchRef);
 
-  const urlQuery = params.get("q") ?? "";
   const statuses = (params.get("s") ?? "")
     .split(",")
     .filter((value): value is StatusGroup =>
@@ -45,65 +48,6 @@ export function SubmissionsPage() {
     );
   const language = params.get("l") ?? "";
   const grouped = params.get("g") === "problem";
-  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
-
-  function update(
-    patch: Record<string, string | null>,
-    { resetPage = true }: { resetPage?: boolean } = {},
-  ) {
-    const next = new URLSearchParams(paramsRef.current);
-    for (const [key, value] of Object.entries(patch)) {
-      if (value === null || value === "") next.delete(key);
-      else next.set(key, value);
-    }
-    if (resetPage && !("page" in patch)) next.delete("page");
-    paramsRef.current = next;
-    setParams(next, { replace: true });
-  }
-
-  // 검색어: 입력은 즉시 반영하고 URL에는 잠시 멈춘 뒤 저장한다(한글 입력 중 끊김 방지)
-  const [queryText, setQueryText] = useState(urlQuery);
-  const lastWritten = useRef(urlQuery);
-  useEffect(() => {
-    if (urlQuery !== lastWritten.current) {
-      lastWritten.current = urlQuery;
-      setQueryText(urlQuery);
-    }
-  }, [urlQuery]);
-  useEffect(() => {
-    if (queryText === urlQuery) return;
-    const timer = setTimeout(() => {
-      lastWritten.current = queryText;
-      update({ q: queryText || null });
-    }, 250);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryText, urlQuery]);
-
-  // 서버가 문제명·판정·언어 검색을 지원하지 않아, 전체 이력을 받아 이 화면에서 거른다.
-  useEffect(() => {
-    if (!session) return;
-    const controller = new AbortController();
-    setLoading(true);
-    setAll([]);
-    setError("");
-    fetchAll<Submission>("/submissions", controller.signal, session.accessToken)
-      .then((items) => {
-        if (!controller.signal.aborted) setAll(items);
-      })
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "제출을 불러오지 못했습니다.",
-          );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, [session]);
 
   const keyword = urlQuery.trim().toLowerCase();
   const matchesBase = (item: Submission) =>
@@ -139,7 +83,6 @@ export function SubmissionsPage() {
       .filter((item) => !seen.has(item.problem.id) && seen.add(item.problem.id))
       .map((item) => ({ item, count: counts.get(item.problem.id) ?? 1 }));
     return { rows: latest, filteredCount: latest.length };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [all, statuses.join(","), language, keyword, grouped]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
@@ -169,6 +112,7 @@ export function SubmissionsPage() {
               className="search-input"
               placeholder="문제 제목 검색"
               aria-label="제출한 문제 검색"
+              aria-keyshortcuts="/"
               value={queryText}
               onChange={(event) => setQueryText(event.target.value)}
             />

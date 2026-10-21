@@ -112,6 +112,6 @@ export interface Page<T> {
   limit: number;
   total: number;
   totalPages: number;
-  /** Opaque continuation; null marks the end. Absent on legacy offset pages. */
+  /** 다음 페이지 커서(내용은 해석하지 않는다). null이면 끝이고, 옛 오프셋 방식 응답에는 없다. */
   nextCursor?: string | null;
 }

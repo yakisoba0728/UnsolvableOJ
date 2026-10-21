@@ -176,48 +176,44 @@ test("K12: edit fields initialize from storage before subscribing and later even
   });
 });
 
-for (const deletion of ["missing", "deleted"] as const) {
-  test(`K13: fresh-state ${deletion} targets reject edits and answers without touching drafts`, async ({ page }) => {
-    await seed(page);
-    await page.goto("/community/mine");
-    const result = await page.evaluate(async ({ key, deletion }) => {
-      const modulePath = "/src/community/store.ts";
-      const store = await import(modulePath);
-      const draft = { category: "question", title: "미완성 수정", body: "보관할 본문", tags: [], savedAt: 1 };
-      store.writeDraft("solver", draft, "mine");
-      store.writeAnswerDraft("solver", "mine", "보관할 답변 초안");
-      const activity = JSON.parse(localStorage.getItem(key)!);
-      if (deletion === "missing") {
-        activity.posts = activity.posts.filter((post: CommunityPost) => post.id !== "mine");
-      } else activity.deleted = ["mine"];
-      const before = JSON.stringify(activity);
-      localStorage.setItem(key, before);
-      const messages = [];
-      for (const mutate of [
-        () => store.communityActions.updatePost("mine", draft),
-        () => store.communityActions.addAnswer("mine", "고아가 되면 안 되는 답변", { name: "solver", tier: "Bronze I" }),
-      ]) {
-        try {
-          mutate();
-          messages.push("");
-        } catch (cause) {
-          messages.push(cause instanceof Error ? cause.message : String(cause));
-        }
+test("K13: fresh-state missing targets reject edits and answers without touching drafts", async ({ page }) => {
+  await seed(page);
+  await page.goto("/community/mine");
+  const result = await page.evaluate(async (key) => {
+    const modulePath = "/src/community/store.ts";
+    const store = await import(modulePath);
+    const draft = { category: "question", title: "미완성 수정", body: "보관할 본문", tags: [], savedAt: 1 };
+    store.writeDraft("solver", draft, "mine");
+    store.writeAnswerDraft("solver", "mine", "보관할 답변 초안");
+    const activity = JSON.parse(localStorage.getItem(key)!);
+    activity.posts = activity.posts.filter((post: CommunityPost) => post.id !== "mine");
+    const before = JSON.stringify(activity);
+    localStorage.setItem(key, before);
+    const messages = [];
+    for (const mutate of [
+      () => store.communityActions.updatePost("mine", draft),
+      () => store.communityActions.addAnswer("mine", "고아가 되면 안 되는 답변", { name: "solver", tier: "Bronze I" }),
+    ]) {
+      try {
+        mutate();
+        messages.push("");
+      } catch (cause) {
+        messages.push(cause instanceof Error ? cause.message : String(cause));
       }
-      return {
-        messages,
-        before,
-        after: localStorage.getItem(key),
-        draft: store.readDraft("solver", "mine"),
-        answerDraft: store.readAnswerDraft("solver", "mine"),
-      };
-    }, { key: activityKey, deletion });
-    expect(result.messages).toEqual(["글이 삭제되었거나 존재하지 않아요.", "글이 삭제되었거나 존재하지 않아요."]);
-    expect(result.after).toBe(result.before);
-    expect(result.draft).toMatchObject({ title: "미완성 수정", body: "보관할 본문" });
-    expect(result.answerDraft).toBe("보관할 답변 초안");
-  });
-}
+    }
+    return {
+      messages,
+      before,
+      after: localStorage.getItem(key),
+      draft: store.readDraft("solver", "mine"),
+      answerDraft: store.readAnswerDraft("solver", "mine"),
+    };
+  }, activityKey);
+  expect(result.messages).toEqual(["글이 삭제되었거나 존재하지 않아요.", "글이 삭제되었거나 존재하지 않아요."]);
+  expect(result.after).toBe(result.before);
+  expect(result.draft).toMatchObject({ title: "미완성 수정", body: "보관할 본문" });
+  expect(result.answerDraft).toBe("보관할 답변 초안");
+});
 
 for (const editing of [false, true]) {
   test(`K13/K15: failed ${editing ? "edit" : "publish"} retains the draft and retries once`, async ({ page }) => {
@@ -389,7 +385,7 @@ test("K13: failed deletion stays on the post and does not clear answer or edit d
   await page.getByRole("button", { name: "글 관리" }).click();
   await page.getByRole("menuitem", { name: "삭제", exact: true }).click();
   await expect(page).toHaveURL(/\/community$/);
-  expect((await readActivity(page)).deleted).toContain("mine");
+  expect((await readActivity(page)).posts.map((post: CommunityPost) => post.id)).not.toContain("mine");
   expect(await readStored(page, answerDraftKey)).toBeNull();
   expect(await readStored(page, editDraftKey)).toBeNull();
 });
@@ -647,7 +643,7 @@ test("K32: old t=a,b links retain list semantics and unusual published tags are 
   await expect(page.locator(".post-title")).toHaveText(["태그 보존 수정"]);
 });
 
-test("K13: the currently unused saved-post action also propagates persistence failures", async ({ page }) => {
+test("K13: the follow action also propagates persistence failures", async ({ page }) => {
   await seed(page);
   await page.goto("/community");
   const before = await readActivity(page);
@@ -656,7 +652,7 @@ test("K13: the currently unused saved-post action also propagates persistence fa
     const modulePath = "/src/community/store.ts";
     const { communityActions } = await import(modulePath);
     try {
-      communityActions.toggleSaved("mine");
+      communityActions.toggleFollow("solver");
       return false;
     } catch {
       return true;

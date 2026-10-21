@@ -5,6 +5,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type ComponentType,
   type ReactElement,
 } from "react";
 import {
@@ -14,71 +15,33 @@ import {
   Route,
   Routes,
   useLocation,
-  useParams,
   useNavigationType,
   useNavigate,
 } from "react-router-dom";
 import logo from "./assets/logo.png";
-import { useAuth } from "./auth";
+import { canAuthor, useAuth } from "./auth";
 import { HomePage } from "./pages/HomePage";
 import { ComingSoonPage } from "./components/ComingSoonPage";
 import { NotFoundPage } from "./components/NotFoundPage";
 import { ThemeToggle } from "./components/ThemeToggle";
 
 // 화면 단위로 코드를 나눠, 처음 방문한 화면의 코드만 내려받는다.
-const AuthPage = lazy(() =>
-  import("./pages/AuthPage").then((module) => ({ default: module.AuthPage })),
-);
-const CommunityPage = lazy(() =>
-  import("./pages/CommunityPage").then((module) => ({
-    default: module.CommunityPage,
-  })),
-);
-const CommunityPostPage = lazy(() =>
-  import("./pages/CommunityPostPage").then((module) => ({
-    default: module.CommunityPostPage,
-  })),
-);
-const CommunityWritePage = lazy(() =>
-  import("./pages/CommunityWritePage").then((module) => ({
-    default: module.CommunityWritePage,
-  })),
-);
-const CreateProblemPage = lazy(() =>
-  import("./pages/CreateProblemPage").then((module) => ({
-    default: module.CreateProblemPage,
-  })),
-);
-const MyProblemsPage = lazy(() =>
-  import("./pages/MyProblemsPage").then((module) => ({
-    default: module.MyProblemsPage,
-  })),
-);
-const ProblemPage = lazy(() =>
-  import("./pages/ProblemPage").then((module) => ({
-    default: module.ProblemPage,
-  })),
-);
-const ProblemsPage = lazy(() =>
-  import("./pages/ProblemsPage").then((module) => ({
-    default: module.ProblemsPage,
-  })),
-);
-const ProfilePage = lazy(() =>
-  import("./pages/ProfilePage").then((module) => ({
-    default: module.ProfilePage,
-  })),
-);
-const SubmissionPage = lazy(() =>
-  import("./pages/SubmissionPage").then((module) => ({
-    default: module.SubmissionPage,
-  })),
-);
-const SubmissionsPage = lazy(() =>
-  import("./pages/SubmissionsPage").then((module) => ({
-    default: module.SubmissionsPage,
-  })),
-);
+// import()는 호출하는 자리에 그대로 둬야 Vite가 화면마다 청크를 나눈다.
+const lazyPage = <K extends string, M extends Record<K, ComponentType<any>>>(
+  load: () => Promise<M>,
+  name: K,
+) => lazy(() => load().then((module) => ({ default: module[name] })));
+const AuthPage = lazyPage(() => import("./pages/AuthPage"), "AuthPage");
+const CommunityPage = lazyPage(() => import("./pages/CommunityPage"), "CommunityPage");
+const CommunityPostPage = lazyPage(() => import("./pages/CommunityPostPage"), "CommunityPostPage");
+const CommunityWritePage = lazyPage(() => import("./pages/CommunityWritePage"), "CommunityWritePage");
+const CreateProblemPage = lazyPage(() => import("./pages/CreateProblemPage"), "CreateProblemPage");
+const MyProblemsPage = lazyPage(() => import("./pages/MyProblemsPage"), "MyProblemsPage");
+const ProblemPage = lazyPage(() => import("./pages/ProblemPage"), "ProblemPage");
+const ProblemsPage = lazyPage(() => import("./pages/ProblemsPage"), "ProblemsPage");
+const ProfilePage = lazyPage(() => import("./pages/ProfilePage"), "ProfilePage");
+const SubmissionPage = lazyPage(() => import("./pages/SubmissionPage"), "SubmissionPage");
+const SubmissionsPage = lazyPage(() => import("./pages/SubmissionsPage"), "SubmissionsPage");
 
 const upcoming = [
   {
@@ -95,21 +58,8 @@ const upcoming = [
       cta: { to: "/problems", label: "문제 풀러 가기" },
     },
   },
-  {
-    path: "/community",
-    label: "커뮤니티",
-    page: {
-      title: "커뮤니티",
-      description:
-        "질문하고, 풀이를 나누고, 더 좋은 풀이로 이어가는 공간입니다.",
-      points: [
-        "질문 · 풀이 공유 · 자유 · 공지 카테고리",
-        "답변과 추천, 글 작성 중 초안 자동 복원",
-        "문제 페이지의 '질문' 탭과 연결",
-      ],
-      cta: { to: "/problems", label: "문제 둘러보기" },
-    },
-  },
+  // 커뮤니티는 실제 화면이 있어 준비 중 안내(page)가 없다.
+  { path: "/community", label: "커뮤니티" },
   {
     path: "/missions",
     label: "미션",
@@ -140,14 +90,6 @@ const upcoming = [
   },
 ];
 
-/** 계정이나 글이 바뀌면 이전 작성자의 폼 상태를 재사용하지 않는다. */
-function CommunityEditRoute() {
-  const { id } = useParams();
-  const { session } = useAuth();
-  const { pathname } = useLocation();
-  return <CommunityWritePage key={`${session?.user.id}:${pathname}:${id}`} />;
-}
-
 export function App({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { session, setSession } = useAuth();
   const { pathname, search, hash } = useLocation();
@@ -157,7 +99,7 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
   useEffect(() => {
     if (navigationType === "POP") return;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pathname]);
   const navigate = useNavigate();
   // 로그아웃 직후에는 로그인 화면이 아니라 홈으로 보낸다.
   const signedOutRef = useRef(false);
@@ -173,12 +115,12 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
   );
   /** 비로그인은 로그인으로, 권한이 없는 로그인 사용자는 문제 목록으로 보낸다. */
   const authorOnly = (element: ReactElement) =>
-    session?.user.role === "AUTHOR" || session?.user.role === "ADMIN" ? (
+    canAuthor(session) ? (
       element
     ) : !session ? (
       loginRedirect
     ) : (
-      <Navigate to={signedOutRef.current ? "/" : "/problems"} replace />
+      <Navigate to="/problems" replace />
     );
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -272,7 +214,7 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               </NavLink>
             ))}
             {session ? <NavLink to="/submissions">내 제출</NavLink> : null}
-            {session && session.user.role !== "USER" ? (
+            {canAuthor(session) ? (
               <NavLink
                 to="/problems/new"
                 className={({ isActive }) =>
@@ -396,6 +338,7 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               element={session ? <ProfilePage key={session.user.id} /> : loginRedirect}
             />
             <Route path="/community" element={<CommunityPage />} />
+            {/* 계정이나 글이 바뀌면 이전 작성자의 폼 상태를 재사용하지 않는다. */}
             <Route
               path="/community/new"
               element={
@@ -410,23 +353,22 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               path="/community/:id/edit"
               element={
                 session ? (
-                  <CommunityEditRoute />
+                  <CommunityWritePage key={`${session.user.id}:${pathname}`} />
                 ) : (
                   loginRedirect
                 )
               }
             />
             <Route path="/community/:id" element={<CommunityPostPage />} />
-            {/* 커뮤니티는 실제 화면이 있으므로 준비 중 안내에서 제외한다 */}
-            {upcoming
-              .filter((item) => item.path !== "/community")
-              .map((item) => (
+            {upcoming.map((item) =>
+              item.page ? (
                 <Route
                   key={item.path}
                   path={item.path}
                   element={<ComingSoonPage {...item.page} />}
                 />
-              ))}
+              ) : null,
+            )}
             <Route
               path="/submissions"
               element={session ? <SubmissionsPage key={session.user.id} /> : loginRedirect}

@@ -14,7 +14,7 @@ import { MarkdownField } from "../components/MarkdownField";
 import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
-import { useDocumentTitle } from "../hooks";
+import { savedTime, useDocumentTitle } from "../hooks";
 import { useUnsavedChanges } from "../useUnsavedChanges";
 import { problemPath } from "../paths";
 import {
@@ -204,9 +204,9 @@ export function CreateProblemPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, session?.user.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [id, session?.user.id]);
 
-  // Store committed work immediately; unmount recovery must not depend on a debounce.
+  // 확정된 입력은 바로 저장한다: 화면을 벗어날 때의 복구가 지연 저장에 기대면 안 된다.
   function saveDraft() {
     if (doneRef.current || loading) return;
     const ok = writeProblemDraft(draftScope, draft);
@@ -224,7 +224,6 @@ export function CreateProblemPage() {
       return;
     }
     saveDraft();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft, dirty, loading]);
 
   // 이미 공개된 주소인지 잠시 뒤에 확인한다(초안 주소는 저장할 때 서버가 알려 준다).
@@ -262,7 +261,6 @@ export function CreateProblemPage() {
     return () => observer.disconnect();
   }, [loading, createdDraft]);
 
-  // ---- 테스트케이스 편집 ----
   function updateCase(key: string, change: Partial<CaseForm>) {
     doneRef.current = false;
     setForm((previous) => ({
@@ -328,7 +326,6 @@ export function CreateProblemPage() {
   const hiddenCount = form.cases.length - sampleCount;
   const firstCaseError = Object.keys(errors.cases)[0];
 
-  // ---- 확인 목록 ----
   const checklist = [
     { label: "제목", ok: !errors.title, target: "title" },
     ...(editing
@@ -542,7 +539,7 @@ export function CreateProblemPage() {
   const statusText = saveFailed
     ? "임시 저장소를 읽거나 저장하지 못했어요. 현재 내용은 메모리에만 남아 있어 새로고침·탭 닫기 후 복구되지 않을 수 있어요."
     : savedAt
-      ? `이 탭에 임시 저장됨 · ${new Date(savedAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
+      ? `이 탭에 임시 저장됨 · ${savedTime(savedAt)}`
       : editing
         ? "변경 사항이 없어요."
         : "작성한 내용은 이 탭이 열려 있는 동안 임시 저장돼요.";
