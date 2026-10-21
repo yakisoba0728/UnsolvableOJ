@@ -146,6 +146,7 @@ test('nginx uses Docker DNS resolve compatible with 1.27.5 without rewriting URI
   assert.match(nginx, /server back:3000 resolve;/);
   assert.match(nginx, /proxy_pass http:\/\/unsolvable_api;/);
   assert.match(nginx, /client_max_body_size 16m;/);
+  assert.match(nginx, /location \/assets\/ \{\s*try_files \$uri =404;/);
   for (const header of [
     'Host $host', 'X-Real-IP $remote_addr',
     'X-Forwarded-For $remote_addr', 'X-Forwarded-Proto $scheme',
