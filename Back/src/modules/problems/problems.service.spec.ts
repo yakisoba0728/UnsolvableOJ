@@ -122,8 +122,6 @@ describe('problem update', () => {
     await expect(
       service.update(ids[0], {}, {
         id: ids[1],
-        email: 'author@example.com',
-        username: 'author',
         role: UserRole.AUTHOR,
       }),
     ).rejects.toBeInstanceOf(BadRequestException);

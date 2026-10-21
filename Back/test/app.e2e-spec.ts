@@ -1,30 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import type { NestExpressApplication } from '@nestjs/platform-express';
-import { configureHttp } from '../src/configure-http.js';
 import { randomUUID } from 'node:crypto';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DataSource } from 'typeorm';
-import { getQueueToken } from '@nestjs/bullmq';
-import type { Queue } from 'bullmq';
-import { JUDGE_QUEUE } from '../src/common/queue.constants.js';
 import request from 'supertest';
-import { AppModule } from './../src/app.module.js';
+import { closeApp, createApp, login, register } from './helpers.js';
 
-describe('AppController (e2e)', () => {
+describe('Health and submission judging flow (e2e)', () => {
   let app: NestExpressApplication;
   let dataSource: DataSource;
-  const userIds: string[] = [];
-  let problemId: string | undefined;
   let submissionId: string | undefined;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication<NestExpressApplication>({
-      bodyParser: false,
-    });
-    configureHttp(app);
+    app = await createApp();
     await app.init();
     dataSource = app.get(DataSource);
   });
@@ -41,34 +27,18 @@ describe('AppController (e2e)', () => {
 
   it('registers users, creates a problem, submits code, and records a judge result', async () => {
     const suffix = randomUUID().slice(0, 8);
-    const register = async (name: string) => {
-      const response = await request(app.getHttpServer())
-        .post('/api/v1/auth/register')
-        .send({
-          email: `${name}-${suffix}@example.com`,
-          username: `${name}_${suffix}`,
-          password: 'test-password-123',
-        })
-        .expect(201);
-      userIds.push(response.body.user.id);
-      return response.body;
-    };
-
-    const author = await register('author');
-    const solver = await register('solver');
-    const other = await register('other');
+    const author = await register(app, 'author', suffix);
+    const solver = await register(app, 'solver', suffix);
+    const other = await register(app, 'other', suffix);
     await dataSource.query('UPDATE users SET role = $1 WHERE id = $2', [
       'AUTHOR',
       author.user.id,
     ]);
-    const authorLogin = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
-      .send({ email: author.user.email, password: 'test-password-123' })
-      .expect(200);
+    const authorLogin = await login(app, author.user.email);
 
     const created = await request(app.getHttpServer())
       .post('/api/v1/problems')
-      .set('Authorization', `Bearer ${authorLogin.body.accessToken}`)
+      .set('Authorization', `Bearer ${authorLogin.accessToken}`)
       .send({
         slug: `sum-${suffix}`,
         title: 'Sum',
@@ -85,7 +55,7 @@ describe('AppController (e2e)', () => {
         ],
       })
       .expect(201);
-    problemId = created.body.id;
+    const problemId = created.body.id;
     await dataSource.query(
       "UPDATE problems SET status = 'PUBLISHED' WHERE id = $1",
       [problemId],
@@ -225,7 +195,7 @@ describe('AppController (e2e)', () => {
 
     await request(app.getHttpServer())
       .post(`/api/v1/submissions/${submitted.body.id}/rejudge`)
-      .set('Authorization', `Bearer ${authorLogin.body.accessToken}`)
+      .set('Authorization', `Bearer ${authorLogin.accessToken}`)
       .expect(202);
     const requeued = await request(app.getHttpServer())
       .get(`/api/v1/submissions/${submitted.body.id}`)
@@ -239,24 +209,9 @@ describe('AppController (e2e)', () => {
   });
 
   afterAll(async () => {
-    if (app && submissionId) {
-      const queue = app.get<Queue>(getQueueToken(JUDGE_QUEUE));
-      const job = await queue.getJob(`${submissionId}-1`);
-      if (job) await job.remove();
-      const rejudgeJob = await queue.getJob(`${submissionId}-2`);
-      if (rejudgeJob) await rejudgeJob.remove();
-    }
-    if (problemId) {
-      await dataSource.query('DELETE FROM submissions WHERE problem_id = $1', [
-        problemId,
-      ]);
-      await dataSource.query('DELETE FROM problems WHERE id = $1', [problemId]);
-    }
-    if (userIds.length) {
-      await dataSource.query('DELETE FROM users WHERE id = ANY($1::uuid[])', [
-        userIds,
-      ]);
-    }
-    if (app) await app.close();
+    await closeApp(
+      app,
+      submissionId ? [`${submissionId}-1`, `${submissionId}-2`] : [],
+    );
   });
 });

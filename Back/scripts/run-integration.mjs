@@ -17,42 +17,6 @@ export function integrationDatabaseUrl(env = process.env) {
   return env.DATABASE_URL;
 }
 
-export function waitForApiListening(child) {
-  return new Promise((resolve, reject) => {
-    const finish = (error, address) => {
-      clearTimeout(timeout);
-      child.off('message', message);
-      child.off('error', failed);
-      child.off('exit', exited);
-      if (error) reject(error);
-      else resolve(address);
-    };
-    const failed = (error) => finish(error);
-    const exited = (code, signal) =>
-      finish(new Error(`Test API exited before listening: ${signal ?? code}`));
-    const message = (value) => {
-      if (value?.type !== 'unsolvable-api-listening') return;
-      const address = value.address;
-      if (
-        address?.address !== '127.0.0.1' ||
-        !Number.isInteger(address.port) ||
-        address.port < 1 || address.port > 65535
-      ) {
-        finish(new Error('Test API reported an invalid listening address'));
-      } else finish(undefined, address);
-    };
-    const timeout = setTimeout(
-      () => finish(new Error('Test API did not report its listening address')),
-      30_000,
-    );
-    child.on('message', message);
-    child.once('error', failed);
-    child.once('exit', exited);
-    if (child.exitCode !== null || child.signalCode !== null)
-      exited(child.exitCode, child.signalCode);
-  });
-}
-
 export async function stopChild(child, group = false) {
   if (!child?.pid) return;
   const signal = (value) => {
@@ -80,10 +44,7 @@ export async function stopChild(child, group = false) {
 
 async function runIntegration() {
   const [mode, ...args] = process.argv.slice(2);
-  assert.ok(
-    ['e2e', 'pipeline', 'judge-flow'].includes(mode),
-    'Expected e2e, pipeline or judge-flow.',
-  );
+  assert.ok(['e2e', 'pipeline'].includes(mode), 'Expected e2e or pipeline.');
   // Capture the test DB before dotenv can supply the development Redis DB (usually 0).
   const redisDb = mode === 'e2e'
     ? process.env.REDIS_DB ?? '1'
@@ -124,7 +85,7 @@ async function runIntegration() {
   try {
     await admin.initialize();
     if (interrupted) return;
-    // The configured database only grants CREATE/DROP access; it is never migrated.
+    // The configured database is only used to create and drop the disposable one; it is never migrated.
     await admin.query(`CREATE DATABASE "${name}"`);
     created = true;
     db = await new DataSource({ ...configured.options, url: url.href }).initialize();
@@ -132,13 +93,10 @@ async function runIntegration() {
     await db.runMigrations();
     await db.destroy();
     if (interrupted) return;
-    const command = mode === 'judge-flow'
-      ? ['scripts/check-judge-flow.mjs', ...args]
-      : [
-          'node_modules/vitest/vitest.mjs', 'run', '--config',
-          `./vitest.config.${mode}.ts`, ...args,
-        ];
-    child = spawn(process.execPath, command, {
+    child = spawn(process.execPath, [
+      'node_modules/vitest/vitest.mjs', 'run', '--config',
+      `./vitest.config.${mode}.ts`, ...args,
+    ], {
       cwd: fileURLToPath(new URL('../', import.meta.url)),
       env: {
         ...process.env,

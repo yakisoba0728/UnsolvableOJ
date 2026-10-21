@@ -11,7 +11,7 @@ import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { CreateProblemDto } from '../dist/modules/problems/dto/create-problem.dto.js';
 import { PasswordHasher } from '../dist/modules/auth/password-hasher.service.js';
-import { databaseConnectionOptions } from '../dist/config/env.validation.js';
+import { databaseConnectionOptions } from '../dist/config/database.config.js';
 import { assertNoNul, prepareProblem } from './boj-content.mjs';
 
 const { values } = parseArgs({

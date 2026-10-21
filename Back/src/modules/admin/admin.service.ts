@@ -7,6 +7,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { InjectDataSource } from '@nestjs/typeorm';
 import type { Queue } from 'bullmq';
 import { DataSource } from 'typeorm';
+import { recordAudit } from '../../common/database.js';
 import {
   JUDGE_QUEUE,
   JUDGE_WORKER_ONLINE_MS,
@@ -42,16 +43,10 @@ export class AdminService {
           'UPDATE users SET role = $1, token_version = token_version + 1, updated_at = now() WHERE id = $2',
           [role, id],
         );
-        await manager.query(
-          'INSERT INTO audit_events (actor_id, action, target_type, target_id, details) VALUES ($1, $2, $3, $4, $5::jsonb)',
-          [
-            actor.id,
-            'user.role',
-            'user',
-            id,
-            JSON.stringify({ from: rows[0].role, to: role }),
-          ],
-        );
+        await recordAudit(manager, actor.id, 'user.role', 'user', id, {
+          from: rows[0].role,
+          to: role,
+        });
       }
       return { id, role };
     });

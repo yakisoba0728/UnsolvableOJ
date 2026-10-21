@@ -25,11 +25,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!current || current.tokenVersion !== payload.tokenVersion) {
       throw new UnauthorizedException('다시 로그인해야 합니다.');
     }
-    return {
-      id: current.id,
-      email: current.email,
-      username: current.username,
-      role: current.role,
-    };
+    return { id: current.id, role: current.role };
   }
 }

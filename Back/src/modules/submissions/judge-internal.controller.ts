@@ -13,7 +13,7 @@ import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { JudgeResultDto } from './dto/judge-result.dto.js';
 import { JudgeTokenGuard } from './judge-token.guard.js';
-import { SubmissionsService } from './submissions.service.js';
+import { JudgeService } from './judge.service.js';
 
 @ApiTags('judge-internal')
 @ApiHeader({ name: 'X-Judge-Token', required: true })
@@ -21,11 +21,11 @@ import { SubmissionsService } from './submissions.service.js';
 @UseGuards(JudgeTokenGuard)
 @Controller('internal/judge')
 export class JudgeInternalController {
-  constructor(private readonly submissionsService: SubmissionsService) {}
+  constructor(private readonly judgeService: JudgeService) {}
 
   @Post('heartbeat')
   heartbeat(@Headers('x-judge-worker') workerId: string) {
-    return this.submissionsService.heartbeat(workerId);
+    return this.judgeService.heartbeat(workerId);
   }
 
   @Get('submissions/:id')
@@ -34,11 +34,7 @@ export class JudgeInternalController {
     @Headers('x-judge-generation') generation: string,
     @Headers('x-judge-attempt') attemptId: string,
   ) {
-    return this.submissionsService.claimForJudge(
-      id,
-      Number(generation),
-      attemptId,
-    );
+    return this.judgeService.claimForJudge(id, Number(generation), attemptId);
   }
 
   @Patch('submissions/:id/heartbeat')
@@ -47,11 +43,7 @@ export class JudgeInternalController {
     @Headers('x-judge-generation') generation: string,
     @Headers('x-judge-attempt') attemptId: string,
   ) {
-    return this.submissionsService.renewLease(
-      id,
-      Number(generation),
-      attemptId,
-    );
+    return this.judgeService.renewLease(id, Number(generation), attemptId);
   }
 
   @Patch('submissions/:id/result')
@@ -61,7 +53,7 @@ export class JudgeInternalController {
     @Headers('x-judge-attempt') attemptId: string,
     @Body() dto: JudgeResultDto,
   ) {
-    return this.submissionsService.recordJudgeResult(
+    return this.judgeService.recordJudgeResult(
       id,
       Number(generation),
       attemptId,

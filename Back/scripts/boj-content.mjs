@@ -3,7 +3,7 @@ import domino from '@mixmark-io/domino';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 
-export const normalizeNewlines = (value) => value.replace(/\r\n?/g, '\n');
+const normalizeNewlines = (value) => value.replace(/\r\n?/g, '\n');
 
 export function assertNoNul(value, slug) {
   if (typeof value === 'string') {
@@ -13,7 +13,7 @@ export function assertNoNul(value, slug) {
   }
 }
 
-export function mapDifficulty(level) {
+function mapDifficulty(level) {
   if (!level) return 'MEDIUM';
   if (level <= 5) return 'BEGINNER';
   if (level <= 10) return 'EASY';

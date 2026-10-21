@@ -22,6 +22,5 @@ import { PasswordHasher } from './password-hasher.service.js';
   ],
   controllers: [AuthController],
   providers: [AuthService, PasswordHasher, JwtStrategy],
-  exports: [JwtModule],
 })
 export class AuthModule {}

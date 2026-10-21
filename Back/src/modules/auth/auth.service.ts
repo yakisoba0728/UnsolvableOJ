@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService, type JwtSignOptions } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { isUniqueViolation } from '../../common/database.js';
 import { User } from '../users/user.entity.js';
 import type { AccessTokenPayload } from './auth.types.js';
 import type { LoginDto } from './dto/login.dto.js';
@@ -40,7 +41,7 @@ export class AuthService {
     try {
       await this.users.save(user);
     } catch (error: unknown) {
-      if (this.isUniqueViolation(error)) {
+      if (isUniqueViolation(error)) {
         throw new ConflictException(
           '이미 사용 중인 이메일 또는 사용자 이름입니다.',
         );
@@ -94,14 +95,5 @@ export class AuthService {
         rating: user.rating,
       },
     };
-  }
-
-  private isUniqueViolation(error: unknown): boolean {
-    return (
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      error.code === '23505'
-    );
   }
 }
