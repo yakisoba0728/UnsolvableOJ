@@ -14,6 +14,7 @@ export class ListSubmissionsQuery {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(1_000_000)
   page = 1;
 
   @IsOptional()

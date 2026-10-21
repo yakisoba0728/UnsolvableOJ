@@ -110,6 +110,13 @@ describe('Backend features (e2e)', () => {
       .expect(200);
     expect(JSON.stringify(publicView.body)).not.toContain('5 7');
     await request(app.getHttpServer())
+      .get(`${base}/problems?page=1000001`)
+      .expect(400);
+    await request(app.getHttpServer())
+      .get(`${base}/submissions?page=1000001`)
+      .set(bearer(solver.accessToken))
+      .expect(400);
+    await request(app.getHttpServer())
       .get(`${base}/problems/${problemId}/manage`)
       .set(bearer(solver.accessToken))
       .expect(403);
