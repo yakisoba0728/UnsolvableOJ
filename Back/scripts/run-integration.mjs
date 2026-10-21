@@ -124,7 +124,7 @@ async function runIntegration() {
   try {
     await admin.initialize();
     if (interrupted) return;
-    // The configured database only grants CREATE/DROP access; it is never migrated.
+    // The configured database is only used to create and drop the disposable one; it is never migrated.
     await admin.query(`CREATE DATABASE "${name}"`);
     created = true;
     db = await new DataSource({ ...configured.options, url: url.href }).initialize();

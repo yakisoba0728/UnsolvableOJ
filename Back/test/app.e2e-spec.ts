@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import request from 'supertest';
 import { closeApp, createApp, login, register } from './helpers.js';
 
-describe('AppController (e2e)', () => {
+describe('Health and submission judging flow (e2e)', () => {
   let app: NestExpressApplication;
   let dataSource: DataSource;
   let submissionId: string | undefined;
