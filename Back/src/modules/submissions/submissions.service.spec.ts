@@ -67,8 +67,6 @@ describe('SubmissionsService queue failure', () => {
           { language: SubmissionLanguage.PYTHON, sourceCode: 'print(3)' },
           {
             id: randomUUID(),
-            email: 'solver@example.com',
-            username: 'solver',
             role: UserRole.USER,
           },
         ),
@@ -177,8 +175,6 @@ describe('submission debug output lifecycle', () => {
   function setup() {
     const user = {
       id: randomUUID(),
-      email: 'author@example.com',
-      username: 'author',
       role: UserRole.AUTHOR,
     };
     const attemptId = randomUUID();

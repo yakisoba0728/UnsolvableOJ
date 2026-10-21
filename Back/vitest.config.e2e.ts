@@ -2,7 +2,6 @@ import { defineConfig } from 'vitest/config';
 import { integrationDatabaseUrl } from './scripts/run-integration.mjs';
 
 export default defineConfig({
-  resolve: { tsconfigPaths: true },
   test: {
     globals: true,
     root: './',

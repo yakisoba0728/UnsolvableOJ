@@ -10,8 +10,6 @@ describe('AdminService.changeRole', () => {
   const id = '12345678-abcd-4abc-8abc-123456789abc';
   const actor: AuthenticatedUser = {
     id,
-    email: 'admin@example.com',
-    username: 'admin',
     role: UserRole.ADMIN,
   };
 

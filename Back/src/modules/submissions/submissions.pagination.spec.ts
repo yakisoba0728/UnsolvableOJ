@@ -27,8 +27,6 @@ const encodeCursor = (parts: unknown) =>
 function setup() {
   const user = {
     id: randomUUID(),
-    email: 'solver@example.com',
-    username: 'solver',
     role: UserRole.USER,
   };
   const problemId = randomUUID();
