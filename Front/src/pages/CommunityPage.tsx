@@ -91,8 +91,9 @@ export function CommunityPage() {
     if (queryText === urlQuery) return;
     // '#단어'는 Enter를 눌러 태그가 되기 전까지 검색어로 쓰지 않는다(입력 중에 목록이 비는 것을 막는다).
     if (queryText.trim().startsWith("#")) return;
+    // 다듬지 않고 저장한다: 주소 값이 입력칸으로 되돌아오므로 다듬으면 입력 중인 공백이 사라진다.
     const timer = window.setTimeout(() => {
-      update({ q: queryText.trim() || null });
+      update({ q: queryText || null });
     }, 250);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps

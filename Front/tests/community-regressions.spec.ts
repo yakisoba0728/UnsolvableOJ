@@ -512,6 +512,21 @@ test("K18: debounced community search rebases onto the latest filters and sort",
   expect(Object.fromEntries(params)).toEqual({ t: "dp", future: "keep", c: "free", s: "accepted", sort: "views", q: "질문" });
 });
 
+test("community search keeps the space typed before a pause", async ({ page }) => {
+  await page.clock.install();
+  await seed(page);
+  await page.goto("/community");
+  const search = page.getByRole("searchbox", { name: "게시글 검색" });
+  await search.fill("two ");
+  await page.clock.runFor(300);
+  await expect(page).toHaveURL(/q=two/);
+  await search.press("End");
+  await page.keyboard.type("sum");
+  await page.clock.runFor(300);
+  await expect(search).toHaveValue("two sum");
+  expect(new URL(page.url()).searchParams.get("q")).toBe("two sum");
+});
+
 test("K31: vote ordering uses the displayed count and still puts pinned notices first", async ({ page }) => {
   await seed(page, [
     { ...mine, upvotes: 5 },
