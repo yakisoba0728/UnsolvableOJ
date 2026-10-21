@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../auth";
+import { canAuthor, useAuth } from "../auth";
 import { BrandArt } from "../components/BrandArt";
 import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
@@ -187,7 +187,6 @@ export function ProblemsPage() {
   const hasFilter = Boolean(
     selectedDifficulties.length || statuses.length || keyword,
   );
-  const solvedCount = problems.filter((p) => history.solved.has(p.id)).length;
 
   // 이어 풀 문제(시도했지만 못 푼 가장 최근 문제). 없으면 가장 쉬운 안 푼 문제.
   const recommendationsReady =
@@ -619,7 +618,7 @@ export function ProblemsPage() {
               ) : null}
             </ol>
           </div>
-          {session?.user.role === "AUTHOR" || session?.user.role === "ADMIN" ? (
+          {canAuthor(session) ? (
             <div className="guide-card create-cta">
               <h2>직접 문제를 만들어 보세요</h2>
               <p>

@@ -108,6 +108,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** 문제를 만들고 고칠 수 있는 계정(작성자·관리자)인지. */
+export const canAuthor = (session: Session | null) =>
+  session?.user.role === "AUTHOR" || session?.user.role === "ADMIN";
+
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) throw new Error("AuthProvider is missing");
