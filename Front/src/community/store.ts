@@ -313,5 +313,6 @@ export function relativeTime(iso: string) {
   if (days < 30) return `${days}일 전`;
   const months = Math.floor(days / 30);
   if (months < 12) return `${months}개월 전`;
-  return `${Math.floor(days / 365)}년 전`;
+  // 360–364일은 12개월이지만 365일 미만이라 0년이 되지 않게 한다.
+  return `${Math.max(1, Math.floor(days / 365))}년 전`;
 }

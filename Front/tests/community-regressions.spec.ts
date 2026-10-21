@@ -582,3 +582,14 @@ test("K13: the currently unused saved-post action also propagates persistence fa
   expect(threw).toBe(true);
   expect(await readActivity(page)).toEqual(before);
 });
+
+test("relative time never reads 0년 전 for posts 360–364 days old", async ({ page }) => {
+  await page.goto("/community");
+  const labels = await page.evaluate(async () => {
+    const modulePath = "/src/community/store.ts";
+    const { relativeTime } = await import(modulePath);
+    const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
+    return [359, 362, 365].map((days) => relativeTime(daysAgo(days)));
+  });
+  expect(labels).toEqual(["11개월 전", "1년 전", "1년 전"]);
+});
