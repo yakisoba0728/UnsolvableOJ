@@ -25,7 +25,7 @@ import {
   writeAnswerDraft,
 } from "../community/store";
 import { categoryLabel, type CommunityAuthor } from "../community/types";
-import { useDocumentTitle } from "../hooks";
+import { useDocumentTitle, useFlashNotice } from "../hooks";
 
 const MIN_ANSWER = 5;
 
@@ -51,9 +51,7 @@ export function CommunityPostPage() {
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
   const [pending, setPending] = useState(false);
-  const [notice, setNotice] = useState(
-    (location.state as { notice?: string } | null)?.notice ?? "",
-  );
+  const [notice, setNotice] = useFlashNotice();
   const [answersOpen, setAnswersOpen] = useState(false);
   const editorRef = useRef<HTMLTextAreaElement>(null);
 
@@ -341,7 +339,7 @@ export function CommunityPostPage() {
                 type="button"
                 className="answers-toggle"
                 aria-expanded={answersOpen}
-                aria-controls="answer-list"
+                aria-controls={shown.length ? "answer-list" : undefined}
                 onClick={() => setAnswersOpen((open) => !open)}
               >
                 <span>답변 {answers.length}</span>

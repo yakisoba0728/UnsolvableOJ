@@ -1,4 +1,5 @@
 import type { Difficulty } from "../types";
+import { DIFFICULTIES } from "../difficulty";
 
 /** 문제 만들기·수정 화면이 함께 쓰는 폼 모델과 규칙 */
 
@@ -181,7 +182,7 @@ function isDraft(value: unknown): value is ProblemDraft {
         "title", "slug", "statement", "inputDescription",
         "outputDescription", "hint", "source",
       ].every((key) => typeof form[key as keyof ProblemForm] === "string") &&
-      ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"].includes(form.difficulty) &&
+      DIFFICULTIES.includes(form.difficulty) &&
       typeof form.timeLimitMs === "number" &&
       typeof form.memoryLimitMb === "number" &&
       Array.isArray(form.cases) &&

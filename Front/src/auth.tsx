@@ -66,8 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
   const setSession = (next: Session | null) => {
     const value = next ? { session: next, expiresAt: expiryTime(next) } : null;
-    if (value) localStorage.setItem(storageKey, JSON.stringify(value));
-    else localStorage.removeItem(storageKey);
+    try {
+      if (value) localStorage.setItem(storageKey, JSON.stringify(value));
+      else localStorage.removeItem(storageKey);
+    } catch {
+      /* 저장소를 쓸 수 없어도(쿠키 차단·용량 초과) 이번 방문의 로그인·로그아웃은 반영한다 */
+    }
     updateSession(value);
   };
   useEffect(() => {

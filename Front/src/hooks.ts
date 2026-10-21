@@ -1,6 +1,8 @@
 import { useEffect, useState, type RefObject } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "./api";
 import { fetchAll } from "./pagination";
+import { DIFFICULTIES } from "./difficulty";
 export { fetchAll } from "./pagination";
 import type {
   ProblemSummary,
@@ -193,14 +195,33 @@ export function useMyStanding(session: Session | null) {
   return { profile, rank, profileLoading, rankLoading, profileError, rankError };
 }
 
+/**
+ * 다른 화면이 navigate state로 넘긴 안내(notice)를 한 번 읽고 기록에서는 지운다.
+ * 남겨 두면 새로고침·뒤로 가기마다 다시 뜬다. listSearch 같은 나머지 state는 그대로 둔다.
+ */
+export function useFlashNotice() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const state = location.state as { notice?: string } | null;
+  const [notice, setNotice] = useState(state?.notice ?? "");
+  useEffect(() => {
+    if (!state?.notice) return;
+    setNotice(state.notice);
+    const { notice: _shown, ...rest } = state;
+    navigate(location.pathname + location.search + location.hash, {
+      replace: true,
+      state: rest,
+    });
+  }, [state, location.pathname, location.search, location.hash, navigate]);
+  return [notice, setNotice] as const;
+}
+
 /** 탭·히스토리·공유에서 화면을 구분하도록 페이지별 제목을 설정한다. 제목이 없으면 기본 제목. */
 export function useDocumentTitle(title?: string) {
   useEffect(() => {
     document.title = title ? `${title} | 못풀준` : "못풀준 · UnsolvableOJ";
   }, [title]);
 }
-
-const difficultyRank = ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"];
 
 /** 공개 목록에 남아 있는 미해결 문제의 가장 최근 제출(이어서 풀 문제). */
 export function pickResume(
@@ -228,8 +249,8 @@ export function pickNextProblem(
       .filter((problem) => !solved.has(problem.id))
       .sort(
         (a, b) =>
-          difficultyRank.indexOf(a.difficulty) -
-          difficultyRank.indexOf(b.difficulty),
+          DIFFICULTIES.indexOf(a.difficulty) -
+          DIFFICULTIES.indexOf(b.difficulty),
       )[0] ?? null
   );
 }

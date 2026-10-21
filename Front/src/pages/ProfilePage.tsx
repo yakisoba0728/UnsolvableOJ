@@ -15,20 +15,15 @@ import {
 } from "../hooks";
 import { PostScroller } from "../components/PostScroller";
 import { allPosts, useActivity } from "../community/store";
-import type { RankingEntry, UserProfile } from "../types";
+import {
+  LANGUAGE_LABELS,
+  type RankingEntry,
+  type UserProfile,
+} from "../types";
+import { difficultyOptions } from "../difficulty";
 
 const WEEKS_WIDE = 16;
 const WEEKS_NARROW = 12;
-const languageLabels: Record<string, string> = {
-  C: "C",
-  CPP: "C++",
-  JAVA: "Java",
-  PYTHON: "Python",
-  JAVASCRIPT: "JavaScript",
-  TYPESCRIPT: "TypeScript",
-  GO: "Go",
-  RUST: "Rust",
-};
 /** 다른 사용자들이 많이 쓰는 순서. 내가 쓰지 않은 언어는 이 순서로 0%를 채운다. */
 const popularLanguages = [
   "PYTHON",
@@ -41,13 +36,6 @@ const popularLanguages = [
   "RUST",
 ];
 const LANGUAGE_ROWS = 4;
-const difficultyRows = [
-  { value: "BEGINNER", label: "입문" },
-  { value: "EASY", label: "쉬움" },
-  { value: "MEDIUM", label: "보통" },
-  { value: "HARD", label: "어려움" },
-  { value: "EXPERT", label: "전문가" },
-];
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
 /** 서버 규칙: level = 1 + xp / 100 */
@@ -252,7 +240,7 @@ export function ProfilePage() {
             aria-valuemax={XP_PER_LEVEL}
             aria-valuenow={xpInLevel}
           >
-            <span style={{ width: `${xpInLevel}%` }} />
+            <span style={{ width: `${(xpInLevel / XP_PER_LEVEL) * 100}%` }} />
           </div>
         </div>
         <dl className="profile-stats">
@@ -267,10 +255,6 @@ export function ProfilePage() {
           <div>
             <dt>연속 학습</dt>
             <dd>{streak}일</dd>
-          </div>
-          <div>
-            <dt>레이팅</dt>
-            <dd>{profile.rating.toLocaleString()}</dd>
           </div>
         </dl>
       </section>
@@ -435,7 +419,7 @@ export function ProfilePage() {
                   <li key={language}>
                     <div className="lang-row">
                       <span className="lang-name">
-                        {languageLabels[language] ?? language}
+                        {LANGUAGE_LABELS[language] ?? language}
                       </span>
                       <span className="muted">{percent}%</span>
                     </div>
@@ -454,7 +438,7 @@ export function ProfilePage() {
               </div>
             </div>
             <ul className="lang-stats">
-              {difficultyRows.map((row) => {
+              {difficultyOptions.map((row) => {
                 const count = solvedByDifficulty.get(row.value) ?? 0;
                 const percent = solvedTotal
                   ? Math.round((count / solvedTotal) * 100)

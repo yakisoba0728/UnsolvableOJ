@@ -5,7 +5,7 @@ import { Select } from "../components/Select";
 import { ProblemMarkdown } from "../components/ProblemMarkdown";
 import { Link, useParams } from "react-router-dom";
 import { Skeleton, SkeletonRegion } from "../components/Skeleton";
-import { api } from "../api";
+import { api, ApiError } from "../api";
 import { useAuth } from "../auth";
 import {
   CaseResults,
@@ -44,7 +44,13 @@ import {
   resetSourceDraft,
   writeSourceDraft,
 } from "../editor/sourceDrafts";
-import type { Language, Page, Problem, Submission } from "../types";
+import {
+  LANGUAGE_LABELS,
+  type Language,
+  type Page,
+  type Problem,
+  type Submission,
+} from "../types";
 import { problemPath } from "../paths";
 import {
   DEFAULT_SPLIT,
@@ -55,7 +61,7 @@ import {
   type SplitMode,
   type SplitState,
 } from "../solveSplit";
-import { difficultyLabel } from "./ProblemsPage";
+import { difficultyLabel } from "../difficulty";
 
 const languages: { value: Language; label: string; starter: string }[] = [
   {
@@ -192,7 +198,10 @@ export function ProblemPage() {
   });
   const [tab, setTab] = useState<Tab>("statement");
   const [history, setHistory] = useState<Submission[] | null>(null);
+  const [historyFailed, setHistoryFailed] = useState(false);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
+  // 불러온 초안은 저장 시각을 모른다(이번에 저장하기 전까지 시각 없이 표시).
+  const [draftLoaded, setDraftLoaded] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const [cursor, setCursor] = useState({ line: 1, column: 1 });
@@ -276,6 +285,7 @@ export function ProblemPage() {
     const restored = draft.value ?? starter(language);
     setSource(restored);
     setSavedAt(draft.savedAt);
+    setDraftLoaded(draft.value !== null);
     setSaveFailed(draft.failed);
     // 복원한 글에 맞는 Tab 단위만 이어받는다(글자가 공백 네 칸이 아니면 버려진다). 시작 코드의 들여쓰기는 기억하지 않는다.
     unitsRef.current = remapUnits(
@@ -345,6 +355,7 @@ export function ProblemPage() {
     if (tab !== "history" || !session || !problem) return;
     const controller = new AbortController();
     setHistory(null);
+    setHistoryFailed(false);
     api<Page<Submission>>(
       `/submissions?problemId=${problem.id}&page=1&limit=20`,
       { signal: controller.signal },
@@ -352,7 +363,7 @@ export function ProblemPage() {
     )
       .then((data) => setHistory(data.items))
       .catch(() => {
-        if (!controller.signal.aborted) setHistory([]);
+        if (!controller.signal.aborted) setHistoryFailed(true);
       });
     return () => controller.abort();
   }, [tab, session, problem, finishedId]);
@@ -368,7 +379,11 @@ export function ProblemPage() {
     })
       .then(setProblem)
       .catch((cause) => {
-        if (!controller.signal.aborted)
+        // 404만 '없는 문제'(오류 없이 빈 문제)로 두고, 나머지 실패는 이유를 보여 준다.
+        if (
+          !controller.signal.aborted &&
+          !(cause instanceof ApiError && cause.status === 404)
+        )
           setError(
             cause instanceof Error
               ? cause.message
@@ -383,8 +398,8 @@ export function ProblemPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // Ctrl/⌘+Enter로도 제출되므로 버튼 비활성화만으로는 중복 제출을 막을 수 없다.
-    if (!problem || !session || submittingRef.current) return;
+    // Ctrl/⌘+Enter로도 제출되므로 버튼 비활성화만으로는 중복·빈 코드 제출을 막을 수 없다.
+    if (!problem || !session || submittingRef.current || !source.trim()) return;
     submittingRef.current = true;
     const requestedFor = problem.id;
     setSubmitting(true);
@@ -429,11 +444,11 @@ export function ProblemPage() {
   if (error || !problem)
     return (
       <div className="page-width empty-state not-found-state" role="alert">
-        <strong>문제를 찾을 수 없어요</strong>
+        <strong>
+          {error ? "문제를 불러오지 못했어요" : "문제를 찾을 수 없어요"}
+        </strong>
         <p>
-          {error && !error.includes("찾을 수 없")
-            ? error
-            : "주소가 바뀌었거나 아직 공개되지 않은 문제일 수 있어요."}
+          {error || "주소가 바뀌었거나 아직 공개되지 않은 문제일 수 있어요."}
         </p>
         <Link className="button" to="/problems">
           문제 목록으로
@@ -806,7 +821,9 @@ export function ProblemPage() {
           <div className="tab-list" role="tablist" aria-label="문제 보기">
             <button
               role="tab"
+              id="problem-tab-statement"
               aria-selected={tab === "statement"}
+              aria-controls={tab === "statement" ? "problem-tabpanel" : undefined}
               className={`tab-button ${tab === "statement" ? "active" : ""}`}
               onClick={() => setTab("statement")}
             >
@@ -814,7 +831,9 @@ export function ProblemPage() {
             </button>
             <button
               role="tab"
+              id="problem-tab-history"
               aria-selected={tab === "history"}
+              aria-controls={tab === "history" ? "problem-tabpanel" : undefined}
               className={`tab-button ${tab === "history" ? "active" : ""}`}
               onClick={() => setTab("history")}
             >
@@ -822,7 +841,12 @@ export function ProblemPage() {
             </button>
           </div>
           {tab === "statement" ? (
-            <article className="problem-content">
+            <article
+              className="problem-content"
+              role="tabpanel"
+              id="problem-tabpanel"
+              aria-labelledby="problem-tab-statement"
+            >
               <div className="meta-strip">
                 <span>
                   <strong>시간</strong> {problem.timeLimitMs}ms
@@ -877,10 +901,19 @@ export function ProblemPage() {
               ))}
             </article>
           ) : (
-            <div className="history-panel">
+            <div
+              className="history-panel"
+              role="tabpanel"
+              id="problem-tabpanel"
+              aria-labelledby="problem-tab-history"
+            >
               {!session ? (
                 <p className="muted">
                   로그인하면 이 문제의 제출 내역이 여기에 표시됩니다.
+                </p>
+              ) : historyFailed ? (
+                <p className="error-message" role="alert">
+                  제출 내역을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
                 </p>
               ) : history === null ? (
                 <SkeletonRegion label="제출 내역을 불러오는 중입니다">
@@ -899,7 +932,7 @@ export function ProblemPage() {
                           {verdictLabel(item.status)}
                         </span>
                         <span>
-                          {item.language} ·{" "}
+                          {LANGUAGE_LABELS[item.language] ?? item.language} ·{" "}
                           {new Date(item.createdAt).toLocaleString("ko-KR")}
                         </span>
                         <span className="muted">
@@ -955,7 +988,9 @@ export function ProblemPage() {
                 ? "초안을 읽거나 저장하지 못했어요. 현재 내용은 메모리에만 남아 새로고침 후 복구되지 않을 수 있어요."
                 : savedAt
                   ? `초안 저장됨 · ${savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
-                  : "자동 저장 대기"}
+                  : draftLoaded
+                    ? "저장된 초안을 불러왔어요"
+                    : "자동 저장 대기"}
             </span>
             <span className="cursor-info" aria-live="off">
               줄 {cursor.line}, 열 {cursor.column}
@@ -996,6 +1031,7 @@ export function ProblemPage() {
                 lastValueRef.current = starter(language);
                 setSaveFailed(!resetSourceDraft(problem.id, language, starter(language)));
                 setSavedAt(null);
+                setDraftLoaded(false);
               }}
             >
               초기화

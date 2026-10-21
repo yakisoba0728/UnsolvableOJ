@@ -30,6 +30,33 @@ test("login returns to the problem and logout removes the saved session", async 
   ).toBeNull();
 });
 
+test("login and logout still work when the browser refuses to store the session", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const blocked = () => {
+      throw new DOMException("The operation is insecure.", "SecurityError");
+    };
+    Storage.prototype.setItem = blocked;
+    Storage.prototype.removeItem = blocked;
+  });
+  await page.route("**/api/v1/auth/login", (route) =>
+    route.fulfill({ json: session }),
+  );
+  await page.goto("/problems/view/sum");
+  await page.getByRole("link", { name: "로그인하고 풀기" }).click();
+  await page.getByLabel("이메일").fill(session.user.email);
+  await page.getByLabel("비밀번호").fill("browser-password");
+  await page.getByRole("button", { name: "로그인", exact: true }).click();
+  await expect(page).toHaveURL(/\/problems\/view\/sum$/);
+  await expect(page.locator(".account-name")).toHaveText(session.user.username);
+  await page.getByRole("button", { name: "로그아웃" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(
+    page.getByRole("link", { name: "로그인" }).first(),
+  ).toBeVisible();
+});
+
 test("registration sends the username and starts a session", async ({
   page,
 }) => {

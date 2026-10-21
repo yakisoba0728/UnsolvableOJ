@@ -121,6 +121,19 @@ test.describe("problem editor", () => {
     await expect(page.getByText("숨김 1개", { exact: true })).toBeVisible();
   });
 
+  test("the form opens and autosaves without crypto.randomUUID (plain HTTP)", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      Reflect.deleteProperty(Crypto.prototype, "randomUUID");
+    });
+    await authenticate(page, "AUTHOR");
+    await page.goto("/problems/new");
+    await expect(page.getByLabel("제목", { exact: true })).toBeVisible();
+    await page.getByLabel("제목", { exact: true }).fill("HTTP에서 만든 문제");
+    await expect(page.getByText(/임시 저장됨/)).toBeVisible();
+  });
+
   test("an unsaved draft is restored after reload", async ({ page }) => {
     await authenticate(page, "AUTHOR");
     await page.goto("/problems/new");
@@ -133,6 +146,38 @@ test.describe("problem editor", () => {
     await expect(page.getByLabel("제목", { exact: true })).toHaveValue(
       "임시 저장 문제",
     );
+  });
+
+  test("an author can unpublish their own problem but not publish a draft", async ({
+    page,
+  }) => {
+    await authenticate(page, "AUTHOR");
+    const row = {
+      slug: problem.slug,
+      title: problem.title,
+      difficulty: problem.difficulty,
+      currentVersion: 1,
+      updatedAt: problem.updatedAt,
+    };
+    await page.route("**/api/v1/problems/mine", (route) =>
+      route.fulfill({
+        json: [
+          { ...row, id: "live", status: "PUBLISHED" },
+          { ...row, id: "draft", slug: "draft", status: "DRAFT" },
+        ],
+      }),
+    );
+    let changed: unknown;
+    await page.route("**/api/v1/problems/live/status", async (route) => {
+      changed = route.request().postDataJSON();
+      await route.fulfill({ json: { id: "live", status: "DRAFT", currentVersion: 1 } });
+    });
+    await page.goto("/my-problems");
+    await expect(page.getByRole("button", { name: "공개하기" })).toHaveCount(0);
+    await page.getByRole("button", { name: "비공개로 전환" }).click();
+    await expect(page.getByRole("status")).toHaveText("문제를 비공개로 전환했어요.");
+    expect(changed).toEqual({ status: "DRAFT" });
+    await expect(page.getByRole("button", { name: "비공개로 전환" })).toHaveCount(0);
   });
 
   test("author edits an existing problem from the my problems list", async ({

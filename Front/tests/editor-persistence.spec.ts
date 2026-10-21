@@ -157,6 +157,12 @@ test("source writes beat stale storage across language/problem switches and rese
   expect(readSourceDraft("source-p", "CPP")).toMatchObject({ value: null, failed: true });
 });
 
+test("source drafts: a draft read from storage has no save time, a write records one", () => {
+  local.setItem("unsolvable-oj-draft-v1:saved-at-p:PYTHON", "old");
+  expect(readSourceDraft("saved-at-p", "PYTHON")).toEqual({ value: "old", savedAt: null, failed: false });
+  expect(writeSourceDraft("saved-at-p", "PYTHON", "new").savedAt).toBeInstanceOf(Date);
+});
+
 test("source reset overwrites stale storage with the starter when removal alone fails", () => {
   writeSourceDraft("reset-fallback-p", "PYTHON", "old source");
   local.failRemoves = true;

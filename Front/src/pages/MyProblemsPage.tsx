@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { SkeletonRows } from "../components/Skeleton";
 import { PageHeader } from "../components/PageHeader";
-import { useDocumentTitle } from "../hooks";
+import { useDocumentTitle, useFlashNotice } from "../hooks";
 import { problemPath } from "../paths";
+import { difficultyLabel } from "../difficulty";
 
 interface MyProblem {
   id: string;
@@ -17,13 +18,6 @@ interface MyProblem {
   updatedAt: string;
 }
 
-const difficultyLabel: Record<string, string> = {
-  BEGINNER: "입문",
-  EASY: "쉬움",
-  MEDIUM: "보통",
-  HARD: "어려움",
-  EXPERT: "전문가",
-};
 const statusLabel: Record<MyProblem["status"], string> = {
   DRAFT: "초안 · 검수 대기",
   PUBLISHED: "공개 중",
@@ -33,14 +27,11 @@ const statusLabel: Record<MyProblem["status"], string> = {
 export function MyProblemsPage() {
   useDocumentTitle("내 문제");
   const { session } = useAuth();
-  const location = useLocation();
   const isAdmin = session?.user.role === "ADMIN";
   const [problems, setProblems] = useState<MyProblem[] | null>(null);
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState("");
-  const [notice, setNotice] = useState(
-    (location.state as { notice?: string } | null)?.notice ?? "",
-  );
+  const [notice, setNotice] = useFlashNotice();
 
   useEffect(() => {
     if (!session) return;
@@ -83,7 +74,7 @@ export function MyProblemsPage() {
       setNotice(
         status === "PUBLISHED"
           ? "문제를 공개했어요."
-          : "문제를 초안으로 돌렸어요.",
+          : "문제를 비공개로 전환했어요.",
       );
     } catch (cause) {
       setError(
@@ -139,7 +130,7 @@ export function MyProblemsPage() {
               <div className="my-problem-main">
                 <strong>{problem.title}</strong>
                 <span className="muted">
-                  {difficultyLabel[problem.difficulty] ?? problem.difficulty} ·
+                  {difficultyLabel(problem.difficulty)} ·
                   수정 {new Date(problem.updatedAt).toLocaleDateString("ko-KR")}{" "}
                   · /{problem.slug}
                 </span>
@@ -171,14 +162,15 @@ export function MyProblemsPage() {
                     공개하기
                   </button>
                 ) : null}
-                {isAdmin && problem.status === "PUBLISHED" ? (
+                {/* 공개는 관리자 검수가 필요하지만 비공개 전환은 작성자도 할 수 있다(서버 규칙). */}
+                {problem.status === "PUBLISHED" ? (
                   <button
                     type="button"
                     className="text-button"
                     disabled={busyId === problem.id}
                     onClick={() => changeStatus(problem, "DRAFT")}
                   >
-                    초안으로
+                    비공개로 전환
                   </button>
                 ) : null}
               </div>

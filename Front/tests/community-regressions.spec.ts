@@ -394,6 +394,74 @@ test("K13: failed deletion stays on the post and does not clear answer or edit d
   expect(await readStored(page, editDraftKey)).toBeNull();
 });
 
+test("a notice passed on navigation shows once and does not return on reload or Back/Forward", async ({ page }) => {
+  await seed(page);
+  await page.goto("/community/mine");
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "글 관리" }).click();
+  await page.getByRole("menuitem", { name: "삭제", exact: true }).click();
+  await expect(page).toHaveURL(/\/community$/);
+  const notice = page.getByRole("status").filter({ hasText: "글을 삭제했어요." });
+  await expect(notice).toBeVisible();
+  // 안내는 4초 뒤 저절로 사라지므로, 목록이 그려진 그 순간에 바로 센다(재시도하지 않음).
+  await page.reload();
+  await expect(page.getByRole("searchbox", { name: "게시글 검색" })).toBeVisible();
+  expect(await notice.count()).toBe(0);
+  await page.goBack();
+  await page.goForward();
+  await expect(page.getByRole("searchbox", { name: "게시글 검색" })).toBeVisible();
+  expect(await notice.count()).toBe(0);
+});
+
+test("the collapsed answers toggle controls the answer list only while it is rendered", async ({ page }) => {
+  await seed(page);
+  await page.goto("/community/mine");
+  const toggle = page.getByRole("button", { name: /^답변 1/ });
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(toggle).not.toHaveAttribute("aria-controls", /.*/);
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-controls", "answer-list");
+  await expect(page.locator("#answer-list")).toBeVisible();
+});
+
+test("the profile post scroller counter stays in range when its list shrinks", async ({ page }) => {
+  const posts = [1, 2, 3, 4].map((n) => ({ ...other, id: `liked-${n}`, title: `추천 글 ${n}` }));
+  await seed(page, posts, posts.map((post) => post.id));
+  await page.route("**/api/v1/users/me", (route) => route.fulfill({
+    json: { ...session.user, solvedCount: 0, createdAt: "2026-09-01T00:00:00Z" },
+  }));
+  await page.route("**/api/v1/rankings", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/submissions?**", (route) => route.fulfill({
+    json: { items: [], page: 1, limit: 100, total: 0, totalPages: 1 },
+  }));
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/profile");
+  const scroller = page.getByRole("region", { name: "추천한 글" });
+  const count = scroller.locator(".scroller-count");
+  await expect(count).toHaveText("1–2 / 4");
+  await scroller.getByRole("button", { name: "다음 글" }).click();
+  await expect(count).toHaveText("2–3 / 4");
+  await scroller.getByRole("button", { name: "다음 글" }).click();
+  await expect(count).toHaveText("3–4 / 4");
+  // 스크롤 위치가 줄어든 목록에 맞춰지면 곧 바로잡히므로, 그 전에 그려진 값까지 모두 기록한다.
+  const shown = await page.evaluate(async (key) => {
+    const counter = document.querySelector('[aria-label="추천한 글"] .scroller-count')!;
+    const texts: string[] = [];
+    const observer = new MutationObserver(() => texts.push(counter.textContent ?? ""));
+    observer.observe(counter, { subtree: true, childList: true, characterData: true });
+    const activity = JSON.parse(localStorage.getItem(key)!);
+    activity.upvoted = activity.upvoted.slice(1);
+    localStorage.setItem(key, JSON.stringify(activity));
+    window.dispatchEvent(new StorageEvent("storage", { key }));
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    observer.disconnect();
+    return texts;
+  }, activityKey);
+  expect(shown).not.toContain("3–4 / 3");
+  await expect(count).toHaveText("2–3 / 3");
+  await expect(scroller.getByRole("button", { name: "다음 글" })).toBeDisabled();
+});
+
 test("K11: draft helpers isolate owners and posts, preserve ownerless legacy data and keep public posts shared", async ({ page }) => {
   await seed(page);
   await page.goto("/community");
@@ -512,6 +580,21 @@ test("K18: debounced community search rebases onto the latest filters and sort",
   expect(Object.fromEntries(params)).toEqual({ t: "dp", future: "keep", c: "free", s: "accepted", sort: "views", q: "질문" });
 });
 
+test("community search keeps the space typed before a pause", async ({ page }) => {
+  await page.clock.install();
+  await seed(page);
+  await page.goto("/community");
+  const search = page.getByRole("searchbox", { name: "게시글 검색" });
+  await search.fill("two ");
+  await page.clock.runFor(300);
+  await expect(page).toHaveURL(/q=two/);
+  await search.press("End");
+  await page.keyboard.type("sum");
+  await page.clock.runFor(300);
+  await expect(search).toHaveValue("two sum");
+  expect(new URL(page.url()).searchParams.get("q")).toBe("two sum");
+});
+
 test("K31: vote ordering uses the displayed count and still puts pinned notices first", async ({ page }) => {
   await seed(page, [
     { ...mine, upvotes: 5 },
@@ -581,4 +664,15 @@ test("K13: the currently unused saved-post action also propagates persistence fa
   });
   expect(threw).toBe(true);
   expect(await readActivity(page)).toEqual(before);
+});
+
+test("relative time never reads 0년 전 for posts 360–364 days old", async ({ page }) => {
+  await page.goto("/community");
+  const labels = await page.evaluate(async () => {
+    const modulePath = "/src/community/store.ts";
+    const { relativeTime } = await import(modulePath);
+    const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
+    return [359, 362, 365].map((days) => relativeTime(daysAgo(days)));
+  });
+  expect(labels).toEqual(["11개월 전", "1년 전", "1년 전"]);
 });
