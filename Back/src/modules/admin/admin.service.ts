@@ -7,7 +7,11 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { InjectDataSource } from '@nestjs/typeorm';
 import type { Queue } from 'bullmq';
 import { DataSource } from 'typeorm';
-import { JUDGE_QUEUE } from '../../common/queue.constants.js';
+import {
+  JUDGE_QUEUE,
+  JUDGE_WORKER_ONLINE_MS,
+  JUDGE_WORKERS_KEY,
+} from '../../common/queue.constants.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { UserRole } from '../users/user-role.enum.js';
 
@@ -73,7 +77,7 @@ export class AdminService {
       ),
       this.queue
         .getBackend()
-        .client.then((client) => client.hgetall('judge:workers')),
+        .client.then((client) => client.hgetall(JUDGE_WORKERS_KEY)),
       this.queue.getJobs(['failed'], 0, 9),
     ]);
     const now = Date.now();
@@ -81,7 +85,7 @@ export class AdminService {
       queue,
       submissions,
       workers: Object.entries(workerMap)
-        .filter(([, seen]) => now - Number(seen) < 30_000)
+        .filter(([, seen]) => now - Number(seen) < JUDGE_WORKER_ONLINE_MS)
         .map(([id, seen]) => ({
           id,
           lastSeenAt: new Date(Number(seen)).toISOString(),
