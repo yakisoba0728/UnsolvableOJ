@@ -20,7 +20,8 @@ export function readSourceDraft(
   try {
     const value = localStorage.getItem(id);
     if (cached && value === cached.storedValue) return cached.draft;
-    const draft = { value, savedAt: value === null ? null : new Date(), failed: false };
+    // 저장 시각은 따로 남기지 않으므로 읽은 초안에는 시각이 없다.
+    const draft = { value, savedAt: null, failed: false };
     drafts.set(id, { draft, storedValue: value });
     return draft;
   } catch {

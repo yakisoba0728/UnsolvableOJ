@@ -193,6 +193,8 @@ export function ProblemPage() {
   const [tab, setTab] = useState<Tab>("statement");
   const [history, setHistory] = useState<Submission[] | null>(null);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
+  // 불러온 초안은 저장 시각을 모른다(이번에 저장하기 전까지 시각 없이 표시).
+  const [draftLoaded, setDraftLoaded] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const [cursor, setCursor] = useState({ line: 1, column: 1 });
@@ -276,6 +278,7 @@ export function ProblemPage() {
     const restored = draft.value ?? starter(language);
     setSource(restored);
     setSavedAt(draft.savedAt);
+    setDraftLoaded(draft.value !== null);
     setSaveFailed(draft.failed);
     // 복원한 글에 맞는 Tab 단위만 이어받는다(글자가 공백 네 칸이 아니면 버려진다). 시작 코드의 들여쓰기는 기억하지 않는다.
     unitsRef.current = remapUnits(
@@ -955,7 +958,9 @@ export function ProblemPage() {
                 ? "초안을 읽거나 저장하지 못했어요. 현재 내용은 메모리에만 남아 새로고침 후 복구되지 않을 수 있어요."
                 : savedAt
                   ? `초안 저장됨 · ${savedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
-                  : "자동 저장 대기"}
+                  : draftLoaded
+                    ? "저장된 초안을 불러왔어요"
+                    : "자동 저장 대기"}
             </span>
             <span className="cursor-info" aria-live="off">
               줄 {cursor.line}, 열 {cursor.column}
@@ -996,6 +1001,7 @@ export function ProblemPage() {
                 lastValueRef.current = starter(language);
                 setSaveFailed(!resetSourceDraft(problem.id, language, starter(language)));
                 setSavedAt(null);
+                setDraftLoaded(false);
               }}
             >
               초기화
