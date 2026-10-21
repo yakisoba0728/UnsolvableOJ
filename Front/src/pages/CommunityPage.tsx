@@ -28,6 +28,7 @@ import {
   type CommunityPost,
 } from "../community/types";
 import { useDocumentTitle, useStickyTop } from "../hooks";
+import { pageRange, pageRangeTitle } from "../pageRange";
 
 const PAGE_SIZE = 10;
 
@@ -370,13 +371,11 @@ export function CommunityPage() {
                 </button>
               ) : null}
             </div>
-            <span className="total-count">
-              {
-                filtered.filter((post) =>
-                  belongs(post, selectedCategories, statuses),
-                ).length
-              }
-              개
+            <span
+              className="total-count"
+              title={pageRangeTitle(first, visible.length, filtered.length)}
+            >
+              {pageRange(first, visible.length, filtered.length)}
             </span>
           </div>
           {visible.length ? (

@@ -2483,11 +2483,11 @@ test("lists show skeletons instead of zero placeholders while the server respond
   });
   await page.goto("/problems");
   await expect(page.locator(".skeleton-rows")).toBeVisible();
-  await expect(page.locator(".total-count")).not.toContainText("0문제");
+  await expect(page.locator(".total-count")).not.toContainText("0/0");
   await expect(page.locator(".toggle-count:not(.skeleton)")).toHaveCount(0);
   release();
   await expect(page.locator(".skeleton-rows")).toHaveCount(0);
-  await expect(page.locator(".total-count")).toContainText("1문제");
+  await expect(page.locator(".total-count")).toHaveText("1 - 1/1");
   await expect(page.locator("a.problem-row")).toHaveCount(1);
 });
 
@@ -2877,15 +2877,15 @@ test.describe("community filter counts include pinned notices where they belong"
     await expect.poll(() => count(page, "분류 필터", /^질문/)).toBe(2);
     await expect.poll(() => count(page, "분류 필터", /^자유/)).toBe(1);
     await expect.poll(() => count(page, "분류 필터", /^전체/)).toBe(5);
-    await expect(total(page)).toHaveText("5개");
+    await expect(total(page)).toHaveText("1 - 5/5");
 
-    // 질문만 고르면 공지 칩 개수는 그대로이고(칩은 눌렀을 때의 결과 수), 목록 합계는 질문 글만 센다
+    // 질문만 고르면 공지 칩 개수는 그대로이고(칩은 눌렀을 때의 결과 수), 목록 머리글은 실제로 나열된 줄(질문 2 + 항상 보이는 고정 공지 1)을 센다
     await page
       .getByRole("group", { name: "분류 필터" })
       .getByRole("button", { name: /^질문/ })
       .click();
     await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(2);
-    await expect(total(page)).toHaveText("2개");
+    await expect(total(page)).toHaveText("1 - 3/3");
     // 고정 공지는 그대로 목록 맨 위에 보인다
     await expect(page.locator(".post-row.pinned")).toHaveCount(1);
   });
@@ -2896,12 +2896,12 @@ test.describe("community filter counts include pinned notices where they belong"
     await open(page, "ZZ고정");
     await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(1);
     await expect.poll(() => count(page, "분류 필터", /^전체/)).toBe(1);
-    await expect(total(page)).toHaveText("1개");
+    await expect(total(page)).toHaveText("1 - 1/1");
     // 아무 글도 맞지 않는 검색어(이모지 포함): 모든 개수가 0
     await page.goto("/community?q=ZZzzzzzz%F0%9F%98%80");
     await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(0);
     await expect.poll(() => count(page, "분류 필터", /^전체/)).toBe(0);
-    await expect(total(page)).toHaveText("0개");
+    await expect(total(page)).toHaveText("0/0");
   });
 
   test("notices count as not accepted in the status chips, and the pinned one stays visible under every status", async ({
@@ -2917,13 +2917,13 @@ test.describe("community filter counts include pinned notices where they belong"
     const statusGroup = page.getByRole("group", { name: "채택 상태 필터" });
     await statusGroup.getByRole("button", { name: /^채택 전/ }).click();
     await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(2);
-    await expect(total(page)).toHaveText("5개");
+    await expect(total(page)).toHaveText("1 - 5/5");
     await expect(page.locator(".post-row.pinned")).toHaveCount(1);
 
-    // 채택 완료만 고르면 맞는 글이 없어 개수는 0이지만, 고정 공지는 여전히 맨 위에 보인다
+    // 채택 완료만 고르면 맞는 글이 없어 칩 개수는 0이지만, 고정 공지는 여전히 맨 위에 보이므로 머리글은 그 한 줄을 센다
     await statusGroup.getByRole("button", { name: /^채택 완료/ }).click();
     await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(0);
-    await expect(total(page)).toHaveText("0개");
+    await expect(total(page)).toHaveText("1 - 1/1");
     await expect(page.locator(".post-row.pinned")).toHaveCount(1);
   });
 });
@@ -3071,4 +3071,82 @@ test("the verdict in the my-submissions list is plain coloured text, not a pill"
   await expect(page.locator(".data-list .difficulty").first()).toBeVisible();
   expect(verdict).toEqual(await typography(".data-list .difficulty"));
   expect(verdict.weight).toBe("700");
+});
+
+test("the problem list and the community list show the page range the same way", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.route(/\/api\/v1\/problems(\?.*)?$/, (route) =>
+    route.fulfill({
+      json: {
+        items: Array.from({ length: 25 }, (_, index) => ({
+          ...problem,
+          id: `p-${index}`,
+          slug: `p-${index}`,
+          title: `문제 ${index + 1}`,
+        })),
+        page: 1,
+        limit: 100,
+        total: 25,
+        totalPages: 1,
+      },
+    }),
+  );
+  const posts = Array.from({ length: 12 }, (_, index) => ({
+    id: `r-${index}`,
+    category: "free",
+    title: `ZZ범위 ${index}`,
+    body: "본문",
+    tags: [] as string[],
+    author: { name: "tester", tier: "브론즈" },
+    createdAt: `2026-10-${String(index + 1).padStart(2, "0")}T00:00:00Z`,
+    upvotes: 0,
+    views: 1,
+  }));
+  await page.addInitScript((value) => {
+    localStorage.setItem(
+      "unsolvable-oj-community-v1",
+      JSON.stringify({
+        posts: value,
+        answers: [],
+        upvoted: [],
+        saved: [],
+        followed: [],
+        accepted: {},
+        deleted: [],
+      }),
+    );
+  }, posts);
+  const label = page.locator(".total-count");
+  const look = () =>
+    label.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return {
+        weight: style.fontWeight,
+        size: style.fontSize,
+        color: style.color,
+        family: style.fontFamily,
+      };
+    });
+
+  await page.goto("/problems");
+  await expect(label).toHaveText("1 - 20/25");
+  const problemLook = await look();
+  await page.goto("/problems?page=2");
+  await expect(label).toHaveText("21 - 25/25");
+  // 아무것도 맞지 않는 검색: 0/0
+  await page.goto("/problems?q=zzzzzz%F0%9F%98%80");
+  await expect(label).toHaveText("0/0");
+
+  await page.goto("/community?q=ZZ");
+  await expect(label).toHaveText("1 - 10/12");
+  const communityLook = await look();
+  await page.goto("/community?q=ZZ&page=2");
+  await expect(label).toHaveText("11 - 12/12");
+  await page.goto("/community?q=ZZzzzzzz%F0%9F%98%80");
+  await expect(label).toHaveText("0/0");
+
+  // 글씨 모양도 같다
+  expect(communityLook).toEqual(problemLook);
 });
