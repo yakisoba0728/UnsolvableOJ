@@ -246,6 +246,9 @@ describe('Backend features (e2e)', () => {
 
     await request(app.getHttpServer())
       .post(`${base}/submissions/${submissionId}/rejudge`)
+      .expect(401);
+    await request(app.getHttpServer())
+      .post(`${base}/submissions/${submissionId}/rejudge`)
       .set(bearer(solver.accessToken))
       .expect(403);
     const rejudge = await request(app.getHttpServer())
