@@ -5,6 +5,7 @@ import { ListProblemsQuery } from './dto/list-problems.query.js';
 import type { Problem } from './problem.entity.js';
 import { ProblemStatus } from './problem.enums.js';
 import { ProblemsService } from './problems.service.js';
+import { UserRole } from '../users/user-role.enum.js';
 
 const ids = [1, 2, 3].map(
   (value) => `10000000-0000-4000-8000-${String(value).padStart(12, '0')}`,
@@ -112,5 +113,19 @@ describe('public problem detail', () => {
     expect(result.samples).toEqual(
       samples.map(({ input, expectedOutput }) => ({ input, expectedOutput })),
     );
+  });
+});
+
+describe('problem update', () => {
+  it('rejects an empty body as a bad request', async () => {
+    const { service } = fixture([]);
+    await expect(
+      service.update(ids[0], {}, {
+        id: ids[1],
+        email: 'author@example.com',
+        username: 'author',
+        role: UserRole.AUTHOR,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

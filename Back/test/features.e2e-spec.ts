@@ -135,7 +135,7 @@ describe('Backend features (e2e)', () => {
       .patch(`${base}/problems/${problemId}`)
       .set(bearer(authorToken))
       .send({})
-      .expect(409);
+      .expect(400);
     await request(app.getHttpServer())
       .patch(`${base}/problems/${problemId}`)
       .set(bearer(authorToken))

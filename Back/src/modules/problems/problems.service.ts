@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -79,7 +80,7 @@ export class ProblemsService {
 
   async update(id: string, dto: UpdateProblemDto, user: AuthenticatedUser) {
     if (!Object.keys(dto).length)
-      throw new ConflictException('변경할 필드가 없습니다.');
+      throw new BadRequestException('변경할 필드가 없습니다.');
     return this.dataSource.transaction(async (manager) => {
       const problem = await manager
         .getRepository(Problem)
