@@ -59,7 +59,7 @@ go-judge는 privileged Linux 서비스입니다. 운영에서는 API/DB와 분�
 (cd Back && npm run check)
 (cd Judge && npm run check)
 (cd Front && npm run check)
-# 세 Playwright 브라우저 설치 후; 기존 개발 DB를 사용하지 않는 실제 전체 Compose 검사
+# Playwright Chromium 설치 후; 기존 개발 DB를 사용하지 않는 실제 전체 Compose 검사
 node scripts/check-compose.mjs
 # PostgreSQL/Redis 실행 중에만; CREATEDB 권한·별도 테스트 Redis DB 필요
 # 실행마다 일회용 PostgreSQL DB를 생성하고 종료 후 삭제
