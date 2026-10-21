@@ -3048,4 +3048,27 @@ test("the verdict in the my-submissions list is plain coloured text, not a pill"
     );
     expect(colorOf("verdict-queued")).not.toBe(colorOf("verdict-wrong_answer"));
   }
+
+  // 굵기·크기·줄 높이는 문제 목록의 난이도 글씨와 같다.
+  const typography = (selector: string) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((el) => {
+        const style = getComputedStyle(el);
+        return {
+          weight: style.fontWeight,
+          size: style.fontSize,
+          lineHeight: style.lineHeight,
+          family: style.fontFamily,
+        };
+      });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/submissions");
+  await expect(page.locator(".history-row .verdict").first()).toBeVisible();
+  const verdict = await typography(".history-row .verdict");
+  await page.goto("/problems");
+  await expect(page.locator(".data-list .difficulty").first()).toBeVisible();
+  expect(verdict).toEqual(await typography(".data-list .difficulty"));
+  expect(verdict.weight).toBe("700");
 });
