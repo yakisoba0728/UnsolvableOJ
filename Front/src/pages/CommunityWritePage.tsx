@@ -171,7 +171,6 @@ export function CommunityWritePage() {
     }
     const timer = window.setTimeout(saveDraft, 1200);
     return () => window.clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, title, tags, tagText, body, dirty, ownerId, editingId]);
 
   // 자동 저장을 기다리지 않고 이탈·세션 만료 직전의 입력까지 보관한다.

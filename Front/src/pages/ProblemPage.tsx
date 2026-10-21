@@ -294,7 +294,6 @@ export function ProblemPage() {
       restored,
     );
     unitsBaseRef.current = restored;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [problem?.id, language]);
 
   // 문제는 새 탭으로 열린다. 각 탭은 열린 시점의 초안만 가져오고, 같은 문제의 다른 탭과 실시간으로 동기화하지 않는다.
@@ -336,7 +335,6 @@ export function ProblemPage() {
     } catch {
       /* 저장할 수 없어도 편집은 그대로 동작한다 */
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source]);
 
   // 문제나 언어가 바뀌면 진행 중이던 스니펫 칸 이동을 끝낸다.

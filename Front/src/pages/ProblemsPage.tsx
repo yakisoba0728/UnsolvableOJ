@@ -158,7 +158,6 @@ export function ProblemsPage() {
     else if (sort !== "random")
       base.sort((a, b) => b.createdAt.localeCompare(a.createdAt) * dir);
     return base.filter((problem) => matches(problem, null));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     problems,
     sort,

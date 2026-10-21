@@ -204,7 +204,7 @@ export function CreateProblemPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, session?.user.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [id, session?.user.id]);
 
   // Store committed work immediately; unmount recovery must not depend on a debounce.
   function saveDraft() {
@@ -224,7 +224,6 @@ export function CreateProblemPage() {
       return;
     }
     saveDraft();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft, dirty, loading]);
 
   // 이미 공개된 주소인지 잠시 뒤에 확인한다(초안 주소는 저장할 때 서버가 알려 준다).

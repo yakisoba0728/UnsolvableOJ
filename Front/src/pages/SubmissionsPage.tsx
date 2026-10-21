@@ -83,7 +83,6 @@ export function SubmissionsPage() {
       .filter((item) => !seen.has(item.problem.id) && seen.add(item.problem.id))
       .map((item) => ({ item, count: counts.get(item.problem.id) ?? 1 }));
     return { rows: latest, filteredCount: latest.length };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [all, statuses.join(","), language, keyword, grouped]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));

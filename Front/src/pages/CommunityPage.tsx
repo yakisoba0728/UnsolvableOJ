@@ -178,7 +178,6 @@ export function CommunityPage() {
       return b.createdAt.localeCompare(a.createdAt);
     });
     return list;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activity,
     selectedCategories.join(","),
