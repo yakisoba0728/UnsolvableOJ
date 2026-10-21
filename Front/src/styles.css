@@ -209,7 +209,6 @@ p {
   background: var(--color-feature-border);
 }
 .button:focus-visible,
-.filter-chip:focus-visible,
 .page-button:focus-visible,
 .tab-button:focus-visible {
   outline: 3px solid var(--color-ink-900);
@@ -238,7 +237,6 @@ p {
   font-weight: 600;
   color: var(--color-primary);
 }
-.hero h1 em,
 .auth-intro h1 em {
   font-style: normal;
   color: var(--color-success);
@@ -270,23 +268,6 @@ p {
   gap: 9px;
   flex-wrap: wrap;
   margin: 26px 0 22px;
-}
-.filter-chip {
-  background: var(--color-surface);
-  border: 1px solid var(--color-divider);
-  border-radius: 999px;
-  padding: 9px 16px;
-  color: var(--color-ink-600);
-  font-size: 13px;
-  font-weight: var(--weight-label);
-}
-.filter-chip:hover {
-  border-color: var(--color-border-strong);
-}
-.filter-chip.selected {
-  background: var(--color-primary-soft);
-  border-color: var(--color-primary-soft);
-  color: var(--color-primary);
 }
 .problem-list {
   background: var(--color-surface);
@@ -363,10 +344,6 @@ p {
   font:
     13px "JetBrains Mono",
     monospace;
-}
-.row-arrow {
-  color: var(--color-ink-400);
-  font-size: 18px;
 }
 .empty-state {
   background: var(--color-surface);
@@ -524,14 +501,10 @@ textarea {
 .auth-card .back-link {
   margin: 34px 0 0;
 }
-.detail-heading h1,
 .result-page h1,
 .create-page h1 {
   font-size: clamp(34px, 3.3vw, 48px);
   margin: 12px 0 0;
-}
-.detail-heading .difficulty {
-  margin-bottom: 8px;
 }
 .meta-strip {
   display: flex;
@@ -639,9 +612,6 @@ textarea {
 .standalone-section {
   padding-top: 55px;
   min-height: 65vh;
-}
-.submission-row .problem-title {
-  padding-left: 6px;
 }
 .verdict {
   display: inline-flex;
@@ -824,17 +794,6 @@ textarea {
   margin-left: auto;
   font-size: 13px;
 }
-.check-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--color-ink-600);
-  font-size: 13px;
-}
-.check-label input {
-  width: auto;
-  margin: 0;
-}
 .case-editor .sample-grid textarea {
   font-family: "JetBrains Mono", monospace;
   font-size: 13px;
@@ -942,28 +901,10 @@ textarea {
   border-color: transparent;
   color: var(--color-primary);
 }
-.pill-success {
-  background: var(--color-success-soft);
-  border-color: transparent;
-  color: var(--color-success);
-}
 .pill-warning {
   background: var(--color-warning-soft);
   border-color: transparent;
   color: var(--color-warning);
-}
-.pill-dark {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: transparent;
-  color: var(--color-on-solid);
-}
-.button-white {
-  background: var(--color-surface);
-  border-color: var(--color-surface);
-  color: #1d4fd8;
-}
-.button-white:hover {
-  background: var(--color-feature);
 }
 .text-button.light {
   color: #b9c7db;
@@ -1096,11 +1037,6 @@ textarea {
   font: var(--text-section);
   margin: 0 0 4px;
 }
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
 .problem-card {
   display: flex;
   flex-direction: column;
@@ -1222,21 +1158,6 @@ textarea {
   gap: 16px;
   position: sticky;
   top: 80px;
-}
-.resume-card {
-  background: var(--color-strong-bg);
-  color: var(--color-strong-ink);
-  border-radius: var(--radius-feature);
-  padding: 24px;
-}
-.resume-card h2 {
-  font-size: 20px;
-  margin: 14px 0 6px;
-}
-.resume-card p {
-  color: var(--color-strong-muted);
-  font-size: 13px;
-  margin-bottom: 18px;
 }
 .guide-card {
   background: var(--color-surface);
@@ -1656,14 +1577,6 @@ button.heat-cell.selected {
   color: var(--color-primary);
   margin-right: 6px;
 }
-.soon-inline h2 {
-  font-size: 18px;
-  margin: 10px 0 4px;
-}
-.soon-inline p {
-  margin: 0;
-  font-size: 14px;
-}
 
 /* 준비 중 */
 .soon-page {
@@ -1826,9 +1739,6 @@ button.heat-cell.selected {
   .stat-tiles {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .card-grid {
-    grid-template-columns: 1fr;
-  }
   .header-inner {
     gap: 25px;
   }
@@ -1903,9 +1813,6 @@ button.heat-cell.selected {
     font-size: 12px;
     min-width: 54px;
   }
-  .row-arrow {
-    font-size: 14px;
-  }
   .auth-layout {
     grid-template-columns: 1fr;
     padding: 30px 0 70px;
@@ -1950,7 +1857,6 @@ button.heat-cell.selected {
   .site-footer span:last-child {
     display: none;
   }
-  .home-header,
   .filter-row {
     flex-direction: column;
     align-items: stretch;
@@ -1976,9 +1882,6 @@ button.heat-cell.selected {
   .problem-row:not(.submission-row) .difficulty {
     grid-area: level;
     justify-self: end;
-  }
-  .problem-row:not(.submission-row) .row-arrow {
-    grid-area: arrow;
   }
   .pagination {
     justify-content: center;
@@ -2011,28 +1914,6 @@ button.heat-cell.selected {
 .result-actions {
   margin-top: 8px;
   padding-bottom: 72px;
-}
-.solved-summary {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 14px;
-  font-size: 14px;
-  color: var(--color-ink-600);
-}
-.solved-summary strong {
-  color: var(--color-primary);
-  font-size: 18px;
-}
-.solved-summary .progress {
-  flex: 1;
-  max-width: 280px;
-}
-.chip-count {
-  margin-left: 6px;
-  font-size: 13px;
-  opacity: 0.7;
-  font-variant-numeric: tabular-nums;
 }
 .highlight-stats {
   display: flex;
@@ -2194,9 +2075,6 @@ kbd {
   }
 }
 @media (max-width: 650px) {
-  .home-header .pill {
-    align-self: flex-start;
-  }
   .filter-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2246,16 +2124,9 @@ kbd {
   position: relative;
   overflow: hidden;
 }
-.continue-card > :not(.learning-illustration) {
+.continue-card > * {
   position: relative;
   z-index: 1;
-}
-.learning-illustration {
-  position: absolute;
-  right: 28px;
-  bottom: 0;
-  width: min(340px, 42%);
-  height: auto;
 }
 .history-head,
 .history-row {
@@ -2354,18 +2225,6 @@ kbd {
 .notfound-page .card-actions {
   justify-content: center;
 }
-.soon-inline > div {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.soon-inline h2 {
-  margin: 0;
-}
-.soon-inline {
-  padding: 16px 24px;
-}
 @media (max-width: 880px) {
   .history-head {
     display: none;
@@ -2382,9 +2241,6 @@ kbd {
   .history-row .verdict {
     grid-area: verdict;
     justify-self: end;
-  }
-  .history-row .row-arrow {
-    grid-area: arrow;
   }
   .history-lang {
     grid-area: lang;
@@ -2758,27 +2614,6 @@ input,
   }
 }
 
-/* 일러스트: 좁은 폭에서도 숨기지 않고 위치만 바꾼다 */
-@media (max-width: 650px) {
-  .continue-card .learning-illustration {
-    position: static;
-    order: 99;
-    align-self: flex-end;
-    width: min(260px, 80%);
-    margin: 8px -16px -32px 0;
-  }
-}
-@media (min-width: 651px) and (max-width: 900px) {
-  .learning-illustration {
-    width: min(300px, 38%);
-  }
-}
-
-/* 머리글 오른쪽 영역의 푼 문제 요약(.solved-summary) — 지금은 쓰는 화면이 없다 */
-.page-header-aside .solved-summary {
-  margin: 0;
-  min-width: 240px;
-}
 .problem-title strong {
   font-size: 16px;
 }
@@ -2794,9 +2629,6 @@ input,
 }
 :root[data-theme="dark"] .site-header {
   border-bottom-color: var(--color-border);
-}
-:root[data-theme="dark"] .pill-dark {
-  background: rgba(255, 255, 255, 0.12);
 }
 :root[data-theme="dark"] .code-panel {
   border-color: var(--color-border);
@@ -2974,9 +2806,6 @@ input,
 }
 .button-soft:hover {
   background: var(--color-feature-border);
-}
-.button-white {
-  color: #364c82;
 }
 .problem-card-more .more-arrow {
   background: var(--color-button);
@@ -3169,17 +2998,7 @@ h3 {
   }
 }
 
-/* ===== 문제 목록: 비로그인 소개 카드(.brand-card). 머리글 버튼 영역(.header-actions)은 지금 쓰지 않는다 ===== */
-.header-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.header-actions .button {
-  white-space: nowrap;
-}
+/* ===== 문제 목록: 비로그인 소개 카드(.brand-card) ===== */
 .brand-card {
   padding: 16px 20px 22px;
   background: linear-gradient(160deg, var(--color-feature) 0%, var(--color-primary-soft) 100%);
@@ -3203,26 +3022,9 @@ h3 {
   color: var(--color-ink-600);
 }
 @media (max-width: 650px) {
-  .header-actions {
-    justify-content: flex-start;
-    gap: 14px;
-  }
-}
-@media (max-width: 650px) {
   .page-header-aside {
     flex: 1 1 100%;
     min-width: 0;
-  }
-  .header-actions {
-    flex-wrap: nowrap;
-    width: 100%;
-  }
-  .header-actions .solved-summary {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-  .header-actions .solved-summary .progress {
-    max-width: none;
   }
 }
 
@@ -3407,52 +3209,6 @@ h3 {
   align-items: start;
   padding-bottom: 48px;
 }
-.filter-menu {
-  position: relative;
-}
-.filter-menu-button {
-  gap: 8px;
-  padding: 0 16px;
-}
-.filter-menu-button.active {
-  border-color: var(--color-button);
-  color: var(--color-button);
-}
-.filter-count {
-  display: inline-grid;
-  place-items: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--color-button);
-  color: var(--color-on-solid);
-  font-size: 12px;
-}
-.filter-popover {
-  position: absolute;
-  z-index: 15;
-  top: calc(100% + 8px);
-  left: 0;
-  width: min(360px, calc(100vw - 32px));
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-panel);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
-}
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.filter-group > strong {
-  font-size: 13px;
-  color: var(--color-ink-600);
-}
 .post-list {
   list-style: none;
   margin: 0;
@@ -3538,26 +3294,6 @@ h3 {
   color: var(--color-ink-600);
   font-size: 13px;
 }
-.post-stats-cols {
-  display: flex;
-  gap: 18px;
-}
-.post-stats-cols > span {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 40px;
-  gap: 2px;
-}
-.post-stats-cols b {
-  font: 700 18px/1.2 var(--font-display);
-  font-variant-numeric: tabular-nums;
-  color: var(--color-ink-900);
-}
-.post-stats-cols small {
-  font-size: 12px;
-  color: var(--color-ink-600);
-}
 .community-nudge {
   display: flex;
   justify-content: space-between;
@@ -3611,36 +3347,6 @@ h3 {
   color: var(--color-ink-600);
   font-size: 14px;
   line-height: 1.8;
-}
-.community-about {
-  padding: 24px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-panel);
-}
-.community-about h2 {
-  font-size: 18px;
-  margin-bottom: 10px;
-}
-.community-about p {
-  margin-bottom: 18px;
-  color: var(--color-ink-600);
-  font-size: 14px;
-}
-.community-about-chips {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.community-about-chips button {
-  padding: 4px 16px;
-  min-height: 28px;
-  border: 0;
-  border-radius: var(--radius-control);
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  font-size: 14px;
-  font-weight: var(--weight-title);
 }
 
 /* 상세 */
@@ -3973,30 +3679,6 @@ h3 {
     height: 24px;
     font-size: 12px;
   }
-  .post-stats-cols {
-    gap: 14px;
-  }
-  .post-stats-cols > span {
-    flex-direction: row;
-    gap: 4px;
-    min-width: 0;
-  }
-  .post-stats-cols b {
-    font-size: 13px;
-    font-family: var(--font-sans);
-    font-weight: var(--weight-label);
-    order: 2;
-  }
-  .post-stats-cols small {
-    font-size: 13px;
-  }
-  .filter-menu {
-    width: 100%;
-  }
-  .filter-menu-button {
-    width: 100%;
-    justify-content: center;
-  }
   .community-pager {
     grid-template-columns: 1fr;
     justify-items: center;
@@ -4028,21 +3710,6 @@ h3 {
 }
 
 /* ===== 디자인 통일: 커뮤니티를 문제 목록과 같은 구성·치수로 맞춘다 ===== */
-/* 검색·필터·정렬은 문제 목록과 같은 필터 카드 한 줄 */
-.filter-row .filter-menu {
-  flex: none;
-}
-.filter-row .filter-menu-button {
-  min-height: var(--control-height);
-}
-.filter-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.filter-popover .filter-options {
-  gap: 9px;
-}
 /* 글 목록: 문제 목록처럼 한 덩어리 패널 + 행 구분선 */
 .post-list {
   gap: 0;
@@ -4077,9 +3744,6 @@ h3 {
 .community-guide h3 {
   font-size: 14px;
 }
-.community-about h2 {
-  font-size: 18px;
-}
 /* 상세·작성: 카드 제목 크기 통일, 작성 화면은 문제 만들기와 같은 폭·머리글 */
 .post-section-title,
 .answer-editor .post-section-title {
@@ -4092,12 +3756,6 @@ h3 {
   padding-top: 32px;
 }
 @media (max-width: 650px) {
-  .filter-row .filter-menu {
-    flex: 1 1 auto;
-  }
-  .filter-row .sort-toggle {
-    width: 100%;
-  }
   .post-row {
     padding: 14px 16px;
   }
@@ -4404,13 +4062,6 @@ h3 {
 .filter-bar .slide-toggle {
   margin: 0;
 }
-.filter-popover {
-  width: min(460px, calc(100vw - 32px));
-}
-.filter-popover .slide-toggle {
-  display: flex;
-  width: 100%;
-}
 @media (max-width: 650px) {
   .filter-bar {
     flex-wrap: wrap;
@@ -4430,10 +4081,6 @@ h3 {
   .toggle-option {
     transition: none;
   }
-}
-.filter-popover {
-  left: auto;
-  right: 0;
 }
 @media (max-width: 650px) {
   .toggle-option {
@@ -4500,40 +4147,6 @@ h3 {
 }
 .community-guide .button-full {
   margin-top: 14px;
-}
-
-/* 풀이 공유 안내: 위 질문 가이드 배너와 같은 형식(feature 바탕·같은 여백·폭 전체 버튼) */
-.community-about {
-  padding: 16px 18px 18px;
-  background: var(--color-feature);
-  border: 1px solid var(--color-feature-border);
-  border-radius: var(--radius-feature);
-}
-.community-about h2 {
-  font: var(--text-section);
-  font-size: 18px;
-  margin-bottom: 8px;
-}
-.community-about p {
-  margin-bottom: 14px;
-}
-
-/* 질문 가이드 + 풀이 공유 안내를 한 배너로 합침 */
-.community-guide-note {
-  margin: 14px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--color-feature-border);
-  color: var(--color-ink-600);
-  font-size: 14px;
-}
-.community-guide-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 14px;
-}
-.community-guide-actions .button {
-  padding: 0 10px;
 }
 
 /* 배너 하단: 질문 안내와 풀이 공유 안내를 가로로 나누고, 각 버튼을 자기 내용 아래 같은 높이에 맞춘다 */
@@ -4779,84 +4392,6 @@ h3 {
   flex: 1;
 }
 
-/* 필터 적용 상태 전환: 버튼 색, 개수 배지, 적용된 필터 태그 */
-.filter-menu-button {
-  transition:
-    border-color 0.2s ease,
-    color 0.2s ease,
-    background 0.2s ease;
-}
-.filter-menu-button .filter-count {
-  min-width: 0;
-  max-width: 0;
-  padding: 0;
-  margin-left: -8px;
-  opacity: 0;
-  transform: scale(0.8);
-  overflow: hidden;
-  transition:
-    max-width 0.22s ease,
-    margin 0.22s ease,
-    padding 0.22s ease,
-    opacity 0.2s ease,
-    transform 0.22s ease;
-}
-.filter-menu-button .filter-count.show {
-  min-width: 20px;
-  max-width: 32px;
-  padding: 0 6px;
-  margin-left: 0;
-  opacity: 1;
-  transform: scale(1);
-}
-.applied-wrap {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition:
-    grid-template-rows 0.22s ease,
-    opacity 0.2s ease;
-}
-.applied-wrap.open {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-.applied-inner {
-  min-height: 0;
-  overflow: hidden;
-}
-.applied-bar {
-  margin: 0;
-  padding: 14px 0 2px;
-}
-.applied-bar .filter-chip {
-  animation: chip-in 0.2s ease both;
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease,
-    border-color 0.15s ease;
-}
-.applied-bar .filter-chip.leaving {
-  opacity: 0;
-  transform: scale(0.9);
-  pointer-events: none;
-}
-@keyframes chip-in {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .filter-menu-button,
-  .filter-menu-button .filter-count,
-  .applied-wrap,
-  .applied-bar .filter-chip {
-    transition: none;
-    animation: none;
-  }
-}
-
 /* 프로필: 최근 제출 활동 아래에 추천한 글을 두고, 오른쪽 통계 카드와 높이를 맞춘다 */
 .profile-main-col {
   display: flex;
@@ -5067,9 +4602,6 @@ h3 {
 /* 최근 제출 활동 상세 박스: 세로 간격을 줄여 히트맵 높이에 맞춘다 */
 .activity-panel .day-detail {
   padding: 14px 24px;
-}
-.activity-panel .day-detail .day-date {
-  margin-bottom: 6px;
 }
 .activity-panel .day-detail .history-list {
   gap: 0;
@@ -5950,18 +5482,6 @@ h3 {
   color: var(--color-ink-900);
   font-weight: var(--weight-label);
 }
-.data-list .row-arrow {
-  color: var(--color-ink-400);
-  font-size: 18px;
-  line-height: 1;
-  transition:
-    transform 0.15s ease,
-    color 0.15s ease;
-}
-.data-list a:hover .row-arrow {
-  color: var(--color-primary);
-  transform: translateX(2px);
-}
 @media (max-width: 880px) {
   /* 좁은 화면: 머리글을 숨기고 한 행을 카드처럼 — 제목 한 줄, 아래에 배지·수치 */
   .data-list .problem-head,
@@ -5992,22 +5512,11 @@ h3 {
     order: 3;
     font-size: 13px;
   }
-  .data-list .row-arrow {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    order: 9;
-  }
-  .data-list a:hover .row-arrow {
-    transform: translateY(-50%) translateX(2px);
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .data-list .problem-row,
   .data-list .history-row,
-  .data-list .post-row,
-  .data-list .row-arrow {
+  .data-list .post-row {
     transition: none;
   }
 }
@@ -6148,17 +5657,6 @@ h3 {
   .shuffle-icon-button {
     transition: none;
   }
-}
-
-/* 위험한 동작(삭제)용 보조 버튼 */
-.button-danger-outline,
-.button-danger-outline:hover {
-  background: var(--color-surface);
-  border-color: var(--color-danger-border);
-  color: var(--color-danger);
-}
-.button-danger-outline:hover {
-  background: var(--color-danger-soft);
 }
 
 /* 풀이 화면 에디터: 글꼴 크기·커서 위치·단축키 안내 */
