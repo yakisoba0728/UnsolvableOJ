@@ -206,7 +206,7 @@ export function CreateProblemPage() {
     };
   }, [id, session?.user.id]);
 
-  // Store committed work immediately; unmount recovery must not depend on a debounce.
+  // 확정된 입력은 바로 저장한다: 화면을 벗어날 때의 복구가 지연 저장에 기대면 안 된다.
   function saveDraft() {
     if (doneRef.current || loading) return;
     const ok = writeProblemDraft(draftScope, draft);
@@ -261,7 +261,6 @@ export function CreateProblemPage() {
     return () => observer.disconnect();
   }, [loading, createdDraft]);
 
-  // ---- 테스트케이스 편집 ----
   function updateCase(key: string, change: Partial<CaseForm>) {
     doneRef.current = false;
     setForm((previous) => ({
@@ -327,7 +326,6 @@ export function CreateProblemPage() {
   const hiddenCount = form.cases.length - sampleCount;
   const firstCaseError = Object.keys(errors.cases)[0];
 
-  // ---- 확인 목록 ----
   const checklist = [
     { label: "제목", ok: !errors.title, target: "title" },
     ...(editing

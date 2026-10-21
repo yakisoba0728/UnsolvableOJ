@@ -48,7 +48,7 @@ let snapshotRaw: string | null | undefined;
 const listeners = new Set<() => void>();
 
 function commit(update: (current: Activity) => Activity) {
-  // shortcut: cross-tab read/write is not atomic; add locking if concurrent edits must be serialized.
+  // shortcut: 탭 사이의 읽기·쓰기가 원자적이지 않다. 동시 수정을 차례로 처리해야 하면 잠금을 추가한다.
   const next = update(load(true));
   const serialized = JSON.stringify(next);
   localStorage.setItem(storageKey, serialized);

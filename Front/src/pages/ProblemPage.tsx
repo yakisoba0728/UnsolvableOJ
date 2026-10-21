@@ -587,7 +587,7 @@ export function ProblemPage() {
   /** 계산한 편집 결과를 입력창에 적용한다(실행 취소가 유지되도록 브라우저 편집 명령을 우선 쓴다). */
   function applyEdit(target: HTMLTextAreaElement, next: EditState) {
     if (!applyToTextarea(target, next)) {
-      // Mirror reconciliation reads the DOM again in the same input event.
+      // 미러 칸 맞추기가 같은 입력 이벤트 안에서 DOM을 다시 읽으므로 값을 바로 넣는다.
       target.value = next.value;
       target.setSelectionRange(next.start, next.end);
       updateSource(next.value);

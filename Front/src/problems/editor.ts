@@ -148,8 +148,9 @@ export const hasErrors = (errors: FormErrors) =>
     name === "cases" ? Object.keys(value as object).length > 0 : Boolean(value),
   );
 
-// sessionStorage provides tab isolation, including tabs duplicated by the browser.
-// shortcut: recovery lasts for this tab's session, add an explicit export for closed-tab recovery.
+// sessionStorage라서 탭마다 따로 저장된다(브라우저가 복제한 탭도 분리된다).
+// 주인을 알 수 없는 옛 v1(localStorage) 초안은 가져오지도 지우지도 않는다.
+// shortcut: 이 탭이 열려 있는 동안만 복구된다. 닫은 탭까지 복구하려면 명시적인 내보내기를 추가한다.
 const draftKey = (scope: string) => `unsolvable-oj-problem-draft-v2:${scope}`;
 
 export interface ProblemDraft {
@@ -202,7 +203,6 @@ export function readProblemDraft(scope: string): DraftRead {
   const cached = drafts.get(scope);
   if (cached) return cached;
   try {
-    // Never adopt or delete the ownerless v1 localStorage record.
     const raw = sessionStorage.getItem(draftKey(scope));
     if (!raw || raw === "null") return { draft: null, failed: false };
     const value: unknown = JSON.parse(raw);

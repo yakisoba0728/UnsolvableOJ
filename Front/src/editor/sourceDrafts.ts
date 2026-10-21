@@ -46,7 +46,7 @@ export function writeSourceDraft(
     draft.savedAt = new Date();
     draft.failed = false;
   } catch {
-    // The in-memory value takes priority over an older stored draft.
+    // 저장하지 못해도 메모리의 값이 예전에 저장된 초안보다 우선한다.
   }
   return draft;
 }
@@ -65,7 +65,7 @@ export function resetSourceDraft(
   } catch {
     try {
       localStorage.setItem(id, starter);
-      // A reset still returns no draft while its fallback starter remains stored.
+      // 대신 시작 코드를 저장해 두었어도 초기화한 뒤에는 초안이 없는 것으로 본다.
       drafts.set(id, { draft, storedValue: starter });
       return true;
     } catch {

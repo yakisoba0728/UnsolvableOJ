@@ -74,7 +74,7 @@ export function ProfilePage() {
   const counts = submissionsByDay(history.submissions);
   const streak = streakDays(counts);
 
-  // 오늘이 속한 주를 마지막 열로, 일요일 시작 12주 격자
+  // 오늘이 속한 주를 마지막 열로, 일요일 시작 주 단위 격자(넓은 화면 16주, 좁은 화면 12주)
   const today = new Date();
   const start = new Date(today);
   start.setDate(today.getDate() - today.getDay() - (weeks - 1) * 7);

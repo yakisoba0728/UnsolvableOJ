@@ -24,7 +24,7 @@ const router = createBrowserRouter([
   },
 ]);
 
-// Observe navigation before React/Suspense commits, even when returning to the same entry.
+// React·Suspense가 화면을 바꾸기 전에 이동을 감지한다. 같은 기록 항목으로 돌아올 때도 센다.
 let location = router.state.location;
 let pendingLocation = router.state.navigation.location;
 router.subscribe((state) => {
