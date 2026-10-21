@@ -246,7 +246,7 @@ export function ProfilePage() {
             aria-valuemax={XP_PER_LEVEL}
             aria-valuenow={xpInLevel}
           >
-            <span style={{ width: `${xpInLevel}%` }} />
+            <span style={{ width: `${(xpInLevel / XP_PER_LEVEL) * 100}%` }} />
           </div>
         </div>
         <dl className="profile-stats">
