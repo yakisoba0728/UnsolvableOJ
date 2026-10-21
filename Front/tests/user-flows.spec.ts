@@ -1234,6 +1234,54 @@ test("each tab takes the draft from the moment it opened and does not sync live 
   await second.close();
 });
 
+test("every language starter is tidy: no input-example comment, consistent indentation, and a hint line", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.goto("/problems/view/sum");
+  const labels = [
+    "Python 3",
+    "C++ 20",
+    "C 17",
+    "Java 21",
+    "JavaScript",
+    "TypeScript",
+    "Go",
+    "Rust",
+  ];
+  let previousValue = "";
+  for (const [index, label] of labels.entries()) {
+    if (index > 0) {
+      await page.getByRole("combobox", { name: "언어", exact: true }).click();
+      await page.getByRole("option", { name: label, exact: true }).click();
+    }
+    const editor = page.getByRole("textbox", { name: `${label} 소스 코드` });
+    // 언어를 바꾼 직후에는 이름표만 먼저 바뀌고 내용은 잠깐 이전 언어일 수 있어, 내용이 바뀐 뒤에 읽는다.
+    if (index > 0)
+      await expect.poll(() => editor.inputValue()).not.toBe(previousValue);
+    const value = await editor.inputValue();
+    previousValue = value;
+    expect(value, label).not.toContain("입력 예시");
+    expect(value, label).toContain("여기에 코드를 작성하세요.");
+    // 들여쓰기는 한 단계(JS·TS는 2칸, 나머지는 4칸)의 배수이고, 열린 블록 없이 깊어지지 않는다.
+    const step = label === "JavaScript" || label === "TypeScript" ? 2 : 4;
+    let previous: { indent: number; text: string } | null = null;
+    for (const line of value.split("\n")) {
+      if (!line.trim()) continue;
+      const indent = line.length - line.trimStart().length;
+      expect(indent % step, `${label}: ${JSON.stringify(line)}`).toBe(0);
+      if (previous && indent > previous.indent) {
+        expect(
+          /[{(:]$/.test(previous.text.trimEnd()),
+          `${label}: 열린 블록 없이 깊어짐 ${JSON.stringify(line)}`,
+        ).toBe(true);
+        expect(indent - previous.indent, label).toBeLessThanOrEqual(step);
+      }
+      previous = { indent, text: line };
+    }
+  }
+});
+
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
   page,
 }) => {
