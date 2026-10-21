@@ -417,6 +417,24 @@ test("Ctrl/⌘+Enter pressed twice creates only one submission", async ({
   expect(posts).toBe(1);
 });
 
+test("Ctrl/⌘+Enter does not submit whitespace-only code", async ({ page }) => {
+  await authenticate(page);
+  let posts = 0;
+  await page.route("**/api/v1/problems/problem-id/submissions", (route) => {
+    posts += 1;
+    return route.fulfill({ status: 429, json: { message: "제출됨" } });
+  });
+  await page.goto("/problems/view/sum");
+  const editor = page.getByLabel("소스 코드");
+  await editor.fill("  \n\t\n");
+  await editor.press("ControlOrMeta+Enter");
+  // 이어서 실제 코드를 제출해 앞선 단축키가 요청을 보내지 않았는지 확인한다.
+  await editor.fill("print(1)");
+  await editor.press("ControlOrMeta+Enter");
+  await expect(page.getByRole("alert")).toHaveText("제출됨");
+  expect(posts).toBe(1);
+});
+
 test("submission API errors preserve the source and re-enable submission", async ({
   page,
 }) => {

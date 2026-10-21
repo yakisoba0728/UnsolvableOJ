@@ -386,8 +386,8 @@ export function ProblemPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // Ctrl/⌘+Enter로도 제출되므로 버튼 비활성화만으로는 중복 제출을 막을 수 없다.
-    if (!problem || !session || submittingRef.current) return;
+    // Ctrl/⌘+Enter로도 제출되므로 버튼 비활성화만으로는 중복·빈 코드 제출을 막을 수 없다.
+    if (!problem || !session || submittingRef.current || !source.trim()) return;
     submittingRef.current = true;
     const requestedFor = problem.id;
     setSubmitting(true);
