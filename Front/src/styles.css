@@ -1164,7 +1164,8 @@ textarea {
 }
 .list-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  /* 오른쪽 카드 열: 예전 폭(320px)과 줄였던 폭(262px)의 중간(291px)으로 두어 목록에 폭을 더 주면서 카드 내용도 여유 있게 담는다 */
+  grid-template-columns: minmax(0, 1fr) 291px;
   gap: 24px;
   align-items: start;
 }
@@ -1329,26 +1330,27 @@ textarea {
   flex: 1;
   min-width: 0;
 }
-.breadcrumb {
-  display: flex;
-  align-items: center; /* 링크에만 터치 영역 패딩이 있어도 글자 높이를 맞춘다 */
-  gap: 8px;
-  color: var(--color-ink-600);
-  font-size: 13px;
-}
-.breadcrumb a {
-  padding: 6px 2px;
-}
-.breadcrumb a:hover {
-  color: var(--color-primary);
-}
 .solve-grid {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);
-  gap: 16px;
+  /* 문제 설명 | 크기 조절 손잡이 | 코드 작성. 열 크기는 화면 코드가 --solve-columns로 정한다(기본은 3:5) */
+  grid-template-columns: var(
+    --solve-columns,
+    minmax(0, 3fr) 16px minmax(0, 5fr)
+  );
+  column-gap: 0;
+  row-gap: 16px;
   align-items: stretch;
   height: calc(100vh - 176px);
   min-height: 560px;
+}
+.solve-grid > .statement-panel {
+  grid-column: 1;
+}
+.solve-grid > .solve-resizer {
+  grid-column: 2;
+}
+.solve-grid > .code-panel {
+  grid-column: 3;
 }
 .solve-panel {
   background: var(--color-surface);
@@ -1801,6 +1803,14 @@ button.heat-cell.selected {
   .solve-grid {
     grid-template-columns: 1fr;
     height: auto;
+  }
+  /* 위아래로 쌓이는 배치에서는 크기 조절 손잡이도, 패널 숨김도 쓰지 않는다 */
+  .solve-grid > .statement-panel,
+  .solve-grid > .code-panel {
+    grid-column: 1;
+  }
+  .solve-grid > .solve-resizer {
+    display: none;
   }
   .statement-panel .problem-content {
     max-height: 60vh;
@@ -2703,6 +2713,8 @@ input,
     border-bottom: 1px solid var(--color-border);
     box-shadow: 0 16px 24px rgba(0, 0, 0, 0.08);
     z-index: 19;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
   }
   .main-nav.open {
     display: flex;
@@ -2790,14 +2802,10 @@ input,
   border-color: var(--color-border);
 }
 
-/* 풀이 화면 머리글(모바일): 이동 경로는 한 줄을 차지하고, 제목·난이도는 그 아래에 놓는다 */
+/* 풀이 화면 머리글(모바일): 제목이 남는 폭을 차지하고 난이도는 그 옆(길면 아래)에 놓는다 */
 @media (max-width: 650px) {
   .solve-heading {
     row-gap: 4px;
-  }
-  .breadcrumb {
-    flex: 1 0 100%;
-    flex-wrap: wrap;
   }
   .solve-heading h1 {
     flex: 1 1 0;
@@ -2843,28 +2851,59 @@ input,
 .slider-area {
   position: relative;
 }
-/* 트랙은 컨테이너 양쪽 여백을 지나 화면 끝까지 확장된다(좌우 대칭).
-   처음에는 첫 카드가 컨테이너 왼쪽 선에, 끝에서는 마지막 카드가 오른쪽 선에 맞는다. */
+/* 트랙은 컨테이너(위·아래 카드와 같은 폭) 안에서만 보인다.
+   스크롤된 쪽 가장자리에서는 카드가 점점 흐려지다가 컨테이너 경계에서 완전히 사라진다. */
+@property --slider-fade-left {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+@property --slider-fade-right {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+.slider-area {
+  --slider-fade-size: 72px;
+  --slider-fade-left: 0px;
+  --slider-fade-right: 0px;
+  transition:
+    --slider-fade-left 0.2s,
+    --slider-fade-right 0.2s;
+}
+.slider-area.can-back {
+  --slider-fade-left: var(--slider-fade-size);
+}
+.slider-area.can-forward {
+  --slider-fade-right: var(--slider-fade-size);
+}
 .slider-track {
   display: flex;
   gap: 16px;
-  margin-left: calc((100% - 100vw) / 2);
-  margin-right: calc((100% - 100vw) / 2);
-  padding: 2px calc((100vw - 100%) / 2) 4px calc((100vw - 100%) / 2 + 2px);
+  padding: 2px 2px 4px;
   overflow-x: auto;
-  scroll-snap-type: x proximity;
-  /* 왼쪽 패딩과 같은 값: 시작 위치가 scrollLeft 0이 되게.
-     scroll-padding의 %는 트랙 전체 폭 기준이라, 컨테이너 폭(.page-width와 같은 식)을 직접 빼서 여백을 구한다 */
-  scroll-padding-left: calc((100% - min(1180px, 100% - 48px)) / 2 + 2px);
   scrollbar-width: none;
   overscroll-behavior-x: contain;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--slider-fade-left),
+    #000 calc(100% - var(--slider-fade-right)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--slider-fade-left),
+    #000 calc(100% - var(--slider-fade-right)),
+    transparent 100%
+  );
 }
 .slider-track::-webkit-scrollbar {
   display: none;
 }
 .slider-track > .problem-card {
   flex: 0 0 340px;
-  scroll-snap-align: start;
 }
 .problem-card-more {
   align-items: center;
@@ -2887,29 +2926,26 @@ input,
 .problem-card-more:hover .more-arrow {
   background: var(--color-primary-solid-hover);
 }
-/* 가장자리 블러: 좌우 모두 컨테이너 바깥 여백까지 같은 폭으로 대칭 */
+/* 가장자리 블러: 컨테이너 경계 쪽으로 갈수록 강해진다(카드는 위 마스크로 같은 폭에서 투명해진다) */
 .slider-fade {
   position: absolute;
   top: 0;
   bottom: 0;
+  width: var(--slider-fade-size);
   pointer-events: none;
   transition: opacity 0.2s;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-}
-.slider-fade.right {
-  right: calc((100% - 100vw) / 2);
-  width: calc((100vw - 100%) / 2 + 64px);
-  background: linear-gradient(to right, transparent, var(--color-bg) 80%);
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 55%);
-  mask-image: linear-gradient(to right, transparent, #000 55%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .slider-fade.left {
-  left: calc((100% - 100vw) / 2);
-  width: calc((100vw - 100%) / 2 + 64px);
-  background: linear-gradient(to left, transparent, var(--color-bg) 80%);
-  -webkit-mask-image: linear-gradient(to left, transparent, #000 55%);
-  mask-image: linear-gradient(to left, transparent, #000 55%);
+  left: 0;
+  -webkit-mask-image: linear-gradient(to right, #000, transparent);
+  mask-image: linear-gradient(to right, #000, transparent);
+}
+.slider-fade.right {
+  right: 0;
+  -webkit-mask-image: linear-gradient(to left, #000, transparent);
+  mask-image: linear-gradient(to left, #000, transparent);
 }
 .slider-fade.hidden {
   opacity: 0;
@@ -2924,6 +2960,7 @@ input,
 }
 @media (prefers-reduced-motion: reduce) {
   .slider-fade,
+  .slider-area,
   .arrow-button {
     transition: none;
   }
@@ -3189,9 +3226,13 @@ h3 {
   }
 }
 
-/* 데스크톱 메뉴 표시선: 활성 메뉴로 미끄러져 이동 (움직임 줄이기 설정이면 즉시 이동) */
-.main-nav {
-  position: relative;
+/* 데스크톱 메뉴 표시선: 활성 메뉴로 미끄러져 이동 (움직임 줄이기 설정이면 즉시 이동)
+   표시선의 기준이 되도록 데스크톱에서만 relative로 둔다. 1100px 이하의 펼침 메뉴는 헤더 아래에
+   absolute로 펼쳐지므로 여기서 덮어쓰면 안 된다(덮어쓰면 메뉴가 헤더 줄 안에 끼어 좁게 밀린다). */
+@media (min-width: 1101px) {
+  .main-nav {
+    position: relative;
+  }
 }
 .nav-indicator {
   position: absolute;
@@ -5748,7 +5789,7 @@ h3 {
   overflow: hidden;
 }
 .data-list.list-history {
-  --cols: minmax(0, 1fr) 176px 112px 148px 168px 16px;
+  --cols: minmax(0, 1fr) 144px 104px 96px 148px 168px;
 }
 .data-list.list-posts {
   --cols: 96px minmax(0, 1fr) 72px 80px;
@@ -6134,27 +6175,29 @@ h3 {
 .font-controls {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  color: #b9c7db;
+  gap: 6px;
+  color: var(--color-code-ink);
 }
+/* 글꼴 크기 버튼: 어두운 툴바에서도 버튼으로 보이도록 테두리와 옅은 배경, 밝은 글자를 쓴다 */
 .font-button {
-  min-width: 30px;
-  height: 28px;
-  padding: 0 6px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: transparent;
+  min-width: 34px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid rgba(233, 240, 249, 0.4);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.1);
   color: inherit;
-  font-size: 12px;
-  font-weight: var(--weight-label);
+  font-size: 13px;
+  font-weight: var(--weight-title);
   cursor: pointer;
 }
 .font-button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.7);
   color: #fff;
 }
 .font-button:disabled {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: default;
 }
 .font-button:focus-visible {
@@ -6162,10 +6205,48 @@ h3 {
   outline-offset: 1px;
 }
 .font-size {
-  min-width: 22px;
+  min-width: 26px;
   text-align: center;
-  font-size: 12px;
+  color: var(--color-code-ink);
+  font-size: 13px;
+  font-weight: var(--weight-label);
   font-variant-numeric: tabular-nums;
+}
+/* 초기화 버튼: 글꼴 크기 버튼과 같은 모양의 외곽선 버튼 */
+.text-button.light.reset-button {
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid rgba(233, 240, 249, 0.4);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-code-ink);
+  font-size: 13px;
+  font-weight: var(--weight-title);
+}
+.text-button.light.reset-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.7);
+  color: #fff;
+}
+.text-button.light.reset-button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+.font-button,
+.text-button.light.reset-button {
+  white-space: nowrap;
+}
+@media (max-width: 650px) {
+  /* 좁은 화면: 언어 선택·글꼴 크기·초기화를 한 줄에 두고, 저장 상태 문구는 아래 줄로 내려 글자가 세로로 쪼개지지 않게 한다 */
+  .code-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .code-toolbar .save-state {
+    order: 3;
+    flex: 1 0 100%;
+    min-width: 0;
+  }
 }
 .editor-hints {
   margin: 0;
@@ -7055,4 +7136,241 @@ textarea {
 .search-tag-remove:focus-visible {
   background: color-mix(in srgb, var(--color-primary) 20%, transparent);
   outline: none;
+}
+
+/* 내 제출 목록: 문제 제목을 뺀 나머지 열을 모두 오른쪽 정렬(문제 목록·커뮤니티 목록과 같게), 끝 화살표 없음 */
+.data-list.list-history .history-head span:not(:first-child),
+.data-list.list-history .history-row .verdict,
+.data-list.list-history .history-row .history-lang,
+.data-list.list-history .history-row .history-tests,
+.data-list.list-history .history-row .history-metrics,
+.data-list.list-history .history-row .history-time {
+  justify-self: end;
+  text-align: right;
+}
+.data-list .history-tests {
+  color: var(--color-ink-700);
+  font: 400 14px/1.4 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+@media (max-width: 880px) {
+  /* 좁은 화면은 카드형 배치라 왼쪽 정렬을 유지하고, 열 머리글이 없으니 테스트 수 앞에 이름을 붙인다 */
+  .data-list.list-history .history-row .verdict,
+  .data-list.list-history .history-row .history-lang,
+  .data-list.list-history .history-row .history-tests,
+  .data-list.list-history .history-row .history-metrics,
+  .data-list.list-history .history-row .history-time {
+    justify-self: auto;
+    text-align: left;
+  }
+  .data-list.list-history .history-row {
+    padding-right: 16px;
+  }
+  .data-list.list-history .history-row .history-tests {
+    order: 2;
+  }
+  .data-list.list-history .history-tests::before {
+    content: attr(data-label) " ";
+    color: var(--color-ink-500);
+  }
+}
+
+/* 글 작성: 태그 입력과 카테고리 선택을 한 줄에(카테고리는 좁게 오른쪽), 임시 저장 안내와 버튼을 한 줄에 */
+.write-form .field-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.write-form .field-row > .field-group {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.write-form .field-row > .field-category {
+  flex: 0 0 150px;
+}
+.write-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin: 16px 0;
+}
+.write-bar .write-hint {
+  margin: 0;
+}
+.write-bar .write-footer {
+  margin-left: auto;
+}
+@media (max-width: 650px) {
+  .write-form .field-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .write-form .field-row > .field-category {
+    flex: none;
+  }
+  .write-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .write-bar .write-footer {
+    margin-left: 0;
+  }
+}
+/* 같은 줄의 두 라벨(태그·카테고리)은 높이와 위치를 똑같이 맞춘다 */
+.write-form .field-row .field-group > label,
+.write-form .field-row .field-label {
+  display: block;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: var(--weight-title);
+}
+
+/* 글 작성: 본문 칸은 기본으로 크게(미리보기도 같은 높이), 입력 중 안내는 회원가입과 같은 방식 */
+.write-form .write-body-input,
+.write-form .write-body-preview {
+  min-height: 480px;
+}
+.write-form .write-body-preview {
+  box-sizing: border-box;
+}
+.write-form [aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px var(--color-danger-soft);
+}
+.write-form .tag-input[aria-invalid="true"]:focus-within {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px var(--color-danger-soft);
+}
+.write-form .md-field {
+  scroll-margin-top: 100px;
+}
+
+/* 본문의 *기울임*: Pretendard에는 이탤릭 글자체가 없어서 전역 font-synthesis: none 때문에 똑바로 보였다. 기울임만 합성을 허용한다 */
+.markdown em {
+  font-synthesis: style;
+}
+
+/* 커뮤니티 목록: 추천·조회 수 열을 문제 목록처럼 오른쪽 정렬해, 마지막 열이 목록 안쪽 여백에 닿게 한다 */
+.data-list.list-posts .post-head span:nth-child(n + 3),
+.data-list.list-posts .post-row .post-num {
+  justify-self: end;
+  justify-content: flex-end;
+  text-align: right;
+}
+@media (max-width: 880px) {
+  /* 좁은 화면은 카드형 배치라 왼쪽 정렬을 유지한다 */
+  .data-list.list-posts .post-row .post-num {
+    justify-self: auto;
+    justify-content: flex-start;
+    text-align: left;
+  }
+}
+
+/* 슬라이드 키보드 포커스 링: 트랙의 마스크(가장자리 흐림)가 트랙 밖에 그려지는 outline을 잘라 링이 안 보였다.
+   :has를 지원하면 마스크가 없는 바깥 영역에 링을 그리고, 지원하지 않으면 트랙 안쪽으로 그린다. */
+.slider-track:focus-visible {
+  outline-offset: -3px;
+}
+@supports selector(:has(*)) {
+  .slider-track:focus-visible {
+    outline: none;
+  }
+  .slider-area:has(> .slider-track:focus-visible) {
+    outline: 3px solid var(--color-ink-900);
+    outline-offset: 4px;
+    border-radius: var(--radius-panel);
+  }
+}
+
+/* 내 제출 목록: 881~1100px에서는 고정 열 폭 합이 커서 제목 열이 60~160px까지 줄어 말줄임이 심했다.
+   이 구간에서만 열 폭을 줄여 제목이 읽히게 한다(1100px 초과·880px 이하의 모양은 그대로). */
+@media (min-width: 881px) and (max-width: 1100px) {
+  .data-list.list-history {
+    --cols: minmax(0, 1fr) 112px 80px 72px 120px 140px;
+  }
+}
+
+/* 풀이 화면: 문제 설명과 코드 작성 사이의 가로 크기 조절 손잡이(프로그래머스처럼 끌어서 조절) */
+.solve-resizer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+.solve-resizer-grip {
+  width: 4px;
+  height: 56px;
+  border-radius: 999px;
+  background: var(--color-border-strong);
+  transition:
+    background 0.15s ease,
+    height 0.15s ease;
+}
+.solve-resizer:hover .solve-resizer-grip,
+.solve-resizer:focus-visible .solve-resizer-grip,
+.solve-grid.is-dragging .solve-resizer-grip {
+  height: 96px;
+  background: var(--color-primary);
+}
+.solve-resizer:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-control);
+}
+/* 한쪽 패널이 너무 좁아져 사라진 상태: 사라진 패널은 숨기고(입력 중인 코드와 선택한 탭은 그대로 보존), 손잡이는 남긴다 */
+.solve-grid > .solve-panel.is-hidden {
+  display: none;
+}
+/* 세로로 쌓이는 폭에서는 손잡이가 없으므로 저장된 숨김 상태를 무시하고 둘 다 보여 준다 */
+@media (max-width: 1100px) {
+  .solve-grid > .solve-panel.is-hidden {
+    display: flex;
+  }
+}
+.solve-grid.is-dragging {
+  user-select: none;
+  cursor: col-resize;
+}
+.solve-grid.is-dragging iframe,
+.solve-grid.is-dragging textarea {
+  pointer-events: none;
+}
+.solve-grid.is-code .solve-resizer-grip::before,
+.solve-grid.is-statement .solve-resizer-grip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid var(--color-ink-600);
+  border-right: 2px solid var(--color-ink-600);
+  transform: translateY(-50%) rotate(45deg);
+}
+/* 문제 설명이 숨겨졌으면 손잡이 왼쪽 가장자리에서 오른쪽(열기) 방향, 코드 작성이 숨겨졌으면 반대 방향의 화살표를 보인다 */
+.solve-grid.is-code .solve-resizer-grip::before {
+  left: -2px;
+}
+.solve-grid.is-statement .solve-resizer-grip::before {
+  right: -2px;
+  transform: translateY(-50%) rotate(225deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .solve-resizer-grip {
+    transition: none;
+  }
+}
+
+/* 내 제출 목록의 판정은 알약 대신 색만 입힌 글씨로 보인다(풀이 화면·제출 상세의 판정 알약은 그대로).
+   굵기·크기는 문제 목록의 난이도 글씨(700, 14px)와 같다. */
+.data-list.list-history .history-row .verdict {
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font: 700 14px/1.4 var(--font-sans);
+  letter-spacing: 0;
 }

@@ -14,7 +14,7 @@ const prefersReducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
- * 가로 슬라이드. 화면 오른쪽 끝까지 확장되고, 가장자리는 블러로 흐려진다.
+ * 가로 슬라이드. 컨테이너 안에서만 보이고, 스크롤된 쪽 가장자리는 블러와 함께 흐려지다가 경계에서 완전히 사라진다.
  * 화살표 · 마우스 휠 · 터치 스와이프 · 키보드(←/→)로 이동하며, 끝에 닿으면 휠이 페이지 스크롤로 넘어간다.
  */
 export function CardSlider({ title, description, label, count, children }: CardSliderProps) {
@@ -101,7 +101,9 @@ export function CardSlider({ title, description, label, count, children }: CardS
           </button>
         </div>
       </div>
-      <div className="slider-area">
+      <div
+        className={`slider-area ${edge.start ? "" : "can-back"} ${edge.end ? "" : "can-forward"}`}
+      >
         <div
           className="slider-track"
           ref={track}

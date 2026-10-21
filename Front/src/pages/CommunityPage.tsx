@@ -28,6 +28,7 @@ import {
   type CommunityPost,
 } from "../community/types";
 import { useDocumentTitle, useStickyTop } from "../hooks";
+import { pageRange, pageRangeTitle } from "../pageRange";
 
 const PAGE_SIZE = 10;
 
@@ -80,7 +81,7 @@ export function CommunityPage() {
       ...(params.get("t") ?? "").split(","),
     ].filter(Boolean)),
   ];
-  const page = Math.max(1, Number(params.get("page")) || 1);
+  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
   const size = PAGE_SIZE;
 
   // 검색어는 입력 중에는 로컬 상태로 두고, 잠시 멈추면 주소에 반영한다.
@@ -163,7 +164,8 @@ export function CommunityPage() {
     statusFilter: string[],
   ) => {
     // 일반 검색어는 제목에서만 찾는다. 태그는 '#단어' + Enter로 만든 태그 알약으로만 거른다.
-    const matchesKeyword = !keyword || post.title.toLowerCase().includes(keyword);
+    const matchesKeyword =
+      !keyword || post.title.toLowerCase().includes(keyword);
     // 고른 태그를 모두 가진 글만 보인다(대소문자 무시).
     const matchesTags = selectedTags.every((tag) =>
       post.tags.some((item) => item.toLowerCase() === tag.toLowerCase()),
@@ -182,15 +184,29 @@ export function CommunityPage() {
     }
     return matchesKeyword && matchesTags;
   };
-  // 고정 공지는 어떤 필터에서도 항상 보이므로 칩·목록 개수에서는 빼서 합계가 맞게 한다.
+  // 고정 공지는 어떤 필터에서도 목록에 항상 보이지만, 개수는 "그 칩에 실제로 속하는 글"만 센다:
+  // 분류는 공지 칩과 전체 칩에만 들어가고, 상태는 채택된 답변이 없으므로 "채택 전"과 전체에 들어간다(검색어·태그는 그대로 적용).
+  const belongs = (
+    post: CommunityPost,
+    categoryFilter: CategoryKey[],
+    statusFilter: string[],
+  ) => {
+    if (!post.pinned) return matches(post, categoryFilter, statusFilter);
+    if (categoryFilter.length && !categoryFilter.includes(post.category))
+      return false;
+    if (
+      statusFilter.length &&
+      !statusFilter.some((state) => state !== "accepted")
+    )
+      return false;
+    return matches(post, [], []);
+  };
   const categoryCount = (value: CategoryKey | "") =>
-    posts.filter(
-      (post) => !post.pinned && matches(post, value ? [value] : [], statuses),
-    ).length;
+    posts.filter((post) => belongs(post, value ? [value] : [], statuses))
+      .length;
   const statusCount = (value: string) =>
-    posts.filter(
-      (post) =>
-        !post.pinned && matches(post, selectedCategories, value ? [value] : []),
+    posts.filter((post) =>
+      belongs(post, selectedCategories, value ? [value] : []),
     ).length;
 
   const filtered = useMemo(() => {
@@ -226,9 +242,9 @@ export function CommunityPage() {
   const visible = filtered.slice(first, first + size);
   const hasFilter = Boolean(
     selectedCategories.length ||
-      statuses.length ||
-      selectedTags.length ||
-      urlQuery.trim(),
+    statuses.length ||
+    selectedTags.length ||
+    urlQuery.trim(),
   );
 
   function write(initialCategory?: CategoryKey) {
@@ -289,7 +305,12 @@ export function CommunityPage() {
                 value={queryText}
                 onChange={(event) => setQueryText(event.target.value)}
                 onKeyDown={(event) => {
-                  if (event.nativeEvent.isComposing) return;
+                  // Safari는 한글 조합 확정 Enter를 isComposing=false, keyCode 229로 보낸다(Enter일 때만 막는다).
+                  if (
+                    event.nativeEvent.isComposing ||
+                    (event.key === "Enter" && event.keyCode === 229)
+                  )
+                    return;
                   if (event.key === "Enter" && commitTag(queryText)) {
                     event.preventDefault();
                   } else if (
@@ -367,8 +388,15 @@ export function CommunityPage() {
                 </button>
               ) : null}
             </div>
-            <span className="total-count">
-              {filtered.filter((post) => !post.pinned).length}개
+            <span
+              className="total-count"
+              aria-hidden="true"
+              title={pageRangeTitle(first, visible.length, filtered.length)}
+            >
+              {pageRange(first, visible.length, filtered.length)}
+            </span>
+            <span className="sr-only">
+              {pageRangeTitle(first, visible.length, filtered.length)}
             </span>
           </div>
           {visible.length ? (

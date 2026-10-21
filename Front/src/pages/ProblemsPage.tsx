@@ -6,6 +6,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
 import { Pagination } from "../components/Pagination";
+import { pageRange, pageRangeTitle } from "../pageRange";
 import { Skeleton, SkeletonRegion, SkeletonRows } from "../components/Skeleton";
 import { ReverseIcon } from "../components/ReverseIcon";
 import { ShuffleIcon } from "../components/ShuffleIcon";
@@ -104,9 +105,10 @@ export function ProblemsPage() {
   const legacySort = legacySorts[rawSort];
   const sort = legacySort?.sort ?? rawSort;
   // 기본 순서(최신순=최신 먼저, 난이도순=쉬운 것 먼저, 푼 사람순=많은 순, 정답률순=높은 순)를 뒤집은 상태
-  const reversed = (params.get("rev") === "1") !== Boolean(legacySort?.reversed);
+  const reversed =
+    (params.get("rev") === "1") !== Boolean(legacySort?.reversed);
   const seed = Number(params.get("seed")) || 1;
-  const page = Math.max(1, Number(params.get("page")) || 1);
+  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
 
   function update(
     patch: Record<string, string | null>,
@@ -197,9 +199,7 @@ export function ProblemsPage() {
     else if (sort === "title")
       base.sort((a, b) => a.title.localeCompare(b.title, "ko") * dir);
     else if (sort === "solvers")
-      base.sort(
-        (a, b) => ((b.solverCount ?? 0) - (a.solverCount ?? 0)) * dir,
-      );
+      base.sort((a, b) => ((b.solverCount ?? 0) - (a.solverCount ?? 0)) * dir);
     else if (sort === "rate")
       // 정답률이 없는(제출 없는) 문제는 뒤집어도 맨 뒤에 둔다.
       base.sort((a, b) => {
@@ -213,7 +213,15 @@ export function ProblemsPage() {
       base.sort((a, b) => b.createdAt.localeCompare(a.createdAt) * dir);
     return base.filter((problem) => matches(problem, null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [problems, sort, reversed, seed, params, history.solved, history.attempted]);
+  }, [
+    problems,
+    sort,
+    reversed,
+    seed,
+    params,
+    history.solved,
+    history.attempted,
+  ]);
 
   const statusCount = (value: "" | SolveState) =>
     problems.filter(
@@ -429,18 +437,29 @@ export function ProblemsPage() {
                 </>
               ) : null}
             </div>
-            <span className="total-count">
+            <span
+              className="total-count"
+              aria-hidden={loading ? undefined : true}
+            >
               {loading ? (
                 <Skeleton width={80} height={14} />
               ) : (
-                <>
-                  {filtered.length}문제
-                  {filtered.length
-                    ? ` 중 ${(current - 1) * PAGE_SIZE + 1}–${(current - 1) * PAGE_SIZE + visible.length}`
-                    : ""}
-                </>
+                pageRange(
+                  (current - 1) * PAGE_SIZE,
+                  visible.length,
+                  filtered.length,
+                )
               )}
             </span>
+            {loading ? null : (
+              <span className="sr-only">
+                {pageRangeTitle(
+                  (current - 1) * PAGE_SIZE,
+                  visible.length,
+                  filtered.length,
+                )}
+              </span>
+            )}
           </div>
           {loading ? (
             <SkeletonRows count={8} />
@@ -454,10 +473,17 @@ export function ProblemsPage() {
               </div>
               {visible.map((problem) => (
                 <div className="problem-row-wrap" key={problem.id}>
-                  <Link className="problem-row" to={problemPath(problem.slug)}>
+                  {/* 프로그래머스처럼 문제는 새 탭에서 열어, 목록의 검색·필터·쪽 위치를 그대로 둔다. */}
+                  <Link
+                    className="problem-row"
+                    to={problemPath(problem.slug)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <span className="problem-title">
                       <span className="post-title-line">
                         <strong title={problem.title}>{problem.title}</strong>
+                        <span className="sr-only">(새 탭에서 열려요)</span>
                         {session && history.loading ? (
                           <Skeleton width={48} height={16} />
                         ) : stateOf(problem) === "none" ? null : (

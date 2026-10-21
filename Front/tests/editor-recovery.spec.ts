@@ -251,8 +251,9 @@ test("source storage failure keeps the latest draft across languages and visits,
   await page.getByRole("combobox", { name: "언어", exact: true }).click();
   await page.getByRole("option", { name: "Python 3", exact: true }).click();
   await expect(editor).toHaveValue("print('memory latest')");
-  await page.getByRole("link", { name: "문제 목록", exact: true }).click();
-  await page.getByRole("link", { name: new RegExp(problem.title) }).click();
+  await page.locator("header").getByRole("link", { name: "문제", exact: true }).click();
+  await expect(page).toHaveURL(/\/problems$/);
+  await page.goBack();
   await expect(editor).toHaveValue("print('memory latest')");
   await page.getByRole("button", { name: "초기화", exact: true }).click();
   await expect(editor).not.toHaveValue("print('memory latest')");
@@ -269,6 +270,8 @@ test("mirrored snippet input survives an execCommand no-op in the actual editor"
   await page.getByRole("combobox", { name: "언어", exact: true }).click();
   await page.getByRole("option", { name: "Java 21", exact: true }).click();
   const editor = page.getByLabel("소스 코드");
+  // 언어를 바꾸면 시작 코드가 한 번 더 그린 뒤에 들어오므로, 들어온 것을 확인하고 비운다.
+  await expect(editor).toHaveValue(/public class Main/);
   await editor.fill("");
   await editor.pressSequentially("fori");
   await page.getByRole("listbox", { name: "자동완성 제안" }).getByRole("option", { name: /^fori/ }).click();

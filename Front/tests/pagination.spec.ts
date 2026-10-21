@@ -48,7 +48,7 @@ test("all imported problems remain searchable beyond five pages", async ({
     });
   });
   await page.goto("/problems");
-  await expect(page.locator(".total-count")).toContainText("9744문제");
+  await expect(page.locator(".total-count")).toHaveText("1 - 20/9744");
   expect([...requested].sort((a, b) => a - b)).toEqual(
     Array.from({ length: 10 }, (_, i) => i + 1),
   );

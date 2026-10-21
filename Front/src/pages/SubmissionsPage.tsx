@@ -56,7 +56,7 @@ export function SubmissionsPage() {
     );
   const language = params.get("l") ?? "";
   const grouped = params.get("g") === "problem";
-  const page = Math.max(1, Number(params.get("page")) || 1);
+  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
 
   function update(
     patch: Record<string, string | null>,
@@ -238,13 +238,14 @@ export function SubmissionsPage() {
         </p>
       ) : null}
       {loading ? (
-        <SkeletonRows count={8} columns={5} />
+        <SkeletonRows count={8} columns={6} />
       ) : visible.length ? (
         <div className="problem-list data-list list-history">
           <div className="history-head" aria-hidden="true">
             <span>문제</span>
             <span>판정</span>
             <span>언어</span>
+            <span>테스트</span>
             <span>실행 결과</span>
             <span>제출 시각</span>
           </div>
@@ -256,16 +257,16 @@ export function SubmissionsPage() {
             >
               <span className="history-title">
                 <strong>{item.problem.title ?? "문제"}</strong>
-                <small>
-                  {item.passedTestCases} / {item.totalTestCases} 통과
-                  {grouped ? ` · 이 문제 ${count}회 제출` : ""}
-                </small>
+                {grouped ? <small>이 문제 {count}회 제출</small> : null}
               </span>
               <span className={`verdict verdict-${item.status.toLowerCase()}`}>
                 {verdictLabel(item.status)}
               </span>
               <span className="history-lang">
                 {languageLabels[item.language] ?? item.language}
+              </span>
+              <span className="history-tests" data-label="테스트">
+                {item.passedTestCases}/{item.totalTestCases}
               </span>
               <span className="history-metrics">
                 {item.runtimeMs === null ? "—" : `${item.runtimeMs}ms`}
@@ -282,9 +283,6 @@ export function SubmissionsPage() {
                   minute: "2-digit",
                 })}
               </time>
-              <span className="row-arrow" aria-hidden="true">
-                ›
-              </span>
             </Link>
           ))}
         </div>
