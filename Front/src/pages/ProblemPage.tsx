@@ -494,10 +494,11 @@ export function ProblemPage() {
 
   function startSplitDrag(event: React.PointerEvent<HTMLDivElement>) {
     const grid = gridRef.current;
-    // 보조 버튼·두 번째 손가락·이미 끌고 있는 중의 입력은 무시한다
-    if (!grid || event.button !== 0 || !event.isPrimary || endDragRef.current)
-      return;
+    // 보조 버튼과 두 번째 손가락의 입력은 무시한다
+    if (!grid || event.button !== 0 || !event.isPrimary) return;
     event.preventDefault();
+    // 어떤 이유로 끝나지 못한 이전 끌기가 있으면 정리하고 새로 시작한다(이후 끌기가 막히지 않게)
+    endDragRef.current?.();
     const handle = event.currentTarget;
     const pointerId = event.pointerId;
     handle.setPointerCapture(pointerId);
