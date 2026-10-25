@@ -1,0 +1,170 @@
+# Dokploy: Docker Compose mode, repository root as the checkout directory.
+# All six services run on one host; sandbox has no public ports or data mounts.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    mem_limit: ${POSTGRES_MEMORY_LIMIT:-1g}
+    environment:
+      POSTGRES_DB: unsolvable_oj
+      POSTGRES_USER: unsolvable
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a random hex PostgreSQL password}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U unsolvable -d unsolvable_oj"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging: *logging
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    mem_limit: ${REDIS_MEMORY_LIMIT:-512m}
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set a private Redis password}
+      REDIS_MAXMEMORY: ${REDIS_MAXMEMORY:-256mb}
+    command:
+      - /bin/sh
+      - -ec
+      - exec redis-server --appendonly yes --maxmemory "$$REDIS_MAXMEMORY" --maxmemory-policy noeviction --requirepass "$$REDIS_PASSWORD"
+    volumes:
+      - redis-data:/data
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli --raw ping | grep -qx PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging: *logging
+
+  back:
+    build:
+      context: ../Back
+    init: true
+    restart: unless-stopped
+    mem_limit: ${BACK_MEMORY_LIMIT:-1g}
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      TRUST_PROXY: uniquelocal
+      CORS_ORIGIN: ${PUBLIC_ORIGIN:?Set the public HTTPS origin without a trailing slash}
+      # Hex passwords need no URL escaping. Do not use the development password.
+      DATABASE_URL: postgresql://unsolvable:${POSTGRES_PASSWORD:?Set a random hex PostgreSQL password}@postgres:5432/unsolvable_oj
+      DATABASE_SSL: "false"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set a private Redis password}
+      REDIS_DB: 0
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Set a random JWT signing secret}
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JUDGE_SERVICE_TOKEN: ${JUDGE_SERVICE_TOKEN:?Set the shared API and worker token}
+    networks: [app, data]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/v1/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    logging: *logging
+
+  go-judge:
+    build:
+      context: ../Judge/runtime
+    privileged: true
+    restart: unless-stopped
+    shm_size: 512m
+    mem_limit: ${SANDBOX_MEMORY_LIMIT:-3g}
+    # Equal RAM and combined RAM+swap limits disable swap at container creation.
+    memswap_limit: ${SANDBOX_MEMORY_LIMIT:-3g}
+    cgroup: private
+    cpus: ${SANDBOX_CPUS:-2.0}
+    networks: [sandbox]
+    environment:
+      ES_AUTH_TOKEN: ${GO_JUDGE_TOKEN:?Set a separate sandbox authentication token}
+    command:
+      - -no-fallback
+      - -enable-cpu-rate
+      - -parallelism=${JUDGE_CONCURRENCY:-2}
+      - -file-timeout=15m
+      - -time-limit-checker-interval=2ms
+      - -output-limit=64m
+      - -copy-out-limit=64m
+    # The runtime image supplies a cgroup/seccomp/authentication healthcheck.
+    logging: *logging
+
+  judge:
+    build:
+      context: ../Judge
+    init: true
+    restart: unless-stopped
+    mem_limit: ${JUDGE_MEMORY_LIMIT:-512m}
+    stop_grace_period: 2m
+    environment:
+      API_BASE_URL: http://back:3000/api/v1
+      JUDGE_SERVICE_TOKEN: ${JUDGE_SERVICE_TOKEN:?Set the shared API and worker token}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set a private Redis password}
+      REDIS_DB: 0
+      GO_JUDGE_URL: http://go-judge:5050
+      GO_JUDGE_TOKEN: ${GO_JUDGE_TOKEN:?Set a separate sandbox authentication token}
+      JUDGE_CONCURRENCY: ${JUDGE_CONCURRENCY:-2}
+    networks: [data, sandbox]
+    depends_on:
+      back:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      go-judge:
+        condition: service_healthy
+    logging: *logging
+
+  front:
+    build:
+      context: ../Front
+      args:
+        VITE_API_BASE_URL: /api/v1
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+    restart: unless-stopped
+    mem_limit: ${FRONT_MEMORY_LIMIT:-128m}
+    environment:
+      # Obtain the real subnet from docker network inspect dokploy-network.
+      TRUSTED_PROXY_CIDR: ${TRUSTED_PROXY_CIDR:?Set the Dokploy Traefik network subnet}
+    expose: ["80"]
+    networks: [app, dokploy-network]
+    depends_on:
+      back:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    logging: *logging
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  app: {}
+  data: {}
+  sandbox:
+    internal: true
+  dokploy-network:
+    external: true

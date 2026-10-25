@@ -66,6 +66,8 @@ jobs:
           npm run test:operations --prefix Back
       - name: Frontend build and test types
         run: npm run check --prefix Front
+      - name: Production Compose configuration
+        run: node scripts/check-production-compose.mjs
       - name: Browser regression tests
         working-directory: Front
         run: |
