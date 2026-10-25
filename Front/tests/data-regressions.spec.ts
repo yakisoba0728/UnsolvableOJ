@@ -774,3 +774,25 @@ test("a stale chunk after a deploy reloads the page once, not in a loop", async 
   await page.waitForTimeout(500);
   expect(loads).toBe(1);
 });
+
+test("the result page loads submission history only for an accepted result and hides the streak if that fails", async ({ page }) => {
+  await authenticate(page);
+  let historyCalls = 0;
+  await page.route("**/api/v1/submissions?*", (route) => {
+    historyCalls += 1;
+    return route.fulfill({ status: 500, json: { message: "history failed" } });
+  });
+  await page.route("**/api/v1/submissions/data-result", (route) => route.fulfill({ json: submission }));
+  await page.route("**/api/v1/submissions/accepted-result", (route) =>
+    route.fulfill({ json: { ...submission, id: "accepted-result", status: "ACCEPTED" } }),
+  );
+  await page.goto("/submissions/data-result");
+  await expect(page.locator(".result-summary")).toBeVisible();
+  await page.waitForTimeout(300);
+  expect(historyCalls).toBe(0);
+  await page.goto("/submissions/accepted-result");
+  await expect(page.locator(".result-summary")).toBeVisible();
+  await expect.poll(() => historyCalls).toBeGreaterThan(0);
+  await page.waitForTimeout(300);
+  await expect(page.locator(".streak-card")).toHaveCount(0);
+});
