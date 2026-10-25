@@ -98,9 +98,9 @@ export function submissionsByDay(submissions: Submission[]) {
   return counts;
 }
 
-/** 오늘(없으면 어제)부터 거꾸로 이어진 연속 제출 일수. */
-export function streakDays(counts: Map<string, number>) {
-  const cursor = new Date();
+/** now 기준 오늘(없으면 어제)부터 거꾸로 이어진 연속 제출 일수. */
+export function streakDays(counts: Map<string, number>, now = new Date()) {
+  const cursor = new Date(now);
   if (!counts.has(dayKey(cursor))) cursor.setDate(cursor.getDate() - 1);
   let streak = 0;
   while (counts.has(dayKey(cursor))) {
@@ -322,4 +322,14 @@ export function useStickyTop<T extends HTMLElement>(
       el.style.removeProperty("--side-top");
     };
   }, [ref, top, bottomGap]);
+}
+
+/** 남은 시간·상태(예정·진행 중·마감)처럼 시간에 따라 바뀌는 표시를 위해 주기적으로 현재 시각을 갱신한다. */
+export function useNow(intervalMs = 30_000) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), intervalMs);
+    return () => clearInterval(timer);
+  }, [intervalMs]);
+  return now;
 }

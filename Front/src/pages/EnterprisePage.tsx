@@ -7,19 +7,13 @@ import {
   metaLine,
   sortTests,
   statusLabel,
+  statusPillClass,
   testStatus,
   type EnterpriseTest,
   type TestStatus,
 } from "../enterprise/model";
 import { useEnterpriseTests } from "../enterprise/store";
-import { useNow } from "../enterprise/useNow";
-import { useDocumentTitle } from "../hooks";
-
-export const statusPillClass: Record<TestStatus, string> = {
-  scheduled: "pill",
-  running: "pill pill-success",
-  closed: "pill ent-pill-closed",
-};
+import { useDocumentTitle, useNow } from "../hooks";
 
 function periodCell(test: EnterpriseTest, status: TestStatus, now: number) {
   if (status === "scheduled")

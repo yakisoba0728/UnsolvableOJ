@@ -8,9 +8,9 @@ import { WeekStrip } from "../components/WeekStrip";
 import { XpBoostCard } from "../components/XpBoostCard";
 import { useActivity } from "../community/store";
 import { remainingText } from "../enterprise/model";
-import { useNow } from "../enterprise/useNow";
 import {
   useDocumentTitle,
+  useNow,
   useSubmissionHistory,
   submissionsByDay,
 } from "../hooks";
@@ -133,7 +133,6 @@ export function MissionsPage() {
       ) : (
         <>
           <div className="mission-top">
-            {/* 이전 시즌 카드는 components/SeasonBanner.tsx(SeasonBannerLegacy)에 보관 중 */}
             <SeasonRing
               title="알고리즘 마스터"
               done={seasonDone}
