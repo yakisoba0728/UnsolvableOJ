@@ -440,7 +440,26 @@ for (const failure of ["network", "429-seconds", "503-date"] as const) {
   });
 }
 
-for (const status of [401, 403, 404]) {
+test("K17: a 401 while polling signs out and sends the user to log in", async ({ page }) => {
+  await page.clock.install();
+  await authenticate(page);
+  let polling = false;
+  await page.route("**/api/v1/submissions/data-result", async (route) => {
+    if (!polling) {
+      await pauseClock(page);
+      return route.fulfill({ json: { ...submission, status: "QUEUED" } });
+    }
+    return route.fulfill({ status: 401, json: { message: "Unauthorized" } });
+  });
+  await page.goto("/submissions/data-result");
+  await expect(page.locator(".result-summary")).toBeVisible();
+  polling = true;
+  await page.clock.runFor(2000);
+  await expect(page).toHaveURL(/\/auth$/);
+  expect(await page.evaluate((key) => localStorage.getItem(key), storageKey)).toBeNull();
+});
+
+for (const status of [403, 404]) {
   test(`K17: permanent ${status} stops polling without losing the prior result`, async ({ page }) => {
     await page.clock.install();
     await authenticate(page);

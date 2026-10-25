@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { unauthorizedEvent } from "./api";
 import type { Session } from "./types";
 
 const storageKey = "unsolvable-oj-session-v1";
@@ -64,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionVersion.current += 1;
     update(next);
   }, []);
-  const setSession = (next: Session | null) => {
+  const setSession = useCallback((next: Session | null) => {
     const value = next ? { session: next, expiresAt: expiryTime(next) } : null;
     try {
       if (value) localStorage.setItem(storageKey, JSON.stringify(value));
@@ -73,7 +74,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       /* 저장소를 쓸 수 없어도(쿠키 차단·용량 초과) 이번 방문의 로그인·로그아웃은 반영한다 */
     }
     updateSession(value);
-  };
+  }, [updateSession]);
+  useEffect(() => {
+    // 이미 다른 토큰으로 바뀐 뒤 늦게 도착한 401은 새 로그인을 지우지 않는다.
+    const signOut = (event: Event) => {
+      if ((event as CustomEvent<string>).detail === current.current?.session.accessToken)
+        setSession(null);
+    };
+    window.addEventListener(unauthorizedEvent, signOut);
+    return () => window.removeEventListener(unauthorizedEvent, signOut);
+  }, [setSession]);
   useEffect(() => {
     const synchronize = (event?: StorageEvent) => {
       if (
