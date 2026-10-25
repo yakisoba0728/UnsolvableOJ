@@ -38,7 +38,7 @@ npm run start:dev
 
 워커는 sandbox 검사와 인증된 API heartbeat를 모두 통과한 뒤에만 Redis 연결·큐 소비를 시작합니다. 기존 generation/attempt·문제 스냅샷을 유지하고 워커·제출 heartbeat를 10초마다 전송합니다. 결과 PATCH의 네트워크 오류·429·5xx는 같은 payload/attempt로 최대 3회(1초·2초 간격) 전송하며, 응답을 확인할 때까지 제출 heartbeat를 유지합니다. lease heartbeat의 409는 현재 실행을 취소하고 이전 시도의 결과 전송을 중단하지만, 일시적인 통신 오류는 실행을 취소하지 않습니다. go-judge 연결 실패·429·5xx는 판정이 아니므로 SYSTEM_ERROR를 보내지 않고 작업을 실패로 끝냅니다. 제출 heartbeat가 멈춰 lease(60초)가 만료되면 API 복구가 다음 generation으로 다시 큐에 넣습니다. 같은 작업의 BullMQ 재시도는 아직 lease가 살아 있으면 claim 409로 조용히 끝납니다.
 
-실행 중 API 401/403이 확인되면 해당 워커만 큐 소비를 pause하고 진행 중인 채점·결과 전송을 취소합니다. 자동 재개하지 않으므로 토큰을 수정한 뒤 워커를 재시작하세요. SIGINT/SIGTERM에서는 새 작업 소비를 중단하고 진행 중인 채점·결과 전송을 마친 뒤 Redis 연결을 닫습니다.
+실행 중 API 401/403이 확인되면 진행 중인 채점·결과 전송을 취소하고 워커를 닫은 뒤 종료 코드 1로 끝납니다. 토큰을 고칠 때까지 재시작해도 시작 heartbeat에서 다시 실패하므로 `docker compose ps`의 종료·재시작 상태로 확인하세요. SIGINT/SIGTERM에서는 새 작업 소비를 중단하고 진행 중인 채점·결과 전송을 마친 뒤 Redis 연결을 닫습니다.
 
 ## 운영 격리
 

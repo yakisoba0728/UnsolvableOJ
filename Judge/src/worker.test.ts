@@ -44,8 +44,7 @@ function harness(
   const sleeps: { ms: number; resolve: () => void }[] = [];
   let processor: Processor | undefined;
   const consumer = {
-    pause: t.mock.fn(async (_doNotWaitActive?: boolean) => {}),
-    close: t.mock.fn(async () => {}),
+    close: t.mock.fn(async (_force?: boolean) => {}),
   };
   const consume = t.mock.fn((process: Processor) => {
     processor = process;
@@ -159,7 +158,7 @@ for (const failure of ["network", 429, 503] as const) {
     await invocation;
     assert.equal(h.intervals.size, 1, "only worker heartbeat remains after acknowledgment");
     assert.equal(runJudge.mock.callCount(), 1);
-    assert.equal(h.consumer.pause.mock.callCount(), 0);
+    assert.equal(h.consumer.close.mock.callCount(), 0);
     assert.deepEqual(h.logs.mock.calls.map((call) => call.arguments), [["Judged submission"]]);
   });
 }
@@ -245,7 +244,7 @@ for (const cooperates of [true, false]) {
     execution.resolve(result);
     await invocation;
     assert.equal(h.requests.filter((request) => request.path.endsWith("/result")).length, 0);
-    assert.equal(h.consumer.pause.mock.callCount(), 0, "lease loss must not pause unrelated jobs");
+    assert.equal(h.consumer.close.mock.callCount(), 0, "lease loss must not stop unrelated jobs");
     assert.equal(h.logs.mock.callCount(), 0, "obsolete work must not log a successful verdict");
     assert.equal(h.intervals.size, 1);
   });
@@ -275,7 +274,7 @@ test("transient lease failures do not abort judging", async (t) => {
   execution.resolve(result);
   await invocation;
   assert.equal(h.requests.filter((request) => request.path.endsWith("/result")).length, 1);
-  assert.equal(h.consumer.pause.mock.callCount(), 0);
+  assert.equal(h.consumer.close.mock.callCount(), 0);
 });
 
 test("lease loss during result backoff cancels the wait and prevents replay", async (t) => {
@@ -315,7 +314,7 @@ test("a lease HTTP 409 remains definitive even if discarding its response body f
   assert.equal(h.requests.filter((request) => request.path.endsWith("/result")).length, 0);
 });
 
-test("transient worker presence failures neither pause consumption nor abort active judging", async (t) => {
+test("transient worker presence failures neither stop the worker nor abort active judging", async (t) => {
   let started = false;
   const execution = deferred<JudgeResult>();
   const failures = ["network", 503];
@@ -339,7 +338,7 @@ test("transient worker presence failures neither pause consumption nor abort act
   for (let i = 0; i < 2; i++) {
     await h.heartbeat();
     assert.equal(signal?.aborted, false);
-    assert.equal(h.consumer.pause.mock.callCount(), 0);
+    assert.equal(h.consumer.close.mock.callCount(), 0);
   }
   execution.resolve(result);
   await invocation;
@@ -405,7 +404,9 @@ test("an empty API token fails before constructing a consumer", async (t) => {
 
 for (const stage of ["worker", "claim", "lease", "result"] as const) {
   for (const status of [401, 403]) {
-    test(`runtime ${stage} HTTP ${status} pauses consumption and stops obsolete work`, async (t) => {
+    test(`runtime ${stage} HTTP ${status} closes the worker without waiting and exits non-zero`, async (t) => {
+      const exited = deferred<void>();
+      const exit = t.mock.method(process, "exit", (() => exited.resolve()) as typeof process.exit);
       let deny = false;
       let signal: AbortSignal | undefined;
       const execution = deferred<JudgeResult>();
@@ -430,14 +431,15 @@ for (const stage of ["worker", "claim", "lease", "result"] as const) {
         await invocation;
         assert.equal(signal?.aborted, true);
       }
-      assert.equal(h.consumer.pause.mock.callCount(), 1);
-      assert.deepEqual(h.consumer.pause.mock.calls[0].arguments, [true]);
+      await exited.promise;
+      assert.deepEqual(exit.mock.calls.map((call) => call.arguments), [[1]]);
+      assert.deepEqual(h.consumer.close.mock.calls.map((call) => call.arguments), [[true]]);
       assert.equal(h.intervals.size, 0);
       assert.equal(h.requests.filter((request) => request.path.endsWith("/result")).length, stage === "result" ? 1 : 0);
       assert.equal(h.errors.mock.callCount(), 1, "the first authentication failure must be diagnosed exactly once");
       const diagnostic = h.errors.mock.calls[0].arguments.join(" ");
-      assert.match(diagnostic, /worker paused/i);
-      assert.match(diagnostic, /restart required/i);
+      assert.match(diagnostic, /worker exiting/i);
+      assert.match(diagnostic, /fix the token/i);
       assert.match(diagnostic, new RegExp(`HTTP ${status}`));
       assert.ok(diagnostic.includes(`${stage === "worker" ? "POST" : stage === "claim" ? "GET" : "PATCH"} ${deniedPath.slice("/api/v1".length)}`));
       assert.ok(!diagnostic.includes("unit-token"));
@@ -445,7 +447,7 @@ for (const stage of ["worker", "claim", "lease", "result"] as const) {
       assert.equal(h.logs.mock.callCount(), 0, "authentication cancellation must not log Judged completion");
       const calls = h.requests.length;
       await assert.rejects(h.process(), new RegExp(`HTTP ${status}`));
-      assert.equal(h.requests.length, calls, "paused worker must not make more claim requests");
+      assert.equal(h.requests.length, calls, "a closing worker must not make more claim requests");
       assert.equal(h.errors.mock.callCount(), 1, "latched authentication failures must not repeat diagnostics");
     });
   }
