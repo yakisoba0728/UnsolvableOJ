@@ -5,8 +5,8 @@ const secret = Joi.string()
   .min(32)
   .required()
   .when('NODE_ENV', {
-    is: 'production',
-    then: Joi.string().pattern(/^replace-this/, { invert: true }),
+    not: 'production',
+    otherwise: Joi.string().pattern(/^replace-this/, { invert: true }),
   })
   .messages({
     'string.pattern.invert.base':
