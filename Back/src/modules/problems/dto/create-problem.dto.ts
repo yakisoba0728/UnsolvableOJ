@@ -7,7 +7,6 @@ import {
   IsBoolean,
   IsEnum,
   IsInt,
-  IsOptional,
   IsString,
   Length,
   Matches,
@@ -17,16 +16,19 @@ import {
   Validate,
   ValidateNested,
 } from 'class-validator';
+import { IsPostgresText } from '../../../common/postgres-text.js';
 import { ProblemDifficulty, ProblemStatus } from '../problem.enums.js';
 import { ExpectedOutputValidator } from './expected-output.validator.js';
 
 export class CreateTestCaseDto {
   @IsString()
   @MaxLength(1_000_000)
+  @IsPostgresText()
   input: string;
 
   @IsString()
   @MaxLength(1_000_000)
+  @IsPostgresText()
   @Validate(ExpectedOutputValidator)
   expectedOutput: string;
 
@@ -43,18 +45,22 @@ export class CreateTestCaseDto {
 export class ProblemContentDto {
   @IsString()
   @Length(1, 150)
+  @IsPostgresText()
   title: string;
 
   @IsString()
   @MaxLength(200_000)
+  @IsPostgresText()
   statementMarkdown: string;
 
   @IsString()
   @MaxLength(100_000)
+  @IsPostgresText()
   inputDescriptionMarkdown: string;
 
   @IsString()
   @MaxLength(100_000)
+  @IsPostgresText()
   outputDescriptionMarkdown: string;
 
   @IsEnum(ProblemDifficulty)
@@ -85,7 +91,7 @@ export class CreateProblemDto extends ProblemContentDto {
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
   slug: string;
 
-  @IsOptional()
+  // 생략하면 기본값 DRAFT로 검증하고, null은 기본값을 덮어쓰므로 거절합니다.
   @IsEnum(ProblemStatus)
   status: ProblemStatus = ProblemStatus.DRAFT;
 
