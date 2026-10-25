@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import { test, type TestContext } from "node:test";
-import { checkSandbox, judge, type Claim } from "./judge.js";
+import { checkSandbox, judge, SandboxUnavailableError, type Claim } from "./judge.js";
 
 interface Step {
   status?: string;
@@ -307,13 +308,33 @@ test("oversized output is rejected and all cached files are reclaimed", async (t
 test("aborting execution still cleans artifacts with a separate cleanup signal", async (t) => {
   const abort = new AbortController();
   const s = await sandbox(t, [{}, { hang: () => abort.abort() }]);
-  await assert.rejects(judge(claim({ language: "C" }), s.config, abort.signal), /abort/i);
+  await assert.rejects(judge(claim({ language: "C" }), s.config, abort.signal),
+    (error) => /abort/i.test(String(error)) && !(error instanceof SandboxUnavailableError));
   assert.equal(s.files.size, 0);
 });
 
-test("cache cleanup failure is reported rather than silently leaking files", async (t) => {
-  const s = await sandbox(t, [{ stdout: "3\n" }]);
+for (const [httpStatus, transient] of [[400, false], [429, true], [500, false], [501, false], [502, true], [503, true], [504, true]] as const) {
+  test(`go-judge HTTP ${httpStatus} is ${transient ? "" : "not "}a transient sandbox failure`, async (t) => {
+    const s = await sandbox(t, [{ httpStatus }]);
+    await assert.rejects(judge(claim(), s.config),
+      (error) => String(error).includes(`HTTP ${httpStatus}`) && (error instanceof SandboxUnavailableError) === transient);
+  });
+}
+
+test("an unreachable go-judge is a transient sandbox failure", async () => {
+  const server = createServer();
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const { port } = server.address() as AddressInfo;
+  await new Promise((resolve) => server.close(resolve));
+  await assert.rejects(judge(claim(), { url: `http://127.0.0.1:${port}`, token: "unit-token" }), SandboxUnavailableError);
+});
+
+test("cache cleanup failure is logged and keeps the verdict without deleting twice", async (t) => {
+  const errors = t.mock.method(console, "error", () => {});
+  const s = await sandbox(t, [{}, { stdout: "3\n" }]);
   s.state.denyDelete = true;
-  await assert.rejects(judge(claim(), s.config), /clean go-judge/);
-  assert.ok(s.deleted.length >= 2);
+  assert.equal((await judge(claim({ language: "C" }), s.config)).status, "ACCEPTED");
+  assert.equal(s.deleted.length, 5, "compile outputs, run outputs and the artifact are each deleted once");
+  assert.equal(new Set(s.deleted).size, 5);
+  assert.equal(errors.mock.callCount(), 5);
 });
