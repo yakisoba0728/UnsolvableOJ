@@ -228,3 +228,64 @@ XP 획득 원장이 남아 있는 foundations 마이그레이션의 롤백은 �
 정답, 오답, 실행 오류, 시간 초과, 출력 초과, 컴파일 오류, 비공개 오류 차단을 실제 실행으로 검증합니다.
 
 검증은 로컬에서 위 명령어와 `Judge/`의 `npm run check`, `npm run test:runtime`으로 실행합니다. 워커는 Docker socket을 사용하지 않습니다. 운영에서는 privileged go-judge 실행 서비스를 API/DB와 분리된 전용 Linux 호스트에 배치해야 합니다.
+
+## 커뮤니티 (seongyun 프론트 연동)
+
+`seongyun`의 `80d1580` 화면을 기준으로 연결했습니다. 기존 목록/상세/작성 레이아웃과 테마를 유지하며 코드 리뷰와 문제 연결, 작성자 수정·삭제를 추가합니다. 채점 API와 워커는 이 기능의 변경 대상이 아닙니다.
+
+### 적용 순서
+
+1. Back 환경의 PostgreSQL/Redis와 기존 인증 설정을 준비합니다.
+2. `npm run db:migration:run`으로 `Community1791200000000`, `CommunityUi1791200001000`을 적용하고 API를 실행합니다.
+3. Front를 **`VITE_DEMO_MODE=false`** 및 `VITE_API_BASE_URL=https://백엔드주소/api/v1`로 빌드합니다. Vite 환경 변수 변경 후에는 재빌드/재배포가 필요합니다. 백엔드 `CORS_ORIGIN`에도 실제 프론트 주소를 설정합니다.
+4. 데모 모듈이 포함된 빌드의 `true` 모드는 더미 데이터와 브라우저 저장소만 사용합니다. 현재 upstream에는 데모 모듈이 없습니다. 데모 글·추천·답변은 실제 DB로 자동 이관하지 않습니다.
+
+### 계약
+
+기본 경로는 `/api/v1/community/posts`입니다. 목록·상세·답변·작성자 통계는 공개이며, 쓰기 및 내 상태 조회는 기존 `Authorization: Bearer <accessToken>`을 사용합니다. 사용자 ID/권한은 토큰으로 결정하며 본문에서 받지 않습니다.
+
+| 메서드/상대 경로 | 동작 |
+| --- | --- |
+| GET `/` | `categories=QUESTION,FREE` (기존 `category`도 지원), `status=accepted/unaccepted`, `includePinned=true`, `q`, `problemId`, `sort=latest/votes/answers/views`, `page`, `limit`으로 목록 조회 |
+| POST `/`, PUT `/:id`, DELETE `/:id` | 글 작성, 작성자 수정, 작성자/관리자 삭제 |
+| GET `/:id` | 본문·코드·태그·연결 문제·채택 답변 ID·추천/답변 수 |
+| POST `/:id/view` | 방문 횟수 증가(순방문자 수 아님) |
+| GET/POST `/:id/comments` | 페이지 단위 답변 조회/등록 |
+| PUT/DELETE `/:id/comments/:commentId` | 작성자 수정, 작성자/관리자 삭제 |
+| PUT `/:id/accepted-answer/:commentId`, DELETE `/:id/accepted-answer` | 질문 작성자만 채택/취소 |
+| GET/PUT/DELETE `/:id/vote` | 내 글 추천 상태/추천/취소 |
+| PUT/DELETE `/:id/comments/:commentId/vote` | 답변 추천/취소 |
+| GET `/:id/interaction` | 로그인 사용자의 글 추천·저장·작성자 팔로우·답변 추천 상태 |
+| PUT/DELETE `/:id/saved`, PUT/DELETE `/:id/follow` | 글 저장/취소, 작성자 팔로우/취소 |
+| GET `/:id/author-stats` | 작성자의 글 수·채택 답변 수 |
+
+카테고리는 `QUESTION`, `SOLUTION`, `REVIEW`, `FREE`, `NOTICE`입니다. 공지는 관리자만 작성하며 목록에서 우선 표시합니다. 풀이 공유는 공개 문제의 `problemId`가 필수이고, 코드 리뷰는 `code`, `language`가 필수입니다. 기존 글의 카테고리는 수정하지 않습니다.
+
+```json
+{
+  "category": "REVIEW",
+  "title": "반복문 최적화 질문",
+  "body": "이 코드의 시간 복잡도를 개선하고 싶습니다.",
+  "tags": ["파이썬", "최적화"],
+  "code": "print(1)",
+  "language": "Python",
+  "problemId": null
+}
+```
+
+제목 150자, 본문 20,000자, 코드 30,000자, 언어 40자, 태그 최대 5개/각 30자, 답변 10,000자 제한입니다. 프론트 제목은 기존 디자인의 100자 제한을 유지합니다. 목록은 본문·코드를 포함하지 않고 `{items,total,filteredTotal,facets,page,limit,totalPages}`를 반환합니다. 작성자 공개 정보는 ID·사용자명·레벨이며, 구현되지 않은 티어/명성을 임의로 만들지 않습니다. 비공개 문제의 상세 정보는 반환하지 않습니다.
+
+추천·저장·팔로우 PUT/DELETE는 반복 호출해도 중복되지 않습니다. 답변 채택은 같은 질문의 답변만 가능하며, 삭제 시 채택 연결도 해제됩니다. 글과 답변의 초안은 **계정과 글별 로컬 브라우저 저장소**에 저장합니다. 풀이 본문은 스포일러 접기로 제공하며 HTML 실행은 허용하지 않습니다. 저장/팔로우는 상태를 영속화하며 별도의 내 저장글 목록·알림 기능은 포함하지 않습니다.
+
+### 검증 명령
+
+- Back: `npm run check`, `npm run test:e2e`, `npm run test:migrations` (격리 DB/Redis 권장).
+- Front: `npm run check`, `npm run test:e2e -- --project=chromium --workers=1 tests/community.spec.ts tests/user-flows.spec.ts`.
+- 실제 브라우저↔API 테스트: 격리 DB에 마이그레이션 후 API를 실행하고 Front 실행 환경에 `COMMUNITY_TEST_API`와 `VITE_API_BASE_URL`을 같은 API 주소로 지정합니다. `VITE_DEMO_MODE=false`로 `npm run test:e2e -- --project=chromium --workers=1 tests/community-live.spec.ts`를 실행합니다. 백엔드 CORS에 `http://127.0.0.1:4173`을 허용해야 합니다.
+- 실제 테스트는 두 테스트 계정을 만들며, 생성 글은 종료 시 삭제합니다. 계정은 테스트 DB에 남으므로 운영 DB에서 실행하지 마세요. DB 검증의 대량 입력 테스트에서만 요청 속도 제한을 비활성화하며 실제 브라우저 테스트는 정상 제한을 적용합니다.
+
+### 2026-10-19 화면 동기화
+
+분류 Ctrl/⌘ 다중 선택, 채택 상태, 조회순 정렬과 필터별 전체 개수를 API에 연결했습니다. `facets.categories`는 대문자 카테고리, `facets.statuses`는 accepted/unaccepted 키이며 빈 문자열 키는 전체입니다. 고정 공지는 필터 개수에서 제외하고 `includePinned=true`이면 분류/채택 조건과 무관하게 목록 앞에 포함합니다(검색어/문제 조건은 적용). `total`은 공지를 포함한 페이지 수 계산용, `filteredTotal`은 일반 글 수입니다. 답변 작성 폼은 답변 목록 위에 있으며, 목록이 접혀도 채택된 답변은 표시합니다. 문제 주소는 `/problems/view/:slug`를 사용합니다.
+
+로컬 실행·DB 연결은 저장소 루트의 `LOCAL-COMMUNITY.md`를 참고하세요.

@@ -7493,3 +7493,20 @@ textarea {
     min-width: 0;
   }
 }
+
+/* 커뮤니티 API 연동: 문제 화면의 커뮤니티 링크, 본문 코드 블록과 좁은 화면 넘침 */
+.community-problem-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-block: 0.75rem;
+}
+.post-body pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.post-column,
+.post-card,
+.community-layout > section {
+  min-width: 0;
+}
