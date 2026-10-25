@@ -57,16 +57,6 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
   const navigationType = useNavigationType();
   // 다른 화면으로 이동하면 스크롤을 맨 위로 올린다(뒤로 가기는 브라우저 동작에 맡기고,
   // 같은 화면에서 필터·검색 주소만 바뀔 때는 위치를 유지한다).
-  // 키보드·화면 낭독기 사용자가 새 화면의 처음부터 읽도록 포커스를 본문으로 옮긴다
-  // (화면이 스스로 입력칸 등에 포커스를 줬으면 그대로 둔다).
-  const mainRef = useRef<HTMLElement>(null);
-  const focusedPath = useRef(pathname);
-  useEffect(() => {
-    if (focusedPath.current === pathname) return;
-    focusedPath.current = pathname;
-    if (!mainRef.current?.contains(document.activeElement))
-      mainRef.current?.focus({ preventScroll: true });
-  }, [pathname]);
   useEffect(() => {
     if (navigationType === "POP") return;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
@@ -106,7 +96,7 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
           navigate("/");
         }}
       />
-      <main className="main-content" id="main" ref={mainRef} tabIndex={-1}>
+      <main className="main-content" id="main" tabIndex={-1}>
         <ErrorBoundary resetKey={pathname}>
           <Suspense
             fallback={

@@ -1,8 +1,10 @@
-export type CategoryKey = "question" | "solution" | "free" | "notice";
+export type CategoryKey =
+  "question" | "solution" | "review" | "free" | "notice";
 
 export const categories: { key: CategoryKey; label: string }[] = [
   { key: "question", label: "질문" },
   { key: "solution", label: "풀이 공유" },
+  { key: "review", label: "코드 리뷰" },
   { key: "free", label: "자유" },
   { key: "notice", label: "공지" },
 ];
@@ -15,11 +17,19 @@ export const categoryLongLabel = (key: CategoryKey) =>
   key === "question" ? "질문과 답변" : categoryLabel(key);
 
 export interface CommunityAuthor {
+  id?: string;
   name: string;
   tier: string;
 }
 
 export interface CommunityPost {
+  authorId?: string;
+  code?: string;
+  language?: string;
+  problemId?: string | null;
+  problem?: { id: string; slug: string; title: string } | null;
+  acceptedCommentId?: string | null;
+  commentCount?: number;
   id: string;
   category: CategoryKey;
   title: string;
@@ -33,6 +43,7 @@ export interface CommunityPost {
 }
 
 export interface CommunityAnswer {
+  authorId?: string;
   id: string;
   postId: string;
   author: CommunityAuthor;

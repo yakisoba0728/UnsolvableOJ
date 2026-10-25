@@ -9,12 +9,12 @@ import {
   streakDays,
   submissionsByDay,
   useAllProblems,
+  useMyCommunityPosts,
   useMyStanding,
   useSubmissionHistory,
   useDocumentTitle,
 } from "../hooks";
 import { PostScroller } from "../components/PostScroller";
-import { allPosts, upvotedIds, useActivity } from "../community/store";
 import { LANGUAGE_LABELS } from "../types";
 import { difficultyOptions } from "../difficulty";
 
@@ -46,13 +46,7 @@ export function ProfilePage() {
   const { session } = useAuth();
   const { profile, rank, rankLoading, profileError, rankError } =
     useMyStanding(session);
-  const activity = useActivity();
-  const myPosts = allPosts(activity).filter(
-    (post) => post.author.name === session?.user.username,
-  );
-  const upvotedPosts = allPosts(activity).filter((post) =>
-    upvotedIds(activity, session?.user.id).includes(post.id),
-  );
+  const communityPosts = useMyCommunityPosts(session);
   const [selected, setSelected] = useState(dayKey(new Date()));
   const history = useSubmissionHistory(session);
   const {
@@ -139,7 +133,13 @@ export function ProfilePage() {
       </div>
     );
   // 프로필·랭킹·제출 기록·문제 목록이 모두 도착하기 전에는 0 같은 임시 값을 보이지 않는다.
-  if (!profile || rankLoading || history.loading || problemsLoading)
+  if (
+    !profile ||
+    rankLoading ||
+    history.loading ||
+    problemsLoading ||
+    communityPosts.loading
+  )
     return (
       <div className="page-width profile-page">
         <PageHeader
@@ -325,16 +325,20 @@ export function ProfilePage() {
           <div className="profile-post-pair">
             <PostScroller
               title="작성한 글"
-              posts={myPosts}
-              activity={activity}
+              posts={communityPosts.data.written}
               emptyText="아직 작성한 글이 없어요. 궁금한 점이나 나만의 풀이를 첫 글로 남겨 보세요."
               emptyAction={{ label: "글 작성하러 가기", to: "/community/new" }}
             />
             <PostScroller
               title="추천한 글"
-              posts={upvotedPosts}
-              activity={activity}
+              posts={communityPosts.data.voted}
               emptyText="아직 추천한 글이 없어요. 도움이 된 글에 추천을 눌러 보세요."
+              emptyAction={{ label: "커뮤니티 둘러보기", to: "/community" }}
+            />
+            <PostScroller
+              title="저장한 글"
+              posts={communityPosts.data.saved}
+              emptyText="아직 저장한 글이 없어요. 다시 보고 싶은 글을 저장해 보세요."
               emptyAction={{ label: "커뮤니티 둘러보기", to: "/community" }}
             />
           </div>

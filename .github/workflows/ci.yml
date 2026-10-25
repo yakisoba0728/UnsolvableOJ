@@ -6,13 +6,18 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      full:
+        description: Include Firefox/WebKit, native sandbox and full Compose tests
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.head_ref || github.ref_name }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 
 defaults:
   run:
@@ -22,7 +27,7 @@ jobs:
   check:
     name: CI required
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: ${{ inputs.full && 40 || 15 }}
     services:
       postgres:
         image: postgres:17
@@ -64,18 +69,29 @@ jobs:
           npm run check --prefix Back
           npm run test:boj-import --prefix Back
           npm run test:operations --prefix Back
+          npm run test:starter --prefix Back
       - name: Frontend build and test types
         run: npm run check --prefix Front
-      - name: Browser regression tests
+      - name: Production Compose configuration
+        run: node scripts/check-production-compose.mjs
+      - name: Chromium regression tests
+        if: ${{ !inputs.full }}
         working-directory: Front
         run: |
-          npx --no-install playwright install --with-deps chromium firefox webkit
-          npm run test:e2e -- --workers=1
+          npx --no-install playwright install --with-deps --only-shell chromium
+          npm run test:e2e -- --project=unit --project=chromium --workers=2
+      - name: Full browser regression tests
+        if: ${{ inputs.full }}
+        working-directory: Front
+        run: |
+          npx --no-install playwright install --with-deps --only-shell chromium firefox webkit
+          npm run test:e2e -- --workers=2
       - name: Worker build and protocol regression tests
         run: |
           npm run check --prefix Judge
           python3 -m unittest discover -s Judge/runtime -p 'test_*.py'
       - name: go-judge language and isolation regression tests
+        if: ${{ inputs.full }}
         env:
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: |
@@ -94,14 +110,27 @@ jobs:
           JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: |
-          npm run test:migrations
-          npm run test:e2e
-          npm run test:pipeline
+          node scripts/check-migrations.mjs
+          node scripts/run-integration.mjs e2e
+      - name: Native judging pipeline
+        if: ${{ inputs.full }}
+        working-directory: Back
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://unsolvable:ci_disposable_password@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/unsolvable_ci
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+          PIPELINE_REDIS_DB: '2'
+          JWT_ACCESS_SECRET: test-jwt-secret-with-at-least-32-characters
+          JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
+          GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
+        run: node scripts/run-integration.mjs pipeline
       - name: Full Compose browser flow
+        if: ${{ inputs.full }}
         run: node scripts/check-compose.mjs
       - name: Sandbox failure logs
-        if: failure()
+        if: ${{ failure() && inputs.full }}
         run: docker compose logs --no-color go-judge
       - name: Stop sandbox
-        if: always()
+        if: ${{ always() && inputs.full }}
         run: docker compose stop go-judge

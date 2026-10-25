@@ -49,10 +49,17 @@ try {
     [user.id, problem.id],
   );
   await db.destroy();
-  db = await new DataSource(options).initialize();
+  // 아래의 부분 되돌리기 검사는 강화 마이그레이션까지만 다룬다(마지막 것부터 되돌리므로).
+  // 그 뒤에 추가된 마이그레이션은 마지막의 새 설치·전체 되돌리기·재적용에서 확인한다.
+  const hardening = configured.options.migrations.findIndex(
+    (migration) => migration.name === 'BackendHardening1790554000000',
+  );
+  assert.notEqual(hardening, -1);
+  const throughHardening = configured.options.migrations.slice(0, hardening + 1);
+  db = await new DataSource({ ...options, migrations: throughHardening }).initialize();
   assert.equal(
     (await db.runMigrations()).length,
-    configured.options.migrations.length - 1,
+    throughHardening.length - 1,
   );
   const [{ snapshot }] = await db.query(
     'SELECT snapshot FROM problem_versions WHERE problem_id = $1',

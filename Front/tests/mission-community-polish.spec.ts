@@ -1,47 +1,16 @@
 import { expect, test, type Page } from "@playwright/test";
+import { mockCommunityApi } from "./fixtures";
 
 const iso = (minutesAgo: number) =>
   new Date(Date.now() - minutesAgo * 60_000).toISOString();
 
-const community = {
-  posts: [
-    {
-      id: "p2",
-      category: "question",
-      title: "이분 탐색에서 mid 계산이 오버플로나는 이유",
-      body: "본문",
-      tags: ["이분탐색"],
-      author: { name: "kim", tier: "SILVER" },
-      createdAt: iso(90),
-      upvotes: 4,
-      views: 1520,
-    },
-  ],
-  answers: [
-    {
-      id: "a1",
-      postId: "p2",
-      author: { name: "park", tier: "BRONZE" },
-      body: "답변",
-      createdAt: iso(30),
-      upvotes: 1,
-    },
-  ],
-  upvoted: [],
-  saved: [],
-  followedBy: { solver: ["kim"] },
-  accepted: {},
-  deleted: [],
-};
-
 async function seed(page: Page) {
   await page.addInitScript(
-    ({ session, data }) => {
+    ({ session }) => {
       localStorage.setItem(
         "unsolvable-oj-session-v1",
         JSON.stringify({ session, expiresAt: Date.now() + 900_000 }),
       );
-      localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(data));
     },
     {
       session: {
@@ -58,9 +27,26 @@ async function seed(page: Page) {
           rating: 0,
         },
       },
-      data: community,
     },
   );
+  await mockCommunityApi(page, {
+    posts: [
+      {
+        id: "p2",
+        category: "question",
+        title: "이분 탐색에서 mid 계산이 오버플로나는 이유",
+        tags: ["이분탐색"],
+        author: "kim",
+        createdAt: iso(90),
+        upvotes: 4,
+        views: 1520,
+      },
+    ],
+    answers: [
+      { id: "a1", postId: "p2", author: "park", body: "답변", createdAt: iso(30) },
+    ],
+    following: ["kim"],
+  });
   await page.route("**/api/v1/submissions?*", (route) =>
     route.fulfill({
       json: { items: [], page: 1, limit: 1000, total: 0, totalPages: 1 },

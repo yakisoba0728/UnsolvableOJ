@@ -81,6 +81,21 @@ npm run db:bootstrap:admin -- admin@example.com
 작성자·문제·테스트케이스·v1 스냅샷은 하나의 트랜잭션으로 저장합니다. 과거 실행 중단으로 v1이 없는 경우 현재 버전이 1이고 저장된 테스트케이스가 있을 때만 순서대로 읽어 복구합니다. 이미 수정된 v2 이상의 내용으로 과거 v1을 만들지 않으며, 비어 있거나 누락된 기존 버전 이력은 오류로 중단하므로 운영자가 검증된 백업에서 복구해야 합니다. 정상적인 기존 불변 스냅샷은 재실행으로 변경하지 않습니다. 실패한 실행은 데모 계정 비밀번호도 변경하지 않습니다.
 관리자는 `PATCH /api/v1/admin/users/:id/role`로 작성자와 관리자 역할을 지정할 수 있습니다. 역할 변경 시 기존 access token은 즉시 무효화됩니다.
 
+## 기본 연습 문제 등록
+
+독자적으로 작성한 입문·쉬움·보통 문제 10개를 등록할 수 있습니다. 각 문제에는 공개 예제와 비공개 경계값 테스트가 있습니다. 먼저 DB를 백업한 뒤 실행하세요.
+
+```bash
+npm run test:starter
+npm run db:seed:starter
+npm run db:seed:starter -- --rollback-check
+npm run db:seed:starter -- --apply
+```
+
+첫 명령은 독립적인 풀이로 정답 데이터를 검사합니다. seed의 기본 실행은 DTO 검증만 하며, `--rollback-check`는 실제 INSERT와 버전 스냅샷을 검사한 뒤 롤백합니다. `--apply`는 별도 작성자 계정, 문제, 테스트케이스, v1 스냅샷과 감사 로그를 하나의 트랜잭션으로 저장합니다. 운영 back 컨테이너에서는 빌드 없이 `node scripts/seed-starter.mjs --apply`로 실행합니다.
+
+같은 원본 해시의 문제는 건너뛰고 기존 문제나 수정된 버전을 덮어쓰지 않습니다. 충돌하면 전체 반입을 중단합니다. 전용 작성자의 비밀번호는 출력하지 않으며, 기존 계정은 CLI 생성 감사 기록과 자격 증명 지문이 일치할 때만 재사용합니다. 운영 DB의 문제·사용자·제출을 초기화하지 않습니다.
+
 ## BOJ 한국어 문제 반입
 
 적격성 감사 결과(`summary.json`, `eligible_problem_ids.json`)와 원본 데이터셋을 사용합니다. `Back/.env`의 DB에 연결하며, 기본 실행은 변환·검증만 하고 DB를 변경하지 않습니다.
@@ -124,6 +139,8 @@ npm run db:import:boj -- --dataset /path/to/boj_dataset --audit /path/to/boj_imp
 | `POST`  | `/api/v1/submissions/:id/rejudge`  | 작성자/ADMIN | 원래 문제 버전으로 재채점                |
 | `GET`   | `/api/v1/users/me`                 | USER         | XP, 레벨, 해결 문제 수                   |
 | `GET`   | `/api/v1/rankings`                 | 없음         | XP 상위 100명                            |
+| `GET`   | `/api/v1/community/posts`          | 없음         | 커뮤니티 글 목록과 분류·상태별 개수      |
+| `POST`  | `/api/v1/community/posts`          | USER         | 커뮤니티 글 작성(공지는 ADMIN만)         |
 | `GET`   | `/api/v1/admin/users`              | ADMIN        | 최근 사용자 100명                        |
 | `PATCH` | `/api/v1/admin/users/:id/role`     | ADMIN        | 역할 변경                                |
 | `GET`   | `/api/v1/admin/audit`              | ADMIN        | 최근 변경 이력 100건                     |
@@ -230,3 +247,9 @@ XP 획득 원장이 남아 있는 foundations 마이그레이션의 롤백은 �
 정답, 오답, 실행 오류, 시간 초과, 출력 초과, 컴파일 오류, 비공개 오류 차단을 실제 실행으로 검증합니다.
 
 검증은 로컬에서 위 명령어와 `Judge/`의 `npm run check`, `npm run test:runtime`으로 실행합니다. 워커는 Docker socket을 사용하지 않습니다. 운영에서는 privileged go-judge 실행 서비스를 API/DB와 분리된 전용 Linux 호스트에 배치해야 합니다.
+
+## 커뮤니티
+
+글·답변·추천·팔로우는 PostgreSQL에 저장합니다(`Community1791200000000`, `CommunityUi1791200001000` 마이그레이션). 전체 API와 입력 제한은 [기능 목록](./FEATURES.md#6-커뮤니티)에 있습니다. 브라우저에는 계정별 작성 초안만 남습니다. 예전 버전이 브라우저에만 저장한 글·답변·추천은 서버로 옮기지 않습니다.
+
+API 규칙은 `npm run test:e2e`의 `test/community.e2e-spec.ts`가, 실제 화면과 API의 연결은 저장소 루트 `node scripts/check-compose.mjs`가 실행하는 `Front/tests-live/community-flow.spec.ts`가 검증합니다.
