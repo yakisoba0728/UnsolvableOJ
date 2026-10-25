@@ -47,6 +47,8 @@ async function mockProblems(page: Page) {
 }
 
 const iso = (offsetMs: number) => new Date(Date.now() + offsetMs).toISOString();
+const noonToday = new Date().setHours(12, 0, 0, 0);
+const atNoon = (offsetMs: number) => new Date(noonToday + offsetMs).toISOString();
 const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
 
@@ -77,16 +79,18 @@ test("dashboard groups tests by status and offers the right management action", 
       key: testsKey,
       saved: {
         solver: [
-          { id: "t-closed", title: "지난 인턴 선발", description: "", startsAt: iso(-2 * DAY), endsAt: iso(-DAY), durationMin: 60, problemIds: ["p1", "p2"], createdAt: iso(-3 * DAY), updatedAt: iso(-3 * DAY) },
-          { id: "t-soon", title: "다음 주 공채", description: "", startsAt: iso(DAY), endsAt: iso(3 * DAY), durationMin: 90, problemIds: ["p1"], createdAt: iso(-HOUR), updatedAt: iso(-HOUR) },
-          { id: "t-live", title: "진행 중 공채", description: "", startsAt: iso(-HOUR), endsAt: iso(HOUR), durationMin: 30, problemIds: ["p1", "p2", "p3"], createdAt: iso(-DAY), updatedAt: iso(-DAY) },
+          { id: "t-closed", title: "지난 인턴 선발", description: "", startsAt: atNoon(-2 * DAY), endsAt: atNoon(-DAY), durationMin: 60, problemIds: ["p1", "p2"], createdAt: atNoon(-3 * DAY), updatedAt: atNoon(-3 * DAY) },
+          { id: "t-soon", title: "다음 주 공채", description: "", startsAt: atNoon(DAY), endsAt: atNoon(3 * DAY), durationMin: 90, problemIds: ["p1"], createdAt: atNoon(-HOUR), updatedAt: atNoon(-HOUR) },
+          { id: "t-live", title: "진행 중 공채", description: "", startsAt: atNoon(-HOUR), endsAt: atNoon(HOUR), durationMin: 30, problemIds: ["p1", "p2", "p3"], createdAt: atNoon(-DAY), updatedAt: atNoon(-DAY) },
         ],
         other: [
-          { id: "t-other", title: "남의 테스트", description: "", startsAt: iso(-HOUR), endsAt: iso(HOUR), durationMin: 30, problemIds: ["p1"], createdAt: iso(-DAY), updatedAt: iso(-DAY) },
+          { id: "t-other", title: "남의 테스트", description: "", startsAt: atNoon(-HOUR), endsAt: atNoon(HOUR), durationMin: 30, problemIds: ["p1"], createdAt: atNoon(-DAY), updatedAt: atNoon(-DAY) },
         ],
       },
     },
   );
+  // 하루짜리 테스트(진행 중 공채)가 자정을 넘지 않도록 브라우저 시각을 오늘 정오로 고정한다.
+  await page.clock.install({ time: noonToday });
   await signIn(page);
   await page.goto("/enterprise");
 
@@ -346,4 +350,29 @@ test("the list says when a scheduled test starts today or tomorrow", async ({
   await expect(period("오늘 저녁 시작")).toHaveText("오늘 오후 7시 시작 예정");
   await expect(period("내일 오후 시작")).toHaveText("내일 오후 2시 시작 예정");
   await expect(period("다음 주 시작")).toHaveText("10월27일 시작 예정");
+});
+
+test("saving in one tab keeps tests another tab created while this one was elsewhere", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/enterprise");
+  await expect(page.getByText("아직 만든 테스트가 없어요")).toBeVisible();
+  const ids = await page.evaluate(async (key) => {
+    const modulePath = "/src/enterprise/store.ts";
+    const { enterpriseActions } = await import(modulePath);
+    // 다른 탭이 만든 테스트: 같은 탭의 setItem은 storage 이벤트를 보내지 않아 이 탭의 메모리는 낡은 상태다.
+    const other = { id: "t-other", title: "다른 탭", description: "", startsAt: "2026-11-01T00:00:00Z", endsAt: "2026-11-02T00:00:00Z", durationMin: 60, problemIds: ["p1"], createdAt: "2026-10-01T00:00:00Z", updatedAt: "2026-10-01T00:00:00Z" };
+    localStorage.setItem(key, JSON.stringify({ solver: [other] }));
+    enterpriseActions.create("solver", { title: "이 탭", description: "", startsAt: "2026-11-03T00:00:00Z", endsAt: "2026-11-04T00:00:00Z", durationMin: 30, problemIds: ["p2"] });
+    return JSON.parse(localStorage.getItem(key)!).solver.map((test: { title: string }) => test.title);
+  }, testsKey);
+  expect(ids).toEqual(["이 탭", "다른 탭"]);
+});
+
+test("logging in from an edit link returns to that edit page", async ({ page }) => {
+  await page.goto("/enterprise/t-1/edit");
+  await page.getByRole("link", { name: /로그인하기/ }).click();
+  await expect(page).toHaveURL(/\/auth$/);
+  expect(await page.evaluate(() => (history.state?.usr as { from?: string } | undefined)?.from)).toBe(
+    "/enterprise/t-1/edit",
+  );
 });

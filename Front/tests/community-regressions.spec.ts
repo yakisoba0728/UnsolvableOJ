@@ -49,7 +49,7 @@ async function seed(
     activity: {
       posts,
       answers: [answer],
-      upvoted,
+      upvotedBy: { [session.user.id]: upvoted },
       saved: [],
       followed: [],
       accepted: {},
@@ -446,7 +446,7 @@ test("the profile post scroller counter stays in range when its list shrinks", a
     const observer = new MutationObserver(() => texts.push(counter.textContent ?? ""));
     observer.observe(counter, { subtree: true, childList: true, characterData: true });
     const activity = JSON.parse(localStorage.getItem(key)!);
-    activity.upvoted = activity.upvoted.slice(1);
+    activity.upvotedBy.solver = activity.upvotedBy.solver.slice(1);
     localStorage.setItem(key, JSON.stringify(activity));
     window.dispatchEvent(new StorageEvent("storage", { key }));
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -506,6 +506,31 @@ test("K11: draft helpers isolate owners and posts, preserve ownerless legacy dat
   await expect(page.getByLabel(/^제목/)).toHaveValue("");
   await page.goto("/community/mine");
   await expect(page.getByLabel("답변 내용")).toHaveValue("");
+});
+
+test("K11: upvotes and follows belong to the account that made them, not to the browser", async ({ page }) => {
+  await seed(page);
+  await page.goto("/community/other");
+  const vote = page.locator(".post-vote");
+  await vote.click();
+  await page.getByRole("button", { name: "+ 팔로우" }).click();
+  await expect(vote).toHaveAttribute("aria-pressed", "true");
+  await expect(vote).toContainText("1");
+
+  await page.evaluate(({ key, saved }) => localStorage.setItem(key, JSON.stringify(saved)), {
+    key: sessionKey,
+    saved: { session: { ...session, user: { ...session.user, id: "second", username: "second" } }, expiresAt: Date.now() + 900_000 },
+  });
+  await page.reload();
+  await expect(vote).toHaveAttribute("aria-pressed", "false");
+  await expect(vote).toContainText("1");
+  await expect(page.getByRole("button", { name: "+ 팔로우" })).toBeVisible();
+});
+
+test("a malformed stored post is skipped instead of breaking the community page", async ({ page }) => {
+  await seed(page, [mine, { ...other, tags: undefined } as unknown as CommunityPost]);
+  await page.goto("/community");
+  await expect(page.locator(".post-title")).toHaveText(["내 질문"]);
 });
 
 test("K15: SPA navigation can be rejected, accepted navigation recovers edits, explicit discard does not restore them", async ({ page }) => {

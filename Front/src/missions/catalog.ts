@@ -1,4 +1,4 @@
-import { dayKey, submissionsByDay } from "../hooks";
+import { dayKey, streakDays, submissionsByDay } from "../hooks";
 import type { Submission } from "../types";
 
 export type MissionStatus = "idle" | "active" | "done";
@@ -56,18 +56,6 @@ export function deadlineOf(period: MissionPeriod, now: Date) {
 const statusOf = (current: number, target: number): MissionStatus =>
   current >= target ? "done" : current > 0 ? "active" : "idle";
 
-/** now 기준으로 오늘(없으면 어제)부터 거꾸로 이어진 연속 제출 일수. */
-export function streakAt(counts: Map<string, number>, now: Date) {
-  const cursor = new Date(now);
-  if (!counts.has(dayKey(cursor))) cursor.setDate(cursor.getDate() - 1);
-  let streak = 0;
-  while (counts.has(dayKey(cursor))) {
-    streak += 1;
-    cursor.setDate(cursor.getDate() - 1);
-  }
-  return streak;
-}
-
 export function buildMissions({
   submissions,
   analysis,
@@ -106,7 +94,7 @@ export function buildMissions({
       created.getMonth() === now.getMonth()
     );
   }).length;
-  const streak = streakAt(submissionsByDay(submissions), now);
+  const streak = streakDays(submissionsByDay(submissions), now);
 
   const define = (
     mission: Omit<Mission, "current" | "status">,

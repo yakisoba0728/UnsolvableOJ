@@ -20,7 +20,9 @@ import {
   readAnswerDraft,
   relativeTime,
   statsOf,
+  isFollowing,
   upvoteCount,
+  upvotedIds,
   useActivity,
   writeAnswerDraft,
 } from "../community/store";
@@ -93,16 +95,17 @@ export function CommunityPostPage() {
     : null;
   const isMine = Boolean(me && post.author.name === me.name);
   const authorStats = statsOf(activity, post.author.name);
-  const following = activity.followed.includes(post.author.name);
+  const following = isFollowing(activity, session?.user.id, post.author.name);
+  const upvoted = upvotedIds(activity, session?.user.id);
 
-  function requireLogin(action: () => void) {
+  function requireLogin(action: (userId: string) => void) {
     if (!session) {
       navigate("/auth", { state: { from: `/community/${id}` } });
       return;
     }
     setActionError("");
     try {
-      action();
+      action(session.user.id);
     } catch {
       setNotice("");
       setActionError("변경 내용을 저장하지 못했어요. 다시 시도해 주세요.");
@@ -237,8 +240,8 @@ export function CommunityPostPage() {
                     className="button button-outline button-small"
                     aria-pressed={following}
                     onClick={() =>
-                      requireLogin(() =>
-                        communityActions.toggleFollow(post.author.name),
+                      requireLogin((userId) =>
+                        communityActions.toggleFollow(userId, post.author.name),
                       )
                     }
                   >
@@ -273,10 +276,10 @@ export function CommunityPostPage() {
             <div className="post-actions">
               <button
                 type="button"
-                className={`button post-vote ${activity.upvoted.includes(post.id) ? "" : "button-soft"}`}
-                aria-pressed={activity.upvoted.includes(post.id)}
+                className={`button post-vote ${upvoted.includes(post.id) ? "" : "button-soft"}`}
+                aria-pressed={upvoted.includes(post.id)}
                 onClick={() =>
-                  requireLogin(() => communityActions.toggleUpvote(post.id))
+                  requireLogin((userId) => communityActions.toggleUpvote(userId, post.id))
                 }
               >
                 <ThumbsUp size={15} aria-hidden="true" /> 추천{" "}
@@ -363,10 +366,10 @@ export function CommunityPostPage() {
                           <button
                             type="button"
                             className="answer-vote"
-                            aria-pressed={activity.upvoted.includes(answer.id)}
+                            aria-pressed={upvoted.includes(answer.id)}
                             onClick={() =>
-                              requireLogin(() =>
-                                communityActions.toggleUpvote(answer.id),
+                              requireLogin((userId) =>
+                                communityActions.toggleUpvote(userId, answer.id),
                               )
                             }
                           >

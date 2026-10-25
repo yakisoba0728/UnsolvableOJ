@@ -26,7 +26,10 @@ export function SubmissionPage() {
       ? `${submission.problem.title ?? "제출"} 채점 결과`
       : "채점 결과",
   );
-  const history = useSubmissionHistory(session);
+  // 연속 학습 카드는 정답일 때만 보이므로 그때만 전체 제출 기록을 받는다.
+  const history = useSubmissionHistory(
+    submission?.status === "ACCEPTED" ? session : null,
+  );
 
   if (error && !submission)
     return (
@@ -63,7 +66,7 @@ export function SubmissionPage() {
         </p>
       ) : null}
       <ResultSummary submission={submission} />
-      {submission.status === "ACCEPTED" && !history.loading ? (
+      {submission.status === "ACCEPTED" && !history.loading && !history.error ? (
         <section className="streak-card" aria-label="연속 학습">
           <div className="streak-text">
             <strong>

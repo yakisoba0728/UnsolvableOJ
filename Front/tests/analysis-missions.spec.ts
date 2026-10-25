@@ -63,6 +63,8 @@ test("code analysis: search and filters narrow the list and are kept in the URL"
   await page.getByLabel("문제 검색").fill("안정 정렬");
   await expect(rows(page)).toHaveCount(0);
   await page.getByLabel("문제 검색").fill("print");
+  // 앞 검색도 0건이라, 검색어가 주소에 반영된 뒤에 세어야 실제로 검사된다.
+  await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("print");
   await expect(rows(page)).toHaveCount(0);
   await page.getByLabel("문제 검색").fill("없는 검색어 zzz");
   await expect(rows(page)).toHaveCount(0);
@@ -385,4 +387,25 @@ test("signed-out visitors can open missions and are asked to log in", async ({
   await expect(
     page.locator(".mission-card", { hasText: "일일 미션" }),
   ).toContainText("0 / 5");
+});
+
+test("code analysis: malformed stored records are skipped and other tabs' records are kept", async ({ page }) => {
+  await authenticate(page);
+  await page.addInitScript(() => {
+    if (!sessionStorage.getItem("seeded")) {
+      sessionStorage.setItem("seeded", "1");
+      localStorage.setItem("unsolvable-oj-analysis-v1", JSON.stringify([null, { userId: "solver" }]));
+    }
+  });
+  await page.goto("/analysis");
+  await expect(rows(page).first()).toBeVisible();
+  const kept = await page.evaluate(async () => {
+    const modulePath = "/src/analysis/progress.ts";
+    const { recordAnalysisAttempt } = await import(modulePath);
+    const other = { userId: "solver", questionId: "other-tab", correct: true, at: "2026-10-01T00:00:00Z" };
+    localStorage.setItem("unsolvable-oj-analysis-v1", JSON.stringify([other]));
+    recordAnalysisAttempt("solver", "this-tab", false, 1);
+    return JSON.parse(localStorage.getItem("unsolvable-oj-analysis-v1")!).map((item: { questionId: string }) => item.questionId);
+  });
+  expect(kept).toEqual(["other-tab", "this-tab"]);
 });

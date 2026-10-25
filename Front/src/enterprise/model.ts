@@ -20,6 +20,12 @@ export const statusLabel: Record<TestStatus, string> = {
   closed: "마감",
 };
 
+export const statusPillClass: Record<TestStatus, string> = {
+  scheduled: "pill",
+  running: "pill pill-success",
+  closed: "pill ent-pill-closed",
+};
+
 export const LIMITS = {
   title: 60,
   description: 300,
