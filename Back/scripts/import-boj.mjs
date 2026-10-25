@@ -183,7 +183,7 @@ try {
           AND a.action='service_account.provision.boj' AND a.target_type='user' AND a.target_id=u.id
           AND a.details->>'provisioner'='scripts/import-boj.mjs' AND a.details->>'version'='1'
           AND a.details->>'passwordHashSha256'=encode(sha256(convert_to(u.password_hash,'UTF8')),'hex')
-        ) AS provisioned FROM users u WHERE u.username=$1 OR u.email=$2 FOR UPDATE OF u`,
+        ) AS provisioned FROM users u WHERE lower(u.username)=$1 OR u.email=$2 FOR UPDATE OF u`,
         ['boj_import', 'boj-import@unsolvable.local'],
       )
     ).rows;
