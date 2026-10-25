@@ -7,13 +7,12 @@ import {
   metaLine,
   remainingText,
   statusLabel,
+  statusPillClass,
   testStatus,
 } from "../enterprise/model";
 import { enterpriseActions, useEnterpriseTests } from "../enterprise/store";
-import { useNow } from "../enterprise/useNow";
-import { useAllProblems, useDocumentTitle } from "../hooks";
+import { useAllProblems, useDocumentTitle, useNow } from "../hooks";
 import { problemPath } from "../paths";
-import { statusPillClass } from "./EnterprisePage";
 import { difficultyLabel } from "../difficulty";
 
 function Missing({ children }: { children: React.ReactNode }) {

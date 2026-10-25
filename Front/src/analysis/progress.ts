@@ -14,31 +14,43 @@ export interface AnalysisAttempt {
 const storageKey = "unsolvable-oj-analysis-v1";
 const MAX_ATTEMPTS = 500;
 
-function load(): AnalysisAttempt[] {
+const isAttempt = (value: unknown): value is AnalysisAttempt => {
+  const attempt = value as Partial<AnalysisAttempt> | null;
+  return (
+    !!attempt &&
+    typeof attempt.userId === "string" &&
+    typeof attempt.questionId === "string" &&
+    typeof attempt.correct === "boolean" &&
+    typeof attempt.at === "string" &&
+    (attempt.selected === undefined || typeof attempt.selected === "number")
+  );
+};
+
+/** 모양이 맞지 않는 기록은 버린다. 저장소를 읽을 수 없으면 null: 부르는 쪽이 메모리의 값을 계속 쓴다. */
+function load(): AnalysisAttempt[] | null {
   try {
     const raw = localStorage.getItem(storageKey);
     const parsed: unknown = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? (parsed as AnalysisAttempt[]) : [];
+    return Array.isArray(parsed) ? parsed.filter(isAttempt) : [];
   } catch {
-    return [];
+    return null;
   }
 }
 
-let state = load();
+let state = load() ?? [];
 const listeners = new Set<() => void>();
+
+// 다른 탭의 기록은 코드 분석 화면을 벗어난 동안에도 반영한다.
+window.addEventListener("storage", (event) => {
+  if (event.key !== storageKey && event.key !== null) return;
+  state = load() ?? state;
+  listeners.forEach((listener) => listener());
+});
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
-  const onStorage = (event: StorageEvent) => {
-    if (event.key === storageKey) {
-      state = load();
-      listener();
-    }
-  };
-  window.addEventListener("storage", onStorage);
   return () => {
     listeners.delete(listener);
-    window.removeEventListener("storage", onStorage);
   };
 }
 
@@ -51,8 +63,9 @@ export function recordAnalysisAttempt(
   correct: boolean,
   selected: number,
 ) {
+  // 다른 탭에서 남긴 기록 위에 더해야 그 기록을 덮어쓰지 않는다.
   state = [
-    ...state,
+    ...(load() ?? state),
     { userId, questionId, correct, selected, at: new Date().toISOString() },
   ].slice(-MAX_ATTEMPTS);
   try {

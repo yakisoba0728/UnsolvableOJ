@@ -61,6 +61,25 @@ p {
 .main-content {
   flex: 1;
 }
+/* 화면을 옮길 때 포커스를 받는 자리일 뿐이라 테두리를 그리지 않는다 */
+.main-content:focus {
+  outline: none;
+}
+/* 키보드로 처음 Tab을 누르면 나타나 머리글 메뉴를 건너뛴다 */
+.skip-link {
+  position: absolute;
+  top: -48px;
+  left: 16px;
+  z-index: 100;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: var(--weight-label);
+}
+.skip-link:focus {
+  top: 8px;
+}
 .page-width {
   width: min(1180px, calc(100% - 48px));
   margin: auto;
@@ -928,6 +947,11 @@ textarea {
   background: var(--color-warning-soft);
   border-color: transparent;
   color: var(--color-warning);
+}
+.pill-success {
+  background: var(--color-success-soft);
+  border-color: transparent;
+  color: var(--color-success);
 }
 .text-button.light {
   color: var(--color-strong-muted);
@@ -4012,7 +4036,7 @@ h3 {
 
 .post-views {
   margin: 0;
-  color: var(--color-ink-500);
+  color: var(--color-ink-400);
   font-size: 13px;
 }
 .answers-toggle {
@@ -4028,7 +4052,7 @@ h3 {
   cursor: pointer;
 }
 .answers-chevron {
-  color: var(--color-ink-500);
+  color: var(--color-ink-400);
 }
 
 /* 프로필: 최근 제출 활동 + 학습 통계 */
@@ -4963,7 +4987,7 @@ h3 {
 .guide-card .row-chevron {
   grid-column: 2;
   grid-row: 1 / span 2;
-  color: var(--color-ink-500, var(--color-ink-600));
+  color: var(--color-ink-600);
   font-size: 20px;
   font-style: normal;
   line-height: 1;
@@ -5812,7 +5836,7 @@ h3 {
   gap: 5px;
 }
 .data-list .post-num svg {
-  color: var(--color-ink-500);
+  color: var(--color-ink-400);
   flex: none;
 }
 
@@ -6006,7 +6030,7 @@ h3 {
   }
   .data-list.list-problems .problem-limit::before {
     content: attr(data-label) " ";
-    color: var(--color-ink-500);
+    color: var(--color-ink-400);
   }
 }
 
@@ -6299,7 +6323,7 @@ textarea {
   }
   .data-list.list-history .history-tests::before {
     content: attr(data-label) " ";
-    color: var(--color-ink-500);
+    color: var(--color-ink-400);
   }
 }
 
@@ -6768,25 +6792,6 @@ textarea {
 .analysis-page > .page-header {
   padding: 0;
 }
-.analysis-row-meta {
-  display: block;
-  color: var(--color-ink-600);
-  font-size: 13px;
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.analysis-guide {
-  margin: 0;
-  padding-left: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--color-ink-700);
-}
 .analysis-all-done {
   margin: 16px 0 0;
   font-size: 14px;
@@ -6916,6 +6921,8 @@ textarea {
   font-size: 13px;
   font-weight: var(--weight-title);
   color: var(--color-primary);
+  border-radius: 6px;
+  transition: transform 0.12s ease-out;
 }
 .mission-start:hover {
   text-decoration: underline;
@@ -6968,10 +6975,12 @@ textarea {
 .season-ring-track {
   stroke: var(--color-disabled);
 }
+/* 시즌 링: 처음 나타날 때 한 번 그려진다(빠르게 시작해 천천히 멈춤) */
 .season-ring-arc {
   stroke: var(--color-primary-solid);
   stroke-linecap: round;
   transition: stroke-dashoffset 0.4s;
+  animation: season-ring-draw 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 .season-ring-chart strong {
   position: relative;
@@ -6997,64 +7006,6 @@ textarea {
   font-weight: var(--weight-title);
   color: var(--color-primary);
   font-variant-numeric: tabular-nums;
-}
-.season-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 24px;
-  border: 1px solid var(--color-feature-border);
-  border-radius: var(--radius-feature);
-  background: var(--color-feature);
-}
-.season-main {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-  min-width: 0;
-}
-.season-main h2 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: var(--weight-display);
-  letter-spacing: -0.02em;
-}
-/* 원(달성 횟수)과 남은 일 수를 가로로 나란히 */
-.season-stats {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex: none;
-}
-.season-badge {
-  display: grid;
-  place-items: center;
-  width: 88px;
-  height: 88px;
-  border: 1px solid var(--color-feature-border);
-  border-radius: 999px;
-  background: var(--color-surface);
-  color: var(--color-primary);
-  font-size: 20px;
-  font-weight: var(--weight-display);
-  font-variant-numeric: tabular-nums;
-}
-.season-dday {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 80px;
-}
-.season-dday strong {
-  font-size: 28px;
-  font-weight: var(--weight-display);
-  letter-spacing: -0.02em;
-}
-.season-dday span {
-  font-size: 13px;
-  color: var(--color-ink-600);
 }
 /* 연속 학습: 진행 막대와 이번 주 기록을 가로로 */
 .mission-streak {
@@ -7138,11 +7089,6 @@ textarea {
   }
 }
 @media (max-width: 600px) {
-  .season-card {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 20px;
-  }
   .analysis-page {
     width: calc(100% - 32px);
     padding-top: 20px;
@@ -7444,10 +7390,6 @@ textarea {
 .answers-toggle {
   min-height: 40px;
 }
-.mission-start {
-  border-radius: 6px;
-  transition: transform 0.12s ease-out;
-}
 .mission-start:active {
   transform: scale(0.97);
 }
@@ -7467,14 +7409,10 @@ textarea {
 .community-page .total-count {
   font-variant-numeric: tabular-nums;
 }
-/* 시즌 링: 처음 나타날 때 한 번 그려진다(빠르게 시작해 천천히 멈춤) */
 @keyframes season-ring-draw {
   from {
     stroke-dashoffset: var(--ring-full);
   }
-}
-.season-ring-arc {
-  animation: season-ring-draw 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 @media (prefers-reduced-motion: reduce) {
   .season-ring-arc,

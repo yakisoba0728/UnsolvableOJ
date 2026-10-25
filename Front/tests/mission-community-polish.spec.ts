@@ -210,6 +210,41 @@ test("the XP double card skips problems already solved and turns done when all a
   await expect(card.getByRole("link")).toHaveCount(0);
 });
 
+test("the XP double card keeps today's problem after it is solved and shows it as done", async ({
+  page,
+}) => {
+  await seed(page);
+  await problemsRoute(page, [problem(1), problem(2), problem(3)]);
+  const submissions: unknown[] = [];
+  await page.route("**/api/v1/submissions?*", (route) =>
+    route.fulfill({
+      json: { items: submissions, page: 1, limit: 1000, total: submissions.length, totalPages: 1 },
+    }),
+  );
+  await page.goto("/missions");
+  const card = page.locator(".xp-boost-card");
+  const link = card.getByRole("link", { name: /시작하기/ });
+  const slug = (await link.getAttribute("href"))!.split("/").pop()!;
+  const n = Number(slug.replace("problem-", ""));
+  submissions.push({
+    id: "today",
+    problem: { id: `prob-${n}`, slug, title: `임시 문제 ${n}` },
+    language: "PYTHON",
+    status: "ACCEPTED",
+    runtimeMs: 1,
+    memoryKb: 1,
+    passedTestCases: 1,
+    totalTestCases: 1,
+    compileOutput: null,
+    judgeMessage: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+  await page.reload();
+  await expect(card).toContainText(`임시 문제 ${n}`);
+  await expect(card.locator(".mission-status")).toHaveText("달성");
+});
+
 test("the XP double card falls back to the problem list when nothing can be picked", async ({
   page,
 }) => {
