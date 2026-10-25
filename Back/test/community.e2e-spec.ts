@@ -272,6 +272,7 @@ describe('Community (PostgreSQL e2e)', () => {
     await call('get', '/mine').expect(401);
     const myPosts = (await call('get', '/mine', 1).expect(200)).body;
     expect(myPosts.voted.map((p: { id: string }) => p.id)).toContain(id);
+    expect(myPosts.saved.map((p: { id: string }) => p.id)).toContain(id);
     expect(myPosts.following).toEqual([users[0].id]);
     expect(myPosts.written.map((p: { id: string }) => p.id)).not.toContain(id);
     expect(

@@ -117,6 +117,8 @@ export async function mockCommunityApi(
     answers?: SeedAnswer[];
     /** 내가 추천한 글·답변 id */
     voted?: string[];
+    /** 내가 저장한 글 id */
+    saved?: string[];
     /** 내가 팔로우한 작성자 이름 */
     following?: string[];
   } = {},
@@ -146,6 +148,7 @@ export async function mockCommunityApi(
       ...answer,
     })),
     voted: new Set(seed.voted ?? []),
+    saved: new Set(seed.saved ?? []),
     following: new Set(seed.following ?? []),
     /** 요청을 실패시키려면 상태 코드를 돌려준다. */
     fail: (() => undefined) as (
@@ -265,6 +268,9 @@ export async function mockCommunityApi(
           voted: state.posts
             .filter((post) => state.voted.has(post.id))
             .map((post) => toApi(post, false)),
+          saved: state.posts
+            .filter((post) => state.saved.has(post.id))
+            .map((post) => toApi(post, false)),
           following: [...state.following],
         });
       if (method === "POST" && !path) {
@@ -329,6 +335,7 @@ export async function mockCommunityApi(
       if (action === "interaction")
         return reply({
           voted: state.voted.has(id),
+          saved: state.saved.has(id),
           following: state.following.has(post.author),
           commentVotes: answersOf(id)
             .map((answer) => answer.id)
@@ -337,6 +344,10 @@ export async function mockCommunityApi(
       if (action === "vote") {
         toggle(state.voted, id);
         return reply({ voted: state.voted.has(id), voteCount: toApi(post).voteCount });
+      }
+      if (action === "saved") {
+        toggle(state.saved, id);
+        return reply({ ok: true });
       }
       if (action === "follow") {
         toggle(state.following, post.author);
@@ -383,6 +394,18 @@ export async function mockCommunityApi(
           limit,
           totalPages: Math.ceil(items.length / limit),
         });
+      }
+      if (action === "comments" && answerId && !answerAction) {
+        const answer = answersOf(id).find((item) => item.id === answerId);
+        if (!answer) return reply({ message: "답변을 찾을 수 없습니다." }, 404);
+        // 권한(작성자, 삭제는 관리자도)은 Back e2e가 확인한다. 여기서는 화면이 보낸 요청만 반영한다.
+        if (method === "PUT") answer.body = String((body as { body: string }).body);
+        else {
+          state.answers = state.answers.filter((item) => item !== answer);
+          // 채택된 답변을 지우면 채택도 풀린다(ON DELETE SET NULL).
+          if (post.accepted === answerId) post.accepted = null;
+        }
+        return reply({ ok: true });
       }
       if (action === "comments" && answerAction === "vote") {
         toggle(state.voted, answerId);

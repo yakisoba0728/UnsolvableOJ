@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import {
+  Bookmark,
   ChevronDown,
   ChevronUp,
   Eye,
@@ -88,6 +89,11 @@ export function CommunityPostPage() {
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useFlashNotice();
   const [answersOpen, setAnswersOpen] = useState(false);
+  // 한 번에 답변 하나만 고친다.
+  const [editing, setEditing] = useState<{ id: string; text: string } | null>(
+    null,
+  );
+  const [editError, setEditError] = useState("");
   const editorRef = useRef<HTMLTextAreaElement>(null);
   // 새 답변은 다시 불러온 뒤에야 화면에 생기므로, 그때 그 답변으로 스크롤한다.
   const scrollTarget = useRef("");
@@ -106,6 +112,7 @@ export function CommunityPostPage() {
     setError("");
     setActionError("");
     setAnswersOpen(false);
+    setEditing(null);
   }, [id, ownerId]);
   useEffect(() => {
     setData(null);
@@ -164,13 +171,15 @@ export function CommunityPostPage() {
     ? answers.items
     : answers.items.filter((answer) => answer.id === acceptedId);
   const isMine = Boolean(session && post.authorId === session.user.id);
-  const canDelete = isMine || session?.user.role === "ADMIN";
+  const isAdmin = session?.user.role === "ADMIN";
+  const canDelete = isMine || isAdmin;
   const following = interaction.following;
 
   /** 로그인하지 않았으면 로그인 화면으로 보낸다. 성공하면 글을 다시 불러온다. */
   async function act(
     path: string,
     method: "PUT" | "DELETE",
+    body?: object,
   ): Promise<boolean> {
     if (!session) {
       navigate("/auth", { state: { from: `/community/${id}` } });
@@ -180,7 +189,7 @@ export function CommunityPostPage() {
     setPending(true);
     setActionError("");
     try {
-      await postAction(id, path, method, session.accessToken);
+      await postAction(id, path, method, session.accessToken, body);
       setRevision((count) => count + 1);
       return true;
     } catch {
@@ -217,6 +226,31 @@ export function CommunityPostPage() {
         notice: `글을 삭제했어요.${answerCleared && editCleared ? "" : " 임시 초안을 지우지 못했어요."}`,
       },
     });
+  }
+
+  async function saveAnswer(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editing) return;
+    const body = editing.text.trim();
+    if (body.length < MIN_ANSWER) {
+      setEditError(`답변을 ${MIN_ANSWER}자 이상 입력해 주세요.`);
+      return;
+    }
+    setEditError("");
+    if (await act(`/comments/${editing.id}`, "PUT", { body })) {
+      setEditing(null);
+      setNotice("답변을 수정했어요.");
+    }
+  }
+
+  async function deleteAnswer(answerId: string) {
+    if (!window.confirm("이 답변을 삭제할까요? 되돌릴 수 없어요.")) return;
+    if (!(await act(`/comments/${answerId}`, "DELETE"))) return;
+    if (editing?.id === answerId) setEditing(null);
+    setNotice("답변을 삭제했어요.");
+    // 쪽의 마지막 답변을 지우면 그 쪽이 비므로 앞 쪽으로 간다.
+    if (answers.items.length === 1 && answerPage > 1)
+      setAnswerPage(answerPage - 1);
   }
 
   function onDraftChange(value: string) {
@@ -399,6 +433,22 @@ export function CommunityPostPage() {
               >
                 <ThumbsUp size={15} aria-hidden="true" /> 추천 {post.upvotes}
               </button>
+              <button
+                type="button"
+                className={`button ${interaction.saved ? "" : "button-soft"}`}
+                aria-pressed={interaction.saved}
+                disabled={pending}
+                onClick={() =>
+                  void act("/saved", interaction.saved ? "DELETE" : "PUT")
+                }
+              >
+                <Bookmark
+                  size={15}
+                  aria-hidden="true"
+                  fill={interaction.saved ? "currentColor" : "none"}
+                />{" "}
+                저장
+              </button>
             </div>
           </article>
 
@@ -471,6 +521,9 @@ export function CommunityPostPage() {
                 {shown.map((answer) => {
                   const accepted = answer.id === acceptedId;
                   const voted = interaction.commentVotes.includes(answer.id);
+                  const mineAnswer = Boolean(
+                    session && answer.authorId === session.user.id,
+                  );
                   return (
                     <li
                       key={answer.id}
@@ -517,11 +570,85 @@ export function CommunityPostPage() {
                               {accepted ? "채택 취소" : "채택하기"}
                             </button>
                           ) : null}
+                          {mineAnswer || isAdmin ? (
+                            <ActionMenu
+                              label="답변 관리"
+                              items={[
+                                // 관리자는 남의 답변을 지울 수만 있고 고칠 수는 없다.
+                                ...(mineAnswer
+                                  ? [
+                                      {
+                                        label: "수정",
+                                        icon: (
+                                          <Pencil size={15} aria-hidden="true" />
+                                        ),
+                                        onSelect: () => {
+                                          setEditError("");
+                                          setEditing({
+                                            id: answer.id,
+                                            text: answer.body,
+                                          });
+                                        },
+                                      },
+                                    ]
+                                  : []),
+                                {
+                                  label: "삭제",
+                                  icon: <Trash2 size={15} aria-hidden="true" />,
+                                  danger: true,
+                                  onSelect: () => void deleteAnswer(answer.id),
+                                },
+                              ]}
+                            />
+                          ) : null}
                         </span>
                       </div>
-                      <div className="markdown answer-body">
-                        <Markdown>{answer.body}</Markdown>
-                      </div>
+                      {editing?.id === answer.id ? (
+                        <form
+                          className="answer-edit"
+                          onSubmit={saveAnswer}
+                          noValidate
+                        >
+                          <textarea
+                            rows={6}
+                            maxLength={10_000}
+                            aria-label="답변 수정"
+                            aria-invalid={Boolean(editError)}
+                            autoFocus
+                            value={editing.text}
+                            onChange={(event) =>
+                              setEditing({
+                                id: answer.id,
+                                text: event.target.value,
+                              })
+                            }
+                          />
+                          {editError ? (
+                            <p className="error-message" role="alert">
+                              {editError}
+                            </p>
+                          ) : null}
+                          <div className="answer-footer">
+                            <button
+                              type="button"
+                              className="button button-outline button-small"
+                              onClick={() => setEditing(null)}
+                            >
+                              취소
+                            </button>
+                            <button
+                              className="button button-small"
+                              disabled={pending}
+                            >
+                              {pending ? "저장 중…" : "저장"}
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <div className="markdown answer-body">
+                          <Markdown>{answer.body}</Markdown>
+                        </div>
+                      )}
                       <small className="muted">
                         {relativeTime(answer.createdAt)}
                       </small>
