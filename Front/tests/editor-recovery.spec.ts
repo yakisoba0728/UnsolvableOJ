@@ -239,11 +239,15 @@ test("author storage failure is honest and memory recovery survives an immediate
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("link", { name: "← 문제 목록", exact: true }).click();
   await expect(page).toHaveURL(/\/problems$/);
+  // A changed URL can precede a lazy route's commit. Wait for unmount before
+  // testing recovery on a fresh editor, rather than reusing the old form.
+  await expect(page.getByRole("heading", { name: "문제 목록", exact: true })).toBeVisible();
   await page.locator("header").getByRole("link", { name: "문제 만들기", exact: true }).click();
   await expect(page.getByLabel("제목", { exact: true })).toHaveValue("Memory only latest");
   await page.getByRole("button", { name: "지우고 새로 시작" }).click();
   await page.getByRole("link", { name: "← 문제 목록", exact: true }).click();
   await expect(page).toHaveURL(/\/problems$/);
+  await expect(page.getByRole("heading", { name: "문제 목록", exact: true })).toBeVisible();
   await page.locator("header").getByRole("link", { name: "문제 만들기", exact: true }).click();
   await expect(page.getByLabel("제목", { exact: true })).toHaveValue("");
 });
