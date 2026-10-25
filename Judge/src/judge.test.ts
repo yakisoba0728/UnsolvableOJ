@@ -313,7 +313,7 @@ test("aborting execution still cleans artifacts with a separate cleanup signal",
   assert.equal(s.files.size, 0);
 });
 
-for (const [httpStatus, transient] of [[400, false], [429, true], [500, true], [503, true]] as const) {
+for (const [httpStatus, transient] of [[400, false], [429, true], [500, false], [501, false], [502, true], [503, true], [504, true]] as const) {
   test(`go-judge HTTP ${httpStatus} is ${transient ? "" : "not "}a transient sandbox failure`, async (t) => {
     const s = await sandbox(t, [{ httpStatus }]);
     await assert.rejects(judge(claim(), s.config),

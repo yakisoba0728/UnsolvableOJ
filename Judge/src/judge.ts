@@ -92,7 +92,8 @@ const LANGUAGES: Record<string, { source: string; compile?: string[]; artifact?:
   RUST: { source: "main.rs", compile: ["/usr/bin/rustc", "main.rs", "--edition=2021", "-O", "-o", "main"], artifact: "main", run: ["/w/main"] },
 };
 
-// go-judge에 닿지 못했거나 5xx/429를 받은 경우: 제출의 판정이 아니므로 최종 결과로 기록하지 않습니다.
+// go-judge에 닿지 못했거나 429/502/503/504를 받은 경우: 제출의 판정이 아니므로 최종 결과로 기록하지 않습니다.
+// 500 등 나머지는 특정 제출이 반복해 일으킬 수 있으므로 SYSTEM_ERROR로 끝냅니다.
 export class SandboxUnavailableError extends Error {}
 
 async function request(config: SandboxConfig, path: string, signal: AbortSignal, options: RequestInit = {}) {
@@ -112,7 +113,7 @@ async function request(config: SandboxConfig, path: string, signal: AbortSignal,
   if (!response.ok) {
     await response.body?.cancel();
     const message = `${name}: HTTP ${response.status}`;
-    throw response.status === 429 || response.status >= 500 ? new SandboxUnavailableError(message) : new Error(message);
+    throw [429, 502, 503, 504].includes(response.status) ? new SandboxUnavailableError(message) : new Error(message);
   }
   return response;
 }

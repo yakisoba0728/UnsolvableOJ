@@ -87,7 +87,7 @@ export async function startWorker(
       } catch (error) {
         if (cancellation.signal.aborted) return;
         console.error(`Judge failed for ${job.data.submissionId}:`, error);
-        // 결과를 보내지 않고 lease를 만료시키면 API 복구가 다음 generation으로 다시 큐에 넣습니다.
+        // 결과를 보내지 않고 lease를 만료시키면 API 복구가 다음 generation으로 다시 큐에 넣습니다(제출당 5회 뒤에는 API가 SYSTEM_ERROR로 끝냄).
         if (error instanceof SandboxUnavailableError) throw error;
         result = {
           status: "SYSTEM_ERROR",
