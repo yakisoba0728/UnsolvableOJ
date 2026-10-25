@@ -57,8 +57,13 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
   const navigationType = useNavigationType();
   // 다른 화면으로 이동하면 스크롤을 맨 위로 올린다(뒤로 가기는 브라우저 동작에 맡기고,
   // 같은 화면에서 필터·검색 주소만 바뀔 때는 위치를 유지한다).
+  useEffect(() => {
+    if (navigationType === "POP") return;
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  }, [pathname]);
   // 키보드·화면 낭독기 사용자가 새 화면의 처음부터 읽도록 포커스를 본문으로 옮긴다
-  // (화면이 스스로 입력칸 등에 포커스를 줬으면 그대로 둔다).
+  // (화면이 스스로 입력칸 등에 포커스를 줬으면 그대로 둔다). 스크롤을 올린 뒤에 옮겨야
+  // 포커스 때문에 시작된 부드러운 스크롤이 맨 위 위치를 덮어쓰지 않는다(Firefox).
   const mainRef = useRef<HTMLElement>(null);
   const focusedPath = useRef(pathname);
   useEffect(() => {
@@ -66,10 +71,6 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
     focusedPath.current = pathname;
     if (!mainRef.current?.contains(document.activeElement))
       mainRef.current?.focus({ preventScroll: true });
-  }, [pathname]);
-  useEffect(() => {
-    if (navigationType === "POP") return;
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
   }, [pathname]);
   const navigate = useNavigate();
   // 로그아웃 직후에는 로그인 화면이 아니라 홈으로 보낸다.
