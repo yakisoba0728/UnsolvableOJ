@@ -1,18 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { answersOf, relativeTime, upvoteCount } from "../community/store";
+import { relativeTime } from "../community/store";
 import { categoryLabel, type CommunityPost } from "../community/types";
 
 /** 한 글이 차지하는 세로 길이(글 높이 + 간격). */
 const slideStep = (slide: HTMLElement) =>
   slide.offsetHeight + parseFloat(getComputedStyle(slide).marginBottom);
 
-type ActivityState = Parameters<typeof answersOf>[0];
-
 interface PostScrollerProps {
   title: string;
   posts: CommunityPost[];
-  activity: ActivityState;
   emptyText: string;
   /** 글이 없을 때 안내 문구 아래에 보여 줄 이동 버튼 */
   emptyAction?: { label: string; to: string };
@@ -25,7 +22,6 @@ interface PostScrollerProps {
 export function PostScroller({
   title,
   posts,
-  activity,
   emptyText,
   emptyAction,
 }: PostScrollerProps) {
@@ -149,9 +145,9 @@ export function PostScroller({
                 {post.title}
               </Link>
               <div className="scroller-stats muted">
-                <span>추천 {upvoteCount(activity, post.id, post.upvotes)}</span>
+                <span>추천 {post.upvotes}</span>
                 <span>조회 {post.views.toLocaleString()}</span>
-                <span>답변 {answersOf(activity, post.id).length}</span>
+                <span>답변 {post.commentCount ?? 0}</span>
               </div>
             </article>
           ))}

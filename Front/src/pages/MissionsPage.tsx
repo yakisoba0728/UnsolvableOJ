@@ -6,11 +6,11 @@ import { SeasonRing } from "../components/SeasonRing";
 import { MissionBody } from "../components/MissionBody";
 import { WeekStrip } from "../components/WeekStrip";
 import { XpBoostCard } from "../components/XpBoostCard";
-import { useActivity } from "../community/store";
 import { remainingText } from "../enterprise/model";
 import {
   dayKey,
   useDocumentTitle,
+  useMyCommunityPosts,
   useNow,
   useSubmissionHistory,
   submissionsByDay,
@@ -43,7 +43,7 @@ export function MissionsPage() {
   const { session } = useAuth();
   const history = useSubmissionHistory(session);
   const attempts = useAnalysisAttempts();
-  const activity = useActivity();
+  const communityPosts = useMyCommunityPosts(session);
   const tick = useNow();
 
   const now = new Date(tick);
@@ -51,15 +51,9 @@ export function MissionsPage() {
   const input = {
     submissions: history.submissions,
     analysis: userId ? attempts.filter((item) => item.userId === userId) : [],
-    posts: session
-      ? activity.posts
-          .filter(
-            (post) =>
-              post.category === "solution" &&
-              post.author.name === session.user.username,
-          )
-          .map((post) => post.createdAt)
-      : [],
+    posts: communityPosts.data.written
+      .filter((post) => post.category === "solution")
+      .map((post) => post.createdAt),
     now,
   };
   const missions = buildMissions(input);
@@ -132,7 +126,7 @@ export function MissionsPage() {
         </p>
       )}
 
-      {session && history.loading ? (
+      {session && (history.loading || communityPosts.loading) ? (
         <div className="empty-state">미션 진행률을 불러오는 중입니다…</div>
       ) : (
         <>

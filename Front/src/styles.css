@@ -61,7 +61,7 @@ p {
 .main-content {
   flex: 1;
 }
-/* 화면을 옮길 때 포커스를 받는 자리일 뿐이라 테두리를 그리지 않는다 */
+/* 본문 바로가기로 포커스를 받는 자리일 뿐이라 테두리를 그리지 않는다 */
 .main-content:focus {
   outline: none;
 }
@@ -3359,6 +3359,15 @@ h3 {
   flex-wrap: wrap;
   font-size: 13px;
 }
+.answer-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.answer-edit .answer-footer {
+  justify-content: flex-end;
+  gap: 8px;
+}
 .login-prompt {
   margin: 0;
   color: var(--color-ink-600);
@@ -4133,12 +4142,21 @@ h3 {
   min-width: 0;
 }
 
-/* 프로필: 작성한 글 · 추천한 글 세로 스크롤 카드 */
+/* 프로필: 작성한 글 · 추천한 글 · 저장한 글 세로 스크롤 카드 */
 .profile-post-pair {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
   flex: 1;
+}
+/* 세 칸이면 머리글이 줄바꿈되는 폭에서는 두 칸으로 두고 저장한 글을 아래 한 줄에 펼친다 */
+@media (min-width: 1101px) and (max-width: 1200px), (max-width: 900px) {
+  .profile-post-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .profile-post-pair > :last-child {
+    grid-column: 1 / -1;
+  }
 }
 .post-scroller {
   --slide-height: 134px;
@@ -7430,4 +7448,30 @@ textarea {
     width: auto;
     min-width: 0;
   }
+}
+
+/* 커뮤니티 API 연동: 문제 화면의 커뮤니티 링크, 본문 코드 블록과 좁은 화면 넘침 */
+.community-problem-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-block: 0.75rem;
+}
+.post-body pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.post-column,
+.post-card,
+.community-layout > section {
+  min-width: 0;
+}
+/* 글 작성: 문제 주소 입력 칸 옆의 "문제 연결" 버튼은 줄바꿈하지 않는다 */
+.write-form .field-row > input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.write-form .field-row > .button {
+  flex: none;
+  white-space: nowrap;
 }

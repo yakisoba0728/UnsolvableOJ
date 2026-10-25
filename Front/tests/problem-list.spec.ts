@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test";
 import type { Problem } from "../src/types";
-import { authenticate, mockProblemApi, problem } from "./fixtures";
+import {
+  authenticate,
+  mockCommunityApi,
+  mockProblemApi,
+  problem,
+} from "./fixtures";
 
 test.beforeEach(({ page }) => mockProblemApi(page));
 
@@ -329,29 +334,11 @@ test("the problem list and the community list show the page range the same way",
   );
   const posts = Array.from({ length: 12 }, (_, index) => ({
     id: `r-${index}`,
-    category: "free",
     title: `ZZ범위 ${index}`,
-    body: "본문",
-    tags: [] as string[],
-    author: { name: "tester", tier: "브론즈" },
+    author: "tester",
     createdAt: `2026-10-${String(index + 1).padStart(2, "0")}T00:00:00Z`,
-    upvotes: 0,
-    views: 1,
   }));
-  await page.addInitScript((value) => {
-    localStorage.setItem(
-      "unsolvable-oj-community-v1",
-      JSON.stringify({
-        posts: value,
-        answers: [],
-        upvoted: [],
-        saved: [],
-        followed: [],
-        accepted: {},
-        deleted: [],
-      }),
-    );
-  }, posts);
+  await mockCommunityApi(page, { posts });
   const label = page.locator(".total-count");
   const look = () =>
     label.evaluate((el) => {

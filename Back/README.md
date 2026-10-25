@@ -124,6 +124,8 @@ npm run db:import:boj -- --dataset /path/to/boj_dataset --audit /path/to/boj_imp
 | `POST`  | `/api/v1/submissions/:id/rejudge`  | 작성자/ADMIN | 원래 문제 버전으로 재채점                |
 | `GET`   | `/api/v1/users/me`                 | USER         | XP, 레벨, 해결 문제 수                   |
 | `GET`   | `/api/v1/rankings`                 | 없음         | XP 상위 100명                            |
+| `GET`   | `/api/v1/community/posts`          | 없음         | 커뮤니티 글 목록과 분류·상태별 개수      |
+| `POST`  | `/api/v1/community/posts`          | USER         | 커뮤니티 글 작성(공지는 ADMIN만)         |
 | `GET`   | `/api/v1/admin/users`              | ADMIN        | 최근 사용자 100명                        |
 | `PATCH` | `/api/v1/admin/users/:id/role`     | ADMIN        | 역할 변경                                |
 | `GET`   | `/api/v1/admin/audit`              | ADMIN        | 최근 변경 이력 100건                     |
@@ -230,3 +232,9 @@ XP 획득 원장이 남아 있는 foundations 마이그레이션의 롤백은 �
 정답, 오답, 실행 오류, 시간 초과, 출력 초과, 컴파일 오류, 비공개 오류 차단을 실제 실행으로 검증합니다.
 
 검증은 로컬에서 위 명령어와 `Judge/`의 `npm run check`, `npm run test:runtime`으로 실행합니다. 워커는 Docker socket을 사용하지 않습니다. 운영에서는 privileged go-judge 실행 서비스를 API/DB와 분리된 전용 Linux 호스트에 배치해야 합니다.
+
+## 커뮤니티
+
+글·답변·추천·팔로우는 PostgreSQL에 저장합니다(`Community1791200000000`, `CommunityUi1791200001000` 마이그레이션). 전체 API와 입력 제한은 [기능 목록](./FEATURES.md#6-커뮤니티)에 있습니다. 브라우저에는 계정별 작성 초안만 남습니다. 예전 버전이 브라우저에만 저장한 글·답변·추천은 서버로 옮기지 않습니다.
+
+API 규칙은 `npm run test:e2e`의 `test/community.e2e-spec.ts`가, 실제 화면과 API의 연결은 저장소 루트 `node scripts/check-compose.mjs`가 실행하는 `Front/tests-live/community-flow.spec.ts`가 검증합니다.

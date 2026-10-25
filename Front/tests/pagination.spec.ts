@@ -87,7 +87,10 @@ test("rate limits retry the same page without duplicating or dropping items", as
     if (current === 2 && requested.filter((value) => value === 2).length === 1)
       return route.fulfill({
         status: 429,
-        headers: { "Retry-After": "0" },
+        headers: {
+          "Retry-After": "0",
+          "Access-Control-Expose-Headers": "Retry-After",
+        },
         json: { message: "retry" },
       });
     return route.fulfill({

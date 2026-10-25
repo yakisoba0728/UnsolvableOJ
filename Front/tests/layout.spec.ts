@@ -250,7 +250,7 @@ test("the home problem slider does not snap cards into place after scrolling", a
   }
 });
 
-test("keyboard users can skip the header, and moving to another page puts focus at the new content", async ({ page }) => {
+test("keyboard users can skip the header to the main content", async ({ page }) => {
   await page.goto("/problems");
   // WebKit은 기본 설정에서 Tab이 링크에 멈추지 않아 포커스를 직접 준다.
   const skip = page.getByRole("link", { name: "본문으로 건너뛰기" });
@@ -258,8 +258,5 @@ test("keyboard users can skip the header, and moving to another page puts focus 
   await skip.focus();
   await expect(skip).toBeInViewport();
   await page.keyboard.press("Enter");
-  await expect(page.locator("main")).toBeFocused();
-  await page.locator("header").getByRole("link", { name: "커뮤니티" }).first().click();
-  await expect(page).toHaveURL(/\/community$/);
   await expect(page.locator("main")).toBeFocused();
 });

@@ -6,29 +6,28 @@ import {
   type KeyboardEvent,
 } from "react";
 import {
+  Link,
   Navigate,
   useLocation,
   useNavigate,
   useParams,
+  useSearchParams,
 } from "react-router-dom";
 import Markdown from "react-markdown";
+import { api } from "../api";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
-import {
-  allPosts,
-  clearDraft,
-  communityActions,
-  readDraft,
-  useActivity,
-  writeDraft,
-} from "../community/store";
+import { Skeleton, SkeletonRegion } from "../components/Skeleton";
+import { errorMessage, getPost, savePost } from "../community/api";
+import { clearDraft, readDraft, writeDraft } from "../community/store";
 import {
   categories,
   categoryLongLabel,
   type CategoryKey,
+  type CommunityPost,
 } from "../community/types";
-import { savedTime, useDocumentTitle } from "../hooks";
+import { savedTime, useDocumentTitle, useRequest } from "../hooks";
 import { useUnsavedChanges } from "../useUnsavedChanges";
 
 const MAX_TAGS = 5;
@@ -56,22 +55,65 @@ function tagValue(value: string) {
   return value.trim().replace(/^#+/, "").trim();
 }
 
+/** 문제 화면 주소(/problems/view/slug)나 slug를 받아 slug만 돌려준다. */
+function problemSlugOf(value: string) {
+  const text = value.trim();
+  const path = text.split("/problems/")[1];
+  if (path === undefined) return text;
+  return decodeURIComponent(path.replace(/^view\//, "").split(/[/?#]/)[0]);
+}
+
 export function CommunityWritePage() {
   const { id: editingId } = useParams();
-  const editing = Boolean(editingId);
-  useDocumentTitle(editing ? "글 수정" : "글 작성");
+  useDocumentTitle(editingId ? "글 수정" : "글 작성");
+  const { session } = useAuth();
+  // 수정 모드: 글을 받아 온 뒤 폼을 연다. 내가 쓴 글만 고칠 수 있다.
+  const { data: original, loading, error } = useRequest<CommunityPost | null>(
+    editingId ? (signal) => getPost(editingId, signal) : null,
+    null,
+    "글을 불러오지 못했어요.",
+    [editingId],
+  );
+  // 비로그인 접근은 App의 라우트에서 로그인 화면(또는 로그아웃 직후 홈)으로 보낸다.
+  if (!session) return null;
+  if (!editingId) return <WriteForm />;
+  if (loading)
+    return (
+      <div className="write-page">
+        <SkeletonRegion label="글을 불러오는 중입니다">
+          <Skeleton width={160} height={30} style={{ margin: "16px 0 20px" }} />
+          <Skeleton height={420} radius={14} />
+        </SkeletonRegion>
+      </div>
+    );
+  if (error)
+    return (
+      <div className="page-width empty-state" role="alert">
+        <strong>글을 불러오지 못했어요.</strong>
+        <p>{error}</p>
+        <Link to={`/community/${editingId}`}>글로 돌아가기</Link>
+      </div>
+    );
+  if (!original || original.authorId !== session.user.id)
+    return <Navigate to={`/community/${editingId}`} replace />;
+  return <WriteForm original={original} />;
+}
+
+function WriteForm({ original }: { original?: CommunityPost }) {
+  const editingId = original?.id;
+  const editing = Boolean(original);
   const { session } = useAuth();
   const ownerId = session?.user.id ?? "";
-  const activity = useActivity();
-  // 수정 모드: 내가 쓴 글만 열 수 있다.
-  const original = editingId
-    ? allPosts(activity).find((post) => post.id === editingId)
-    : undefined;
   const navigate = useNavigate();
   const location = useLocation();
-  const requestedCategory = (
-    location.state as { category?: CategoryKey } | null
-  )?.category;
+  const [params] = useSearchParams();
+  const linkState = location.state as {
+    category?: CategoryKey;
+    problem?: { id: string; title: string };
+  } | null;
+  // 배너·문제 화면에서 들어오면 그 카테고리(c)와 문제(problemId)로 시작한다.
+  const requestedCategory =
+    linkState?.category ?? (params.get("c") as CategoryKey | null);
   const isAdmin = session?.user.role === "ADMIN";
   const options = categories.filter(
     (item) =>
@@ -79,11 +121,7 @@ export function CommunityWritePage() {
   );
 
   // 새 글과 각 글의 수정 초안은 계정별로 따로 복원한다.
-  const [restored] = useState(() =>
-    !editing || original?.author.name === session?.user.username
-      ? readDraft(ownerId, editingId)
-      : null,
-  );
+  const [restored] = useState(() => readDraft(ownerId, editingId));
   // 배너에서 "풀이 공유하기"로 들어오면 그 카테고리로 시작한다.
   const [category, setCategory] = useState<CategoryKey>(
     restored && options.some((item) => item.key === restored.category)
@@ -101,6 +139,22 @@ export function CommunityWritePage() {
   );
   const [tagText, setTagText] = useState(restored?.tagText ?? "");
   const [body, setBody] = useState(restored?.body ?? original?.body ?? "");
+  const [code, setCode] = useState(restored?.code ?? original?.code ?? "");
+  const [language, setLanguage] = useState(
+    restored?.language ?? original?.language ?? "",
+  );
+  const [problemId, setProblemId] = useState<string | null>(
+    restored
+      ? (restored.problemId ?? null)
+      : (original?.problemId ?? params.get("problemId")),
+  );
+  // 문제 제목은 초안에 남기지 않는다. 모르면 "연결한 문제"로 보인다.
+  const [problemTitle, setProblemTitle] = useState(
+    original?.problem?.title ?? linkState?.problem?.title ?? "",
+  );
+  const [problemText, setProblemText] = useState("");
+  const [problemError, setProblemError] = useState("");
+  const [linking, setLinking] = useState(false);
   const [submitError, setSubmitError] = useState("");
   // 입력을 시작한 칸은 바로, 건드리고 떠난 칸은 비어 있어도 안내한다(회원가입과 같은 방식).
   const [touched, setTouched] = useState<Record<Field, boolean>>({
@@ -130,20 +184,36 @@ export function CommunityWritePage() {
       body !== original.body ||
       category !== original.category ||
       JSON.stringify(tags) !== JSON.stringify(original.tags) ||
-      Boolean(tagText.trim())
-    : Boolean(title.trim() || body.trim() || tags.length || tagText.trim());
+      Boolean(tagText.trim()) ||
+      code !== (original.code ?? "") ||
+      language !== (original.language ?? "") ||
+      problemId !== (original.problemId ?? null)
+    : Boolean(
+        title.trim() ||
+          body.trim() ||
+          tags.length ||
+          tagText.trim() ||
+          code.trim() ||
+          language.trim(),
+      );
   useUnsavedChanges(dirty && Boolean(session), bypass);
-  const latest = useRef({ category, title, tags, tagText, body, dirty });
-  latest.current = { category, title, tags, tagText, body, dirty };
+  const fields = {
+    category,
+    title,
+    tags,
+    tagText,
+    body,
+    code,
+    language,
+    problemId,
+  };
+  const latest = useRef({ ...fields, dirty });
+  latest.current = { ...fields, dirty };
 
   function saveDraft() {
     if (bypass.current) return false;
     const now = Date.now();
-    const ok = writeDraft(
-      ownerId,
-      { category, title, tags, tagText, body, savedAt: now },
-      editingId,
-    );
+    const ok = writeDraft(ownerId, { ...fields, savedAt: now }, editingId);
     setSaveState(ok ? "saved" : "failed");
     if (ok) setSavedAt(now);
     return ok;
@@ -171,7 +241,19 @@ export function CommunityWritePage() {
     }
     const timer = window.setTimeout(saveDraft, 1200);
     return () => window.clearTimeout(timer);
-  }, [category, title, tags, tagText, body, dirty, ownerId, editingId]);
+  }, [
+    category,
+    title,
+    tags,
+    tagText,
+    body,
+    code,
+    language,
+    problemId,
+    dirty,
+    ownerId,
+    editingId,
+  ]);
 
   // 자동 저장을 기다리지 않고 이탈·세션 만료 직전의 입력까지 보관한다.
   useEffect(() => {
@@ -187,15 +269,7 @@ export function CommunityWritePage() {
     };
   }, [ownerId, editingId]);
 
-  // 비로그인 접근은 App의 라우트에서 로그인 화면(또는 로그아웃 직후 홈)으로 보낸다.
   if (!session) return null;
-  if (editing && (!original || original.author.name !== session.user.username))
-    return (
-      <Navigate
-        to={editingId ? `/community/${editingId}` : "/community"}
-        replace
-      />
-    );
 
   const values: Record<Field, string> = { title, body, tag: tagText };
   const problems: Record<Field, string> = {
@@ -239,6 +313,26 @@ export function CommunityWritePage() {
     }
   }
 
+  /** 문제 주소나 slug로 문제를 찾아 연결한다. */
+  async function linkProblem() {
+    const slug = problemSlugOf(problemText);
+    if (!slug) return setProblemError("문제 주소를 입력해 주세요.");
+    setLinking(true);
+    setProblemError("");
+    try {
+      const problem = await api<{ id: string; title: string }>(
+        `/problems/by-slug/${encodeURIComponent(slug)}`,
+      );
+      setProblemId(problem.id);
+      setProblemTitle(problem.title);
+      setProblemText("");
+    } catch (cause) {
+      setProblemError(errorMessage(cause));
+    } finally {
+      setLinking(false);
+    }
+  }
+
   function cancel() {
     if (bypass.current) return;
     if (
@@ -261,7 +355,7 @@ export function CommunityWritePage() {
     navigate(editingId ? `/community/${editingId}` : "/community");
   }
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (bypass.current || pending || !session) return;
     setTouched({ title: true, body: true, tag: true });
@@ -271,30 +365,45 @@ export function CommunityWritePage() {
       return setFocusBody(true);
     }
     if (problems.tag) return document.getElementById("tag-input")?.focus();
+    // 서버 규칙: 풀이 공유는 문제를, 코드 리뷰는 코드와 언어를 함께 올린다.
+    if (category === "solution" && !problemId) {
+      setSubmitError("풀이를 공유할 문제를 연결해 주세요.");
+      return document.getElementById("problem-input")?.focus();
+    }
+    if (category === "review" && (!code.trim() || !language.trim())) {
+      setSubmitError("코드 리뷰에는 코드와 언어를 함께 입력해 주세요.");
+      return document
+        .getElementById(language.trim() ? "code-input" : "language-input")
+        ?.focus();
+    }
 
     saveDraft();
     setPending(true);
     setSubmitError("");
     try {
-      const input = { category, title: title.trim(), body: body.trim(), tags };
-      let postId = editingId;
-      if (postId) communityActions.updatePost(postId, input);
-      else {
-        postId = communityActions.addPost({
-          ...input,
-          author: { name: session.user.username, tier: "Bronze I" },
-        }).id;
-      }
+      const post = await savePost(
+        {
+          category,
+          title: title.trim(),
+          body: body.trim(),
+          tags,
+          code,
+          language: language.trim(),
+          problemId,
+        },
+        session.accessToken,
+        editingId,
+      );
       const cleared = clearDraft(ownerId, editingId);
       bypass.current = true;
-      navigate(`/community/${postId}`, {
+      navigate(`/community/${post.id}`, {
         state: {
           notice: `${editing ? "글을 수정했어요." : "글을 등록했어요."}${cleared ? "" : " 임시 초안을 지우지 못했어요."}`,
         },
       });
-    } catch {
+    } catch (cause) {
       setSubmitError(
-        "글을 저장하지 못했어요. 입력한 내용과 초안을 유지했으니 다시 시도해 주세요.",
+        `글을 저장하지 못했어요. ${errorMessage(cause)} 입력한 내용과 초안은 그대로 남아 있어요.`,
       );
     } finally {
       if (!bypass.current) setPending(false);
@@ -333,6 +442,11 @@ export function CommunityWritePage() {
               setBody(original?.body ?? "");
               setTags(original?.tags ?? []);
               setTagText("");
+              setCode(original?.code ?? "");
+              setLanguage(original?.language ?? "");
+              setProblemId(
+                original?.problemId ?? params.get("problemId") ?? null,
+              );
               setShowRestored(false);
               setSaveState("idle");
               setSavedAt(null);
@@ -424,6 +538,8 @@ export function CommunityWritePage() {
               </span>
               <Select
                 ariaLabel="카테고리"
+                // 서버는 글을 올린 뒤 게시판을 바꾸지 못하게 한다.
+                disabled={editing}
                 value={category}
                 options={options.map((item) => ({
                   value: item.key,
@@ -483,6 +599,7 @@ export function CommunityWritePage() {
                 aria-required="true"
                 aria-invalid={shown("body") ? true : undefined}
                 aria-describedby={shown("body") ? "body-error" : undefined}
+                maxLength={20_000}
                 onChange={(event) => setBody(event.target.value)}
                 onBlur={() => touch("body")}
               />
@@ -506,6 +623,94 @@ export function CommunityWritePage() {
               </span>
             ) : null}
           </div>
+          <div className="field-group">
+            <label htmlFor="problem-input">
+              연결 문제
+              {category === "solution" ? (
+                <span className="required-mark">필수</span>
+              ) : null}
+            </label>
+            {problemId ? (
+              <p className="muted" role="status">
+                연결됨 · {problemTitle || "연결한 문제"}{" "}
+                <button
+                  type="button"
+                  className="inline-button"
+                  onClick={() => {
+                    setProblemId(null);
+                    setProblemTitle("");
+                  }}
+                >
+                  연결 해제
+                </button>
+              </p>
+            ) : (
+              <div className="field-row">
+                <input
+                  id="problem-input"
+                  value={problemText}
+                  placeholder="문제 화면 주소를 붙여 넣으세요"
+                  aria-invalid={problemError ? true : undefined}
+                  aria-describedby={problemError ? "problem-error" : undefined}
+                  onChange={(event) => setProblemText(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" || event.nativeEvent.isComposing)
+                      return;
+                    event.preventDefault();
+                    void linkProblem();
+                  }}
+                />
+                <button
+                  type="button"
+                  className="button button-outline"
+                  disabled={linking}
+                  onClick={() => void linkProblem()}
+                >
+                  문제 연결
+                </button>
+              </div>
+            )}
+            {problemError ? (
+              <span
+                id="problem-error"
+                className="field-error"
+                aria-live="polite"
+              >
+                {problemError}
+              </span>
+            ) : null}
+          </div>
+          <label>
+            <span className="label-row">
+              코드 언어
+              {category === "review" ? (
+                <span className="required-mark">필수</span>
+              ) : null}
+            </span>
+            <input
+              id="language-input"
+              value={language}
+              maxLength={40}
+              placeholder="Python, C++, Java…"
+              onChange={(event) => setLanguage(event.target.value)}
+            />
+          </label>
+          <label>
+            <span className="label-row">
+              공유할 코드
+              {category === "review" ? (
+                <span className="required-mark">필수</span>
+              ) : null}
+            </span>
+            <textarea
+              id="code-input"
+              rows={8}
+              value={code}
+              maxLength={30_000}
+              spellCheck={false}
+              onChange={(event) => setCode(event.target.value)}
+            />
+          </label>
         </div>
       </form>
       <div className="write-bar">
