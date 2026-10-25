@@ -161,7 +161,7 @@ JSON 요청 전체 제한은 16MiB입니다. 각 필드의 길이 제한과 별�
 3. `PATCH /api/v1/internal/judge/submissions/:id/result`
    - 최종 판정과 실행 정보를 기록합니다.
 
-워커는 별도 `POST /api/v1/internal/judge/heartbeat`를 10초마다 호출하며 `X-Judge-Worker`에 워커 UUID를 전송합니다. 관리자 운영 API는 최근 30초에 응답한 워커만 표시합니다. 복구 작업은 누락된 큐 작업을 재등록하고 만료된 채점 시도를 새 세대로 다시 큐에 넣습니다.
+워커는 별도 `POST /api/v1/internal/judge/heartbeat`를 10초마다 호출하며 `X-Judge-Worker`에 워커 UUID를 전송합니다. 관리자 운영 API는 최근 30초에 응답한 워커만 표시합니다. 복구 작업은 누락된 큐 작업을 재등록하고 만료된 채점 시도를 새 세대로 다시 큐에 넣습니다. 워커를 반복해서 중단시키는 제출이 슬롯을 계속 차지하지 않도록 lease 복구가 5번을 넘으면 SYSTEM_ERROR로 종료합니다.
 
 결과 예시는 다음과 같습니다.
 

@@ -244,6 +244,7 @@ export class SubmissionsService {
       current.judgeGeneration += 1;
       current.judgeAttemptId = null;
       current.judgeLeaseExpiresAt = null;
+      current.recoveryCount = 0;
       if (current.status === SubmissionStatus.ACCEPTED)
         current.acceptedForXp = true;
       current.status = SubmissionStatus.QUEUED;

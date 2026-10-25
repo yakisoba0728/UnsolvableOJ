@@ -169,6 +169,62 @@ describe('SubmissionsService queue failure', () => {
     );
     expect(submissions.update).not.toHaveBeenCalled();
   });
+
+  function expiredLease(recoveryCount: number) {
+    const expired = { id: randomUUID(), judgeGeneration: 3, recoveryCount };
+    const builder = {
+      update: vi.fn().mockReturnThis(),
+      set: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      execute: vi.fn().mockResolvedValue({ affected: 1 }),
+    };
+    const submissions = {
+      find: vi.fn().mockResolvedValueOnce([]).mockResolvedValueOnce([expired]),
+      createQueryBuilder: () => builder,
+    };
+    const queue = { add: vi.fn() };
+    const judge = new JudgeService(
+      submissions as unknown as Repository<Submission>,
+      {} as DataSource,
+      queue as unknown as Queue,
+    );
+    return { expired, builder, queue, judge };
+  }
+
+  it('re-enqueues an expired lease as a new generation and counts the recovery', async () => {
+    const { expired, builder, queue, judge } = expiredLease(4);
+    await judge['requeueMissingJobs']();
+    const changes = builder.set.mock.calls[0][0];
+    expect(changes).toMatchObject({
+      status: SubmissionStatus.QUEUED,
+      judgeGeneration: 4,
+    });
+    expect(changes.recoveryCount()).toBe('recovery_count + 1');
+    expect(builder.where).toHaveBeenCalledWith(
+      expect.stringContaining('judge_lease_expires_at < now()'),
+      { id: expired.id, status: SubmissionStatus.JUDGING, generation: 3 },
+    );
+    expect(queue.add).toHaveBeenCalledExactlyOnceWith(
+      'judge-submission',
+      { submissionId: expired.id, generation: 4 },
+      expect.objectContaining({ jobId: `${expired.id}-4` }),
+    );
+  });
+
+  it('finalizes a lease expired after 5 recoveries as SYSTEM_ERROR without touching XP evidence', async () => {
+    const { expired, builder, queue, judge } = expiredLease(5);
+    await judge['requeueMissingJobs']();
+    expect(builder.set).toHaveBeenCalledExactlyOnceWith({
+      status: SubmissionStatus.SYSTEM_ERROR,
+      judgeMessage: expect.any(String),
+      judgeLeaseExpiresAt: null,
+    });
+    expect(builder.where).toHaveBeenCalledWith(
+      expect.stringContaining('judge_lease_expires_at < now()'),
+      { id: expired.id, status: SubmissionStatus.JUDGING, generation: 3 },
+    );
+    expect(queue.add).not.toHaveBeenCalled();
+  });
 });
 
 describe('submission debug output lifecycle', () => {
@@ -332,9 +388,11 @@ describe('submission debug output lifecycle', () => {
   it('clears previous output on rejudge and rejects stale results', async () => {
     const { service, judge, submission, user, attemptId, output } = setup();
     submission.debugOutputs = [output];
+    submission.recoveryCount = 5;
     await service.rejudge(submission.id, user);
     expect(submission.debugOutputs).toEqual([]);
     expect(submission.judgeGeneration).toBe(2);
+    expect(submission.recoveryCount).toBe(0);
     await expect(
       judge.recordJudgeResult(submission.id, 1, attemptId, {
         status: SubmissionStatus.WRONG_ANSWER,
