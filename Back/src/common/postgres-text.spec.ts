@@ -3,6 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { CreateProblemDto } from '../modules/problems/dto/create-problem.dto.js';
 import { UpdateProblemDto } from '../modules/problems/dto/update-problem.dto.js';
 import { CreateSubmissionDto } from '../modules/submissions/dto/create-submission.dto.js';
+import {
+  CommunityCommentDto,
+  CommunityPostDto,
+} from '../modules/community/community.dto.js';
 
 describe('PostgreSQL-unsafe user text', () => {
   const pipe = new ValidationPipe({
@@ -49,6 +53,28 @@ describe('PostgreSQL-unsafe user text', () => {
           JSON.stringify((error as BadRequestException).getResponse()),
         ).toContain(`${field}에는 NUL`);
       }
+    });
+
+    it.each([
+      ['title', { title: `T${unsafe}` }],
+      ['body', { body: `B${unsafe}` }],
+      ['code', { code: unsafe }],
+      ['tags', { tags: [`t${unsafe}`] }],
+    ])('rejects community post %s', async (_field, override) => {
+      await expect(
+        validate(CommunityPostDto, {
+          category: 'QUESTION',
+          title: 'T',
+          body: 'B',
+          ...override,
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('rejects community comment body', async () => {
+      await expect(
+        validate(CommunityCommentDto, { body: `B${unsafe}` }),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
 
     it('rejects submission source code', async () => {
