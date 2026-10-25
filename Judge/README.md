@@ -26,7 +26,7 @@ npm run start:dev
 
 ## 채점 정책
 
-- C17(`gnu17`, `-lm` 링크), C++20, Java 21(`Main`), Python 3, JavaScript, TypeScript(esbuild), Go, Rust(2021 edition)를 지원합니다. 도구는 `runtime/Dockerfile`에 설치합니다. Java는 모든 class 파일을 jar로 묶습니다.
+- C17(`gnu17`, `-lm` 링크), C++20, Java 21(`Main`), Python 3, JavaScript(Node 24), TypeScript(esbuild), Go, Rust(2021 edition)를 지원합니다. 도구는 `runtime/Dockerfile`에 설치하며 기반 이미지는 digest, Node·esbuild는 정확한 버전으로 고정합니다. Java는 모든 class 파일을 jar로 묶습니다.
 - 컴파일은 CPU/wall 각각 30초·메모리 1GiB입니다. 실행은 문제의 CPU/wall 시간과 메모리 제한, task 64개, CPU 1개분을 사용합니다. JVM·Node heap 상한은 문제 메모리 값으로 설정하되 전체 프로세스 메모리는 cgroup이 제한합니다.
 - 제출 전체 deadline은 테스트 수 × 테스트별 시간 제한 + 컴파일·통신 여유 60초입니다. API의 최대 100개 × 60초 제한에서는 6,060초입니다.
 - REST에는 명령별 파일 크기 상한이 없어, 실행 명령에 표준 Linux `prlimit`을 붙여 stdout/stderr 및 생성 파일에 **정확히 1,000,000바이트 hard limit**을 적용합니다. 컴파일 산출물은 별도 상한 64MiB입니다.
