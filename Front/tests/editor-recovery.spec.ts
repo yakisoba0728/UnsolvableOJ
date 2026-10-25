@@ -140,6 +140,22 @@ test("session expiry preserves edit recovery by account and problem without adop
   await expect(page.getByLabel("제목", { exact: true })).toHaveValue(problem.title);
 });
 
+test("a failed problem load keeps the edit recovery for the next visit", async ({ page }) => {
+  await seedSession(page);
+  page.on("dialog", (dialog) => dialog.accept());
+  await page.goto("/my-problems/managed-a/edit");
+  await page.getByLabel("제목", { exact: true }).fill("Unsaved edit");
+  await page.goto("/my-problems");
+  await page.route("**/api/v1/problems/managed-a/manage", (route) =>
+    route.fulfill({ status: 503, json: { message: "Service Unavailable" } }),
+  );
+  await page.goto("/my-problems/managed-a/edit");
+  await expect(page.getByText("Service Unavailable")).toBeVisible();
+  await page.unroute("**/api/v1/problems/managed-a/manage");
+  await page.reload();
+  await expect(page.getByLabel("제목", { exact: true })).toHaveValue("Unsaved edit");
+});
+
 test("hidden-only existing problems save and successful edits do not resurrect recovery", async ({ page }) => {
   await seedSession(page);
   let sent: Record<string, unknown> | undefined;
