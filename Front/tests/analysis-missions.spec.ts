@@ -120,7 +120,7 @@ test("code analysis: pick a question, confirm, read the explanation and move on"
   await page.locator(".analysis-option").nth(first.answer).click();
   await expect(confirm).toBeEnabled();
   await confirm.click();
-  await expect(page.getByRole("heading", { name: "정답입니다" })).toBeVisible();
+  await expect(page.getByRole("status")).toHaveText("정답입니다.");
   await expect(page.locator(".analysis-option.is-correct")).toContainText("내 답 / 정답");
   await expect(page.getByLabel("관련 개념")).toContainText(first.concepts[0]);
 
@@ -138,10 +138,10 @@ test("code analysis: a wrong answer shows the right one and the list marks it �
   const wrong = (first.answer + 1) % first.options.length;
   await solve(page, wrong);
   await expect(
-    page.getByRole("heading", { name: `정답은 ${first.options[first.answer]}입니다` }),
-  ).toBeVisible();
+    page.getByRole("status"),
+  ).toHaveText(`오답입니다. 정답은 ${["A", "B", "C", "D"][first.answer]}, ${first.options[first.answer]}입니다.`);
   await expect(page.locator(".analysis-option.is-wrong")).toContainText("내 답 / 오답");
-  await expect(page.locator(".analysis-option.is-correct")).toContainText("· 정답");
+  await expect(page.locator(".analysis-option.is-correct .analysis-option-note")).toHaveText("정답");
 
   await page.getByRole("link", { name: "목록으로" }).click();
   await expect(rows(page).first().locator(".solve-badge")).toHaveText("풀이 중");
@@ -158,13 +158,13 @@ test("code analysis: coming back to a solved question keeps the result and allow
   const [first] = analysisQuestions;
   await page.goto(`/analysis/${first.id}`);
   await solve(page, first.answer);
-  await expect(page.getByRole("heading", { name: "정답입니다" })).toBeVisible();
+  await expect(page.getByRole("status")).toHaveText("정답입니다.");
 
   // 다른 메뉴에 다녀오거나 새로고침해도 결과가 그대로다.
   await page.getByRole("link", { name: "미션", exact: true }).click();
   await expect(page.getByRole("heading", { name: "오늘의 도전" })).toBeVisible();
   await page.goBack();
-  await expect(page.getByRole("heading", { name: "정답입니다" })).toBeVisible();
+  await expect(page.getByRole("status")).toHaveText("정답입니다.");
   await page.reload();
   await expect(page.locator(".analysis-option.is-correct")).toContainText("내 답 / 정답");
 
@@ -176,6 +176,33 @@ test("code analysis: coming back to a solved question keeps the result and allow
   await expect(rows(page).first().locator(".solve-badge")).toContainText("해결");
   await expect(page.locator(".standing-card")).toContainText("1 / 10");
   await expect(page.getByLabel("풀이 상태 필터").getByRole("button", { name: /^미해결/ })).toContainText("9");
+});
+
+test("code analysis: keyboard choices reveal the answer, preserve focus and respect modified shortcuts", async ({ page }) => {
+  const [first] = analysisQuestions;
+  await page.goto(`/analysis/${first.id}`);
+  const question = page.locator(".analysis-question");
+  await expect(page.locator('.analysis-reveal[data-open="true"]')).toHaveCount(0);
+  await question.focus();
+  await question.dispatchEvent("keydown", { key: "2", ctrlKey: true });
+  await expect(page.getByRole("radio", { checked: true })).toHaveCount(0);
+  await question.press(String(first.answer + 1));
+  await expect(page.getByRole("radio").nth(first.answer)).toBeChecked();
+  await question.press("Enter");
+  await expect(page.getByRole("status")).toHaveText("정답입니다.");
+  await expect(page.getByRole("status")).toBeFocused();
+  await expect(page.locator('.analysis-reveal[data-open="true"]')).toBeVisible();
+  await page.getByRole("button", { name: "다시 풀기" }).click();
+  await expect(question).toBeFocused();
+  await expect(page.getByRole("button", { name: "정답 확인" })).toBeDisabled();
+});
+
+test("code analysis: code font size persists after reloading", async ({ page }) => {
+  await page.goto(`/analysis/${analysisQuestions[0].id}`);
+  await page.getByRole("button", { name: "글꼴 크게" }).click();
+  await expect(page.locator(".analysis-code")).toHaveCSS("font-size", "14px");
+  await page.reload();
+  await expect(page.locator(".analysis-code")).toHaveCSS("font-size", "14px");
 });
 
 test("code analysis: unknown question ids show a way back", async ({ page }) => {

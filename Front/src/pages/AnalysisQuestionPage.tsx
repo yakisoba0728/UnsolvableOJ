@@ -115,7 +115,7 @@ function AnalysisQuestion({
 
   // 보기 영역에서 1~4로 고르고 Enter로 확인한다.
   function onChoiceKeyDown(event: React.KeyboardEvent) {
-    if (confirmed) return;
+    if (confirmed || event.ctrlKey || event.metaKey || event.altKey) return;
     const n = Number(event.key);
     if (n >= 1 && n <= question.options.length) {
       setPicked(n - 1);
