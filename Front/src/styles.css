@@ -929,6 +929,11 @@ textarea {
   border-color: transparent;
   color: var(--color-warning);
 }
+.pill-success {
+  background: var(--color-success-soft);
+  border-color: transparent;
+  color: var(--color-success);
+}
 .text-button.light {
   color: var(--color-strong-muted);
   font-size: 13px;
@@ -4003,7 +4008,7 @@ h3 {
 
 .post-views {
   margin: 0;
-  color: var(--color-ink-500);
+  color: var(--color-ink-400);
   font-size: 13px;
 }
 .answers-toggle {
@@ -4019,7 +4024,7 @@ h3 {
   cursor: pointer;
 }
 .answers-chevron {
-  color: var(--color-ink-500);
+  color: var(--color-ink-400);
 }
 
 /* 프로필: 최근 제출 활동 + 학습 통계 */
@@ -4945,7 +4950,7 @@ h3 {
 .guide-card .row-chevron {
   grid-column: 2;
   grid-row: 1 / span 2;
-  color: var(--color-ink-500, var(--color-ink-600));
+  color: var(--color-ink-600);
   font-size: 20px;
   font-style: normal;
   line-height: 1;
@@ -5794,7 +5799,7 @@ h3 {
   gap: 5px;
 }
 .data-list .post-num svg {
-  color: var(--color-ink-500);
+  color: var(--color-ink-400);
   flex: none;
 }
 
@@ -5988,7 +5993,7 @@ h3 {
   }
   .data-list.list-problems .problem-limit::before {
     content: attr(data-label) " ";
-    color: var(--color-ink-500);
+    color: var(--color-ink-400);
   }
 }
 
@@ -6281,7 +6286,7 @@ textarea {
   }
   .data-list.list-history .history-tests::before {
     content: attr(data-label) " ";
-    color: var(--color-ink-500);
+    color: var(--color-ink-400);
   }
 }
 
