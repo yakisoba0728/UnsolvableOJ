@@ -76,7 +76,7 @@ const ENV = [
   "LANG=C.UTF-8",
 ];
 const LANGUAGES: Record<string, { source: string; compile?: string[]; artifact?: string; run: string[] }> = {
-  C: { source: "main.c", compile: ["/usr/bin/gcc", "main.c", "-O2", "-std=c17", "-o", "main"], artifact: "main", run: ["/w/main"] },
+  C: { source: "main.c", compile: ["/usr/bin/gcc", "main.c", "-O2", "-std=gnu17", "-o", "main", "-lm"], artifact: "main", run: ["/w/main"] },
   CPP: { source: "main.cpp", compile: ["/usr/bin/g++", "main.cpp", "-O2", "-std=c++20", "-o", "main"], artifact: "main", run: ["/w/main"] },
   JAVA: {
     source: "Main.java",
@@ -89,7 +89,7 @@ const LANGUAGES: Record<string, { source: string; compile?: string[]; artifact?:
   JAVASCRIPT: { source: "main.js", run: ["/usr/bin/node", "main.js"] },
   TYPESCRIPT: { source: "main.ts", compile: ["/usr/local/bin/esbuild", "main.ts", "--outfile=main.js", "--platform=node", "--format=cjs"], artifact: "main.js", run: ["/usr/bin/node", "main.js"] },
   GO: { source: "main.go", compile: ["/usr/bin/go", "build", "-o", "main", "main.go"], artifact: "main", run: ["/w/main"] },
-  RUST: { source: "main.rs", compile: ["/usr/bin/rustc", "main.rs", "-O", "-o", "main"], artifact: "main", run: ["/w/main"] },
+  RUST: { source: "main.rs", compile: ["/usr/bin/rustc", "main.rs", "--edition=2021", "-O", "-o", "main"], artifact: "main", run: ["/w/main"] },
 };
 
 async function request(config: SandboxConfig, path: string, signal: AbortSignal, options: RequestInit = {}) {
