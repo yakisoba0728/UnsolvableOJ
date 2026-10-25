@@ -15,10 +15,10 @@ import { Pagination } from "../components/Pagination";
 import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { useAuth } from "../auth";
 import {
-  endpoint,
   errorMessage,
   getPostPage,
   postAction,
+  postUrl,
 } from "../community/api";
 import {
   clearDraft,
@@ -70,7 +70,7 @@ export function CommunityPostPage() {
   useEffect(() => {
     if (!post || viewed.current === id) return;
     viewed.current = id;
-    void api(`${endpoint}/${id}/view`, { method: "POST" }).catch(() => {});
+    void api(`${postUrl(id)}/view`, { method: "POST" }).catch(() => {});
   }, [id, post]);
   useDocumentTitle(post ? post.title : "커뮤니티");
 

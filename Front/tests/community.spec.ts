@@ -779,6 +779,24 @@ test.describe("community API", () => {
     await expect(page).toHaveURL(/\/auth$/);
   });
 
+  test("a post id from the address cannot point the signed-in request at another API", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await mockCommunityApi(page);
+    const paths: string[] = [];
+    page.on("request", (request) => {
+      const { pathname } = new URL(request.url());
+      if (pathname.startsWith("/api/")) paths.push(pathname);
+    });
+    await page.goto("/community/..%2F..%2Fadmin%2Fusers");
+    await expect(page.getByText("글을 찾을 수 없어요.")).toBeVisible();
+    expect(paths.length).toBeGreaterThan(0);
+    expect(
+      paths.filter((path) => !path.startsWith("/api/v1/community/posts/")),
+    ).toEqual([]);
+  });
+
   test("an admin can delete someone else's post but not edit it", async ({
     page,
   }) => {

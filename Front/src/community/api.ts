@@ -53,6 +53,8 @@ export const emptyInteraction: Interaction = {
   commentVotes: [],
 };
 export const endpoint = "/community/posts";
+// 글 id는 주소창에서 온다. 인코딩하지 않으면 "../"로 다른 API에 토큰을 실어 보낼 수 있다.
+export const postUrl = (id: string) => `${endpoint}/${encodeURIComponent(id)}`;
 export const errorMessage = (error: unknown) =>
   error instanceof Error
     ? error.message
@@ -77,7 +79,7 @@ export async function listPosts(query: URLSearchParams, signal?: AbortSignal) {
   return { ...result, items: result.items.map(convertPost) };
 }
 export async function getPost(id: string, signal?: AbortSignal) {
-  return convertPost(await api<ApiPost>(`${endpoint}/${id}`, { signal }));
+  return convertPost(await api<ApiPost>(postUrl(id), { signal }));
 }
 export async function getComments(
   id: string,
@@ -85,7 +87,7 @@ export async function getComments(
   signal?: AbortSignal,
 ): Promise<Page<CommunityAnswer>> {
   const result = await api<Page<ApiComment>>(
-    `${endpoint}/${id}/comments?page=${page}&limit=20`,
+    `${postUrl(id)}/comments?page=${page}&limit=20`,
     { signal },
   );
   return {
@@ -110,7 +112,7 @@ export interface PostInput {
 export async function savePost(input: PostInput, token: string, id?: string) {
   return convertPost(
     await api<ApiPost>(
-      `${endpoint}${id ? `/${id}` : ""}`,
+      id ? postUrl(id) : endpoint,
       {
         method: id ? "PUT" : "POST",
         body: JSON.stringify({
@@ -133,9 +135,9 @@ export async function getPostPage(
   const [post, answers, stats, interaction] = await Promise.all([
     getPost(id, signal),
     getComments(id, answerPage, signal),
-    api<AuthorStats>(`${endpoint}/${id}/author-stats`, { signal }),
+    api<AuthorStats>(`${postUrl(id)}/author-stats`, { signal }),
     token
-      ? api<Interaction>(`${endpoint}/${id}/interaction`, { signal }, token)
+      ? api<Interaction>(`${postUrl(id)}/interaction`, { signal }, token)
       : emptyInteraction,
   ]);
   return { post, answers, stats, interaction };
@@ -150,7 +152,7 @@ export const postAction = <T = unknown>(
   body?: object,
 ) =>
   api<T>(
-    `${endpoint}/${id}${path}`,
+    `${postUrl(id)}${path}`,
     { method, ...(body ? { body: JSON.stringify(body) } : {}) },
     token,
   );
