@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   analysisQuestions,
   analysisTopics,
@@ -19,7 +19,12 @@ import { ReverseIcon } from "../components/ReverseIcon";
 import { Select } from "../components/Select";
 import { ShuffleIcon } from "../components/ShuffleIcon";
 import { SlideToggle } from "../components/SlideToggle";
-import { useDocumentTitle, useStickyTop } from "../hooks";
+import {
+  useDocumentTitle,
+  useSlashFocus,
+  useStickyTop,
+  useUrlFilters,
+} from "../hooks";
 import { analysisPath } from "../paths";
 import { newSeed, seededShuffle } from "../shuffle";
 import type { Difficulty } from "../types";
@@ -68,10 +73,11 @@ export function AnalysisPage() {
     () => analysisStatus(attempts, userId),
     [attempts, userId],
   );
-  const [params, setParams] = useSearchParams();
+  const { params, update, urlQuery, queryText, setQueryText, page } =
+    useUrlFilters();
   const searchRef = useRef<HTMLInputElement>(null);
+  useSlashFocus(searchRef);
 
-  const urlQuery = params.get("q") ?? "";
   const picked = <T extends string>(key: string, allowed: readonly T[]) =>
     (params.get(key) ?? "")
       .split(",")
@@ -85,64 +91,12 @@ export function AnalysisPage() {
   // 기본 순서(출제순, 쉬운 난이도 먼저, 제목 가나다순)를 뒤집은 상태
   const reversed = params.get("rev") === "1";
   const seed = Number(params.get("seed")) || 1;
-  const page = Math.max(1, Number(params.get("page")) || 1);
   const [announce, setAnnounce] = useState("");
   // 아이콘 애니메이션은 키가 바뀔 때마다 처음부터 다시 실행된다.
   const [spinKey, setSpinKey] = useState(0);
   const [reverseKey, setReverseKey] = useState(0);
   const sideRef = useRef<HTMLElement>(null);
   useStickyTop(sideRef);
-
-  // 지연된 호출(검색어 디바운스)이 오래된 주소로 다른 필터를 덮어쓰지 않도록 최신 값에서 계산한다.
-  function update(
-    patch: Record<string, string | null>,
-    { resetPage = true }: { resetPage?: boolean } = {},
-  ) {
-    setParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        for (const [key, value] of Object.entries(patch)) {
-          if (value === null || value === "") next.delete(key);
-          else next.set(key, value);
-        }
-        if (resetPage && !("page" in patch)) next.delete("page");
-        return next;
-      },
-      { replace: true },
-    );
-  }
-
-  // 검색어: 입력은 즉시 반영하고 URL에는 잠시 멈춘 뒤 저장한다(한글 입력 중 끊김 방지)
-  const [queryText, setQueryText] = useState(urlQuery);
-  const lastWritten = useRef(urlQuery);
-  useEffect(() => {
-    if (urlQuery !== lastWritten.current) {
-      lastWritten.current = urlQuery;
-      setQueryText(urlQuery);
-    }
-  }, [urlQuery]);
-  useEffect(() => {
-    if (queryText === urlQuery) return;
-    const timer = setTimeout(() => {
-      lastWritten.current = queryText;
-      update({ q: queryText || null });
-    }, 250);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryText, urlQuery]);
-
-  // "/" 키로 검색창에 바로 이동
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      const target = event.target as HTMLElement;
-      if (event.key !== "/" || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))
-        return;
-      event.preventDefault();
-      searchRef.current?.focus();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
 
   const keyword = urlQuery.trim().toLowerCase();
   const isSingle = (value: string) =>
@@ -185,7 +139,6 @@ export function AnalysisPage() {
       base.sort((a, b) => a.title.localeCompare(b.title, "ko") * dir);
     else if (sort === "default" && reversed) base.reverse();
     return base.filter((item) => matches(item, null));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sort, reversed, seed, params, solved, attempted]);
 
   const count = (
