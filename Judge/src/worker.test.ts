@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import timers, { setImmediate } from "node:timers/promises";
 import { test, type TestContext } from "node:test";
-import type { Claim, JudgeResult, judge } from "./judge.js";
+import { SandboxUnavailableError, type Claim, type JudgeResult, type judge } from "./judge.js";
 import { startWorker } from "./worker.js";
 
 const claim: Claim = {
@@ -359,6 +359,17 @@ test("an ordinary judge failure reports SYSTEM_ERROR without exposing internal d
   });
   assert.equal(h.errors.mock.callCount(), 1);
   assert.match(String(h.errors.mock.calls[0].arguments[1]), /e{1500}/);
+});
+
+test("a transient sandbox failure reports nothing and leaves the lease to expire", async (t) => {
+  const h = harness(t, undefined, async () => { throw new SandboxUnavailableError("go-judge POST run: HTTP 503"); });
+  const running = await h.start();
+  t.after(() => running.close());
+  await assert.rejects(h.process(), SandboxUnavailableError);
+  assert.equal(h.requests.filter((request) => request.path.endsWith("/result")).length, 0);
+  assert.equal(h.intervals.size, 1, "only the worker heartbeat remains after the lease heartbeat stops");
+  assert.equal(h.errors.mock.callCount(), 1);
+  assert.equal(h.consumer.close.mock.callCount(), 0);
 });
 
 test("the consuming worker is constructed only after an authenticated API heartbeat", async (t) => {

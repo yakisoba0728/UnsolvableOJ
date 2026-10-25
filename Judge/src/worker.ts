@@ -3,7 +3,7 @@ import timers from "node:timers/promises";
 import { pathToFileURL } from "node:url";
 import { Worker } from "bullmq";
 import { Redis } from "ioredis";
-import { checkSandbox, judge, type Claim, type JudgeResult, type SandboxConfig } from "./judge.js";
+import { checkSandbox, judge, SandboxUnavailableError, type Claim, type JudgeResult, type SandboxConfig } from "./judge.js";
 
 interface JudgeJob {
   data: { submissionId: string; generation: number };
@@ -85,6 +85,8 @@ export async function startWorker(
       } catch (error) {
         if (cancellation.signal.aborted) return;
         console.error(`Judge failed for ${job.data.submissionId}:`, error);
+        // 결과를 보내지 않고 lease를 만료시키면 API 복구가 다음 generation으로 다시 큐에 넣습니다.
+        if (error instanceof SandboxUnavailableError) throw error;
         result = {
           status: "SYSTEM_ERROR",
           runtimeMs: 0,
