@@ -44,11 +44,13 @@ export interface Page<T> {
 }
 export interface Interaction {
   voted: boolean;
+  saved: boolean;
   following: boolean;
   commentVotes: string[];
 }
 export const emptyInteraction: Interaction = {
   voted: false,
+  saved: false,
   following: false,
   commentVotes: [],
 };
@@ -143,7 +145,7 @@ export async function getPostPage(
   return { post, answers, stats, interaction };
 }
 
-/** 글에 딸린 동작(추천·팔로우·답변·채택·삭제). path는 글 주소 뒤에 붙는다. */
+/** 글에 딸린 동작(추천·저장·팔로우·답변·채택·삭제). path는 글 주소 뒤에 붙는다. */
 export const postAction = <T = unknown>(
   id: string,
   path: string,
@@ -157,16 +159,18 @@ export const postAction = <T = unknown>(
     token,
   );
 
-/** 내가 쓴 글과 추천한 글(각각 최근 100편), 팔로우한 작성자 id */
+/** 내가 쓴 글·추천한 글·저장한 글(각각 최근 100편), 팔로우한 작성자 id */
 export async function getMyPosts(token: string, signal: AbortSignal) {
   const result = await api<{
     written: ApiPost[];
     voted: ApiPost[];
+    saved: ApiPost[];
     following: string[];
   }>(`${endpoint}/mine`, { signal }, token);
   return {
     written: result.written.map(convertPost),
     voted: result.voted.map(convertPost),
+    saved: result.saved.map(convertPost),
     following: result.following,
   };
 }

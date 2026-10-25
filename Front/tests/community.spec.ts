@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { authenticate, mockCommunityApi, mockProblemApi } from "./fixtures";
+import {
+  authenticate,
+  mockCommunityApi,
+  mockProblemApi,
+  session,
+} from "./fixtures";
 
 test.beforeEach(({ page }) => mockProblemApi(page));
 
@@ -835,5 +840,121 @@ test.describe("community API", () => {
     await expect(page.getByText("답변을 등록했어요.")).toBeVisible();
     await expect(page.locator(".answer")).toHaveText([/스물한 번째 답변입니다\./]);
     await expect(page.getByRole("button", { name: /^답변 21/ })).toBeVisible();
+  });
+
+  test("my own answer is edited inline and deleted; a failed edit keeps the text open", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    const api = await mockCommunityApi(page, {
+      posts: [{ id: "q-1", category: "question", title: "질문", author: "other" }],
+      answers: [
+        { id: "mine-a", postId: "q-1", body: "처음 쓴 답변입니다." },
+        { id: "their-a", postId: "q-1", author: "other", body: "남의 답변입니다." },
+      ],
+    });
+    await page.goto("/community/q-1");
+    await page.getByRole("button", { name: /^답변 2/ }).click();
+    // 남의 답변은 관리 메뉴가 없다.
+    await expect(
+      page.locator("#their-a").getByRole("button", { name: "답변 관리" }),
+    ).toHaveCount(0);
+
+    const mine = page.locator("#mine-a");
+    await mine.getByRole("button", { name: "답변 관리" }).click();
+    await page.getByRole("menuitem", { name: "수정" }).click();
+    const editor = mine.getByLabel("답변 수정");
+    await expect(editor).toBeFocused();
+    await expect(editor).toHaveValue("처음 쓴 답변입니다.");
+    const save = mine.getByRole("button", { name: "저장", exact: true });
+
+    await editor.fill("짧다");
+    await save.click();
+    await expect(mine.getByText("답변을 5자 이상 입력해 주세요.")).toBeVisible();
+
+    api.fail = (method) => (method === "PUT" ? 503 : undefined);
+    await editor.fill("고친 답변입니다.");
+    await save.click();
+    await expect(page.getByText("변경 내용을 저장하지 못했어요.", { exact: false })).toBeVisible();
+    await expect(editor).toHaveValue("고친 답변입니다.");
+    expect(api.answers.find((answer) => answer.id === "mine-a")!.body).toBe(
+      "처음 쓴 답변입니다.",
+    );
+
+    api.fail = () => undefined;
+    await save.click();
+    await expect(page.getByText("답변을 수정했어요.")).toBeVisible();
+    await expect(editor).toHaveCount(0);
+    await expect(mine.locator(".answer-body")).toHaveText("고친 답변입니다.");
+
+    page.once("dialog", (dialog) => dialog.accept());
+    await mine.getByRole("button", { name: "답변 관리" }).click();
+    await page.getByRole("menuitem", { name: "삭제" }).click();
+    await expect(page.getByText("답변을 삭제했어요.")).toBeVisible();
+    await expect(page.locator(".answer")).toHaveCount(1);
+    expect(api.answers.map((answer) => answer.id)).toEqual(["their-a"]);
+  });
+
+  test("an admin can delete someone else's accepted answer but not edit it", async ({
+    page,
+  }) => {
+    await authenticate(page, "ADMIN");
+    const api = await mockCommunityApi(page, {
+      posts: [
+        {
+          id: "q-2",
+          category: "question",
+          title: "채택된 질문",
+          author: "other",
+          accepted: "their-a",
+        },
+      ],
+      answers: [{ id: "their-a", postId: "q-2", author: "other" }],
+    });
+    await page.goto("/community/q-2");
+    await expect(page.getByText("채택 완료", { exact: true })).toBeVisible();
+    await page.locator("#their-a").getByRole("button", { name: "답변 관리" }).click();
+    await expect(page.getByRole("menuitem", { name: "수정" })).toHaveCount(0);
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("menuitem", { name: "삭제" }).click();
+    await expect(page.locator(".answer")).toHaveCount(0);
+    await expect(page.getByText("채택 완료", { exact: true })).toHaveCount(0);
+    expect(api.answers).toHaveLength(0);
+  });
+
+  test("saving a post toggles the button and lists it on the profile", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    const api = await mockCommunityApi(page, {
+      posts: [{ id: "s-1", title: "다시 볼 글", author: "other" }],
+    });
+    await page.goto("/community/s-1");
+    const save = page.locator(".post-actions").getByRole("button", { name: "저장" });
+    await expect(save).toHaveAttribute("aria-pressed", "false");
+    await save.click();
+    await expect(save).toHaveAttribute("aria-pressed", "true");
+    await save.click();
+    await expect(save).toHaveAttribute("aria-pressed", "false");
+    expect([...api.saved]).toEqual([]);
+    await save.click();
+    await expect(save).toHaveAttribute("aria-pressed", "true");
+    expect([...api.saved]).toEqual(["s-1"]);
+
+    await page.route("**/api/v1/users/me", (route) =>
+      route.fulfill({
+        json: { ...session.user, solvedCount: 0, createdAt: "2026-09-01T00:00:00Z" },
+      }),
+    );
+    await page.route("**/api/v1/rankings", (route) => route.fulfill({ json: [] }));
+    await page.route("**/api/v1/submissions?**", (route) =>
+      route.fulfill({
+        json: { items: [], page: 1, limit: 100, total: 0, totalPages: 1 },
+      }),
+    );
+    await page.goto("/profile");
+    await expect(page.getByRole("region", { name: "저장한 글" })).toContainText(
+      "다시 볼 글",
+    );
   });
 });

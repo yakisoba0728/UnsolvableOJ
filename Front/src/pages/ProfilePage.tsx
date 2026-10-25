@@ -335,6 +335,12 @@ export function ProfilePage() {
               emptyText="아직 추천한 글이 없어요. 도움이 된 글에 추천을 눌러 보세요."
               emptyAction={{ label: "커뮤니티 둘러보기", to: "/community" }}
             />
+            <PostScroller
+              title="저장한 글"
+              posts={communityPosts.data.saved}
+              emptyText="아직 저장한 글이 없어요. 다시 보고 싶은 글을 저장해 보세요."
+              emptyAction={{ label: "커뮤니티 둘러보기", to: "/community" }}
+            />
           </div>
         </div>
 
