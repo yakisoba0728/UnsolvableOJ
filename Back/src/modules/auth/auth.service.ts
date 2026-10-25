@@ -27,7 +27,11 @@ export class AuthService {
   async register(dto: RegisterDto) {
     const email = dto.email.trim().toLowerCase();
     const username = dto.username.trim();
-    if (email === 'boj-import@unsolvable.local' || username === 'boj_import') {
+    // 이름 고유성은 lower(username) 인덱스로 대소문자 없이 판단하므로 예약 이름도 같은 기준으로 막습니다.
+    if (
+      email === 'boj-import@unsolvable.local' ||
+      username.toLowerCase() === 'boj_import'
+    ) {
       throw new ConflictException(
         '이미 사용 중인 이메일 또는 사용자 이름입니다.',
       );

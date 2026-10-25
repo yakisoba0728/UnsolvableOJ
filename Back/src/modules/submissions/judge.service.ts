@@ -26,6 +26,7 @@ import {
 } from './submissions.service.js';
 
 const LEASE_MS = 60_000;
+const MAX_LEASE_RECOVERIES = 5;
 const XP: Record<ProblemDifficulty, number> = {
   BEGINNER: 10,
   EASY: 20,
@@ -329,6 +330,28 @@ export class JudgeService {
       take: 100,
     });
     for (const submission of expired) {
+      const fence =
+        'id = :id AND status = :status AND judge_generation = :generation AND judge_lease_expires_at < now()';
+      const fenceParams = {
+        id: submission.id,
+        status: SubmissionStatus.JUDGING,
+        generation: submission.judgeGeneration,
+      };
+      // 워커를 죽이거나 실행 서비스에 닿지 못하는 제출이 슬롯을 무한히 다시 차지하지 않게 합니다.
+      // 다른 SYSTEM_ERROR처럼 XP 정답 근거와 해결 기록은 건드리지 않습니다.
+      if (submission.recoveryCount >= MAX_LEASE_RECOVERIES) {
+        await this.submissions
+          .createQueryBuilder()
+          .update()
+          .set({
+            status: SubmissionStatus.SYSTEM_ERROR,
+            judgeMessage: '채점이 반복해서 중단되어 종료했습니다.',
+            judgeLeaseExpiresAt: null,
+          })
+          .where(fence, fenceParams)
+          .execute();
+        continue;
+      }
       const changed = await this.submissions
         .createQueryBuilder()
         .update()
@@ -337,15 +360,9 @@ export class JudgeService {
           judgeGeneration: submission.judgeGeneration + 1,
           judgeAttemptId: null,
           judgeLeaseExpiresAt: null,
+          recoveryCount: () => 'recovery_count + 1',
         })
-        .where(
-          'id = :id AND status = :status AND judge_generation = :generation AND judge_lease_expires_at < now()',
-          {
-            id: submission.id,
-            status: SubmissionStatus.JUDGING,
-            generation: submission.judgeGeneration,
-          },
-        )
+        .where(fence, fenceParams)
         .execute();
       if (changed.affected)
         await enqueueJudge(

@@ -99,6 +99,9 @@ export class Submission {
   })
   judgeLeaseExpiresAt: Date | null;
 
+  @Column({ name: 'recovery_count', type: 'integer', default: 0 })
+  recoveryCount: number;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
