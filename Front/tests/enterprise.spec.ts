@@ -347,3 +347,19 @@ test("the list says when a scheduled test starts today or tomorrow", async ({
   await expect(period("내일 오후 시작")).toHaveText("내일 오후 2시 시작 예정");
   await expect(period("다음 주 시작")).toHaveText("10월27일 시작 예정");
 });
+
+test("saving in one tab keeps tests another tab created while this one was elsewhere", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/enterprise");
+  await expect(page.getByText("아직 만든 테스트가 없어요")).toBeVisible();
+  const ids = await page.evaluate(async (key) => {
+    const modulePath = "/src/enterprise/store.ts";
+    const { enterpriseActions } = await import(modulePath);
+    // 다른 탭이 만든 테스트: 같은 탭의 setItem은 storage 이벤트를 보내지 않아 이 탭의 메모리는 낡은 상태다.
+    const other = { id: "t-other", title: "다른 탭", description: "", startsAt: "2026-11-01T00:00:00Z", endsAt: "2026-11-02T00:00:00Z", durationMin: 60, problemIds: ["p1"], createdAt: "2026-10-01T00:00:00Z", updatedAt: "2026-10-01T00:00:00Z" };
+    localStorage.setItem(key, JSON.stringify({ solver: [other] }));
+    enterpriseActions.create("solver", { title: "이 탭", description: "", startsAt: "2026-11-03T00:00:00Z", endsAt: "2026-11-04T00:00:00Z", durationMin: 30, problemIds: ["p2"] });
+    return JSON.parse(localStorage.getItem(key)!).solver.map((test: { title: string }) => test.title);
+  }, testsKey);
+  expect(ids).toEqual(["이 탭", "다른 탭"]);
+});

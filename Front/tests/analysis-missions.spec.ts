@@ -386,3 +386,24 @@ test("signed-out visitors can open missions and are asked to log in", async ({
     page.locator(".mission-card", { hasText: "일일 미션" }),
   ).toContainText("0 / 5");
 });
+
+test("code analysis: malformed stored records are skipped and other tabs' records are kept", async ({ page }) => {
+  await authenticate(page);
+  await page.addInitScript(() => {
+    if (!sessionStorage.getItem("seeded")) {
+      sessionStorage.setItem("seeded", "1");
+      localStorage.setItem("unsolvable-oj-analysis-v1", JSON.stringify([null, { userId: "solver" }]));
+    }
+  });
+  await page.goto("/analysis");
+  await expect(rows(page).first()).toBeVisible();
+  const kept = await page.evaluate(async () => {
+    const modulePath = "/src/analysis/progress.ts";
+    const { recordAnalysisAttempt } = await import(modulePath);
+    const other = { userId: "solver", questionId: "other-tab", correct: true, at: "2026-10-01T00:00:00Z" };
+    localStorage.setItem("unsolvable-oj-analysis-v1", JSON.stringify([other]));
+    recordAnalysisAttempt("solver", "this-tab", false, 1);
+    return JSON.parse(localStorage.getItem("unsolvable-oj-analysis-v1")!).map((item: { questionId: string }) => item.questionId);
+  });
+  expect(kept).toEqual(["other-tab", "this-tab"]);
+});
