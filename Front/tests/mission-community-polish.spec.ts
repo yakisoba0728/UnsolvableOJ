@@ -29,7 +29,7 @@ const community = {
   ],
   upvoted: [],
   saved: [],
-  followed: ["kim"],
+  followedBy: { solver: ["kim"] },
   accepted: {},
   deleted: [],
 };

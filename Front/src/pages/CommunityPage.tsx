@@ -13,6 +13,7 @@ import {
   allPosts,
   answersOf,
   relativeTime,
+  isFollowing,
   upvoteCount,
   useActivity,
 } from "../community/store";
@@ -398,7 +399,7 @@ export function CommunityPage() {
                         <span className="post-meta">
                           <span className="post-author">
                             {post.author.name}
-                            {activity.followed.includes(post.author.name) ? (
+                            {isFollowing(activity, session?.user.id, post.author.name) ? (
                               <span
                                 className="post-follow-badge"
                                 title="내가 팔로우한 사람이 쓴 글이에요"

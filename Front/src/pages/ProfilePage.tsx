@@ -14,7 +14,7 @@ import {
   useDocumentTitle,
 } from "../hooks";
 import { PostScroller } from "../components/PostScroller";
-import { allPosts, useActivity } from "../community/store";
+import { allPosts, upvotedIds, useActivity } from "../community/store";
 import { LANGUAGE_LABELS } from "../types";
 import { difficultyOptions } from "../difficulty";
 
@@ -51,7 +51,7 @@ export function ProfilePage() {
     (post) => post.author.name === session?.user.username,
   );
   const upvotedPosts = allPosts(activity).filter((post) =>
-    activity.upvoted.includes(post.id),
+    upvotedIds(activity, session?.user.id).includes(post.id),
   );
   const [selected, setSelected] = useState(dayKey(new Date()));
   const history = useSubmissionHistory(session);
