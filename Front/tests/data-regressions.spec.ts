@@ -440,7 +440,26 @@ for (const failure of ["network", "429-seconds", "503-date"] as const) {
   });
 }
 
-for (const status of [401, 403, 404]) {
+test("K17: a 401 while polling signs out and sends the user to log in", async ({ page }) => {
+  await page.clock.install();
+  await authenticate(page);
+  let polling = false;
+  await page.route("**/api/v1/submissions/data-result", async (route) => {
+    if (!polling) {
+      await pauseClock(page);
+      return route.fulfill({ json: { ...submission, status: "QUEUED" } });
+    }
+    return route.fulfill({ status: 401, json: { message: "Unauthorized" } });
+  });
+  await page.goto("/submissions/data-result");
+  await expect(page.locator(".result-summary")).toBeVisible();
+  polling = true;
+  await page.clock.runFor(2000);
+  await expect(page).toHaveURL(/\/auth$/);
+  expect(await page.evaluate((key) => localStorage.getItem(key), storageKey)).toBeNull();
+});
+
+for (const status of [403, 404]) {
   test(`K17: permanent ${status} stops polling without losing the prior result`, async ({ page }) => {
     await page.clock.install();
     await authenticate(page);
@@ -729,3 +748,51 @@ for (const path of ["/my-problems", "/profile", "/"] as const) {
     expect(new URL(page.url()).pathname).toBe(path);
   });
 }
+
+test("an error screen in one page clears when the user moves to another page", async ({ page }) => {
+  await authenticate(page);
+  await page.route("**/api/v1/submissions/broken", (route) =>
+    route.fulfill({ json: { ...submission, problem: undefined } }),
+  );
+  await page.goto("/submissions/broken");
+  await expect(page.getByRole("alert")).toContainText("화면을 표시하지 못했어요.");
+  await page.getByRole("link", { name: "못풀준 홈" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByText("화면을 표시하지 못했어요.")).toHaveCount(0);
+});
+
+test("a stale chunk after a deploy reloads the page once, not in a loop", async ({ page }) => {
+  await page.goto("/");
+  let loads = 0;
+  page.on("load", () => (loads += 1));
+  const fire = () =>
+    page
+      .evaluate(() => window.dispatchEvent(new Event("vite:preloadError", { cancelable: true })))
+      .catch(() => undefined);
+  await Promise.all([page.waitForEvent("load"), fire()]);
+  await fire();
+  await page.waitForTimeout(500);
+  expect(loads).toBe(1);
+});
+
+test("the result page loads submission history only for an accepted result and hides the streak if that fails", async ({ page }) => {
+  await authenticate(page);
+  let historyCalls = 0;
+  await page.route("**/api/v1/submissions?*", (route) => {
+    historyCalls += 1;
+    return route.fulfill({ status: 500, json: { message: "history failed" } });
+  });
+  await page.route("**/api/v1/submissions/data-result", (route) => route.fulfill({ json: submission }));
+  await page.route("**/api/v1/submissions/accepted-result", (route) =>
+    route.fulfill({ json: { ...submission, id: "accepted-result", status: "ACCEPTED" } }),
+  );
+  await page.goto("/submissions/data-result");
+  await expect(page.locator(".result-summary")).toBeVisible();
+  await page.waitForTimeout(300);
+  expect(historyCalls).toBe(0);
+  await page.goto("/submissions/accepted-result");
+  await expect(page.locator(".result-summary")).toBeVisible();
+  await expect.poll(() => historyCalls).toBeGreaterThan(0);
+  await page.waitForTimeout(300);
+  await expect(page.locator(".streak-card")).toHaveCount(0);
+});

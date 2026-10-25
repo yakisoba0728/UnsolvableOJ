@@ -11,9 +11,10 @@ import type {
 interface Activity {
   posts: CommunityPost[];
   answers: CommunityAnswer[];
-  /** 추천한 글·답변 id */
-  upvoted: string[];
-  followed: string[];
+  /** 계정 id → 추천한 글·답변 id */
+  upvotedBy: Record<string, string[]>;
+  /** 계정 id → 팔로우한 작성자 이름 */
+  followedBy: Record<string, string[]>;
   /** 게시글 id → 채택한 답변 id (사용자가 바꾼 값만) */
   accepted: Record<string, string | null>;
 }
@@ -25,18 +26,52 @@ const draftKey = "unsolvable-oj-community-draft-v2";
 const empty: Activity = {
   posts: [],
   answers: [],
-  upvoted: [],
-  followed: [],
+  upvotedBy: {},
+  followedBy: {},
   accepted: {},
 };
 
-// 예전 기록에 남은 saved·deleted 키는 읽어도 쓰지 않는다.
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+const isAuthor = (value: unknown): value is CommunityAuthor =>
+  isRecord(value) && typeof value.name === "string" && typeof value.tier === "string";
+const isPost = (value: unknown): value is CommunityPost =>
+  isRecord(value) &&
+  ["id", "category", "title", "body", "createdAt"].every((key) => typeof value[key] === "string") &&
+  typeof value.upvotes === "number" &&
+  typeof value.views === "number" &&
+  Array.isArray(value.tags) &&
+  value.tags.every((tag) => typeof tag === "string") &&
+  isAuthor(value.author);
+const isAnswer = (value: unknown): value is CommunityAnswer =>
+  isRecord(value) &&
+  ["id", "postId", "body", "createdAt"].every((key) => typeof value[key] === "string") &&
+  typeof value.upvotes === "number" &&
+  isAuthor(value.author);
+const listsOf = (value: unknown): Record<string, string[]> =>
+  isRecord(value)
+    ? Object.fromEntries(
+        Object.entries(value)
+          .filter((entry): entry is [string, unknown[]] => Array.isArray(entry[1]))
+          .map(([user, ids]) => [user, ids.filter((id) => typeof id === "string")]),
+      )
+    : {};
+
+// 예전 기록에 남은 saved·deleted 키와, 계정 구분이 없어 주인을 알 수 없는 upvoted·followed는 읽어도 쓰지 않는다.
+// 모양이 맞지 않는 글·답변은 버린다: 하나 때문에 커뮤니티·프로필 화면 전체가 깨지지 않게 한다.
 function load(strict = false, raw?: string | null): Activity {
   try {
     const saved = raw === undefined ? localStorage.getItem(storageKey) : raw;
-    return saved
-      ? { ...empty, ...(JSON.parse(saved) as Partial<Activity>) }
-      : empty;
+    const data: unknown = saved ? JSON.parse(saved) : {};
+    if (!isRecord(data)) return empty;
+    return {
+      ...data,
+      posts: Array.isArray(data.posts) ? data.posts.filter(isPost) : [],
+      answers: Array.isArray(data.answers) ? data.answers.filter(isAnswer) : [],
+      upvotedBy: listsOf(data.upvotedBy),
+      followedBy: listsOf(data.followedBy),
+      accepted: isRecord(data.accepted) ? (data.accepted as Activity["accepted"]) : {},
+    };
   } catch (cause) {
     if (strict) throw cause;
     return empty;
@@ -91,6 +126,9 @@ export const useActivity = () => useSyncExternalStore(subscribe, snapshot);
 
 const toggle = (list: string[], id: string) =>
   list.includes(id) ? list.filter((value) => value !== id) : [...list, id];
+
+const listOf = (lists: Record<string, string[]>, userId?: string) =>
+  (userId && lists[userId]) || [];
 
 function requirePost(activity: Activity, postId: string) {
   if (!activity.posts.some((post) => post.id === postId))
@@ -169,16 +207,25 @@ export const communityActions = {
         posts: current.posts.filter((post) => post.id !== postId),
         answers: current.answers.filter((answer) => answer.postId !== postId),
         accepted,
-        upvoted: current.upvoted.filter(
-          (id) => id !== postId && !answerIds.includes(id),
+        upvotedBy: Object.fromEntries(
+          Object.entries(current.upvotedBy).map(([user, ids]) => [
+            user,
+            ids.filter((id) => id !== postId && !answerIds.includes(id)),
+          ]),
         ),
       };
     });
   },
-  toggleUpvote: (id: string) =>
-    commit((current) => ({ ...current, upvoted: toggle(current.upvoted, id) })),
-  toggleFollow: (name: string) =>
-    commit((current) => ({ ...current, followed: toggle(current.followed, name) })),
+  toggleUpvote: (userId: string, id: string) =>
+    commit((current) => ({
+      ...current,
+      upvotedBy: { ...current.upvotedBy, [userId]: toggle(listOf(current.upvotedBy, userId), id) },
+    })),
+  toggleFollow: (userId: string, name: string) =>
+    commit((current) => ({
+      ...current,
+      followedBy: { ...current.followedBy, [userId]: toggle(listOf(current.followedBy, userId), name) },
+    })),
   setAccepted: (postId: string, answerId: string | null) =>
     commit((current) => ({
       ...current,
@@ -195,9 +242,15 @@ export function acceptedAnswerId(activity: Activity, postId: string) {
   return activity.accepted[postId] ?? null;
 }
 
-/** 내가 추천했다면 +1 */
+/** 이 브라우저에서 추천한 계정 수만큼 더한다 */
 export const upvoteCount = (activity: Activity, id: string, base: number) =>
-  base + (activity.upvoted.includes(id) ? 1 : 0);
+  base + Object.values(activity.upvotedBy).filter((ids) => ids.includes(id)).length;
+
+export const upvotedIds = (activity: Activity, userId?: string) =>
+  listOf(activity.upvotedBy, userId);
+
+export const isFollowing = (activity: Activity, userId: string | undefined, name: string) =>
+  listOf(activity.followedBy, userId).includes(name);
 
 export function statsOf(activity: Activity, name: string): AuthorStats {
   return {

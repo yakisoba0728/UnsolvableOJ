@@ -207,7 +207,8 @@ export function CreateProblemPage() {
     setSavedAt(ok ? draft.savedAt : null);
   }
   useLayoutEffect(() => {
-    if (loading || doneRef.current) return;
+    // 불러오기에 실패하면 비교할 원본이 없다: 복구 초안을 "변경 없음"으로 보고 지우면 안 된다.
+    if (loading || loadError || doneRef.current) return;
     if (!dirty) {
       const previous = readProblemDraft(draftScope).draft;
       if (previous) {
@@ -217,7 +218,7 @@ export function CreateProblemPage() {
       return;
     }
     saveDraft();
-  }, [draft, dirty, loading]);
+  }, [draft, dirty, loading, loadError]);
 
   // 이미 공개된 주소인지 잠시 뒤에 확인한다(초안 주소는 저장할 때 서버가 알려 준다).
   useEffect(() => {

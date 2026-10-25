@@ -50,7 +50,9 @@ export function MarkdownField({
           <button
             type="button"
             role="tab"
+            id={`${id}-tab-write`}
             aria-selected={mode === "write"}
+            aria-controls={mode === "write" ? `${id}-panel` : undefined}
             className={mode === "write" ? "active" : ""}
             onClick={() => setMode("write")}
           >
@@ -59,7 +61,9 @@ export function MarkdownField({
           <button
             type="button"
             role="tab"
+            id={`${id}-tab-preview`}
             aria-selected={mode === "preview"}
+            aria-controls={mode === "preview" ? `${id}-panel` : undefined}
             className={mode === "preview" ? "active" : ""}
             onClick={() => setMode("preview")}
           >
@@ -67,30 +71,36 @@ export function MarkdownField({
           </button>
         </div>
       </div>
-      {mode === "write" ? (
-        <textarea
-          id={id}
-          rows={rows}
-          value={value}
-          placeholder={placeholder}
-          aria-required={required}
-          aria-invalid={Boolean(error)}
-          aria-describedby={
-            error ? `${id}-error` : help ? `${id}-help` : undefined
-          }
-          onChange={(event) => onChange(event.target.value)}
-        />
-      ) : (
-        <div className="md-preview markdown" style={{ minHeight }}>
-          {value.trim() ? (
-            <ProblemMarkdown>{value}</ProblemMarkdown>
-          ) : (
-            <p className="muted">
-              미리볼 내용이 없어요. 작성 탭에서 입력해 보세요.
-            </p>
-          )}
-        </div>
-      )}
+      <div
+        role="tabpanel"
+        id={`${id}-panel`}
+        aria-labelledby={`${id}-tab-${mode}`}
+      >
+        {mode === "write" ? (
+          <textarea
+            id={id}
+            rows={rows}
+            value={value}
+            placeholder={placeholder}
+            aria-required={required}
+            aria-invalid={Boolean(error)}
+            aria-describedby={
+              error ? `${id}-error` : help ? `${id}-help` : undefined
+            }
+            onChange={(event) => onChange(event.target.value)}
+          />
+        ) : (
+          <div className="md-preview markdown" style={{ minHeight }}>
+            {value.trim() ? (
+              <ProblemMarkdown>{value}</ProblemMarkdown>
+            ) : (
+              <p className="muted">
+                미리볼 내용이 없어요. 작성 탭에서 입력해 보세요.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
       {error ? (
         <span id={`${id}-error`} className="field-error" role="alert">
           {error}
