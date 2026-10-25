@@ -269,6 +269,16 @@ describe('Community (PostgreSQL e2e)', () => {
       (await call('get', `/${id}/interaction`, 0)).body.commentVotes,
     ).toContain(answerId);
     await call('put', `/${id}/vote`, 1).expect(200);
+    await call('get', '/mine').expect(401);
+    const myPosts = (await call('get', '/mine', 1).expect(200)).body;
+    expect(myPosts.voted.map((p: { id: string }) => p.id)).toContain(id);
+    expect(myPosts.following).toEqual([users[0].id]);
+    expect(myPosts.written.map((p: { id: string }) => p.id)).not.toContain(id);
+    expect(
+      (await call('get', '/mine', 0)).body.written.map(
+        (p: { id: string }) => p.id,
+      ),
+    ).toContain(id);
     for (const sort of ['latest', 'votes', 'answers']) {
       const sorted = await call('get', `?q=${marker}&sort=${sort}`).expect(200);
       expect(sorted.body.items[0].id).toBe(notice);

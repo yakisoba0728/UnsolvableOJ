@@ -29,6 +29,11 @@ export class CommunityController {
   @Get() list(@Query() query: CommunityQuery) {
     return this.service.list(query);
   }
+  @Get('mine')
+  @UseGuards(JwtAuthGuard)
+  mine(@CurrentUser() user: AuthenticatedUser) {
+    return this.service.mine(user);
+  }
   @Get(':id') detail(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.detail(id);
   }

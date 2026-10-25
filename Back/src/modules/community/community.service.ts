@@ -153,6 +153,32 @@ export class CommunityService {
     };
   }
 
+  /** 프로필·미션 화면용 내가 쓴 글과 추천한 글, 목록의 팔로잉 표시용 팔로우한 작성자 */
+  async mine(user: AuthenticatedUser) {
+    // shortcut: 최근 100편씩만 돌려준다. 프로필에서 더 넘겨 봐야 하면 쪽 단위로 바꾼다.
+    const recent = 'ORDER BY p.created_at DESC, p.id DESC LIMIT 100';
+    const [written, voted, follows] = await Promise.all([
+      this.db.query(
+        `SELECT ${summaryColumns}, ${publicDetails} FROM community_posts p ${joins} WHERE p.author_id=$1 ${recent}`,
+        [user.id],
+      ) as Promise<Post[]>,
+      this.db.query(
+        `SELECT ${summaryColumns}, ${publicDetails} FROM community_posts p ${joins}
+        JOIN community_votes v ON v.post_id=p.id AND v.user_id=$1 ${recent}`,
+        [user.id],
+      ) as Promise<Post[]>,
+      this.db.query(
+        'SELECT author_id AS "authorId" FROM community_follows WHERE user_id=$1',
+        [user.id],
+      ) as Promise<{ authorId: string }[]>,
+    ]);
+    return {
+      written,
+      voted,
+      following: follows.map((follow) => follow.authorId),
+    };
+  }
+
   async detail(id: string) {
     const [post]: Post[] = await this.db.query(
       `SELECT ${columns}, ${publicDetails} FROM community_posts p ${joins} WHERE p.id=$1`,
