@@ -287,7 +287,7 @@ export function CommunityPostPage() {
 
           <section className="post-card answer-write-card" aria-label="답변 작성">
             <form className="answer-editor" onSubmit={submit} noValidate>
-              <h3 className="answer-editor-title">답변 작성</h3>
+              <h2 className="answer-editor-title">답변 작성</h2>
               <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
               {session ? (
                 <>

@@ -249,7 +249,7 @@ export function CommunityPage() {
                 placeholder={
                   selectedTags.length
                     ? "더 검색하거나 #태그 추가"
-                    : "질문이나 풀이를 검색해 보세요 (#태그 + Enter)"
+                    : "질문·풀이 검색 (#태그 + Enter)"
                 }
                 aria-label="게시글 검색"
                 aria-keyshortcuts="/"
@@ -485,7 +485,7 @@ export function CommunityPage() {
         <aside className="side-stack" ref={sideRef}>
           <div className="community-guide">
             <div className="community-guide-head">
-              <h2>질문을 주고 받으며 풀이를 공유하면 모두의 힘이 됩니다.</h2>
+              <h2>질문하고 풀이를 나누면 막힌 곳이 풀려요.</h2>
               <img src={guideArt} alt="" width="232" height="186" />
             </div>
             <div className="community-guide-cols">
