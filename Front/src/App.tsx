@@ -61,17 +61,6 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
     if (navigationType === "POP") return;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
   }, [pathname]);
-  // 키보드·화면 낭독기 사용자가 새 화면의 처음부터 읽도록 포커스를 본문으로 옮긴다
-  // (화면이 스스로 입력칸 등에 포커스를 줬으면 그대로 둔다). 스크롤을 올린 뒤에 옮겨야
-  // 포커스 때문에 시작된 부드러운 스크롤이 맨 위 위치를 덮어쓰지 않는다(Firefox).
-  const mainRef = useRef<HTMLElement>(null);
-  const focusedPath = useRef(pathname);
-  useEffect(() => {
-    if (focusedPath.current === pathname) return;
-    focusedPath.current = pathname;
-    if (!mainRef.current?.contains(document.activeElement))
-      mainRef.current?.focus({ preventScroll: true });
-  }, [pathname]);
   const navigate = useNavigate();
   // 로그아웃 직후에는 로그인 화면이 아니라 홈으로 보낸다.
   const signedOutRef = useRef(false);
@@ -107,7 +96,7 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
           navigate("/");
         }}
       />
-      <main className="main-content" id="main" ref={mainRef} tabIndex={-1}>
+      <main className="main-content" id="main" tabIndex={-1}>
         <ErrorBoundary resetKey={pathname}>
           <Suspense
             fallback={

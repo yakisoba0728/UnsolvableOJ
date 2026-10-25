@@ -61,7 +61,7 @@ p {
 .main-content {
   flex: 1;
 }
-/* 화면을 옮길 때 포커스를 받는 자리일 뿐이라 테두리를 그리지 않는다 */
+/* 본문 바로가기로 포커스를 받는 자리일 뿐이라 테두리를 그리지 않는다 */
 .main-content:focus {
   outline: none;
 }
