@@ -18,6 +18,8 @@ services:
   judge:
     build: ..
     restart: unless-stopped
+    # 종료 시 진행 중인 채점을 마치도록 기다립니다(기본 10초면 채점 중 SIGKILL).
+    stop_grace_period: 2m
     environment:
       API_BASE_URL: ${API_BASE_URL:?Set the application API URL}
       JUDGE_SERVICE_TOKEN: ${JUDGE_SERVICE_TOKEN:?Match the application judge token}

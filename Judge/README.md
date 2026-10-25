@@ -26,7 +26,7 @@ npm run start:dev
 
 ## 채점 정책
 
-- C17, C++20, Java 21(`Main`), Python 3, JavaScript, TypeScript(esbuild), Go, Rust를 지원합니다. 도구는 `runtime/Dockerfile`에 설치합니다. Java는 모든 class 파일을 jar로 묶습니다.
+- C17(`gnu17`, `-lm` 링크), C++20, Java 21(`Main`), Python 3, JavaScript(Node 24), TypeScript(esbuild), Go, Rust(2021 edition)를 지원합니다. 도구는 `runtime/Dockerfile`에 설치하며 기반 이미지는 digest, Node·esbuild는 정확한 버전으로 고정합니다. Java는 모든 class 파일을 jar로 묶습니다.
 - 컴파일은 CPU/wall 각각 30초·메모리 1GiB입니다. 실행은 문제의 CPU/wall 시간과 메모리 제한, task 64개, CPU 1개분을 사용합니다. JVM·Node heap 상한은 문제 메모리 값으로 설정하되 전체 프로세스 메모리는 cgroup이 제한합니다.
 - 제출 전체 deadline은 테스트 수 × 테스트별 시간 제한 + 컴파일·통신 여유 60초입니다. API의 최대 100개 × 60초 제한에서는 6,060초입니다.
 - REST에는 명령별 파일 크기 상한이 없어, 실행 명령에 표준 Linux `prlimit`을 붙여 stdout/stderr 및 생성 파일에 **정확히 1,000,000바이트 hard limit**을 적용합니다. 컴파일 산출물은 별도 상한 64MiB입니다.
@@ -34,11 +34,11 @@ npm run start:dev
 - 출력은 바이트 기준으로 비교하며 끝의 ASCII 공백만 무시합니다. JSON의 UTF-8 치환이 판정을 바꾸지 않도록 캐시 출력을 원시 바이트로 다운로드합니다.
 - 공개 예제 최대 5개의 stdout/stderr 앞 1,000바이트와 잘림 여부를 보존합니다. 번호는 원래 테스트 순서입니다. 비공개 출력·오류 원문은 응답에 넣지 않습니다.
 - 실행 시간은 `runTime`(wall)을 ms로, 메모리는 bytes를 KiB로 바꾼 뒤 테스트별 최대값을 저장합니다. **이전 RSS 샘플러와 cgroup 메모리 측정은 동등하지 않습니다.** 검증 없이 기존 제출을 일괄 재채점하면 판정·XP가 바뀔 수 있습니다.
-- 컴파일 산출물과 출력 `fileIds`는 성공·실패·취소 경로에서 삭제합니다. 응답 유실로 ID를 얻지 못한 파일은 서비스의 15분 idle TTL이 보조 회수합니다. compile/run/delete는 같은 인스턴스로 보내세요.
+- 컴파일 산출물과 출력 `fileIds`는 성공·실패·취소 경로에서 한 번씩 삭제합니다. 삭제 실패는 로그만 남기고 판정을 바꾸지 않으며, 삭제하지 못했거나 응답 유실로 ID를 얻지 못한 파일은 서비스의 15분 idle TTL이 회수합니다. compile/run/delete는 같은 인스턴스로 보내세요.
 
-워커는 sandbox 검사와 인증된 API heartbeat를 모두 통과한 뒤에만 Redis 연결·큐 소비를 시작합니다. 기존 generation/attempt·문제 스냅샷을 유지하고 워커·제출 heartbeat를 10초마다 전송합니다. 결과 PATCH의 네트워크 오류·429·5xx는 같은 payload/attempt로 최대 3회(1초·2초 간격) 전송하며, 응답을 확인할 때까지 제출 heartbeat를 유지합니다. lease heartbeat의 409는 현재 실행을 취소하고 이전 시도의 결과 전송을 중단하지만, 일시적인 통신 오류는 실행을 취소하지 않습니다.
+워커는 sandbox 검사와 인증된 API heartbeat를 모두 통과한 뒤에만 Redis 연결·큐 소비를 시작합니다. 기존 generation/attempt·문제 스냅샷을 유지하고 워커·제출 heartbeat를 10초마다 전송합니다. 결과 PATCH의 네트워크 오류·429·5xx는 같은 payload/attempt로 최대 3회(1초·2초 간격) 전송하며, 응답을 확인할 때까지 제출 heartbeat를 유지합니다. lease heartbeat의 409는 현재 실행을 취소하고 이전 시도의 결과 전송을 중단하지만, 일시적인 통신 오류는 실행을 취소하지 않습니다. go-judge 연결 실패와 HTTP 429·502·503·504는 판정이 아니므로 SYSTEM_ERROR를 보내지 않고 작업을 실패로 끝냅니다. 제출 heartbeat가 멈춰 lease(60초)가 만료되면 API 복구가 다음 generation으로 다시 큐에 넣고, 같은 제출의 복구가 5회를 넘으면 API가 SYSTEM_ERROR로 끝냅니다. 특정 제출이 반복해 일으킬 수 있는 HTTP 500 등 나머지 오류는 바로 SYSTEM_ERROR로 기록합니다. 같은 작업의 BullMQ 재시도는 아직 lease가 살아 있으면 claim 409로 조용히 끝납니다.
 
-실행 중 API 401/403이 확인되면 해당 워커만 큐 소비를 pause하고 진행 중인 채점·결과 전송을 취소합니다. 자동 재개하지 않으므로 토큰을 수정한 뒤 워커를 재시작하세요. SIGINT/SIGTERM에서는 새 작업 소비를 중단하고 진행 중인 채점·결과 전송을 마친 뒤 Redis 연결을 닫습니다.
+실행 중 API 401/403이 확인되면 진행 중인 채점·결과 전송을 취소하고 워커를 닫은 뒤 종료 코드 1로 끝납니다. 토큰을 고칠 때까지 재시작해도 시작 heartbeat에서 다시 실패하므로 `docker compose ps`의 종료·재시작 상태로 확인하세요. SIGINT/SIGTERM에서는 새 작업 소비를 중단하고 진행 중인 채점·결과 전송을 기다린 뒤 Redis 연결을 닫습니다. Compose는 `stop_grace_period: 2m`까지만 기다리므로 더 긴 채점은 강제 종료되고, 그 제출은 lease 만료 후 API 복구가 다시 큐에 넣습니다.
 
 ## 운영 격리
 
