@@ -76,7 +76,11 @@ export function EnterpriseFormPage() {
     return (
       <Notice title="새 테스트 만들기">
         <strong>로그인하고 코드 테스트를 만들어 보세요</strong>
-        <Link className="button" to="/auth" state={{ from: "/enterprise/new" }}>
+        <Link
+          className="button"
+          to="/auth"
+          state={{ from: id ? `/enterprise/${id}/edit` : "/enterprise/new" }}
+        >
           로그인하기 <span aria-hidden="true">→</span>
         </Link>
       </Notice>
@@ -101,7 +105,14 @@ export function EnterpriseFormPage() {
         </Link>
       </Notice>
     );
-  return <TestForm key={existing?.id ?? "new"} userId={session.user.id} existing={existing} />;
+  // 계정이 바뀌면 이전 계정의 입력을 새 계정의 테스트로 저장하지 않도록 폼을 새로 만든다.
+  return (
+    <TestForm
+      key={`${session.user.id}:${existing?.id ?? "new"}`}
+      userId={session.user.id}
+      existing={existing}
+    />
+  );
 }
 
 function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseTest }) {

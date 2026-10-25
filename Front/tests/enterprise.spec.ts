@@ -367,3 +367,12 @@ test("saving in one tab keeps tests another tab created while this one was elsew
   }, testsKey);
   expect(ids).toEqual(["이 탭", "다른 탭"]);
 });
+
+test("logging in from an edit link returns to that edit page", async ({ page }) => {
+  await page.goto("/enterprise/t-1/edit");
+  await page.getByRole("link", { name: /로그인하기/ }).click();
+  await expect(page).toHaveURL(/\/auth$/);
+  expect(await page.evaluate(() => (history.state?.usr as { from?: string } | undefined)?.from)).toBe(
+    "/enterprise/t-1/edit",
+  );
+});
