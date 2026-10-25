@@ -120,6 +120,7 @@ export class CommunityQuery {
   @Transform(trim)
   @IsString()
   @MaxLength(100)
+  @IsPostgresText()
   q?: string;
 
   // 태그에는 쉼표가 들어갈 수 있어 나누지 않고 tag를 반복해 받는다.
@@ -131,6 +132,7 @@ export class CommunityQuery {
   @ArrayMaxSize(20)
   @IsString({ each: true })
   @MaxLength(100, { each: true })
+  @IsPostgresText({ each: true })
   tag?: string[];
 
   @Type(() => Number)

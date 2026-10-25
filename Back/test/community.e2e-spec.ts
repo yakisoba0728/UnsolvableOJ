@@ -108,6 +108,10 @@ describe('Community (PostgreSQL e2e)', () => {
       { problemId: randomUUID() },
       { authorId: users[1].id },
       { code: 'x'.repeat(30001) },
+      // PostgreSQL이 저장하지 못하는 문자는 500이 아니라 400으로 거절한다.
+      { body: 'a\u0000b' },
+      { title: 'a\ud800b' },
+      { tags: ['a\u0000'] },
     ])
       await call('post', '', 0)
         .send({ ...draft, ...values })
@@ -153,6 +157,8 @@ describe('Community (PostgreSQL e2e)', () => {
     const linked = await call('get', `?problemId=${problems[0]}`).expect(200);
     expect(linked.body.total).toBe(4);
     const injection = await call('get', '?q=%27%20OR%201%3D1--').expect(200);
+    await call('get', '?q=a%00b').expect(400);
+    await call('get', '?tag=a%00b').expect(400);
     expect(injection.body.total).toBe(0);
   });
 
@@ -213,6 +219,9 @@ describe('Community (PostgreSQL e2e)', () => {
       ]),
     ).toEqual([{ action: 'community_comment.delete' }]);
     await call('post', `/${id}/comments`, 1).send({ body: '   ' }).expect(400);
+    await call('post', `/${id}/comments`, 1)
+      .send({ body: 'a\u0000b' })
+      .expect(400);
   });
 
   it('persists notices, tags, sorting, saved posts, follows and answer votes with permissions', async () => {
