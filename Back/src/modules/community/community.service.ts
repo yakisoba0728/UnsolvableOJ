@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DataSource, type EntityManager } from 'typeorm';
+import { recordAudit } from '../../common/database.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { UserRole } from '../users/user-role.enum.js';
 import {
@@ -55,10 +56,15 @@ export class CommunityService {
       params.push(query.problemId);
       baseConditions.push(`p.problem_id=$${params.length}`);
     }
+    // 검색어는 제목에서만 찾고, 태그는 고른 태그를 모두 가진 글만 남긴다(대소문자 무시).
     if (query.q) {
       params.push(query.q);
+      baseConditions.push(`strpos(lower(p.title),lower($${params.length}))>0`);
+    }
+    for (const tag of query.tag ?? []) {
+      params.push(tag);
       baseConditions.push(
-        `(strpos(lower(p.title),lower($${params.length}))>0 OR strpos(lower(p.body),lower($${params.length}))>0 OR EXISTS(SELECT 1 FROM unnest(p.tags) tag WHERE strpos(lower(tag),lower($${params.length}))>0))`,
+        `EXISTS(SELECT 1 FROM unnest(p.tags) t WHERE lower(t)=lower($${params.length}))`,
       );
     }
     const baseWhere = baseConditions.length
@@ -84,18 +90,16 @@ export class CommunityService {
       categories: {} as Record<string, number>,
       statuses: {} as Record<string, number>,
     };
-    const ordinary = groups.filter(
-      (g) => g.category !== CommunityCategory.NOTICE,
-    );
+    // 공지는 채택할 수 없으므로 '채택 전'으로 센다. 그래서 공지 칩·전체 칩·'채택 전' 칩에만 들어간다.
     for (const category of ['', ...Object.values(CommunityCategory)])
-      facets.categories[category] = ordinary
+      facets.categories[category] = groups
         .filter(
           (g) =>
             (!category || g.category === category) && statusMatches(g.accepted),
         )
         .reduce((sum, g) => sum + g.count, 0);
     for (const status of ['', 'accepted', 'unaccepted'])
-      facets.statuses[status] = ordinary
+      facets.statuses[status] = groups
         .filter(
           (g) =>
             categoryMatches(g.category) &&
@@ -139,13 +143,9 @@ export class CommunityService {
       `SELECT ${summaryColumns}, ${publicDetails} FROM community_posts p ${joins} ${where} ORDER BY (p.category='NOTICE') DESC, ${sortColumn} DESC, p.created_at DESC, p.id DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, query.limit, (query.page - 1) * query.limit],
     );
-    const filteredTotal = ordinary
-      .filter((g) => categoryMatches(g.category) && statusMatches(g.accepted))
-      .reduce((sum, g) => sum + g.count, 0);
     return {
       items,
       total,
-      filteredTotal,
       facets,
       page: query.page,
       limit: query.limit,
@@ -271,6 +271,15 @@ export class CommunityService {
         [id],
       );
       await manager.query('DELETE FROM community_posts WHERE id=$1', [id]);
+      if (post.authorId !== user.id)
+        await recordAudit(
+          manager,
+          user.id,
+          'community_post.delete',
+          'community_post',
+          id,
+          { authorId: post.authorId, title: post.title },
+        );
     });
     return { ok: true };
   }
@@ -298,11 +307,20 @@ export class CommunityService {
       );
       if (!comment) throw new NotFoundException('답변을 찾을 수 없습니다.');
       this.owner(comment.authorId, user, body === null);
-      if (body === null)
+      if (body === null) {
         await manager.query('DELETE FROM community_comments WHERE id=$1', [
           commentId,
         ]);
-      else
+        if (comment.authorId !== user.id)
+          await recordAudit(
+            manager,
+            user.id,
+            'community_comment.delete',
+            'community_comment',
+            commentId,
+            { postId: id, authorId: comment.authorId },
+          );
+      } else
         await manager.query(
           'UPDATE community_comments SET body=$2,updated_at=now() WHERE id=$1',
           [commentId, body],

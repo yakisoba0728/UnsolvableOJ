@@ -171,6 +171,12 @@ describe('Community (PostgreSQL e2e)', () => {
     expect(res.body.title).toBe('수정한 제목');
     await call('delete', `/${id}`, 2).expect(200);
     await call('get', `/${id}`).expect(404);
+    expect(
+      await db.query(
+        'SELECT actor_id AS "actorId", action FROM audit_events WHERE target_id=$1',
+        [id],
+      ),
+    ).toEqual([{ actorId: users[2].id, action: 'community_post.delete' }]);
   });
 
   it('accepts only answers to the same question and clears acceptance when deleted', async () => {
@@ -201,6 +207,11 @@ describe('Community (PostgreSQL e2e)', () => {
     await call('put', `/${id}/accepted-answer/${commentId}`, 0).expect(200);
     await call('delete', `/${id}/comments/${commentId}`, 2).expect(200);
     expect((await call('get', `/${id}`)).body.acceptedCommentId).toBeNull();
+    expect(
+      await db.query('SELECT action FROM audit_events WHERE target_id=$1', [
+        commentId,
+      ]),
+    ).toEqual([{ action: 'community_comment.delete' }]);
     await call('post', `/${id}/comments`, 1).send({ body: '   ' }).expect(400);
   });
 
@@ -223,9 +234,17 @@ describe('Community (PostgreSQL e2e)', () => {
     await call('get', '?sort=invalid').expect(400);
     const tagged = await call(
       'get',
-      '?q=' + encodeURIComponent('태그검색'),
+      '?tag=' + encodeURIComponent('태그검색'),
     ).expect(200);
     expect(tagged.body.items.map((p: { id: string }) => p.id)).toContain(id);
+    // 검색어는 제목에서만 찾으므로 태그 글자는 검색어로 찾지 않는다.
+    const byKeyword = await call(
+      'get',
+      '?q=' + encodeURIComponent('태그검색'),
+    ).expect(200);
+    expect(byKeyword.body.items.map((p: { id: string }) => p.id)).not.toContain(
+      id,
+    );
     await call('put', `/${id}/saved`, 1).expect(200);
     await call('put', `/${id}/saved`, 1).expect(200);
     await call('put', `/${id}/follow`, 1).expect(200);
@@ -297,11 +316,18 @@ describe('Community (PostgreSQL e2e)', () => {
     ).expect(200);
     expect(selected.body.items[0].id).toBe(notice);
     expect(selected.body.total).toBe(2);
-    expect(selected.body.filteredTotal).toBe(1);
     expect(selected.body.facets.categories.QUESTION).toBe(1);
     expect(selected.body.facets.categories.FREE).toBe(0);
     expect(selected.body.facets.statuses.accepted).toBe(1);
     expect(selected.body.facets.statuses.unaccepted).toBe(1);
+    // 고정 공지는 공지 칩·전체 칩·'채택 전' 칩에 들어간다.
+    const all = await call('get', `?q=${marker}&includePinned=true`).expect(
+      200,
+    );
+    expect(all.body.facets.categories['']).toBe(4);
+    expect(all.body.facets.categories.NOTICE).toBe(1);
+    expect(all.body.facets.statuses.unaccepted).toBe(3);
+    expect(all.body.facets.statuses.accepted).toBe(1);
     const next = await call(
       'get',
       `?q=${marker}&categories=QUESTION,FREE&status=accepted&includePinned=true&limit=1&page=2`,

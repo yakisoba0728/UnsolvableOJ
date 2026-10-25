@@ -115,6 +115,17 @@ export class CommunityQuery {
   @MaxLength(100)
   q?: string;
 
+  // 태그에는 쉼표가 들어갈 수 있어 나누지 않고 tag를 반복해 받는다.
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? [value] : value,
+  )
+  @IsArray()
+  @ArrayMaxSize(20)
+  @IsString({ each: true })
+  @MaxLength(100, { each: true })
+  tag?: string[];
+
   @Type(() => Number)
   @IsInt()
   @Min(1)
