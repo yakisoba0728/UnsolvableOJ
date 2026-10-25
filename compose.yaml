@@ -33,6 +33,8 @@ services:
   back:
     build:
       context: ./Back
+    # PID 1 ignores signals it has no handler for; the init forwards SIGTERM.
+    init: true
     environment:
       NODE_ENV: production
       PORT: 3000

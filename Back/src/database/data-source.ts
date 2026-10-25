@@ -10,6 +10,7 @@ import { InitialSchema1726916400000 } from './migrations/1726916400000-initial-s
 import { BackendFoundations1790550000000 } from './migrations/1790550000000-backend-foundations.js';
 import { BackfillSolves1790551000000 } from './migrations/1790551000000-backfill-solves.js';
 import { SubmissionXpEvidence1790553000000 } from './migrations/1790553000000-submission-xp-evidence.js';
+import { BackendHardening1790554000000 } from './migrations/1790554000000-backend-hardening.js';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -26,6 +27,7 @@ export default new DataSource({
     BackfillSolves1790551000000,
     DebugOutputs1790552000000,
     SubmissionXpEvidence1790553000000,
+    BackendHardening1790554000000,
   ],
   synchronize: false,
 });
