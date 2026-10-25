@@ -50,6 +50,13 @@ const statusOptions = [
 const isCategory = (value: string | null): value is CategoryKey =>
   categories.some((item) => item.key === value);
 
+// tag를 반복해 쉼표·공백이 든 태그도 보존한다. 기존 t=a,b 주소도 계속 읽는다.
+const tagsOf = (params: URLSearchParams) => [
+  ...new Set(
+    [...params.getAll("tag"), ...(params.get("t") ?? "").split(",")].filter(Boolean),
+  ),
+];
+
 export function CommunityPage() {
   useDocumentTitle("커뮤니티");
   const { session } = useAuth();
@@ -72,13 +79,7 @@ export function CommunityPage() {
     .split(",")
     .filter((value) => value === "unaccepted" || value === "accepted");
   const sort = params.get("sort") ?? "latest";
-  // tag를 반복해 쉼표·공백이 든 태그도 보존한다. 기존 t=a,b 주소도 계속 읽는다.
-  const selectedTags = [
-    ...new Set([
-      ...params.getAll("tag"),
-      ...(params.get("t") ?? "").split(","),
-    ].filter(Boolean)),
-  ];
+  const selectedTags = tagsOf(params);
   const size = PAGE_SIZE;
 
   function setTags(next: string[]) {
@@ -90,12 +91,14 @@ export function CommunityPage() {
     if (!raw.trim().startsWith("#")) return false;
     const tag = raw.trim().replace(/^#+/, "").trim();
     if (!tag) return false;
-    const next = selectedTags.some(
-      (item) => item.toLowerCase() === tag.toLowerCase(),
-    )
-      ? selectedTags
-      : [...selectedTags, tag];
-    update({ t: null, tag: next, q: null });
+    // 빠르게 이어서 확정해도 앞 태그를 잃지 않도록 최신 조건에서 계산한다.
+    update((latest) => {
+      const current = tagsOf(latest);
+      const next = current.some((item) => item.toLowerCase() === tag.toLowerCase())
+        ? current
+        : [...current, tag];
+      return { t: null, tag: next, q: null };
+    });
     setQueryText("");
     return true;
   }

@@ -183,15 +183,27 @@ export function useFlashNotice() {
 export function useUrlFilters(hold?: (text: string) => boolean) {
   const [params, setParams] = useSearchParams();
   const paramsRef = useRef(params);
-  paramsRef.current = params;
+  // 라우터는 주소 변경을 transition으로 늦게 반영한다. 그 사이의 다른 렌더가
+  // 방금 쓴 조건을 옛 주소로 되돌리지 않도록, 주소가 실제로 바뀌었을 때만 따라간다.
+  const seenRef = useRef(params);
+  if (seenRef.current !== params) {
+    seenRef.current = params;
+    paramsRef.current = params;
+  }
   const urlQuery = params.get("q") ?? "";
   const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
 
-  /** 빈 값은 지우고, 배열은 같은 키를 반복해 쓴다. 조건이 바뀌면 첫 쪽으로 돌아간다. */
+  /**
+   * 빈 값은 지우고, 배열은 같은 키를 반복해 쓴다. 조건이 바뀌면 첫 쪽으로 돌아간다.
+   * 기존 값에서 계산해야 하면 함수로 넘긴다: 아직 화면에 반영되지 않은 최신 조건을 받는다.
+   */
   function update(
-    patch: Record<string, string | string[] | null>,
+    change:
+      | Record<string, string | string[] | null>
+      | ((latest: URLSearchParams) => Record<string, string | string[] | null>),
     { resetPage = true }: { resetPage?: boolean } = {},
   ) {
+    const patch = typeof change === "function" ? change(paramsRef.current) : change;
     const next = new URLSearchParams(paramsRef.current);
     for (const [key, value] of Object.entries(patch)) {
       next.delete(key);
