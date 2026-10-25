@@ -64,6 +64,7 @@ jobs:
           npm run check --prefix Back
           npm run test:boj-import --prefix Back
           npm run test:operations --prefix Back
+          npm run test:starter --prefix Back
       - name: Frontend build and test types
         run: npm run check --prefix Front
       - name: Production Compose configuration
