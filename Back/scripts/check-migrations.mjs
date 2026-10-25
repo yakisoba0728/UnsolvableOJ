@@ -92,6 +92,16 @@ try {
   assert.equal(acceptedEvidence.length, 2);
   assert.ok(acceptedEvidence.every((row) => row.accepted_for_xp));
 
+  // Case-only username duplicates stop the hardening migration and are listed, not renamed.
+  await db.undoLastMigration();
+  const [caseDuplicate] = await db.query(`INSERT INTO users (email, username, password_hash)
+    VALUES ('legacy-upper@example.com', 'Legacy', 'unused') RETURNING id`);
+  await assert.rejects(
+    db.runMigrations(),
+    /Usernames differ only by case; rename them before migrating: Legacy, legacy/,
+  );
+  await db.query('DELETE FROM users WHERE id = $1', [caseDuplicate.id]);
+
   // Simulate the pre-evidence schema with both known and unknowable past verdicts.
   await db.undoLastMigration();
   const evidenceFixtures = [];
@@ -134,7 +144,7 @@ try {
   const solvesBeforeEvidence = await db.query(
     'SELECT * FROM user_problem_solves ORDER BY user_id, problem_id',
   );
-  assert.equal((await db.runMigrations()).length, 1);
+  assert.equal((await db.runMigrations()).length, 2);
   for (const fixture of evidenceFixtures)
     assert.equal(
       (await db.query('SELECT accepted_for_xp FROM submissions WHERE id = $1', [
@@ -167,6 +177,7 @@ try {
     (row) => row.id !== solve.accepted_submission_id,
   );
   assert.ok(alternative);
+  await db.undoLastMigration();
   const beforeEvidenceRefusal = await db.query(
     'SELECT name FROM migrations ORDER BY id',
   );
@@ -214,7 +225,7 @@ try {
     );
   }
   await verifyBackfill();
-  assert.equal((await db.runMigrations()).length, 3);
+  assert.equal((await db.runMigrations()).length, 4);
   await verifyBackfill();
 
   // A full rollback is only valid for an empty ledger: use a genuinely fresh DB.
@@ -238,7 +249,7 @@ try {
   );
   assert.equal(await db.showMigrations(), false);
   console.log(
-    'Migrations: legacy upgrade, snapshots, solve/XP idempotency, acceptance evidence backfill/refusal, partial rollback, populated-ledger refusal and fresh install/rollback/reapply passed.',
+    'Migrations: legacy upgrade, snapshots, solve/XP idempotency, acceptance evidence backfill/refusal, username case refusal, partial rollback, populated-ledger refusal and fresh install/rollback/reapply passed.',
   );
 } finally {
   if (db?.isInitialized) await db.destroy();

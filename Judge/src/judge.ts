@@ -76,7 +76,7 @@ const ENV = [
   "LANG=C.UTF-8",
 ];
 const LANGUAGES: Record<string, { source: string; compile?: string[]; artifact?: string; run: string[] }> = {
-  C: { source: "main.c", compile: ["/usr/bin/gcc", "main.c", "-O2", "-std=c17", "-o", "main"], artifact: "main", run: ["/w/main"] },
+  C: { source: "main.c", compile: ["/usr/bin/gcc", "main.c", "-O2", "-std=gnu17", "-o", "main", "-lm"], artifact: "main", run: ["/w/main"] },
   CPP: { source: "main.cpp", compile: ["/usr/bin/g++", "main.cpp", "-O2", "-std=c++20", "-o", "main"], artifact: "main", run: ["/w/main"] },
   JAVA: {
     source: "Main.java",
@@ -89,19 +89,31 @@ const LANGUAGES: Record<string, { source: string; compile?: string[]; artifact?:
   JAVASCRIPT: { source: "main.js", run: ["/usr/bin/node", "main.js"] },
   TYPESCRIPT: { source: "main.ts", compile: ["/usr/local/bin/esbuild", "main.ts", "--outfile=main.js", "--platform=node", "--format=cjs"], artifact: "main.js", run: ["/usr/bin/node", "main.js"] },
   GO: { source: "main.go", compile: ["/usr/bin/go", "build", "-o", "main", "main.go"], artifact: "main", run: ["/w/main"] },
-  RUST: { source: "main.rs", compile: ["/usr/bin/rustc", "main.rs", "-O", "-o", "main"], artifact: "main", run: ["/w/main"] },
+  RUST: { source: "main.rs", compile: ["/usr/bin/rustc", "main.rs", "--edition=2021", "-O", "-o", "main"], artifact: "main", run: ["/w/main"] },
 };
 
+// go-judge에 닿지 못했거나 429/502/503/504를 받은 경우: 제출의 판정이 아니므로 최종 결과로 기록하지 않습니다.
+// 500 등 나머지는 특정 제출이 반복해 일으킬 수 있으므로 SYSTEM_ERROR로 끝냅니다.
+export class SandboxUnavailableError extends Error {}
+
 async function request(config: SandboxConfig, path: string, signal: AbortSignal, options: RequestInit = {}) {
-  const response = await fetch(new URL(path, config.url), {
-    ...options,
-    headers: { Authorization: `Bearer ${config.token}`, ...options.headers },
-    redirect: "error",
-    signal,
-  });
+  const name = `go-judge ${options.method ?? "GET"} ${path.split("/")[1]}`;
+  let response: Response;
+  try {
+    response = await fetch(new URL(path, config.url), {
+      ...options,
+      headers: { Authorization: `Bearer ${config.token}`, ...options.headers },
+      redirect: "error",
+      signal,
+    });
+  } catch (error) {
+    if (signal.aborted) throw error;
+    throw new SandboxUnavailableError(`${name}: ${error}`, { cause: error });
+  }
   if (!response.ok) {
     await response.body?.cancel();
-    throw new Error(`go-judge ${options.method ?? "GET"} ${path.split("/")[1]}: HTTP ${response.status}`);
+    const message = `${name}: HTTP ${response.status}`;
+    throw [429, 502, 503, 504].includes(response.status) ? new SandboxUnavailableError(message) : new Error(message);
   }
   return response;
 }
@@ -151,16 +163,17 @@ export async function judge(claim: Claim, config: SandboxConfig, cancellation?: 
   const cached = new Set<string>();
 
   async function remove(ids: string[]) {
+    for (const id of ids) cached.delete(id);
     const results = await Promise.allSettled(ids.map(async (id) => {
       const response = await fetch(new URL(`/file/${encodeURIComponent(id)}`, config.url), {
         method: "DELETE", headers: { Authorization: `Bearer ${config.token}` },
         redirect: "error", signal: AbortSignal.timeout(5_000),
       });
       await response.body?.cancel();
-      if (!response.ok && response.status !== 404) throw new Error("go-judge cache deletion failed");
-      cached.delete(id);
+      if (!response.ok && response.status !== 404) throw new Error(`HTTP ${response.status}`);
     }));
-    if (results.some((result) => result.status === "rejected")) throw new Error("Could not clean go-judge cached files");
+    // 남은 파일은 go-judge의 idle TTL이 회수하므로 이미 계산한 판정을 바꾸지 않습니다.
+    for (const result of results) if (result.status === "rejected") console.error("Could not clean a go-judge cached file:", result.reason);
   }
 
   async function execute(args: string[], copyIn: Record<string, File>, timeMs: number, memoryMb: number, input = "", artifact?: string) {

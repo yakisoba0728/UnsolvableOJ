@@ -63,8 +63,9 @@ export function enqueueJudge(
     { submissionId, generation },
     {
       jobId: `${submissionId}-${generation}`,
-      attempts: 3,
-      backoff: { type: 'exponential', delay: 1000 },
+      // 약 10분(5초부터 지수 증가) 동안 재시도해 짧은 API 재시작에 제출이 실패하지 않게 합니다.
+      attempts: 8,
+      backoff: { type: 'exponential', delay: 5000 },
       removeOnComplete: 1000,
       removeOnFail: 5000,
     },
@@ -243,6 +244,7 @@ export class SubmissionsService {
       current.judgeGeneration += 1;
       current.judgeAttemptId = null;
       current.judgeLeaseExpiresAt = null;
+      current.recoveryCount = 0;
       if (current.status === SubmissionStatus.ACCEPTED)
         current.acceptedForXp = true;
       current.status = SubmissionStatus.QUEUED;

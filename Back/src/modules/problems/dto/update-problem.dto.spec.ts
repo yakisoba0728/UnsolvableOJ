@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { CreateProblemDto } from './create-problem.dto.js';
 import { UpdateProblemDto } from './update-problem.dto.js';
 
@@ -31,6 +31,24 @@ describe('Problem DTO validation', () => {
       ).rejects.toThrow();
     },
   );
+
+  it('rejects a null status instead of overwriting the DRAFT default', async () => {
+    await expect(
+      pipe.transform(
+        {
+          slug: 'new-problem',
+          title: 'New',
+          statementMarkdown: '',
+          inputDescriptionMarkdown: '',
+          outputDescriptionMarkdown: '',
+          difficulty: 'BEGINNER',
+          status: null,
+          testCases: [{ input: '', expectedOutput: '', isSample: true }],
+        },
+        { type: 'body', metatype: CreateProblemDto },
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
 
   it('still supplies limits when creating a problem', async () => {
     const dto = await pipe.transform(
