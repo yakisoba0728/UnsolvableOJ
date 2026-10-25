@@ -61,6 +61,25 @@ p {
 .main-content {
   flex: 1;
 }
+/* 화면을 옮길 때 포커스를 받는 자리일 뿐이라 테두리를 그리지 않는다 */
+.main-content:focus {
+  outline: none;
+}
+/* 키보드로 처음 Tab을 누르면 나타나 머리글 메뉴를 건너뛴다 */
+.skip-link {
+  position: absolute;
+  top: -48px;
+  left: 16px;
+  z-index: 100;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: var(--weight-label);
+}
+.skip-link:focus {
+  top: 8px;
+}
 .page-width {
   width: min(1180px, calc(100% - 48px));
   margin: auto;
