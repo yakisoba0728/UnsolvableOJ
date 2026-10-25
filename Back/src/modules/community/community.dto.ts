@@ -14,6 +14,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { IsPostgresText } from '../../common/postgres-text.js';
 
 export enum CommunityCategory {
   QUESTION = 'QUESTION',
@@ -33,6 +34,7 @@ export class CommunityPostDto {
   @IsString({ each: true })
   @MinLength(1, { each: true })
   @MaxLength(30, { each: true })
+  @IsPostgresText({ each: true })
   tags?: string[];
   @IsEnum(CommunityCategory)
   category: CommunityCategory;
@@ -41,23 +43,27 @@ export class CommunityPostDto {
   @IsString()
   @MinLength(1)
   @MaxLength(150)
+  @IsPostgresText()
   title: string;
 
   @Transform(trim)
   @IsString()
   @MinLength(1)
   @MaxLength(20_000)
+  @IsPostgresText()
   body: string;
 
   @IsOptional()
   @IsString()
   @MaxLength(30_000)
+  @IsPostgresText()
   code?: string;
 
   @IsOptional()
   @Transform(trim)
   @IsString()
   @MaxLength(40)
+  @IsPostgresText()
   language?: string;
 
   @IsOptional()
@@ -70,6 +76,7 @@ export class CommunityCommentDto {
   @IsString()
   @MinLength(1)
   @MaxLength(10_000)
+  @IsPostgresText()
   body: string;
 }
 
@@ -113,6 +120,7 @@ export class CommunityQuery {
   @Transform(trim)
   @IsString()
   @MaxLength(100)
+  @IsPostgresText()
   q?: string;
 
   // 태그에는 쉼표가 들어갈 수 있어 나누지 않고 tag를 반복해 받는다.
@@ -124,6 +132,7 @@ export class CommunityQuery {
   @ArrayMaxSize(20)
   @IsString({ each: true })
   @MaxLength(100, { each: true })
+  @IsPostgresText({ each: true })
   tag?: string[];
 
   @Type(() => Number)

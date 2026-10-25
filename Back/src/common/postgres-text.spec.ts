@@ -1,5 +1,10 @@
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
+import {
+  CommunityCommentDto,
+  CommunityPostDto,
+  CommunityQuery,
+} from '../modules/community/community.dto.js';
 import { CreateProblemDto } from '../modules/problems/dto/create-problem.dto.js';
 import { UpdateProblemDto } from '../modules/problems/dto/update-problem.dto.js';
 import { CreateSubmissionDto } from '../modules/submissions/dto/create-submission.dto.js';
@@ -10,8 +15,11 @@ describe('PostgreSQL-unsafe user text', () => {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  const validate = (metatype: new () => object, body: object) =>
-    pipe.transform(body, { type: 'body', metatype });
+  const validate = (
+    metatype: new () => object,
+    body: object,
+    type: 'body' | 'query' = 'body',
+  ) => pipe.transform(body, { type, metatype });
   const testCases = (overrides: object) => ({
     testCases: [
       { input: '1\n', expectedOutput: '1\n', isSample: true, ...overrides },
@@ -51,6 +59,33 @@ describe('PostgreSQL-unsafe user text', () => {
       }
     });
 
+    it.each([
+      ['title', { title: `T${unsafe}` }],
+      ['body', { body: unsafe }],
+      ['code', { code: unsafe }],
+      ['language', { language: `Py${unsafe}` }],
+      ['tags', { tags: [`t${unsafe}`] }],
+    ])('rejects community post %s', async (_field, body) => {
+      await expect(
+        validate(CommunityPostDto, {
+          category: 'FREE',
+          title: 'T',
+          body: 'B',
+          ...body,
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('rejects community answers and list searches', async () => {
+      await expect(
+        validate(CommunityCommentDto, { body: `답변${unsafe}` }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      for (const query of [{ q: `검색${unsafe}` }, { tag: `태그${unsafe}` }])
+        await expect(
+          validate(CommunityQuery, query, 'query'),
+        ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
     it('rejects submission source code', async () => {
       await expect(
         validate(CreateSubmissionDto, {
@@ -76,5 +111,13 @@ describe('PostgreSQL-unsafe user text', () => {
     await expect(
       validate(CreateSubmissionDto, { language: 'PYTHON', sourceCode: text }),
     ).resolves.toMatchObject({ sourceCode: text });
+    await expect(
+      validate(CommunityPostDto, {
+        category: 'FREE',
+        title: '한글 😀',
+        body: text,
+        tags: ['😀'],
+      }),
+    ).resolves.toMatchObject({ body: text.trim(), tags: ['😀'] });
   });
 });
