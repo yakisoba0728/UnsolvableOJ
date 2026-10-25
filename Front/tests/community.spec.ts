@@ -44,6 +44,8 @@ test("typing #word and pressing Enter in the community search makes a tag pill t
   await search.fill("greedy");
   await expect(rows).toHaveCount(0);
   await search.fill("본문");
+  // 앞 검색도 0건이라, 검색어가 주소에 반영된 뒤에 세어야 실제로 검사된다.
+  await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("본문");
   await expect(rows).toHaveCount(0);
   await search.fill("그리디");
   await expect(rows).toHaveCount(1);

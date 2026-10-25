@@ -63,6 +63,8 @@ test("code analysis: search and filters narrow the list and are kept in the URL"
   await page.getByLabel("문제 검색").fill("안정 정렬");
   await expect(rows(page)).toHaveCount(0);
   await page.getByLabel("문제 검색").fill("print");
+  // 앞 검색도 0건이라, 검색어가 주소에 반영된 뒤에 세어야 실제로 검사된다.
+  await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("print");
   await expect(rows(page)).toHaveCount(0);
   await page.getByLabel("문제 검색").fill("없는 검색어 zzz");
   await expect(rows(page)).toHaveCount(0);
