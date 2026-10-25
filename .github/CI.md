@@ -6,6 +6,7 @@ GitHub 제공 `ubuntu-24.04` 러너에서 **Node 24, 작업 1개**로 필요한 
 - 백엔드 lint·타입 검사·단위 테스트·빌드
 - BOJ HTML 변환·통합 실행기 안전장치 회귀 테스트
 - 프론트엔드 TypeScript 검사·프로덕션 빌드·브라우저 테스트 타입 검사
+- 운영 Compose의 필수 환경 변수·포트 비공개·영속 볼륨·자원 상한·워커 연결 검사
 - Chromium·Firefox·WebKit에서 UI·페이지네이션·제출 당시 예제·본문 렌더링 회귀 테스트
 - 별도 Compose 프로젝트에서 Chromium으로 회원가입→문제 게시→실제 제출/채점→XP→로그아웃 검증
 - 채점 워커 빌드·go-judge HTTP 계약 회귀 테스트
@@ -41,6 +42,9 @@ docker compose up -d --build --wait go-judge
 # Judge/.env의 GO_JUDGE_TOKEN을 실행 서비스와 동일하게 설정한 뒤
 npm run test:runtime --prefix Judge
 node scripts/check-compose.mjs
+# 동일 호스트 운영 Compose로 같은 일회용 브라우저 흐름을 검사할 때
+node scripts/check-production-compose.mjs
+node scripts/check-compose.mjs --production
 ```
 
 `check-compose.mjs`는 무작위 프로젝트명·localhost 임의 포트·메모리 파일시스템 DB/Redis와 일회용 인증키를 사용합니다. 기존 개발 서비스/볼륨을 재사용하지 않으며 성공·실패 모두 생성한 프로젝트만 정리합니다. Docker Compose 2.24.4 이상과 Playwright Chromium이 필요합니다.
