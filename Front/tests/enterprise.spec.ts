@@ -34,7 +34,11 @@ const problems = [
 async function signIn(page: Page) {
   await page.addInitScript(
     ({ key, saved }) => localStorage.setItem(key, JSON.stringify(saved)),
-    { key: sessionKey, saved: { session, expiresAt: Date.now() + 900_000 } },
+    {
+      key: sessionKey,
+      // 브라우저 시각을 오늘 정오로 고정하는 스펙이 있어, 정오 전에 돌려도 세션이 만료되지 않게 둘 중 늦은 때를 기준으로 한다.
+      saved: { session, expiresAt: Math.max(Date.now(), noonToday) + 900_000 },
+    },
   );
 }
 
