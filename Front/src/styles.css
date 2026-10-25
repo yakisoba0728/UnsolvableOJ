@@ -3548,7 +3548,7 @@ h3 {
   border-top: 1px solid var(--color-divider);
 }
 .post-row {
-  min-height: 72px;
+  min-height: 66px;
   padding: 12px 24px;
   background: transparent;
   border: 0;
@@ -5063,7 +5063,7 @@ h3 {
 .data-list .problem-row,
 .data-list .history-row,
 .data-list .post-row {
-  min-height: 72px;
+  min-height: 66px;
   padding-top: 12px;
   padding-bottom: 12px;
   margin: 0;
@@ -5666,7 +5666,7 @@ h3 {
   grid-template-columns: minmax(0, 1fr) repeat(3, 120px);
   align-items: center;
   column-gap: 16px;
-  min-height: 72px;
+  min-height: 66px;
   padding: 12px 24px;
   border-bottom: 1px solid var(--color-divider);
 }
@@ -6599,11 +6599,6 @@ textarea {
   color: var(--color-primary);
   font-weight: var(--weight-title);
 }
-.analysis-head span {
-  color: var(--color-ink-600);
-  font-weight: var(--weight-label);
-  font-variant-numeric: tabular-nums;
-}
 .analysis-code {
   display: flex;
   gap: 16px;
@@ -6619,7 +6614,7 @@ textarea {
 .analysis-code-gutter {
   flex: none;
   text-align: right;
-  opacity: 0.55;
+  opacity: 0.7;
   user-select: none;
 }
 .analysis-code-gutter span {
@@ -6741,27 +6736,6 @@ textarea {
   border-color: var(--color-disabled);
   color: var(--color-ink-600);
 }
-.analysis-explain {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-  border: 1px solid var(--color-success-border);
-  border-radius: var(--radius-panel);
-  background: var(--color-success-soft);
-}
-.analysis-explain h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--color-success);
-}
-.analysis-explain h3 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: var(--weight-title);
-  color: var(--color-ink-900);
-}
 .analysis-explain-body {
   display: flex;
   flex-direction: column;
@@ -6789,8 +6763,246 @@ textarea {
   font-size: 12px;
   font-weight: var(--weight-label);
 }
+/* 정답 보기 항목이 아래로 펼쳐지며 해설이 그 안에서 나온다. */
+.analysis-item {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  transition:
+    border-color 0.3s,
+    background-color 0.3s;
+}
+.analysis-item.is-open {
+  border-color: var(--color-success-border);
+  background: var(--color-success-soft);
+}
+.analysis-item.is-open .analysis-option,
+.analysis-item.is-open .analysis-option.is-correct {
+  border-color: transparent;
+  background: transparent;
+}
+.analysis-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s 0.4s;
+}
+.analysis-reveal[data-open="true"] {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition:
+    grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s;
+}
+.analysis-reveal-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+.analysis-reveal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 17px 14px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 0.25s 0.12s,
+    transform 0.35s 0.12s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.analysis-reveal[data-open="true"] .analysis-reveal-body {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .analysis-item,
+  .analysis-reveal,
+  .analysis-reveal[data-open="true"],
+  .analysis-reveal-body {
+    transition: none;
+  }
+}
 .analysis-page > .page-header {
   padding: 0;
+}
+/* 코드 분석 문제 화면: 왼쪽 코드(+글꼴 크기), 오른쪽 질문·보기. 코드 박스는 오른쪽 열 높이에 끝선을 맞춘다. */
+.analysis-page {
+  width: min(1400px, calc(100% - 48px));
+  padding: 20px 0 2px;
+  gap: 12px;
+}
+.analysis-page > .page-header h1 {
+  font-size: 26px;
+}
+.analysis-page > .page-header p {
+  margin-top: 2px;
+}
+.analysis-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+.analysis-code-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-code);
+  color: var(--color-code-ink);
+  overflow: hidden;
+  /* 코드가 길면 페이지가 늘어나지 않고 코드 영역 안에서 스크롤한다. */
+  max-height: max(420px, calc(100dvh - 270px));
+}
+.analysis-code-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 12px;
+  background: var(--color-code-bar);
+  border-bottom: 1px solid var(--color-border);
+}
+.analysis-code-bar .font-button {
+  min-width: 44px;
+  height: 36px;
+}
+.analysis-code-lang {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-strong-muted);
+}
+.analysis-code-wrap .analysis-code {
+  flex: 1;
+  min-height: 160px;
+  padding: 16px 20px;
+  border: 0;
+  border-radius: 0;
+  font-size: var(--analysis-font, 13px);
+  line-height: 1.75;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+  /* 스크롤할 내용이 더 있는 쪽 가장자리에만 옅은 그림자를 보인다(local 덮개가 끝에서 그림자를 가린다). */
+  background:
+    linear-gradient(to right, var(--color-code) 30%, transparent) left center /
+      28px 100% no-repeat local,
+    linear-gradient(to left, var(--color-code) 30%, transparent) right center /
+      28px 100% no-repeat local,
+    linear-gradient(to bottom, var(--color-code) 30%, transparent) center top /
+      100% 28px no-repeat local,
+    linear-gradient(to top, var(--color-code) 30%, transparent) center bottom /
+      100% 28px no-repeat local,
+    radial-gradient(
+        farthest-side at 0 50%,
+        rgba(233, 240, 249, 0.3),
+        transparent
+      )
+      left center / 12px 100% no-repeat scroll,
+    radial-gradient(
+        farthest-side at 100% 50%,
+        rgba(233, 240, 249, 0.3),
+        transparent
+      )
+      right center / 12px 100% no-repeat scroll,
+    radial-gradient(
+        farthest-side at 50% 0,
+        rgba(233, 240, 249, 0.3),
+        transparent
+      )
+      center top / 100% 12px no-repeat scroll,
+    radial-gradient(
+        farthest-side at 50% 100%,
+        rgba(233, 240, 249, 0.3),
+        transparent
+      )
+      center bottom / 100% 12px no-repeat scroll,
+    var(--color-code);
+}
+.analysis-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.analysis-side .analysis-choice {
+  gap: 12px;
+}
+.analysis-side .analysis-question {
+  font-size: 24px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.analysis-side .analysis-options {
+  gap: 8px;
+}
+.analysis-side .analysis-option {
+  min-height: 56px;
+  padding: 8px 16px;
+  gap: 14px;
+  border-radius: 12px;
+  font-size: 17px;
+}
+.analysis-side .analysis-option-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.analysis-side .analysis-badge {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+  color: var(--color-ink-600);
+  font-size: 15px;
+}
+.analysis-side .analysis-option.is-selected .analysis-badge {
+  background: var(--color-primary-solid);
+  border-color: var(--color-primary-solid);
+  color: var(--color-on-solid);
+}
+.analysis-side .analysis-option.is-correct .analysis-badge {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-bg);
+}
+.analysis-side .analysis-option.is-wrong .analysis-badge {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--color-bg);
+}
+.analysis-side .analysis-option-note {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.analysis-side .analysis-explain-body {
+  max-width: 62ch;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.analysis-side .analysis-footer {
+  margin-top: 4px;
+}
+.analysis-side .analysis-footer > :first-child {
+  margin-right: auto;
+}
+@media (max-width: 900px) {
+  .analysis-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .analysis-code-wrap {
+    max-height: max(320px, 60dvh);
+  }
+  .analysis-code-wrap .analysis-code {
+    min-height: 0;
+  }
 }
 .analysis-all-done {
   margin: 16px 0 0;
@@ -7093,9 +7305,8 @@ textarea {
     width: calc(100% - 32px);
     padding-top: 20px;
   }
-  .analysis-code {
-    padding: 16px;
-    min-height: 0;
+  .analysis-code-wrap .analysis-code {
+    padding: 12px 14px;
   }
 }
 
