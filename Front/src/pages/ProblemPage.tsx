@@ -390,7 +390,12 @@ export function ProblemPage() {
         <nav className="community-problem-links" aria-label="문제 커뮤니티">
           <Link to={`/community?c=question&problemId=${problem.id}`}>질문 보기</Link>
           <Link to={`/community?c=solution&problemId=${problem.id}`}>풀이 공유</Link>
-          <Link to={`/community/new?c=question&problemId=${problem.id}`}>질문 작성</Link>
+          <Link
+            to={`/community/new?c=question&problemId=${problem.id}`}
+            state={{ problem: { id: problem.id, title: problem.title } }}
+          >
+            질문 작성
+          </Link>
         </nav>
         <span
           className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}

@@ -7510,3 +7510,12 @@ textarea {
 .community-layout > section {
   min-width: 0;
 }
+/* 글 작성: 문제 주소 입력 칸 옆의 "문제 연결" 버튼은 줄바꿈하지 않는다 */
+.write-form .field-row > input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.write-form .field-row > .button {
+  flex: none;
+  white-space: nowrap;
+}

@@ -7,6 +7,7 @@ import {
 } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "./api";
+import { getMyPosts } from "./community/api";
 import { fetchAll } from "./pagination";
 import { DIFFICULTIES } from "./difficulty";
 import type {
@@ -18,7 +19,7 @@ import type {
 } from "./types";
 
 /** load가 있으면 요청해 결과·로딩·오류를 돌려준다. deps가 바뀌면 이전 요청을 취소하고 다시 받는다. */
-function useRequest<T>(
+export function useRequest<T>(
   load: ((signal: AbortSignal) => Promise<T>) | null,
   initial: T,
   failure: string,
@@ -78,6 +79,16 @@ export function useSubmissionHistory(session: Session | null) {
     if (item.status === "ACCEPTED") solved.add(item.problem.id);
   }
   return { submissions, solved, attempted, loading, error };
+}
+
+/** 내가 쓴 글·추천한 글과 팔로우한 작성자 id (프로필·미션·커뮤니티 목록) */
+export function useMyCommunityPosts(session: Session | null) {
+  return useRequest(
+    session ? (signal) => getMyPosts(session.accessToken, signal) : null,
+    { written: [], voted: [], following: [] as string[] },
+    "커뮤니티 글을 불러오지 못했습니다.",
+    [session],
+  );
 }
 
 /** 임시 저장 시각을 "오후 03:12"처럼 보여 준다. */

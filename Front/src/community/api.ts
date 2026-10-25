@@ -1,5 +1,10 @@
 import { api } from "../api";
-import type { CategoryKey, CommunityPost, CommunityAnswer } from "./types";
+import type {
+  AuthorStats,
+  CategoryKey,
+  CommunityAnswer,
+  CommunityPost,
+} from "./types";
 
 interface ApiPost {
   id: string;
@@ -28,7 +33,6 @@ interface ApiComment {
   author: ApiPost["author"];
 }
 export interface Page<T> {
-  filteredTotal?: number;
   facets?: {
     categories: Record<string, number>;
     statuses: Record<string, number>;
@@ -40,13 +44,11 @@ export interface Page<T> {
 }
 export interface Interaction {
   voted: boolean;
-  saved: boolean;
   following: boolean;
   commentVotes: string[];
 }
 export const emptyInteraction: Interaction = {
   voted: false,
-  saved: false,
   following: false,
   commentVotes: [],
 };
@@ -119,4 +121,50 @@ export async function savePost(input: PostInput, token: string, id?: string) {
       token,
     ),
   );
+}
+
+/** 글 하나와 그 답변 한 쪽, 작성자 통계, 로그인했다면 내 추천·팔로우 상태를 함께 받는다. */
+export async function getPostPage(
+  id: string,
+  answerPage: number,
+  token: string | undefined,
+  signal: AbortSignal,
+) {
+  const [post, answers, stats, interaction] = await Promise.all([
+    getPost(id, signal),
+    getComments(id, answerPage, signal),
+    api<AuthorStats>(`${endpoint}/${id}/author-stats`, { signal }),
+    token
+      ? api<Interaction>(`${endpoint}/${id}/interaction`, { signal }, token)
+      : emptyInteraction,
+  ]);
+  return { post, answers, stats, interaction };
+}
+
+/** 글에 딸린 동작(추천·팔로우·답변·채택·삭제). path는 글 주소 뒤에 붙는다. */
+export const postAction = <T = unknown>(
+  id: string,
+  path: string,
+  method: "POST" | "PUT" | "DELETE",
+  token: string,
+  body?: object,
+) =>
+  api<T>(
+    `${endpoint}/${id}${path}`,
+    { method, ...(body ? { body: JSON.stringify(body) } : {}) },
+    token,
+  );
+
+/** 내가 쓴 글과 추천한 글(각각 최근 100편), 팔로우한 작성자 id */
+export async function getMyPosts(token: string, signal: AbortSignal) {
+  const result = await api<{
+    written: ApiPost[];
+    voted: ApiPost[];
+    following: string[];
+  }>(`${endpoint}/mine`, { signal }, token);
+  return {
+    written: result.written.map(convertPost),
+    voted: result.voted.map(convertPost),
+    following: result.following,
+  };
 }

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { authenticate, mockProblemApi } from "./fixtures";
+import { authenticate, mockCommunityApi, mockProblemApi } from "./fixtures";
 
 test.beforeEach(({ page }) => mockProblemApi(page));
 
@@ -11,30 +11,17 @@ test("typing #word and pressing Enter in the community search makes a tag pill t
     category: "question",
     title,
     body: `${title} 본문`,
-    author: { name: "other", tier: "Bronze I" },
+    author: "other",
     tags,
     createdAt: at,
-    views: 1,
-    upvotes: 0,
   });
-  await page.addInitScript(
-    (value) => {
-      localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
-    },
-    {
-      posts: [
-        post("t-1", "그리디 질문", ["greedy", "dp"], "2026-10-03T00:00:00Z"),
-        post("t-2", "다이나믹 질문", ["dp"], "2026-10-02T00:00:00Z"),
-        post("t-3", "태그 없는 질문", [], "2026-10-01T00:00:00Z"),
-      ],
-      answers: [],
-      upvoted: [],
-      saved: [],
-      followed: [],
-      accepted: {},
-      deleted: [],
-    },
-  );
+  await mockCommunityApi(page, {
+    posts: [
+      post("t-1", "그리디 질문", ["greedy", "dp"], "2026-10-03T00:00:00Z"),
+      post("t-2", "다이나믹 질문", ["dp"], "2026-10-02T00:00:00Z"),
+      post("t-3", "태그 없는 질문", [], "2026-10-01T00:00:00Z"),
+    ],
+  });
   await page.goto("/community?q=");
   const search = page.getByRole("searchbox", { name: "게시글 검색" });
   const rows = page.locator(".post-row .post-title");
@@ -181,32 +168,18 @@ test("community list: the vote and view columns are right-aligned like the probl
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.addInitScript(
-    (value) => {
-      localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
-    },
-    {
-      posts: [
-        {
-          id: "c-1",
-          category: "question",
-          title: "정렬 확인",
-          body: "본문",
-          author: { name: "other", tier: "Bronze I" },
-          tags: [],
-          createdAt: "2026-10-03T00:00:00Z",
-          views: 1234,
-          upvotes: 5,
-        },
-      ],
-      answers: [],
-      upvoted: [],
-      saved: [],
-      followed: [],
-      accepted: {},
-      deleted: [],
-    },
-  );
+  await mockCommunityApi(page, {
+    posts: [
+      {
+        id: "c-1",
+        category: "question",
+        title: "정렬 확인",
+        author: "other",
+        views: 1234,
+        upvotes: 5,
+      },
+    ],
+  });
   await page.goto("/community?q=%EC%A0%95%EB%A0%AC");
   await expect(page.locator(".post-row")).toHaveCount(1);
   // 글자(범위) 기준으로 목록 오른쪽 끝에서 얼마나 떨어졌는지 잰다.
@@ -304,47 +277,21 @@ test("saving an empty form keeps a consistent state: the draft is not wiped on t
 test("filter toggles allow ⌘/Ctrl+click multi-select within one group only", async ({
   page,
 }) => {
-  // 샘플 글이 없는 환경에서도 같은 결과가 나오도록 이 테스트가 쓸 글을 저장소에 직접 넣어 둔다.
-  const author = { name: "tester", tier: "브론즈" };
-  const post = (
-    id: string,
-    category: string,
-    title: string,
-    pinned = false,
-  ) => ({
+  const post = (id: string, category: string, title: string) => ({
     id,
     category,
     title,
-    body: "본문",
-    tags: [],
-    author,
-    createdAt: "2026-10-01T00:00:00Z",
-    upvotes: 1,
-    views: 10,
-    ...(pinned ? { pinned: true } : {}),
+    author: "tester",
   });
-  await page.addInitScript(
-    (posts) => {
-      localStorage.setItem(
-        "unsolvable-oj-community-v1",
-        JSON.stringify({
-          posts,
-          answers: [],
-          upvoted: [],
-          saved: [],
-          followed: [],
-          accepted: {},
-        }),
-      );
-    },
-    [
-      post("t-notice", "notice", "고정 공지", true),
+  await mockCommunityApi(page, {
+    posts: [
+      post("t-notice", "notice", "고정 공지"),
       post("t-q1", "question", "질문 하나"),
       post("t-q2", "question", "질문 둘"),
       post("t-f1", "free", "자유 글"),
       post("t-s1", "solution", "풀이 공유 글"),
     ],
-  );
+  });
   await page.goto("/community");
   const category = page.getByRole("group", { name: "분류 필터" });
   const status = page.getByRole("group", { name: "채택 상태 필터" });
@@ -353,11 +300,9 @@ test("filter toggles allow ⌘/Ctrl+click multi-select within one group only", a
   await category.getByRole("button", { name: /^질문/ }).click(modifier);
   await category.getByRole("button", { name: /^자유/ }).click(modifier);
   await expect(page).toHaveURL(/c=question%2Cfree/);
-  const labels = await page
-    .locator(".post-row:not(.pinned) .post-category")
-    .allTextContents();
-  expect(labels.length).toBeGreaterThan(0);
-  expect(labels.every((text) => text === "질문" || text === "자유")).toBe(true);
+  await expect(
+    page.locator(".post-row:not(.pinned) .post-category"),
+  ).toHaveText(["자유", "질문", "질문"]);
   await expect(category.getByRole("button", { name: /^질문/ })).toHaveAttribute(
     "aria-pressed",
     "true",
@@ -395,32 +340,13 @@ test("filter toggles allow ⌘/Ctrl+click multi-select within one group only", a
 test("opening a post from a scrolled community list starts at the top", async ({
   page,
 }) => {
-  const author = { name: "tester", tier: "브론즈" };
   const posts = Array.from({ length: 8 }, (_, index) => ({
     id: `scroll-${index}`,
-    category: "free",
     title: `스크롤 확인 글 ${index}`,
-    body: "본문",
-    tags: [],
-    author,
+    author: "tester",
     createdAt: `2030-01-0${index + 1}T00:00:00Z`,
-    upvotes: 0,
-    views: 1,
   }));
-  await page.addInitScript((value) => {
-    localStorage.setItem(
-      "unsolvable-oj-community-v1",
-      JSON.stringify({
-        posts: value,
-        answers: [],
-        upvoted: [],
-        saved: [],
-        followed: [],
-        accepted: {},
-        deleted: [],
-      }),
-    );
-  }, posts);
+  await mockCommunityApi(page, { posts });
   await page.setViewportSize({ width: 1280, height: 420 });
   await page.goto("/community");
   const target = page.getByRole("link", { name: /스크롤 확인 글 7/ });
@@ -435,48 +361,35 @@ test("opening a post from a scrolled community list starts at the top", async ({
 });
 
 test.describe("community post: delete own post and answer layout", () => {
-  const author = { name: "solver", tier: "Bronze I" };
-  const other = { name: "다른사람", tier: "Bronze I" };
-  const mk = (id: string, title: string, who: typeof author) => ({
+  const mk = (id: string, title: string, author: string) => ({
     id,
     category: "question",
     title,
     body: "본문 내용입니다",
-    tags: [],
-    author: who,
-    createdAt: "2026-10-01T00:00:00Z",
-    upvotes: 0,
+    author,
     views: 3,
   });
-  const seedStore = {
-    posts: [
-      mk("mine-1", "내가 쓴 글", author),
-      mk("other-1", "남이 쓴 글", other),
-    ],
-    answers: [
-      {
-        id: "a-1",
-        postId: "mine-1",
-        author: other,
-        body: "첫 답변입니다",
-        createdAt: "2026-10-02T00:00:00Z",
-        upvotes: 0,
-      },
-    ],
-    upvoted: [],
-    saved: [],
-    followed: [],
-    accepted: {},
-    deleted: [],
-  };
+  const seed = (page: import("@playwright/test").Page) =>
+    mockCommunityApi(page, {
+      posts: [
+        mk("mine-1", "내가 쓴 글", "solver"),
+        mk("other-1", "남이 쓴 글", "다른사람"),
+      ],
+      answers: [
+        {
+          id: "a-1",
+          postId: "mine-1",
+          author: "다른사람",
+          body: "첫 답변입니다",
+        },
+      ],
+    });
 
   test("the answer editor and the answer list are separate cards, editor first, with no separate write-answer button", async ({
     page,
   }) => {
     await authenticate(page);
-    await page.addInitScript((value) => {
-      localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
-    }, seedStore);
+    await seed(page);
     await page.goto("/community/other-1");
     await expect(
       page.getByRole("button", { name: "답변 작성", exact: true }),
@@ -498,13 +411,7 @@ test.describe("community post: delete own post and answer layout", () => {
     page,
   }) => {
     await authenticate(page);
-    await page.addInitScript((value) => {
-      if (!localStorage.getItem("unsolvable-oj-community-v1"))
-        localStorage.setItem(
-          "unsolvable-oj-community-v1",
-          JSON.stringify(value),
-        );
-    }, seedStore);
+    await seed(page);
     await page.goto("/community/mine-1");
     page.once("dialog", (dialog) => dialog.dismiss());
     await page.getByRole("button", { name: "글 관리" }).click();
@@ -530,9 +437,7 @@ test.describe("community post: delete own post and answer layout", () => {
     page,
   }) => {
     await authenticate(page);
-    await page.addInitScript((value) => {
-      localStorage.setItem("unsolvable-oj-community-v1", JSON.stringify(value));
-    }, seedStore);
+    await seed(page);
     await page.goto("/community/other-1");
     const header = page.locator(".post-byline");
     await expect(header).toContainText("다른사람");
@@ -554,13 +459,7 @@ test.describe("community post: delete own post and answer layout", () => {
     page,
   }) => {
     await authenticate(page);
-    await page.addInitScript((value) => {
-      if (!localStorage.getItem("unsolvable-oj-community-v1"))
-        localStorage.setItem(
-          "unsolvable-oj-community-v1",
-          JSON.stringify(value),
-        );
-    }, seedStore);
+    await seed(page);
     await page.goto("/community/mine-1");
     const trigger = page.getByRole("button", { name: "글 관리" });
     await trigger.click();
@@ -582,48 +481,22 @@ test.describe("community post: delete own post and answer layout", () => {
 });
 
 test.describe("community filter counts include pinned notices where they belong", () => {
-  // 배포용 저장소에는 화면 구동용 샘플 글이 섞이므로, 이 테스트가 넣은 글만 걸러 보도록 제목에 "ZZ"를 붙이고 검색한다.
-  const author = { name: "tester", tier: "브론즈" };
-  const post = (
-    id: string,
-    category: string,
-    title: string,
-    pinned = false,
-  ) => ({
+  // 서버에서 공지는 모두 고정 공지다. 이 테스트가 넣은 글만 보도록 제목에 "ZZ"를 붙이고 검색한다.
+  const post = (id: string, category: string, title: string) => ({
     id,
     category,
     title,
-    body: "본문",
-    tags: [] as string[],
-    author,
-    createdAt: "2026-10-01T00:00:00Z",
-    upvotes: 1,
-    views: 10,
-    ...(pinned ? { pinned: true } : {}),
+    author: "tester",
   });
   const open = async (page: import("@playwright/test").Page, query = "ZZ") => {
-    await page.addInitScript(
-      (posts) =>
-        localStorage.setItem(
-          "unsolvable-oj-community-v1",
-          JSON.stringify({
-            posts,
-            answers: [],
-            upvoted: [],
-            saved: [],
-            followed: [],
-            accepted: {},
-            deleted: [],
-          }),
-        ),
-      [
-        post("n-1", "notice", "ZZ고정 공지", true),
-        post("n-2", "notice", "ZZ일반 공지"),
+    await mockCommunityApi(page, {
+      posts: [
+        post("n-1", "notice", "ZZ고정 공지"),
         post("q-1", "question", "ZZ질문 하나"),
         post("q-2", "question", "ZZ질문 둘"),
         post("f-1", "free", "ZZ자유 글"),
       ],
-    );
+    });
     await page.goto(`/community?q=${encodeURIComponent(query)}`);
   };
   const count = async (
@@ -645,18 +518,18 @@ test.describe("community filter counts include pinned notices where they belong"
     page,
   }) => {
     await open(page);
-    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(2); // 고정 1 + 일반 1
+    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(1);
     await expect.poll(() => count(page, "분류 필터", /^질문/)).toBe(2);
     await expect.poll(() => count(page, "분류 필터", /^자유/)).toBe(1);
-    await expect.poll(() => count(page, "분류 필터", /^전체/)).toBe(5);
-    await expect(total(page)).toHaveText("1 - 5/5");
+    await expect.poll(() => count(page, "분류 필터", /^전체/)).toBe(4);
+    await expect(total(page)).toHaveText("1 - 4/4");
 
     // 질문만 고르면 공지 칩 개수는 그대로이고(칩은 눌렀을 때의 결과 수), 목록 머리글은 실제로 나열된 줄(질문 2 + 항상 보이는 고정 공지 1)을 센다
     await page
       .getByRole("group", { name: "분류 필터" })
       .getByRole("button", { name: /^질문/ })
       .click();
-    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(2);
+    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(1);
     await expect(total(page)).toHaveText("1 - 3/3");
     // 고정 공지는 그대로 목록 맨 위에 보인다
     await expect(page.locator(".post-row.pinned")).toHaveCount(1);
@@ -682,14 +555,14 @@ test.describe("community filter counts include pinned notices where they belong"
     await open(page);
     const status = (name: RegExp) => count(page, "채택 상태 필터", name);
     // 필터를 걸기 전: 공지도 글이므로 전체에 들어가고, 채택된 답변이 없으니 "채택 전"에 들어간다
-    await expect.poll(() => status(/^전체/)).toBe(5);
-    await expect.poll(() => status(/^채택 전/)).toBe(5);
+    await expect.poll(() => status(/^전체/)).toBe(4);
+    await expect.poll(() => status(/^채택 전/)).toBe(4);
     await expect.poll(() => status(/^채택 완료/)).toBe(0);
 
     const statusGroup = page.getByRole("group", { name: "채택 상태 필터" });
     await statusGroup.getByRole("button", { name: /^채택 전/ }).click();
-    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(2);
-    await expect(total(page)).toHaveText("1 - 5/5");
+    await expect.poll(() => count(page, "분류 필터", /^공지/)).toBe(1);
+    await expect(total(page)).toHaveText("1 - 4/4");
     await expect(page.locator(".post-row.pinned")).toHaveCount(1);
 
     // 채택 완료만 고르면 맞는 글이 없어 칩 개수는 0이지만, 고정 공지는 여전히 맨 위에 보이므로 머리글은 그 한 줄을 센다
@@ -706,29 +579,11 @@ test("an odd page number in the address never shifts the list off a page boundar
   await authenticate(page);
   const posts = Array.from({ length: 16 }, (_, index) => ({
     id: `o-${index}`,
-    category: "free",
     title: `ZZ홀수 ${index}`,
-    body: "본문",
-    tags: [] as string[],
-    author: { name: "tester", tier: "브론즈" },
+    author: "tester",
     createdAt: `2026-10-${String(index + 1).padStart(2, "0")}T00:00:00Z`,
-    upvotes: 0,
-    views: 1,
   }));
-  await page.addInitScript((value) => {
-    localStorage.setItem(
-      "unsolvable-oj-community-v1",
-      JSON.stringify({
-        posts: value,
-        answers: [],
-        upvoted: [],
-        saved: [],
-        followed: [],
-        accepted: {},
-        deleted: [],
-      }),
-    );
-  }, posts);
+  await mockCommunityApi(page, { posts });
   const label = page.locator(".total-count");
   // 소수·0·음수·글자·아주 큰 수: 어느 쪽이든 쪽 경계에 맞는 범위가 나온다
   const expected: Record<string, string> = {
@@ -754,4 +609,213 @@ test("an odd page number in the address never shifts the list off a page boundar
   await expect(page.locator(".total-count + .sr-only")).toHaveText(
     "표시할 항목이 없어요",
   );
+});
+
+test.describe("community API", () => {
+  const listRequest = (api: Awaited<ReturnType<typeof mockCommunityApi>>) =>
+    api.requests
+      .filter((request) => request.method === "GET" && request.path.startsWith("?"))
+      .at(-1)?.path ?? "";
+
+  test("the list sends its filters to the API and retries after a failed load", async ({
+    page,
+  }) => {
+    const api = await mockCommunityApi(page, {
+      posts: [{ id: "r-1", category: "review", title: "연결 테스트 리뷰" }],
+    });
+    api.fail = () => 503;
+    await page.goto("/community");
+    await expect(page.getByRole("alert")).toContainText(
+      "글 목록을 불러오지 못했어요.",
+    );
+    api.fail = () => undefined;
+    await page.getByRole("button", { name: "다시 시도" }).click();
+    await expect(page.getByText("연결 테스트 리뷰")).toBeVisible();
+    // 고정 공지는 어떤 필터에서도 함께 받는다.
+    expect(listRequest(api)).toContain("includePinned=true");
+
+    await page
+      .getByRole("group", { name: "분류 필터" })
+      .getByRole("button", { name: /^코드 리뷰/ })
+      .click();
+    await expect.poll(() => listRequest(api)).toContain("categories=REVIEW");
+    await page.getByLabel("게시글 검색").fill("연결");
+    await expect
+      .poll(() => decodeURIComponent(listRequest(api)))
+      .toContain("q=연결");
+    await page.getByRole("combobox", { name: "정렬", exact: true }).click();
+    await page.getByRole("option", { name: "추천순", exact: true }).click();
+    await expect.poll(() => listRequest(api)).toContain("sort=votes");
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+  });
+
+  test("a code review needs code, keeps it in the draft, survives a failed save and keeps it after editing", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    const api = await mockCommunityApi(page);
+    await page.goto("/community/new?c=review");
+    await expect(
+      page.getByRole("combobox", { name: "카테고리", exact: true }),
+    ).toContainText("코드 리뷰");
+    await page.getByLabel(/^제목/).fill("코드 리뷰 요청");
+    await page.getByLabel(/^본문/).fill("시간 복잡도 개선 부탁드립니다.");
+    await page.getByRole("button", { name: "글 등록", exact: true }).click();
+    await expect(page.getByRole("alert")).toContainText(
+      "코드 리뷰에는 코드와 언어를 함께 입력해 주세요.",
+    );
+    await expect(page.locator("#language-input")).toBeFocused();
+    await page.getByLabel(/^코드 언어/).fill("Python");
+    await page.getByLabel(/^공유할 코드/).fill("print(1)");
+    await page.locator("#tag-input").fill("최적화");
+    await page.locator("#tag-input").press("Enter");
+    await page.getByRole("button", { name: "임시 저장", exact: true }).click();
+    await page.reload();
+    await expect(page.getByLabel(/^공유할 코드/)).toHaveValue("print(1)");
+    await expect(page.getByLabel(/^코드 언어/)).toHaveValue("Python");
+
+    api.fail = (method) => (method === "POST" ? 503 : undefined);
+    await page.getByRole("button", { name: "글 등록", exact: true }).click();
+    await expect(page.getByRole("alert")).toContainText(
+      "테스트에서 실패시킨 요청",
+    );
+    await expect(page.getByLabel(/^제목/)).toHaveValue("코드 리뷰 요청");
+    api.fail = () => undefined;
+    await page.getByRole("button", { name: "글 등록", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "코드 리뷰 요청", exact: true }),
+    ).toBeVisible();
+    await expect(page.locator(".post-code pre")).toHaveText("print(1)");
+    expect(
+      api.requests.filter((request) => request.method === "POST" && !request.path).at(-1)?.body,
+    ).toMatchObject({
+      category: "REVIEW",
+      code: "print(1)",
+      language: "Python",
+      tags: ["최적화"],
+    });
+
+    await page.getByRole("button", { name: "글 관리" }).click();
+    await page.getByRole("menuitem", { name: "수정" }).click();
+    // 서버는 올린 글의 게시판을 바꾸지 못하게 한다.
+    await expect(
+      page.getByRole("combobox", { name: "카테고리", exact: true }),
+    ).toBeDisabled();
+    await expect(page.getByLabel(/^공유할 코드/)).toHaveValue("print(1)");
+    await page.getByLabel(/^제목/).fill("수정된 리뷰");
+    await page.getByRole("button", { name: "수정 저장" }).click();
+    await expect(page.getByRole("heading", { name: "수정된 리뷰" })).toBeVisible();
+    expect(
+      api.requests.filter((request) => request.method === "PUT").at(-1)?.body,
+    ).toMatchObject({ code: "print(1)", tags: ["최적화"] });
+  });
+
+  test("a solution links its problem from a pasted address and sends the problem id", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    const api = await mockCommunityApi(page);
+    await page.goto("/community/new?c=solution");
+    await page.getByLabel(/^제목/).fill("풀이 공유");
+    await page.getByLabel(/^본문/).fill("덧셈으로 해결합니다.");
+    await page.getByRole("button", { name: "글 등록", exact: true }).click();
+    await expect(page.getByRole("alert")).toContainText(
+      "풀이를 공유할 문제를 연결해 주세요.",
+    );
+    await expect(page.locator("#problem-input")).toBeFocused();
+    await page
+      .locator("#problem-input")
+      .fill("https://oj.example.test/problems/view/sum?tab=question");
+    await page.getByRole("button", { name: "문제 연결", exact: true }).click();
+    await expect(
+      page.getByRole("status").filter({ hasText: "연결됨" }),
+    ).toContainText("두 수의 합");
+    await page.getByRole("button", { name: "글 등록", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "풀이 공유", exact: true }),
+    ).toBeVisible();
+    expect(
+      api.requests.find((request) => request.method === "POST" && !request.path)
+        ?.body,
+    ).toMatchObject({ category: "SOLUTION", problemId: "problem-id" });
+    await expect(page.getByRole("link", { name: "두 수의 합" })).toHaveAttribute(
+      "href",
+      "/problems/view/sum",
+    );
+  });
+
+  test("a shared solution starts folded, raw HTML never runs and signed-out actions ask to sign in", async ({
+    page,
+  }) => {
+    await mockCommunityApi(page, {
+      posts: [
+        {
+          id: "s-1",
+          category: "solution",
+          title: "덧셈 풀이",
+          author: "other",
+          body: "핵심 풀이\n\n<script>window.hacked=true</script>",
+          code: "<script>alert(1)</script>",
+          language: "Python",
+        },
+      ],
+    });
+    await page.goto("/community/s-1");
+    await expect(page.getByRole("heading", { name: "덧셈 풀이" })).toBeVisible();
+    await expect(page.getByText("핵심 풀이", { exact: true })).toBeHidden();
+    await page.getByText("풀이 펼치기").click();
+    await expect(page.getByText("핵심 풀이", { exact: true })).toBeVisible();
+    await expect(page.locator(".post-code pre")).toHaveText(
+      "<script>alert(1)</script>",
+    );
+    expect(await page.evaluate(() => "hacked" in window)).toBe(false);
+    await expect(page.getByRole("button", { name: "글 관리" })).toHaveCount(0);
+    await page.locator(".post-vote").click();
+    await expect(page).toHaveURL(/\/auth$/);
+  });
+
+  test("an admin can delete someone else's post but not edit it", async ({
+    page,
+  }) => {
+    await authenticate(page, "ADMIN");
+    const api = await mockCommunityApi(page, {
+      posts: [{ id: "x-1", title: "남의 글", author: "other" }],
+    });
+    await page.goto("/community/x-1");
+    await page.getByRole("button", { name: "글 관리" }).click();
+    await expect(page.getByRole("menuitem", { name: "수정" })).toHaveCount(0);
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("menuitem", { name: "삭제" }).click();
+    await expect(page).toHaveURL(/\/community$/);
+    expect(api.posts).toHaveLength(0);
+  });
+
+  test("answers come in pages of 20 and a new answer opens the last page", async ({
+    page,
+  }) => {
+    await authenticate(page);
+    await mockCommunityApi(page, {
+      posts: [{ id: "many", title: "답변 많은 글", author: "other" }],
+      answers: Array.from({ length: 20 }, (_, index) => ({
+        id: `ans-${index}`,
+        postId: "many",
+        author: "other",
+        body: `답변 ${index + 1}번`,
+      })),
+    });
+    await page.goto("/community/many");
+    await page.getByRole("button", { name: /^답변 20/ }).click();
+    await expect(page.locator(".answer")).toHaveCount(20);
+    await expect(page.getByRole("navigation", { name: /페이지/ })).toHaveCount(0);
+    await page.getByLabel("답변 내용").fill("스물한 번째 답변입니다.");
+    await page.getByRole("button", { name: "답변 등록", exact: true }).click();
+    await expect(page.getByText("답변을 등록했어요.")).toBeVisible();
+    await expect(page.locator(".answer")).toHaveText([/스물한 번째 답변입니다\./]);
+    await expect(page.getByRole("button", { name: /^답변 21/ })).toBeVisible();
+  });
 });
