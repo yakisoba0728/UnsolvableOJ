@@ -9,6 +9,7 @@ import { XpBoostCard } from "../components/XpBoostCard";
 import { useActivity } from "../community/store";
 import { remainingText } from "../enterprise/model";
 import {
+  dayKey,
   useDocumentTitle,
   useNow,
   useSubmissionHistory,
@@ -64,9 +65,12 @@ export function MissionsPage() {
   const missions = buildMissions(input);
   const season = seasonOf(input);
   const seasonDone = Math.min(season.done, season.total);
-  const solvedIds = new Set(
-    history.submissions
-      .filter((item) => item.status === "ACCEPTED")
+  const startOfToday = new Date(now).setHours(0, 0, 0, 0);
+  const accepted = history.submissions.filter((item) => item.status === "ACCEPTED");
+  const solvedIds = new Set(accepted.map((item) => item.problem.id));
+  const solvedBeforeToday = new Set(
+    accepted
+      .filter((item) => Date.parse(item.createdAt) < startOfToday)
       .map((item) => item.problem.id),
   );
   const byId = (id: Mission["id"]) =>
@@ -153,7 +157,12 @@ export function MissionsPage() {
               </div>
             </section>
 
-            <XpBoostCard solvedIds={solvedIds} />
+            <XpBoostCard
+              solvedIds={solvedIds}
+              solvedBeforeToday={solvedBeforeToday}
+              day={dayKey(now)}
+              userId={userId ?? "guest"}
+            />
           </div>
 
           {groups.map(section)}
