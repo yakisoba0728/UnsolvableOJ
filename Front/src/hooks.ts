@@ -81,11 +81,11 @@ export function useSubmissionHistory(session: Session | null) {
   return { submissions, solved, attempted, loading, error };
 }
 
-/** 내가 쓴 글·추천한 글과 팔로우한 작성자 id (프로필·미션·커뮤니티 목록) */
+/** 내가 쓴 글·추천한 글·저장한 글과 팔로우한 작성자 id (프로필·미션·커뮤니티 목록) */
 export function useMyCommunityPosts(session: Session | null) {
   return useRequest(
     session ? (signal) => getMyPosts(session.accessToken, signal) : null,
-    { written: [], voted: [], following: [] as string[] },
+    { written: [], voted: [], saved: [], following: [] as string[] },
     "커뮤니티 글을 불러오지 못했습니다.",
     [session],
   );

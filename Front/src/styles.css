@@ -3335,6 +3335,15 @@ h3 {
   flex-wrap: wrap;
   font-size: 13px;
 }
+.answer-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.answer-edit .answer-footer {
+  justify-content: flex-end;
+  gap: 8px;
+}
 .login-prompt {
   margin: 0;
   color: var(--color-ink-600);
@@ -4109,12 +4118,21 @@ h3 {
   min-width: 0;
 }
 
-/* 프로필: 작성한 글 · 추천한 글 세로 스크롤 카드 */
+/* 프로필: 작성한 글 · 추천한 글 · 저장한 글 세로 스크롤 카드 */
 .profile-post-pair {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
   flex: 1;
+}
+/* 세 칸이면 머리글이 줄바꿈되는 폭에서는 두 칸으로 두고 저장한 글을 아래 한 줄에 펼친다 */
+@media (min-width: 1101px) and (max-width: 1200px), (max-width: 900px) {
+  .profile-post-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .profile-post-pair > :last-child {
+    grid-column: 1 / -1;
+  }
 }
 .post-scroller {
   --slide-height: 134px;
