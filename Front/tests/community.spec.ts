@@ -356,14 +356,19 @@ test("opening a post from a scrolled community list starts at the top", async ({
   await mockCommunityApi(page, { posts });
   await page.setViewportSize({ width: 1280, height: 420 });
   await page.goto("/community");
-  const target = page.getByRole("link", { name: /스크롤 확인 글 7/ });
+  // 가장 오래된 글은 목록 맨 아래에 있어, 맨 아래로 내린 뒤 스크롤 없이 바로 누를 수 있다.
+  const target = page.getByRole("link", { name: /스크롤 확인 글 0/ });
   await expect(target).toBeVisible();
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  // html의 smooth 스크롤 애니메이션이 화면 이동 뒤까지 이어지지 않도록 즉시 내린다(Firefox).
+  await page.evaluate(() =>
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" }),
+  );
   await expect
     .poll(() => page.evaluate(() => window.scrollY))
     .toBeGreaterThan(100);
+  await expect(target).toBeInViewport();
   await target.click();
-  await expect(page).toHaveURL(/\/community\/scroll-7$/);
+  await expect(page).toHaveURL(/\/community\/scroll-0$/);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 });
 
