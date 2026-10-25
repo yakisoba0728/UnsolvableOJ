@@ -9,6 +9,20 @@ import "./styles.css";
 
 initMonitoring();
 
+// 배포로 지워진 옛 청크를 요청하면 새 index.html을 받도록 한 번만 새로고침한다.
+// 곧바로 또 실패하면 반복하지 않고 오류 화면에 맡긴다.
+const reloadKey = "unsolvable-oj-chunk-reload";
+window.addEventListener("vite:preloadError", (event) => {
+  try {
+    if (Date.now() - Number(sessionStorage.getItem(reloadKey)) < 10_000) return;
+    sessionStorage.setItem(reloadKey, String(Date.now()));
+  } catch {
+    return;
+  }
+  event.preventDefault();
+  window.location.reload();
+});
+
 let navigationVersion = 0;
 const getNavigationVersion = () => navigationVersion;
 const router = createBrowserRouter([

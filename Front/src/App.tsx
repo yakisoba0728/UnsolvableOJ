@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 import { canAuthor, useAuth } from "./auth";
 import { HomePage } from "./pages/HomePage";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { NotFoundPage } from "./components/NotFoundPage";
 import { SiteHeader } from "./components/SiteHeader";
 
@@ -93,81 +94,83 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
         }}
       />
       <main className="main-content">
-        <Suspense
-          fallback={
-            <div className="page-width empty-state">불러오는 중입니다…</div>
-          }
-        >
-          <Routes>
-            <Route
-              path="/"
-              element={<HomePage key={session ? `user:${session.user.id}` : "guest"} />}
-            />
-            <Route path="/auth" element={<AuthPage getNavigationVersion={getNavigationVersion} />} />
-            <Route path="/problems" element={<ProblemsPage />} />
-            <Route
-              path="/problems/new"
-              element={authorOnly(
-                <CreateProblemPage key={`${session?.user.id}:${pathname}`} />,
-              )}
-            />
-            <Route
-              path="/my-problems"
-              element={authorOnly(<MyProblemsPage key={session?.user.id} />)}
-            />
-            <Route
-              path="/my-problems/:id/edit"
-              element={authorOnly(
-                <CreateProblemPage key={`${session?.user.id}:${pathname}`} />,
-              )}
-            />
-            <Route path="/problems/view/:slug" element={<ProblemPage />} />
-            <Route path="/problems/:slug" element={<ProblemPage />} />
-            <Route
-              path="/profile"
-              element={session ? <ProfilePage key={session.user.id} /> : loginRedirect}
-            />
-            <Route path="/community" element={<CommunityPage />} />
-            {/* 계정이나 글이 바뀌면 이전 작성자의 폼 상태를 재사용하지 않는다. */}
-            <Route
-              path="/community/new"
-              element={
-                session ? (
-                  <CommunityWritePage key={`${session.user.id}:${pathname}`} />
-                ) : (
-                  loginRedirect
-                )
-              }
-            />
-            <Route
-              path="/community/:id/edit"
-              element={
-                session ? (
-                  <CommunityWritePage key={`${session.user.id}:${pathname}`} />
-                ) : (
-                  loginRedirect
-                )
-              }
-            />
-            <Route path="/community/:id" element={<CommunityPostPage />} />
-            <Route path="/analysis" element={<AnalysisPage />} />
-            <Route path="/analysis/:id" element={<AnalysisQuestionPage />} />
-            <Route path="/missions" element={<MissionsPage />} />
-            <Route path="/enterprise" element={<EnterprisePage />} />
-            <Route path="/enterprise/new" element={<EnterpriseFormPage />} />
-            <Route path="/enterprise/:id" element={<EnterpriseDetailPage />} />
-            <Route path="/enterprise/:id/edit" element={<EnterpriseFormPage />} />
-            <Route
-              path="/submissions"
-              element={session ? <SubmissionsPage key={session.user.id} /> : loginRedirect}
-            />
-            <Route
-              path="/submissions/:id"
-              element={session ? <SubmissionPage key={session.user.id} /> : loginRedirect}
-            />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
+        <ErrorBoundary resetKey={pathname}>
+          <Suspense
+            fallback={
+              <div className="page-width empty-state">불러오는 중입니다…</div>
+            }
+          >
+            <Routes>
+              <Route
+                path="/"
+                element={<HomePage key={session ? `user:${session.user.id}` : "guest"} />}
+              />
+              <Route path="/auth" element={<AuthPage getNavigationVersion={getNavigationVersion} />} />
+              <Route path="/problems" element={<ProblemsPage />} />
+              <Route
+                path="/problems/new"
+                element={authorOnly(
+                  <CreateProblemPage key={`${session?.user.id}:${pathname}`} />,
+                )}
+              />
+              <Route
+                path="/my-problems"
+                element={authorOnly(<MyProblemsPage key={session?.user.id} />)}
+              />
+              <Route
+                path="/my-problems/:id/edit"
+                element={authorOnly(
+                  <CreateProblemPage key={`${session?.user.id}:${pathname}`} />,
+                )}
+              />
+              <Route path="/problems/view/:slug" element={<ProblemPage />} />
+              <Route path="/problems/:slug" element={<ProblemPage />} />
+              <Route
+                path="/profile"
+                element={session ? <ProfilePage key={session.user.id} /> : loginRedirect}
+              />
+              <Route path="/community" element={<CommunityPage />} />
+              {/* 계정이나 글이 바뀌면 이전 작성자의 폼 상태를 재사용하지 않는다. */}
+              <Route
+                path="/community/new"
+                element={
+                  session ? (
+                    <CommunityWritePage key={`${session.user.id}:${pathname}`} />
+                  ) : (
+                    loginRedirect
+                  )
+                }
+              />
+              <Route
+                path="/community/:id/edit"
+                element={
+                  session ? (
+                    <CommunityWritePage key={`${session.user.id}:${pathname}`} />
+                  ) : (
+                    loginRedirect
+                  )
+                }
+              />
+              <Route path="/community/:id" element={<CommunityPostPage />} />
+              <Route path="/analysis" element={<AnalysisPage />} />
+              <Route path="/analysis/:id" element={<AnalysisQuestionPage />} />
+              <Route path="/missions" element={<MissionsPage />} />
+              <Route path="/enterprise" element={<EnterprisePage />} />
+              <Route path="/enterprise/new" element={<EnterpriseFormPage />} />
+              <Route path="/enterprise/:id" element={<EnterpriseDetailPage />} />
+              <Route path="/enterprise/:id/edit" element={<EnterpriseFormPage />} />
+              <Route
+                path="/submissions"
+                element={session ? <SubmissionsPage key={session.user.id} /> : loginRedirect}
+              />
+              <Route
+                path="/submissions/:id"
+                element={session ? <SubmissionPage key={session.user.id} /> : loginRedirect}
+              />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </main>
       <footer className="site-footer">
         <span>못풀준 · 하나씩 풀어가는 온라인 저지</span>

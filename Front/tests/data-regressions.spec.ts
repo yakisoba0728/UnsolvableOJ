@@ -748,3 +748,29 @@ for (const path of ["/my-problems", "/profile", "/"] as const) {
     expect(new URL(page.url()).pathname).toBe(path);
   });
 }
+
+test("an error screen in one page clears when the user moves to another page", async ({ page }) => {
+  await authenticate(page);
+  await page.route("**/api/v1/submissions/broken", (route) =>
+    route.fulfill({ json: { ...submission, problem: undefined } }),
+  );
+  await page.goto("/submissions/broken");
+  await expect(page.getByRole("alert")).toContainText("화면을 표시하지 못했어요.");
+  await page.getByRole("link", { name: "못풀준 홈" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByText("화면을 표시하지 못했어요.")).toHaveCount(0);
+});
+
+test("a stale chunk after a deploy reloads the page once, not in a loop", async ({ page }) => {
+  await page.goto("/");
+  let loads = 0;
+  page.on("load", () => (loads += 1));
+  const fire = () =>
+    page
+      .evaluate(() => window.dispatchEvent(new Event("vite:preloadError", { cancelable: true })))
+      .catch(() => undefined);
+  await Promise.all([page.waitForEvent("load"), fire()]);
+  await fire();
+  await page.waitForTimeout(500);
+  expect(loads).toBe(1);
+});
