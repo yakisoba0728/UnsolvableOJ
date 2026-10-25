@@ -9,18 +9,28 @@ import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+const productionMode = process.argv.includes('--production');
+const testArgs = process.argv.slice(2).filter((arg) => arg !== '--production');
 const project = `unsolvable-e2e-${randomBytes(6).toString('hex')}`;
 const temporary = await mkdtemp(join(tmpdir(), `${project}-`));
 const override = join(temporary, 'compose.yaml');
 const env = {
   ...process.env,
   COMPOSE_PROJECT_NAME: project,
-  COMPOSE_FILE: [join(root, 'compose.yaml'), override].join(delimiter),
+  COMPOSE_FILE: [join(root, productionMode ? 'deploy/compose.yaml' : 'compose.yaml'), override].join(delimiter),
   GO_JUDGE_TOKEN: randomBytes(32).toString('hex'),
   QA_JWT_SECRET: randomBytes(32).toString('hex'),
   QA_JUDGE_TOKEN: randomBytes(32).toString('hex'),
   QA_DB_PASSWORD: randomBytes(24).toString('hex'),
 };
+if (productionMode) Object.assign(env, {
+  PUBLIC_ORIGIN: 'http://127.0.0.1',
+  TRUSTED_PROXY_CIDR: '127.0.0.1/32',
+  POSTGRES_PASSWORD: env.QA_DB_PASSWORD,
+  REDIS_PASSWORD: randomBytes(32).toString('hex'),
+  JWT_ACCESS_SECRET: env.QA_JWT_SECRET,
+  JUDGE_SERVICE_TOKEN: env.QA_JUDGE_TOKEN,
+});
 const run = (command, args, options = {}) => execFileSync(command, args, {
   cwd: root, env, encoding: 'utf8', timeout: 600_000, maxBuffer: 16 * 1024 * 1024, ...options,
 });
@@ -76,6 +86,11 @@ try {
       JUDGE_SERVICE_TOKEN: \${QA_JUDGE_TOKEN}
   front:
     ports: !override ["127.0.0.1::80"]
+${productionMode ? `networks:
+  dokploy-network:
+    external: false
+    name: ${project}-edge
+` : ''}
 `, { mode: 0o600 });
 
   const plan = JSON.parse(compose('config', '--format', 'json'));
@@ -101,12 +116,20 @@ try {
       await delay(500);
     }
   }
-  run('npm', ['run', 'test:live', '--prefix', 'Front', '--', ...process.argv.slice(2)], { stdio: 'inherit' });
+  const internal = await fetch(`${env.LIVE_BASE_URL}/api/v1/internal/judge/heartbeat`, {
+    method: 'POST', signal: AbortSignal.timeout(5000),
+  });
+  assert.equal(internal.status, 404, 'The public frontend must block judge internals');
+  // Run Node directly so Windows does not need a shell to launch npm.cmd.
+  run(process.execPath, [join(root, 'Front/node_modules/@playwright/test/cli.js'),
+    'test', '--config', 'playwright.live.config.ts', ...testArgs], {
+    cwd: join(root, 'Front'), stdio: 'inherit',
+  });
 } catch (error) {
   try {
     let logs = compose('logs', '--no-color', '--tail', '40', 'back', 'judge', 'go-judge');
-    for (const key of ['GO_JUDGE_TOKEN', 'QA_JWT_SECRET', 'QA_JUDGE_TOKEN', 'QA_DB_PASSWORD']) {
-      logs = logs.replaceAll(env[key], '<REDACTED>');
+    for (const key of ['GO_JUDGE_TOKEN', 'QA_JWT_SECRET', 'QA_JUDGE_TOKEN', 'QA_DB_PASSWORD', 'REDIS_PASSWORD']) {
+      if (env[key]) logs = logs.replaceAll(env[key], '<REDACTED>');
     }
     console.error(logs);
   } catch { /* Preserve the original test failure if Docker is unavailable. */ }

@@ -42,7 +42,7 @@ npm run start:dev
 
 ## 운영 격리
 
-**Compose는 로컬 개발용입니다.** go-judge는 중첩 격리를 위해 `privileged`로 실행하므로 운영에서는 API/DB와 분리된 전용 Linux 호스트/VM에 배치하세요. 제출 프로세스 자체는 별도 namespace·seccomp·제한된 권한으로 실행됩니다.
+**루트 Compose는 로컬 개발용입니다.** go-judge는 중첩 격리를 위해 `privileged`로 실행하므로 운영에서는 API/DB와 분리된 전용 Linux 호스트/VM을 권장합니다. 동일 호스트 배치를 선택한 경우 [Dokploy 운영 Compose와 제한](../deploy/README.md)을 확인하세요. 제출 프로세스 자체는 별도 namespace·seccomp·제한된 권한으로 실행되지만 컨테이너가 호스트 간 격리를 대신하지는 않습니다.
 
 - 서비스 API는 Bearer 인증을 사용하며 localhost 포트만 공개합니다. Compose에서는 워커만 애플리케이션·sandbox 두 네트워크에 연결합니다. 외부에 `/run`·`/file`을 공개하지 마세요.
 - `-no-fallback`, seccomp, cpu/memory/pids controller와 `/w`를 healthcheck 및 워커 시작 시 검사합니다. 잘못된 인증/격리 설정에서는 채점을 시작하지 않습니다. `-no-seccomp`, `-net-share`를 켜지 마세요.

@@ -40,7 +40,7 @@ cp Judge/.env.example Judge/.env
 
 전체 서비스를 Docker로 실행하려면 저장소 루트에서 `docker compose up -d --build`를 실행하세요. 기존 PostgreSQL·Redis 볼륨은 유지되며, API는 시작할 때 미적용 마이그레이션을 실행합니다. `docker compose ps`로 상태를 확인하고 `docker compose stop`으로 데이터 삭제 없이 중지할 수 있습니다. 포트는 localhost에만 공개하며 기본 비밀키는 로컬 개발 전용입니다.
 
-go-judge는 privileged Linux 서비스입니다. 운영에서는 API/DB와 분리된 실행 호스트에 배치하세요. 자세한 제한과 주의점은 [Judge 문서](./Judge/README.md)에 있습니다.
+go-judge는 privileged Linux 서비스입니다. 운영에서는 API/DB와 분리된 실행 호스트를 권장합니다. 동일 Dokploy 서버에서 전체 서비스를 실행하는 운영용 Compose와 설정·검증·백업 절차는 [운영 배포 문서](./deploy/README.md)에 있습니다. Docker 컨테이너는 호스트 간 격리를 대신하지 않으며, 자세한 제한은 [Judge 문서](./Judge/README.md)에 있습니다.
 
 운영 실행 노드용 필수 비밀키·사설 Redis 설정과 공개 포트 없는 Compose 템플릿은 [`Judge/deploy/`](./Judge/deploy/README.md)에 있습니다. 실제 서버 배포는 별도 승인 후 진행합니다.
 
@@ -59,6 +59,8 @@ go-judge는 privileged Linux 서비스입니다. 운영에서는 API/DB와 분�
 (cd Back && npm run check)
 (cd Judge && npm run check)
 (cd Front && npm run check)
+# 운영용 Compose 설정 검사 (Docker daemon 불필요)
+node scripts/check-production-compose.mjs
 # Playwright Chromium 설치 후; 기존 개발 DB를 사용하지 않는 실제 전체 Compose 검사
 node scripts/check-compose.mjs
 # PostgreSQL/Redis 실행 중에만; CREATEDB 권한·별도 테스트 Redis DB 필요

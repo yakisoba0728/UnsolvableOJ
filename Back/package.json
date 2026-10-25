@@ -19,6 +19,8 @@
     "db:migration:run": "npm run build && typeorm migration:run -d dist/database/data-source.js",
     "db:migration:revert": "npm run build && typeorm migration:revert -d dist/database/data-source.js",
     "db:seed:demo": "npm run build && node scripts/seed-demo.mjs",
+    "db:seed:starter": "npm run build && node scripts/seed-starter.mjs",
+    "test:starter": "node --test scripts/starter-problems.test.mjs",
     "db:import:boj": "npm run build && node scripts/import-boj.mjs",
     "test:boj-import": "node --test scripts/boj-content.test.mjs",
     "db:bootstrap:admin": "npm run build && node scripts/bootstrap-admin.mjs",
