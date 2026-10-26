@@ -70,6 +70,8 @@ for (const [name, service] of Object.entries(plan.services)) {
   assert.equal('dokploy-network' in service.networks, name === 'front');
 }
 assert.equal(front.environment.TRUSTED_PROXY_CIDR, required.TRUSTED_PROXY_CIDR);
+assert.equal(config({ TRUSTED_PROXY_HOP_CIDR: '' }).services.front.environment.TRUSTED_PROXY_HOP_CIDR, '127.0.0.1/32');
+assert.equal(config({ TRUSTED_PROXY_HOP_CIDR: '172.18.0.1/32' }).services.front.environment.TRUSTED_PROXY_HOP_CIDR, '172.18.0.1/32');
 assert.equal(front.build.args.VITE_API_BASE_URL, '/api/v1');
 assert.equal(back.environment.CORS_ORIGIN, required.PUBLIC_ORIGIN);
 assert.equal(back.environment.JUDGE_SERVICE_TOKEN, judge.environment.JUDGE_SERVICE_TOKEN);
