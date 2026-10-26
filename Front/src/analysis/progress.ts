@@ -1,11 +1,15 @@
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { useAuth } from "../auth";
+import { api } from "../api";
+import { useRequest } from "../hooks";
 
-/** 코드 분석에서 답을 확인한 기록. 서버에 저장소가 생기기 전까지 이 브라우저에만 남는다. */
+/** 로그인한 기록은 서버에, 비로그인 연습 기록만 브라우저에 저장한다. */
 export interface AnalysisAttempt {
   /** 비로그인은 "guest" */
   userId: string;
   questionId: string;
   correct: boolean;
+  solved?: boolean;
   /** 고른 보기의 번호. 다시 열었을 때 결과를 그대로 보여 주는 데 쓴다. */
   selected?: number;
   at: string;
@@ -54,8 +58,36 @@ function subscribe(listener: () => void) {
   };
 }
 
-export const useAnalysisAttempts = () =>
-  useSyncExternalStore(subscribe, () => state);
+export function useAnalysisHistory() {
+  const { session } = useAuth();
+  const local = useSyncExternalStore(subscribe, () => state);
+  const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    const refresh = () => setRevision((v) => v + 1);
+    window.addEventListener("analysis-saved", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener("analysis-saved", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
+  const request = useRequest<AnalysisAttempt[]>(
+    session
+      ? (signal) =>
+          api("/missions/analysis/attempts", { signal }, session.accessToken)
+      : null,
+    [],
+    "분석 기록을 불러오지 못했습니다.",
+    [session, revision],
+  );
+  return {
+    ...request,
+    attempts: session
+      ? request.data.filter((a) => a.userId === session.user.id)
+      : local,
+  };
+}
+export const useAnalysisAttempts = () => useAnalysisHistory().attempts;
 
 export function recordAnalysisAttempt(
   userId: string,
@@ -84,7 +116,7 @@ export function analysisStatus(attempts: AnalysisAttempt[], userId: string) {
   for (const item of attempts) {
     if (item.userId !== userId) continue;
     attempted.add(item.questionId);
-    if (item.correct) solved.add(item.questionId);
+    if (item.correct || item.solved) solved.add(item.questionId);
     latest.set(item.questionId, item);
   }
   return { solved, attempted, latest };

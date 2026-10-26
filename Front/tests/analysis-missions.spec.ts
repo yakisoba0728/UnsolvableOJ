@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { mockMissions } from "./mission-fixtures";
 import { analysisQuestions } from "../src/analysis/questions";
 import type { Session, Submission } from "../src/types";
 
@@ -19,6 +20,7 @@ const session: Session = {
 };
 
 async function authenticate(page: Page) {
+  await mockMissions(page);
   await page.addInitScript(
     ({ key, saved }) => localStorage.setItem(key, JSON.stringify(saved)),
     { key: storageKey, saved: { session, expiresAt: Date.now() + 900_000 } },
@@ -346,63 +348,7 @@ test("season counts achievements cumulatively instead of today's snapshot", asyn
   expect(result.season.daysLeft).toBe(10);
 });
 
-test("missions page shows the signed-in user's progress by period", async ({
-  page,
-}) => {
-  await authenticate(page);
-  const at = new Date().toISOString();
-  const items = Array.from({ length: 2 }, (_, i) => ({
-    id: `s${i}`,
-    problem: { id: `p${i}`, slug: `p${i}`, title: `문제 ${i}` },
-    language: "PYTHON",
-    status: "ACCEPTED",
-    runtimeMs: 1,
-    memoryKb: 1,
-    passedTestCases: 1,
-    totalTestCases: 1,
-    compileOutput: null,
-    judgeMessage: null,
-    createdAt: at,
-    updatedAt: at,
-  })) satisfies Submission[];
-  await page.route("**/api/v1/submissions?*", (route) =>
-    route.fulfill({
-      json: { items, page: 1, limit: 1000, total: 2, totalPages: 1 },
-    }),
-  );
-  await page.goto("/missions");
-
-  // 주기별 묶음과 마감 시간
-  for (const heading of ["오늘", "이번 주", "이번 달"])
-    await expect(page.getByRole("heading", { name: heading, level: 2 })).toBeVisible();
-  await expect(page.locator(".mission-group-day .mission-deadline")).toContainText("자정까지");
-  await expect(page.locator(".mission-group-week .mission-deadline")).toContainText("토요일 자정까지");
-  await expect(page.locator(".mission-group-month .mission-deadline")).toContainText("이번 달 말까지");
-  await expect(page.locator(".mission-group-day .mission-card")).toHaveCount(3);
-
-  const daily = page.locator(".mission-card", { hasText: "일일 미션" });
-  await expect(daily).toContainText("2 / 5");
-  await expect(daily).toContainText("진행 중");
-  // 진행 중인 미션에서도 바로 이어서 할 수 있다.
-  await expect(daily.getByRole("link", { name: /이어서 하기/ })).toHaveAttribute("href", "/problems");
-  const community = page.locator(".mission-card", { hasText: "커뮤니티 기여" });
-  await expect(community).toContainText("시작 전");
-  await expect(community.getByRole("link", { name: /시작하기/ })).toHaveAttribute("href", "/community/new");
-
-  // 연속 학습: 규칙 설명과 이번 주 기록
-  const streak = page.locator(".mission-streak");
-  await expect(streak).toContainText("1 / 7");
-  await expect(streak).toContainText("제출을 1회 이상 하면 연속 학습이 이어져요");
-  await expect(streak.getByRole("list", { name: "이번 주 학습 기록" })).toBeVisible();
-
-  // 시즌: 누적 달성 횟수와 규칙
-  await expect(page.getByRole("img", { name: "이번 달 미션 달성 0 / 15회" })).toBeVisible();
-  await expect(page.getByLabel("시즌 진행")).toContainText("0%");
-  await expect(page.getByLabel("시즌 진행")).toContainText("알고리즘 마스터");
-  await expect(page.getByLabel("시즌 진행")).toContainText("D-");
-  await expect(page.getByText("일일 미션은 날마다 새로 세요")).toBeVisible();
-  await expect(page.getByText("보상(XP·배지) 지급은 서버 연동 후에 열려요")).toBeVisible();
-});
+// Authenticated mission display uses the server contract (server-missions.spec.ts).
 
 test("signed-out visitors can open missions and are asked to log in", async ({
   page,
@@ -417,11 +363,10 @@ test("signed-out visitors can open missions and are asked to log in", async ({
 });
 
 test("code analysis: malformed stored records are skipped and other tabs' records are kept", async ({ page }) => {
-  await authenticate(page);
   await page.addInitScript(() => {
     if (!sessionStorage.getItem("seeded")) {
       sessionStorage.setItem("seeded", "1");
-      localStorage.setItem("unsolvable-oj-analysis-v1", JSON.stringify([null, { userId: "solver" }]));
+      localStorage.setItem("unsolvable-oj-analysis-v1", JSON.stringify([null, { userId: "guest" }]));
     }
   });
   await page.goto("/analysis");
@@ -429,7 +374,7 @@ test("code analysis: malformed stored records are skipped and other tabs' record
   const kept = await page.evaluate(async () => {
     const modulePath = "/src/analysis/progress.ts";
     const { recordAnalysisAttempt } = await import(modulePath);
-    const other = { userId: "solver", questionId: "other-tab", correct: true, at: "2026-10-01T00:00:00Z" };
+    const other = { userId: "guest", questionId: "other-tab", correct: true, at: "2026-10-01T00:00:00Z" };
     localStorage.setItem("unsolvable-oj-analysis-v1", JSON.stringify([other]));
     recordAnalysisAttempt("solver", "this-tab", false, 1);
     return JSON.parse(localStorage.getItem("unsolvable-oj-analysis-v1")!).map((item: { questionId: string }) => item.questionId);

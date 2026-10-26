@@ -4,13 +4,14 @@ import { analysisQuestions } from "../analysis/questions";
 import {
   analysisStatus,
   recordAnalysisAttempt,
-  useAnalysisAttempts,
+  useAnalysisHistory,
 } from "../analysis/progress";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import { useDocumentTitle } from "../hooks";
 import { analysisPath } from "../paths";
 import { difficultyLabel } from "../difficulty";
+import { api } from "../api";
 
 const LETTERS = ["A", "B", "C", "D"];
 // 문제 풀이 화면의 에디터와 같은 값을 써서 글꼴 크기가 두 화면에서 이어진다.
@@ -62,7 +63,13 @@ function AnalysisQuestion({
   index: number;
 }) {
   const question = analysisQuestions[index];
-  const attempts = useAnalysisAttempts();
+  const { session } = useAuth();
+  const { attempts, loading, error: historyError } = useAnalysisHistory();
+  const [saveError, setSaveError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
+  const interacted = useRef(false);
+  const alive = useRef(true);
   const previous = analysisStatus(attempts, userId).latest.get(question.id);
   // 이미 푼 문제를 다시 열면 지난 결과를 그대로 보여 주고, 원하면 다시 풀 수 있다.
   const [answer, setAnswer] = useState<{
@@ -74,6 +81,16 @@ function AnalysisQuestion({
       : null,
   );
   const [picked, setPicked] = useState<number | null>(null);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (!interacted.current && previous?.selected !== undefined)
+      setAnswer({ selected: previous.selected, correct: previous.correct });
+  }, [previous]);
   const [fontSize, setFontSize] = useState(() => {
     try {
       const saved = Number(localStorage.getItem(fontKey));
@@ -102,11 +119,37 @@ function AnalysisQuestion({
   const selected = answer ? answer.selected : picked;
   const nextQuestion = analysisQuestions[index + 1];
 
-  function confirm() {
-    if (picked === null || confirmed) return;
-    const correct = picked === question.answer;
-    setAnswer({ selected: picked, correct });
-    recordAnalysisAttempt(userId, question.id, correct, picked);
+  async function confirm() {
+    if (picked === null || confirmed || savingRef.current || loading) return;
+    interacted.current = true;
+    savingRef.current = true;
+    setSaving(true);
+    setSaveError("");
+    try {
+      let correct = picked === question.answer;
+      if (session) {
+        const result = await api<{ correct: boolean }>(
+          `/missions/analysis/${encodeURIComponent(question.id)}/attempts`,
+          { method: "POST", body: JSON.stringify({ selected: picked }) },
+          session.accessToken,
+        );
+        correct = result.correct;
+        window.dispatchEvent(new Event("analysis-saved"));
+      } else recordAnalysisAttempt(userId, question.id, correct, picked);
+      if (!alive.current) return;
+      setAnswer({ selected: picked, correct });
+    } catch (cause) {
+      if (alive.current)
+        setSaveError(
+          cause instanceof Error
+            ? cause.message
+            : "기록을 저장하지 못했습니다. 다시 시도해 주세요.",
+        );
+      return;
+    } finally {
+      savingRef.current = false;
+      if (alive.current) setSaving(false);
+    }
     // 확인 버튼이 사라지므로 포커스를 결과 안내로 옮겨 읽어 주고, 다음 Tab은 아래 버튼으로 이어진다.
     requestAnimationFrame(() =>
       statusRef.current?.focus({ preventScroll: true }),
@@ -115,10 +158,19 @@ function AnalysisQuestion({
 
   // 보기 영역에서 1~4로 고르고 Enter로 확인한다.
   function onChoiceKeyDown(event: React.KeyboardEvent) {
-    if (confirmed || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (
+      confirmed ||
+      saving ||
+      loading ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.altKey
+    )
+      return;
     const n = Number(event.key);
     if (n >= 1 && n <= question.options.length) {
       setPicked(n - 1);
+      interacted.current = true;
       event.preventDefault();
     } else if (event.key === "Enter" && picked !== null) {
       confirm();
@@ -127,6 +179,7 @@ function AnalysisQuestion({
   }
 
   function solveAgain() {
+    interacted.current = true;
     setAnswer(null);
     setPicked(null);
     questionRef.current?.focus({ preventScroll: true });
@@ -242,8 +295,11 @@ function AnalysisQuestion({
                         className="sr-only"
                         name={`analysis-${question.id}`}
                         checked={selected === i}
-                        disabled={confirmed}
-                        onChange={() => setPicked(i)}
+                        disabled={confirmed || saving || loading}
+                        onChange={() => {
+                          interacted.current = true;
+                          setPicked(i);
+                        }}
                       />
                       <span className="analysis-badge" aria-hidden="true">
                         {LETTERS[i]}
@@ -301,6 +357,11 @@ function AnalysisQuestion({
             )
           ) : null}
           <div className="analysis-footer">
+            {saveError || historyError ? (
+              <p role="alert" className="error-message">
+                {saveError || historyError}
+              </p>
+            ) : null}
             {answer ? (
               <>
                 <Link className="button button-outline" to="/analysis">
@@ -327,7 +388,7 @@ function AnalysisQuestion({
                 <button
                   key="confirm"
                   className="button analysis-confirm"
-                  disabled={picked === null}
+                  disabled={picked === null || saving || loading}
                   onClick={confirm}
                 >
                   정답 확인

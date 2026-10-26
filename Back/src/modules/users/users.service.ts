@@ -17,6 +17,10 @@ export class UsersService {
       [id],
     );
     if (!rows[0]) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    rows[0].badges = await this.db.query(
+      'SELECT badge, awarded_at AS "awardedAt" FROM user_badges WHERE user_id=$1 ORDER BY awarded_at,badge',
+      [id],
+    );
     return rows[0];
   }
 

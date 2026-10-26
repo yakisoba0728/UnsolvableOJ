@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { Missions1793000000000 } from './migrations/1793000000000-missions.js';
 import { DebugOutputs1790552000000 } from './migrations/1790552000000-debug-outputs.js';
 import { DataSource } from 'typeorm';
 import { databaseConnectionOptions } from '../config/database.config.js';
@@ -32,6 +33,7 @@ export default new DataSource({
     BackendHardening1790554000000,
     Community1791200000000,
     CommunityUi1791200001000,
+    Missions1793000000000,
   ],
   synchronize: false,
 });

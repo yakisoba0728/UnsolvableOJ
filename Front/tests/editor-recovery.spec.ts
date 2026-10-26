@@ -89,12 +89,16 @@ test("author SPA exits can be cancelled, accepted exits recover, and explicit di
     page.getByRole("link", { name: "← 문제 목록", exact: true }).click(),
   ]);
   await expect(page).toHaveURL(/\/problems$/);
+  // The URL changes before the lazy page commits; wait for the editor to unmount.
+  await expect(page.getByRole("heading", { name: "문제 목록", exact: true })).toBeVisible();
   await page.locator("header").getByRole("link", { name: "문제 만들기", exact: true }).click();
   await expect(page.getByLabel("제목", { exact: true })).toHaveValue("Keep this work");
   await page.getByRole("button", { name: "지우고 새로 시작" }).click();
   expect(await page.evaluate(() => window.dispatchEvent(new Event("beforeunload", { cancelable: true })))).toBe(true);
   await page.getByRole("link", { name: "← 문제 목록", exact: true }).click();
   await expect(page).toHaveURL(/\/problems$/);
+  // The URL changes before the lazy page commits; wait for the editor to unmount.
+  await expect(page.getByRole("heading", { name: "문제 목록", exact: true })).toBeVisible();
   await page.locator("header").getByRole("link", { name: "문제 만들기", exact: true }).click();
   await expect(page.getByLabel("제목", { exact: true })).toHaveValue("");
   await page.getByLabel("제목", { exact: true }).fill("New work after discard");
@@ -213,6 +217,8 @@ test("an abandoned POST cannot navigate away from or clear a newer creation", as
   await expect(page.getByLabel("제목", { exact: true })).toBeDisabled();
   await page.getByRole("link", { name: "← 문제 목록", exact: true }).click();
   await expect(page).toHaveURL(/\/problems$/);
+  // The URL changes before the lazy page commits; wait for the editor to unmount.
+  await expect(page.getByRole("heading", { name: "문제 목록", exact: true })).toBeVisible();
   await page.locator("header").getByRole("link", { name: "문제 만들기", exact: true }).click();
   await page.getByLabel("제목", { exact: true }).fill("Newer unsent work");
   const oldResponse = page.waitForResponse((response) => response.request().method() === "POST" && response.url().endsWith("/api/v1/problems"));
