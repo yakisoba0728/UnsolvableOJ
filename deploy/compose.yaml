@@ -145,6 +145,7 @@ services:
     environment:
       # Obtain the real subnet from docker network inspect dokploy-network.
       TRUSTED_PROXY_CIDR: ${TRUSTED_PROXY_CIDR:?Set the Dokploy Traefik network subnet}
+      TRUSTED_PROXY_HOP_CIDR: ${TRUSTED_PROXY_HOP_CIDR:-127.0.0.1/32}
     expose: ["80"]
     networks: [app, dokploy-network]
     depends_on:

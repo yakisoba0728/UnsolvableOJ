@@ -37,6 +37,7 @@
 6. [`.env.example`](./.env.example)의 내용을 Dokploy **Environment**에 넣습니다. 필수 값은 비워 두면 Compose 단계에서 거절됩니다.
    - `PUBLIC_ORIGIN`: 실제 HTTPS origin, 예: `https://oj.example.com`. 경로나 마지막 `/`는 제외합니다.
    - `TRUSTED_PROXY_CIDR`: 위 명령에서 확인한 IPv4 subnet. nginx가 이 네트워크에서 온 전달 헤더만 사용해 클라이언트 IP를 복원합니다. 백엔드의 IP별 속도 제한도 이 IP를 사용합니다.
+   - `TRUSTED_PROXY_HOP_CIDR`: 전달 헤더에 추가되는 신뢰 가능한 프록시 홉의 주소. 현재 `judge.yaki.kr` 경로는 `TRUSTED_PROXY_CIDR=10.0.1.0/24`와 `TRUSTED_PROXY_HOP_CIDR=172.18.0.1/32`를 함께 사용합니다. 추가 홉이 없으면 기본값 `127.0.0.1/32`를 유지합니다. 전체 사설망이나 `0.0.0.0/0` 대신 실제 확인한 프록시 주소만 지정하세요.
    - `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `JWT_ACCESS_SECRET`, `JUDGE_SERVICE_TOKEN`, `GO_JUDGE_TOKEN`: 각각 독립적으로 생성한 무작위 값. `openssl rand -hex 32`를 **각각** 실행해 생성할 수 있습니다. PostgreSQL 비밀번호는 URL에 포함되므로 hex를 사용합니다. 실제 값을 Git·채팅·로그에 붙여 넣지 마세요.
    - `VITE_SENTRY_DSN`: 선택 사항인 공개 브라우저 설정이며 변경 시 재빌드가 필요합니다.
 7. Domains에서 실제 도메인을 **service `front`, container port `80`**에 연결합니다. 현재 Cloudflare 경로는 위 설정을 사용합니다. Traefik 직접 접속 환경은 DNS A 레코드를 서버 공인 IP로 지정하고 HTTPS/Let's Encrypt를 설정합니다. 사용하지 않는 AAAA 레코드는 제거하거나 실제 IPv6 경로를 구성합니다. DB, Redis, back, go-judge에 도메인을 연결하지 않습니다.
