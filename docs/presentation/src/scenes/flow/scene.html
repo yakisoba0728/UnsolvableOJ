@@ -1,0 +1,46 @@
+<section class="slide" id="scene-flow" data-title="채점 흐름">
+    <nav class="sec"><span>진행 현황</span><span class="on">기술 스택</span><span>문제 해결</span><span>향후 계획</span></nav>
+    <h2 class="hl">제출하면 <em>이렇게</em> 채점됩니다</h2>
+    <div class="track">
+      <div class="rail" aria-hidden="true"><span class="fill"></span><span class="node" style="--k:0"></span><span class="node" style="--k:1"></span><span class="node" style="--k:2"></span><span class="node" style="--k:3"></span></div>
+      <div class="cards">
+        <div class="card m-rise" style="--k:0;--d:0.15s">
+          <div class="top"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg></span><span class="no">01</span></div>
+          <b>제출</b>
+          <p>코드를 보내면 서버가 저장하고<br>바로 '접수'라고 답해요</p>
+        </div>
+        <div class="card m-rise" style="--k:1;--d:0.27s">
+          <div class="top"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg></span><span class="no">02</span></div>
+          <b>줄 서기</b>
+          <p>코드는 두고 번호표만 줄에 세워<br>차례를 기다려요</p>
+        </div>
+        <div class="card m-rise" style="--k:2;--d:0.39s">
+          <div class="top"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg></span><span class="no">03</span></div>
+          <b>격리 채점</b>
+          <p>밀폐된 방에서 테스트를 하나씩<br>돌려 정답과 비교해요</p>
+          <div class="meter"><div class="cells"><i style="--j:0"></i><i style="--j:1"></i><i style="--j:2"></i><i style="--j:3"></i><i style="--j:4"></i><i style="--j:5"></i><i style="--j:6"></i><i style="--j:7"></i><i style="--j:8"></i><i style="--j:9"></i><i style="--j:10"></i><i style="--j:11"></i></div><span>테스트 12개</span></div>
+        </div>
+        <div class="card m-rise" style="--k:3;--d:0.51s">
+          <div class="top"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg></span><span class="no">04</span></div>
+          <b>결과</b>
+          <p>판정을 저장하고, 처음 맞힌<br>문제면 경험치를 줘요</p>
+          <span class="xp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg>첫 정답 +XP</span>
+        </div>
+      </div>
+    </div>
+    <div class="safe m-rise" style="--d:.8s">
+      <div class="safe-title"><b>채점기가 멈춰도 끝까지</b><span>받은 경험치도 서버 오류로는 사라지지 않아요</span></div>
+      <div class="safe-flow">
+        <div class="sf m-fade" style="--d:1.00s"><span class="sf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg></span><span>채점 중에 멈춤</span></div>
+        <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span><div class="sf m-fade" style="--d:1.25s"><span class="sf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span><span>60초 넘게 소식 없음</span></div>
+        <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span><div class="sf m-fade" style="--d:1.50s"><span class="sf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span><span>다시 줄에 세움</span></div>
+        <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span><div class="sf m-fade" style="--d:1.75s"><span class="sf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span><span>다른 채점기가 끝까지<br>두 번 채점은 없음</span></div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="slide-number"></span></div>
+    <aside class="notes">
+      <p>제출 하나가 채점되는 길을 <strong>네 단계</strong>로 보면 이래요.</p>
+      <p>코드를 보내면 서버가 <strong>접수</strong>하고, 코드 대신 <strong>번호표</strong>만 줄에 세워요. 채점기가 차례로 가져가서 <strong>밀폐된 방</strong>에서 테스트를 하나씩 돌리고, 결과를 저장하면서 처음 맞힌 문제면 경험치를 줍니다.</p>
+      <p>채점기가 중간에 멈춰도 괜찮아요. <em>60초 넘게 소식이 없으면</em> 다시 줄에 세워서 다른 채점기가 끝까지 채점해요.</p>
+    </aside>
+  </section>

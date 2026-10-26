@@ -1,0 +1,112 @@
+/* 장면: 채점 복구 — 워커가 멈춰도 예약 만료 → 복구 순찰 → 새 세대로 다시 채점 */
+#scene-recovery .rc-stage { position: relative; flex: none; width: 1664px; height: 760px; margin-top: 54px; }
+#scene-recovery .rc-stage p { margin: 0; }
+
+/* 위: 흐른 시간과 시간 압축 안내 */
+#scene-recovery .rc-top { position: absolute; left: 0; top: 0; width: 1664px; height: 40px; display: flex; align-items: center; gap: 14px; line-height: 26px; }
+#scene-recovery .rc-clock-lbl { font-size: 20px; font-weight: 600; color: var(--text-3); }
+#scene-recovery .rc-clock { font-family: var(--font-mono); font-size: 30px; font-weight: 700; color: var(--text-1); font-variant-numeric: tabular-nums; letter-spacing: 0; }
+#scene-recovery .rc-zip { margin-left: auto; display: inline-flex; align-items: center; gap: 10px; padding: 7px 18px; border-radius: 999px; background: var(--surface-2); font-size: 19px; color: var(--text-2); }
+#scene-recovery .rc-zip svg { color: var(--text-3); }
+
+/* 상자 공통 */
+#scene-recovery .rc-box { position: absolute; box-sizing: border-box; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 18px; transition: border-color .3s, background-color .3s; }
+#scene-recovery .rc-k { font-size: 20px; font-weight: 700; color: var(--text-3); letter-spacing: .01em; }
+#scene-recovery .rc-name { font-size: 25px; font-weight: 700; letter-spacing: -.02em; color: var(--text-1); transition: color .3s; }
+#scene-recovery .rc-sub { margin-top: 2px !important; font-size: 19px; color: var(--text-3); }
+
+#scene-recovery .rc-queue { left: 0; top: 64px; width: 360px; height: 240px; padding: 18px 24px; background: var(--surface-2); border-color: var(--border); }
+#scene-recovery .rc-legend { margin-top: 2px !important; font-size: 19px; color: var(--text-3); }
+#scene-recovery .rc-legend b { color: var(--accent); }
+
+#scene-recovery .rc-patrol { left: 0; top: 328px; width: 360px; height: 272px; padding: 20px 24px; }
+#scene-recovery .rc-patrol-head { display: flex; align-items: center; gap: 14px; }
+#scene-recovery .rc-patrol-ico { flex: none; color: var(--accent); transform-origin: 50% 50%; }
+#scene-recovery .rc-log { margin: 14px 0 0; padding: 0; list-style: none; }
+#scene-recovery .rc-log li { display: grid; grid-template-columns: 64px 1fr; padding: 7px 0; border-top: 1px solid var(--border); font-size: 20px; line-height: 1.4; color: var(--text-2); opacity: 0; }
+#scene-recovery .rc-log .rc-t { font-family: var(--font-mono); font-size: 19px; color: var(--text-3); letter-spacing: 0; }
+#scene-recovery .rc-log li.is-found b { color: var(--bad); }
+
+#scene-recovery .rc-wa { left: 450px; top: 64px; width: 560px; height: 256px; }
+#scene-recovery .rc-wb { left: 450px; top: 344px; width: 560px; height: 256px; }
+#scene-recovery .rc-worker-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px 0; }
+#scene-recovery .rc-chip { font-size: 19px; font-weight: 700; padding: 6px 14px; border-radius: 999px; background: var(--surface-2); color: var(--text-3); white-space: nowrap; transition: background-color .25s, color .25s; }
+#scene-recovery .rc-cap { position: absolute; left: 372px; top: 192px; width: 180px; text-align: center; line-height: 1.3; }
+#scene-recovery .rc-cap b { display: block; font-size: 18px; font-weight: 700; color: var(--text-2); }
+#scene-recovery .rc-cap span { display: block; font-size: 18px; color: var(--text-3); transition: color .25s; }
+#scene-recovery .rc-cap, #scene-recovery .rc-ring { opacity: 0; }
+#scene-recovery .rc-worker.is-run { border-color: var(--accent); }
+#scene-recovery .rc-worker.is-run .rc-chip { background: var(--accent-soft); color: var(--accent); }
+#scene-recovery .rc-worker.is-stall { background: var(--surface-2); border-style: dashed; border-color: var(--text-3); }
+#scene-recovery .rc-worker.is-stall .rc-name { color: var(--text-3); }
+#scene-recovery .rc-worker.is-stall .rc-chip { background: var(--bad-soft); color: var(--bad); }
+#scene-recovery .rc-worker.is-stall .rc-cap span { color: var(--bad); }
+#scene-recovery .rc-worker.is-late .rc-chip { background: var(--text-1); color: #fff; }
+#scene-recovery .rc-worker.is-done .rc-chip { background: var(--good-soft); color: var(--good); }
+
+/* 오른쪽: 서버의 판정 기록 */
+#scene-recovery .rc-srv { left: 1100px; top: 64px; width: 564px; height: 536px; padding: 22px 28px; }
+#scene-recovery .rc-now { margin-top: 14px; padding: 14px 20px 16px; border-radius: 14px; background: var(--surface-2); }
+#scene-recovery .rc-now span { display: block; font-size: 18px; font-weight: 600; color: var(--text-3); }
+#scene-recovery .rc-now-val { display: block; margin-top: 4px; font-size: 25px; font-weight: 700; letter-spacing: -.01em; color: var(--text-1); }
+#scene-recovery .rc-now-val.is-live { color: var(--accent); }
+#scene-recovery .rc-inbox { margin-top: 22px !important; font-size: 18px; font-weight: 700; color: var(--text-3); }
+#scene-recovery .rc-empty { position: absolute; left: 28px; top: 214px; font-size: 20px; color: var(--text-3); }
+#scene-recovery .rc-row { display: grid; grid-template-columns: 34px 1fr; gap: 16px; margin-top: 10px; padding: 16px 0 4px; border-top: 1px solid var(--border); opacity: 0; }
+#scene-recovery .rc-row svg { margin-top: 2px; }
+#scene-recovery .rc-row.is-ok svg { color: var(--good); }
+#scene-recovery .rc-row.is-no svg { color: var(--bad); }
+#scene-recovery .rc-row b { display: block; font-size: 23px; font-weight: 700; color: var(--text-1); }
+#scene-recovery .rc-row em { font-style: normal; font-size: 18px; font-weight: 700; color: var(--bad); background: var(--bad-soft); border-radius: 999px; padding: 3px 10px; margin-left: 6px; vertical-align: 3px; }
+#scene-recovery .rc-row span { display: block; margin-top: 4px; font-size: 21px; line-height: 1.4; color: var(--text-2); }
+#scene-recovery .rc-row.is-no span + span { color: var(--text-3); font-size: 20px; }
+
+/* 연결선 · 예약 시계 */
+#scene-recovery .rc-wires { position: absolute; left: 0; top: 0; width: 1664px; height: 760px; overflow: visible; pointer-events: none; }
+#scene-recovery .rc-edge { fill: none; stroke: var(--border-strong); stroke-width: 2.5; }
+#scene-recovery .rc-edge-back { stroke: var(--accent); stroke-width: 3; stroke-dasharray: 1; stroke-dashoffset: 1; }
+#scene-recovery .rc-track { fill: var(--surface); stroke: #e1e6ef; stroke-width: 10; }
+#scene-recovery .rc-arc { fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: round; stroke-dasharray: 314.16; transition: stroke .25s; }
+#scene-recovery .rc-sec { font-family: var(--font-sans); font-size: 27px; font-weight: 800; fill: var(--text-1); font-variant-numeric: tabular-nums; transition: fill .25s; }
+#scene-recovery .rc-left { font-family: var(--font-sans); font-size: 18px; font-weight: 600; fill: var(--text-3); }
+#scene-recovery .rc-ring.is-expired .rc-arc { stroke: var(--bad); }
+#scene-recovery .rc-ring.is-expired .rc-track { stroke: #f6d3d4; }
+#scene-recovery .rc-ring.is-expired .rc-sec { fill: var(--bad); }
+#scene-recovery .rc-pulse { fill: none; stroke: var(--accent); stroke-width: 3; opacity: 0; }
+#scene-recovery .rc-scan { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 7 9; opacity: 0; }
+#scene-recovery .rc-ring.is-found .rc-scan { stroke: var(--bad); }
+/* 결과 봉투: 워커 → 서버 */
+#scene-recovery .rc-env { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; font-size: 19px; font-weight: 700; white-space: nowrap; box-shadow: 0 6px 16px rgba(29, 47, 90, .14); opacity: 0; transition: background-color .2s, color .2s; }
+#scene-recovery .rc-env-b { background: var(--accent); color: #fff; }
+#scene-recovery .rc-env-a { background: var(--text-2); color: #fff; }
+#scene-recovery .rc-env-a.is-bad { background: var(--bad); }
+
+/* 움직이는 제출 카드 */
+#scene-recovery .rc-card { position: absolute; left: 0; top: 0; width: 300px; box-sizing: border-box; padding: 18px 22px 20px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 16px; box-shadow: 0 2px 6px rgba(23, 25, 28, .06), 0 16px 36px rgba(29, 47, 90, .14); opacity: 0; will-change: transform; }
+#scene-recovery .rc-card-top { display: flex; align-items: center; justify-content: space-between; }
+#scene-recovery .rc-card-top b { font-size: 23px; font-weight: 700; color: var(--text-1); }
+#scene-recovery .rc-gen { display: inline-block; font-size: 19px; font-weight: 700; padding: 5px 13px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); transition: background-color .25s, color .25s; }
+#scene-recovery .rc-gen.is-flash { background: var(--accent); color: #fff; }
+#scene-recovery .rc-card-st { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+#scene-recovery .rc-card-st i { width: 12px; height: 12px; border-radius: 50%; background: var(--text-3); transition: background-color .25s; }
+#scene-recovery .rc-st { font-size: 23px; font-weight: 700; color: var(--text-2); transition: color .25s; }
+#scene-recovery .rc-enum { font-family: var(--font-mono); font-size: 18px; color: var(--text-3); letter-spacing: 0; }
+#scene-recovery .rc-card.is-run .rc-card-st i { background: var(--accent); }
+#scene-recovery .rc-card.is-run .rc-st { color: var(--accent); }
+#scene-recovery .rc-card.is-done { border-color: #9fd8b9; }
+#scene-recovery .rc-card.is-done .rc-card-st i { background: var(--good); }
+#scene-recovery .rc-card.is-done .rc-st { color: var(--good); }
+
+/* 마지막: XP 규칙 */
+#scene-recovery .rc-xp { position: absolute; left: 0; top: 640px; width: 1664px; height: 120px; box-sizing: border-box; display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 48px; padding: 0 36px; border-radius: 18px; background: var(--good-soft); border: 1px solid #c4e8d5; opacity: 0; }
+#scene-recovery .rc-xp-title { font-size: 24px; font-weight: 800; color: var(--good); }
+#scene-recovery .rc-xp p { display: flex; align-items: center; gap: 12px; font-size: 23px; line-height: 1.4; color: var(--text-1); }
+#scene-recovery .rc-xp svg { flex: none; }
+#scene-recovery .rc-xp-keep svg { color: var(--good); }
+#scene-recovery .rc-xp-take svg { color: var(--bad); }
+
+#scene-recovery .rc-stage.is-jump *, #scene-recovery .rc-stage.is-jump *::before { transition: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  #scene-recovery *, #scene-recovery *::before, #scene-recovery *::after { transition: none !important; animation: none !important; }
+}
