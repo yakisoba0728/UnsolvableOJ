@@ -94,7 +94,9 @@ export class MissionsService {
                   : 'idle',
             reward: state.reward_xp
               ? `+${state.reward_xp} XP${state.badge ? ' · 배지' : ''}`
-              : '+배지',
+              : state.badge
+                ? '+배지'
+                : '보상 없음',
             claimedAt: state.claimed_at,
             completedAt: state.completed_at,
             expiresAt,
@@ -238,9 +240,13 @@ export class MissionsService {
             ? 'seven-day-streak'
             : null;
       // Assign a stable daily bonus once. Never reroll by refreshing the page or editing browser storage.
+      // Rejudging can move a streak's start; reuse a receipt overlapping the current run.
       let [state]: State[] = await m.query(
-        'SELECT * FROM mission_states WHERE user_id=$1 AND mission_key=$2 AND period_key=$3',
-        [userId, d.id, key],
+        `SELECT * FROM mission_states WHERE user_id=$1 AND mission_key=$2 AND (
+          period_key=$3 OR ($2='streak' AND claimed_at IS NOT NULL
+            AND period_key <= $4 AND (claimed_at AT TIME ZONE 'Asia/Seoul')::date >= $3::date)
+        ) ORDER BY claimed_at NULLS LAST LIMIT 1`,
+        [userId, d.id, key, p.day],
       );
       if (!state) {
         const [bonus]: { id: string; xp: number }[] =

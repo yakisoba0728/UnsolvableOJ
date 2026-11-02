@@ -13,7 +13,11 @@ import { configureHttp } from '../src/configure-http.js';
 import { MissionsService } from '../src/modules/missions/missions.service.js';
 import { Missions1793000000000 } from '../src/database/migrations/1793000000000-missions.js';
 import { analysisCatalog } from '../src/modules/missions/analysis-catalog.js';
-import { DAY, periods } from '../src/modules/missions/mission-policy.js';
+import {
+  DAY,
+  kstDay,
+  periods,
+} from '../src/modules/missions/mission-policy.js';
 
 describe('missions (real PostgreSQL transactions and HTTP)', () => {
   let app: NestExpressApplication;
@@ -112,14 +116,19 @@ describe('missions (real PostgreSQL transactions and HTTP)', () => {
     const mission = await analysisReady();
     await service.claim(userId, mission.stateId);
     const runner = db.createQueryRunner();
-    await runner.connect(); await runner.startTransaction();
+    await runner.connect();
+    await runner.startTransaction();
     try {
-      await expect(new Missions1793000000000().down(runner)).rejects.toThrow('Cannot roll back populated missions');
+      await expect(new Missions1793000000000().down(runner)).rejects.toThrow(
+        'Cannot roll back populated missions',
+      );
     } finally {
-      await runner.rollbackTransaction(); await runner.release();
+      await runner.rollbackTransaction();
+      await runner.release();
     }
     const receipt = await service.claim(userId, mission.stateId);
-    expect(receipt.xp).toBe(80); expect(receipt.alreadyClaimed).toBe(true);
+    expect(receipt.xp).toBe(80);
+    expect(receipt.alreadyClaimed).toBe(true);
   });
   it('serializes concurrent first visits and creates exactly one state per period', async () => {
     const pages = await Promise.all(Array.from({ length: 8 }, list));
@@ -324,6 +333,72 @@ describe('missions (real PostgreSQL transactions and HTTP)', () => {
     expect(
       (await list()).items.find((m) => m.id === 'bonus')?.claimedAt,
     ).toBeTruthy();
+  });
+  it.each(['QUEUED', 'JUDGING', 'SYSTEM_ERROR'])(
+    'does not award the same streak again while its oldest submission is %s',
+    async (status) => {
+      const start = periods(now).start;
+      let oldest = '';
+      for (let i = 1; i <= 8; i++)
+        oldest = await submit(
+          new Date(start.getTime() - i * DAY + 1000),
+          'WRONG_ANSWER',
+        );
+      const mission = (await list()).items.find((m) => m.id === 'streak')!;
+      await service.claim(userId, mission.stateId);
+      await db.query('UPDATE submissions SET status=$2 WHERE id=$1', [
+        oldest,
+        status,
+      ]);
+      const current = (await list()).items.find((m) => m.id === 'streak')!;
+      expect(current.stateId).toBe(mission.stateId);
+      expect((await service.claim(userId, current.stateId)).xp).toBe(120);
+    },
+  );
+  it('keeps a claimed streak when a delayed verdict extends its start backwards', async () => {
+    const start = periods(now).start;
+    for (let i = 1; i <= 7; i++)
+      await submit(new Date(start.getTime() - i * DAY + 1000), 'WRONG_ANSWER');
+    const delayed = await submit(
+      new Date(start.getTime() - 8 * DAY + 1000),
+      'SYSTEM_ERROR',
+    );
+    const mission = (await list()).items.find((m) => m.id === 'streak')!;
+    await service.claim(userId, mission.stateId);
+    await db.query("UPDATE submissions SET status='WRONG_ANSWER' WHERE id=$1", [
+      delayed,
+    ]);
+    const current = (await list()).items.find((m) => m.id === 'streak')!;
+    expect(current.stateId).toBe(mission.stateId);
+    expect((await service.claim(userId, current.stateId)).xp).toBe(120);
+  });
+  it('allows a new streak reward after a full missed day', async () => {
+    const start = periods(now).start;
+    await db.query(
+      `INSERT INTO mission_states(user_id,mission_key,period_key,progress,target,reward_xp,completed_at,claimed_at)
+       VALUES($1,'streak',$2,7,7,120,$3,$3)`,
+      [
+        userId,
+        kstDay(new Date(start.getTime() - 17 * DAY)),
+        new Date(start.getTime() - 10 * DAY),
+      ],
+    );
+    await db.query('UPDATE users SET xp=120 WHERE id=$1', [userId]);
+    for (let i = 1; i <= 7; i++)
+      await submit(new Date(start.getTime() - i * DAY + 1000), 'WRONG_ANSWER');
+    const mission = (await list()).items.find((m) => m.id === 'streak')!;
+    expect(mission.claimedAt).toBeNull();
+    expect((await service.claim(userId, mission.stateId)).xp).toBe(240);
+  });
+  it('does not advertise a badge when no bonus problem is available', async () => {
+    await db.query(
+      `INSERT INTO user_problem_solves(user_id,problem_id,accepted_submission_id,awarded_xp)
+       SELECT $1,p.id,$2,10 FROM problems p WHERE p.status='PUBLISHED'`,
+      [userId, await submit(new Date(now.getTime() - 1))],
+    );
+    const bonus = (await list()).items.find((m) => m.id === 'bonus')!;
+    expect(bonus.available).toBe(false);
+    expect(bonus.reward).toBe('보상 없음');
   });
   it('counts Korean night submissions only and awards a single badge without adding XP', async () => {
     const start = periods(now).start;

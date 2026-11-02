@@ -141,6 +141,7 @@ test("bonus assignment and empty assignment use server choices, with no fake rew
   const bonus = data.items.find((m) => m.id === "bonus")!;
   Object.assign(bonus, {
     available: false,
+    reward: "보상 없음",
     description: "새로 풀 수 있는 공개 문제가 없어요.",
     action: { to: "/problems", label: "문제 풀러 가기" },
   });
@@ -148,6 +149,8 @@ test("bonus assignment and empty assignment use server choices, with no fake rew
   await expect(page.locator(".xp-boost-card")).toContainText(
     "공개 문제가 없어요",
   );
+  await expect(page.locator(".xp-boost-card")).toContainText("보상 없음");
+  await expect(page.locator(".xp-boost-card")).not.toContainText("배지");
   await expect(
     page.getByRole("button", { name: "오늘의 보너스 문제 보상 받기" }),
   ).toBeDisabled();
