@@ -7,6 +7,7 @@ import {
   IsBoolean,
   IsEnum,
   IsInt,
+  IsObject,
   IsString,
   Length,
   Matches,
@@ -79,6 +80,7 @@ export class ProblemContentDto {
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(100)
+  @IsObject({ each: true })
   @ValidateNested({ each: true })
   @Type(() => CreateTestCaseDto)
   testCases: CreateTestCaseDto[];

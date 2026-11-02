@@ -14,6 +14,7 @@ import { SubmissionXpEvidence1790553000000 } from './migrations/1790553000000-su
 import { BackendHardening1790554000000 } from './migrations/1790554000000-backend-hardening.js';
 import { Community1791200000000 } from './migrations/1791200000000-community.js';
 import { CommunityUi1791200001000 } from './migrations/1791200001000-community-ui.js';
+import { LearningEvidence1793001000000 } from './migrations/1793001000000-learning-evidence.js';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -34,6 +35,7 @@ export default new DataSource({
     Community1791200000000,
     CommunityUi1791200001000,
     Missions1793000000000,
+    LearningEvidence1793001000000,
   ],
   synchronize: false,
 });

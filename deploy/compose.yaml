@@ -88,9 +88,9 @@ services:
     privileged: true
     restart: unless-stopped
     shm_size: 512m
-    mem_limit: ${SANDBOX_MEMORY_LIMIT:-3g}
+    mem_limit: ${SANDBOX_MEMORY_LIMIT:-10g}
     # Equal RAM and combined RAM+swap limits disable swap at container creation.
-    memswap_limit: ${SANDBOX_MEMORY_LIMIT:-3g}
+    memswap_limit: ${SANDBOX_MEMORY_LIMIT:-10g}
     cgroup: private
     cpus: ${SANDBOX_CPUS:-2.0}
     networks: [sandbox]

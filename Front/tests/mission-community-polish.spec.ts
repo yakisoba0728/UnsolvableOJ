@@ -80,6 +80,7 @@ test("mission links and community back links have a comfortable press area", asy
   await expect.poll(() => hitsTarget(page, ".post-page .back-link", 9)).toBe(true);
   await expect.poll(() => hitsTarget(page, ".post-tags a", 7)).toBe(true);
   await page.locator(".answers-toggle").click();
+  await page.locator(".answer-vote").first().evaluate((element) => element.scrollIntoView({ block: "center" }));
   await expect.poll(() => hitsTarget(page, ".answer-vote", 8)).toBe(true);
 });
 

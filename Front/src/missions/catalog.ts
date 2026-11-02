@@ -1,4 +1,4 @@
-import { dayKey, streakDays, submissionsByDay } from "../hooks";
+import { koreanDayKey as dayKey, streakDays, learningByDay, isLearningSubmission } from "../hooks";
 import type { Submission } from "../types";
 
 export type { Mission, MissionStatus, MissionPeriod } from "./types";
@@ -14,27 +14,30 @@ export interface MissionInput {
 }
 
 const NIGHT_END_HOUR = 6;
+const koreanDate = (at: Date) => new Date(at.getTime() + 9 * 3_600_000);
+const koreanMidnight = (year: number, month: number, day: number) =>
+  new Date(Date.UTC(year, month, day) - 9 * 3_600_000);
 /** 이번 달 시즌 목표: 미션을 달성한 횟수 */
 export const SEASON_TARGET = 15;
 
-/** 이번 주 일요일 0시(로컬). 주 시작은 학습 기록 막대(WeekStrip)와 같다. */
+/** 한국 시간 이번 주 일요일 0시. */
 export function weekStart(now: Date) {
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  start.setDate(start.getDate() - start.getDay());
-  return start;
+  const at = koreanDate(now);
+  return koreanMidnight(at.getUTCFullYear(), at.getUTCMonth(), at.getUTCDate() - at.getUTCDay());
 }
 
 /** 주기별 마감 시각(다음 주기 시작). streak에는 마감이 없다. */
 export function deadlineOf(period: MissionPeriod, now: Date) {
+  const at = koreanDate(now);
   if (period === "day")
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    return koreanMidnight(at.getUTCFullYear(), at.getUTCMonth(), at.getUTCDate() + 1);
   if (period === "week") {
     const end = weekStart(now);
-    end.setDate(end.getDate() + 7);
+    end.setTime(end.getTime() + 7 * 86_400_000);
     return end;
   }
   if (period === "month")
-    return new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return koreanMidnight(at.getUTCFullYear(), at.getUTCMonth() + 1, 1);
   return null;
 }
 
@@ -64,7 +67,7 @@ export function buildMissions({
   );
   const night = submissions.filter((item) => {
     const at = new Date(item.createdAt);
-    return dayKey(at) === today && at.getHours() < NIGHT_END_HOUR;
+    return isLearningSubmission(item) && dayKey(at) === today && koreanDate(at).getUTCHours() < NIGHT_END_HOUR;
   }).length;
   // 같은 문제를 다시 풀어도 한 번만 센다.
   const analysisToday = new Set(
@@ -73,13 +76,14 @@ export function buildMissions({
       .map((item) => item.questionId),
   ).size;
   const communityPosts = posts.filter((at) => {
-    const created = new Date(at);
+    const created = koreanDate(new Date(at));
+    const current = koreanDate(now);
     return (
-      created.getFullYear() === now.getFullYear() &&
-      created.getMonth() === now.getMonth()
+      created.getUTCFullYear() === current.getUTCFullYear() &&
+      created.getUTCMonth() === current.getUTCMonth()
     );
   }).length;
-  const streak = streakDays(submissionsByDay(submissions), now);
+  const streak = streakDays(learningByDay(submissions), now);
 
   const define = (
     mission: Omit<Mission, "current" | "status">,
@@ -166,7 +170,7 @@ export function buildMissions({
 }
 
 const endOfDay = (year: number, month: number, day: number) =>
-  new Date(year, month, day, 23, 59, 59, 999);
+  new Date(koreanMidnight(year, month, day + 1).getTime() - 1);
 
 /** at 시점까지의 기록만으로 계산한 미션 상태(지난 날의 달성 여부를 다시 만드는 데 쓴다). */
 function missionsAt(input: MissionInput, at: Date) {
@@ -193,13 +197,14 @@ export function seasonOf({
   now = new Date(),
 }: MissionInput) {
   const input = { submissions, analysis, posts };
-  const year = now.getFullYear();
-  const month = now.getMonth();
+  const at = koreanDate(now);
+  const year = at.getUTCFullYear();
+  const month = at.getUTCMonth();
   let previous = missionsAt(input, endOfDay(year, month, 0));
   let done = 0;
-  for (let day = 1; day <= now.getDate(); day += 1) {
-    const at = day === now.getDate() ? now : endOfDay(year, month, day);
-    const current = missionsAt(input, at);
+  for (let day = 1; day <= at.getUTCDate(); day += 1) {
+    const moment = day === at.getUTCDate() ? now : endOfDay(year, month, day);
+    const current = missionsAt(input, moment);
     current.forEach((mission, index) => {
       const wasDone = previous[index].status === "done";
       if (mission.status === "done" && (mission.period === "day" || !wasDone))
@@ -207,11 +212,11 @@ export function seasonOf({
     });
     previous = current;
   }
-  const lastDay = new Date(year, month + 1, 0).getDate();
+  const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
   return {
     label: `${month + 1}월 시즌`,
     done,
     total: SEASON_TARGET,
-    daysLeft: lastDay - now.getDate(),
+    daysLeft: lastDay - at.getUTCDate(),
   };
 }

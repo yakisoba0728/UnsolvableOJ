@@ -76,6 +76,148 @@ async function delayPageModule(page: Page, name: string) {
   return { ready, release };
 }
 
+async function delayWrite(page: Page, method: string, path: string) {
+  let release!: () => void;
+  let requested!: () => void;
+  const wait = new Promise<void>((resolve) => { release = resolve; });
+  const ready = new Promise<void>((resolve) => { requested = resolve; });
+  await page.route(`**/api/v1/community/posts${path}`, async (route) => {
+    if (route.request().method() === method) { requested(); await wait; }
+    await route.fallback();
+  });
+  return { ready, release };
+}
+
+test("answer POST locks input and never clears another tab's newer draft", async ({ page, context }) => {
+  await seed(page);
+  await page.goto("/community/my-question");
+  const input = page.getByLabel("답변 내용");
+  await input.fill("요청 당시의 답변입니다.");
+  const gate = await delayWrite(page, "POST", "/my-question/comments");
+  const second = await context.newPage();
+  await second.goto("/");
+  try {
+    await page.getByRole("button", { name: "답변 등록", exact: true }).click();
+    await gate.ready;
+    await expect(input).toBeDisabled();
+    await second.evaluate(({ key, value }) => localStorage.setItem(key, value), { key: answerDraftKey, value: "다른 탭의 새 답변 초안" });
+    gate.release();
+    await expect(page.getByText(/답변을 등록했어요/)).toBeVisible();
+    expect(await readStored(page, answerDraftKey)).toBe("다른 탭의 새 답변 초안");
+    await page.reload();
+    await expect(input).toHaveValue("다른 탭의 새 답변 초안");
+  } finally { gate.release(); }
+});
+
+for (const editing of [false, true]) {
+  test(`${editing ? "edit" : "new post"} POST/PUT locks all inputs and preserves another tab's draft after success/navigation`, async ({ page, context }) => {
+    await seed(page);
+    const key = editing ? editDraftKey : postDraftKey;
+    await page.addInitScript((key) => localStorage.setItem(key, JSON.stringify({ category: "question", title: "복원 초안", body: "복원 본문", tags: [], savedAt: 1 })), key);
+    await page.goto(editing ? "/community/my-question/edit" : "/community/new");
+    await page.getByLabel(/^제목/).fill("제출 당시 제목");
+    await page.getByLabel(/^본문/).fill("제출 당시 본문입니다.");
+    const gate = await delayWrite(page, editing ? "PUT" : "POST", editing ? "/my-question" : "");
+    const second = await context.newPage();
+    await second.goto("/");
+    try {
+      await page.getByRole("button", { name: editing ? "수정 저장" : "글 등록", exact: true }).click();
+      await gate.ready;
+      await expect(page.getByLabel(/^제목/)).toBeDisabled();
+      await expect(page.getByLabel(/^본문/)).toBeDisabled();
+      await expect(page.getByRole("button", { name: "임시 저장", exact: true })).toBeDisabled();
+      await expect(page.getByRole("button", { name: "초안 지우기", exact: true })).toBeDisabled();
+      const newer = { ...JSON.parse((await readStored(page, key))!), title: "다른 탭의 새 초안", savedAt: Date.now() + 10 };
+      await second.evaluate(({ key, value }) => localStorage.setItem(key, value), { key, value: JSON.stringify(newer) });
+      gate.release();
+      await expect(page.getByRole("heading", { name: "제출 당시 제목" })).toBeVisible();
+      expect(JSON.parse((await readStored(page, key))!).title).toBe("다른 탭의 새 초안");
+    } finally { gate.release(); }
+  });
+}
+
+test("a response arriving during suspended navigation cannot revive old unmount draft writes", async ({ page, context }) => {
+  await seed(page);
+  const destination = await delayPageModule(page, "CommunityPage");
+  const gate = await delayWrite(page, "POST", "");
+  try {
+    await page.goto("/community/new");
+    await page.getByLabel(/^제목/).fill("이전 제출 제목");
+    await page.getByLabel(/^본문/).fill("이전 제출 본문");
+    await page.getByRole("button", { name: "글 등록", exact: true }).click();
+    await gate.ready;
+    page.on("dialog", (dialog) => dialog.accept());
+    await page.locator("header").getByRole("link", { name: "커뮤니티", exact: true }).click();
+    await destination.ready;
+    const second = await context.newPage();
+    await second.goto("/");
+    const newer = { ...JSON.parse((await readStored(page, postDraftKey))!), title: "다른 탭의 최신 초안", savedAt: Date.now() + 1 };
+    await second.evaluate(({ key, value }) => localStorage.setItem(key, value), { key: postDraftKey, value: JSON.stringify(newer) });
+    const response = page.waitForResponse((res) => res.request().method() === "POST" && res.url().endsWith("/community/posts"));
+    gate.release();
+    await response;
+    // Flush the response continuation while the old form is still mounted.
+    await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+    destination.release();
+    await expect(page).toHaveURL(/\/community$/);
+    await expect(page.locator(".write-form")).toHaveCount(0);
+    expect(JSON.parse((await readStored(page, postDraftKey))!).title).toBe(newer.title);
+  } finally { gate.release(); destination.release(); }
+});
+
+for (const kind of ["answer", "post"] as const) {
+  for (const move of ["page", "account"] as const) {
+    test(`late ${kind} response after ${move} change cannot clear drafts or redirect the new screen`, async ({ page, context }) => {
+      await seed(page);
+      await page.goto(kind === "answer" ? "/community/my-question" : "/community/new");
+      if (kind === "answer") await page.getByLabel("답변 내용").fill("이전 화면의 답변 초안");
+      else {
+        await page.getByLabel(/^제목/).fill("이전 화면의 글 제목");
+        await page.getByLabel(/^본문/).fill("이전 화면의 글 본문입니다.");
+      }
+      const gate = await delayWrite(page, "POST", kind === "answer" ? "/my-question/comments" : "");
+      try {
+        await page.getByRole("button", { name: kind === "answer" ? "답변 등록" : "글 등록", exact: true }).click();
+        await gate.ready;
+        const key = kind === "answer" ? answerDraftKey : postDraftKey;
+        const stored = await readStored(page, key);
+        if (move === "page") {
+          page.on("dialog", (dialog) => dialog.accept());
+          await page.locator("header").getByRole("link", { name: "커뮤니티", exact: true }).click();
+          await expect(page).toHaveURL(/\/community$/);
+        } else {
+          const second = await context.newPage();
+          await second.goto("/");
+          await second.evaluate(({ sessionKey, session }) => localStorage.setItem(sessionKey, JSON.stringify({ session: { ...session, accessToken: "other-token", user: { ...session.user, id: "another", username: "another" } }, expiresAt: Date.now() + 900_000 })), { sessionKey, session });
+          if (kind === "answer") await expect(page.getByLabel("답변 내용")).toHaveValue("");
+          else await expect(page.getByLabel(/^제목/)).toHaveValue("");
+        }
+        const url = page.url();
+        const response = page.waitForResponse((res) => res.request().method() === "POST" && res.url().includes("/community/posts") && !res.url().endsWith("/view"));
+        gate.release();
+        await response;
+        await expect(page).toHaveURL(url);
+        expect(await readStored(page, key)).toBe(stored);
+        await expect(page.getByText(/(답변|글)을 등록했어요/)).toHaveCount(0);
+      } finally { gate.release(); }
+    });
+  }
+}
+
+test("successful PUT followed by GET 503 keeps the post but shows stale-state warning and retry", async ({ page }) => {
+  const state = await seed(page);
+  await page.goto("/community/my-question");
+  await expect(page.getByRole("heading", { name: mine.title, exact: true })).toBeVisible();
+  state.fail = (method, path) => method === "GET" && path === "/my-question" ? 503 : undefined;
+  await page.getByRole("button", { name: "추천 0", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("아래는 이전에 불러온 내용");
+  await expect(page.getByRole("heading", { name: mine.title, exact: true })).toBeVisible();
+  state.fail = () => undefined;
+  await page.getByRole("button", { name: "다시 시도", exact: true }).click();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "추천 1", exact: true })).toBeVisible();
+});
+
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/**", (route) => {
     const path = new URL(route.request().url()).pathname;
@@ -139,7 +281,7 @@ for (const editing of [false, true]) {
       expect(await readStored(page, key)).toBeNull();
       await page.clock.runFor(1_500);
       expect(await readStored(page, key)).toBeNull();
-      await page.getByRole("button", { name: "임시 저장", exact: true }).click();
+      await expect(page.getByRole("button", { name: "임시 저장", exact: true })).toBeDisabled();
       await page.locator(".write-form").evaluate((form: HTMLFormElement) => {
         form.requestSubmit();
         form.requestSubmit();

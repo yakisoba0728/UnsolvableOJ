@@ -1,7 +1,107 @@
-import { expect, test } from "@playwright/test";
-import { authenticate, mockProblemApi, problem, session } from "./fixtures";
+import { expect, test, type Route } from "@playwright/test";
+import { authenticate, mockProblemApi, problem, session, storageKey } from "./fixtures";
 
 test.beforeEach(({ page }) => mockProblemApi(page));
+
+test("status changes lock every row, reject repeated clicks and unlock after failure", async ({ page }) => {
+  await authenticate(page, "ADMIN");
+  const pending: Route[] = [];
+  await page.route("**/api/v1/problems/mine", (route) => route.fulfill({ json: [
+    { ...problem, id: "a", title: "문제 A", currentVersion: 1 },
+    { ...problem, id: "b", title: "문제 B", currentVersion: 1 },
+  ] }));
+  await page.route("**/api/v1/problems/*/status", (route) => { pending.push(route); });
+  await page.goto("/my-problems");
+  const a = page.locator(".my-problem-row", { hasText: "문제 A" });
+  const b = page.locator(".my-problem-row", { hasText: "문제 B" });
+  await a.getByRole("button", { name: "비공개로 전환" }).click();
+  await expect.poll(() => pending.length).toBe(1);
+  await expect(a.getByRole("button")).toBeDisabled();
+  await expect(b.getByRole("button")).toBeDisabled();
+  // 일반 포인터 클릭은 disabled 버튼에서 요청을 만들지 않아야 한다.
+  for (const row of [b, a]) {
+    const box = await row.getByRole("button").boundingBox();
+    if (!box) throw new Error("상태 버튼을 찾지 못했습니다.");
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  }
+  expect(pending).toHaveLength(1);
+  await pending[0].fulfill({ status: 403, json: { message: "상태 변경 권한이 없습니다." } });
+  await expect(page.getByRole("alert")).toHaveText("상태 변경 권한이 없습니다.");
+  await expect(a).toContainText("공개 중");
+  await expect(a.getByRole("button")).toBeEnabled();
+  await expect(b.getByRole("button")).toBeEnabled();
+  await b.getByRole("button", { name: "비공개로 전환" }).click();
+  await expect.poll(() => pending.length).toBe(2);
+  expect(pending[1].request().url()).toContain("/problems/b/status");
+  expect(pending[1].request().postDataJSON()).toEqual({ status: "DRAFT" });
+  await pending[1].fulfill({ json: { id: "b", status: "DRAFT", currentVersion: 1 } });
+  await expect(b).toContainText("초안 · 검수 대기");
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(a.getByRole("button")).toBeEnabled();
+  await a.getByRole("button", { name: "비공개로 전환" }).click();
+  await expect.poll(() => pending.length).toBe(3);
+  await pending[2].fulfill({ json: { id: "a", status: "DRAFT", currentVersion: 1 } });
+  await expect(a).toContainText("초안 · 검수 대기");
+  await expect(a.getByRole("button", { name: "공개하기", exact: true })).toBeEnabled();
+});
+
+for (const boundary of ["token", "account", "page"] as const) {
+  test(`late status responses cannot overwrite a newer result after a ${boundary} change`, async ({ page }) => {
+    await authenticate(page, "ADMIN");
+    let serverStatus: "DRAFT" | "PUBLISHED" = "PUBLISHED";
+    let first: Route | undefined;
+    let requests = 0;
+    await page.route("**/api/v1/problems/mine", (route) => route.fulfill({
+      json: [{ ...problem, status: serverStatus, currentVersion: 1 }],
+    }));
+    await page.route(`**/api/v1/problems/${problem.id}/status`, async (route) => {
+      requests += 1;
+      serverStatus = (route.request().postDataJSON() as { status: typeof serverStatus }).status;
+      if (requests === 1) first = route;
+      else await route.fulfill({ json: { id: problem.id, status: serverStatus, currentVersion: 1 } });
+    });
+    await page.goto("/my-problems");
+    await page.getByRole("button", { name: "비공개로 전환" }).click();
+    await expect.poll(() => requests).toBe(1);
+    expect(serverStatus).toBe("DRAFT");
+    if (boundary === "page") {
+      await page.getByRole("link", { name: /문제 목록/ }).first().click();
+      await expect(page).toHaveURL(/\/problems$/);
+      await expect(page.getByRole("heading", { name: "문제 목록", exact: true })).toBeVisible();
+      await page.goBack();
+      await expect(page).toHaveURL(/\/my-problems$/);
+    } else {
+      await page.evaluate(({ key, saved }) => {
+        localStorage.setItem(key, JSON.stringify(saved));
+        window.dispatchEvent(new StorageEvent("storage", { key, storageArea: localStorage }));
+      }, { key: storageKey, saved: {
+        session: { ...session, accessToken: "replacement-admin-token", user: {
+          ...session.user, role: "ADMIN", id: boundary === "account" ? "other-admin" : session.user.id,
+        } },
+        expiresAt: Date.now() + 900_000,
+      } });
+    }
+    await expect(page.getByRole("button", { name: "공개하기", exact: true })).toBeEnabled();
+    await page.getByRole("button", { name: "공개하기", exact: true }).click();
+    await expect(page.locator(".my-problem-row")).toContainText("공개 중");
+    await expect(page.getByRole("status")).toHaveText("문제를 공개했어요.");
+    expect(requests).toBe(2);
+    expect(serverStatus).toBe("PUBLISHED");
+    const old = first!;
+    const finished = page.waitForEvent("requestfinished", { predicate: (request) => request === old.request() });
+    await old.fulfill(boundary === "account"
+      ? { status: 403, json: { message: "이전 계정의 늦은 오류" } }
+      : { json: { id: problem.id, status: "DRAFT", currentVersion: 1 } });
+    await finished;
+    await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+    await expect(page.locator(".my-problem-row")).toContainText("공개 중");
+    await expect(page.getByRole("button", { name: "공개하기", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "비공개로 전환" })).toBeEnabled();
+    await expect(page.getByRole("status")).toHaveText("문제를 공개했어요.");
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    expect(serverStatus).toBe("PUBLISHED");
+  });
+}
 
 test("regular users cannot open the author form", async ({ page }) => {
   await authenticate(page);

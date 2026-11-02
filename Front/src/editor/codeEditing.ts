@@ -103,6 +103,12 @@ export function handleCharacter(
     };
   }
   if (hasSelection) return null;
+  if (QUOTES.has(key)) {
+    let backslashes = 0;
+    for (let at = start - 1; at >= 0 && value[at] === "\\"; at -= 1)
+      backslashes += 1;
+    if (backslashes % 2 === 1) return null;
+  }
   const next = value[start];
   if (CLOSERS.has(key) && next === key) {
     return { value, start: start + 1, end: start + 1 };

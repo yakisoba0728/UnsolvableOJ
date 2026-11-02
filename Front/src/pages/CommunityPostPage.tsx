@@ -23,6 +23,8 @@ import {
 } from "../community/api";
 import {
   clearDraft,
+  clearAnswerDraft,
+  readDraft,
   readAnswerDraft,
   relativeTime,
   writeAnswerDraft,
@@ -34,13 +36,24 @@ import { problemPath } from "../paths";
 const MIN_ANSWER = 5;
 const ANSWER_PAGE_SIZE = 20;
 
-export function CommunityPostPage() {
+export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { id = "" } = useParams();
-  const { session } = useAuth();
+  const { session, getSessionVersion } = useAuth();
   const ownerId = session?.user.id ?? "";
   const token = session?.accessToken;
   const navigate = useNavigate();
   const location = useLocation();
+  const mounted = useRef(false);
+  const pendingRef = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+  function requestOwner() {
+    const navigationVersion = getNavigationVersion();
+    const sessionVersion = getSessionVersion();
+    return () => mounted.current && getNavigationVersion() === navigationVersion && getSessionVersion() === sessionVersion;
+  }
   const [answerPage, setAnswerPage] = useState(1);
   const [revision, setRevision] = useState(0);
   const [data, setData] = useState<Awaited<
@@ -185,24 +198,29 @@ export function CommunityPostPage() {
       navigate("/auth", { state: { from: `/community/${id}` } });
       return false;
     }
-    if (pending) return false;
+    if (pendingRef.current) return false;
+    const ownsRequest = requestOwner();
+    pendingRef.current = true;
     setPending(true);
     setActionError("");
     try {
       await postAction(id, path, method, session.accessToken, body);
+      if (!ownsRequest()) return false;
       setRevision((count) => count + 1);
       return true;
     } catch {
+      if (!ownsRequest()) return false;
       setNotice("");
       setActionError("변경 내용을 저장하지 못했어요. 다시 시도해 주세요.");
       return false;
     } finally {
-      setPending(false);
+      pendingRef.current = false;
+      if (ownsRequest()) setPending(false);
     }
   }
 
   async function deletePost() {
-    if (!canDelete || !session || pending) return;
+    if (!canDelete || !session || pendingRef.current) return;
     if (
       !window.confirm(
         "이 글을 삭제할까요? 달린 답변도 함께 삭제되고 되돌릴 수 없어요.",
@@ -211,16 +229,23 @@ export function CommunityPostPage() {
       return;
     setPending(true);
     setActionError("");
+    pendingRef.current = true;
+    const ownsRequest = requestOwner();
+    const submittedAnswer = readAnswerDraft(ownerId, id);
+    const submittedEdit = readDraft(ownerId, id);
     try {
       await postAction(id, "", "DELETE", session.accessToken);
     } catch {
+      if (!ownsRequest()) return;
+      pendingRef.current = false;
       setPending(false);
       setNotice("");
       setActionError("글을 삭제하지 못했어요. 다시 시도해 주세요.");
       return;
     }
-    const answerCleared = writeAnswerDraft(ownerId, id, "");
-    const editCleared = clearDraft(ownerId, id);
+    if (!ownsRequest()) return;
+    const answerCleared = clearAnswerDraft(ownerId, id, submittedAnswer);
+    const editCleared = clearDraft(ownerId, id, submittedEdit);
     navigate(`/community${listSearch}`, {
       state: {
         notice: `글을 삭제했어요.${answerCleared && editCleared ? "" : " 임시 초안을 지우지 못했어요."}`,
@@ -264,7 +289,7 @@ export function CommunityPostPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!session || pending) return;
+    if (!session || pendingRef.current) return;
     const body = draft.trim();
     if (body.length < MIN_ANSWER) {
       setError(`답변을 ${MIN_ANSWER}자 이상 입력해 주세요.`);
@@ -272,6 +297,8 @@ export function CommunityPostPage() {
       return;
     }
     setError("");
+    const ownsRequest = requestOwner();
+    pendingRef.current = true;
     setPending(true);
     try {
       const answer = await postAction<{ id: string }>(
@@ -281,7 +308,8 @@ export function CommunityPostPage() {
         session.accessToken,
         { body },
       );
-      const cleared = writeAnswerDraft(ownerId, id, "");
+      if (!ownsRequest()) return;
+      const cleared = clearAnswerDraft(ownerId, id, draft);
       setAnswerDraft({ ownerId, postId: id, text: "" });
       setNotice(
         `답변을 등록했어요.${cleared ? "" : " 임시 초안을 지우지 못했어요."}`,
@@ -292,12 +320,14 @@ export function CommunityPostPage() {
       setAnswerPage(Math.ceil((answers.total + 1) / ANSWER_PAGE_SIZE));
       setRevision((count) => count + 1);
     } catch {
+      if (!ownsRequest()) return;
       setNotice("");
       setError(
         "답변을 저장하지 못했어요. 입력한 내용과 초안을 유지했으니 다시 시도해 주세요.",
       );
     } finally {
-      setPending(false);
+      pendingRef.current = false;
+      if (ownsRequest()) setPending(false);
     }
   }
 
@@ -316,6 +346,13 @@ export function CommunityPostPage() {
           {actionError}
         </p>
       ) : null}
+      {loadError ? (
+        <p className="error-message" role="alert">
+          최신 내용을 불러오지 못했어요. 아래는 이전에 불러온 내용입니다. {errorMessage(loadError)}{" "}
+          <button type="button" className="inline-button" onClick={() => setRevision((count) => count + 1)}>다시 시도</button>
+        </p>
+      ) : null}
+      {loading ? <p className="muted" role="status">최신 내용을 확인하는 중입니다. 아래는 이전에 불러온 내용입니다.</p> : null}
       <div className="post-layout no-side">
         <div className="post-column">
           <article className="post-card">
@@ -466,6 +503,7 @@ export function CommunityPostPage() {
                     aria-invalid={Boolean(error)}
                     placeholder="답변을 입력하세요."
                     value={draft}
+                    disabled={pending}
                     onChange={(event) => onDraftChange(event.target.value)}
                   />
                   {error ? (
@@ -616,6 +654,7 @@ export function CommunityPostPage() {
                             aria-invalid={Boolean(editError)}
                             autoFocus
                             value={editing.text}
+                            disabled={pending}
                             onChange={(event) =>
                               setEditing({
                                 id: answer.id,

@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import 'dotenv/config';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { parseArgs } from 'node:util';
 import pg from 'pg';
@@ -24,6 +25,7 @@ console.log(JSON.stringify({ prepared: prepared.length,
   hidden: prepared.reduce((n, p) => n + p.dto.testCases.filter((t) => !t.isSample).length, 0) }));
 if (!values.apply && !values['rollback-check']) process.exit(0);
 
+if (!process.env.DATABASE_URL?.trim()) throw new Error('DATABASE_URL is required; refusing to connect to a default database');
 const options = databaseConnectionOptions(process.env.DATABASE_URL, process.env.DATABASE_SSL === 'true');
 const client = new pg.Client({ connectionString: options.url, ssl: options.ssl });
 await client.connect();

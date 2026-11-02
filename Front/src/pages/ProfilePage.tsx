@@ -7,6 +7,7 @@ import { PageHeader } from "../components/PageHeader";
 import {
   dayKey,
   streakDays,
+  learningByDay,
   submissionsByDay,
   useAllProblems,
   useMyCommunityPosts,
@@ -66,7 +67,7 @@ export function ProfilePage() {
   }, []);
 
   const counts = submissionsByDay(history.submissions);
-  const streak = streakDays(counts);
+  const streak = streakDays(learningByDay(history.submissions));
 
   // 오늘이 속한 주를 마지막 열로, 일요일 시작 주 단위 격자(넓은 화면 16주, 좁은 화면 12주)
   const today = new Date();

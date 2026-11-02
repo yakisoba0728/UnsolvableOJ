@@ -37,7 +37,7 @@ export class MissionsService {
 
   private async locked<T>(
     userId: string,
-    run: (m: EntityManager, now: Date) => Promise<T>,
+    run: (m: EntityManager, now: string) => Promise<T>,
   ): Promise<T> {
     return this.db.transaction(async (m) => {
       // Serialize only this user's mission requests. Never lock source submissions:
@@ -46,8 +46,9 @@ export class MissionsService {
         "SELECT pg_advisory_xact_lock(hashtextextended('missions:' || $1, 0))",
         [userId],
       );
-      const [{ now }]: { now: Date }[] = await m.query(
-        'SELECT clock_timestamp() AS now',
+      // Keep PostgreSQL microseconds for SQL comparisons and writes, not a JS Date roundtrip.
+      const [{ now }]: { now: string }[] = await m.query(
+        'SELECT clock_timestamp()::text AS now',
       );
       return run(m, now);
     });
@@ -55,7 +56,8 @@ export class MissionsService {
 
   async list(userId: string) {
     return this.locked(userId, async (m, now) => {
-      const p = periods(now);
+      const date = new Date(now);
+      const p = periods(date);
       const states = await this.refresh(m, userId, now);
       const [{ done }]: { done: number }[] = await m.query(
         'SELECT count(*)::int AS done FROM mission_states WHERE user_id=$1 AND claimed_at >= $2 AND claimed_at < $3',
@@ -127,14 +129,14 @@ export class MissionsService {
       return {
         items,
         badges,
-        serverTime: now.toISOString(),
+        serverTime: date.toISOString(),
         timezone: 'Asia/Seoul',
         season: {
           done,
           total: 15,
           daysLeft: Math.max(
             0,
-            Math.ceil((p.monthEnd.getTime() - now.getTime()) / DAY) - 1,
+            Math.ceil((p.monthEnd.getTime() - date.getTime()) / DAY) - 1,
           ),
         },
       };
@@ -201,8 +203,8 @@ export class MissionsService {
     return rows.map((r) => ({ ...r, name: badgeNames[r.badge] ?? r.badge }));
   }
 
-  private async refresh(m: EntityManager, userId: string, now: Date) {
-    const p = periods(now);
+  private async refresh(m: EntityManager, userId: string, now: string) {
+    const p = periods(new Date(now));
     const [facts]: {
       daily: number;
       weekly: number;
@@ -215,10 +217,10 @@ export class MissionsService {
       SELECT
         (SELECT count(DISTINCT problem_id)::int FROM submissions WHERE user_id=$1 AND (accepted_for_xp OR status='ACCEPTED') AND created_at >= $2 AND created_at < $3) AS daily,
         (SELECT count(DISTINCT problem_id)::int FROM submissions WHERE user_id=$1 AND (accepted_for_xp OR status='ACCEPTED') AND created_at >= $4 AND created_at < $3) AS weekly,
-        (SELECT count(*)::int FROM submissions WHERE user_id=$1 AND status::text IN ${learningVerdicts} AND created_at >= $2 AND created_at < LEAST($3,$2::timestamptz+interval '6 hours')) AS night,
+        (SELECT count(*)::int FROM submissions WHERE user_id=$1 AND (completed_for_learning OR status::text IN ${learningVerdicts}) AND created_at >= $2 AND created_at < LEAST($3,$2::timestamptz+interval '6 hours')) AS night,
         (SELECT count(*)::int FROM community_posts WHERE author_id=$1 AND category='SOLUTION' AND created_at >= $5 AND created_at < $3) AS community,
         (SELECT count(*)::int FROM analysis_attempts WHERE user_id=$1 AND day=$6::date) AS analysis,
-        ARRAY(SELECT DISTINCT to_char(created_at AT TIME ZONE 'Asia/Seoul','YYYY-MM-DD') FROM submissions WHERE user_id=$1 AND status::text IN ${learningVerdicts} AND created_at < $3) AS days
+        ARRAY(SELECT DISTINCT to_char(created_at AT TIME ZONE 'Asia/Seoul','YYYY-MM-DD') FROM submissions WHERE user_id=$1 AND (completed_for_learning OR status::text IN ${learningVerdicts}) AND created_at < $3) AS days
     `,
       [userId, p.start, now, p.week, p.month, p.day],
     );
@@ -309,7 +311,7 @@ export class MissionsService {
         [
           userId,
           questionId,
-          kstDay(now),
+          kstDay(new Date(now)),
           selected,
           question.answer === selected,
           now,

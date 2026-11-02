@@ -5,6 +5,7 @@ import { randomBytes } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkSandboxBudget } from './check-sandbox-budget.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const required = {
@@ -36,6 +37,7 @@ for (const name of Object.keys(required)) {
 }
 
 const plan = config();
+checkSandboxBudget(plan);
 assert.deepEqual(Object.keys(plan.services).sort(), [
   'back', 'front', 'go-judge', 'judge', 'postgres', 'redis',
 ]);
@@ -89,4 +91,17 @@ assert.equal(judge.stop_grace_period, '2m0s');
 const resized = config({ JUDGE_CONCURRENCY: '1' });
 assert.equal(resized.services.judge.environment.JUDGE_CONCURRENCY, '1');
 assert.ok(resized.services['go-judge'].command.includes('-parallelism=1'));
+checkSandboxBudget(resized);
+assert.throws(() => checkSandboxBudget(config({ SANDBOX_MEMORY_LIMIT: '3g' })), /headroom/);
+assert.throws(() => checkSandboxBudget(config({ JUDGE_CONCURRENCY: '3' })), /headroom/);
+checkSandboxBudget(config({ JUDGE_CONCURRENCY: '3', SANDBOX_MEMORY_LIMIT: '14g' }));
+const executorEnv = {
+  ...env, API_BASE_URL: 'https://api.example.test/api/v1', REDIS_HOST: 'redis.private.test',
+};
+const executor = (overrides = {}) => JSON.parse(execFileSync('docker', [
+  'compose', '--env-file', 'Judge/deploy/.env.example', '-f', 'Judge/deploy/compose.yaml', 'config', '--format', 'json',
+], { cwd: root, env: { ...executorEnv, ...overrides }, encoding: 'utf8', stdio: 'pipe' }));
+checkSandboxBudget(executor());
+checkSandboxBudget(executor({ JUDGE_CONCURRENCY: '3', SANDBOX_MEMORY_LIMIT: '14g' }));
+assert.throws(() => checkSandboxBudget(executor({ JUDGE_CONCURRENCY: '3' })), /headroom/);
 console.log('Production Compose: required settings, private networking, persistence, resource budgets and worker wiring passed.');

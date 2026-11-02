@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import type { EnterpriseTest, TestInput } from "./model";
+import { testStatus, type EnterpriseTest, type TestInput } from "./model";
 
 /**
  * 기업 테스트는 아직 서버 저장소가 없어, 만든 계정별로 이 브라우저에만 저장한다.
@@ -48,15 +48,20 @@ let state = load() ?? {};
 const listeners = new Set<() => void>();
 
 // 다른 탭에서 바뀐 목록 위에 고쳐 써야 그 탭의 변경을 덮어쓰지 않는다.
-function commit(update: (current: Data) => Data) {
-  const next = update(load() ?? state);
-  state = next;
+function commit(update: (current: Data) => Data | null) {
+  const current = load();
+  // A failed read must not overwrite records belonging to another tab/account.
+  if (!current) return false;
+  const next = update(current);
+  if (!next) return false;
   try {
     localStorage.setItem(storageKey, JSON.stringify(next));
   } catch {
-    /* 저장소를 쓸 수 없어도 이번 방문에는 반영한다 */
+    return false;
   }
+  state = next;
   listeners.forEach((listener) => listener());
+  return true;
 }
 
 // 다른 탭의 변경은 기업 테스트 화면을 벗어난 동안에도 반영한다.
@@ -79,7 +84,7 @@ export function useEnterpriseTests(userId: string | undefined) {
 }
 
 export const enterpriseActions = {
-  create(userId: string, input: TestInput): EnterpriseTest {
+  create(userId: string, input: TestInput): EnterpriseTest | null {
     const now = new Date().toISOString();
     const test: EnterpriseTest = {
       id: `t-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
@@ -87,23 +92,44 @@ export const enterpriseActions = {
       createdAt: now,
       updatedAt: now,
     };
-    commit((current) => ({ ...current, [userId]: [test, ...(current[userId] ?? [])] }));
-    return test;
+    return commit((current) => ({ ...current, [userId]: [test, ...(current[userId] ?? [])] })) ? test : null;
   },
-  update(userId: string, id: string, input: TestInput) {
-    commit((current) => ({
-      ...current,
-      [userId]: (current[userId] ?? []).map((test) =>
-        test.id === id
-          ? { ...test, ...input, updatedAt: new Date().toISOString() }
-          : test,
-      ),
-    }));
+  /** 성공은 null, 실패는 입력을 유지한 채 표시할 오류 메시지다. */
+  update(userId: string, original: EnterpriseTest, input: TestInput): string | null {
+    let error = "이 브라우저에 저장하지 못했어요. 입력한 내용은 유지했으니 저장 공간·권한을 확인하고 다시 시도해 주세요.";
+    // shortcut: localStorage read/compare/write is not atomic across tabs; use server transactions when simultaneous writes must be serialized.
+    const saved = commit((current) => {
+      const latest = current[userId]?.find((test) => test.id === original.id);
+      if (!latest) {
+        error = "다른 탭에서 테스트가 삭제되었어요. 입력한 내용은 유지했지만 저장할 수 없어요.";
+        return null;
+      }
+      if (testStatus(latest) !== "scheduled") {
+        error = "시작된 테스트는 수정할 수 없어요. 입력한 내용은 유지했지만 저장할 수 없어요.";
+        return null;
+      }
+      if (JSON.stringify(latest) !== JSON.stringify(original)) {
+        error = "다른 탭에서 테스트가 변경되었어요. 입력한 내용은 유지했으니 최신 내용을 다시 확인해 주세요.";
+        return null;
+      }
+      return {
+        ...current,
+        [userId]: current[userId].map((test) =>
+          test.id === original.id
+            ? { ...test, ...input, updatedAt: new Date().toISOString() }
+            : test,
+        ),
+      };
+    });
+    return saved ? null : error;
   },
   remove(userId: string, id: string) {
-    commit((current) => ({
-      ...current,
-      [userId]: (current[userId] ?? []).filter((test) => test.id !== id),
-    }));
+    return commit((current) => {
+      if (!current[userId]?.some((test) => test.id === id)) return null;
+      return {
+        ...current,
+        [userId]: current[userId].filter((test) => test.id !== id),
+      };
+    });
   },
 };

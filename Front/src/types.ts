@@ -68,6 +68,7 @@ export interface Submission {
   problem: { id: string; slug?: string; title?: string };
   language: Language;
   status: string;
+  completedForLearning?: boolean;
   runtimeMs: number | null;
   memoryKb: number | null;
   passedTestCases: number;

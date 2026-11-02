@@ -35,7 +35,7 @@ export interface Comment {
   updatedAt: string;
 }
 const columns = `p.id, p.author_id AS "authorId", p.category, p.tags, p.views, p.title, p.body, p.code, p.language,
-  p.problem_id AS "problemId", p.accepted_comment_id AS "acceptedCommentId",
+  p.accepted_comment_id AS "acceptedCommentId",
   p.created_at AS "createdAt", p.updated_at AS "updatedAt"`;
 const summaryColumns = `p.id, p.author_id AS "authorId", p.category, p.tags, p.views, p.title,
   p.accepted_comment_id AS "acceptedCommentId", p.created_at AS "createdAt", p.updated_at AS "updatedAt"`;
@@ -54,7 +54,7 @@ export class CommunityService {
     const baseConditions: string[] = [];
     if (query.problemId) {
       params.push(query.problemId);
-      baseConditions.push(`p.problem_id=$${params.length}`);
+      baseConditions.push(`EXISTS(SELECT 1 FROM problems visible_problem WHERE visible_problem.id=p.problem_id AND visible_problem.status='PUBLISHED' AND visible_problem.id=$${params.length})`);
     }
     // 검색어는 제목에서만 찾고, 태그는 고른 태그를 모두 가진 글만 남긴다(대소문자 무시).
     if (query.q) {
@@ -187,7 +187,7 @@ export class CommunityService {
 
   async detail(id: string) {
     const [post]: Post[] = await this.db.query(
-      `SELECT ${columns}, ${publicDetails} FROM community_posts p ${joins} WHERE p.id=$1`,
+      `SELECT ${columns}, pr.id AS "problemId", ${publicDetails} FROM community_posts p ${joins} WHERE p.id=$1`,
       [id],
     );
     if (!post) throw new NotFoundException('게시글을 찾을 수 없습니다.');
@@ -260,7 +260,7 @@ export class CommunityService {
 
   private async lock(manager: EntityManager, id: string) {
     const [post]: Post[] = await manager.query(
-      `SELECT ${columns} FROM community_posts p WHERE id=$1 FOR UPDATE`,
+      `SELECT ${columns}, p.problem_id AS "problemId" FROM community_posts p WHERE id=$1 FOR UPDATE`,
       [id],
     );
     if (!post) throw new NotFoundException('게시글을 찾을 수 없습니다.');

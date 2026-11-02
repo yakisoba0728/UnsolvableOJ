@@ -68,8 +68,6 @@ function Notice({ title, children }: { title: string; children: React.ReactNode 
 export function EnterpriseFormPage() {
   const { id } = useParams();
   const { session } = useAuth();
-  const tests = useEnterpriseTests(session?.user.id);
-  const existing = id ? tests.find((test) => test.id === id) : undefined;
   useDocumentTitle(id ? "테스트 편집" : "새 테스트 만들기");
 
   if (!session)
@@ -85,6 +83,17 @@ export function EnterpriseFormPage() {
         </Link>
       </Notice>
     );
+  // 계정이나 주소가 바뀔 때만 새 폼을 연다. 다른 탭의 변경으로 작성 중인 입력을 버리지 않는다.
+  return <EnterpriseForm key={`${session.user.id}:${id ?? "new"}`} userId={session.user.id} id={id} />;
+}
+
+function EnterpriseForm({ userId, id }: { userId: string; id?: string }) {
+  const tests = useEnterpriseTests(userId);
+  const [opened] = useState(() => {
+    const existing = id ? tests.find((test) => test.id === id) : undefined;
+    return { existing, editable: !existing || testStatus(existing) === "scheduled" };
+  });
+  const { existing, editable } = opened;
   if (id && !existing)
     return (
       <Notice title="테스트 편집">
@@ -95,7 +104,7 @@ export function EnterpriseFormPage() {
         </Link>
       </Notice>
     );
-  if (existing && testStatus(existing) !== "scheduled")
+  if (existing && !editable)
     return (
       <Notice title="테스트 편집">
         <strong>시작된 테스트는 수정할 수 없어요</strong>
@@ -105,14 +114,7 @@ export function EnterpriseFormPage() {
         </Link>
       </Notice>
     );
-  // 계정이 바뀌면 이전 계정의 입력을 새 계정의 테스트로 저장하지 않도록 폼을 새로 만든다.
-  return (
-    <TestForm
-      key={`${session.user.id}:${existing?.id ?? "new"}`}
-      userId={session.user.id}
-      existing={existing}
-    />
-  );
+  return <TestForm userId={userId} existing={existing} />;
 }
 
 function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseTest }) {
@@ -121,6 +123,7 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
   const [draft, setDraft] = useState(() => initialDraft(existing));
   const [query, setQuery] = useState("");
   const [showErrors, setShowErrors] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const errors = showErrors ? validateDraft(draft) : {};
   const patch = (next: Partial<TestDraft>) => setDraft((prev) => ({ ...prev, ...next }));
 
@@ -142,6 +145,7 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
 
   function submit(event: FormEvent) {
     event.preventDefault();
+    setSaveError("");
     setShowErrors(true);
     const found = validateDraft(draft);
     const first = fieldOrder.find((key) => found[key]);
@@ -151,9 +155,18 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
     }
     const input = draftToInput(draft);
     if (existing) {
-      enterpriseActions.update(userId, existing.id, input);
-      navigate(`/enterprise/${existing.id}`);
-    } else navigate(`/enterprise/${enterpriseActions.create(userId, input).id}`);
+      const error = enterpriseActions.update(userId, existing, input);
+      if (error) {
+        setSaveError(error);
+        return;
+      }
+    }
+    const saved = existing ?? enterpriseActions.create(userId, input);
+    if (!saved) {
+      setSaveError("이 브라우저에 저장하지 못했어요. 입력한 내용은 유지했으니 저장 공간·권한을 확인하고 다시 시도해 주세요.");
+      return;
+    }
+    navigate(`/enterprise/${saved.id}`);
   }
 
   const err = (key: keyof TestErrors) =>
@@ -169,6 +182,7 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
 
   return (
     <div className="page-width enterprise-page">
+      {saveError ? <p className="error-message" role="alert">{saveError}</p> : null}
       <PageHeader
         title={existing ? "테스트 편집" : "새 테스트 만들기"}
         description="테스트 정보를 입력하고 출제할 문제를 고릅니다."

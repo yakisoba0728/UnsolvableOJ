@@ -251,11 +251,9 @@ test("mission progress is computed from real submissions and learning records", 
   const result = await page.evaluate(async () => {
     const modulePath = "/src/missions/catalog.ts";
     const { buildMissions, seasonOf } = await import(modulePath);
-    const now = new Date();
+    const now = new Date("2026-11-04T12:00:00+09:00");
     const day = (offset: number, hour?: number) => {
-      const at = new Date(now.getFullYear(), now.getMonth(), now.getDate() - offset);
-      if (hour !== undefined) at.setHours(hour, 0, 0, 0);
-      return at.toISOString();
+      return new Date(Date.UTC(2026, 10, 4 - offset, (hour ?? 0) - 9)).toISOString();
     };
     const make = (id: string, status: string, createdAt: string) => ({
       id: `s-${id}`,
@@ -290,7 +288,7 @@ test("mission progress is computed from real submissions and learning records", 
       ),
       season: seasonOf(input),
       expectedDaysLeft:
-        new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate(),
+        26,
     };
   });
 
@@ -314,8 +312,8 @@ test("season counts achievements cumulatively instead of today's snapshot", asyn
     const modulePath = "/src/missions/catalog.ts";
     const { buildMissions, seasonOf } = await import(modulePath);
     // 2026-06-20(토)은 일~토 주로 6월 14일에 시작해 20일에 끝난다. 오늘은 아무것도 하지 않았다.
-    const now = new Date(2026, 5, 20, 12, 0);
-    const at = (day: number) => new Date(2026, 5, day, 10, 0).toISOString();
+    const now = new Date("2026-06-20T12:00:00+09:00");
+    const at = (day: number) => new Date(Date.UTC(2026, 5, day, 1)).toISOString();
     const solved = (day: number, count: number, tag: string) =>
       Array.from({ length: count }, (_, i) => ({
         id: `s-${tag}-${i}`,

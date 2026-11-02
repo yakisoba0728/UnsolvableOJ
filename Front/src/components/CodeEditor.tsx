@@ -85,6 +85,10 @@ export function CodeEditor({
   // 스니펫의 Tab 칸 이동 상태, 직전 입력창 값(칸 위치 보정용), 미러 동기화 중 표시
   const sessionRef = useRef<SnippetSession | null>(null);
   const lastValueRef = useRef("");
+  const compositionRef = useRef<{
+    value: string;
+    session: SnippetSession | null;
+  } | null>(null);
   const syncingRef = useRef(false);
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -93,6 +97,7 @@ export function CodeEditor({
     () => ({
       reset(next) {
         sessionRef.current = null;
+        compositionRef.current = null;
         setPopup(null);
         lastValueRef.current = next;
       },
@@ -106,12 +111,18 @@ export function CodeEditor({
   }
 
   useEffect(() => {
+    // 계정·초안 복원으로 바뀐 값에는 이전 조합·스니펫 위치를 이어 쓰지 않는다.
+    if (value !== lastValueRef.current) {
+      sessionRef.current = null;
+      compositionRef.current = null;
+    }
     lastValueRef.current = value;
   }, [value]);
 
   // 언어가 바뀌면 진행 중이던 스니펫 칸 이동을 끝낸다(다른 문제로 옮기면 편집기를 새로 그린다).
   useEffect(() => {
     sessionRef.current = null;
+    compositionRef.current = null;
   }, [language]);
 
   // 방향키로 고른 제안이 목록 밖으로 나가지 않게 따라간다.
@@ -130,12 +141,42 @@ export function CodeEditor({
 
   /** 계산한 편집 결과를 입력창에 적용한다(실행 취소가 유지되도록 브라우저 편집 명령을 우선 쓴다). */
   function applyEdit(target: HTMLTextAreaElement, next: EditState) {
-    if (!applyToTextarea(target, next)) {
+    // execCommand는 target이 아니라 현재 초점이 있는 입력 칸을 편집한다.
+    if (document.activeElement !== target || !applyToTextarea(target, next)) {
       // 미러 칸 맞추기가 같은 입력 이벤트 안에서 DOM을 다시 읽으므로 값을 바로 넣는다.
       target.value = next.value;
       target.setSelectionRange(next.start, next.end);
       updateSource(next.value);
     }
+    updateCursor(target);
+  }
+
+  function syncSnippet(target: HTMLTextAreaElement, previous = lastValueRef.current) {
+    if (!sessionRef.current || syncingRef.current || previous === target.value) return;
+    const synced = reconcileSession(
+      sessionRef.current,
+      previous,
+      target.value,
+      target.selectionStart,
+    );
+    sessionRef.current = synced.session;
+    if (synced.session && synced.value !== target.value) {
+      syncingRef.current = true;
+      try {
+        applyEdit(target, { value: synced.value, start: synced.caret, end: synced.caret });
+      } finally {
+        syncingRef.current = false;
+      }
+    }
+  }
+
+  function finishComposition(target: HTMLTextAreaElement) {
+    const composition = compositionRef.current;
+    compositionRef.current = null;
+    if (!composition) return;
+    if (sessionRef.current === composition.session)
+      syncSnippet(target, composition.value);
+    updateSource(target.value);
     updateCursor(target);
   }
 
@@ -369,35 +410,30 @@ export function CodeEditor({
         aria-activedescendant={
           popup ? `suggestion-${popup.index}` : undefined
         }
+        onCompositionStart={(event) => {
+          compositionRef.current = {
+            value: event.currentTarget.value,
+            session: sessionRef.current,
+          };
+          setPopup(null);
+        }}
+        onCompositionEnd={(event) => finishComposition(event.currentTarget)}
         onChange={(event) => {
           tabMovesFocus.current = false;
           const target = event.currentTarget;
           const native = event.nativeEvent as InputEvent;
-          // 한글 등 조합 중에는 값만 저장하고, 칸 보정·제안은 조합이 끝난 뒤에 한다.
-          if (native.isComposing) {
+          // 최종 input이 compositionend보다 먼저 와도 종료 전에는 미러를 고치지 않는다.
+          if (!syncingRef.current && (native.isComposing || compositionRef.current)) {
+            compositionRef.current ??= {
+              value: lastValueRef.current,
+              session: sessionRef.current,
+            };
             updateSource(target.value);
             updateCursor(target);
             return;
           }
           // 스니펫 칸 안에서 고친 글을 같은 번호의 다른 칸(미러)에도 반영한다.
-          if (sessionRef.current && !syncingRef.current) {
-            const synced = reconcileSession(
-              sessionRef.current,
-              lastValueRef.current,
-              target.value,
-              target.selectionStart,
-            );
-            sessionRef.current = synced.session;
-            if (synced.session && synced.value !== target.value) {
-              syncingRef.current = true;
-              applyEdit(target, {
-                value: synced.value,
-                start: synced.caret,
-                end: synced.caret,
-              });
-              syncingRef.current = false;
-            }
-          }
+          syncSnippet(target);
           updateSource(target.value);
           updateCursor(target);
           if (suppressSuggest.current) {

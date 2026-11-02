@@ -13,6 +13,7 @@ import { configureHttp } from '../src/configure-http.js';
 import { MissionsService } from '../src/modules/missions/missions.service.js';
 import { Missions1793000000000 } from '../src/database/migrations/1793000000000-missions.js';
 import { analysisCatalog } from '../src/modules/missions/analysis-catalog.js';
+import { withMissionClock } from './mission-clock.js';
 import {
   DAY,
   kstDay,
@@ -51,7 +52,7 @@ describe('missions (real PostgreSQL transactions and HTTP)', () => {
       bodyParser: false,
     });
     configureHttp(app);
-    await app.init();
+    await app.listen(0, '127.0.0.1');
     db = app.get(DataSource);
     service = app.get(MissionsService);
   });
@@ -290,6 +291,34 @@ describe('missions (real PostgreSQL transactions and HTTP)', () => {
     await db.query('DELETE FROM community_posts WHERE author_id=$1', [userId]);
     expect((await service.claim(userId, mission.stateId)).xp).toBe(150);
   });
+  it('uses the original microsecond clock for cutoffs and persisted reward/analysis timestamps', async () => {
+    const clock = '2026-10-15T16:00:00.123726Z';
+    for (const at of ['.122999', '.123037', '.123900'])
+      await db.query(
+        `INSERT INTO community_posts(author_id,category,title,body,created_at)
+         VALUES($1,'SOLUTION','precision','fixture',$2)`,
+        [userId, `2026-10-15T16:00:00${at}Z`],
+      );
+    await withMissionClock(db, clock, async () => {
+      const mission = (await list()).items.find((m) => m.id === 'community')!;
+      expect(mission.current).toBe(2);
+      expect(mission.completedAt).toBeTruthy();
+      // Two prior rows count; the third, later in the same millisecond, does not.
+      await db.query("DELETE FROM community_posts WHERE author_id=$1 AND created_at < '2026-10-15T16:00:00.123000Z'", [userId]);
+      expect((await list()).items.find((m) => m.id === 'community')?.current).toBe(1);
+      await expect(service.claim(userId, mission.stateId)).rejects.toThrow('아직');
+      await db.query("UPDATE community_posts SET created_at='2026-10-15T16:00:00.123038Z' WHERE author_id=$1", [userId]);
+      await service.claim(userId, mission.stateId);
+      await service.answer(userId, 'slice', 2);
+      const [precision] = await db.query(`SELECT
+        completed_at=$2::timestamptz AS completed, claimed_at=$2::timestamptz AS claimed,
+        u.updated_at=$2::timestamptz AS updated,
+        a.created_at=$2::timestamptz AND a.updated_at=$2::timestamptz AS analysis
+        FROM mission_states s JOIN users u ON u.id=s.user_id
+        JOIN analysis_attempts a ON a.user_id=u.id WHERE s.id=$1`, [mission.stateId, clock]);
+      expect(precision).toEqual({ completed: true, claimed: true, updated: true, analysis: true });
+    });
+  });
   it('grants the streak XP and unique badge once per continuous run', async () => {
     const start = periods(now).start;
     for (let i = 1; i <= 7; i++)
@@ -389,6 +418,26 @@ describe('missions (real PostgreSQL transactions and HTTP)', () => {
     const mission = (await list()).items.find((m) => m.id === 'streak')!;
     expect(mission.claimedAt).toBeNull();
     expect((await service.claim(userId, mission.stateId)).xp).toBe(240);
+  });
+  it('awards two genuine runs separated by an initial QUEUED day, without duplicating the badge', async () => {
+    const at = (day: number) => new Date(Date.UTC(2026, 9, day, 3));
+    for (let day = 1; day <= 7; day++) await submit(at(day), 'WRONG_ANSWER');
+    const first = await withMissionClock(db, '2026-10-07T04:00:00Z', async () => {
+      const mission = (await list()).items.find((m) => m.id === 'streak')!;
+      expect((await service.claim(userId, mission.stateId)).xp).toBe(120);
+      return mission;
+    });
+    await submit(at(8), 'QUEUED');
+    for (let day = 9; day <= 15; day++) await submit(at(day), 'COMPILE_ERROR');
+    await withMissionClock(db, '2026-10-15T04:00:00Z', async () => {
+      const second = (await list()).items.find((m) => m.id === 'streak')!;
+      expect(second.stateId).not.toBe(first.stateId);
+      expect(second.current).toBe(7);
+      const receipt = await service.claim(userId, second.stateId);
+      expect(receipt.xp).toBe(240);
+      expect(receipt.badges.filter((b) => b.badge === 'seven-day-streak')).toHaveLength(1);
+      expect((await service.claim(userId, second.stateId)).alreadyClaimed).toBe(true);
+    });
   });
   it('does not advertise a badge when no bonus problem is available', async () => {
     await db.query(

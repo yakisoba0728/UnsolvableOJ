@@ -18,7 +18,7 @@ import {
 import { ProblemDifficulty } from '../problems/problem.enums.js';
 import type { JudgeResultDto } from './dto/judge-result.dto.js';
 import { Submission } from './submission.entity.js';
-import { SubmissionStatus } from './submission.enums.js';
+import { learningStatuses, SubmissionStatus } from './submission.enums.js';
 import {
   enqueueJudge,
   findProblemSnapshot,
@@ -179,6 +179,7 @@ export class JudgeService {
         submission.acceptedForXp = true;
       else if (REJECTED_STATUSES.has(dto.status))
         submission.acceptedForXp = false;
+      if (learningStatuses.has(dto.status)) submission.completedForLearning = true;
       submission.status = dto.status;
       submission.runtimeMs = dto.runtimeMs ?? null;
       submission.memoryKb = dto.memoryKb ?? null;
