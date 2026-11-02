@@ -189,6 +189,17 @@ export function ProfilePage() {
           <h2>
             {profile.username} <small>@{profile.username}</small>
           </h2>
+          <div aria-label="획득한 배지">
+            {profile.badges?.map((b) => (
+              <span className="pill" key={b.badge}>
+                {b.badge === "night-coder"
+                  ? "심야 코더"
+                  : b.badge === "seven-day-streak"
+                    ? "7일 연속 학습"
+                    : b.badge}
+              </span>
+            ))}
+          </div>
           <div className="profile-level">
             <span className="pill pill-warning">Lv.{profile.level}</span>
             <span className="muted">

@@ -93,6 +93,7 @@ export interface Submission {
 }
 
 export interface UserProfile extends User {
+  badges?: { badge: string; awardedAt: string }[];
   createdAt: string;
   solvedCount: number;
 }

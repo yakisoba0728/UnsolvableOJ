@@ -6,7 +6,7 @@ import {
   type AnalysisQuestion,
   type AnalysisTopic,
 } from "../analysis/questions";
-import { analysisStatus, useAnalysisAttempts } from "../analysis/progress";
+import { analysisStatus, useAnalysisHistory } from "../analysis/progress";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import {
@@ -68,7 +68,7 @@ export function AnalysisPage() {
   useDocumentTitle("코드 분석");
   const { session } = useAuth();
   const userId = session?.user.id ?? "guest";
-  const attempts = useAnalysisAttempts();
+  const { attempts, error: historyError } = useAnalysisHistory();
   const { solved, attempted } = useMemo(
     () => analysisStatus(attempts, userId),
     [attempts, userId],
@@ -144,7 +144,9 @@ export function AnalysisPage() {
   const count = (
     skip: "difficulty" | "topic" | "status",
     test: (item: AnalysisQuestion) => boolean,
-  ) => analysisQuestions.filter((item) => matches(item, skip) && test(item)).length;
+  ) =>
+    analysisQuestions.filter((item) => matches(item, skip) && test(item))
+      .length;
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
@@ -154,19 +156,22 @@ export function AnalysisPage() {
   );
   const hasFilter = Boolean(
     selectedDifficulties.length ||
-      selectedTopics.length ||
-      statuses.length ||
-      keyword,
+    selectedTopics.length ||
+    statuses.length ||
+    keyword,
   );
 
   const mine = attempts.filter((item) => item.userId === userId);
   const rate = mine.length
-    ? Math.round((mine.filter((item) => item.correct).length / mine.length) * 100)
+    ? Math.round(
+        (mine.filter((item) => item.correct).length / mine.length) * 100,
+      )
     : null;
   // 이어 풀 문제(시도했지만 아직 못 맞힌 첫 문제). 없으면 아직 안 푼 첫 문제.
   const next =
-    analysisQuestions.find((item) => attempted.has(item.id) && !solved.has(item.id)) ??
-    analysisQuestions.find((item) => !attempted.has(item.id));
+    analysisQuestions.find(
+      (item) => attempted.has(item.id) && !solved.has(item.id),
+    ) ?? analysisQuestions.find((item) => !attempted.has(item.id));
   const resuming = next ? attempted.has(next.id) : false;
 
   // 목록을 무작위 순서로 섞는다(이동하지 않는다). 선택한 조건 안에서 섞인다.
@@ -197,6 +202,11 @@ export function AnalysisPage() {
 
   return (
     <div className="page-width problems-page">
+      {historyError && (
+        <p className="error-message" role="alert">
+          {historyError}
+        </p>
+      )}
       <PageHeader
         title="코드 분석"
         description="코드를 읽고 실행 결과를 추론해 보세요. 풀면 바로 해설을 볼 수 있어요."
@@ -240,7 +250,9 @@ export function AnalysisPage() {
                 ),
               }))}
               defaultValue=""
-              onChangeValues={(values) => update({ s: values.join(",") || null })}
+              onChangeValues={(values) =>
+                update({ s: values.join(",") || null })
+              }
             />
           </div>
           <div className="filter-bar">
@@ -262,7 +274,9 @@ export function AnalysisPage() {
                 })),
               ]}
               defaultValue=""
-              onChangeValues={(values) => update({ d: values.join(",") || null })}
+              onChangeValues={(values) =>
+                update({ d: values.join(",") || null })
+              }
             />
           </div>
           <div className="filter-bar">
@@ -280,7 +294,9 @@ export function AnalysisPage() {
                 })),
               ]}
               defaultValue=""
-              onChangeValues={(values) => update({ t: values.join(",") || null })}
+              onChangeValues={(values) =>
+                update({ t: values.join(",") || null })
+              }
             />
           </div>
           {sort === "random" ? (

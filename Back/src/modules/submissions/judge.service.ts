@@ -189,9 +189,11 @@ export class JudgeService {
           ? null
           : this.safeDiagnosticText(dto.compileOutput);
       submission.debugOutputs = (dto.debugOutputs ?? []).map((output) => ({
-        ...output,
+        testCase: output.testCase,
         stdout: this.safeDiagnosticText(output.stdout),
         stderr: this.safeDiagnosticText(output.stderr),
+        stdoutTruncated: output.stdoutTruncated,
+        stderrTruncated: output.stderrTruncated,
       }));
       submission.judgeMessage =
         dto.judgeMessage == null
