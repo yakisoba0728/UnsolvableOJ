@@ -482,8 +482,8 @@ textarea {
   color: var(--color-ink-900);
   outline: none;
 }
-input:hover:not(:disabled):not(:focus):not([aria-invalid="true"]),
-textarea:hover:not(:disabled):not(:focus):not([aria-invalid="true"]) {
+input:hover:not(:disabled):not([readonly]):not(:focus):not([aria-invalid="true"]),
+textarea:hover:not(:disabled):not([readonly]):not(:focus):not([aria-invalid="true"]) {
   border-color: var(--color-ink-600);
 }
 input:focus,
