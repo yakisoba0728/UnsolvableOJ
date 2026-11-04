@@ -399,11 +399,11 @@ p {
   color: var(--color-ink-600);
   margin: 20px 0;
 }
-.empty-state[role="alert"] {
+.empty-state[role="alert"]:not(.not-found-state) {
   background: var(--color-danger-soft);
   border-color: var(--color-danger-border);
 }
-.empty-state[role="alert"] strong {
+.empty-state[role="alert"]:not(.not-found-state) strong {
   color: var(--color-danger);
 }
 /* 버튼(.button)은 자기 글자색을 쓴다. 안 그러면 파란 버튼 위에 파란 글자가 된다. */
@@ -495,7 +495,8 @@ textarea:focus {
 input[aria-invalid="true"]:focus,
 textarea[aria-invalid="true"]:focus {
   border-color: var(--color-danger);
-  box-shadow: 0 0 0 3px var(--color-danger-soft);
+  box-shadow: 0 0 0 3px var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 40%, transparent);
 }
 input:disabled,
 textarea:disabled {
@@ -682,9 +683,6 @@ textarea {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--focus-ring);
 }
-.code-editor:focus-visible {
-  box-shadow: 0 0 0 3px var(--color-primary);
-}
 .editor-note {
   font-size: 13px;
   color: var(--color-ink-600);
@@ -735,6 +733,7 @@ textarea {
 .verdict-compile_error::before,
 .verdict-time_limit_exceeded::before,
 .verdict-memory_limit_exceeded::before,
+.verdict-output_limit_exceeded::before,
 .verdict-system_error::before {
   content: "✕";
   content: "✕" / "";
@@ -5641,7 +5640,8 @@ h3 {
   border-color: var(--color-danger);
 }
 .auth-field [aria-invalid="true"]:focus {
-  box-shadow: 0 0 0 3px var(--color-danger-soft);
+  box-shadow: 0 0 0 3px var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 40%, transparent);
 }
 @media (max-width: 880px) {
   .problem-row:not(.submission-row) .difficulty {
@@ -6279,8 +6279,8 @@ h3 {
 /* ===== 입력을 받지 않는 곳에는 텍스트 커서(I빔)가 나오지 않게 한다 =====
    화면 글자 위에서는 기본 화살표, 누를 수 있는 곳은 손가락, 글을 입력하는 칸만 텍스트 커서.
    읽고 복사하는 본문(글 내용·문제 설명·코드 출력)은 드래그로 선택하기 쉽도록 텍스트 커서를 둔다. */
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([readonly]),
-textarea:not([readonly]) {
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([readonly]):not(:disabled),
+textarea:not([readonly]):not(:disabled) {
   cursor: text;
 }
 input[readonly],
@@ -6511,11 +6511,13 @@ textarea {
   box-sizing: border-box;
 }
 .write-form [aria-invalid="true"]:focus {
-  box-shadow: 0 0 0 3px var(--color-danger-soft);
+  box-shadow: 0 0 0 3px var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 40%, transparent);
 }
 .write-form .tag-input[aria-invalid="true"]:focus-within {
   border-color: var(--color-danger);
-  box-shadow: 0 0 0 3px var(--color-danger-soft);
+  box-shadow: 0 0 0 3px var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 40%, transparent);
 }
 .write-form .md-field {
   scroll-margin-top: 100px;
