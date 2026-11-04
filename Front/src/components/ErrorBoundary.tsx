@@ -31,7 +31,13 @@ export class ErrorBoundary extends Component<
     if (!this.state.failed) return this.props.children;
     return (
       <div className="page-width notfound-page" role="alert">
-        <h1>화면을 표시하지 못했어요.</h1>
+        <h1
+          tabIndex={-1}
+          ref={(node) => node?.focus()}
+          style={{ outline: "none" }}
+        >
+          화면을 표시하지 못했어요.
+        </h1>
         <p>
           일시적인 문제일 수 있습니다. 새로고침해도 계속되면 잠시 후 다시
           시도해 주세요.
@@ -40,6 +46,9 @@ export class ErrorBoundary extends Component<
           <button className="button" onClick={() => window.location.reload()}>
             새로고침
           </button>
+          <a className="button button-outline" href="/">
+            홈으로
+          </a>
         </div>
       </div>
     );

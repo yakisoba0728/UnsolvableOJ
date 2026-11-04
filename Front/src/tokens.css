@@ -33,6 +33,7 @@
   --color-button-soft-bg: #e8edf8;
   --color-button-soft-fg: #364c82;
   --focus-ring: rgba(29, 79, 216, 0.14);
+  --focus-outline: 3px solid var(--color-ink-900);
 
   /* Color: status */
   --color-success: #137547;
@@ -115,7 +116,7 @@
   --color-primary-solid: #3566e8;
   --focus-ring: rgba(139, 172, 255, 0.3);
   --color-button: #4a63ad;
-  --color-button-hover: #5a75c4;
+  --color-button-hover: #3f58a3; /* 흰 글자 6.52:1, 라이트와 같은 방향(눌리는 느낌) */
   --color-button-soft-bg: #1f2a47;
   --color-button-soft-fg: #aebff0;
 

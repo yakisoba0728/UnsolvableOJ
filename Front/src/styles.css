@@ -17,6 +17,7 @@ body {
   margin: 0;
   word-break: keep-all;
   overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
   font-weight: var(--weight-body);
   cursor: default;
 }
@@ -234,9 +235,11 @@ p {
 }
 .button:focus-visible,
 .page-button:focus-visible,
-.tab-button:focus-visible {
+.tab-button:focus-visible,
+.action-menu-button:focus-visible {
   outline: 3px solid var(--color-ink-900);
   outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--color-surface);
 }
 .site-footer {
   width: min(1220px, calc(100% - 48px));
@@ -379,6 +382,13 @@ p {
   color: var(--color-ink-600);
   margin: 20px 0;
 }
+.empty-state[role="alert"] {
+  background: var(--color-danger-soft);
+  border-color: var(--color-danger-border);
+}
+.empty-state[role="alert"] strong {
+  color: var(--color-danger);
+}
 /* 버튼(.button)은 자기 글자색을 쓴다. 안 그러면 파란 버튼 위에 파란 글자가 된다. */
 .empty-state a:not(.button) {
   color: var(--color-primary);
@@ -421,6 +431,7 @@ p {
 .error-message {
   background: var(--color-danger-soft);
   border: 1px solid var(--color-danger-border);
+  border-left: 4px solid var(--color-danger);
   color: var(--color-danger);
   border-radius: 6px;
   padding: 11px 14px;
@@ -454,11 +465,31 @@ textarea {
   color: var(--color-ink-900);
   outline: none;
 }
+input:hover:not(:disabled):not(:focus):not([aria-invalid="true"]),
+textarea:hover:not(:disabled):not(:focus):not([aria-invalid="true"]) {
+  border-color: var(--color-ink-600);
+}
 input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--focus-ring);
+}
+input[aria-invalid="true"]:focus,
+textarea[aria-invalid="true"]:focus {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px var(--color-danger-soft);
+}
+input:disabled,
+textarea:disabled {
+  background: var(--color-disabled);
+  color: var(--color-ink-600);
+  cursor: not-allowed;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-ink-600);
+  opacity: 0.75;
 }
 textarea {
   resize: vertical;
@@ -633,6 +664,9 @@ textarea {
 .code-editor:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.code-editor:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-primary);
 }
 .editor-note {
   font-size: 13px;
@@ -3417,9 +3451,22 @@ h3 {
   font-size: 13px;
 }
 .field-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
   color: var(--color-danger);
   font-size: 13px;
   font-weight: var(--weight-label);
+}
+.field-error::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7.5v5.5M12 16.5v.01'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7.5v5.5M12 16.5v.01'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 .write-form [aria-invalid="true"] {
   border-color: var(--color-danger);
@@ -3699,8 +3746,21 @@ h3 {
   font-weight: var(--weight-label);
   cursor: pointer;
 }
+.select-option {
+  position: relative;
+}
 .select-option.active {
   background: var(--color-surface-muted);
+}
+.select-option.active::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--color-primary);
 }
 .select-option.selected {
   color: var(--color-primary);
@@ -4215,7 +4275,7 @@ h3 {
   display: none;
 }
 .scroller-view:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-outline);
   outline-offset: 2px;
 }
 .scroller-slide {
@@ -5004,7 +5064,7 @@ h3 {
   color: var(--color-primary);
 }
 .guide-card button:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-outline);
   outline-offset: 1px;
 }
 
@@ -5084,7 +5144,7 @@ h3 {
 .data-list .problem-row:focus-visible,
 .data-list .history-row:focus-visible,
 .data-list .post-row:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-outline);
   outline-offset: -2px;
 }
 .data-list .problem-row-wrap:last-child .problem-row,
@@ -5336,7 +5396,7 @@ h3 {
   cursor: default;
 }
 .shuffle-icon-button:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-outline);
   outline-offset: 2px;
 }
 /* 섞을 때 두 화살표가 곡선을 따라 얽히며 오른쪽으로 나갔다 왼쪽에서 들어온다(버튼 밖은 잘린다) */
@@ -5650,6 +5710,12 @@ h3 {
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.4s ease-in-out infinite;
 }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: var(--color-disabled);
+  }
+}
 @keyframes skeleton-shimmer {
   from {
     background-position: 100% 0;
@@ -5660,6 +5726,12 @@ h3 {
 }
 .skeleton-rows {
   display: block;
+  animation: skeleton-appear 0.2s ease 0.15s both;
+}
+@keyframes skeleton-appear {
+  from {
+    opacity: 0;
+  }
 }
 .skeleton-row {
   display: grid;
@@ -5813,8 +5885,22 @@ h3 {
 .action-menu-item:focus-visible {
   background: var(--color-surface-muted);
 }
+.action-menu-item:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
 .action-menu-item.danger {
   color: var(--color-danger);
+}
+.action-menu-item.danger:hover,
+.action-menu-item.danger:focus-visible {
+  background: var(--color-danger-soft);
+}
+.action-menu-item:not(.danger) + .action-menu-item.danger {
+  margin-top: 4px;
+  border-top: 1px solid var(--color-divider);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 .post-card-head {
   display: flex;
@@ -6468,7 +6554,7 @@ textarea {
   background: var(--color-primary);
 }
 .solve-resizer:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-outline);
   outline-offset: -2px;
   border-radius: var(--radius-control);
 }
@@ -7605,7 +7691,7 @@ textarea {
   transform: scale(0.97);
 }
 .mission-start:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-outline);
   outline-offset: 4px;
 }
 .post-follow-badge {

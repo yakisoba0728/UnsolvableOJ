@@ -226,8 +226,11 @@ export function SubmissionsPage() {
         </div>
       ) : (
         <div className="empty-state">
-          아직 제출이 없습니다.{" "}
-          <Link to="/problems">첫 문제를 골라보세요.</Link>
+          <strong>아직 제출한 풀이가 없어요.</strong>
+          <p>문제를 골라 첫 풀이를 제출하면 여기에 기록됩니다.</p>
+          <Link className="button" to="/problems">
+            문제 둘러보기
+          </Link>
         </div>
       )}
       {!loading ? (
