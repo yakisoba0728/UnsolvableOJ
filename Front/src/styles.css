@@ -11,7 +11,21 @@
   box-sizing: border-box;
 }
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 body {
   margin: 0;
@@ -203,6 +217,9 @@ p {
 .button:hover {
   background: var(--color-button-hover);
   transform: translateY(-1px);
+}
+.button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
 }
 .button:disabled {
   opacity: 0.55;
@@ -707,6 +724,27 @@ textarea {
 .verdict-judging {
   background: var(--color-warning-soft);
   color: var(--color-warning);
+}
+.verdict-accepted::before {
+  content: "✓";
+  content: "✓" / "";
+  margin-right: 6px;
+}
+.verdict-wrong_answer::before,
+.verdict-runtime_error::before,
+.verdict-compile_error::before,
+.verdict-time_limit_exceeded::before,
+.verdict-memory_limit_exceeded::before,
+.verdict-system_error::before {
+  content: "✕";
+  content: "✕" / "";
+  margin-right: 6px;
+}
+.verdict-queued::before,
+.verdict-judging::before {
+  content: "…";
+  content: "…" / "";
+  margin-right: 6px;
 }
 .result-page {
   padding-bottom: 90px;
@@ -4565,7 +4603,7 @@ h3 {
   border-radius: 6px;
 }
 .md-tabs button {
-  min-height: 26px;
+  min-height: 32px;
   padding: 0 12px;
   border: 0;
   border-radius: 4px;
@@ -5552,7 +5590,7 @@ h3 {
 }
 .suggestion-detail {
   color: #9fb0c8;
-  font-size: 11px;
+  font-size: 12px;
   white-space: nowrap;
 }
 

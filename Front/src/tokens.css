@@ -32,7 +32,7 @@
   --color-button-hover: #364c82;
   --color-button-soft-bg: #e8edf8;
   --color-button-soft-fg: #364c82;
-  --focus-ring: rgba(29, 79, 216, 0.14);
+  --focus-ring: rgba(29, 79, 216, 0.28);
   --focus-outline: 3px solid var(--color-ink-900);
 
   /* Color: status */
