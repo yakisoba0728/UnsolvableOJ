@@ -32,13 +32,15 @@
   --color-button-hover: #364c82;
   --color-button-soft-bg: #e8edf8;
   --color-button-soft-fg: #364c82;
-  --focus-ring: rgba(29, 79, 216, 0.14);
+  --focus-ring: rgba(29, 79, 216, 0.28);
+  --focus-outline: 3px solid var(--color-ink-900);
 
   /* Color: status */
   --color-success: #137547;
   --color-success-soft: #e3f7ec;
   --color-success-border: #c4e8d5;
   --color-danger: #c9262b;
+  --focus-ring-danger: rgba(201, 38, 43, 0.4);
   --color-danger-soft: #fdebec;
   --color-danger-border: #f5c6c8;
   --color-warning: #8f5a0c;
@@ -115,7 +117,7 @@
   --color-primary-solid: #3566e8;
   --focus-ring: rgba(139, 172, 255, 0.3);
   --color-button: #4a63ad;
-  --color-button-hover: #5a75c4;
+  --color-button-hover: #3f58a3; /* 흰 글자 6.52:1, 라이트와 같은 방향(눌리는 느낌) */
   --color-button-soft-bg: #1f2a47;
   --color-button-soft-fg: #aebff0;
 
@@ -123,6 +125,7 @@
   --color-success-soft: #12301f;
   --color-success-border: #1f5238;
   --color-danger: #ff8086;
+  --focus-ring-danger: rgba(255, 128, 134, 0.4);
   --color-danger-soft: #3a1a1d;
   --color-danger-border: #5f2b30;
   --color-warning: #f0b660;
