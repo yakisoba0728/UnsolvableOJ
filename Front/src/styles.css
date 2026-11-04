@@ -495,8 +495,7 @@ textarea:focus {
 input[aria-invalid="true"]:focus,
 textarea[aria-invalid="true"]:focus {
   border-color: var(--color-danger);
-  box-shadow: 0 0 0 3px var(--color-danger);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 40%, transparent);
+  box-shadow: 0 0 0 3px var(--focus-ring-danger);
 }
 input:disabled,
 textarea:disabled {
@@ -507,7 +506,7 @@ textarea:disabled {
 input::placeholder,
 textarea::placeholder {
   color: var(--color-ink-600);
-  opacity: 0.75;
+  opacity: 1;
 }
 textarea {
   resize: vertical;
@@ -5640,8 +5639,7 @@ h3 {
   border-color: var(--color-danger);
 }
 .auth-field [aria-invalid="true"]:focus {
-  box-shadow: 0 0 0 3px var(--color-danger);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 40%, transparent);
+  box-shadow: 0 0 0 3px var(--focus-ring-danger);
 }
 @media (max-width: 880px) {
   .problem-row:not(.submission-row) .difficulty {
@@ -6511,13 +6509,11 @@ textarea {
   box-sizing: border-box;
 }
 .write-form [aria-invalid="true"]:focus {
-  box-shadow: 0 0 0 3px var(--color-danger);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 40%, transparent);
+  box-shadow: 0 0 0 3px var(--focus-ring-danger);
 }
 .write-form .tag-input[aria-invalid="true"]:focus-within {
   border-color: var(--color-danger);
-  box-shadow: 0 0 0 3px var(--color-danger);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 40%, transparent);
+  box-shadow: 0 0 0 3px var(--focus-ring-danger);
 }
 .write-form .md-field {
   scroll-margin-top: 100px;

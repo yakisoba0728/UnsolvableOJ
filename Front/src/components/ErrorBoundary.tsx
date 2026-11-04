@@ -1,4 +1,4 @@
-import { Component, type ErrorInfo, type ReactNode } from "react";
+import { Component, createRef, type ErrorInfo, type ReactNode } from "react";
 import { reportError } from "../monitoring";
 
 interface State {
@@ -11,13 +11,24 @@ export class ErrorBoundary extends Component<
   State
 > {
   state: State = { failed: false };
+  private heading = createRef<HTMLHeadingElement>();
 
   static getDerivedStateFromError(): State {
     return { failed: true };
   }
 
   // 다른 화면으로 이동하면 다시 그려 본다: 한 화면의 오류로 사이트 전체가 막히지 않게 한다.
-  componentDidUpdate(previous: { resetKey?: string }) {
+  componentDidMount() {
+    if (this.state.failed) this.heading.current?.focus();
+  }
+
+  componentDidUpdate(
+    previous: { resetKey?: string },
+    previousState: State,
+  ) {
+    // 오류 화면이 새로 나타난 때에만 한 번 포커스를 옮긴다.
+    if (this.state.failed && !previousState.failed)
+      this.heading.current?.focus();
     if (this.state.failed && previous.resetKey !== this.props.resetKey)
       this.setState({ failed: false });
   }
@@ -33,7 +44,7 @@ export class ErrorBoundary extends Component<
       <div className="page-width notfound-page" role="alert">
         <h1
           tabIndex={-1}
-          ref={(node) => node?.focus()}
+          ref={this.heading}
           style={{ outline: "none" }}
         >
           화면을 표시하지 못했어요.
