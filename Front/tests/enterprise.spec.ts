@@ -170,13 +170,19 @@ test("saving after the original start is rejected even if draft dates move into 
   const before = await page.evaluate((key) => localStorage.getItem(key), testsKey);
   await page.clock.fastForward(11_000);
   await page.getByLabel(/테스트 이름/).fill("시작 후 변경 시도");
-  await page.getByLabel("시작 일시").fill("2026-11-03T13:00");
-  await page.getByLabel("종료 일시").fill("2026-11-03T15:00");
+  for (const [label, hour] of [["시작 일시", "13"], ["종료 일시", "15"]]) {
+    await page.getByRole("button", { name: label }).click();
+    const picker = page.getByRole("dialog", { name: "날짜와 시간 선택" });
+    await picker.getByRole("button", { name: "2026년 11월 3일" }).click();
+    await picker.getByLabel("시", { exact: true }).fill(hour);
+    await picker.getByLabel("분", { exact: true }).fill("00");
+    await picker.getByRole("button", { name: "확인" }).click();
+  }
   await page.getByRole("button", { name: "변경 저장", exact: true }).click();
   await expect(page.getByRole("alert")).toContainText("시작된 테스트는 수정할 수 없어요");
   await expect(page).toHaveURL(/\/enterprise\/t-edit\/edit$/);
   await expect(page.getByLabel(/테스트 이름/)).toHaveValue("시작 후 변경 시도");
-  await expect(page.getByLabel("시작 일시")).toHaveValue("2026-11-03T13:00");
+  await expect(page.getByRole("button", { name: "시작 일시" })).toContainText("2026. 11. 03. 13:00");
   expect(await page.evaluate((key) => localStorage.getItem(key), testsKey)).toBe(before);
 });
 
