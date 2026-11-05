@@ -9,7 +9,7 @@ describe('Registration (e2e)', () => {
 
   beforeAll(async () => {
     app = await createApp();
-    await app.init();
+    await app.listen(0, '127.0.0.1');
   });
 
   it('rejects usernames that differ only by case and keeps the typed name', async () => {

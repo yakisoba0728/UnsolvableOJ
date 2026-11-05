@@ -28,9 +28,13 @@ gh workflow run ci.yml --ref main -f full=true
 - Firefox·WebKit을 포함한 세 브라우저 전체 회귀(워커 2개)
 - privileged Linux go-judge 이미지 빌드, 8개 언어·실패 판정·자원 제한·격리·캐시 회수 검사
 - 실제 워커를 사용하는 채점 파이프라인 통합 검사
-- 별도 Compose 프로젝트에서 회원가입 → 문제 게시 → 실제 채점 → XP → 로그아웃 및 커뮤니티 브라우저 흐름
+- 운영 `deploy/compose.yaml`을 사용하는 별도 Compose 프로젝트에서 회원가입 → 문제 게시 → 실제 채점 → XP → 로그아웃 및 커뮤니티 브라우저 흐름(`--production`). 개발 Compose 실실행은 로컬 명령으로 남기며, 기본 CI는 운영 정적검사를 유지합니다.
 
 실행 이미지·격리 설정·Dockerfile·배포 경로 변경이나 릴리스 전에는 전체 검사를 실행하세요. 기본 검사 성공이 세 브라우저와 실제 채점 환경의 전체 검증까지 의미하지는 않습니다. 수동 검사는 선택한 ref를 실행하므로 검사할 브랜치를 지정합니다.
+
+운영 Compose 테스트도 일회용 localhost ingress를 사용하므로 실제 Traefik·Cloudflare·DNS·HTTPS 경로 검증은 아닙니다. 기본 예산은 sandbox 10 GiB, 전체 13.125 GiB 상한이며 일반 CI 흐름은 최대 메모리 동시 부하를 검증하지 않습니다.
+
+실패 시 `browser-failure-<attempt>` artifact에 `Front/test-results/`, `Front/playwright-report/`, live-browser trace/screenshots/HTML/JUnit만 7일 보관합니다. 빈 경로는 실패시키지 않습니다. 테스트용 일회용/fixture 계정만 사용하고 실제 계정·개인 브라우저 프로필·운영 credentials를 이 검사에 넣지 마세요. trace에는 요청/응답과 화면이 포함될 수 있습니다.
 
 ## 데이터와 실행 환경
 

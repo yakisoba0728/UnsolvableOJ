@@ -96,6 +96,22 @@ const LANGUAGES: Record<string, { source: string; compile?: string[]; artifact?:
 // 500 등 나머지는 특정 제출이 반복해 일으킬 수 있으므로 SYSTEM_ERROR로 끝냅니다.
 export class SandboxUnavailableError extends Error {}
 
+async function receiveBody<T>(signal: AbortSignal, read: () => Promise<T>): Promise<T> {
+  try {
+    return await read();
+  } catch (error) {
+    // Fetch can succeed at headers and fail while streaming. Parsing/size errors are not outages.
+    if (!signal.aborted && error instanceof TypeError) {
+      throw new SandboxUnavailableError(`go-judge response body: ${error}`, { cause: error });
+    }
+    throw error;
+  }
+}
+
+async function readJson(response: Response, signal: AbortSignal): Promise<any> {
+  return JSON.parse(await receiveBody(signal, () => response.text()));
+}
+
 async function request(config: SandboxConfig, path: string, signal: AbortSignal, options: RequestInit = {}) {
   const name = `go-judge ${options.method ?? "GET"} ${path.split("/")[1]}`;
   let response: Response;
@@ -121,8 +137,8 @@ async function request(config: SandboxConfig, path: string, signal: AbortSignal,
 export async function checkSandbox(config: SandboxConfig) {
   if (!config.token) throw new Error("GO_JUDGE_TOKEN is required");
   const signal = AbortSignal.timeout(10_000);
-  const version = await (await request(config, "/version", signal)).json();
-  const settings = await (await request(config, "/config", signal)).json();
+  const version = await readJson(await request(config, "/version", signal), signal);
+  const settings = await readJson(await request(config, "/config", signal), signal);
   const runner = settings?.runnerConfig;
   if (version?.os !== "linux" || ![1, 2].includes(runner?.cgroupType) ||
       runner?.seccomp !== true || runner?.workDir !== "/w" || !Array.isArray(runner?.cgroupControllers) ||
@@ -133,15 +149,17 @@ export async function checkSandbox(config: SandboxConfig) {
   await (await request(config, "/file", signal)).body?.cancel();
 }
 
-async function readOutput(response: Response) {
+async function readOutput(response: Response, signal: AbortSignal) {
   const chunks: Uint8Array[] = [];
   let size = 0;
   if (!response.body) throw new Error("go-judge returned no output body");
-  for await (const chunk of response.body) {
-    size += chunk.length;
-    if (size > OUTPUT_LIMIT) throw new Error("go-judge returned oversized output");
-    chunks.push(chunk);
-  }
+  await receiveBody(signal, async () => {
+    for await (const chunk of response.body!) {
+      size += chunk.length;
+      if (size > OUTPUT_LIMIT) throw new Error("go-judge returned oversized output");
+      chunks.push(chunk);
+    }
+  });
   return Buffer.concat(chunks);
 }
 
@@ -185,9 +203,9 @@ export async function judge(claim: Claim, config: SandboxConfig, cancellation?: 
       cpuLimit: timeMs * 1_000_000, clockLimit: timeMs * 1_000_000,
       memoryLimit: memoryMb * 1024 * 1024, procLimit: 64, cpuRateLimit: 1000,
     };
-    const payload: unknown = await (await request(config, "/run", signal, {
+    const payload: unknown = await readJson(await request(config, "/run", signal, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cmd: [command] }),
-    })).json();
+    }), signal);
     if (!Array.isArray(payload)) throw new Error("Invalid go-judge response");
     // Track even partial/error responses before validation so their files are reclaimed.
     for (const item of payload) {
@@ -215,8 +233,8 @@ export async function judge(claim: Claim, config: SandboxConfig, cancellation?: 
     }
     try {
       // JSON strings replace invalid UTF-8; download raw bytes for exact comparison.
-      const stdout = await readOutput(await request(config, `/file/${encodeURIComponent(stdoutId)}`, signal));
-      const stderr = await readOutput(await request(config, `/file/${encodeURIComponent(stderrId)}`, signal));
+      const stdout = await readOutput(await request(config, `/file/${encodeURIComponent(stdoutId)}`, signal), signal);
+      const stderr = await readOutput(await request(config, `/file/${encodeURIComponent(stderrId)}`, signal), signal);
       return { execution, stdout, stderr };
     } finally {
       await remove([stdoutId, stderrId]);

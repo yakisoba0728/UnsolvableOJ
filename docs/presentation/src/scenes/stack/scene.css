@@ -1,0 +1,12 @@
+#scene-stack .cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; margin-top: 64px; }
+#scene-stack .col-head { padding-bottom: 18px; margin-bottom: 10px; border-bottom: 2px solid var(--border); }
+#scene-stack .col-head b { display: block; font-size: 30px; color: var(--text-1); letter-spacing: -0.02em; }
+#scene-stack .col-head span { display: block; font-size: 19px; color: var(--text-3); margin-top: 4px; }
+#scene-stack .tile { display: grid; grid-template-columns: 68px 1fr; gap: 18px; align-items: center; padding: 16px 0; }
+#scene-stack .ic { width: 68px; height: 68px; border-radius: 18px; background: #fff; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(23, 25, 28, 0.05); display: flex; align-items: center; justify-content: center; }
+#scene-stack .ic svg { width: 38px; height: 38px; }
+#scene-stack .lc { color: var(--accent); display: contents; }
+#scene-stack .tx b { display: block; font-size: 24px; color: var(--text-1); letter-spacing: -0.01em; }
+#scene-stack .tx span { display: block; font-size: 18px; line-height: 1.4; color: var(--text-3); margin-top: 3px; }
+#scene-stack .more { margin: 36px 0 0; font-size: 20px; color: var(--text-3); }
+#scene-stack .more b { color: var(--text-2); font-weight: 600; }

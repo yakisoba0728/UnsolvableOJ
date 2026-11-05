@@ -56,6 +56,216 @@ const atNoon = (offsetMs: number) => new Date(noonToday + offsetMs).toISOString(
 const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
 
+const editNow = new Date(2026, 10, 2, 12).getTime();
+const editableTest = {
+  id: "t-edit", title: "동시 편집 테스트", description: "원래 안내",
+  startsAt: new Date(editNow + HOUR).toISOString(),
+  endsAt: new Date(editNow + 3 * HOUR).toISOString(),
+  durationMin: 90, problemIds: ["p1"],
+  createdAt: new Date(editNow).toISOString(), updatedAt: new Date(editNow).toISOString(),
+};
+
+async function openEnterpriseEditor(page: Page, saved = editableTest) {
+  await page.addInitScript(({ sessionKey, testsKey, session, saved, expiresAt }) => {
+    localStorage.setItem(sessionKey, JSON.stringify({ session, expiresAt }));
+    localStorage.setItem(testsKey, JSON.stringify({ solver: [saved] }));
+  }, { sessionKey, testsKey, session, saved, expiresAt: editNow + DAY });
+  await mockProblems(page);
+  await page.goto(`/enterprise/${saved.id}/edit`);
+  await expect(page.getByLabel(/테스트 이름/)).toHaveValue(saved.title);
+}
+
+test("two tabs reject stale same-test edits even when updatedAt is unchanged", async ({ page, context }) => {
+  await page.clock.setFixedTime(editNow);
+  await openEnterpriseEditor(page);
+  await page.getByLabel(/테스트 이름/).fill("A가 작성 중인 제목");
+  await page.evaluate((key) => {
+    window.addEventListener("storage", (event) => {
+      if (event.key === key) document.body.dataset.enterpriseStorageEvent = event.newValue ?? "";
+    });
+  }, testsKey);
+  const other = await context.newPage();
+  try {
+    await mockProblems(other);
+    await other.goto("/enterprise/t-edit/edit");
+    await other.getByLabel(/안내 문구/).fill("B가 저장한 안내");
+    await other.getByRole("checkbox", { name: /두 수의 합/ }).uncheck();
+    await other.getByRole("checkbox", { name: /수 정렬하기/ }).check();
+    await other.getByRole("button", { name: "변경 저장", exact: true }).click();
+    await expect(other.getByRole("heading", { name: editableTest.title, exact: true })).toBeVisible();
+    const afterB = await other.evaluate((key) => localStorage.getItem(key), testsKey);
+    expect(JSON.parse(afterB!).solver[0]).toMatchObject({
+      description: "B가 저장한 안내", problemIds: ["p2"], updatedAt: editableTest.updatedAt,
+    });
+    await expect.poll(() => page.evaluate(() => document.body.dataset.enterpriseStorageEvent)).toBe(afterB);
+    await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+    await page.getByRole("button", { name: "변경 저장", exact: true }).click();
+    await expect(page.getByRole("alert")).toContainText("다른 탭에서 테스트가 변경되었어요");
+    await expect(page).toHaveURL(/\/enterprise\/t-edit\/edit$/);
+    await expect(page.getByLabel(/테스트 이름/)).toHaveValue("A가 작성 중인 제목");
+    await expect(page.getByLabel(/안내 문구/)).toHaveValue("원래 안내");
+    await expect(page.getByRole("checkbox", { name: /두 수의 합/ })).toBeChecked();
+    expect(await page.evaluate((key) => localStorage.getItem(key), testsKey)).toBe(afterB);
+  } finally {
+    await other.close();
+  }
+});
+
+test("deleting the same test in another tab rejects saving and preserves the open draft", async ({ page, context }) => {
+  await page.clock.setFixedTime(editNow);
+  await openEnterpriseEditor(page);
+  await page.getByLabel(/테스트 이름/).fill("삭제 후에도 남을 입력");
+  await page.evaluate((key) => {
+    window.addEventListener("storage", (event) => {
+      if (event.key === key) document.body.dataset.enterpriseStorageEvent = event.newValue ?? "";
+    });
+  }, testsKey);
+  const other = await context.newPage();
+  try {
+    await mockProblems(other);
+    await other.goto("/enterprise/t-edit");
+    other.once("dialog", (dialog) => dialog.accept());
+    await other.getByRole("button", { name: "삭제", exact: true }).click();
+    await expect(other).toHaveURL(/\/enterprise$/);
+    const afterDelete = await other.evaluate((key) => localStorage.getItem(key), testsKey);
+    expect(JSON.parse(afterDelete!).solver).toEqual([]);
+    await expect.poll(() => page.evaluate(() => document.body.dataset.enterpriseStorageEvent)).toBe(afterDelete);
+    await expect(page.getByLabel(/테스트 이름/)).toHaveValue("삭제 후에도 남을 입력");
+    await page.getByRole("button", { name: "변경 저장", exact: true }).click();
+    await expect(page.getByRole("alert")).toContainText("다른 탭에서 테스트가 삭제되었어요");
+    await expect(page).toHaveURL(/\/enterprise\/t-edit\/edit$/);
+    await expect(page.getByLabel(/테스트 이름/)).toHaveValue("삭제 후에도 남을 입력");
+    expect(await page.evaluate((key) => localStorage.getItem(key), testsKey)).toBe(afterDelete);
+  } finally {
+    await other.close();
+  }
+});
+
+test("an unrelated test created in another tab survives saving the open editor", async ({ page, context }) => {
+  await page.clock.setFixedTime(editNow);
+  await openEnterpriseEditor(page);
+  await page.getByLabel(/테스트 이름/).fill("A가 수정한 테스트");
+  const other = await context.newPage();
+  try {
+    await mockProblems(other);
+    await other.goto("/enterprise/new");
+    await other.getByLabel(/테스트 이름/).fill("B가 추가한 별도 테스트");
+    await other.getByRole("checkbox", { name: /수 정렬하기/ }).check();
+    await other.getByRole("button", { name: "테스트 만들기", exact: true }).click();
+    await expect(other.getByRole("heading", { name: "B가 추가한 별도 테스트", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "변경 저장", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "A가 수정한 테스트", exact: true })).toBeVisible();
+    expect(await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!).solver.map((item: { title: string }) => item.title).sort(), testsKey))
+      .toEqual(["A가 수정한 테스트", "B가 추가한 별도 테스트"]);
+  } finally {
+    await other.close();
+  }
+});
+
+test("saving after the original start is rejected even if draft dates move into the future", async ({ page }) => {
+  await page.clock.install({ time: editNow - 60_000 });
+  const saved = { ...editableTest, startsAt: new Date(editNow + 10_000).toISOString() };
+  await openEnterpriseEditor(page, saved);
+  await page.clock.pauseAt(editNow);
+  const before = await page.evaluate((key) => localStorage.getItem(key), testsKey);
+  await page.clock.fastForward(11_000);
+  await page.getByLabel(/테스트 이름/).fill("시작 후 변경 시도");
+  await page.getByLabel("시작 일시").fill("2026-11-03T13:00");
+  await page.getByLabel("종료 일시").fill("2026-11-03T15:00");
+  await page.getByRole("button", { name: "변경 저장", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("시작된 테스트는 수정할 수 없어요");
+  await expect(page).toHaveURL(/\/enterprise\/t-edit\/edit$/);
+  await expect(page.getByLabel(/테스트 이름/)).toHaveValue("시작 후 변경 시도");
+  await expect(page.getByLabel("시작 일시")).toHaveValue("2026-11-03T13:00");
+  expect(await page.evaluate((key) => localStorage.getItem(key), testsKey)).toBe(before);
+});
+
+test("missing or other-account enterprise records cannot report a successful update or deletion", async ({ page }) => {
+  await page.clock.setFixedTime(editNow);
+  await openEnterpriseEditor(page);
+  const result = await page.evaluate(async ({ key, original }) => {
+    const modulePath = "/src/enterprise/store.ts";
+    const { enterpriseActions } = await import(modulePath);
+    const before = localStorage.getItem(key);
+    const { id: _id, createdAt: _created, updatedAt: _updated, ...input } = original;
+    const otherAccount = enterpriseActions.update("another-user", original, input);
+    const missing = enterpriseActions.update("solver", { ...original, id: "missing" }, input);
+    const removed = enterpriseActions.remove("solver", "missing");
+    return { before, after: localStorage.getItem(key), otherAccount, missing, removed };
+  }, { key: testsKey, original: editableTest });
+  expect(result.otherAccount).toContain("삭제되었어요");
+  expect(result.missing).toContain("삭제되었어요");
+  expect(result.removed).toBe(false);
+  expect(result.after).toBe(result.before);
+});
+
+async function failEnterpriseStorage(page: Page, mode: "read" | "quota") {
+  await page.evaluate(({ key, mode }) => {
+    const get = Storage.prototype.getItem;
+    const set = Storage.prototype.setItem;
+    Storage.prototype.getItem = function(name) {
+      if (mode === "read" && name === key) throw new Error("read denied");
+      return get.call(this, name);
+    };
+    Storage.prototype.setItem = function(name, value) {
+      if (mode === "quota" && name === key) throw new Error("quota exceeded");
+      return set.call(this, name, value);
+    };
+    (window as unknown as { restoreStorage: () => void }).restoreStorage = () => {
+      Storage.prototype.getItem = get;
+      Storage.prototype.setItem = set;
+    };
+  }, { key: testsKey, mode });
+}
+
+for (const mode of ["read", "quota"] as const) {
+  test(`${mode} failure does not pretend enterprise create succeeded and preserves inputs for retry`, async ({ page }) => {
+    await signIn(page);
+    await mockProblems(page);
+    await page.goto("/enterprise/new");
+    await page.getByLabel(/테스트 이름/).fill("저장 실패에도 남을 이름");
+    await page.getByLabel(/안내 문구/).fill("남을 입력");
+    await page.getByRole("checkbox", { name: /두 수의 합/ }).check();
+    await failEnterpriseStorage(page, mode);
+    await page.getByRole("button", { name: "테스트 만들기", exact: true }).click();
+    await expect(page.getByRole("alert")).toContainText("저장하지 못했어요");
+    await expect(page).toHaveURL(/\/enterprise\/new$/);
+    await expect(page.getByLabel(/테스트 이름/)).toHaveValue("저장 실패에도 남을 이름");
+    await expect(page.getByLabel(/안내 문구/)).toHaveValue("남을 입력");
+    await page.evaluate(() => (window as unknown as { restoreStorage: () => void }).restoreStorage());
+    expect(await page.evaluate((key) => localStorage.getItem(key), testsKey)).toBeNull();
+    await page.getByRole("button", { name: "테스트 만들기", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "저장 실패에도 남을 이름" })).toBeVisible();
+    expect(await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!).solver.length, testsKey)).toBe(1);
+  });
+}
+
+test("enterprise update/remove storage failures leave the persisted record and do not navigate", async ({ page }) => {
+  await signIn(page);
+  await mockProblems(page);
+  await page.goto("/enterprise/new");
+  await page.getByLabel(/테스트 이름/).fill("기존 테스트");
+  await page.getByRole("checkbox", { name: /두 수의 합/ }).check();
+  await page.getByRole("button", { name: "테스트 만들기", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "기존 테스트" })).toBeVisible();
+  const url = page.url();
+  await page.getByRole("link", { name: "편집", exact: true }).click();
+  await page.getByLabel(/테스트 이름/).fill("실패한 수정");
+  await failEnterpriseStorage(page, "quota");
+  await page.getByRole("button", { name: "변경 저장", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("저장하지 못했어요");
+  await expect(page).toHaveURL(url + "/edit");
+  await expect(page.getByLabel(/테스트 이름/)).toHaveValue("실패한 수정");
+  await page.getByRole("link", { name: /테스트 상세/ }).click();
+  await expect(page.getByRole("heading", { name: "기존 테스트" })).toBeVisible();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "삭제", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("삭제하지 못했어요");
+  await expect(page).toHaveURL(url);
+  await page.evaluate(() => (window as unknown as { restoreStorage: () => void }).restoreStorage());
+  expect(await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!).solver[0].title, testsKey)).toBe("기존 테스트");
+});
+
 test("signed-out visitors see a login prompt instead of tests", async ({ page }) => {
   await page.goto("/enterprise");
   await expect(page.getByRole("heading", { name: "기업 코드 테스트" })).toBeVisible();

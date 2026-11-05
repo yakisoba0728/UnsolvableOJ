@@ -138,7 +138,7 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
                 path="/community/new"
                 element={
                   session ? (
-                    <CommunityWritePage key={`${session.user.id}:${pathname}`} />
+                    <CommunityWritePage key={`${session.user.id}:${session.accessToken}:${pathname}`} getNavigationVersion={getNavigationVersion} />
                   ) : (
                     loginRedirect
                   )
@@ -148,13 +148,13 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
                 path="/community/:id/edit"
                 element={
                   session ? (
-                    <CommunityWritePage key={`${session.user.id}:${pathname}`} />
+                    <CommunityWritePage key={`${session.user.id}:${session.accessToken}:${pathname}`} getNavigationVersion={getNavigationVersion} />
                   ) : (
                     loginRedirect
                   )
                 }
               />
-              <Route path="/community/:id" element={<CommunityPostPage />} />
+              <Route path="/community/:id" element={<CommunityPostPage key={`${session?.user.id}:${session?.accessToken}:${pathname}`} getNavigationVersion={getNavigationVersion} />} />
               <Route path="/analysis" element={<AnalysisPage />} />
               <Route path="/analysis/:id" element={<AnalysisQuestionPage />} />
               <Route path="/missions" element={<MissionsPage />} />

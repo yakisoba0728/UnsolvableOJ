@@ -249,6 +249,7 @@ describe('submission debug output lifecycle', () => {
       judgeAttemptId: attemptId,
       status: SubmissionStatus.JUDGING,
       acceptedForXp: false,
+      completedForLearning: false,
       debugOutputs: [],
       sourceCode: 'print(4)',
     } as unknown as Submission;
@@ -421,6 +422,8 @@ describe('submission debug output lifecycle', () => {
       totalTestCases: 1,
     });
     expect(submission.acceptedForXp).toBe(accepted);
+    expect(submission.completedForLearning).toBe(true);
+    expect(result.completedForLearning).toBe(true);
     expect(manager.save).toHaveBeenCalledWith(
       expect.objectContaining({ acceptedForXp: accepted }),
     );
@@ -437,10 +440,12 @@ describe('submission debug output lifecycle', () => {
     async (status, accepted) => {
       const { judge, submission, attemptId, manager } = setup();
       submission.acceptedForXp = accepted;
+      submission.completedForLearning = accepted;
       const dto = { status, passedTestCases: 0, totalTestCases: 1 };
       await judge.recordJudgeResult(submission.id, 1, attemptId, dto);
       await judge.recordJudgeResult(submission.id, 1, attemptId, dto);
       expect(submission.acceptedForXp).toBe(accepted);
+      expect(submission.completedForLearning).toBe(accepted);
       expect(manager.save).toHaveBeenCalledTimes(1);
       expect(manager.query).not.toHaveBeenCalled();
     },
@@ -452,9 +457,24 @@ describe('submission debug output lifecycle', () => {
     await service.rejudge(submission.id, user);
     expect(submission.status).toBe(SubmissionStatus.QUEUED);
     expect(submission.acceptedForXp).toBe(true);
+    expect(submission.completedForLearning).toBe(true);
     expect(manager.save).toHaveBeenCalledWith(
       expect.objectContaining({ acceptedForXp: true }),
     );
+  });
+
+  it.each([
+    SubmissionStatus.WRONG_ANSWER, SubmissionStatus.COMPILE_ERROR,
+    SubmissionStatus.RUNTIME_ERROR, SubmissionStatus.TIME_LIMIT_EXCEEDED,
+    SubmissionStatus.MEMORY_LIMIT_EXCEEDED, SubmissionStatus.OUTPUT_LIMIT_EXCEEDED,
+  ])('captures legacy %s as learning before rejudge, independently of XP acceptance', async (status) => {
+    const { service, submission, user } = setup();
+    submission.status = status;
+    await service.rejudge(submission.id, user);
+    expect(submission.completedForLearning).toBe(true);
+    expect(submission.acceptedForXp).toBe(false);
+    await service.rejudge(submission.id, user);
+    expect(submission.completedForLearning).toBe(true);
   });
 
   it('rejects a stale generation SYSTEM_ERROR without touching retained evidence', async () => {

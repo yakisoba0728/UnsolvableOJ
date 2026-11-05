@@ -22,3 +22,13 @@ export enum SubmissionStatus {
   SYSTEM_ERROR = 'SYSTEM_ERROR',
   CANCELLED = 'CANCELLED',
 }
+
+export const learningStatuses = new Set<SubmissionStatus>([
+  SubmissionStatus.ACCEPTED,
+  SubmissionStatus.WRONG_ANSWER,
+  SubmissionStatus.TIME_LIMIT_EXCEEDED,
+  SubmissionStatus.MEMORY_LIMIT_EXCEEDED,
+  SubmissionStatus.RUNTIME_ERROR,
+  SubmissionStatus.COMPILE_ERROR,
+  SubmissionStatus.OUTPUT_LIMIT_EXCEEDED,
+]);

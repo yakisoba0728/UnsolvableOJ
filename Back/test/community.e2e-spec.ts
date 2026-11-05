@@ -48,7 +48,8 @@ describe('Community (PostgreSQL e2e)', () => {
       bodyParser: false,
     });
     configureHttp(app);
-    await app.init();
+    // Keep one owned listener: Supertest's per-request auto-close races parallel votes.
+    await app.listen(0, '127.0.0.1');
     db = app.get(DataSource);
     for (let i = 0; i < 3; i++) {
       const suffix = randomUUID().slice(0, 8);
@@ -183,6 +184,27 @@ describe('Community (PostgreSQL e2e)', () => {
         [id],
       ),
     ).toEqual([{ actorId: users[2].id, action: 'community_post.delete' }]);
+  });
+
+  it.each(['DRAFT', 'ARCHIVED'])('hides the linked ID and filter after a problem becomes %s without deleting public posts', async (status) => {
+    const marker = randomUUID();
+    const id = await create({ title: marker, problemId: problems[0] });
+    await db.query('UPDATE problems SET status=$2 WHERE id=$1', [problems[0], status]);
+    try {
+      const detail = await call('get', `/${id}`).expect(200);
+      expect(detail.body.problem).toBeNull();
+      expect(detail.body.problemId).toBeNull();
+      expect(detail.body.body).toBe(draft.body);
+      const visible = await call('get', `?q=${marker}`).expect(200);
+      expect(visible.body.items[0].id).toBe(id);
+      expect(visible.body.items[0].problem).toBeNull();
+      const filtered = await call('get', `?problemId=${problems[0]}&includePinned=true`).expect(200);
+      expect(filtered.body.total).toBe(0);
+      expect(filtered.body.items).toEqual([]);
+      expect(filtered.body.facets.categories['']).toBe(0);
+    } finally {
+      await db.query("UPDATE problems SET status='PUBLISHED' WHERE id=$1", [problems[0]]);
+    }
   });
 
   it('accepts only answers to the same question and clears acceptance when deleted', async () => {

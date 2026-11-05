@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
@@ -28,6 +29,7 @@ export function EnterpriseDetailPage() {
   const { id } = useParams();
   const { session } = useAuth();
   const navigate = useNavigate();
+  const [saveError, setSaveError] = useState("");
   const now = useNow(10_000);
   const tests = useEnterpriseTests(session?.user.id);
   const { problems, loading } = useAllProblems();
@@ -70,12 +72,16 @@ export function EnterpriseDetailPage() {
       )
     )
       return;
-    enterpriseActions.remove(session!.user.id, test!.id);
+    if (!enterpriseActions.remove(session!.user.id, test!.id)) {
+      setSaveError("테스트를 삭제하지 못했어요. 저장 공간·권한을 확인하고 다시 시도해 주세요.");
+      return;
+    }
     navigate("/enterprise");
   }
 
   return (
     <div className="page-width enterprise-page">
+      {saveError ? <p className="error-message" role="alert">{saveError}</p> : null}
       <PageHeader
         title={test.title}
         badge={<span className={statusPillClass[status]}>{statusLabel[status]}</span>}

@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { delimiter, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
+import { checkSandboxBudget } from './check-sandbox-budget.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const productionMode = process.argv.includes('--production');
@@ -52,6 +53,7 @@ try {
     assert.throws(() => run('docker', deployment, { env: { ...deploymentEnv, [key]: '' }, stdio: 'pipe' }));
   }
   const production = JSON.parse(run('docker', deployment, { env: deploymentEnv }));
+  checkSandboxBudget(production);
   assert.deepEqual(Object.keys(production.services).sort(), ['go-judge', 'judge']);
   for (const service of Object.values(production.services)) {
     assert.equal(service.ports?.length ?? 0, 0);
@@ -94,6 +96,7 @@ ${productionMode ? `networks:
 `, { mode: 0o600 });
 
   const plan = JSON.parse(compose('config', '--format', 'json'));
+  if (productionMode) checkSandboxBudget(plan);
   for (const name of ['postgres', 'redis']) assert.equal(plan.services[name].volumes?.length ?? 0, 0);
   for (const service of Object.values(plan.services)) {
     for (const port of service.ports ?? []) {

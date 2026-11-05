@@ -109,27 +109,47 @@ export function submissionsByDay(submissions: Submission[]) {
   return counts;
 }
 
-/** now 기준 오늘(없으면 어제)부터 거꾸로 이어진 연속 제출 일수. */
+export function koreanDayKey(date: Date) {
+  const kst = new Date(date.getTime() + 9 * 3_600_000);
+  return `${kst.getUTCFullYear()}-${kst.getUTCMonth() + 1}-${kst.getUTCDate()}`;
+}
+
+export const isLearningSubmission = (item: Submission) => item.completedForLearning === true || [
+  "ACCEPTED", "WRONG_ANSWER", "COMPILE_ERROR", "RUNTIME_ERROR",
+  "TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "OUTPUT_LIMIT_EXCEEDED",
+].includes(item.status);
+
+/** 보상/연속 학습만 한국 날짜와 완료된 학습 판정을 사용한다. 히트맵은 전체 제출을 유지한다. */
+export function learningByDay(submissions: Submission[]) {
+  const counts = new Map<string, number>();
+  for (const item of submissions.filter(isLearningSubmission)) {
+    const key = koreanDayKey(new Date(item.createdAt));
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return counts;
+}
+
+/** 한국 날짜 기준 오늘(없으면 어제)부터 거꾸로 이어진 연속 학습 일수. */
 export function streakDays(counts: Map<string, number>, now = new Date()) {
-  const cursor = new Date(now);
-  if (!counts.has(dayKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+  let cursor = now.getTime();
+  if (!counts.has(koreanDayKey(new Date(cursor)))) cursor -= 86_400_000;
   let streak = 0;
-  while (counts.has(dayKey(cursor))) {
+  while (counts.has(koreanDayKey(new Date(cursor)))) {
     streak += 1;
-    cursor.setDate(cursor.getDate() - 1);
+    cursor -= 86_400_000;
   }
   return streak;
 }
 
 /** 오늘 새로 해결(ACCEPTED)한 서로 다른 문제 수. */
 export function solvedToday(submissions: Submission[]) {
-  const today = dayKey(new Date());
+  const today = koreanDayKey(new Date());
   return new Set(
     submissions
       .filter(
         (item) =>
           item.status === "ACCEPTED" &&
-          dayKey(new Date(item.createdAt)) === today,
+          koreanDayKey(new Date(item.createdAt)) === today,
       )
       .map((item) => item.problem.id),
   ).size;

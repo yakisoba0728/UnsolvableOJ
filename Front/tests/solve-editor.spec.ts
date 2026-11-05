@@ -3,6 +3,40 @@ import { authenticate, mockProblemApi, problem } from "./fixtures";
 
 test.beforeEach(({ page }) => mockProblemApi(page));
 
+for (const [language, label, source] of [
+  ["PYTHON", "Python 3", String.raw`print("\"")`],
+  ["JAVASCRIPT", "JavaScript", String.raw`console.log("\"");`],
+  ["JAVA", "Java 21", String.raw`System.out.println("\"");`],
+] as const) {
+  test(`WEB-SOLVE-02: ${language} escaped quotes survive typing, undo/redo and submission unchanged`, async ({ page }) => {
+    await authenticate(page);
+    let sent: { language: string; sourceCode: string } | undefined;
+    await page.route("**/api/v1/problems/problem-id/submissions", (route) => {
+      sent = route.request().postDataJSON();
+      return route.fulfill({ status: 429, json: { message: "Local quote fixture" } });
+    });
+    await page.goto("/problems/view/sum");
+    if (language !== "PYTHON") {
+      await page.getByRole("combobox", { name: "언어", exact: true }).click();
+      await page.getByRole("option", { name: label, exact: true }).click();
+    }
+    const editor = page.getByRole("textbox", { name: `${label} 소스 코드` });
+    await expect(editor).toHaveValue(language === "JAVA" ? /public class Main/ : language === "JAVASCRIPT" ? /require\("fs"\)/ : /def solution/);
+    await editor.fill("");
+    await editor.pressSequentially(source);
+    await expect(editor).toHaveValue(source);
+    await editor.press("ControlOrMeta+z");
+    await expect(editor).not.toHaveValue(source);
+    await editor.press("ControlOrMeta+Shift+z");
+    await expect(editor).toHaveValue(source);
+    await editor.press("ControlOrMeta+Enter");
+    await expect(page.getByRole("alert")).toHaveText("Local quote fixture");
+    expect(sent).toEqual({ language, sourceCode: source });
+    await expect(editor).toHaveValue(source);
+    expect(await page.evaluate((language) => localStorage.getItem(`unsolvable-oj-draft-v2:user:solver:problem-id:${language}`), language)).toBe(source);
+  });
+}
+
 test("each tab takes the draft from the moment it opened and does not sync live with other tabs of the same problem", async ({
   page,
 }) => {
@@ -467,11 +501,11 @@ test.describe("code editor basics on the solve page", () => {
     await page.clock.install();
     await page.addInitScript(() => {
       localStorage.setItem(
-        "unsolvable-oj-draft-v1:problem-id:PYTHON",
+        "unsolvable-oj-draft-v2:guest:problem-id:PYTHON",
         "print(111)",
       );
       localStorage.setItem(
-        "unsolvable-oj-draft-v1:problem-id:CPP",
+        "unsolvable-oj-draft-v2:guest:problem-id:CPP",
         "int main() {}",
       );
     });
@@ -489,7 +523,7 @@ test.describe("code editor basics on the solve page", () => {
     await expect(python).toHaveValue("print(222)");
     expect(
       await page.evaluate(() =>
-        localStorage.getItem("unsolvable-oj-draft-v1:problem-id:CPP"),
+        localStorage.getItem("unsolvable-oj-draft-v2:guest:problem-id:CPP"),
       ),
     ).toBe("int main() { return 0; }");
   });
@@ -529,7 +563,7 @@ test.describe("code editor basics on the solve page", () => {
     await expect(editor).toHaveValue(starter);
     expect(
       await page.evaluate(() =>
-        localStorage.getItem("unsolvable-oj-draft-v1:problem-id:PYTHON"),
+        localStorage.getItem("unsolvable-oj-draft-v2:guest:problem-id:PYTHON"),
       ),
     ).toBeNull();
     await page.reload();
