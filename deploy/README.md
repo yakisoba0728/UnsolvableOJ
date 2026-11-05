@@ -17,8 +17,8 @@
 - Linux Docker, Compose 2.24.4 이상, cgroup v2의 cpu/memory/pids controller와 seccomp가 필요합니다. Docker Desktop에서도 검증할 수 있지만 운영 대상은 Linux 서버입니다.
 - go-judge는 중첩 sandbox를 위해 `privileged: true`가 필요합니다. 컨테이너 네트워크와 자원 제한은 별도 VM의 격리를 대신하지 않습니다. 실행기나 커널이 뚫리면 같은 호스트의 DB 및 기존 Dokploy 프로젝트도 영향을 받을 수 있습니다. 이 구성은 소유자가 선택한 동일 호스트 배치이며, 호스트 격리가 필요해지면 [별도 실행 노드 구성](../Judge/deploy/README.md)으로 이전하세요.
 - 실행기는 private cgroup namespace를 사용하며 `memswap_limit`을 `mem_limit`과 같게 설정해 Docker가 시작 전에 swap을 금지합니다. swap이 켜진 cgroup v2에서는 실제 `memory.swap.max=0`도 healthcheck로 확인합니다. 이 제한을 적용할 수 없는 호스트에서는 기동을 중단합니다. 실패할 때 `-no-fallback`이나 seccomp를 해제하지 마세요.
-- 기본 메모리 상한 합계는 약 **6.125 GiB**입니다. OS, Dokploy, 기존 프로젝트, Docker 빌드 메모리는 별도입니다. 배포 전 실제 여유 RAM·CPU·디스크를 확인하고 `.env.example`의 예산을 조정하세요. 상한은 메모리 예약이나 실제 사용량 보장이 아닙니다.
-- 동시 채점은 기본 2개이며 go-judge CPU 상한은 2 CPU입니다. 컴파일 한 건은 최대 1 GiB를 사용하므로 동시성 변경 시 sandbox 메모리도 함께 조정하세요. Redis는 기본 256 MB에서 `noeviction`으로 새 쓰기를 거절합니다. 큐 증가·메모리·재시작을 모니터링하세요.
+- 기본 메모리 상한 합계는 약 **13.125 GiB**입니다(sandbox 10 GiB 포함). 최소 16 GiB급 호스트를 출발점으로 OS, Dokploy, 기존 프로젝트, Docker 빌드용 여유를 별도로 확보하세요. 배포 전 실제 여유 RAM·CPU·디스크를 확인하세요. 상한은 예약이나 호스트 용량 보장이 아닙니다.
+- 동시 채점은 기본 2개, go-judge CPU 상한은 2 CPU입니다. 문제당 최대 4096 MiB(컴파일 1 GiB)를 지원하므로 sandbox는 **4 GiB × 동시성 + 2 GiB 서비스/캐시 여유** 이상으로 설정하세요. 예: 동시성 3이면 14 GiB. 캐시 증가·커널/런타임 오버헤드까지 엄밀히 보장하는 scheduler는 없으므로 최대 부하에서 OOM·캐시·재시작을 모니터링하고 여유를 늘리세요. Redis는 기본 256 MB에서 `noeviction`으로 새 쓰기를 거절합니다.
 
 ## Dokploy 설정
 
@@ -37,6 +37,7 @@
 6. [`.env.example`](./.env.example)의 내용을 Dokploy **Environment**에 넣습니다. 필수 값은 비워 두면 Compose 단계에서 거절됩니다.
    - `PUBLIC_ORIGIN`: 실제 HTTPS origin, 예: `https://oj.example.com`. 경로나 마지막 `/`는 제외합니다.
    - `TRUSTED_PROXY_CIDR`: 위 명령에서 확인한 IPv4 subnet. nginx가 이 네트워크에서 온 전달 헤더만 사용해 클라이언트 IP를 복원합니다. 백엔드의 IP별 속도 제한도 이 IP를 사용합니다.
+   - `TRUSTED_PROXY_HOP_CIDR`: 전달 헤더에 추가되는 신뢰 가능한 프록시 홉의 주소. 현재 `judge.yaki.kr` 경로는 `TRUSTED_PROXY_CIDR=10.0.1.0/24`와 `TRUSTED_PROXY_HOP_CIDR=172.18.0.1/32`를 함께 사용합니다. 추가 홉이 없으면 기본값 `127.0.0.1/32`를 유지합니다. 전체 사설망이나 `0.0.0.0/0` 대신 실제 확인한 프록시 주소만 지정하세요.
    - `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `JWT_ACCESS_SECRET`, `JUDGE_SERVICE_TOKEN`, `GO_JUDGE_TOKEN`: 각각 독립적으로 생성한 무작위 값. `openssl rand -hex 32`를 **각각** 실행해 생성할 수 있습니다. PostgreSQL 비밀번호는 URL에 포함되므로 hex를 사용합니다. 실제 값을 Git·채팅·로그에 붙여 넣지 마세요.
    - `VITE_SENTRY_DSN`: 선택 사항인 공개 브라우저 설정이며 변경 시 재빌드가 필요합니다.
 7. Domains에서 실제 도메인을 **service `front`, container port `80`**에 연결합니다. 현재 Cloudflare 경로는 위 설정을 사용합니다. Traefik 직접 접속 환경은 DNS A 레코드를 서버 공인 IP로 지정하고 HTTPS/Let's Encrypt를 설정합니다. 사용하지 않는 AAAA 레코드는 제거하거나 실제 IPv6 경로를 구성합니다. DB, Redis, back, go-judge에 도메인을 연결하지 않습니다.
@@ -97,4 +98,7 @@ node scripts/check-compose.mjs --production
 
 ```sh
 docker compose --env-file deploy/.env -f deploy/compose.yaml config --quiet
+docker compose --env-file deploy/.env -f deploy/compose.yaml config --format json | node scripts/check-sandbox-budget.mjs
 ```
+
+두 번째 검사는 커스텀 동시성/메모리 예산을 서비스 기동 없이 확인하며 비밀키를 출력하지 않습니다. Dokploy 설정 변경 전에도 실제 Environment로 동일 검사를 실행하세요. Compose 자체가 예산 산식을 강제하지는 않습니다.

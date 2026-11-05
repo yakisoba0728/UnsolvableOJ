@@ -9,6 +9,7 @@ import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import {
   solvedToday,
   streakDays,
+  learningByDay,
   submissionsByDay,
   useDocumentTitle,
   useAllProblems,
@@ -35,7 +36,7 @@ export function HomePage() {
   const history = useSubmissionHistory(session);
 
   const dayCounts = submissionsByDay(history.submissions);
-  const streak = streakDays(dayCounts);
+  const streak = streakDays(learningByDay(history.submissions));
   const todaySolved = solvedToday(history.submissions);
   const DAILY_GOAL = 1;
   // 내가 6위 밖이면 상위 5명 + 내 순위, 그 외에는 상위 6명 (어느 쪽이든 6줄로 카드 높이를 맞춘다)

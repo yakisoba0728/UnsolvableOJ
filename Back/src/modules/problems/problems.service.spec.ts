@@ -91,6 +91,51 @@ describe('public problem continuation', () => {
 });
 
 describe('public problem detail', () => {
+  it.each(['abc\0def', '\0', 'abc\uD800def', 'abc\uDC00def'])(
+    'rejects PostgreSQL-unsafe slug %j before any database access',
+    async (slug) => {
+      const repository = { findOne: vi.fn(), find: vi.fn() };
+      const db = { transaction: vi.fn(), query: vi.fn() };
+      const service = new ProblemsService(
+        repository as unknown as Repository<Problem>,
+        db as unknown as DataSource,
+      );
+      await expect(service.findPublishedBySlug(slug)).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      expect(db.transaction).not.toHaveBeenCalled();
+      expect(db.query).not.toHaveBeenCalled();
+      expect(repository.findOne).not.toHaveBeenCalled();
+      expect(repository.find).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(['SUM', 'legacy-한글-😀', 'literal-\\u0000', 'literal-%00'])(
+    'does not tighten the format of PostgreSQL-safe lookup slug %j',
+    async (slug) => {
+      const findOneBy = vi
+        .fn()
+        .mockResolvedValue({ id: ids[0], slug: slug.toLowerCase() });
+      const find = vi.fn().mockResolvedValue([]);
+      const service = new ProblemsService(
+        {} as Repository<Problem>,
+        {
+          transaction: vi.fn(async (isolation, run) => {
+            expect(isolation).toBe('REPEATABLE READ');
+            return run({ findOneBy, find });
+          }),
+        } as unknown as DataSource,
+      );
+      await expect(service.findPublishedBySlug(slug)).resolves.toMatchObject({
+        slug: slug.toLowerCase(),
+      });
+      expect(findOneBy).toHaveBeenCalledWith(expect.anything(), {
+        slug: slug.toLowerCase(),
+        status: ProblemStatus.PUBLISHED,
+      });
+    },
+  );
+
   it.each([
     [[{ input: '1\n', expectedOutput: '1\n', isSample: true }]],
     [[]],
@@ -98,11 +143,14 @@ describe('public problem detail', () => {
     const findOneBy = vi.fn().mockResolvedValue({ id: ids[0], slug: 'sum' });
     const find = vi.fn().mockResolvedValue(samples);
     const service = new ProblemsService(
-      { findOneBy } as unknown as Repository<Problem>,
-      { manager: { find } } as unknown as DataSource,
+      {} as Repository<Problem>,
+      { transaction: vi.fn(async (isolation, run) => {
+        expect(isolation).toBe('REPEATABLE READ');
+        return run({ findOneBy, find });
+      }) } as unknown as DataSource,
     );
     const result = await service.findPublishedBySlug('SUM');
-    expect(findOneBy).toHaveBeenCalledWith({
+    expect(findOneBy).toHaveBeenCalledWith(expect.anything(), {
       slug: 'sum',
       status: ProblemStatus.PUBLISHED,
     });

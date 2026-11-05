@@ -6,15 +6,19 @@ interface SourceDraft {
   failed: boolean;
 }
 
-const key = (problemId: string, language: Language) =>
-  `unsolvable-oj-draft-v1:${problemId}:${language}`;
+export const sourceDraftScope = (ownerId: string | null) =>
+  ownerId ? `user:${encodeURIComponent(ownerId)}` : "guest";
+// Ownerless v1 records remain untouched; they cannot safely belong to any account.
+const key = (ownerId: string | null, problemId: string, language: Language) =>
+  `unsolvable-oj-draft-v2:${sourceDraftScope(ownerId)}:${problemId}:${language}`;
 const drafts = new Map<string, { draft: SourceDraft; storedValue: string | null }>();
 
 export function readSourceDraft(
+  ownerId: string | null,
   problemId: string,
   language: Language,
 ): SourceDraft {
-  const id = key(problemId, language);
+  const id = key(ownerId, problemId, language);
   const cached = drafts.get(id);
   if (cached?.draft.failed) return cached.draft;
   try {
@@ -34,11 +38,12 @@ export function readSourceDraft(
 }
 
 export function writeSourceDraft(
+  ownerId: string | null,
   problemId: string,
   language: Language,
   value: string,
 ): SourceDraft {
-  const id = key(problemId, language);
+  const id = key(ownerId, problemId, language);
   const draft: SourceDraft = { value, savedAt: null, failed: true };
   drafts.set(id, { draft, storedValue: value });
   try {
@@ -52,11 +57,12 @@ export function writeSourceDraft(
 }
 
 export function resetSourceDraft(
+  ownerId: string | null,
   problemId: string,
   language: Language,
   starter: string,
 ): boolean {
-  const id = key(problemId, language);
+  const id = key(ownerId, problemId, language);
   const draft = { value: null, savedAt: null, failed: false };
   drafts.set(id, { draft, storedValue: null });
   try {

@@ -88,9 +88,9 @@ services:
     privileged: true
     restart: unless-stopped
     shm_size: 512m
-    mem_limit: ${SANDBOX_MEMORY_LIMIT:-3g}
+    mem_limit: ${SANDBOX_MEMORY_LIMIT:-10g}
     # Equal RAM and combined RAM+swap limits disable swap at container creation.
-    memswap_limit: ${SANDBOX_MEMORY_LIMIT:-3g}
+    memswap_limit: ${SANDBOX_MEMORY_LIMIT:-10g}
     cgroup: private
     cpus: ${SANDBOX_CPUS:-2.0}
     networks: [sandbox]
@@ -145,6 +145,7 @@ services:
     environment:
       # Obtain the real subnet from docker network inspect dokploy-network.
       TRUSTED_PROXY_CIDR: ${TRUSTED_PROXY_CIDR:?Set the Dokploy Traefik network subnet}
+      TRUSTED_PROXY_HOP_CIDR: ${TRUSTED_PROXY_HOP_CIDR:-127.0.0.1/32}
     expose: ["80"]
     networks: [app, dokploy-network]
     depends_on:

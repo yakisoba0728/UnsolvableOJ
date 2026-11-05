@@ -42,8 +42,9 @@ export const writeDraft = (ownerId: string, draft: PostDraft, postId?: string) =
     return true;
   });
 
-export const clearDraft = (ownerId: string, postId?: string) =>
+export const clearDraft = (ownerId: string, postId?: string, expected?: PostDraft | null) =>
   ownedStorage(ownerId, false, () => {
+    if (expected !== undefined && localStorage.getItem(postDraftKey(ownerId, postId)) !== (expected ? JSON.stringify(expected) : null)) return false;
     localStorage.removeItem(postDraftKey(ownerId, postId));
     return true;
   });
@@ -58,6 +59,13 @@ export const writeAnswerDraft = (ownerId: string, postId: string, text: string) 
   ownedStorage(ownerId, false, () => {
     if (text) localStorage.setItem(answerDraftKey(ownerId, postId), text);
     else localStorage.removeItem(answerDraftKey(ownerId, postId));
+    return true;
+  });
+
+export const clearAnswerDraft = (ownerId: string, postId: string, expected: string) =>
+  ownedStorage(ownerId, false, () => {
+    if ((localStorage.getItem(answerDraftKey(ownerId, postId)) ?? "") !== expected) return false;
+    localStorage.removeItem(answerDraftKey(ownerId, postId));
     return true;
   });
 

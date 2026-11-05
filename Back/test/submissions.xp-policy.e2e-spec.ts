@@ -13,6 +13,8 @@ import {
 import { JudgeService } from '../src/modules/submissions/judge.service.js';
 import { SubmissionsService } from '../src/modules/submissions/submissions.service.js';
 import { UserRole } from '../src/modules/users/user-role.enum.js';
+import { MissionsService } from '../src/modules/missions/missions.service.js';
+import { withMissionClock } from './mission-clock.js';
 
 describe('submission XP evidence (PostgreSQL)', () => {
   let db: DataSource;
@@ -133,6 +135,7 @@ describe('submission XP evidence (PostgreSQL)', () => {
         result.dto,
       );
       expect(await evidence(submission.id)).toBe(false);
+      expect((await db.getRepository(Submission).findOneByOrFail({ id: submission.id })).completedForLearning).toBe(false);
       await expectSolve(null);
       await service.rejudge(submission.id, user);
     }
@@ -246,4 +249,78 @@ describe('submission XP evidence (PostgreSQL)', () => {
       await expectSolve(null);
     },
   );
+
+  it.each([
+    [SubmissionStatus.WRONG_ANSWER, SubmissionStatus.QUEUED],
+    [SubmissionStatus.WRONG_ANSWER, SubmissionStatus.JUDGING],
+    [SubmissionStatus.ACCEPTED, SubmissionStatus.QUEUED],
+    [SubmissionStatus.ACCEPTED, SubmissionStatus.JUDGING],
+    [SubmissionStatus.WRONG_ANSWER, SubmissionStatus.SYSTEM_ERROR],
+    [SubmissionStatus.ACCEPTED, SubmissionStatus.SYSTEM_ERROR],
+  ])('never splits a rewarded 1–15 day run when day 8 moves from %s to %s', async (verdict, pending) => {
+    const missions = new MissionsService(db);
+    const at = (day: number) => new Date(Date.UTC(2026, 9, day, 3)).toISOString();
+    let middle = '';
+    for (let day = 1; day <= 7; day++) {
+      const row = await createSubmission();
+      await db.query('UPDATE submissions SET created_at=$2 WHERE id=$1', [row.id, at(day)]);
+      await finish(row.id, SubmissionStatus.WRONG_ANSWER);
+    }
+    const first = await withMissionClock(db, at(7).replace('.000', '.001'), async () => {
+      const mission = (await missions.list(user.id)).items.find((m) => m.id === 'streak')!;
+      expect(mission.current).toBe(7);
+      expect((await missions.claim(user.id, mission.stateId)).awardedXp).toBe(120);
+      return mission;
+    });
+    for (let day = 8; day <= 15; day++) {
+      const row = await createSubmission();
+      await db.query('UPDATE submissions SET created_at=$2 WHERE id=$1', [row.id, at(day)]);
+      await finish(row.id, day === 8 ? verdict : SubmissionStatus.WRONG_ANSWER);
+      if (day === 8) middle = row.id;
+    }
+    const [{ xp }] = await db.query('SELECT xp FROM users WHERE id=$1', [user.id]);
+    const queued = await service.rejudge(middle, user);
+    if (pending === SubmissionStatus.JUDGING)
+      await judge.claimForJudge(middle, queued.judgeGeneration, randomUUID());
+    else if (pending === SubmissionStatus.SYSTEM_ERROR)
+      await finish(middle, pending);
+    await withMissionClock(db, at(15).replace('.000', '.001'), async () => {
+      const assertReceipt = async () => {
+        const current = (await new MissionsService(db).list(user.id)).items.find((m) => m.id === 'streak')!;
+        expect(current.stateId).toBe(first.stateId);
+        const receipts = await Promise.all(Array.from({ length: 4 }, () => missions.claim(user.id, current.stateId)));
+        expect(receipts.every((r) => r.alreadyClaimed && r.xp === xp)).toBe(true);
+        expect(receipts[0].badges.filter((b) => b.badge === 'seven-day-streak')).toHaveLength(1);
+        const history = await service.findMine(user, { page: 1, limit: 100 });
+        expect(history.items.find((s) => s.id === middle)?.completedForLearning).toBe(true);
+      };
+      await assertReceipt();
+      if (pending !== SubmissionStatus.QUEUED) await service.rejudge(middle, user);
+      const restored = await finish(middle, verdict);
+      await judge.recordJudgeResult(middle, restored.generation, restored.attemptId, restored.dto);
+      await assertReceipt();
+      await service.rejudge(middle, user);
+      await assertReceipt();
+    });
+  });
+
+  it('does not turn initial QUEUED/JUDGING or infrastructure failures into completed learning', async () => {
+    const row = await createSubmission();
+    const missions = new MissionsService(db);
+    const assertEmpty = async () => {
+      expect((await db.getRepository(Submission).findOneByOrFail({ id: row.id })).completedForLearning).toBe(false);
+      expect((await missions.list(user.id)).items.find((m) => m.id === 'streak')?.current).toBe(0);
+    };
+    await assertEmpty();
+    const attempt = randomUUID();
+    await judge.claimForJudge(row.id, row.judgeGeneration, attempt);
+    await assertEmpty();
+    await judge.recordJudgeResult(row.id, row.judgeGeneration, attempt, {
+      status: SubmissionStatus.SYSTEM_ERROR, passedTestCases: 0, totalTestCases: 1,
+    });
+    await assertEmpty();
+    await service.rejudge(row.id, user);
+    await finish(row.id, SubmissionStatus.CANCELLED);
+    await assertEmpty();
+  });
 });

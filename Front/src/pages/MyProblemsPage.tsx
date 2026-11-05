@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
@@ -26,29 +26,39 @@ const statusLabel: Record<MyProblem["status"], string> = {
 
 export function MyProblemsPage() {
   useDocumentTitle("내 문제");
-  const { session } = useAuth();
+  const { session, getSessionVersion } = useAuth();
+  const sessionVersion = getSessionVersion();
   const isAdmin = session?.user.role === "ADMIN";
   const [problems, setProblems] = useState<MyProblem[] | null>(null);
   const [error, setError] = useState("");
-  const [busyId, setBusyId] = useState("");
+  const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
+  const alive = useRef(false);
   const [notice, setNotice] = useFlashNotice();
 
   useEffect(() => {
-    if (!session) return;
+    alive.current = true;
+    busyRef.current = false;
+    setBusy(false);
+    setProblems(null);
+    setError("");
     let cancelled = false;
-    api<MyProblem[]>("/problems/mine", {}, session.accessToken)
-      .then((list) => !cancelled && setProblems(list))
-      .catch(
-        (cause) =>
-          !cancelled &&
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "목록을 불러오지 못했습니다.",
-          ),
-      );
+    if (session) {
+      api<MyProblem[]>("/problems/mine", {}, session.accessToken)
+        .then((list) => !cancelled && setProblems(list))
+        .catch(
+          (cause) =>
+            !cancelled &&
+            setError(
+              cause instanceof Error
+                ? cause.message
+                : "목록을 불러오지 못했습니다.",
+            ),
+        );
+    }
     return () => {
       cancelled = true;
+      alive.current = false;
     };
   }, [session]);
 
@@ -56,8 +66,15 @@ export function MyProblemsPage() {
     problem: MyProblem,
     status: "PUBLISHED" | "DRAFT",
   ) {
-    if (!session) return;
-    setBusyId(problem.id);
+    const current = () => alive.current && sessionVersion === getSessionVersion();
+    if (
+      !session ||
+      !current() ||
+      busyRef.current ||
+      (status === "PUBLISHED" && !isAdmin)
+    ) return;
+    busyRef.current = true;
+    setBusy(true);
     setError("");
     try {
       await api(
@@ -65,6 +82,7 @@ export function MyProblemsPage() {
         { method: "PATCH", body: JSON.stringify({ status }) },
         session.accessToken,
       );
+      if (!current()) return;
       setProblems(
         (previous) =>
           previous?.map((item) =>
@@ -77,11 +95,16 @@ export function MyProblemsPage() {
           : "문제를 비공개로 전환했어요.",
       );
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "상태를 바꾸지 못했습니다.",
-      );
+      if (current()) {
+        setError(
+          cause instanceof Error ? cause.message : "상태를 바꾸지 못했습니다.",
+        );
+      }
     } finally {
-      setBusyId("");
+      if (current()) {
+        busyRef.current = false;
+        setBusy(false);
+      }
     }
   }
 
@@ -156,7 +179,7 @@ export function MyProblemsPage() {
                   <button
                     type="button"
                     className="button"
-                    disabled={busyId === problem.id}
+                    disabled={busy}
                     onClick={() => changeStatus(problem, "PUBLISHED")}
                   >
                     공개하기
@@ -167,7 +190,7 @@ export function MyProblemsPage() {
                   <button
                     type="button"
                     className="text-button"
-                    disabled={busyId === problem.id}
+                    disabled={busy}
                     onClick={() => changeStatus(problem, "DRAFT")}
                   >
                     비공개로 전환

@@ -63,7 +63,7 @@ function problemSlugOf(value: string) {
   return decodeURIComponent(path.replace(/^view\//, "").split(/[/?#]/)[0]);
 }
 
-export function CommunityWritePage() {
+export function CommunityWritePage({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { id: editingId } = useParams();
   useDocumentTitle(editingId ? "글 수정" : "글 작성");
   const { session } = useAuth();
@@ -76,7 +76,7 @@ export function CommunityWritePage() {
   );
   // 비로그인 접근은 App의 라우트에서 로그인 화면(또는 로그아웃 직후 홈)으로 보낸다.
   if (!session) return null;
-  if (!editingId) return <WriteForm />;
+  if (!editingId) return <WriteForm getNavigationVersion={getNavigationVersion} />;
   if (loading)
     return (
       <div className="write-page">
@@ -96,13 +96,13 @@ export function CommunityWritePage() {
     );
   if (!original || original.authorId !== session.user.id)
     return <Navigate to={`/community/${editingId}`} replace />;
-  return <WriteForm original={original} />;
+  return <WriteForm original={original} getNavigationVersion={getNavigationVersion} />;
 }
 
-function WriteForm({ original }: { original?: CommunityPost }) {
+function WriteForm({ original, getNavigationVersion }: { original?: CommunityPost; getNavigationVersion: () => number }) {
   const editingId = original?.id;
   const editing = Boolean(original);
-  const { session } = useAuth();
+  const { session, getSessionVersion } = useAuth();
   const ownerId = session?.user.id ?? "";
   const navigate = useNavigate();
   const location = useLocation();
@@ -178,6 +178,12 @@ function WriteForm({ original }: { original?: CommunityPost }) {
   const titleRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const bypass = useRef(false);
+  const pendingRef = useRef(false);
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
 
   const dirty = original
     ? title !== original.title ||
@@ -211,12 +217,13 @@ function WriteForm({ original }: { original?: CommunityPost }) {
   latest.current = { ...fields, dirty };
 
   function saveDraft() {
-    if (bypass.current) return false;
+    if (bypass.current || pendingRef.current) return false;
     const now = Date.now();
-    const ok = writeDraft(ownerId, { ...fields, savedAt: now }, editingId);
+    const draft = { ...fields, savedAt: now };
+    const ok = writeDraft(ownerId, draft, editingId);
     setSaveState(ok ? "saved" : "failed");
     if (ok) setSavedAt(now);
-    return ok;
+    return draft;
   }
 
   useEffect(() => {
@@ -227,7 +234,7 @@ function WriteForm({ original }: { original?: CommunityPost }) {
 
   // 입력하면 잠시 뒤 자동으로 임시 저장한다.
   useEffect(() => {
-    if (!ownerId || bypass.current) return;
+    if (!ownerId || bypass.current || pending) return;
     const emptied = wasDirtyRef.current && !dirty;
     wasDirtyRef.current = dirty;
     if (!dirty) {
@@ -253,12 +260,13 @@ function WriteForm({ original }: { original?: CommunityPost }) {
     dirty,
     ownerId,
     editingId,
+    pending,
   ]);
 
   // 자동 저장을 기다리지 않고 이탈·세션 만료 직전의 입력까지 보관한다.
   useEffect(() => {
     const persistLatest = () => {
-      if (bypass.current || !ownerId || !latest.current.dirty) return;
+      if (bypass.current || pendingRef.current || !ownerId || !latest.current.dirty) return;
       const { dirty: _dirty, ...draft } = latest.current;
       writeDraft(ownerId, { ...draft, savedAt: Date.now() }, editingId);
     };
@@ -334,7 +342,7 @@ function WriteForm({ original }: { original?: CommunityPost }) {
   }
 
   function cancel() {
-    if (bypass.current) return;
+    if (bypass.current || pendingRef.current) return;
     if (
       dirty &&
       !window.confirm(
@@ -357,7 +365,7 @@ function WriteForm({ original }: { original?: CommunityPost }) {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (bypass.current || pending || !session) return;
+    if (bypass.current || pendingRef.current || linking || !session) return;
     setTouched({ title: true, body: true, tag: true });
     if (problems.title) return titleRef.current?.focus();
     if (problems.body) {
@@ -377,7 +385,11 @@ function WriteForm({ original }: { original?: CommunityPost }) {
         ?.focus();
     }
 
-    saveDraft();
+    const submittedDraft = saveDraft();
+    const navigationVersion = getNavigationVersion();
+    const sessionVersion = getSessionVersion();
+    const ownsRequest = () => mounted.current && getNavigationVersion() === navigationVersion && getSessionVersion() === sessionVersion;
+    pendingRef.current = true;
     setPending(true);
     setSubmitError("");
     try {
@@ -394,7 +406,8 @@ function WriteForm({ original }: { original?: CommunityPost }) {
         session.accessToken,
         editingId,
       );
-      const cleared = clearDraft(ownerId, editingId);
+      if (!ownsRequest()) return;
+      const cleared = clearDraft(ownerId, editingId, submittedDraft || null);
       bypass.current = true;
       navigate(`/community/${post.id}`, {
         state: {
@@ -402,11 +415,16 @@ function WriteForm({ original }: { original?: CommunityPost }) {
         },
       });
     } catch (cause) {
+      if (!ownsRequest()) return;
       setSubmitError(
         `글을 저장하지 못했어요. ${errorMessage(cause)} 입력한 내용과 초안은 그대로 남아 있어요.`,
       );
     } finally {
-      if (!bypass.current) setPending(false);
+      // A stale response during lazy navigation must not re-enable unmount persistence.
+      if (ownsRequest()) {
+        pendingRef.current = false;
+        if (!bypass.current) setPending(false);
+      }
     }
   }
 
@@ -430,6 +448,7 @@ function WriteForm({ original }: { original?: CommunityPost }) {
           <button
             type="button"
             className="inline-button"
+            disabled={pending}
             onClick={() => {
               if (!clearDraft(ownerId, editingId)) {
                 setSubmitError(
@@ -463,7 +482,7 @@ function WriteForm({ original }: { original?: CommunityPost }) {
         </p>
       ) : null}
       <form className="form-card write-form" onSubmit={submit} noValidate>
-        <div className="form-stack">
+        <fieldset className="form-stack" disabled={pending} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
           <label>
             <span className="label-row">
               제목<span className="required-mark">필수</span>
@@ -539,7 +558,7 @@ function WriteForm({ original }: { original?: CommunityPost }) {
               <Select
                 ariaLabel="카테고리"
                 // 서버는 글을 올린 뒤 게시판을 바꾸지 못하게 한다.
-                disabled={editing}
+                disabled={editing || pending}
                 value={category}
                 options={options.map((item) => ({
                   value: item.key,
@@ -711,7 +730,7 @@ function WriteForm({ original }: { original?: CommunityPost }) {
               onChange={(event) => setCode(event.target.value)}
             />
           </label>
-        </div>
+        </fieldset>
       </form>
       <div className="write-bar">
         <p className="write-hint" role="status">
@@ -725,6 +744,7 @@ function WriteForm({ original }: { original?: CommunityPost }) {
           <button
             type="button"
             className="button button-ghost"
+            disabled={pending}
             onClick={cancel}
           >
             취소
@@ -732,6 +752,7 @@ function WriteForm({ original }: { original?: CommunityPost }) {
           <button
             type="button"
             className="button button-outline"
+            disabled={pending}
             onClick={saveDraft}
           >
             임시 저장
@@ -739,7 +760,7 @@ function WriteForm({ original }: { original?: CommunityPost }) {
           <button
             type="button"
             className="button"
-            disabled={pending}
+            disabled={pending || linking}
             onClick={() =>
               (
                 document.querySelector(".write-form") as HTMLFormElement | null

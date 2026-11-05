@@ -10,7 +10,10 @@ import {
   writeProblemDraft,
   type ProblemDraft,
 } from "../src/problems/editor";
-import { readSourceDraft, resetSourceDraft, writeSourceDraft } from "../src/editor/sourceDrafts";
+import { readSourceDraft as readOwnedSourceDraft, resetSourceDraft as resetOwnedSourceDraft, writeSourceDraft as writeOwnedSourceDraft } from "../src/editor/sourceDrafts";
+const readSourceDraft = readOwnedSourceDraft.bind(null, null);
+const resetSourceDraft = resetOwnedSourceDraft.bind(null, null);
+const writeSourceDraft = writeOwnedSourceDraft.bind(null, null);
 
 class StorageFixture {
   values = new Map<string, string>();
@@ -54,6 +57,22 @@ const draft = (revision: string): ProblemDraft => ({
   slugTouched: false,
   revision,
   savedAt: 1,
+});
+
+test("source drafts isolate accounts and guest, including failed-write memory, without adopting ownerless data", () => {
+  const legacy = "unsolvable-oj-draft-v1:private-source:PYTHON";
+  local.setItem(legacy, "unknown owner's code");
+  for (const owner of [null, "a", "b"]) expect(readOwnedSourceDraft(owner, "private-source", "PYTHON").value).toBeNull();
+  writeOwnedSourceDraft(null, "private-source", "PYTHON", "guest code");
+  writeOwnedSourceDraft("b", "private-source", "PYTHON", "b code");
+  local.failWrites = true;
+  writeOwnedSourceDraft("a", "private-source", "PYTHON", "a memory code");
+  expect(readOwnedSourceDraft("b", "private-source", "PYTHON").value).toBe("b code");
+  expect(readOwnedSourceDraft(null, "private-source", "PYTHON").value).toBe("guest code");
+  expect(readOwnedSourceDraft("a", "private-source", "PYTHON").value).toBe("a memory code");
+  resetOwnedSourceDraft("b", "private-source", "PYTHON", "starter");
+  expect(readOwnedSourceDraft("a", "private-source", "PYTHON").value).toBe("a memory code");
+  expect(local.getItem(legacy)).toBe("unknown owner's code");
 });
 
 test("hidden-only cases and empty/whitespace output are valid, but no test cases is not", () => {
@@ -141,7 +160,7 @@ test("stored author drafts are validated and read failures are explicit", () => 
 });
 
 test("source writes beat stale storage across language/problem switches and reset clears memory too", () => {
-  local.setItem("unsolvable-oj-draft-v1:source-p:PYTHON", "old");
+  local.setItem("unsolvable-oj-draft-v2:guest:source-p:PYTHON", "old");
   expect(readSourceDraft("source-p", "PYTHON").value).toBe("old");
   local.failWrites = true;
   expect(writeSourceDraft("source-p", "PYTHON", "latest").failed).toBe(true);
@@ -158,7 +177,7 @@ test("source writes beat stale storage across language/problem switches and rese
 });
 
 test("source drafts: a draft read from storage has no save time, a write records one", () => {
-  local.setItem("unsolvable-oj-draft-v1:saved-at-p:PYTHON", "old");
+  local.setItem("unsolvable-oj-draft-v2:guest:saved-at-p:PYTHON", "old");
   expect(readSourceDraft("saved-at-p", "PYTHON")).toEqual({ value: "old", savedAt: null, failed: false });
   expect(writeSourceDraft("saved-at-p", "PYTHON", "new").savedAt).toBeInstanceOf(Date);
 });
@@ -167,13 +186,13 @@ test("source reset overwrites stale storage with the starter when removal alone 
   writeSourceDraft("reset-fallback-p", "PYTHON", "old source");
   local.failRemoves = true;
   expect(resetSourceDraft("reset-fallback-p", "PYTHON", "starter source")).toBe(true);
-  expect(local.getItem("unsolvable-oj-draft-v1:reset-fallback-p:PYTHON")).toBe("starter source");
+  expect(local.getItem("unsolvable-oj-draft-v2:guest:reset-fallback-p:PYTHON")).toBe("starter source");
   expect(readSourceDraft("reset-fallback-p", "PYTHON").value).toBeNull();
 });
 
 test("source drafts: a clean persisted cache refreshes after an external write", () => {
   const problemId = "external-source-replacement";
-  const key = `unsolvable-oj-draft-v1:${problemId}:PYTHON`;
+  const key = `unsolvable-oj-draft-v2:guest:${problemId}:PYTHON`;
   local.setItem(key, "print('old persisted source')");
   expect(readSourceDraft(problemId, "PYTHON")).toMatchObject({ value: "print('old persisted source')", failed: false });
   local.setItem(key, "print('other tab latest')");
@@ -183,7 +202,7 @@ test("source drafts: a clean persisted cache refreshes after an external write",
 
 test("source drafts: a cached absence refreshes after another tab first saves", () => {
   const problemId = "external-source-first-save";
-  const key = `unsolvable-oj-draft-v1:${problemId}:PYTHON`;
+  const key = `unsolvable-oj-draft-v2:guest:${problemId}:PYTHON`;
   expect(readSourceDraft(problemId, "PYTHON")).toMatchObject({ value: null, failed: false });
   local.setItem(key, "print('other tab first save')");
   const restored = readSourceDraft(problemId, "PYTHON");
@@ -192,7 +211,7 @@ test("source drafts: a cached absence refreshes after another tab first saves", 
 
 test("source drafts: read failure falls back to clean memory without blocking later refresh", () => {
   const problemId = "source-read-recovery";
-  const key = `unsolvable-oj-draft-v1:${problemId}:PYTHON`;
+  const key = `unsolvable-oj-draft-v2:guest:${problemId}:PYTHON`;
   const saved = writeSourceDraft(problemId, "PYTHON", "old source");
   expect(readSourceDraft(problemId, "PYTHON")).toBe(saved);
   local.failReads = true;
@@ -205,7 +224,7 @@ test("source drafts: read failure falls back to clean memory without blocking la
 
 test("source drafts: failed-write memory still wins when shared storage is readable", () => {
   const problemId = "source-dirty-memory";
-  const key = `unsolvable-oj-draft-v1:${problemId}:PYTHON`;
+  const key = `unsolvable-oj-draft-v2:guest:${problemId}:PYTHON`;
   local.setItem(key, "persisted source");
   local.failWrites = true;
   const unsaved = writeSourceDraft(problemId, "PYTHON", "memory-only latest");
@@ -218,7 +237,7 @@ test("source drafts: failed-write memory still wins when shared storage is reada
 
 test("source drafts: a fallback reset refreshes only after its persisted value changes", () => {
   const problemId = "source-reset-refresh";
-  const key = `unsolvable-oj-draft-v1:${problemId}:PYTHON`;
+  const key = `unsolvable-oj-draft-v2:guest:${problemId}:PYTHON`;
   writeSourceDraft(problemId, "PYTHON", "old source");
   local.failRemoves = true;
   expect(resetSourceDraft(problemId, "PYTHON", "starter")).toBe(true);

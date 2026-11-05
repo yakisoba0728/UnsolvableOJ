@@ -16,6 +16,7 @@ import {
   readSourceDraft,
   resetSourceDraft,
   writeSourceDraft,
+  sourceDraftScope,
 } from "../editor/sourceDrafts";
 import {
   LANGUAGE_LABELS,
@@ -43,14 +44,14 @@ const FONT_MIN = 11;
 const FONT_MAX = 20;
 
 /** Tab으로 넣은 들여쓰기 한 단계의 위치 목록(초안 옆에 저장해, 새로고침 뒤에도 Backspace가 한 단계씩 지운다). */
-function unitsKey(problemId: string, language: Language) {
-  return `unsolvable-oj-draft-units-v1:${problemId}:${language}`;
+function unitsKey(ownerId: string | null, problemId: string, language: Language) {
+  return `unsolvable-oj-draft-units-v2:${sourceDraftScope(ownerId)}:${problemId}:${language}`;
 }
 
-function readUnits(problemId: string, language: Language): number[] {
+function readUnits(ownerId: string | null, problemId: string, language: Language): number[] {
   try {
     const parsed: unknown = JSON.parse(
-      localStorage.getItem(unitsKey(problemId, language)) ?? "[]",
+      localStorage.getItem(unitsKey(ownerId, problemId, language)) ?? "[]",
     );
     return Array.isArray(parsed)
       ? parsed.filter((item): item is number => typeof item === "number")
@@ -61,6 +62,12 @@ function readUnits(problemId: string, language: Language): number[] {
 }
 
 export function ProblemPage() {
+  const { session } = useAuth();
+  // Remount before rendering the new account: no old source, undo state or units can leak.
+  return <OwnedProblemPage key={sourceDraftScope(session?.user.id ?? null)} />;
+}
+
+function OwnedProblemPage() {
   const { slug } = useParams();
   const [problem, setProblem] = useState<Problem | null>(null);
   useDocumentTitle(problem?.title);
@@ -116,6 +123,7 @@ export function ProblemPage() {
     }
   }
   const { session } = useAuth();
+  const ownerId = session?.user.id ?? null;
   const { submission: result, error: resultError } = useSubmissionResult(
     submissionId,
     session,
@@ -151,7 +159,7 @@ export function ProblemPage() {
   // 문제가 바뀌거나 불러와지면 저장된 초안을 복원한다.
   useEffect(() => {
     if (!problem) return;
-    const draft = readSourceDraft(problem.id, language);
+    const draft = readSourceDraft(ownerId, problem.id, language);
     const restored = draft.value ?? starter(language);
     setSource(restored);
     setSavedAt(draft.savedAt);
@@ -159,7 +167,7 @@ export function ProblemPage() {
     setSaveFailed(draft.failed);
     // 복원한 글에 맞는 Tab 단위만 이어받는다(글자가 공백 네 칸이 아니면 버려진다). 시작 코드의 들여쓰기는 기억하지 않는다.
     unitsRef.current = remapUnits(
-      draft.value === null ? [] : readUnits(problem.id, language),
+      draft.value === null ? [] : readUnits(ownerId, problem.id, language),
       restored,
       restored,
     );
@@ -173,7 +181,7 @@ export function ProblemPage() {
   function updateSource(next: string) {
     setSource(next);
     if (!problem) return;
-    const draft = writeSourceDraft(problem.id, language, next);
+    const draft = writeSourceDraft(ownerId, problem.id, language, next);
     setSavedAt(draft.savedAt);
     setSaveFailed(draft.failed);
   }
@@ -195,7 +203,7 @@ export function ProblemPage() {
     if (!problem) return;
     try {
       localStorage.setItem(
-        unitsKey(problem.id, language),
+        unitsKey(ownerId, problem.id, language),
         JSON.stringify(unitsRef.current),
       );
     } catch {
@@ -620,7 +628,7 @@ export function ProblemPage() {
                 unitsRef.current = [];
                 unitsBaseRef.current = starter(language);
                 setSource(starter(language));
-                setSaveFailed(!resetSourceDraft(problem.id, language, starter(language)));
+                setSaveFailed(!resetSourceDraft(ownerId, problem.id, language, starter(language)));
                 setSavedAt(null);
                 setDraftLoaded(false);
               }}

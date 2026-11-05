@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import type { Mission, MissionStatus } from "../missions/catalog";
+import type { Mission, MissionStatus } from "../missions/types";
 
 /** 미션 카드 한 장에 필요한 값. 시즌 미션이 아니어도(예: XP 두 배 문제) 같은 틀로 그릴 수 있다. */
 export type MissionCardData = Pick<

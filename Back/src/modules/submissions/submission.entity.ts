@@ -65,6 +65,9 @@ export class Submission {
   @Column({ name: 'accepted_for_xp', type: 'boolean', default: false })
   acceptedForXp: boolean;
 
+  @Column({ name: 'completed_for_learning', type: 'boolean', default: false })
+  completedForLearning: boolean;
+
   @Column({ name: 'runtime_ms', type: 'integer', nullable: true })
   runtimeMs: number | null;
 

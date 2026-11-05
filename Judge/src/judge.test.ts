@@ -16,14 +16,18 @@ interface Step {
   dropStdout?: boolean;
   transform?: (result: Record<string, unknown>) => unknown;
   hang?: () => void;
+  breakBody?: "json" | "stdout";
+  invalidJson?: boolean;
 }
 
 async function sandbox(t: TestContext, steps: Step[] = []) {
   const files = new Map<string, Buffer>();
   const commands: any[] = [];
   const deleted: string[] = [];
+  const brokenFiles = new Set<string>();
   const state = {
     os: "linux", denyDelete: false,
+    onPartialBody: undefined as (() => void) | undefined,
     runner: { cgroupType: 2, seccomp: true, workDir: "/w", cgroupControllers: ["cpu", "memory", "pids"] },
   };
   let nextId = 0;
@@ -32,6 +36,12 @@ async function sandbox(t: TestContext, steps: Step[] = []) {
       const json = (value: unknown, status = 200) => {
         response.writeHead(status, { "Content-Type": "application/json" });
         response.end(JSON.stringify(value));
+      };
+      const breakBody = (text: string) => {
+        response.writeHead(200, { "Content-Length": "10000" });
+        response.flushHeaders();
+        response.write(text);
+        setTimeout(() => { state.onPartialBody?.(); response.destroy(); }, 10);
       };
       if (request.url === "/version") return json({ os: state.os });
       if (request.url === "/config") return json({ runnerConfig: state.runner });
@@ -46,6 +56,7 @@ async function sandbox(t: TestContext, steps: Step[] = []) {
           return response.end();
         }
         const content = files.get(id);
+        if (brokenFiles.has(id)) return breakBody("partial output");
         response.writeHead(content ? 200 : 404, { "Content-Type": "application/octet-stream" });
         return response.end(content);
       }
@@ -58,6 +69,8 @@ async function sandbox(t: TestContext, steps: Step[] = []) {
       const step = steps.shift();
       assert.ok(step, "Unexpected execution");
       if (step.hang) return step.hang();
+      if (step.breakBody === "json") return breakBody("[{");
+      if (step.invalidJson) return response.end("[{");
       if (step.httpStatus) return json({ error: "hidden-secret" }, step.httpStatus);
       const fileIds: Record<string, string> = {};
       for (const name of body.cmd[0].copyOutCached as string[]) {
@@ -66,6 +79,7 @@ async function sandbox(t: TestContext, steps: Step[] = []) {
         const id = String(++nextId);
         files.set(id, Buffer.from(key === "stdout" ? (step.stdout ?? "") : key === "stderr" ? (step.stderr ?? "") : "binary"));
         fileIds[key] = id;
+        if (key === "stdout" && step.breakBody === "stdout") brokenFiles.add(id);
       }
       const result = {
         status: step.status ?? "Accepted", exitStatus: step.exitStatus ?? 0,
@@ -97,6 +111,27 @@ function claim(overrides: Partial<Claim> = {}): Claim {
     ...overrides,
   };
 }
+
+for (const breakBody of ["json", "stdout"] as const) {
+  test(`HTTP 200 interrupted ${breakBody} body is transient, not a final SYSTEM_ERROR`, async (t) => {
+    const s = await sandbox(t, [{ breakBody }]);
+    await assert.rejects(judge(claim(), s.config), SandboxUnavailableError);
+    assert.equal(s.files.size, 0);
+  });
+  test(`user cancellation during ${breakBody} download is not a sandbox outage`, async (t) => {
+    const s = await sandbox(t, [{ breakBody }]);
+    const abort = new AbortController();
+    s.state.onPartialBody = () => abort.abort(new TypeError("user cancelled"));
+    await assert.rejects(judge(claim(), s.config, abort.signal),
+      (error) => !(error instanceof SandboxUnavailableError));
+    assert.equal(s.files.size, 0);
+  });
+}
+
+test("complete but invalid JSON is not a transient transport failure", async (t) => {
+  const s = await sandbox(t, [{ invalidJson: true }]);
+  await assert.rejects(judge(claim(), s.config), SyntaxError);
+});
 
 test("startup requires authenticated Linux, seccomp and all resource controllers", async (t) => {
   const s = await sandbox(t);
@@ -301,7 +336,8 @@ test("a lost output download still cleans the compiled artifact and other output
 
 test("oversized output is rejected and all cached files are reclaimed", async (t) => {
   const s = await sandbox(t, [{ stdout: "x".repeat(1_000_001) }]);
-  await assert.rejects(judge(claim(), s.config), /oversized/);
+  await assert.rejects(judge(claim(), s.config),
+    (error) => /oversized/.test(String(error)) && !(error instanceof SandboxUnavailableError));
   assert.equal(s.files.size, 0);
 });
 

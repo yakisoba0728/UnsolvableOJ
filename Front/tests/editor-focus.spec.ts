@@ -27,7 +27,7 @@ for (const key of ["Tab", "Shift+Tab"]) {
     if (browserName !== "webkit")
       expect(await page.evaluate(() => document.activeElement !== document.body)).toBe(true);
     await expect(editor).toHaveValue("private draft");
-    expect(await page.evaluate(() => localStorage.getItem("unsolvable-oj-draft-v1:focus:PYTHON"))).toBe("private draft");
+    expect(await page.evaluate(() => localStorage.getItem("unsolvable-oj-draft-v2:guest:focus:PYTHON"))).toBe("private draft");
   });
 }
 

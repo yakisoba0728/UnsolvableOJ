@@ -6,6 +6,7 @@ import { WeekStrip } from "../components/WeekStrip";
 import { problemPath } from "../paths";
 import {
   streakDays,
+  learningByDay,
   submissionsByDay,
   useDocumentTitle,
   useSubmissionHistory,
@@ -70,7 +71,7 @@ export function SubmissionPage() {
         <section className="streak-card" aria-label="연속 학습">
           <div className="streak-text">
             <strong>
-              {streakDays(submissionsByDay(history.submissions))}일
+              {streakDays(learningByDay(history.submissions))}일
             </strong>
             <span>연속 학습 중이에요. 내일도 이어가 보세요!</span>
           </div>

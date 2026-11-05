@@ -108,6 +108,35 @@ test.describe("code editing rules", () => {
       });
   });
 
+  test("escaped quotes neither skip nor pair after odd backslashes; even backslashes still close", () => {
+    for (const quote of ['"', "'", "`"]) {
+      for (const count of [0, 1, 2, 3, 4]) {
+        const prefix = quote + "\\".repeat(count);
+        const state = at(prefix + quote, prefix.length);
+        if (count % 2 === 1) {
+          for (const suffix of [quote, "", " "])
+            expect(handleCharacter(at(prefix + suffix, prefix.length), quote)).toBeNull();
+        } else {
+          expect(handleCharacter(state, quote)).toEqual({
+            value: state.value,
+            start: prefix.length + 1,
+            end: prefix.length + 1,
+          });
+        }
+      }
+    }
+  });
+
+  test("quote escaping leaves selection wrapping and bracket pairing unchanged", () => {
+    for (const quote of ['"', "'", "`"])
+      expect(handleCharacter(at("\\abc", 1, 4), quote)).toEqual({
+        value: `\\${quote}abc${quote}`,
+        start: 2,
+        end: 5,
+      });
+    expect(handleCharacter(at("\\", 1), "(")).toEqual(at("\\()", 2));
+  });
+
   test("line commands exclude the line at the selection's exclusive end", () => {
     expect(handleTab(at("\na", 0, 1), false).value).toBe("\na");
     expect(handleTab(at("a\nb", 0, 2), false)).toEqual({
