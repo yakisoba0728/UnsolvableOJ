@@ -31,6 +31,22 @@ const problems = [
   createdAt: "2026-09-01T00:00:00Z",
 }));
 
+/** 달력(DateTimePicker)을 열어 `YYYY-MM-DDTHH:mm` 값을 고른다. 시·분은 24시간제로 직접 입력한다. */
+async function pickDateTime(page: Page, label: string, value: string) {
+  const [, y, m, d, h, min] = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value)!.map(Number) as unknown as number[];
+  await page.getByLabel(label).click();
+  const dialog = page.getByRole("dialog", { name: "날짜와 시간 선택" });
+  const heading = dialog.locator(".dtp-head strong");
+  for (let i = 0; i < 36 && (await heading.innerText()) !== `${y}년 ${m}월`; i++) {
+    const [vy, vm] = (await heading.innerText()).match(/\d+/g)!.map(Number);
+    await dialog.getByRole("button", { name: vy * 12 + vm < y * 12 + m ? "다음 달" : "이전 달" }).click();
+  }
+  await dialog.getByRole("button", { name: `${y}년 ${m}월 ${d}일`, exact: true }).click();
+  await dialog.getByRole("textbox", { name: "시" }).fill(String(h));
+  await dialog.getByRole("textbox", { name: "분" }).fill(String(min));
+  await dialog.getByRole("button", { name: "확인" }).click();
+}
+
 async function signIn(page: Page) {
   await page.addInitScript(
     ({ key, saved }) => localStorage.setItem(key, JSON.stringify(saved)),
@@ -170,19 +186,13 @@ test("saving after the original start is rejected even if draft dates move into 
   const before = await page.evaluate((key) => localStorage.getItem(key), testsKey);
   await page.clock.fastForward(11_000);
   await page.getByLabel(/테스트 이름/).fill("시작 후 변경 시도");
-  for (const [label, hour] of [["시작 일시", "13"], ["종료 일시", "15"]]) {
-    await page.getByRole("button", { name: label }).click();
-    const picker = page.getByRole("dialog", { name: "날짜와 시간 선택" });
-    await picker.getByRole("button", { name: "2026년 11월 3일" }).click();
-    await picker.getByLabel("시", { exact: true }).fill(hour);
-    await picker.getByLabel("분", { exact: true }).fill("00");
-    await picker.getByRole("button", { name: "확인" }).click();
-  }
+  await pickDateTime(page, "시작 일시", "2026-11-03T13:00");
+  await pickDateTime(page, "종료 일시", "2026-11-03T15:00");
   await page.getByRole("button", { name: "변경 저장", exact: true }).click();
   await expect(page.getByRole("alert")).toContainText("시작된 테스트는 수정할 수 없어요");
   await expect(page).toHaveURL(/\/enterprise\/t-edit\/edit$/);
   await expect(page.getByLabel(/테스트 이름/)).toHaveValue("시작 후 변경 시도");
-  await expect(page.getByRole("button", { name: "시작 일시" })).toContainText("2026. 11. 03. 13:00");
+  await expect(page.getByLabel("시작 일시")).toContainText("2026. 11. 03. 13:00");
   expect(await page.evaluate((key) => localStorage.getItem(key), testsKey)).toBe(before);
 });
 
