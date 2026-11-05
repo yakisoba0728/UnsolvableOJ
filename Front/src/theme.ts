@@ -56,6 +56,17 @@ export function useTheme() {
     } catch {
       /* 저장소를 쓸 수 없어도 이번 방문에는 적용한다 */
     }
+    // 화면을 통째로 크로스페이드한다(요소마다 전환을 걸면 상속되는 글자색이 겹쳐 깜빡인다).
+    // 지원하지 않거나 모션 줄이기 설정이면 바로 바꾼다.
+    const start = (
+      document as Document & {
+        startViewTransition?: (update: () => void) => unknown;
+      }
+    ).startViewTransition?.bind(document);
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (start && !reduce) start(() => apply(next));
     setTheme(next);
   }, [theme]);
 
