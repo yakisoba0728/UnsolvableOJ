@@ -8,6 +8,7 @@
 - 현재 실제 검증 기준은 Linux/cgroup v2입니다. cpu·memory·pids controller와 seccomp가 필요하며 fallback은 허용하지 않습니다. v1은 호스트 swap을 꺼야 하고 별도 실행 검증 전에는 운영에 사용하지 마세요.
 - 이 Compose에는 워커와 go-judge만 있습니다. API·Redis는 사설망/VPN으로 접근하며 외부 공개 Redis를 사용하지 마세요. Redis 인증 정보는 API와 워커가 일치해야 합니다.
 - go-judge는 privileged이지만 호스트 포트를 전혀 공개하지 않습니다. Docker socket·홈 디렉터리·운영 데이터는 mount하지 않습니다. Docker 관리자 권한과 로그 접근 권한을 제한하세요.
+- 기본 sandbox 상한은 10 GiB(최대 4 GiB × 동시성 2 + 서비스/캐시 2 GiB), 워커는 512 MiB입니다. OS·빌드 여유를 별도로 확보한 최소 12 GiB급 전용 호스트를 출발점으로 사용하세요. 동시성 변경 시 `SANDBOX_MEMORY_LIMIT`도 `4 GiB × 동시성 + 2 GiB` 이상으로 늘려야 합니다. 캐시/런타임 오버헤드와 호스트 여유는 부하 검증·OOM 모니터링이 필요합니다.
 
 ## 배포 승인 후 준비할 설정
 
@@ -21,8 +22,9 @@
 
 ```sh
 docker compose --env-file .env -p unsolvable-executor -f compose.yaml config --quiet
+docker compose --env-file .env -p unsolvable-executor -f compose.yaml config --format json | node ../../scripts/check-sandbox-budget.mjs
 docker compose --env-file .env -p unsolvable-executor -f compose.yaml up -d --build --wait
 docker compose --env-file .env -p unsolvable-executor -f compose.yaml ps
 ```
 
-미설정 필수 값은 Compose가 거절합니다. 상태 확인은 API `/admin/ops`의 워커·실패 작업과 실행 노드 healthcheck를 함께 보세요. 실제 문제로 8개 언어·실패 판정·예제 출력 차단을 검증하고, 장애 시 새 워커를 중지한 뒤 이전 검증 버전으로 되돌립니다. DB 볼륨 삭제나 `down -v`를 운영 복구 절차로 사용하지 마세요.
+미설정 필수 값은 Compose가 거절합니다. 상태 확인은 API `/admin/ops`의 워커·실패 작업과 실행 노드 healthcheck를 함께 보세요. API 토큰이 맞지 않으면 워커가 종료 코드 1로 끝나 재시작을 반복하므로 `ps`에 드러납니다. 실제 문제로 8개 언어·실패 판정·예제 출력 차단을 검증하고, 장애 시 새 워커를 중지한 뒤 이전 검증 버전으로 되돌립니다. DB 볼륨 삭제나 `down -v`를 운영 복구 절차로 사용하지 마세요.

@@ -11,6 +11,8 @@ async function bootstrap() {
   });
   const config = app.get(ConfigService);
   configureHttp(app);
+  // SIGTERM에 큐 복구 타이머·Redis·DB 연결을 정리하고 종료합니다.
+  app.enableShutdownHooks();
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('UnsolvableOJ API')

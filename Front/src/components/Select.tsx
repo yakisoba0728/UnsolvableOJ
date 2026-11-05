@@ -122,7 +122,7 @@ export function Select({
         role="combobox"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-controls={`${id}-list`}
+        aria-controls={open ? `${id}-list` : undefined}
         aria-activedescendant={open ? `${id}-${active}` : undefined}
         aria-label={ariaLabel}
         disabled={disabled}
@@ -139,6 +139,7 @@ export function Select({
           className={`select-list ${openUp ? "up" : ""}`}
           id={`${id}-list`}
           role="listbox"
+          aria-label={ariaLabel}
           ref={listRef}
         >
           {options.map((option, index) => (

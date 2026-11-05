@@ -10,6 +10,17 @@ export const LANGUAGES = [
   "RUST",
 ] as const;
 export type Language = (typeof LANGUAGES)[number];
+/** 언어 코드(서버 값)를 화면 이름으로. 모르는 코드는 호출하는 쪽에서 그대로 보여 준다. */
+export const LANGUAGE_LABELS: Record<string, string> = {
+  C: "C",
+  CPP: "C++",
+  JAVA: "Java",
+  PYTHON: "Python",
+  JAVASCRIPT: "JavaScript",
+  TYPESCRIPT: "TypeScript",
+  GO: "Go",
+  RUST: "Rust",
+};
 export type Role = "USER" | "AUTHOR" | "ADMIN";
 
 export interface User {
@@ -57,6 +68,7 @@ export interface Submission {
   problem: { id: string; slug?: string; title?: string };
   language: Language;
   status: string;
+  completedForLearning?: boolean;
   runtimeMs: number | null;
   memoryKb: number | null;
   passedTestCases: number;
@@ -82,6 +94,7 @@ export interface Submission {
 }
 
 export interface UserProfile extends User {
+  badges?: { badge: string; awardedAt: string }[];
   createdAt: string;
   solvedCount: number;
 }
@@ -101,6 +114,6 @@ export interface Page<T> {
   limit: number;
   total: number;
   totalPages: number;
-  /** Opaque continuation; null marks the end. Absent on legacy offset pages. */
+  /** 다음 페이지 커서(내용은 해석하지 않는다). null이면 끝이고, 옛 오프셋 방식 응답에는 없다. */
   nextCursor?: string | null;
 }

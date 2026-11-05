@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { Problem, Session, Submission } from "../src/types";
+import { readAll, storageKey } from "./fixtures";
 
-const storageKey = "unsolvable-oj-session-v1";
 const session: Session = {
   accessToken: "data-test-token",
   tokenType: "Bearer",
@@ -71,14 +71,6 @@ async function freeze(page: Page) {
 async function pauseClock(page: Page) {
   // HTTP-date Retry-After has whole-second precision.
   await page.clock.pauseAt(Math.ceil(await page.evaluate(() => Date.now() + 60_000) / 1000) * 1000);
-}
-
-async function readAll(page: Page) {
-  return page.evaluate(async () => {
-    const modulePath = "/src/pagination.ts";
-    const { fetchAll } = await import(modulePath);
-    return fetchAll("/data-pagination", new AbortController().signal);
-  });
 }
 
 test.beforeEach(async ({ context }) => {
@@ -448,7 +440,26 @@ for (const failure of ["network", "429-seconds", "503-date"] as const) {
   });
 }
 
-for (const status of [401, 403, 404]) {
+test("K17: a 401 while polling signs out and sends the user to log in", async ({ page }) => {
+  await page.clock.install();
+  await authenticate(page);
+  let polling = false;
+  await page.route("**/api/v1/submissions/data-result", async (route) => {
+    if (!polling) {
+      await pauseClock(page);
+      return route.fulfill({ json: { ...submission, status: "QUEUED" } });
+    }
+    return route.fulfill({ status: 401, json: { message: "Unauthorized" } });
+  });
+  await page.goto("/submissions/data-result");
+  await expect(page.locator(".result-summary")).toBeVisible();
+  polling = true;
+  await page.clock.runFor(2000);
+  await expect(page).toHaveURL(/\/auth$/);
+  expect(await page.evaluate((key) => localStorage.getItem(key), storageKey)).toBeNull();
+});
+
+for (const status of [403, 404]) {
   test(`K17: permanent ${status} stops polling without losing the prior result`, async ({ page }) => {
     await page.clock.install();
     await authenticate(page);
@@ -572,7 +583,7 @@ test("K19: opaque cursors take precedence over changing page counts and deduplic
     return route.fulfill({ json: { ...list([{ id: "b" }, { id: "c" }]), totalPages: 99, nextCursor: null } });
   });
   await page.goto("/auth");
-  expect(await readAll(page)).toEqual([{ id: "a" }, { id: "b" }, { id: "c" }]);
+  expect(await readAll(page, "/data-pagination")).toEqual([{ id: "a" }, { id: "b" }, { id: "c" }]);
   expect(cursors).toEqual([null, "opaque +/&="]);
 });
 
@@ -587,7 +598,7 @@ for (const brokenCursor of ["repeat", "missing", "empty"] as const) {
         : { ...response, nextCursor: brokenCursor === "empty" ? "" : "one" } });
     });
     await page.goto("/auth");
-    await expect(readAll(page)).rejects.toThrow(/커서/);
+    await expect(readAll(page, "/data-pagination")).rejects.toThrow(/커서/);
     expect(calls).toBe(2);
   });
 }
@@ -598,7 +609,7 @@ test("K19: legacy offset responses still deduplicate IDs without pretending to b
     return route.fulfill({ json: { ...list(current === 1 ? [{ id: "a" }, { id: "b" }] : [{ id: "b" }, { id: "c" }]), page: current, totalPages: 2 } });
   });
   await page.goto("/auth");
-  expect(await readAll(page)).toEqual([{ id: "a" }, { id: "b" }, { id: "c" }]);
+  expect(await readAll(page, "/data-pagination")).toEqual([{ id: "a" }, { id: "b" }, { id: "c" }]);
 });
 
 for (const failed of ["profile", "rank"] as const) {
@@ -729,6 +740,7 @@ for (const path of ["/my-problems", "/profile", "/"] as const) {
       await expect(page.locator(".profile-card")).toHaveCount(0);
       await expect(page.getByText(`@${privateName}`, { exact: true })).toHaveCount(0);
     } else {
+      await expect(page.getByRole("alert")).toHaveText(message);
       await expect(page.locator('.stat-tiles[aria-busy="true"]')).toHaveCount(0);
       await expect(page.locator(".stat-tile")).toHaveCount(0);
       await expect(page.locator(".brand-art text")).toHaveCount(0);
@@ -736,3 +748,51 @@ for (const path of ["/my-problems", "/profile", "/"] as const) {
     expect(new URL(page.url()).pathname).toBe(path);
   });
 }
+
+test("an error screen in one page clears when the user moves to another page", async ({ page }) => {
+  await authenticate(page);
+  await page.route("**/api/v1/submissions/broken", (route) =>
+    route.fulfill({ json: { ...submission, problem: undefined } }),
+  );
+  await page.goto("/submissions/broken");
+  await expect(page.getByRole("alert")).toContainText("화면을 표시하지 못했어요.");
+  await page.getByRole("link", { name: "못풀준 홈" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByText("화면을 표시하지 못했어요.")).toHaveCount(0);
+});
+
+test("a stale chunk after a deploy reloads the page once, not in a loop", async ({ page }) => {
+  await page.goto("/");
+  let loads = 0;
+  page.on("load", () => (loads += 1));
+  const fire = () =>
+    page
+      .evaluate(() => window.dispatchEvent(new Event("vite:preloadError", { cancelable: true })))
+      .catch(() => undefined);
+  await Promise.all([page.waitForEvent("load"), fire()]);
+  await fire();
+  await page.waitForTimeout(500);
+  expect(loads).toBe(1);
+});
+
+test("the result page loads submission history only for an accepted result and hides the streak if that fails", async ({ page }) => {
+  await authenticate(page);
+  let historyCalls = 0;
+  await page.route("**/api/v1/submissions?*", (route) => {
+    historyCalls += 1;
+    return route.fulfill({ status: 500, json: { message: "history failed" } });
+  });
+  await page.route("**/api/v1/submissions/data-result", (route) => route.fulfill({ json: submission }));
+  await page.route("**/api/v1/submissions/accepted-result", (route) =>
+    route.fulfill({ json: { ...submission, id: "accepted-result", status: "ACCEPTED" } }),
+  );
+  await page.goto("/submissions/data-result");
+  await expect(page.locator(".result-summary")).toBeVisible();
+  await page.waitForTimeout(300);
+  expect(historyCalls).toBe(0);
+  await page.goto("/submissions/accepted-result");
+  await expect(page.locator(".result-summary")).toBeVisible();
+  await expect.poll(() => historyCalls).toBeGreaterThan(0);
+  await page.waitForTimeout(300);
+  await expect(page.locator(".streak-card")).toHaveCount(0);
+});

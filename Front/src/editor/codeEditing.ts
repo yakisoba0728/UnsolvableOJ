@@ -103,6 +103,12 @@ export function handleCharacter(
     };
   }
   if (hasSelection) return null;
+  if (QUOTES.has(key)) {
+    let backslashes = 0;
+    for (let at = start - 1; at >= 0 && value[at] === "\\"; at -= 1)
+      backslashes += 1;
+    if (backslashes % 2 === 1) return null;
+  }
   const next = value[start];
   if (CLOSERS.has(key) && next === key) {
     return { value, start: start + 1, end: start + 1 };
@@ -186,7 +192,7 @@ function isUnitAt(value: string, units: readonly number[], at: number) {
 }
 
 /** 값 `prev` → `next`의 가운데 바뀐 구간: 앞에서부터·뒤에서부터 같은 글자를 빼고 남은 부분. */
-function changedSpan(prev: string, next: string) {
+export function changedSpan(prev: string, next: string) {
   const limit = Math.min(prev.length, next.length);
   let prefix = 0;
   while (prefix < limit && prev[prefix] === next[prefix]) prefix += 1;
@@ -395,18 +401,9 @@ export function applyToTextarea(
     el.setSelectionRange(next.start, next.end);
     return true;
   }
-  let prefix = 0;
-  const limit = Math.min(before.length, next.value.length);
-  while (prefix < limit && before[prefix] === next.value[prefix]) prefix += 1;
-  let suffix = 0;
-  while (
-    suffix < limit - prefix &&
-    before[before.length - 1 - suffix] ===
-      next.value[next.value.length - 1 - suffix]
-  )
-    suffix += 1;
-  const inserted = next.value.slice(prefix, next.value.length - suffix);
-  el.setSelectionRange(prefix, before.length - suffix);
+  const { prefix, oldEnd, delta } = changedSpan(before, next.value);
+  const inserted = next.value.slice(prefix, oldEnd + delta);
+  el.setSelectionRange(prefix, oldEnd);
   const ok =
     typeof document.execCommand === "function" &&
     (inserted.length > 0

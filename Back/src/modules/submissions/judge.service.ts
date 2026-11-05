@@ -18,7 +18,7 @@ import {
 import { ProblemDifficulty } from '../problems/problem.enums.js';
 import type { JudgeResultDto } from './dto/judge-result.dto.js';
 import { Submission } from './submission.entity.js';
-import { SubmissionStatus } from './submission.enums.js';
+import { learningStatuses, SubmissionStatus } from './submission.enums.js';
 import {
   enqueueJudge,
   findProblemSnapshot,
@@ -26,6 +26,7 @@ import {
 } from './submissions.service.js';
 
 const LEASE_MS = 60_000;
+const MAX_LEASE_RECOVERIES = 5;
 const XP: Record<ProblemDifficulty, number> = {
   BEGINNER: 10,
   EASY: 20,
@@ -178,6 +179,7 @@ export class JudgeService {
         submission.acceptedForXp = true;
       else if (REJECTED_STATUSES.has(dto.status))
         submission.acceptedForXp = false;
+      if (learningStatuses.has(dto.status)) submission.completedForLearning = true;
       submission.status = dto.status;
       submission.runtimeMs = dto.runtimeMs ?? null;
       submission.memoryKb = dto.memoryKb ?? null;
@@ -188,9 +190,11 @@ export class JudgeService {
           ? null
           : this.safeDiagnosticText(dto.compileOutput);
       submission.debugOutputs = (dto.debugOutputs ?? []).map((output) => ({
-        ...output,
+        testCase: output.testCase,
         stdout: this.safeDiagnosticText(output.stdout),
         stderr: this.safeDiagnosticText(output.stderr),
+        stdoutTruncated: output.stdoutTruncated,
+        stderrTruncated: output.stderrTruncated,
       }));
       submission.judgeMessage =
         dto.judgeMessage == null
@@ -329,6 +333,28 @@ export class JudgeService {
       take: 100,
     });
     for (const submission of expired) {
+      const fence =
+        'id = :id AND status = :status AND judge_generation = :generation AND judge_lease_expires_at < now()';
+      const fenceParams = {
+        id: submission.id,
+        status: SubmissionStatus.JUDGING,
+        generation: submission.judgeGeneration,
+      };
+      // 워커를 죽이거나 실행 서비스에 닿지 못하는 제출이 슬롯을 무한히 다시 차지하지 않게 합니다.
+      // 다른 SYSTEM_ERROR처럼 XP 정답 근거와 해결 기록은 건드리지 않습니다.
+      if (submission.recoveryCount >= MAX_LEASE_RECOVERIES) {
+        await this.submissions
+          .createQueryBuilder()
+          .update()
+          .set({
+            status: SubmissionStatus.SYSTEM_ERROR,
+            judgeMessage: '채점이 반복해서 중단되어 종료했습니다.',
+            judgeLeaseExpiresAt: null,
+          })
+          .where(fence, fenceParams)
+          .execute();
+        continue;
+      }
       const changed = await this.submissions
         .createQueryBuilder()
         .update()
@@ -337,15 +363,9 @@ export class JudgeService {
           judgeGeneration: submission.judgeGeneration + 1,
           judgeAttemptId: null,
           judgeLeaseExpiresAt: null,
+          recoveryCount: () => 'recovery_count + 1',
         })
-        .where(
-          'id = :id AND status = :status AND judge_generation = :generation AND judge_lease_expires_at < now()',
-          {
-            id: submission.id,
-            status: SubmissionStatus.JUDGING,
-            generation: submission.judgeGeneration,
-          },
-        )
+        .where(fence, fenceParams)
         .execute();
       if (changed.affected)
         await enqueueJudge(

@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { MissionsModule } from './modules/missions/missions.module.js';
+import { CommunityModule } from './modules/community/community.module.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
@@ -45,6 +47,8 @@ import { UsersModule } from './modules/users/users.module.js';
     SubmissionsModule,
     AdminModule,
     UsersModule,
+    CommunityModule,
+    MissionsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

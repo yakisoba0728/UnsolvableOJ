@@ -65,11 +65,22 @@ export class BackendFoundations1790550000000 implements MigrationInterface {
   }
 
   async down(queryRunner: QueryRunner): Promise<void> {
+    if (!queryRunner.isTransactionActive)
+      throw new Error('Backend foundations rollback requires a transaction.');
     await queryRunner.query(`
-      LOCK TABLE user_problem_solves IN ACCESS EXCLUSIVE MODE;
+      LOCK TABLE users, problems, submissions, problem_versions, user_problem_solves IN ACCESS EXCLUSIVE MODE;
       DO $$ BEGIN
         IF EXISTS (SELECT 1 FROM user_problem_solves) THEN
           RAISE EXCEPTION 'Cannot roll back backend foundations with a populated solve ledger; preserve XP and solve history.';
+        END IF;
+        -- Even a lone v1 snapshot may differ from the mutable live problem.
+        IF EXISTS (SELECT 1 FROM problem_versions)
+          OR EXISTS (SELECT 1 FROM problems WHERE current_version <> 1)
+          OR EXISTS (SELECT 1 FROM submissions WHERE problem_version <> 1) THEN
+          RAISE EXCEPTION 'Cannot roll back backend foundations with version history; preserve immutable problem and submission versions.';
+        END IF;
+        IF EXISTS (SELECT 1 FROM users WHERE token_version <> 0) THEN
+          RAISE EXCEPTION 'Cannot roll back backend foundations with revoked tokens; preserve token versions.';
         END IF;
       END $$;
       DROP TABLE audit_events;

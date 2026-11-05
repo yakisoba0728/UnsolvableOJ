@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { CopyButton } from "./CopyButton";
 import { verdictLabel } from "../verdict";
 import { api, ApiError } from "../api";
-import type { Session, Submission } from "../types";
+import { LANGUAGE_LABELS, type Session, type Submission } from "../types";
 
-/** Match the runner's bytes.rstrip(): only trailing ASCII whitespace is ignored. */
+/** 채점기의 bytes.rstrip()과 맞춘다: 끝에 붙은 ASCII 공백만 무시한다. */
 const normalizeOutput = (text: string) => text.replace(/[\t\n\v\f\r ]+$/, "");
 
 function IoBlock({
@@ -20,6 +21,7 @@ function IoBlock({
   return (
     <div className={`io-block ${tone ?? ""}`}>
       <strong>{label}</strong>
+      <CopyButton label={`${label} 복사`} text={text} />
       <pre className="source-code">{text || "(없음)"}</pre>
       {note ? <small className="muted">{note}</small> : null}
     </div>
@@ -33,10 +35,21 @@ export function useSubmissionResult(
 ) {
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [error, setError] = useState("");
+  const [retryIndex, setRetryIndex] = useState(0);
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
+  const [retrying, setRetrying] = useState(false);
+  const identity = `${session?.accessToken ?? ""}:${id ?? ""}`;
+  const identityRef = useRef(identity);
+  const retry = useCallback(() => setRetryIndex((value) => value + 1), []);
 
   useEffect(() => {
-    setSubmission(null);
+    if (identityRef.current !== identity) {
+      identityRef.current = identity;
+      setSubmission(null);
+      setLastUpdated(null);
+    }
     setError("");
+    setRetrying(false);
     if (!session || !id) return;
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -53,6 +66,7 @@ export function useSubmissionResult(
       timer = setTimeout(tick, Math.min(delay, 2_147_483_647));
     }
     async function load() {
+      if (!controller.signal.aborted) setRetrying(true);
       try {
         const next = await api<Submission>(
           `/submissions/${id}`,
@@ -63,6 +77,8 @@ export function useSubmissionResult(
         failures = 0;
         setError("");
         setSubmission(next);
+        setLastUpdated(Date.now());
+        setRetrying(false);
         if (isJudging(next)) schedule(2000);
       } catch (cause) {
         if (
@@ -76,6 +92,7 @@ export function useSubmissionResult(
             (cause.status === 429 ||
               (cause.status >= 500 && cause.status <= 599)));
         const retry = transient && failures < 5;
+        setRetrying(retry);
         setError(
           (cause instanceof Error
             ? cause.message
@@ -87,7 +104,7 @@ export function useSubmissionResult(
           schedule(
             Math.max(
               Math.min(30_000, 2000 * 2 ** (failures - 1)),
-              cause instanceof ApiError ? cause.retryAfterMs ?? 0 : 0,
+              cause instanceof ApiError ? (cause.retryAfterMs ?? 0) : 0,
             ),
           );
         }
@@ -98,9 +115,72 @@ export function useSubmissionResult(
       controller.abort();
       if (timer !== undefined) clearTimeout(timer);
     };
-  }, [id, session]);
+  }, [id, session, identity, retryIndex]);
 
-  return { submission, error };
+  const current = identityRef.current === identity && session && id;
+  return {
+    submission: current ? submission : null,
+    error: current ? error : "",
+    retry,
+    retrying,
+    lastUpdated: current ? lastUpdated : null,
+  };
+}
+
+export function JudgeRefreshNotice({
+  error,
+  retry,
+  retrying,
+  lastUpdated,
+}: {
+  error: string;
+  retry: () => void;
+  retrying: boolean;
+  lastUpdated: number | null;
+}) {
+  return (
+    <>
+      {error ? (
+        <div className="error-message" role="alert">
+          <p>{error}</p>
+          {lastUpdated ? (
+            <p>표시된 결과는 마지막 확인 당시 상태입니다.</p>
+          ) : null}
+          {!retrying ? (
+            <button
+              type="button"
+              className="button button-outline"
+              onClick={retry}
+            >
+              다시 확인
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+      {lastUpdated ? (
+        <p className="judge-last-updated muted">
+          마지막 확인: {new Date(lastUpdated).toLocaleTimeString("ko-KR")}
+        </p>
+      ) : null}
+    </>
+  );
+}
+
+function JudgeElapsed({ createdAt }: { createdAt: string }) {
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const start = Date.parse(createdAt);
+  if (!Number.isFinite(start)) return null;
+  const seconds = Math.max(0, Math.floor((now - start) / 1000));
+  return (
+    <p className="judge-last-updated muted">
+      제출 후 {Math.floor(seconds / 60)}분 {seconds % 60}초 경과 (기기 시각
+      기준, 완료 예상 시간이 아닙니다)
+    </p>
+  );
 }
 
 export const isJudging = (submission: Submission) =>
@@ -117,18 +197,20 @@ export function ResultSummary({ submission }: { submission: Submission }) {
           <span className="result-label">채점 결과</span>
           <strong>{verdictLabel(submission.status)}</strong>
         </div>
-        <span className="result-symbol">
+        <span className="result-symbol" aria-hidden="true">
           {submission.status === "ACCEPTED"
             ? "✓"
             : submission.status === "QUEUED" || submission.status === "JUDGING"
               ? "…"
-              : "!"}
+              : "✕"}
         </span>
       </div>
       <div className="result-stats">
         <div>
           <small>언어</small>
-          <strong>{submission.language}</strong>
+          <strong>
+            {LANGUAGE_LABELS[submission.language] ?? submission.language}
+          </strong>
         </div>
         <div>
           <small>실행 시간</small>
@@ -139,7 +221,9 @@ export function ResultSummary({ submission }: { submission: Submission }) {
         <div>
           <small>메모리</small>
           <strong>
-            {submission.memoryKb === null ? "—" : `${submission.memoryKb}KB`}
+            {submission.memoryKb === null
+              ? "—"
+              : `${(submission.memoryKb / 1024).toFixed(1)}MB`}
           </strong>
         </div>
         <div>
@@ -149,6 +233,9 @@ export function ResultSummary({ submission }: { submission: Submission }) {
           </strong>
         </div>
       </div>
+      {isJudging(submission) ? (
+        <JudgeElapsed createdAt={submission.createdAt} />
+      ) : null}
     </div>
   );
 }

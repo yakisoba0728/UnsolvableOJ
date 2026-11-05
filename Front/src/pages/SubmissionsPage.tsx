@@ -1,123 +1,61 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { verdictLabel } from "../verdict";
-import { fetchAll, useDocumentTitle } from "../hooks";
-import { Link, useSearchParams } from "react-router-dom";
+import {
+  useDocumentTitle,
+  useSlashFocus,
+  useSubmissionHistory,
+  useUrlFilters,
+} from "../hooks";
+import { Link } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
 import { Skeleton, SkeletonRows } from "../components/Skeleton";
-import type { Submission } from "../types";
-
-const languageLabels: Record<string, string> = {
-  C: "C",
-  CPP: "C++",
-  JAVA: "Java",
-  PYTHON: "Python",
-  JAVASCRIPT: "JavaScript",
-  TYPESCRIPT: "TypeScript",
-  GO: "Go",
-  RUST: "Rust",
-};
+import { LANGUAGE_LABELS, type Submission } from "../types";
+import { calendarDate, parseCalendarDate } from "../calendar";
 
 const PAGE_SIZE = 20;
 
-type StatusGroup = "" | "accepted" | "wrong" | "pending";
+type StatusGroup = "" | "accepted" | "wrong" | "pending" | "system";
 const groupOf = (status: string): StatusGroup =>
   status === "ACCEPTED"
     ? "accepted"
     : status === "QUEUED" || status === "JUDGING"
       ? "pending"
-      : "wrong";
+      : status === "SYSTEM_ERROR" ? "system" : "wrong";
 const statusChips: { value: StatusGroup; label: string }[] = [
   { value: "", label: "전체" },
   { value: "accepted", label: "성공" },
   { value: "wrong", label: "틀림·오류" },
   { value: "pending", label: "채점 중" },
+  { value: "system", label: "시스템 오류" },
 ];
 
 export function SubmissionsPage() {
   useDocumentTitle("내 제출");
   const { session } = useAuth();
-  const [params, setParams] = useSearchParams();
-  const paramsRef = useRef(params);
-  paramsRef.current = params;
-  const [all, setAll] = useState<Submission[]>([]);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const { params, update, urlQuery, queryText, setQueryText, page } =
+    useUrlFilters();
+  // 서버가 문제명·판정·언어 검색을 지원하지 않아, 전체 이력을 받아 이 화면에서 거른다.
+  const { submissions: all, loading, error } = useSubmissionHistory(session);
   const searchRef = useRef<HTMLInputElement>(null);
+  useSlashFocus(searchRef);
 
-  const urlQuery = params.get("q") ?? "";
   const statuses = (params.get("s") ?? "")
     .split(",")
     .filter((value): value is StatusGroup =>
-      ["accepted", "wrong", "pending"].includes(value),
+      ["accepted", "wrong", "pending", "system"].includes(value),
     );
   const language = params.get("l") ?? "";
+  const rawDate = params.get("date") ?? "";
+  const selectedDate = parseCalendarDate(rawDate) ? rawDate : "";
   const grouped = params.get("g") === "problem";
-  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
-
-  function update(
-    patch: Record<string, string | null>,
-    { resetPage = true }: { resetPage?: boolean } = {},
-  ) {
-    const next = new URLSearchParams(paramsRef.current);
-    for (const [key, value] of Object.entries(patch)) {
-      if (value === null || value === "") next.delete(key);
-      else next.set(key, value);
-    }
-    if (resetPage && !("page" in patch)) next.delete("page");
-    paramsRef.current = next;
-    setParams(next, { replace: true });
-  }
-
-  // 검색어: 입력은 즉시 반영하고 URL에는 잠시 멈춘 뒤 저장한다(한글 입력 중 끊김 방지)
-  const [queryText, setQueryText] = useState(urlQuery);
-  const lastWritten = useRef(urlQuery);
-  useEffect(() => {
-    if (urlQuery !== lastWritten.current) {
-      lastWritten.current = urlQuery;
-      setQueryText(urlQuery);
-    }
-  }, [urlQuery]);
-  useEffect(() => {
-    if (queryText === urlQuery) return;
-    const timer = setTimeout(() => {
-      lastWritten.current = queryText;
-      update({ q: queryText || null });
-    }, 250);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryText, urlQuery]);
-
-  // 서버가 문제명·판정·언어 검색을 지원하지 않아, 전체 이력을 받아 이 화면에서 거른다.
-  useEffect(() => {
-    if (!session) return;
-    const controller = new AbortController();
-    setLoading(true);
-    setAll([]);
-    setError("");
-    fetchAll<Submission>("/submissions", controller.signal, session.accessToken)
-      .then((items) => {
-        if (!controller.signal.aborted) setAll(items);
-      })
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "제출을 불러오지 못했습니다.",
-          );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, [session]);
 
   const keyword = urlQuery.trim().toLowerCase();
   const matchesBase = (item: Submission) =>
+    (!selectedDate || calendarDate(new Date(item.createdAt)) === selectedDate) &&
     (!language || item.language === language) &&
     (!keyword || (item.problem.title ?? "").toLowerCase().includes(keyword));
   // 칩의 숫자는 "그 칩을 눌렀을 때의 결과 수"가 되도록 상태 조건만 빼고 센다.
@@ -131,16 +69,17 @@ export function SubmissionsPage() {
     [all],
   );
 
-  const { rows, filteredCount } = useMemo(() => {
+  const { rows, filteredCount, matchedCount } = useMemo(() => {
     const filtered = all.filter(
       (item) =>
         matchesBase(item) &&
         (!statuses.length || statuses.includes(groupOf(item.status))),
-    );
+    ).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
     if (!grouped)
       return {
         rows: filtered.map((item) => ({ item, count: 0 })),
         filteredCount: filtered.length,
+        matchedCount: filtered.length,
       };
     const counts = new Map<string, number>();
     for (const item of filtered)
@@ -149,24 +88,23 @@ export function SubmissionsPage() {
     const latest = filtered
       .filter((item) => !seen.has(item.problem.id) && seen.add(item.problem.id))
       .map((item) => ({ item, count: counts.get(item.problem.id) ?? 1 }));
-    return { rows: latest, filteredCount: latest.length };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [all, statuses.join(","), language, keyword, grouped]);
+    return { rows: latest, filteredCount: latest.length, matchedCount: filtered.length };
+  }, [all, statuses.join(","), language, keyword, selectedDate, grouped]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
   const visible = rows.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
-  const hasFilter = Boolean(statuses.length || language || keyword);
+  const hasFilter = Boolean(statuses.length || language || keyword || selectedDate);
 
   return (
-    <div className="page-width page-body">
+    <div className="page-width page-body submissions-page">
       <PageHeader
         title="내 제출"
         badge={
           loading ? (
             <Skeleton width={48} height={24} radius={999} />
           ) : (
-            <span className="pill">{filteredCount}건</span>
+            <span className="pill">{filteredCount}{grouped ? "문제" : "건"}</span>
           )
         }
         description="제출한 코드와 판정을 확인하세요."
@@ -180,6 +118,7 @@ export function SubmissionsPage() {
               className="search-input"
               placeholder="문제 제목 검색"
               aria-label="제출한 문제 검색"
+              aria-keyshortcuts="/"
               value={queryText}
               onChange={(event) => setQueryText(event.target.value)}
             />
@@ -191,7 +130,7 @@ export function SubmissionsPage() {
               { value: "", label: "모든 언어" },
               ...languages.map((value) => ({
                 value,
-                label: languageLabels[value] ?? value,
+                label: LANGUAGE_LABELS[value] ?? value,
               })),
             ]}
             onChange={(next) => update({ l: next || null })}
@@ -229,8 +168,13 @@ export function SubmissionsPage() {
           </div>
         </div>
       </div>
-      <p className="sr-only" role="status" aria-live="polite">
-        {loading ? "" : `${filteredCount}건`}
+      <div className="submission-date-filter">
+        <label htmlFor="submission-date">제출 날짜 (기기 현지 시간)</label>
+        <input id="submission-date" type="date" value={selectedDate} onChange={(event) => update({ date: event.target.value || null })} />
+        {selectedDate ? <button type="button" className="text-button" onClick={() => update({ date: null })}>날짜 해제</button> : null}
+      </div>
+      <p className="submission-count-summary muted" role="status" aria-live="polite">
+        {loading || error ? "" : `전체 제출 ${all.length}건 · 조건 일치 ${matchedCount}건${grouped ? ` · 표시 ${rows.length}문제 (현재 조건 안에서 문제별 최신 제출)` : ""}`}
       </p>
       {error ? (
         <p className="error-message" role="alert">
@@ -263,7 +207,7 @@ export function SubmissionsPage() {
                 {verdictLabel(item.status)}
               </span>
               <span className="history-lang">
-                {languageLabels[item.language] ?? item.language}
+                {LANGUAGE_LABELS[item.language] ?? item.language}
               </span>
               <span className="history-tests" data-label="테스트">
                 {item.passedTestCases}/{item.totalTestCases}
@@ -293,8 +237,9 @@ export function SubmissionsPage() {
         </div>
       ) : (
         <div className="empty-state">
-          아직 제출이 없습니다.{" "}
-          <Link to="/problems">첫 문제를 골라보세요.</Link>
+          <strong>아직 제출한 풀이가 없어요.</strong>
+          <p>문제를 골라 첫 풀이를 제출하면 여기에 기록됩니다.</p>
+          <Link className="button" to="/problems">문제 둘러보기</Link>
         </div>
       )}
       {!loading ? (

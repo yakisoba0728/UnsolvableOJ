@@ -34,5 +34,13 @@
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "^6.0.2",
     "vite": "^7.1.0"
+  },
+  "overrides": {
+    "rehype-katex": {
+      "katex": "$katex"
+    },
+    "micromark-extension-math": {
+      "katex": "$katex"
+    }
   }
 }

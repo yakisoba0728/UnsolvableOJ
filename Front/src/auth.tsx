@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { unauthorizedEvent } from "./api";
 import type { Session } from "./types";
 
 const storageKey = "unsolvable-oj-session-v1";
@@ -16,7 +17,7 @@ interface SavedSession {
   expiresAt: number;
 }
 
-// Reads cannot safely delete an expired value: another tab may replace it mid-read.
+// 읽는 쪽에서 만료된 값을 지우지 않는다: 읽는 사이 다른 탭이 새 값으로 바꿨을 수 있다.
 function storedSession(): SavedSession | null {
   try {
     const raw = localStorage.getItem(storageKey);
@@ -64,12 +65,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionVersion.current += 1;
     update(next);
   }, []);
-  const setSession = (next: Session | null) => {
+  const setSession = useCallback((next: Session | null) => {
     const value = next ? { session: next, expiresAt: expiryTime(next) } : null;
-    if (value) localStorage.setItem(storageKey, JSON.stringify(value));
-    else localStorage.removeItem(storageKey);
+    try {
+      if (value) localStorage.setItem(storageKey, JSON.stringify(value));
+      else localStorage.removeItem(storageKey);
+    } catch {
+      /* 저장소를 쓸 수 없어도(쿠키 차단·용량 초과) 이번 방문의 로그인·로그아웃은 반영한다 */
+    }
     updateSession(value);
-  };
+  }, [updateSession]);
+  useEffect(() => {
+    // 이미 다른 토큰으로 바뀐 뒤 늦게 도착한 401은 새 로그인을 지우지 않는다.
+    const signOut = (event: Event) => {
+      if ((event as CustomEvent<string>).detail === current.current?.session.accessToken)
+        setSession(null);
+    };
+    window.addEventListener(unauthorizedEvent, signOut);
+    return () => window.removeEventListener(unauthorizedEvent, signOut);
+  }, [setSession]);
   useEffect(() => {
     const synchronize = (event?: StorageEvent) => {
       if (
@@ -88,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!saved) return;
     const timer = setTimeout(
       () => {
-        // A newer tab may have replaced this session before its storage event arrives.
+        // storage 이벤트가 오기 전에 다른 탭이 새 세션으로 바꿨을 수 있어 저장소를 다시 읽는다.
         updateSession(storedSession());
       },
       Math.min(2_147_483_647, Math.max(0, saved.expiresAt - Date.now())),
@@ -103,6 +117,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     </AuthContext.Provider>
   );
 }
+
+/** 문제를 만들고 고칠 수 있는 계정(작성자·관리자)인지. */
+export const canAuthor = (session: Session | null) =>
+  session?.user.role === "AUTHOR" || session?.user.role === "ADMIN";
 
 export function useAuth() {
   const context = useContext(AuthContext);

@@ -1,4 +1,5 @@
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+export const unauthorizedEvent = "unsolvable-oj:unauthorized";
 
 export class ApiError extends Error {
   constructor(
@@ -30,6 +31,9 @@ export async function api<T>(
       response.status,
       "서버 응답을 확인할 수 없습니다. 백엔드 주소(VITE_API_BASE_URL) 설정을 확인해 주세요.",
     );
+  // 토큰이 무효가 됐다(역할 변경·만료 등). 로그인 상태를 정리하도록 알린다.
+  if (response.status === 401 && token)
+    window.dispatchEvent(new CustomEvent(unauthorizedEvent, { detail: token }));
   if (!response.ok) {
     const detail = data?.message;
     const retryAfter = response.headers.get("Retry-After");

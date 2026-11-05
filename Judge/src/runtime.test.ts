@@ -64,6 +64,14 @@ test("real go-judge sandbox", { timeout: 600_000 }, async (t) => {
     const result = await judge(input("class Helper { static int sum(int a,int b) { return a+b; } } public class Main { static class Nested { static int sum(int a,int b) { return Helper.sum(a,b); } } public static void main(String[] args) { java.util.Scanner s=new java.util.Scanner(System.in); System.out.println(Nested.sum(s.nextInt(),s.nextInt())); } }", "JAVA", 256, 5000), config);
     assert.equal(result.status, "ACCEPTED", JSON.stringify(result));
   });
+  await t.test("links C libm and exposes M_PI/strdup", async () => {
+    const result = await judge(input('#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\nint main(void) { int a,b; scanf("%d %d", &a, &b); char *s = strdup("x"); double p = pow(a, b), r = sqrt((double)a * a); printf("%d\\n", (int)floor(r + b * M_PI / M_PI + 0.5) + (p < 0) + (int)strlen(s) - 1); free(s); }', "C", 256, 5000), config);
+    assert.equal(result.status, "ACCEPTED", JSON.stringify(result));
+  });
+  await t.test("compiles Rust with the 2021 prelude", async () => {
+    const result = await judge(input("use std::io::Read; fn main(){let mut s=String::new();std::io::stdin().read_to_string(&mut s).unwrap();let v:Vec<i64>=s.split_whitespace().map(|x|x.parse().unwrap()).collect();let sum:i32=(v[0]+v[1]).try_into().unwrap();println!(\"{}\",sum);}", "RUST", 256, 5000), config);
+    assert.equal(result.status, "ACCEPTED", JSON.stringify(result));
+  });
   await t.test("hides private stderr and keeps the public sample", async () => {
     const result = await judge(input('a,b=map(int,input().split())\nif a==1: raise RuntimeError("hidden-secret")\nprint(a+b)'), config);
     assert.equal(result.status, "RUNTIME_ERROR");

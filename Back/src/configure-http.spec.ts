@@ -39,10 +39,16 @@ describe('Public problem routes and HTTP limits', () => {
       logger: false,
     });
     configureHttp(app);
-    await app.init();
+    await app.listen(0, '127.0.0.1');
   });
   afterAll(async () => {
     await app?.close();
+  });
+
+  it('owns the IPv4 endpoint used by Supertest instead of an auto-bound IPv6 port', () => {
+    expect(app.getHttpServer().address()).toEqual({
+      address: '127.0.0.1', family: 'IPv4', port: expect.any(Number),
+    });
   });
 
   it.each(['mine', 'new', 'by-slug'])(
@@ -116,7 +122,7 @@ describe.each(['', 'loopback', '127.0.0.0/8, ::1/128'])(
         logger: false,
       });
       configureHttp(app);
-      await app.init();
+      await app.listen(0, '127.0.0.1');
     });
     afterAll(async () => {
       await app?.close();

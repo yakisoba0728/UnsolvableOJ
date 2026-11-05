@@ -1,4 +1,4 @@
-import { defineConfig } from "@playwright/test";
+import { defineConfig, devices } from "@playwright/test";
 import base from "./playwright.config";
 
 const url = new URL(process.env.LIVE_BASE_URL ?? "http://invalid");
@@ -19,6 +19,15 @@ export default defineConfig({
     ["html", { outputFolder: "reports/live-browser-report", open: "never" }],
     ["junit", { outputFile: "reports/live-browser.xml" }],
   ],
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: undefined,
-  use: { ...base.use, baseURL: url.origin, actionTimeout: 15_000 },
+  // Windows already ships Edge; Linux/CI uses Playwright's bundled Chromium.
+  // LIVE_BROWSER_CHANNEL can explicitly select another installed channel.
+  // Keep this confined to disposable-stack tests.
+  use: {
+    ...base.use,
+    baseURL: url.origin,
+    actionTimeout: 15_000,
+    channel: process.env.LIVE_BROWSER_CHANNEL || (process.platform === 'win32' ? 'msedge' : undefined),
+  },
 });

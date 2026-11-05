@@ -1,18 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { answersOf, relativeTime, upvoteCount } from "../community/store";
+import { relativeTime } from "../community/store";
 import { categoryLabel, type CommunityPost } from "../community/types";
 
 /** 한 글이 차지하는 세로 길이(글 높이 + 간격). */
 const slideStep = (slide: HTMLElement) =>
   slide.offsetHeight + parseFloat(getComputedStyle(slide).marginBottom);
 
-type ActivityState = Parameters<typeof answersOf>[0];
-
 interface PostScrollerProps {
   title: string;
   posts: CommunityPost[];
-  activity: ActivityState;
   emptyText: string;
   /** 글이 없을 때 안내 문구 아래에 보여 줄 이동 버튼 */
   emptyAction?: { label: string; to: string };
@@ -25,14 +22,15 @@ interface PostScrollerProps {
 export function PostScroller({
   title,
   posts,
-  activity,
   emptyText,
   emptyAction,
 }: PostScrollerProps) {
   const viewRef = useRef<HTMLDivElement>(null);
-  const [index, setIndex] = useState(0);
+  const [rawIndex, setIndex] = useState(0);
   const VISIBLE = 2;
   const maxIndex = Math.max(0, posts.length - VISIBLE);
+  // 목록이 줄면 스크롤 이벤트가 오기 전에도 범위를 넘지 않게 한다.
+  const index = Math.min(rawIndex, maxIndex);
 
   useEffect(() => {
     const view = viewRef.current;
@@ -63,7 +61,7 @@ export function PostScroller({
   }
 
   return (
-    <section className="panel post-scroller" aria-label={title}>
+    <section className={`panel post-scroller${maxIndex === 0 ? " has-static-posts" : ""}`} aria-label={title}>
       <div className="section-heading compact">
         <div>
           <h2>{title}</h2>
@@ -75,7 +73,7 @@ export function PostScroller({
                 ? `${index + 1}–${index + VISIBLE} / ${posts.length}`
                 : `${posts.length} / ${posts.length}`}
             </span>
-            <button
+            {maxIndex > 0 ? <><button
               type="button"
               className="scroller-button"
               aria-label="이전 글"
@@ -122,7 +120,7 @@ export function PostScroller({
                   strokeLinejoin="round"
                 />
               </svg>
-            </button>
+            </button></> : null}
           </div>
         ) : null}
       </div>
@@ -130,7 +128,7 @@ export function PostScroller({
         <div
           className="scroller-view"
           ref={viewRef}
-          tabIndex={0}
+          tabIndex={maxIndex > 0 ? 0 : undefined}
           aria-label={`${title} 목록`}
         >
           {posts.map((post) => (
@@ -147,9 +145,9 @@ export function PostScroller({
                 {post.title}
               </Link>
               <div className="scroller-stats muted">
-                <span>추천 {upvoteCount(activity, post.id, post.upvotes)}</span>
+                <span>추천 {post.upvotes}</span>
                 <span>조회 {post.views.toLocaleString()}</span>
-                <span>답변 {answersOf(activity, post.id).length}</span>
+                <span>답변 {post.commentCount ?? 0}</span>
               </div>
             </article>
           ))}

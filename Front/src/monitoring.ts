@@ -6,18 +6,13 @@ import * as Sentry from "@sentry/react";
  */
 const dsn = import.meta.env.VITE_SENTRY_DSN as string | undefined;
 
-export const monitoringEnabled = Boolean(dsn);
-
 export function initMonitoring() {
   if (!dsn) return;
   Sentry.init({
     dsn,
-    environment:
-      (import.meta.env.VITE_SENTRY_ENVIRONMENT as string | undefined) ??
-      import.meta.env.MODE,
-    release: import.meta.env.VITE_SENTRY_RELEASE as string | undefined,
+    environment: import.meta.env.MODE,
     tracesSampleRate: 0,
-    // 브라우저 확장 프로그램이나 네트워크 일시 오류처럼 우리 코드와 무관한 잡음 제외
+    // ResizeObserver 경고와 브라우저 확장 프로그램 오류처럼 우리 코드와 무관한 잡음 제외
     ignoreErrors: [
       "ResizeObserver loop limit exceeded",
       "ResizeObserver loop completed with undelivered notifications.",

@@ -3,7 +3,7 @@ import timers from "node:timers/promises";
 import { pathToFileURL } from "node:url";
 import { Worker } from "bullmq";
 import { Redis } from "ioredis";
-import { checkSandbox, judge, type Claim, type JudgeResult, type SandboxConfig } from "./judge.js";
+import { checkSandbox, judge, SandboxUnavailableError, type Claim, type JudgeResult, type SandboxConfig } from "./judge.js";
 
 interface JudgeJob {
   data: { submissionId: string; generation: number };
@@ -18,13 +18,13 @@ class JudgeApiError extends Error {
 export async function startWorker(
   api: { url: string; token: string },
   sandbox: SandboxConfig,
-  consume: (processor: (job: JudgeJob) => Promise<void>) => Pick<Worker, "pause" | "close">,
+  consume: (processor: (job: JudgeJob) => Promise<void>) => Pick<Worker, "close">,
   runJudge = judge,
 ) {
   if (!api.token) throw new Error("JUDGE_SERVICE_TOKEN is required");
   const workerId = randomUUID();
   const active = new Set<AbortController>();
-  let worker: Pick<Worker, "pause" | "close"> | undefined;
+  let worker: Pick<Worker, "close"> | undefined;
   let workerHeartbeat: ReturnType<typeof setInterval> | undefined;
   let authenticationFailure: JudgeApiError | undefined;
 
@@ -46,10 +46,12 @@ export async function startWorker(
       const error = new JudgeApiError(`Judge API ${method} ${path}: HTTP ${response.status}`, response.status);
       if ((response.status === 401 || response.status === 403) && !authenticationFailure) {
         authenticationFailure = error;
-        console.error(`Judge worker paused; restart required after API authentication failure: ${error.message}`);
+        console.error(`Judge worker exiting after API authentication failure; fix the token: ${error.message}`);
         clearInterval(workerHeartbeat);
-        void worker?.pause(true).catch((pauseError) => console.error("Judge worker pause failed:", pauseError));
         for (const controller of active) controller.abort(error);
+        // 결과를 더 보낼 수 없으므로 진행 중인 작업을 기다리지 않고, 종료 코드로 restart 정책과 `docker compose ps`에 드러냅니다.
+        void worker?.close(true).catch((closeError) => console.error("Judge worker close failed:", closeError))
+          .finally(() => process.exit(1));
       }
       await response.body?.cancel().catch(() => {});
       if (response.status === 409 && method === "GET") return null;
@@ -85,6 +87,8 @@ export async function startWorker(
       } catch (error) {
         if (cancellation.signal.aborted) return;
         console.error(`Judge failed for ${job.data.submissionId}:`, error);
+        // 결과를 보내지 않고 lease를 만료시키면 API 복구가 다음 generation으로 다시 큐에 넣습니다(제출당 5회 뒤에는 API가 SYSTEM_ERROR로 끝냄).
+        if (error instanceof SandboxUnavailableError) throw error;
         result = {
           status: "SYSTEM_ERROR",
           runtimeMs: 0,

@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { CreateProblemDto } from './create-problem.dto.js';
 import { UpdateProblemDto } from './update-problem.dto.js';
 
@@ -32,6 +32,24 @@ describe('Problem DTO validation', () => {
     },
   );
 
+  it('rejects a null status instead of overwriting the DRAFT default', async () => {
+    await expect(
+      pipe.transform(
+        {
+          slug: 'new-problem',
+          title: 'New',
+          statementMarkdown: '',
+          inputDescriptionMarkdown: '',
+          outputDescriptionMarkdown: '',
+          difficulty: 'BEGINNER',
+          status: null,
+          testCases: [{ input: '', expectedOutput: '', isSample: true }],
+        },
+        { type: 'body', metatype: CreateProblemDto },
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
   it('still supplies limits when creating a problem', async () => {
     const dto = await pipe.transform(
       {
@@ -49,6 +67,54 @@ describe('Problem DTO validation', () => {
       timeLimitMs: 1000,
       memoryLimitMb: 256,
       status: 'DRAFT',
+    });
+  });
+
+  describe.each([
+    { name: 'CreateProblemDto', metatype: CreateProblemDto },
+    { name: 'UpdateProblemDto', metatype: UpdateProblemDto },
+  ])('$name test-case elements', ({ metatype }) => {
+    const testCase = { input: ' \n', expectedOutput: '', isSample: false };
+    const content = {
+      slug: 'test-case-shape',
+      title: 'Test case shape',
+      statementMarkdown: '',
+      inputDescriptionMarkdown: '',
+      outputDescriptionMarkdown: '',
+      difficulty: 'BEGINNER',
+    };
+    const validate = (testCases: unknown) =>
+      pipe.transform(
+        metatype === CreateProblemDto ? { ...content, testCases } : { testCases },
+        { type: 'body', metatype },
+      );
+
+    it.each([
+      { name: 'empty array element', value: [[]] },
+      { name: 'nested valid object array', value: [[testCase]] },
+      { name: 'empty and nested valid arrays', value: [[], [testCase]] },
+      { name: 'mixed object and array', value: [testCase, []] },
+      { name: 'null element', value: [null] },
+      { name: 'string element', value: ['case'] },
+      { name: 'number element', value: [1] },
+      { name: 'boolean element', value: [true] },
+      { name: 'incomplete object', value: [{}] },
+      { name: 'null collection', value: null },
+      { name: 'non-array collection', value: testCase },
+    ])('rejects $name through the real ValidationPipe', async ({ value }) => {
+      await expect(validate(value)).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('accepts hidden-only objects and preserves empty/whitespace input and output', async () => {
+      const testCases = [
+        testCase,
+        { input: '', expectedOutput: '\t\r\n ', isSample: false },
+      ];
+      const dto = await validate(testCases);
+      expect(dto.testCases).toMatchObject(testCases);
+      expect(
+        dto.testCases.every((item: { score: number }) => item.score === 1),
+      ).toBe(true);
     });
   });
 });
