@@ -1,4 +1,5 @@
 import type { Language } from "../types";
+import { changedSpan } from "./codeEditing";
 import {
   GLOBALS,
   HEADERS,
@@ -957,18 +958,7 @@ export function reconcileSession(
   newValue: string,
   caret: number,
 ): { session: SnippetSession | null; value: string; caret: number } {
-  let prefix = 0;
-  const limit = Math.min(oldValue.length, newValue.length);
-  while (prefix < limit && oldValue[prefix] === newValue[prefix]) prefix++;
-  let suffix = 0;
-  while (
-    suffix < limit - prefix &&
-    oldValue[oldValue.length - 1 - suffix] ===
-      newValue[newValue.length - 1 - suffix]
-  )
-    suffix++;
-  const oldEnd = oldValue.length - suffix;
-  const delta = newValue.length - oldValue.length;
+  const { prefix, oldEnd, delta } = changedSpan(oldValue, newValue);
   const current = primaryOf(session, session.current);
   if (!current || prefix < current.start || oldEnd > current.end)
     return { session: null, value: newValue, caret };

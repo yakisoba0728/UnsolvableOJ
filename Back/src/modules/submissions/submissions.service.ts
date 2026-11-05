@@ -26,7 +26,7 @@ import { UserRole } from '../users/user-role.enum.js';
 import type { CreateSubmissionDto } from './dto/create-submission.dto.js';
 import type { ListSubmissionsQuery } from './dto/list-submissions.query.js';
 import { Submission } from './submission.entity.js';
-import { SubmissionStatus } from './submission.enums.js';
+import { learningStatuses, SubmissionStatus } from './submission.enums.js';
 
 interface ProblemSnapshot {
   difficulty: ProblemDifficulty;
@@ -63,8 +63,9 @@ export function enqueueJudge(
     { submissionId, generation },
     {
       jobId: `${submissionId}-${generation}`,
-      attempts: 3,
-      backoff: { type: 'exponential', delay: 1000 },
+      // 약 10분(5초부터 지수 증가) 동안 재시도해 짧은 API 재시작에 제출이 실패하지 않게 합니다.
+      attempts: 8,
+      backoff: { type: 'exponential', delay: 5000 },
       removeOnComplete: 1000,
       removeOnFail: 5000,
     },
@@ -86,6 +87,7 @@ export function toSubmissionResponse(
       : { id: submission.problemId },
     language: submission.language,
     status: submission.status,
+    completedForLearning: submission.completedForLearning === true,
     problemVersion: submission.problemVersion,
     judgeGeneration: submission.judgeGeneration,
     runtimeMs: submission.runtimeMs,
@@ -174,6 +176,7 @@ export class SubmissionsService {
           problemId: true,
           language: true,
           status: true,
+          completedForLearning: true,
           problemVersion: true,
           judgeGeneration: true,
           runtimeMs: true,
@@ -243,8 +246,11 @@ export class SubmissionsService {
       current.judgeGeneration += 1;
       current.judgeAttemptId = null;
       current.judgeLeaseExpiresAt = null;
+      current.recoveryCount = 0;
       if (current.status === SubmissionStatus.ACCEPTED)
         current.acceptedForXp = true;
+      if (learningStatuses.has(current.status))
+        current.completedForLearning = true;
       current.status = SubmissionStatus.QUEUED;
       current.runtimeMs = null;
       current.memoryKb = null;

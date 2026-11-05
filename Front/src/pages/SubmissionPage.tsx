@@ -6,6 +6,7 @@ import { WeekStrip } from "../components/WeekStrip";
 import { problemPath } from "../paths";
 import {
   streakDays,
+  learningByDay,
   submissionsByDay,
   useDocumentTitle,
   useSubmissionHistory,
@@ -26,7 +27,10 @@ export function SubmissionPage() {
       ? `${submission.problem.title ?? "제출"} 채점 결과`
       : "채점 결과",
   );
-  const history = useSubmissionHistory(session);
+  // 연속 학습 카드는 정답일 때만 보이므로 그때만 전체 제출 기록을 받는다.
+  const history = useSubmissionHistory(
+    submission?.status === "ACCEPTED" ? session : null,
+  );
 
   if (error && !submission)
     return (
@@ -63,11 +67,11 @@ export function SubmissionPage() {
         </p>
       ) : null}
       <ResultSummary submission={submission} />
-      {submission.status === "ACCEPTED" && !history.loading ? (
+      {submission.status === "ACCEPTED" && !history.loading && !history.error ? (
         <section className="streak-card" aria-label="연속 학습">
           <div className="streak-text">
             <strong>
-              {streakDays(submissionsByDay(history.submissions))}일
+              {streakDays(learningByDay(history.submissions))}일
             </strong>
             <span>연속 학습 중이에요. 내일도 이어가 보세요!</span>
           </div>

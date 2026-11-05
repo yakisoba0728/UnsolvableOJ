@@ -7,3 +7,6 @@ test-results
 .env.*
 *.env
 npm-debug.log
+
+playwright-report
+test-results

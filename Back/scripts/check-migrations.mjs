@@ -5,6 +5,11 @@ import { DataSource } from 'typeorm';
 import configured from '../dist/database/data-source.js';
 import { InitialSchema1726916400000 } from '../dist/database/migrations/1726916400000-initial-schema.js';
 import { BackfillSolves1790551000000 } from '../dist/database/migrations/1790551000000-backfill-solves.js';
+import { BackendFoundations1790550000000 } from '../dist/database/migrations/1790550000000-backend-foundations.js';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { JwtStrategy } from '../dist/modules/auth/jwt.strategy.js';
+import { User } from '../dist/modules/users/user.entity.js';
 
 // Only this generated database is modified/dropped. The configured database is
 // used to obtain a connection with CREATEDB permission, never as a test target.
@@ -49,10 +54,17 @@ try {
     [user.id, problem.id],
   );
   await db.destroy();
-  db = await new DataSource(options).initialize();
+  // 아래의 부분 되돌리기 검사는 강화 마이그레이션까지만 다룬다(마지막 것부터 되돌리므로).
+  // 그 뒤에 추가된 마이그레이션은 마지막의 새 설치·전체 되돌리기·재적용에서 확인한다.
+  const hardening = configured.options.migrations.findIndex(
+    (migration) => migration.name === 'BackendHardening1790554000000',
+  );
+  assert.notEqual(hardening, -1);
+  const throughHardening = configured.options.migrations.slice(0, hardening + 1);
+  db = await new DataSource({ ...options, migrations: throughHardening }).initialize();
   assert.equal(
     (await db.runMigrations()).length,
-    configured.options.migrations.length - 1,
+    throughHardening.length - 1,
   );
   const [{ snapshot }] = await db.query(
     'SELECT snapshot FROM problem_versions WHERE problem_id = $1',
@@ -91,6 +103,16 @@ try {
   );
   assert.equal(acceptedEvidence.length, 2);
   assert.ok(acceptedEvidence.every((row) => row.accepted_for_xp));
+
+  // Case-only username duplicates stop the hardening migration and are listed, not renamed.
+  await db.undoLastMigration();
+  const [caseDuplicate] = await db.query(`INSERT INTO users (email, username, password_hash)
+    VALUES ('legacy-upper@example.com', 'Legacy', 'unused') RETURNING id`);
+  await assert.rejects(
+    db.runMigrations(),
+    /Usernames differ only by case; rename them before migrating: Legacy, legacy/,
+  );
+  await db.query('DELETE FROM users WHERE id = $1', [caseDuplicate.id]);
 
   // Simulate the pre-evidence schema with both known and unknowable past verdicts.
   await db.undoLastMigration();
@@ -134,7 +156,7 @@ try {
   const solvesBeforeEvidence = await db.query(
     'SELECT * FROM user_problem_solves ORDER BY user_id, problem_id',
   );
-  assert.equal((await db.runMigrations()).length, 1);
+  assert.equal((await db.runMigrations()).length, 2);
   for (const fixture of evidenceFixtures)
     assert.equal(
       (await db.query('SELECT accepted_for_xp FROM submissions WHERE id = $1', [
@@ -167,6 +189,7 @@ try {
     (row) => row.id !== solve.accepted_submission_id,
   );
   assert.ok(alternative);
+  await db.undoLastMigration();
   const beforeEvidenceRefusal = await db.query(
     'SELECT name FROM migrations ORDER BY id',
   );
@@ -214,10 +237,126 @@ try {
     );
   }
   await verifyBackfill();
-  assert.equal((await db.runMigrations()).length, 3);
+  assert.equal((await db.runMigrations()).length, 4);
   await verifyBackfill();
 
-  // A full rollback is only valid for an empty ledger: use a genuinely fresh DB.
+  // Independent foundations fixtures: neither has a solve ledger to mask the guard.
+  await db.destroy();
+  await admin.query(`DROP DATABASE "${name}" WITH (FORCE)`);
+  created = false;
+  await admin.query(`CREATE DATABASE "${name}"`);
+  created = true;
+  db = await new DataSource({ ...options, migrations: [InitialSchema1726916400000, BackendFoundations1790550000000] }).initialize();
+  await db.runMigrations();
+  const [owner] = await db.query(`INSERT INTO users(email,username,password_hash)
+    VALUES('versions@fixture.invalid','versions','unused') RETURNING id`);
+  const [versioned] = await db.query(`INSERT INTO problems(slug,title,statement_md,difficulty,author_id,current_version)
+    VALUES('versions','v2','v2 statement','BEGINNER',$1,2) RETURNING id`, [owner.id]);
+  await db.query(`INSERT INTO problem_versions(problem_id,version,snapshot) VALUES
+    ($1,1,'{"statementMarkdown":"v1","testCases":[{"expectedOutput":"original"}]}'),
+    ($1,2,'{"statementMarkdown":"v2","testCases":[{"expectedOutput":"changed"}]}')`, [versioned.id]);
+  await db.query(`INSERT INTO submissions(user_id,problem_id,language,source_code,status,problem_version)
+    VALUES($1,$2,'PYTHON','pass','WRONG_ANSWER',1)`, [owner.id, versioned.id]);
+  const versionsBefore = await db.query('SELECT * FROM problem_versions ORDER BY version');
+  const submissionBefore = await db.query('SELECT * FROM submissions');
+  const migrationBefore = await db.query('SELECT * FROM migrations ORDER BY id');
+  const unwrapped = db.createQueryRunner();
+  try {
+    await assert.rejects(new BackendFoundations1790550000000().down(unwrapped), /requires a transaction/);
+  } finally {
+    await unwrapped.release();
+  }
+  const locked = db.createQueryRunner();
+  await locked.connect();
+  await locked.startTransaction();
+  try {
+    const [{ pid }] = await locked.query('SELECT pg_backend_pid() AS pid');
+    const query = locked.query.bind(locked);
+    locked.query = async (sql, ...parameters) => {
+      const boundary = sql.indexOf('DO $$');
+      if (boundary < 0) return query(sql, ...parameters);
+      // Observe the real migration's locks before its refusal check, in the same transaction.
+      await query(sql.slice(0, boundary));
+      const locks = await db.query(`SELECT c.relname FROM pg_locks l JOIN pg_class c ON c.oid=l.relation
+        WHERE l.pid=$1 AND l.mode='AccessExclusiveLock' AND l.granted`, [pid]);
+      for (const table of ['users', 'problems', 'submissions', 'problem_versions', 'user_problem_solves'])
+        assert.ok(locks.some((row) => row.relname === table), `${table} must be locked before checking`);
+      return query(sql.slice(boundary), ...parameters);
+    };
+    await assert.rejects(new BackendFoundations1790550000000().down(locked), /version history/);
+  } finally {
+    await locked.rollbackTransaction();
+    await locked.release();
+  }
+  await assert.rejects(db.undoLastMigration(), /Cannot roll back backend foundations with version history/);
+  assert.deepEqual(await db.query('SELECT * FROM problem_versions ORDER BY version'), versionsBefore);
+  assert.deepEqual(await db.query('SELECT * FROM submissions'), submissionBefore);
+  assert.deepEqual(await db.query('SELECT * FROM migrations ORDER BY id'), migrationBefore);
+  assert.equal((await db.query('SELECT current_version FROM problems'))[0].current_version, 2);
+  assert.equal((await db.query('SELECT count(*)::int AS n FROM user_problem_solves'))[0].n, 0);
+  // Current/submission version metadata is protected even if snapshots are absent.
+  await db.query('DELETE FROM problem_versions');
+  await assert.rejects(db.undoLastMigration(), /version history/);
+  await db.query('UPDATE problems SET current_version=1');
+  await db.query('UPDATE submissions SET problem_version=2');
+  await assert.rejects(db.undoLastMigration(), /version history/);
+  await db.query('DELETE FROM submissions');
+  await db.query('DELETE FROM problems');
+
+  const secret = 'migration-fixture-only-secret-at-least-32-characters';
+  const jwt = new JwtService({ secret });
+  const oldToken = await jwt.signAsync({ sub: owner.id, tokenVersion: 0 }, { expiresIn: '5m' });
+  const strategy = new JwtStrategy(new ConfigService({ JWT_ACCESS_SECRET: secret }), db.getRepository(User));
+  await db.query("UPDATE users SET token_version=1,role='ADMIN' WHERE id=$1", [owner.id]);
+  const payload = await jwt.verifyAsync(oldToken);
+  await assert.rejects(strategy.validate(payload), /다시 로그인/);
+  await assert.rejects(db.undoLastMigration(), /Cannot roll back backend foundations with revoked tokens/);
+  assert.deepEqual(await db.query('SELECT * FROM migrations ORDER BY id'), migrationBefore);
+  assert.deepEqual((await db.query('SELECT token_version,role FROM users WHERE id=$1', [owner.id]))[0], { token_version: 1, role: 'ADMIN' });
+  await assert.rejects(strategy.validate(await jwt.verifyAsync(oldToken)), /다시 로그인/);
+  await db.query('DELETE FROM users');
+  await db.undoLastMigration();
+  await db.runMigrations();
+
+  // Learning backfill uses only current verdicts, retained AC, or the solve ledger.
+  const [learner] = await db.query(`INSERT INTO users(email,username,password_hash)
+    VALUES('learning@fixture.invalid','learning','unused') RETURNING id`);
+  const [exercise] = await db.query(`INSERT INTO problems(slug,title,statement_md,difficulty,author_id)
+    VALUES('learning','Learning','Test','BEGINNER',$1) RETURNING id`, [learner.id]);
+  const learningFixtures = [];
+  // Upgrade to just before the new evidence migration before inserting legacy rows.
+  await db.destroy();
+  db = await new DataSource({ ...options, migrations: configured.options.migrations.slice(0, -1) }).initialize();
+  await db.runMigrations();
+  for (const status of ['ACCEPTED','WRONG_ANSWER','COMPILE_ERROR','RUNTIME_ERROR','TIME_LIMIT_EXCEEDED','MEMORY_LIMIT_EXCEEDED','OUTPUT_LIMIT_EXCEEDED','QUEUED','JUDGING','SYSTEM_ERROR','CANCELLED']) {
+    const [row] = await db.query(`INSERT INTO submissions(user_id,problem_id,language,source_code,status)
+      VALUES($1,$2,'PYTHON','pass',$3) RETURNING id`, [learner.id, exercise.id, status]);
+    learningFixtures.push({ id: row.id, completed: !['QUEUED','JUDGING','SYSTEM_ERROR','CANCELLED'].includes(status) });
+  }
+  for (const anchor of ['accepted_for_xp', 'ledger']) {
+    const [row] = await db.query(`INSERT INTO submissions(user_id,problem_id,language,source_code,status,accepted_for_xp)
+      VALUES($1,$2,'PYTHON','pass','SYSTEM_ERROR',$3) RETURNING id`, [learner.id, exercise.id, anchor === 'accepted_for_xp']);
+    if (anchor === 'ledger') await db.query(`INSERT INTO user_problem_solves(user_id,problem_id,accepted_submission_id,awarded_xp)
+      VALUES($1,$2,$3,10)`, [learner.id, exercise.id, row.id]);
+    learningFixtures.push({ id: row.id, completed: true });
+  }
+  const beforeLearning = await db.query('SELECT xp,level FROM users WHERE id=$1', [learner.id]);
+  const ledgerBeforeLearning = await db.query('SELECT * FROM user_problem_solves');
+  await db.destroy();
+  db = await new DataSource(options).initialize();
+  assert.equal((await db.runMigrations()).length, 1);
+  for (const fixture of learningFixtures) assert.equal(
+    (await db.query('SELECT completed_for_learning FROM submissions WHERE id=$1', [fixture.id]))[0].completed_for_learning,
+    fixture.completed,
+  );
+  assert.deepEqual(await db.query('SELECT xp,level FROM users WHERE id=$1', [learner.id]), beforeLearning);
+  assert.deepEqual(await db.query('SELECT * FROM user_problem_solves'), ledgerBeforeLearning);
+  const learningMigrations = await db.query('SELECT * FROM migrations ORDER BY id');
+  await assert.rejects(db.undoLastMigration(), /Cannot roll back retained learning evidence/);
+  assert.deepEqual(await db.query('SELECT * FROM migrations ORDER BY id'), learningMigrations);
+  assert.ok((await db.query('SELECT completed_for_learning FROM submissions WHERE id=$1', [learningFixtures[0].id]))[0].completed_for_learning);
+
+  // A full rollback is only valid for a genuinely fresh DB.
   await db.destroy();
   await admin.query(`DROP DATABASE "${name}" WITH (FORCE)`);
   created = false;
@@ -238,7 +377,7 @@ try {
   );
   assert.equal(await db.showMigrations(), false);
   console.log(
-    'Migrations: legacy upgrade, snapshots, solve/XP idempotency, acceptance evidence backfill/refusal, partial rollback, populated-ledger refusal and fresh install/rollback/reapply passed.',
+    'Migrations: legacy upgrade, snapshots, solve/XP idempotency, acceptance and learning evidence backfill/refusal, username case refusal, partial rollback, foundations version/token refusal (signed revoked JWT remains rejected), and fresh install/rollback/reapply passed.',
   );
 } finally {
   if (db?.isInitialized) await db.destroy();

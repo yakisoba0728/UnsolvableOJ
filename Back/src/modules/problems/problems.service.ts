@@ -244,17 +244,24 @@ export class ProblemsService {
   }
 
   async findPublishedBySlug(slug: string) {
-    const problem = await this.problems.findOneBy({
-      slug: slug.toLowerCase(),
-      status: ProblemStatus.PUBLISHED,
+    // Same character boundary as IsPostgresText, without narrowing legacy slug formats.
+    if (/[\0\p{Cs}]/u.test(slug))
+      throw new BadRequestException(
+        'slug에는 NUL 문자나 짝이 맞지 않는 서로게이트 문자를 쓸 수 없습니다.',
+      );
+    return this.dataSource.transaction('REPEATABLE READ', async (manager) => {
+      const problem = await manager.findOneBy(Problem, {
+        slug: slug.toLowerCase(),
+        status: ProblemStatus.PUBLISHED,
+      });
+      if (!problem) throw new NotFoundException('문제를 찾을 수 없습니다.');
+      // Read body and samples from one snapshot; never load large hidden cases.
+      problem.testCases = await manager.find(TestCase, {
+        where: { problemId: problem.id, isSample: true },
+        order: { order: 'ASC' },
+      });
+      return this.toDetail(problem);
     });
-    if (!problem) throw new NotFoundException('문제를 찾을 수 없습니다.');
-    // Hidden cases can be megabytes each; the public view needs samples only.
-    problem.testCases = await this.dataSource.manager.find(TestCase, {
-      where: { problemId: problem.id, isSample: true },
-      order: { order: 'ASC' },
-    });
-    return this.toDetail(problem);
   }
 
   private assertOwner(problem: Problem, user: AuthenticatedUser) {

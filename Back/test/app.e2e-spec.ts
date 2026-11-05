@@ -11,7 +11,7 @@ describe('Health and submission judging flow (e2e)', () => {
 
   beforeAll(async () => {
     app = await createApp();
-    await app.init();
+    await app.listen(0, '127.0.0.1');
     dataSource = app.get(DataSource);
   });
 

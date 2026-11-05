@@ -41,6 +41,7 @@ describe('AuthService.register importer identity reservation', () => {
   it.each([
     { username: 'boj_import', email: 'human@example.com' },
     { username: '  boj_import  ', email: 'human@example.com' },
+    { username: '  BOJ_Import  ', email: 'human@example.com' },
     { username: 'human', email: 'boj-import@unsolvable.local' },
     { username: 'human', email: '  BOJ-IMPORT@UNSOLVABLE.LOCAL  ' },
   ])('rejects reserved normalized identifiers: $username / $email', async (dto) => {
@@ -57,12 +58,12 @@ describe('AuthService.register importer identity reservation', () => {
   it('keeps trim-only usernames and allows other email addresses on the same domain', async () => {
     const { service, users, passwordHasher } = setup();
     const session = await service.register({
-      username: '  BOJ_IMPORT  ',
+      username: '  Human_Name  ',
       email: '  HUMAN@UNSOLVABLE.LOCAL  ',
       password: 'a-strong-password',
     });
     expect(users.create).toHaveBeenCalledExactlyOnceWith({
-      username: 'BOJ_IMPORT',
+      username: 'Human_Name',
       email: 'human@unsolvable.local',
       passwordHash: 'hashed-password',
     });
@@ -71,7 +72,7 @@ describe('AuthService.register importer identity reservation', () => {
     );
     expect(users.save).toHaveBeenCalledOnce();
     expect(session.user).toMatchObject({
-      username: 'BOJ_IMPORT',
+      username: 'Human_Name',
       email: 'human@unsolvable.local',
       role: UserRole.USER,
     });

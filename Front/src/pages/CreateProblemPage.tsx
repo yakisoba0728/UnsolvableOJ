@@ -13,29 +13,31 @@ import { useAuth } from "../auth";
 import { MarkdownField } from "../components/MarkdownField";
 import { PageHeader } from "../components/PageHeader";
 import { Select } from "../components/Select";
-import { SlideToggle } from "../components/SlideToggle";
-import { useDocumentTitle } from "../hooks";
+import { savedTime, useDocumentTitle } from "../hooks";
 import { useUnsavedChanges } from "../useUnsavedChanges";
 import { problemPath } from "../paths";
+import { CaseEditor } from "../problems/CaseEditor";
 import {
   SLUG_PATTERN,
   blankCase,
   blankForm,
   clearProblemDraft,
   composeStatement,
-  hasErrors,
+  editCases,
   isPristine,
   problemDraftScope,
   readProblemDraft,
+  reviewForm,
   slugify,
   splitStatement,
   validate,
   writeProblemDraft,
-  type CaseForm,
+  type CaseAction,
   type FormErrors,
   type ProblemForm,
 } from "../problems/editor";
 import type { Difficulty, Problem } from "../types";
+import { difficultyOptions } from "../difficulty";
 
 interface ManagedProblem extends Problem {
   testCases: {
@@ -45,19 +47,6 @@ interface ManagedProblem extends Problem {
     score: number;
   }[];
 }
-
-const difficultyOptions = [
-  { value: "BEGINNER", label: "입문" },
-  { value: "EASY", label: "쉬움" },
-  { value: "MEDIUM", label: "보통" },
-  { value: "HARD", label: "어려움" },
-  { value: "EXPERT", label: "전문가" },
-];
-
-const caseKindOptions = [
-  { value: "sample", label: "예제" },
-  { value: "hidden", label: "숨김" },
-];
 
 const sections = [
   { id: "sec-basic", label: "기본 정보" },
@@ -71,9 +60,6 @@ const snapshot = (form: ProblemForm) =>
     ...form,
     cases: form.cases.map(({ collapsed: _c, key: _k, ...rest }) => rest),
   });
-
-const lineCount = (text: string) =>
-  text ? text.replace(/\n$/, "").split("\n").length : 0;
 
 function toForm(problem: ManagedProblem): ProblemForm {
   const parts = splitStatement(problem.statementMarkdown);
@@ -155,7 +141,14 @@ export function CreateProblemPage() {
     ? snapshot(form) !== initialRef.current
     : !isPristine(form);
   const draft = useMemo(
-    () => ({ form, slugTouched, savedAt: Date.now(), revision: crypto.randomUUID() }),
+    () => ({
+      form,
+      slugTouched,
+      savedAt: Date.now(),
+      // randomUUID는 보안 컨텍스트(HTTPS·localhost)에만 있다. 사설 IP의 HTTP 접속에서도 열리게 한다.
+      revision:
+        crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    }),
     [form, slugTouched],
   );
   const latestRef = useRef({ draft, dirty, loading });
@@ -204,9 +197,9 @@ export function CreateProblemPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, session?.user.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [id, session?.user.id]);
 
-  // Store committed work immediately; unmount recovery must not depend on a debounce.
+  // 확정된 입력은 바로 저장한다: 화면을 벗어날 때의 복구가 지연 저장에 기대면 안 된다.
   function saveDraft() {
     if (doneRef.current || loading) return;
     const ok = writeProblemDraft(draftScope, draft);
@@ -214,7 +207,8 @@ export function CreateProblemPage() {
     setSavedAt(ok ? draft.savedAt : null);
   }
   useLayoutEffect(() => {
-    if (loading || doneRef.current) return;
+    // 불러오기에 실패하면 비교할 원본이 없다: 복구 초안을 "변경 없음"으로 보고 지우면 안 된다.
+    if (loading || loadError || doneRef.current) return;
     if (!dirty) {
       const previous = readProblemDraft(draftScope).draft;
       if (previous) {
@@ -224,8 +218,7 @@ export function CreateProblemPage() {
       return;
     }
     saveDraft();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft, dirty, loading]);
+  }, [draft, dirty, loading, loadError]);
 
   // 이미 공개된 주소인지 잠시 뒤에 확인한다(초안 주소는 저장할 때 서버가 알려 준다).
   useEffect(() => {
@@ -262,158 +255,37 @@ export function CreateProblemPage() {
     return () => observer.disconnect();
   }, [loading, createdDraft]);
 
-  // ---- 테스트케이스 편집 ----
-  function updateCase(key: string, change: Partial<CaseForm>) {
-    doneRef.current = false;
-    setForm((previous) => ({
-      ...previous,
-      cases: previous.cases.map((item) =>
-        item.key === key ? { ...item, ...change } : item,
-      ),
-    }));
-  }
-  function addCase(isSample: boolean) {
-    doneRef.current = false;
-    setForm((previous) => ({
-      ...previous,
-      cases: [...previous.cases, blankCase(isSample)],
-    }));
-  }
-  function duplicateCase(key: string) {
+  function changeCases(action: CaseAction) {
     doneRef.current = false;
     setForm((previous) => {
-      const at = previous.cases.findIndex((item) => item.key === key);
-      if (at === -1) return previous;
-      const copy = {
-        ...previous.cases[at],
-        key: blankCase().key,
-        collapsed: false,
-      };
-      const cases = [...previous.cases];
-      cases.splice(at + 1, 0, copy);
-      return { ...previous, cases };
+      const cases = editCases(previous.cases, action);
+      return cases === previous.cases ? previous : { ...previous, cases };
     });
   }
-  function moveCase(key: string, step: -1 | 1) {
-    doneRef.current = false;
-    setForm((previous) => {
-      const at = previous.cases.findIndex((item) => item.key === key);
-      const to = at + step;
-      if (at === -1 || to < 0 || to >= previous.cases.length) return previous;
-      const cases = [...previous.cases];
-      [cases[at], cases[to]] = [cases[to], cases[at]];
-      return { ...previous, cases };
-    });
-  }
-  function removeCase(key: string) {
-    doneRef.current = false;
-    setForm((previous) =>
-      previous.cases.length > 1
-        ? {
-            ...previous,
-            cases: previous.cases.filter((item) => item.key !== key),
-          }
-        : previous,
-    );
-  }
-  const setAllCollapsed = (collapsed: boolean) => {
-    doneRef.current = false;
-    setForm((previous) => ({
-      ...previous,
-      cases: previous.cases.map((item) => ({ ...item, collapsed })),
-    }));
-  };
 
-  const sampleCount = form.cases.filter((item) => item.isSample).length;
-  const hiddenCount = form.cases.length - sampleCount;
-  const firstCaseError = Object.keys(errors.cases)[0];
-
-  // ---- 확인 목록 ----
-  const checklist = [
-    { label: "제목", ok: !errors.title, target: "title" },
-    ...(editing
-      ? []
-      : [
-          {
-            label: "주소(slug)",
-            ok: !errors.slug && !slugTaken,
-            target: "slug",
-          },
-        ]),
-    {
-      label: "시간·메모리 제한",
-      ok: !errors.timeLimitMs && !errors.memoryLimitMb,
-      target: "limits",
-    },
-    { label: "문제 본문", ok: !errors.statement, target: "statement" },
-    { label: "입력 설명", ok: !errors.inputDescription, target: "input-desc" },
-    {
-      label: "출력 설명",
-      ok: !errors.outputDescription,
-      target: "output-desc",
-    },
-    { label: "테스트케이스 1개 이상", ok: !errors.testCases, target: "cases" },
-    {
-      label: "테스트케이스 확인 (빈 기대 출력도 허용)",
-      ok: !firstCaseError,
-      target: firstCaseError ? `case-${firstCaseError}` : "cases",
-    },
-  ];
-  const warnings: string[] = [];
-  if (sampleCount === 0)
-    warnings.push("공개 예제가 없어요. 풀이에 도움이 되도록 예제를 추가하는 것을 권장해요.");
-  if (hiddenCount === 0)
-    warnings.push(
-      "숨김 테스트케이스가 없어요. 예제만으로 채점하면 예제에 맞춘 풀이도 통과할 수 있어요.",
-    );
-  if (form.cases.length === 1)
-    warnings.push(
-      "테스트케이스가 하나뿐이에요. 경계값(가장 작은 값·가장 큰 값)도 추가해 보세요.",
-    );
-  const basicOk =
-    !errors.title &&
-    (editing || (!errors.slug && !slugTaken)) &&
-    !errors.timeLimitMs &&
-    !errors.memoryLimitMb;
-  const stepDone: Record<string, boolean> = {
-    "sec-basic": basicOk,
-    "sec-statement":
-      !errors.statement &&
-      !errors.inputDescription &&
-      !errors.outputDescription,
-    "sec-cases": !errors.testCases && !firstCaseError,
-    "sec-review": !hasErrors(errors) && !slugTaken,
-  };
-
-  /** 화면 위에서 아래 순서로 처음 만나는 오류 칸 */
-  function firstErrorTarget(next: FormErrors) {
-    if (next.title) return "title";
-    if (next.slug || slugTaken) return "slug";
-    if (next.timeLimitMs || next.memoryLimitMb) return "limits";
-    if (next.statement) return "statement";
-    if (next.inputDescription) return "input-desc";
-    if (next.outputDescription) return "output-desc";
-    if (next.testCases) return "cases";
-    const key = Object.keys(next.cases)[0];
-    return key ? `case-${key}` : null;
-  }
+  const {
+    sampleCount,
+    hiddenCount,
+    firstCaseError,
+    checklist,
+    warnings,
+    stepDone,
+    firstErrorTarget,
+  } = reviewForm(form, errors, editing, slugTaken);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!session || pendingRef.current || doneRef.current) return;
     setShowErrors(true);
     setError("");
-    const target = firstErrorTarget(errors);
-    if (target) {
+    if (firstErrorTarget) {
       // 접혀 있던 케이스는 펼쳐서 오류 칸이 보이게 한다.
       if (firstCaseError)
         setForm((previous) => ({
           ...previous,
-          cases: previous.cases.map((item) =>
-            errors.cases[item.key] ? { ...item, collapsed: false } : item,
-          ),
+          cases: editCases(previous.cases, { type: "reveal", errors: errors.cases }),
         }));
-      window.setTimeout(() => jumpTo(target), 50);
+      window.setTimeout(() => jumpTo(firstErrorTarget), 50);
       return;
     }
     pendingRef.current = true;
@@ -542,7 +414,7 @@ export function CreateProblemPage() {
   const statusText = saveFailed
     ? "임시 저장소를 읽거나 저장하지 못했어요. 현재 내용은 메모리에만 남아 있어 새로고침·탭 닫기 후 복구되지 않을 수 있어요."
     : savedAt
-      ? `이 탭에 임시 저장됨 · ${new Date(savedAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`
+      ? `이 탭에 임시 저장됨 · ${savedTime(savedAt)}`
       : editing
         ? "변경 사항이 없어요."
         : "작성한 내용은 이 탭이 열려 있는 동안 임시 저장돼요.";
@@ -845,7 +717,10 @@ export function CreateProblemPage() {
                 type="button"
                 className="text-button"
                 onClick={() =>
-                  setAllCollapsed(!form.cases.every((item) => item.collapsed))
+                  changeCases({
+                    type: "collapseAll",
+                    collapsed: !form.cases.every((item) => item.collapsed),
+                  })
                 }
               >
                 {form.cases.every((item) => item.collapsed)
@@ -859,156 +734,28 @@ export function CreateProblemPage() {
               {shown.testCases}
             </p>
           ) : null}
-          {form.cases.map((testCase, index) => {
-            const caseError = shown.cases[testCase.key];
-            const kind = testCase.isSample ? "sample" : "hidden";
-            return (
-              <div
-                className={`case-editor ${kind}`}
-                key={testCase.key}
-                id={`f-case-${testCase.key}`}
-              >
-                <div className="case-heading">
-                  <strong>
-                    테스트 {index + 1}
-                    <span className={`case-pill ${kind}`}>
-                      {testCase.isSample
-                        ? "예제 · 문제 화면에 공개"
-                        : "숨김 · 채점에만 사용"}
-                    </span>
-                  </strong>
-                  <SlideToggle
-                    ariaLabel={`테스트 ${index + 1} 공개 여부`}
-                    value={kind}
-                    options={caseKindOptions}
-                    onChange={(next) =>
-                      updateCase(testCase.key, { isSample: next === "sample" })
-                    }
-                  />
-                  <div className="case-actions">
-                    <button
-                      type="button"
-                      className="text-button"
-                      aria-label={`테스트 ${index + 1} 위로 이동`}
-                      disabled={index === 0}
-                      onClick={() => moveCase(testCase.key, -1)}
-                    >
-                      ↑
-                    </button>
-                    <button
-                      type="button"
-                      className="text-button"
-                      aria-label={`테스트 ${index + 1} 아래로 이동`}
-                      disabled={index === form.cases.length - 1}
-                      onClick={() => moveCase(testCase.key, 1)}
-                    >
-                      ↓
-                    </button>
-                    <button
-                      type="button"
-                      className="text-button"
-                      onClick={() => duplicateCase(testCase.key)}
-                    >
-                      복제
-                    </button>
-                    <button
-                      type="button"
-                      className="text-button"
-                      aria-expanded={!testCase.collapsed}
-                      onClick={() =>
-                        updateCase(testCase.key, {
-                          collapsed: !testCase.collapsed,
-                        })
-                      }
-                    >
-                      {testCase.collapsed ? "펼치기" : "접기"}
-                    </button>
-                    {form.cases.length > 1 ? (
-                      <button
-                        type="button"
-                        className="text-button danger"
-                        onClick={() => removeCase(testCase.key)}
-                      >
-                        삭제
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
-                {testCase.collapsed ? (
-                  <p className="case-collapsed muted">
-                    입력 {lineCount(testCase.input)}줄 · 출력{" "}
-                    {lineCount(testCase.expectedOutput)}줄
-                    {testCase.input || testCase.expectedOutput
-                      ? ` — ${(testCase.input.split("\n")[0] || "(없음)").slice(0, 24)} → ${(testCase.expectedOutput.split("\n")[0] || "(없음)").slice(0, 24)}`
-                      : " — 아직 비어 있어요"}
-                  </p>
-                ) : (
-                  <div className="sample-grid">
-                    <div className="code-field">
-                      <label>
-                        입력
-                        <textarea
-                          className="code-input"
-                          rows={4}
-                          spellCheck={false}
-                          wrap="off"
-                          value={testCase.input}
-                          placeholder="입력이 없으면 비워 두세요"
-                          onChange={(event) =>
-                            updateCase(testCase.key, {
-                              input: event.target.value,
-                            })
-                          }
-                        />
-                      </label>
-                      <span className="field-help">
-                        {lineCount(testCase.input)}줄
-                      </span>
-                    </div>
-                    <div className="code-field">
-                      <label>
-                        기대 출력
-                        <textarea
-                          className="code-input"
-                          rows={4}
-                          spellCheck={false}
-                          wrap="off"
-                          value={testCase.expectedOutput}
-                          aria-invalid={Boolean(caseError)}
-                          onChange={(event) =>
-                            updateCase(testCase.key, {
-                              expectedOutput: event.target.value,
-                            })
-                          }
-                        />
-                      </label>
-                      {caseError ? (
-                        <span className="field-error" role="alert">
-                          {caseError}
-                        </span>
-                      ) : (
-                        <span className="field-help">
-                          {lineCount(testCase.expectedOutput)}줄
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {form.cases.map((testCase, index) => (
+            <CaseEditor
+              key={testCase.key}
+              testCase={testCase}
+              index={index}
+              total={form.cases.length}
+              error={shown.cases[testCase.key]}
+              onEdit={changeCases}
+            />
+          ))}
           <div className="case-add">
             <button
               type="button"
               className="button button-outline"
-              onClick={() => addCase(true)}
+              onClick={() => changeCases({ type: "add", isSample: true })}
             >
               + 예제 추가
             </button>
             <button
               type="button"
               className="button button-outline"
-              onClick={() => addCase(false)}
+              onClick={() => changeCases({ type: "add", isSample: false })}
             >
               + 숨김 케이스 추가
             </button>

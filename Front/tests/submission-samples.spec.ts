@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { authenticate } from "./fixtures";
 
 for (const example of [
   { name: "submitted snapshot", actual: "3\n", expected: "3\n", matches: true },
@@ -36,28 +37,7 @@ for (const example of [
   },
 ]) {
   test(`public output comparison uses ${example.name}`, async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.setItem(
-        "unsolvable-oj-session-v1",
-        JSON.stringify({
-          expiresAt: Date.now() + 900_000,
-          session: {
-            accessToken: "solver-token",
-            tokenType: "Bearer",
-            expiresIn: "15m",
-            user: {
-              id: "solver",
-              username: "solver",
-              email: "solver@example.com",
-              role: "USER",
-              level: 1,
-              xp: 0,
-              rating: 0,
-            },
-          },
-        }),
-      );
-    });
+    await authenticate(page);
     let latestProblemReads = 0;
     await page.route("**/api/v1/**", (route) => {
       const path = new URL(route.request().url()).pathname;

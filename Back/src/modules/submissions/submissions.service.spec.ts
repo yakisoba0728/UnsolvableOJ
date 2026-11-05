@@ -169,6 +169,62 @@ describe('SubmissionsService queue failure', () => {
     );
     expect(submissions.update).not.toHaveBeenCalled();
   });
+
+  function expiredLease(recoveryCount: number) {
+    const expired = { id: randomUUID(), judgeGeneration: 3, recoveryCount };
+    const builder = {
+      update: vi.fn().mockReturnThis(),
+      set: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      execute: vi.fn().mockResolvedValue({ affected: 1 }),
+    };
+    const submissions = {
+      find: vi.fn().mockResolvedValueOnce([]).mockResolvedValueOnce([expired]),
+      createQueryBuilder: () => builder,
+    };
+    const queue = { add: vi.fn() };
+    const judge = new JudgeService(
+      submissions as unknown as Repository<Submission>,
+      {} as DataSource,
+      queue as unknown as Queue,
+    );
+    return { expired, builder, queue, judge };
+  }
+
+  it('re-enqueues an expired lease as a new generation and counts the recovery', async () => {
+    const { expired, builder, queue, judge } = expiredLease(4);
+    await judge['requeueMissingJobs']();
+    const changes = builder.set.mock.calls[0][0];
+    expect(changes).toMatchObject({
+      status: SubmissionStatus.QUEUED,
+      judgeGeneration: 4,
+    });
+    expect(changes.recoveryCount()).toBe('recovery_count + 1');
+    expect(builder.where).toHaveBeenCalledWith(
+      expect.stringContaining('judge_lease_expires_at < now()'),
+      { id: expired.id, status: SubmissionStatus.JUDGING, generation: 3 },
+    );
+    expect(queue.add).toHaveBeenCalledExactlyOnceWith(
+      'judge-submission',
+      { submissionId: expired.id, generation: 4 },
+      expect.objectContaining({ jobId: `${expired.id}-4` }),
+    );
+  });
+
+  it('finalizes a lease expired after 5 recoveries as SYSTEM_ERROR without touching XP evidence', async () => {
+    const { expired, builder, queue, judge } = expiredLease(5);
+    await judge['requeueMissingJobs']();
+    expect(builder.set).toHaveBeenCalledExactlyOnceWith({
+      status: SubmissionStatus.SYSTEM_ERROR,
+      judgeMessage: expect.any(String),
+      judgeLeaseExpiresAt: null,
+    });
+    expect(builder.where).toHaveBeenCalledWith(
+      expect.stringContaining('judge_lease_expires_at < now()'),
+      { id: expired.id, status: SubmissionStatus.JUDGING, generation: 3 },
+    );
+    expect(queue.add).not.toHaveBeenCalled();
+  });
 });
 
 describe('submission debug output lifecycle', () => {
@@ -193,6 +249,7 @@ describe('submission debug output lifecycle', () => {
       judgeAttemptId: attemptId,
       status: SubmissionStatus.JUDGING,
       acceptedForXp: false,
+      completedForLearning: false,
       debugOutputs: [],
       sourceCode: 'print(4)',
     } as unknown as Submission;
@@ -332,9 +389,11 @@ describe('submission debug output lifecycle', () => {
   it('clears previous output on rejudge and rejects stale results', async () => {
     const { service, judge, submission, user, attemptId, output } = setup();
     submission.debugOutputs = [output];
+    submission.recoveryCount = 5;
     await service.rejudge(submission.id, user);
     expect(submission.debugOutputs).toEqual([]);
     expect(submission.judgeGeneration).toBe(2);
+    expect(submission.recoveryCount).toBe(0);
     await expect(
       judge.recordJudgeResult(submission.id, 1, attemptId, {
         status: SubmissionStatus.WRONG_ANSWER,
@@ -363,6 +422,8 @@ describe('submission debug output lifecycle', () => {
       totalTestCases: 1,
     });
     expect(submission.acceptedForXp).toBe(accepted);
+    expect(submission.completedForLearning).toBe(true);
+    expect(result.completedForLearning).toBe(true);
     expect(manager.save).toHaveBeenCalledWith(
       expect.objectContaining({ acceptedForXp: accepted }),
     );
@@ -379,10 +440,12 @@ describe('submission debug output lifecycle', () => {
     async (status, accepted) => {
       const { judge, submission, attemptId, manager } = setup();
       submission.acceptedForXp = accepted;
+      submission.completedForLearning = accepted;
       const dto = { status, passedTestCases: 0, totalTestCases: 1 };
       await judge.recordJudgeResult(submission.id, 1, attemptId, dto);
       await judge.recordJudgeResult(submission.id, 1, attemptId, dto);
       expect(submission.acceptedForXp).toBe(accepted);
+      expect(submission.completedForLearning).toBe(accepted);
       expect(manager.save).toHaveBeenCalledTimes(1);
       expect(manager.query).not.toHaveBeenCalled();
     },
@@ -394,9 +457,24 @@ describe('submission debug output lifecycle', () => {
     await service.rejudge(submission.id, user);
     expect(submission.status).toBe(SubmissionStatus.QUEUED);
     expect(submission.acceptedForXp).toBe(true);
+    expect(submission.completedForLearning).toBe(true);
     expect(manager.save).toHaveBeenCalledWith(
       expect.objectContaining({ acceptedForXp: true }),
     );
+  });
+
+  it.each([
+    SubmissionStatus.WRONG_ANSWER, SubmissionStatus.COMPILE_ERROR,
+    SubmissionStatus.RUNTIME_ERROR, SubmissionStatus.TIME_LIMIT_EXCEEDED,
+    SubmissionStatus.MEMORY_LIMIT_EXCEEDED, SubmissionStatus.OUTPUT_LIMIT_EXCEEDED,
+  ])('captures legacy %s as learning before rejudge, independently of XP acceptance', async (status) => {
+    const { service, submission, user } = setup();
+    submission.status = status;
+    await service.rejudge(submission.id, user);
+    expect(submission.completedForLearning).toBe(true);
+    expect(submission.acceptedForXp).toBe(false);
+    await service.rejudge(submission.id, user);
+    expect(submission.completedForLearning).toBe(true);
   });
 
   it('rejects a stale generation SYSTEM_ERROR without touching retained evidence', async () => {

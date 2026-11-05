@@ -1,0 +1,101 @@
+  <section class="slide" id="scene-recovery" data-title="문제 해결 · 신뢰성">
+    <nav class="sec"><span>진행 현황</span><span>기술 스택</span><span class="on">문제 해결</span><span>향후 계획</span></nav>
+    <h2 class="hl">워커가 멈춰도 채점은 <em>끝까지</em> 갑니다</h2>
+    <div class="rc-stage m-fade" style="--d:.1s" role="img" aria-label="워커 A가 제출을 가져가 60초 채점 예약을 받고 10초마다 연장하다가 멈춘다. 예약이 끝나면 30초마다 도는 복구 순찰이 찾아내 제출을 세대 2로 다시 줄에 세우고, 워커 B가 새로 채점해 판정을 저장한다. 멈췄던 워커 A가 늦게 보낸 세대 1 결과는 이전 채점 시도의 결과라서 거절된다. XP는 재채점 대기나 서버 오류 때 유지하고, 정상 채점으로 오답이 확정되고 다른 정답도 없을 때만 회수한다.">
+
+      <div class="rc-top">
+        <span class="rc-clock-lbl">실제로 흐른 시간</span><b class="rc-clock">0:00</b>
+        <span class="rc-zip"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 5l7 6-7 6zM11 5l7 6-7 6z" fill="currentColor"/></svg>시간 압축 · 실제 60초·30초를 몇 초로 줄여서 보여 줍니다</span>
+      </div>
+
+      <div class="rc-box rc-queue">
+        <p class="rc-k">번호표 줄 (큐)</p>
+        <p class="rc-legend"><b>세대</b> = 몇 번째 채점 시도인지</p>
+      </div>
+      <div class="rc-box rc-patrol">
+        <div class="rc-patrol-head">
+          <svg class="rc-patrol-ico" width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><path d="M28 17a11 11 0 1 1-3.2-7.8" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M27.5 4.5v6h-6" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><p class="rc-name">복구 순찰</p><p class="rc-sub">30초마다 만료된 예약을 찾음</p></div>
+        </div>
+        <ul class="rc-log">
+          <li><span class="rc-t">0:30</span><span>이상 없음 · 예약 남음</span></li>
+          <li><span class="rc-t">1:00</span><span>이상 없음 · 예약 남음</span></li>
+          <li class="is-found"><span class="rc-t">1:30</span><span><b>만료 발견</b><br>세대 2로 다시 줄에 세움</span></li>
+        </ul>
+      </div>
+
+      <div class="rc-box rc-worker rc-wa">
+        <div class="rc-worker-head"><p class="rc-name">워커 A</p><span class="rc-chip">쉬는 중</span></div>
+        <p class="rc-cap"><b>채점 예약 (lease)</b><span>10초마다 연장</span></p>
+      </div>
+      <div class="rc-box rc-worker rc-wb">
+        <div class="rc-worker-head"><p class="rc-name">워커 B</p><span class="rc-chip">쉬는 중</span></div>
+        <p class="rc-cap"><b>채점 예약 (lease)</b><span>10초마다 연장</span></p>
+      </div>
+
+      <div class="rc-box rc-srv">
+        <p class="rc-k">API 서버 · 판정 기록 (PostgreSQL)</p>
+        <div class="rc-now"><span>지금 인정하는 채점</span><b class="rc-now-val">아직 없음 · 줄에서 대기</b></div>
+        <p class="rc-inbox">도착한 결과</p>
+        <p class="rc-empty">아직 없음</p>
+        <div class="rc-row is-ok">
+          <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="16" fill="currentColor"/><path d="M10 17.5l4.5 4.5 9-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><b>워커 B · 세대 2</b><span>저장 → 정답 · 첫 정답이라 XP 지급</span></div>
+        </div>
+        <div class="rc-row is-no">
+          <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="16" fill="currentColor"/><path d="M11.5 11.5l11 11M22.5 11.5l-11 11" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+          <div><b>워커 A · 세대 1 <em>늦게 도착</em></b><span>거절 → “이전 채점 시도의 결과입니다.”</span><span>XP 변화 없음</span></div>
+        </div>
+      </div>
+
+      <svg class="rc-wires" viewBox="0 0 1664 760" aria-hidden="true">
+        <defs>
+          <marker id="scene-recovery-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--border-strong)"/></marker>
+          <marker id="scene-recovery-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--accent)"/></marker>
+        </defs>
+        <path class="rc-edge" d="M364 212H444" marker-end="url(#scene-recovery-a)"/>
+        <path class="rc-edge" d="M364 264H404V476H444" marker-end="url(#scene-recovery-a)"/>
+        <path class="rc-edge rc-edge-back" d="M446 286H368" pathLength="1" marker-end="url(#scene-recovery-b)"/>
+        <path class="rc-edge rc-edge-a" d="M1014 196H1094" marker-end="url(#scene-recovery-a)"/>
+        <path class="rc-edge rc-edge-b" d="M1014 476H1094" marker-end="url(#scene-recovery-a)"/>
+        <g class="rc-ring rc-ring-a" transform="translate(912 196)">
+          <circle class="rc-pulse" r="50"/>
+          <circle class="rc-scan" r="66"/>
+          <circle class="rc-track" r="50"/>
+          <circle class="rc-arc" r="50" transform="rotate(-90)"/>
+          <text class="rc-sec" y="6" text-anchor="middle">60초</text>
+          <text class="rc-left" y="32" text-anchor="middle">남음</text>
+        </g>
+        <g class="rc-ring rc-ring-b" transform="translate(912 476)">
+          <circle class="rc-pulse" r="50"/>
+          <circle class="rc-scan" r="66"/>
+          <circle class="rc-track" r="50"/>
+          <circle class="rc-arc" r="50" transform="rotate(-90)"/>
+          <text class="rc-sec" y="6" text-anchor="middle">60초</text>
+          <text class="rc-left" y="32" text-anchor="middle">남음</text>
+        </g>
+      </svg>
+
+      <span class="rc-env rc-env-b"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="4.5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="2" fill="none"/><path d="M3 6l8 6 8-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>세대 2 결과</span>
+      <span class="rc-env rc-env-a"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="4.5" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="2" fill="none"/><path d="M3 6l8 6 8-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>세대 1 결과</span>
+
+      <div class="rc-card">
+        <div class="rc-card-top"><b>제출 #1042</b><span class="rc-gen">세대 1</span></div>
+        <div class="rc-card-st"><i></i><b class="rc-st">대기</b><span class="rc-enum">QUEUED</span></div>
+      </div>
+
+      <div class="rc-xp">
+        <b class="rc-xp-title">XP 규칙</b>
+        <p class="rc-xp-keep"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13" fill="currentColor"/><path d="M8 14.5l4 4 8-9" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>재채점 대기 · 서버 오류 → <b>받은 XP 유지</b></p>
+        <p class="rc-xp-take"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13" fill="currentColor"/><path d="M8.5 14h11" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>정상 채점으로 오답이 확정되고 다른 정답도 없을 때만 → <b>XP 회수</b></p>
+        <span class="ref">#10</span>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="slide-number"></span></div>
+    <aside class="notes">
+      <p>다음은 <strong>워커가 멈췄을 때</strong>예요. 워커는 제출을 가져가면서 <strong>60초짜리 채점 예약</strong>을 받고, 10초마다 연장해요.</p>
+      <p>워커가 멈추면 연장이 끊기고, 예약이 끝나면 <strong>30초마다 도는 복구 순찰</strong>이 찾아내서 <strong>세대 2</strong>로 다시 줄에 세워요.</p>
+      <p>다른 워커가 끝까지 채점하고, 멈췄던 워커가 늦게 보낸 결과는 <strong>이전 세대라서 거절</strong>돼요. 그래서 두 번 채점되지 않아요.</p>
+      <p>XP도 안전해요. 서버 오류 때는 그대로 두고, <strong>오답이 확정되고 다른 정답도 없을 때만</strong> 회수합니다.</p>
+    </aside>
+  </section>

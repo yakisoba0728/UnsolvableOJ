@@ -1,34 +1,26 @@
 import { useEffect, useState } from "react";
 import { verdictLabel } from "../verdict";
 import { Link } from "react-router-dom";
-import { api } from "../api";
 import { useAuth } from "../auth";
 import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { PageHeader } from "../components/PageHeader";
 import {
   dayKey,
   streakDays,
+  learningByDay,
   submissionsByDay,
   useAllProblems,
+  useMyCommunityPosts,
+  useMyStanding,
   useSubmissionHistory,
   useDocumentTitle,
 } from "../hooks";
 import { PostScroller } from "../components/PostScroller";
-import { allPosts, useActivity } from "../community/store";
-import type { RankingEntry, UserProfile } from "../types";
+import { LANGUAGE_LABELS } from "../types";
+import { difficultyOptions } from "../difficulty";
 
 const WEEKS_WIDE = 16;
 const WEEKS_NARROW = 12;
-const languageLabels: Record<string, string> = {
-  C: "C",
-  CPP: "C++",
-  JAVA: "Java",
-  PYTHON: "Python",
-  JAVASCRIPT: "JavaScript",
-  TYPESCRIPT: "TypeScript",
-  GO: "Go",
-  RUST: "Rust",
-};
 /** 다른 사용자들이 많이 쓰는 순서. 내가 쓰지 않은 언어는 이 순서로 0%를 채운다. */
 const popularLanguages = [
   "PYTHON",
@@ -41,13 +33,6 @@ const popularLanguages = [
   "RUST",
 ];
 const LANGUAGE_ROWS = 4;
-const difficultyRows = [
-  { value: "BEGINNER", label: "입문" },
-  { value: "EASY", label: "쉬움" },
-  { value: "MEDIUM", label: "보통" },
-  { value: "HARD", label: "어려움" },
-  { value: "EXPERT", label: "전문가" },
-];
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
 /** 서버 규칙: level = 1 + xp / 100 */
@@ -60,16 +45,9 @@ function heatLevel(count: number) {
 export function ProfilePage() {
   useDocumentTitle("내 학습 기록");
   const { session } = useAuth();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [rankings, setRankings] = useState<RankingEntry[]>([]);
-  const [error, setError] = useState("");
-  const activity = useActivity();
-  const myPosts = allPosts(activity).filter(
-    (post) => post.author.name === session?.user.username,
-  );
-  const upvotedPosts = allPosts(activity).filter((post) =>
-    activity.upvoted.includes(post.id),
-  );
+  const { profile, rank, rankLoading, profileError, rankError } =
+    useMyStanding(session);
+  const communityPosts = useMyCommunityPosts(session);
   const [selected, setSelected] = useState(dayKey(new Date()));
   const history = useSubmissionHistory(session);
   const {
@@ -77,7 +55,6 @@ export function ProfilePage() {
     loading: problemsLoading,
     error: problemsError,
   } = useAllProblems();
-  const [ready, setReady] = useState(false);
   // 넓은 화면에서는 폭을 채우도록 주 수를 늘리고, 좁은 화면에서는 가로 스크롤이 생기지 않게 줄인다.
   const [weeks, setWeeks] = useState(() =>
     window.matchMedia("(max-width: 650px)").matches ? WEEKS_NARROW : WEEKS_WIDE,
@@ -89,40 +66,10 @@ export function ProfilePage() {
     return () => media.removeEventListener("change", update);
   }, []);
 
-  useEffect(() => {
-    if (!session) return;
-    const controller = new AbortController();
-    setError("");
-    Promise.all([
-      api<UserProfile>(
-        "/users/me",
-        { signal: controller.signal },
-        session.accessToken,
-      ).then(setProfile),
-      api<RankingEntry[]>("/rankings", { signal: controller.signal }).then(
-        setRankings,
-      ),
-    ])
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "정보를 불러오지 못했습니다.",
-          );
-      })
-      .finally(() => {
-        // 실패해도 로딩 표시가 끝나도록 한다(오류는 아래에서 안내).
-        if (!controller.signal.aborted) setReady(true);
-      });
-    return () => controller.abort();
-  }, [session]);
-
   const counts = submissionsByDay(history.submissions);
-  const streak = streakDays(counts);
-  const rank = rankings.findIndex((entry) => entry.id === session?.user.id);
+  const streak = streakDays(learningByDay(history.submissions));
 
-  // 오늘이 속한 주를 마지막 열로, 일요일 시작 12주 격자
+  // 오늘이 속한 주를 마지막 열로, 일요일 시작 주 단위 격자(넓은 화면 16주, 좁은 화면 12주)
   const today = new Date();
   const start = new Date(today);
   start.setDate(today.getDate() - today.getDay() - (weeks - 1) * 7);
@@ -178,16 +125,22 @@ export function ProfilePage() {
     (item) => dayKey(new Date(item.createdAt)) === selected,
   );
 
-  if (error && !profile)
+  if (profileError)
     return (
       <div className="page-width standalone-section">
         <p className="error-message" role="alert">
-          {error}
+          {profileError}
         </p>
       </div>
     );
   // 프로필·랭킹·제출 기록·문제 목록이 모두 도착하기 전에는 0 같은 임시 값을 보이지 않는다.
-  if (!profile || !ready || history.loading || problemsLoading)
+  if (
+    !profile ||
+    rankLoading ||
+    history.loading ||
+    problemsLoading ||
+    communityPosts.loading
+  )
     return (
       <div className="page-width profile-page">
         <PageHeader
@@ -223,9 +176,9 @@ export function ProfilePage() {
         title="내 학습 기록"
         description="쌓아 온 실력과 꾸준함을 한눈에 확인하세요."
       />
-      {error || history.error || problemsError ? (
+      {rankError || history.error || problemsError ? (
         <p className="error-message" role="alert">
-          {error || history.error || problemsError}
+          {rankError || history.error || problemsError}
         </p>
       ) : null}
 
@@ -237,6 +190,17 @@ export function ProfilePage() {
           <h2>
             {profile.username} <small>@{profile.username}</small>
           </h2>
+          <div aria-label="획득한 배지">
+            {profile.badges?.map((b) => (
+              <span className="pill" key={b.badge}>
+                {b.badge === "night-coder"
+                  ? "심야 코더"
+                  : b.badge === "seven-day-streak"
+                    ? "7일 연속 학습"
+                    : b.badge}
+              </span>
+            ))}
+          </div>
           <div className="profile-level">
             <span className="pill pill-warning">Lv.{profile.level}</span>
             <span className="muted">
@@ -252,7 +216,7 @@ export function ProfilePage() {
             aria-valuemax={XP_PER_LEVEL}
             aria-valuenow={xpInLevel}
           >
-            <span style={{ width: `${xpInLevel}%` }} />
+            <span style={{ width: `${(xpInLevel / XP_PER_LEVEL) * 100}%` }} />
           </div>
         </div>
         <dl className="profile-stats">
@@ -267,10 +231,6 @@ export function ProfilePage() {
           <div>
             <dt>연속 학습</dt>
             <dd>{streak}일</dd>
-          </div>
-          <div>
-            <dt>레이팅</dt>
-            <dd>{profile.rating.toLocaleString()}</dd>
           </div>
         </dl>
       </section>
@@ -377,16 +337,20 @@ export function ProfilePage() {
           <div className="profile-post-pair">
             <PostScroller
               title="작성한 글"
-              posts={myPosts}
-              activity={activity}
+              posts={communityPosts.data.written}
               emptyText="아직 작성한 글이 없어요. 궁금한 점이나 나만의 풀이를 첫 글로 남겨 보세요."
               emptyAction={{ label: "글 작성하러 가기", to: "/community/new" }}
             />
             <PostScroller
               title="추천한 글"
-              posts={upvotedPosts}
-              activity={activity}
+              posts={communityPosts.data.voted}
               emptyText="아직 추천한 글이 없어요. 도움이 된 글에 추천을 눌러 보세요."
+              emptyAction={{ label: "커뮤니티 둘러보기", to: "/community" }}
+            />
+            <PostScroller
+              title="저장한 글"
+              posts={communityPosts.data.saved}
+              emptyText="아직 저장한 글이 없어요. 다시 보고 싶은 글을 저장해 보세요."
               emptyAction={{ label: "커뮤니티 둘러보기", to: "/community" }}
             />
           </div>
@@ -435,7 +399,7 @@ export function ProfilePage() {
                   <li key={language}>
                     <div className="lang-row">
                       <span className="lang-name">
-                        {languageLabels[language] ?? language}
+                        {LANGUAGE_LABELS[language] ?? language}
                       </span>
                       <span className="muted">{percent}%</span>
                     </div>
@@ -454,7 +418,7 @@ export function ProfilePage() {
               </div>
             </div>
             <ul className="lang-stats">
-              {difficultyRows.map((row) => {
+              {difficultyOptions.map((row) => {
                 const count = solvedByDifficulty.get(row.value) ?? 0;
                 const percent = solvedTotal
                   ? Math.round((count / solvedTotal) * 100)

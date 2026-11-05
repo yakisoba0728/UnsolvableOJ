@@ -81,6 +81,21 @@ npm run db:bootstrap:admin -- admin@example.com
 작성자·문제·테스트케이스·v1 스냅샷은 하나의 트랜잭션으로 저장합니다. 과거 실행 중단으로 v1이 없는 경우 현재 버전이 1이고 저장된 테스트케이스가 있을 때만 순서대로 읽어 복구합니다. 이미 수정된 v2 이상의 내용으로 과거 v1을 만들지 않으며, 비어 있거나 누락된 기존 버전 이력은 오류로 중단하므로 운영자가 검증된 백업에서 복구해야 합니다. 정상적인 기존 불변 스냅샷은 재실행으로 변경하지 않습니다. 실패한 실행은 데모 계정 비밀번호도 변경하지 않습니다.
 관리자는 `PATCH /api/v1/admin/users/:id/role`로 작성자와 관리자 역할을 지정할 수 있습니다. 역할 변경 시 기존 access token은 즉시 무효화됩니다.
 
+## 기본 연습 문제 등록
+
+독자적으로 작성한 입문·쉬움·보통 문제 10개를 등록할 수 있습니다. 각 문제에는 공개 예제와 비공개 경계값 테스트가 있습니다. 먼저 DB를 백업한 뒤 실행하세요.
+
+```bash
+npm run test:starter
+npm run db:seed:starter
+npm run db:seed:starter -- --rollback-check
+npm run db:seed:starter -- --apply
+```
+
+첫 명령은 독립적인 풀이로 정답 데이터를 검사합니다. seed의 기본 실행은 DTO 검증만 하며, `--rollback-check`는 실제 INSERT와 버전 스냅샷을 검사한 뒤 롤백합니다. `--apply`는 별도 작성자 계정, 문제, 테스트케이스, v1 스냅샷과 감사 로그를 하나의 트랜잭션으로 저장합니다. 운영 back 컨테이너에서는 빌드 없이 `node scripts/seed-starter.mjs --apply`로 실행합니다.
+
+같은 원본 해시의 문제는 건너뛰고 기존 문제나 수정된 버전을 덮어쓰지 않습니다. 충돌하면 전체 반입을 중단합니다. 전용 작성자의 비밀번호는 출력하지 않으며, 기존 계정은 CLI 생성 감사 기록과 자격 증명 지문이 일치할 때만 재사용합니다. 운영 DB의 문제·사용자·제출을 초기화하지 않습니다.
+
 ## BOJ 한국어 문제 반입
 
 적격성 감사 결과(`summary.json`, `eligible_problem_ids.json`)와 원본 데이터셋을 사용합니다. `Back/.env`의 DB에 연결하며, 기본 실행은 변환·검증만 하고 DB를 변경하지 않습니다.
@@ -124,6 +139,8 @@ npm run db:import:boj -- --dataset /path/to/boj_dataset --audit /path/to/boj_imp
 | `POST`  | `/api/v1/submissions/:id/rejudge`  | 작성자/ADMIN | 원래 문제 버전으로 재채점                |
 | `GET`   | `/api/v1/users/me`                 | USER         | XP, 레벨, 해결 문제 수                   |
 | `GET`   | `/api/v1/rankings`                 | 없음         | XP 상위 100명                            |
+| `GET`   | `/api/v1/community/posts`          | 없음         | 커뮤니티 글 목록과 분류·상태별 개수      |
+| `POST`  | `/api/v1/community/posts`          | USER         | 커뮤니티 글 작성(공지는 ADMIN만)         |
 | `GET`   | `/api/v1/admin/users`              | ADMIN        | 최근 사용자 100명                        |
 | `PATCH` | `/api/v1/admin/users/:id/role`     | ADMIN        | 역할 변경                                |
 | `GET`   | `/api/v1/admin/audit`              | ADMIN        | 최근 변경 이력 100건                     |
@@ -134,6 +151,14 @@ npm run db:import:boj -- --dataset /path/to/boj_dataset --audit /path/to/boj_imp
 첫 정답 XP는 BEGINNER 10, EASY 20, MEDIUM 40, HARD 80, EXPERT 160입니다. 레벨은 `1 + floor(XP / 100)`입니다. 같은 문제의 추가 정답에는 XP를 중복 지급하지 않습니다. 재채점 대기·서버 오류(`SYSTEM_ERROR`)·취소(`CANCELLED`)는 기존 정답 근거와 XP를 유지하며, 최초 제출의 오류에는 XP를 지급하지 않습니다. 정상 채점으로 오답 등이 확정되고 다른 유효 정답도 없을 때만 지급 XP를 회수합니다.
 
 이 정책은 제출별 `accepted_for_xp`에 마지막 정상 정답 근거를 보존합니다. 적용 시 채점 요청·워커를 잠시 중지하고 `npm run db:migration:run`으로 스키마를 갱신한 뒤 모든 API를 새 버전으로 교체하고 채점을 재개하세요. 이전 API와 새 API를 섞어 운영하지 마세요. 마이그레이션은 현재 정답과 기존 XP 원장으로 확인되는 근거만 반영하며, 이미 사라진 과거 정답 이력이나 회수된 XP를 추정해 복원하지 않습니다. 현재 판정이 정답이 아닌 제출에 정답 근거가 보존되어 있으면 이 필드를 제거하는 롤백도 거절합니다.
+
+정상 학습 완료 이력은 후속 `LearningEvidence1793001000000`의 `completed_for_learning`에 별도로 보존합니다. 오답/컴파일 오류도 포함하며 재채점 대기·오류로 지우지 않습니다. 같은 배포 중지/전체 교체 절차를 따르며 backfill 한계와 미션 정책은 `docs/missions.md`를 참고하세요.
+
+Foundations down은 solve 원장 외에도 version snapshot(단일 v1 포함), 기본값이 아닌 현재/제출 버전, 0이 아닌 token version이 있으면 거절합니다. snapshot은 현재 문제로부터 동일하게 재생성할 수 있다고 보장할 수 없고 token version 초기화는 폐기된 토큰을 되살릴 수 있기 때문입니다. 검사·삭제는 같은 트랜잭션의 테이블 잠금으로 보호하며 빈 신규 DB 왕복만 안전하게 허용합니다. 운영 DB에서 데이터 삭제로 이 가드를 우회하지 마세요.
+
+`node scripts/check-audit-regressions.mjs`는 최신 빌드 후 disposable PostgreSQL에서 IPv4 HTTP·정밀 시각·실제 재채점 streak를 직접 assert하는 보조 검사입니다. 자체 생성한 DB만 수정/삭제하며 전체 Vitest API suite를 대체하지 않습니다. 실행에는 네트워크·쓰기·리소스가 제한된 승인 sandbox와 전용 test DB endpoint를 사용하세요.
+
+사용자 이름은 대소문자 없이 고유합니다(`lower(username)` 고유 인덱스). 기존 DB에 대소문자만 다른 이름이 있으면 `BackendHardening` 마이그레이션이 해당 이름 목록과 함께 중단되며 이름을 자동으로 바꾸지 않습니다. 운영자가 사용자에게 확인해 정리한 뒤 다시 실행하세요.
 
 JSON 요청 전체 제한은 16MiB입니다. 각 필드의 길이 제한과 별도로 적용되므로 여러 대형 테스트케이스를 한 번에 보내는 경우 합계 크기도 확인하세요. 기존 `/problems/:slug` 상세 경로는 호환성을 위해 유지하지만, `mine` 등의 관리 경로와 충돌하지 않는 `/problems/by-slug/:slug`를 사용하세요.
 
@@ -161,7 +186,7 @@ JSON 요청 전체 제한은 16MiB입니다. 각 필드의 길이 제한과 별�
 3. `PATCH /api/v1/internal/judge/submissions/:id/result`
    - 최종 판정과 실행 정보를 기록합니다.
 
-워커는 별도 `POST /api/v1/internal/judge/heartbeat`를 10초마다 호출하며 `X-Judge-Worker`에 워커 UUID를 전송합니다. 관리자 운영 API는 최근 30초에 응답한 워커만 표시합니다. 복구 작업은 누락된 큐 작업을 재등록하고 만료된 채점 시도를 새 세대로 다시 큐에 넣습니다.
+워커는 별도 `POST /api/v1/internal/judge/heartbeat`를 10초마다 호출하며 `X-Judge-Worker`에 워커 UUID를 전송합니다. 관리자 운영 API는 최근 30초에 응답한 워커만 표시합니다. 복구 작업은 누락된 큐 작업을 재등록하고 만료된 채점 시도를 새 세대로 다시 큐에 넣습니다. 워커를 반복해서 중단시키는 제출이 슬롯을 계속 차지하지 않도록 lease 복구가 5번을 넘으면 SYSTEM_ERROR로 종료합니다.
 
 결과 예시는 다음과 같습니다.
 
@@ -228,3 +253,9 @@ XP 획득 원장이 남아 있는 foundations 마이그레이션의 롤백은 �
 정답, 오답, 실행 오류, 시간 초과, 출력 초과, 컴파일 오류, 비공개 오류 차단을 실제 실행으로 검증합니다.
 
 검증은 로컬에서 위 명령어와 `Judge/`의 `npm run check`, `npm run test:runtime`으로 실행합니다. 워커는 Docker socket을 사용하지 않습니다. 운영에서는 privileged go-judge 실행 서비스를 API/DB와 분리된 전용 Linux 호스트에 배치해야 합니다.
+
+## 커뮤니티
+
+글·답변·추천·팔로우는 PostgreSQL에 저장합니다(`Community1791200000000`, `CommunityUi1791200001000` 마이그레이션). 전체 API와 입력 제한은 [기능 목록](./FEATURES.md#6-커뮤니티)에 있습니다. 브라우저에는 계정별 작성 초안만 남습니다. 예전 버전이 브라우저에만 저장한 글·답변·추천은 서버로 옮기지 않습니다.
+
+API 규칙은 `npm run test:e2e`의 `test/community.e2e-spec.ts`가, 실제 화면과 API의 연결은 저장소 루트 `node scripts/check-compose.mjs`가 실행하는 `Front/tests-live/community-flow.spec.ts`가 검증합니다.
