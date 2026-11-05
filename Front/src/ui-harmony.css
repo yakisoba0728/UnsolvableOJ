@@ -1,0 +1,220 @@
+/* PR #29와 사용 흐름 보완의 접점. 기존 팔레트·서버 데이터·편집기 배치는 유지한다. */
+.editor-frame:focus-within {
+  box-shadow: inset 0 3px 0 var(--color-primary);
+}
+.verdict-accepted::before {
+  content: "✓";
+  content: "✓" / "";
+  margin-right: 6px;
+}
+.verdict-wrong_answer::before,
+.verdict-runtime_error::before,
+.verdict-compile_error::before,
+.verdict-time_limit_exceeded::before,
+.verdict-memory_limit_exceeded::before,
+.verdict-output_limit_exceeded::before,
+.verdict-system_error::before {
+  content: "✕";
+  content: "✕" / "";
+  margin-right: 6px;
+}
+.verdict-queued::before,
+.verdict-judging::before {
+  content: "…";
+  content: "…" / "";
+  margin-right: 6px;
+}
+.local-storage-notice {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-feature-border);
+  border-radius: var(--radius-control);
+  background: var(--color-feature);
+  color: var(--color-ink-700);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.goal-rule,
+.mission-goal-note,
+.schedule-zone,
+.submission-count-summary,
+.judge-last-updated {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.daily-goal .goal-rule {
+  margin: 8px 0 0;
+}
+.enterprise-schedule {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.enterprise-schedule summary {
+  cursor: pointer;
+  color: var(--color-primary);
+  padding: 8px 0;
+}
+.enterprise-exact-schedule {
+  margin: 8px 0;
+}
+.enterprise-exact-schedule div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.enterprise-exact-schedule dt {
+  font-weight: var(--weight-label);
+}
+.enterprise-exact-schedule dd {
+  margin: 0;
+}
+.ent-schedule-detail {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.submission-date-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 16px 0;
+}
+.submission-date-filter input {
+  width: auto;
+  max-width: 100%;
+}
+/* 다섯 번째 판정도 좁은 화면에서 발견 가능하게 한다. 다중 선택 트랙은 한 줄로 유지한다. */
+.submissions-page .slide-toggle {
+  scrollbar-width: thin;
+}
+.submissions-page .slide-toggle::-webkit-scrollbar {
+  display: block;
+  height: 6px;
+}
+.submissions-page .slide-toggle::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-control);
+}
+.copy-control {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 12px;
+}
+.copy-control .text-button {
+  padding: 6px 8px;
+  white-space: nowrap;
+}
+.result-summary > .judge-last-updated {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+.post-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+#answer-write {
+  scroll-margin-top: 80px;
+}
+.activity-list-alternative {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.activity-list-alternative summary {
+  cursor: pointer;
+  font-weight: var(--weight-label);
+}
+.activity-list-alternative input {
+  display: block;
+  width: min(100%, 240px);
+  margin: 8px 0;
+}
+.activity-list-alternative ul {
+  max-height: 240px;
+  overflow-y: auto;
+  padding-left: 20px;
+}
+.activity-list-alternative a {
+  color: var(--color-primary);
+}
+.profile-post-pair {
+  align-items: start;
+  flex: 0 0 auto;
+  gap: var(--panel-gap);
+}
+.post-scroller.has-static-posts .scroller-view {
+  height: auto;
+  overflow: visible;
+  scroll-snap-type: none;
+}
+.post-scroller.has-static-posts .scroller-slide {
+  height: auto;
+  min-height: 0;
+}
+.post-scroller.has-static-posts .scroller-slide:last-child {
+  margin-bottom: 0;
+}
+.enterprise-page .form-card {
+  padding: var(--panel-padding);
+  border-radius: var(--radius-panel);
+}
+.button.button-outline.ent-danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger-border);
+}
+.button.button-outline.ent-danger:hover {
+  background: var(--color-danger-soft);
+}
+@media (max-width: 1100px) {
+  .main-nav {
+    max-height: calc(100vh - 64px);
+    max-height: calc(100dvh - 64px);
+  }
+}
+@media (min-width: 1101px) and (max-width: 1200px) {
+  .header-inner {
+    gap: 12px;
+  }
+  .main-nav {
+    gap: 12px;
+  }
+  .main-nav a {
+    font-size: 13px;
+    padding-inline: 2px;
+  }
+  .account-actions {
+    gap: 6px;
+  }
+}
+@media (max-width: 650px) {
+  :root {
+    --panel-padding: 16px;
+  }
+  .data-list.list-problems .post-title-line {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .data-list.list-problems .post-title-line strong {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .data-list.list-problems .problem-limit {
+    color: var(--color-ink-600);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .missions-page .season-ring-chart {
+    width: 76px;
+    height: 76px;
+  }
+  .missions-page .season-ring-chart strong {
+    font-size: 20px;
+  }
+}

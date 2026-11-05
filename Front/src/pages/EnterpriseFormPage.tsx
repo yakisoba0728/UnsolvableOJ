@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
+import { deviceTimeZone, EnterpriseStorageNotice } from "../components/EnterpriseSchedule";
 import {
   LIMITS,
   draftToInput,
@@ -189,6 +190,8 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
         back={{ to: existing ? `/enterprise/${existing.id}` : "/enterprise", label: existing ? "테스트 상세" : "기업 테스트" }}
       />
       <form className="ent-form" onSubmit={submit} noValidate>
+        <EnterpriseStorageNotice />
+        <p className="muted schedule-zone">입력 기준 시간대: {deviceTimeZone()} (이 기기의 현지 시간)</p>
         <div className="ent-form-grid">
           <section className="form-card ent-card" aria-labelledby="ent-basic">
             <h2 id="ent-basic">기본 정보</h2>

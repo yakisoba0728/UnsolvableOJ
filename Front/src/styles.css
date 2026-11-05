@@ -11,12 +11,24 @@
   box-sizing: border-box;
 }
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 body {
   margin: 0;
   word-break: keep-all;
   overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
   font-weight: var(--weight-body);
   cursor: default;
 }
@@ -208,6 +220,7 @@ p {
   cursor: not-allowed;
   transform: none;
 }
+.button:active:not(:disabled) { transform: translateY(0) scale(0.98); }
 .button-small {
   min-height: 37px;
   padding: 0 16px;
@@ -234,9 +247,11 @@ p {
 }
 .button:focus-visible,
 .page-button:focus-visible,
-.tab-button:focus-visible {
+.tab-button:focus-visible,
+.action-menu-button:focus-visible {
   outline: 3px solid var(--color-ink-900);
   outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--color-surface);
 }
 .site-footer {
   width: min(1220px, calc(100% - 48px));
@@ -421,6 +436,7 @@ p {
 .error-message {
   background: var(--color-danger-soft);
   border: 1px solid var(--color-danger-border);
+  border-left: 4px solid var(--color-danger);
   color: var(--color-danger);
   border-radius: 6px;
   padding: 11px 14px;
@@ -463,6 +479,14 @@ textarea:focus {
 textarea {
   resize: vertical;
 }
+input:hover:not(:disabled):not([readonly]):not(:focus):not([aria-invalid="true"]),
+textarea:hover:not(:disabled):not([readonly]):not(:focus):not([aria-invalid="true"]) { border-color: var(--color-ink-600); }
+input[aria-invalid="true"]:focus,
+textarea[aria-invalid="true"]:focus { border-color: var(--color-danger); box-shadow: 0 0 0 3px var(--focus-ring-danger); }
+input:disabled, textarea:disabled { background: var(--color-disabled); color: var(--color-ink-600); cursor: not-allowed; }
+input::placeholder, textarea::placeholder { color: var(--color-ink-600); opacity: 1; }
+.empty-state[role="alert"]:not(.not-found-state) { background: var(--color-danger-soft); border-color: var(--color-danger-border); }
+.empty-state[role="alert"]:not(.not-found-state) strong { color: var(--color-danger); }
 .auth-layout {
   min-height: calc(100vh - 153px);
   display: grid;
@@ -3417,9 +3441,16 @@ h3 {
   font-size: 13px;
 }
 .field-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
   color: var(--color-danger);
   font-size: 13px;
   font-weight: var(--weight-label);
+}
+.field-error::before {
+  content: ""; flex: none; width: 14px; height: 14px; margin-top: 2px; background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7.5v5.5M12 16.5v.01'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 .write-form [aria-invalid="true"] {
   border-color: var(--color-danger);
@@ -3702,6 +3733,8 @@ h3 {
 .select-option.active {
   background: var(--color-surface-muted);
 }
+.select-option { position: relative; }
+.select-option.active::before { content: ""; position: absolute; left: 2px; top: 8px; bottom: 8px; width: 3px; border-radius: 2px; background: var(--color-primary); }
 .select-option.selected {
   color: var(--color-primary);
 }
@@ -4215,7 +4248,7 @@ h3 {
   display: none;
 }
 .scroller-view:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-outline);
   outline-offset: 2px;
 }
 .scroller-slide {
@@ -4505,7 +4538,7 @@ h3 {
   border-radius: 6px;
 }
 .md-tabs button {
-  min-height: 26px;
+  min-height: 32px;
   padding: 0 12px;
   border: 0;
   border-radius: 4px;
@@ -5004,7 +5037,7 @@ h3 {
   color: var(--color-primary);
 }
 .guide-card button:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-outline);
   outline-offset: 1px;
 }
 
@@ -5084,7 +5117,7 @@ h3 {
 .data-list .problem-row:focus-visible,
 .data-list .history-row:focus-visible,
 .data-list .post-row:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-outline);
   outline-offset: -2px;
 }
 .data-list .problem-row-wrap:last-child .problem-row,
@@ -5336,7 +5369,7 @@ h3 {
   cursor: default;
 }
 .shuffle-icon-button:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-outline);
   outline-offset: 2px;
 }
 /* 섞을 때 두 화살표가 곡선을 따라 얽히며 오른쪽으로 나갔다 왼쪽에서 들어온다(버튼 밖은 잘린다) */
@@ -5492,7 +5525,7 @@ h3 {
 }
 .suggestion-detail {
   color: #9fb0c8;
-  font-size: 11px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -5543,7 +5576,7 @@ h3 {
   border-color: var(--color-danger);
 }
 .auth-field [aria-invalid="true"]:focus {
-  box-shadow: 0 0 0 3px var(--color-danger-soft);
+  box-shadow: 0 0 0 3px var(--focus-ring-danger);
 }
 @media (max-width: 880px) {
   .problem-row:not(.submission-row) .difficulty {
@@ -5660,6 +5693,11 @@ h3 {
 }
 .skeleton-rows {
   display: block;
+  animation: skeleton-appear 0.2s ease 0.15s both;
+}
+@keyframes skeleton-appear { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; background: var(--color-disabled); }
 }
 .skeleton-row {
   display: grid;
@@ -5816,6 +5854,9 @@ h3 {
 .action-menu-item.danger {
   color: var(--color-danger);
 }
+.action-menu-item:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+.action-menu-item.danger:hover, .action-menu-item.danger:focus-visible { background: var(--color-danger-soft); }
+.action-menu-item:not(.danger) + .action-menu-item.danger { margin-top: 4px; border-top: 1px solid var(--color-divider); border-top-left-radius: 0; border-top-right-radius: 0; }
 .post-card-head {
   display: flex;
   align-items: flex-start;
@@ -6155,8 +6196,8 @@ h3 {
 /* ===== 입력을 받지 않는 곳에는 텍스트 커서(I빔)가 나오지 않게 한다 =====
    화면 글자 위에서는 기본 화살표, 누를 수 있는 곳은 손가락, 글을 입력하는 칸만 텍스트 커서.
    읽고 복사하는 본문(글 내용·문제 설명·코드 출력)은 드래그로 선택하기 쉽도록 텍스트 커서를 둔다. */
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([readonly]),
-textarea:not([readonly]) {
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([readonly]):not(:disabled),
+textarea:not([readonly]):not(:disabled) {
   cursor: text;
 }
 input[readonly],
@@ -6387,11 +6428,11 @@ textarea {
   box-sizing: border-box;
 }
 .write-form [aria-invalid="true"]:focus {
-  box-shadow: 0 0 0 3px var(--color-danger-soft);
+  box-shadow: 0 0 0 3px var(--focus-ring-danger);
 }
 .write-form .tag-input[aria-invalid="true"]:focus-within {
   border-color: var(--color-danger);
-  box-shadow: 0 0 0 3px var(--color-danger-soft);
+  box-shadow: 0 0 0 3px var(--focus-ring-danger);
 }
 .write-form .md-field {
   scroll-margin-top: 100px;
@@ -6468,7 +6509,7 @@ textarea {
   background: var(--color-primary);
 }
 .solve-resizer:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-outline);
   outline-offset: -2px;
   border-radius: var(--radius-control);
 }
@@ -7605,7 +7646,7 @@ textarea {
   transform: scale(0.97);
 }
 .mission-start:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--focus-outline);
   outline-offset: 4px;
 }
 .post-follow-badge {

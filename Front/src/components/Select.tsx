@@ -139,6 +139,7 @@ export function Select({
           className={`select-list ${openUp ? "up" : ""}`}
           id={`${id}-list`}
           role="listbox"
+          aria-label={ariaLabel}
           ref={listRef}
         >
           {options.map((option, index) => (

@@ -4,6 +4,7 @@ import { verdictLabel } from "../verdict";
 import type { Submission } from "../types";
 import {
   CaseResults,
+  JudgeRefreshNotice,
   isJudging,
   ResultNotices,
   ResultSummary,
@@ -27,6 +28,7 @@ export function readPanelHeight() {
 export function JudgePanel({
   result,
   error,
+  refresh,
   open,
   height,
   onHeightChange,
@@ -35,6 +37,7 @@ export function JudgePanel({
 }: {
   result: Submission | null;
   error: string;
+  refresh: { retry: () => void; retrying: boolean; lastUpdated: number | null };
   open: boolean;
   height: number;
   onHeightChange: (height: number) => void;
@@ -152,14 +155,10 @@ export function JudgePanel({
       </div>
       {open ? (
         <div className="judge-panel-body">
-          {error ? (
-            <p className="error-message" role="alert">
-              {error}
-            </p>
-          ) : null}
-          {!result ? (
+          <JudgeRefreshNotice error={error} {...refresh} />
+          {!result && !error ? (
             <p className="muted">채점을 시작하고 있어요…</p>
-          ) : (
+          ) : result ? (
             <>
               {isJudging(result) ? (
                 <p className="muted">
@@ -170,7 +169,7 @@ export function JudgePanel({
               <ResultNotices submission={result} />
               <CaseResults submission={result} />
             </>
-          )}
+          ) : null}
         </div>
       ) : null}
     </section>

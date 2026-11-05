@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
+import { EnterpriseSchedule, EnterpriseStorageNotice } from "../components/EnterpriseSchedule";
 import {
   formatPeriod,
   formatStart,
@@ -39,16 +40,17 @@ export function EnterprisePage() {
     <div className="page-width enterprise-page">
       <PageHeader
         title="기업 코드 테스트"
-        description="테스트 일정과 응시 현황을 확인하고 결과를 검토합니다."
+        description="문제와 일정을 이 브라우저에서 구성합니다. 실제 응시·결과 수집은 준비 중입니다."
         aside={create}
       />
+      <EnterpriseStorageNotice />
 
       {!session ? (
         <div className="empty-state ent-empty">
           <strong>로그인하고 코드 테스트를 만들어 보세요</strong>
           <p>
             공개된 문제 중에서 문제를 고르고, 응시 기간과 제한 시간을 정해
-            테스트를 운영할 수 있어요.
+            테스트 구성을 이 브라우저에 저장할 수 있어요.
           </p>
           <Link className="button" to="/auth" state={{ from: "/enterprise" }}>
             로그인하기 <span aria-hidden="true">→</span>
@@ -117,7 +119,7 @@ export function EnterprisePage() {
                         </Link>
                         <small>{metaLine(test)}</small>
                       </td>
-                      <td className="ent-period">{periodCell(test, status, now)}</td>
+                      <td className="ent-period">{periodCell(test, status, now)}<EnterpriseSchedule test={test} compact /></td>
                       <td>
                         <span className={statusPillClass[status]}>
                           {statusLabel[status]}

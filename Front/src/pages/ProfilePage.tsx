@@ -18,6 +18,7 @@ import {
 import { PostScroller } from "../components/PostScroller";
 import { LANGUAGE_LABELS } from "../types";
 import { difficultyOptions } from "../difficulty";
+import { calendarDate, parseCalendarDate } from "../calendar";
 
 const WEEKS_WIDE = 16;
 const WEEKS_NARROW = 12;
@@ -124,6 +125,10 @@ export function ProfilePage() {
   const selectedSubmissions = history.submissions.filter(
     (item) => dayKey(new Date(item.createdAt)) === selected,
   );
+  const selectedIso = calendarDate(new Date(sy, sm - 1, sd));
+  const visibleDays = columns.flat().filter((cell) => !cell.future);
+  const focusDay = visibleDays.some((cell) => dayKey(cell.date) === selected)
+    ? selected : dayKey(visibleDays[visibleDays.length - 1].date);
 
   if (profileError)
     return (
@@ -260,6 +265,20 @@ export function ProfilePage() {
                   className="heatmap"
                   role="group"
                   aria-label="일별 제출 활동"
+                  onKeyDown={(event) => {
+                    const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>("button:not(:disabled)")];
+                    const index = buttons.indexOf(event.target as HTMLButtonElement);
+                    if (index < 0) return;
+                    const offsets: Record<string, number> = { ArrowUp: -1, ArrowDown: 1, ArrowLeft: -7, ArrowRight: 7 };
+                    let next = index + (offsets[event.key] ?? 0);
+                    if (event.key === "Home") next = event.ctrlKey ? 0 : Math.floor(index / 7) * 7;
+                    else if (event.key === "End") next = event.ctrlKey ? buttons.length - 1 : Math.floor(index / 7) * 7 + 6;
+                    else if (offsets[event.key] === undefined) return;
+                    event.preventDefault();
+                    const button = buttons[Math.max(0, Math.min(buttons.length - 1, next))];
+                    setSelected(button.dataset.day!);
+                    button.focus();
+                  }}
                 >
                   <div className="heat-days" aria-hidden="true">
                     {weekdays.map((day) => (
@@ -275,9 +294,11 @@ export function ProfilePage() {
                             key={key}
                             type="button"
                             disabled={cell.future}
+                            data-day={key}
+                            tabIndex={key === focusDay ? 0 : -1}
                             className={`heat-cell level-${heatLevel(cell.count)} ${selected === key ? "selected" : ""}`}
                             aria-pressed={selected === key}
-                            aria-label={`${cell.date.getMonth() + 1}월 ${cell.date.getDate()}일 제출 ${cell.count}회`}
+                            aria-label={`${cell.date.getFullYear()}년 ${cell.date.getMonth() + 1}월 ${cell.date.getDate()}일 제출 ${cell.count}회`}
                             title={`${cell.date.getMonth() + 1}/${cell.date.getDate()} · ${cell.count}회`}
                             onClick={() => setSelected(key)}
                           />
@@ -312,7 +333,7 @@ export function ProfilePage() {
                   </ul>
                 ) : null}
                 {selectedSubmissions.length > 3 ? (
-                  <Link className="inline-button day-more" to="/submissions">
+                  <Link className="inline-button day-more" to={`/submissions?date=${selectedIso}`}>
                     제출 {selectedSubmissions.length}건 모두 보기 →
                   </Link>
                 ) : null}
@@ -334,6 +355,19 @@ export function ProfilePage() {
             </div>
           </section>
 
+          <details className="activity-list-alternative">
+            <summary>일별 활동 목록 (히트맵 대안)</summary>
+            <p className="muted">히트맵은 방향키로 이동합니다. 날짜 입력으로도 기록을 확인할 수 있어요.</p>
+            <label htmlFor="activity-date">활동 날짜 (기기 현지 시간)</label>
+            <input id="activity-date" type="date" value={selectedIso} max={calendarDate(today)} onChange={(event) => {
+              const date = parseCalendarDate(event.target.value);
+              if (date && date <= today) setSelected(dayKey(date));
+            }} />
+            <ul>{[...visibleDays].reverse().filter((cell) => cell.count > 0).map((cell) => <li key={dayKey(cell.date)}>
+              <Link to={`/submissions?date=${calendarDate(cell.date)}`}>{calendarDate(cell.date)} · 제출 {cell.count}회</Link>
+            </li>)}</ul>
+            <Link to={`/submissions?date=${selectedIso}`}>{selectedIso} 제출 내역 보기</Link>
+          </details>
           <div className="profile-post-pair">
             <PostScroller
               title="작성한 글"

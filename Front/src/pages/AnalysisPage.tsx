@@ -514,8 +514,7 @@ export function AnalysisPage() {
               </li>
             </ol>
             <p className="analysis-hint">
-              푼 기록은 이 브라우저에 저장되고, 오늘 푼 문제는 미션 ‘코드 분석
-              워밍업’에 반영돼요.{" "}
+              {session ? "풀이 기록은 계정에 저장되며 미션 ‘코드 분석 워밍업’에 반영돼요. " : "로그인 전 풀이 기록은 이 브라우저에만 저장돼요. "}
               {session ? null : (
                 <>
                   <Link to="/auth" state={{ from: "/analysis" }}>
