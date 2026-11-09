@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { api } from "../api";
 import { useAuth } from "../auth";
 import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { PageHeader } from "../components/PageHeader";
@@ -9,6 +11,7 @@ import {
   learningByDay,
   submissionsByDay,
   useDocumentTitle,
+  useRequest,
   useSubmissionHistory,
 } from "../hooks";
 import {
@@ -33,6 +36,46 @@ export function SubmissionPage() {
   const history = useSubmissionHistory(
     submission?.status === "ACCEPTED" && !submission.isTest ? session : null,
   );
+  // 재채점은 문제 작성자와 관리자만 한다. 작성자는 내 문제 목록으로 확인한다.
+  const isAuthor = session?.user.role === "AUTHOR";
+  const mine = useRequest<{ id: string }[]>(
+    isAuthor ? (signal) => api("/problems/mine", { signal }, session?.accessToken) : null,
+    [],
+    "",
+    [isAuthor, session?.accessToken],
+  );
+  const canRejudge =
+    session?.user.role === "ADMIN" ||
+    (isAuthor && mine.data.some((item) => item.id === submission?.problem.id));
+  const [rejudging, setRejudging] = useState(false);
+  const [rejudgeError, setRejudgeError] = useState("");
+  async function rejudge() {
+    if (
+      !session ||
+      !submission ||
+      rejudging ||
+      !window.confirm(
+        "이 제출을 다시 채점할까요? 지금 판정은 지워지고 새 제출 뒤에 채점됩니다.",
+      )
+    )
+      return;
+    setRejudging(true);
+    setRejudgeError("");
+    try {
+      await api(
+        `/submissions/${submission.id}/rejudge`,
+        { method: "POST" },
+        session.accessToken,
+      );
+      resultState.retry();
+    } catch (cause) {
+      setRejudgeError(
+        cause instanceof Error ? cause.message : "재채점을 요청하지 못했습니다.",
+      );
+    } finally {
+      setRejudging(false);
+    }
+  }
 
   if (error && !submission)
     return (
@@ -62,6 +105,23 @@ export function SubmissionPage() {
         description={`제출 ${submission.id.slice(0, 8).toUpperCase()} · ${new Date(submission.createdAt).toLocaleString("ko-KR")}`}
       />
       <JudgeRefreshNotice {...resultState} />
+      {canRejudge ? (
+        <div className="card-actions">
+          <button
+            type="button"
+            className="button button-outline button-small"
+            disabled={rejudging}
+            onClick={() => void rejudge()}
+          >
+            다시 채점
+          </button>
+          {rejudgeError ? (
+            <p className="error-message" role="alert">
+              {rejudgeError}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       <ResultSummary submission={submission} />
       {submission.status === "ACCEPTED" &&
       !submission.isTest &&

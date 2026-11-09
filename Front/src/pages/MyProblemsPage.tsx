@@ -41,6 +41,14 @@ export function MyProblemsPage() {
   const busyRef = useRef(false);
   const alive = useRef(false);
   const [notice, setNotice] = useFlashNotice();
+  // 일괄 재채점은 한 번에 200건까지라 남은 제출이 있으면 next부터 이어서 요청한다.
+  const [rejudge, setRejudge] = useState<{
+    problem: MyProblem;
+    requeued: number;
+    skipped: number;
+    remaining: number;
+    next: string | null;
+  } | null>(null);
 
   useEffect(() => {
     alive.current = true;
@@ -48,6 +56,7 @@ export function MyProblemsPage() {
     setBusy(false);
     setProblems(null);
     setError("");
+    setRejudge(null);
     let cancelled = false;
     if (session) {
       api<MyProblem[]>("/problems/mine", {}, session.accessToken)
@@ -121,6 +130,49 @@ export function MyProblemsPage() {
     }
   }
 
+  async function rejudgeProblem(problem: MyProblem, after?: string) {
+    const current = () => alive.current && sessionVersion === getSessionVersion();
+    if (!session || !current() || busyRef.current) return;
+    if (
+      !after &&
+      !window.confirm(
+        `‘${problem.title}’의 모든 제출을 다시 채점할까요? 오래된 제출부터 200건씩 처리하며, 지금 판정과 XP가 바뀔 수 있어요. 대기·채점 중인 제출과 기업 테스트 응시 제출은 건너뜁니다.`,
+      )
+    )
+      return;
+    busyRef.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      const result = await api<{
+        requeued: number;
+        skipped: number;
+        remaining: number;
+        next: string | null;
+      }>(
+        `/problems/${problem.id}/rejudge`,
+        { method: "POST", body: JSON.stringify(after ? { after } : {}) },
+        session.accessToken,
+      );
+      if (!current()) return;
+      setRejudge((previous) => ({
+        problem,
+        ...result,
+        // 이어서 처리한 묶음은 앞 묶음과 합쳐 보여 준다.
+        requeued: result.requeued + (after && previous ? previous.requeued : 0),
+        skipped: result.skipped + (after && previous ? previous.skipped : 0),
+      }));
+    } catch (cause) {
+      if (current())
+        setError(cause instanceof Error ? cause.message : "재채점을 요청하지 못했습니다.");
+    } finally {
+      if (current()) {
+        busyRef.current = false;
+        setBusy(false);
+      }
+    }
+  }
+
   return (
     <div className="page-width my-problems-page">
       <PageHeader
@@ -141,6 +193,32 @@ export function MyProblemsPage() {
         <p className="notice-inline" role="status">
           {notice}
         </p>
+      ) : null}
+      {rejudge ? (
+        <div className="notice-inline my-problem-rejudge" role="status">
+          <span>
+            ‘{rejudge.problem.title}’ 제출 {rejudge.requeued}건을 다시 채점
+            대기열에 넣었어요. 건너뜀 {rejudge.skipped}건
+            {rejudge.remaining > 0 ? `, 남은 제출 ${rejudge.remaining}건` : ""}.
+          </span>
+          {rejudge.remaining > 0 && rejudge.next ? (
+            <button
+              type="button"
+              className="button button-small"
+              disabled={busy}
+              onClick={() => rejudgeProblem(rejudge.problem, rejudge.next!)}
+            >
+              계속
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => setRejudge(null)}
+          >
+            닫기
+          </button>
+        </div>
       ) : null}
       {error ? (
         <p className="error-message" role="alert">
@@ -214,6 +292,14 @@ export function MyProblemsPage() {
                     비공개로 전환
                   </button>
                 ) : null}
+                <button
+                  type="button"
+                  className="text-button"
+                  disabled={busy}
+                  onClick={() => rejudgeProblem(problem)}
+                >
+                  전체 재채점
+                </button>
                 {/* 보관 해제는 초안으로 돌아간다. 다시 공개하려면 관리자 검수를 거친다. */}
                 <button
                   type="button"

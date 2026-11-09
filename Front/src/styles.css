@@ -8297,3 +8297,23 @@ label.check-row input[type="checkbox"] {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* 관리자 임시 비밀번호·신고, 내 문제 일괄 재채점 */
+.admin-issued,
+.my-problem-rejudge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.admin-issued p {
+  flex-basis: 100%;
+  margin: 0;
+}
+.admin-issued code {
+  font-size: 1rem;
+  user-select: all;
+}
+.admin-table td a {
+  overflow-wrap: anywhere;
+}
