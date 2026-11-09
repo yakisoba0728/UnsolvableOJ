@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { writeFile } from "node:fs/promises";
 import timers from "node:timers/promises";
 import { pathToFileURL } from "node:url";
 import { Worker } from "bullmq";
@@ -16,7 +17,7 @@ class JudgeApiError extends Error {
 }
 
 export async function startWorker(
-  api: { url: string; token: string },
+  api: { url: string; token: string; heartbeatFile?: string },
   sandbox: SandboxConfig,
   consume: (processor: (job: JudgeJob) => Promise<void>) => Pick<Worker, "close">,
   runJudge = judge,
@@ -60,8 +61,14 @@ export async function startWorker(
     return response.json();
   }
 
+  // 성공한 heartbeat마다 파일 mtime을 갱신해 컨테이너 healthcheck가 멈춘 워커를 찾게 합니다.
+  async function heartbeat() {
+    await callApi("/internal/judge/heartbeat", "POST");
+    if (api.heartbeatFile) await writeFile(api.heartbeatFile, "");
+  }
+
   await checkSandbox(sandbox);
-  await callApi("/internal/judge/heartbeat", "POST");
+  await heartbeat();
   worker = consume(async (job) => {
     const path = `/internal/judge/submissions/${job.data.submissionId}`;
     const attempt = { generation: job.data.generation, attemptId: randomUUID() };
@@ -125,7 +132,7 @@ export async function startWorker(
     }
   });
   workerHeartbeat = setInterval(() => {
-    void callApi("/internal/judge/heartbeat", "POST").catch((error) => {
+    void heartbeat().catch((error) => {
       if (!authenticationFailure) console.error("Worker heartbeat failed:", error);
     });
   }, 10_000);
@@ -145,6 +152,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const running = await startWorker({
     url: process.env.API_BASE_URL ?? "http://localhost:3000/api/v1",
     token: process.env.JUDGE_SERVICE_TOKEN ?? "",
+    heartbeatFile: process.env.JUDGE_HEARTBEAT_FILE || undefined,
   }, {
     url: process.env.GO_JUDGE_URL ?? "http://127.0.0.1:5050",
     token: process.env.GO_JUDGE_TOKEN ?? "",
