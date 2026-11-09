@@ -7905,8 +7905,10 @@ textarea {
   animation-timing-function: ease;
 }
 
-/* 문제·코드 분석·커뮤니티 목록: 왼쪽 제목의 글자 윗선을 오른쪽 카드 윗선에 맞춘다(줄 높이 때문에 글자가 박스 위에서 살짝 아래로 내려와 보이던 것을 보정) */
-.list-layout > section > .section-heading,
-.community-layout > section > .section-heading {
-  margin-top: -6px;
+/* 문제·코드 분석·커뮤니티: 오른쪽 카드 윗선을 왼쪽 목록 박스 윗선(제목 31px + 간격 12px 아래)에 맞춘다. 한 줄로 쌓이는 1100px 이하에서는 적용하지 않는다. */
+@media (min-width: 1101px) {
+  .list-layout > .side-stack,
+  .community-layout > .side-stack {
+    margin-top: 43px;
+  }
 }
