@@ -21,17 +21,16 @@ export function MissionsPage() {
 }
 
 function MissionDashboardView({ token }: { token?: string }) {
-  const [revision, setRevision] = useState(0);
   const [pending, setPending] = useState("");
   const [message, setMessage] = useState("");
   const [claimError, setClaimError] = useState("");
   const busy = useRef(false);
   const mounted = useRef(true);
-  const { data, loading, error } = useRequest<MissionDashboard | null>(
+  const { data, loading, error, retry } = useRequest<MissionDashboard | null>(
     token ? (signal) => api("/missions", { signal }, token) : null,
     null,
     "미션을 불러오지 못했습니다.",
-    [token, revision],
+    [token],
   );
   useEffect(() => {
     mounted.current = true;
@@ -42,7 +41,7 @@ function MissionDashboardView({ token }: { token?: string }) {
   useEffect(() => {
     if (!token) return;
     const refresh = () => {
-      if (!busy.current) setRevision((v) => v + 1);
+      if (!busy.current) retry();
     };
     const timer = window.setInterval(refresh, 60_000);
     window.addEventListener("focus", refresh);
@@ -50,7 +49,7 @@ function MissionDashboardView({ token }: { token?: string }) {
       clearInterval(timer);
       window.removeEventListener("focus", refresh);
     };
-  }, [token]);
+  }, [token, retry]);
 
   async function claim(mission: ServerMission) {
     if (!token || busy.current) return;
@@ -81,7 +80,7 @@ function MissionDashboardView({ token }: { token?: string }) {
       busy.current = false;
       if (mounted.current) {
         setPending("");
-        setRevision((v) => v + 1);
+        retry();
       }
     }
   }
@@ -153,7 +152,7 @@ function MissionDashboardView({ token }: { token?: string }) {
       {error && (
         <div className="empty-state" role="alert">
           <p>{error}</p>
-          <button className="button" onClick={() => setRevision((v) => v + 1)}>
+          <button className="button" onClick={retry}>
             다시 시도
           </button>
         </div>
@@ -178,7 +177,7 @@ function MissionDashboardView({ token }: { token?: string }) {
             )}
           </ul>
         </>
-      ) : loading ? (
+      ) : loading && !data ? (
         <div className="empty-state">미션 진행률을 불러오는 중입니다…</div>
       ) : (
         data && (

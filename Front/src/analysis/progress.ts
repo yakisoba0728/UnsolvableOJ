@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useAuth } from "../auth";
 import { api } from "../api";
 import { useRequest } from "../hooks";
@@ -61,16 +61,6 @@ function subscribe(listener: () => void) {
 export function useAnalysisHistory() {
   const { session } = useAuth();
   const local = useSyncExternalStore(subscribe, () => state);
-  const [revision, setRevision] = useState(0);
-  useEffect(() => {
-    const refresh = () => setRevision((v) => v + 1);
-    window.addEventListener("analysis-saved", refresh);
-    window.addEventListener("focus", refresh);
-    return () => {
-      window.removeEventListener("analysis-saved", refresh);
-      window.removeEventListener("focus", refresh);
-    };
-  }, []);
   const request = useRequest<AnalysisAttempt[]>(
     session
       ? (signal) =>
@@ -78,8 +68,17 @@ export function useAnalysisHistory() {
       : null,
     [],
     "분석 기록을 불러오지 못했습니다.",
-    [session, revision],
+    [session],
   );
+  const { retry } = request;
+  useEffect(() => {
+    window.addEventListener("analysis-saved", retry);
+    window.addEventListener("focus", retry);
+    return () => {
+      window.removeEventListener("analysis-saved", retry);
+      window.removeEventListener("focus", retry);
+    };
+  }, [retry]);
   return {
     ...request,
     attempts: session

@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -18,7 +19,10 @@ import type {
   UserProfile,
 } from "./types";
 
-/** load가 있으면 요청해 결과·로딩·오류를 돌려준다. deps가 바뀌거나 retry를 부르면 이전 요청을 취소하고 다시 받는다. */
+/**
+ * load가 있으면 요청해 결과·로딩·오류를 돌려준다. deps가 바뀌거나 retry를 부르면 이전 요청을 취소하고 다시 받는다.
+ * deps가 바뀌면 다른 데이터이므로 initial로 비우고, retry는 새 값이 올 때까지 지금 값을 그대로 보여 준다.
+ */
 export function useRequest<T>(
   load: ((signal: AbortSignal) => Promise<T>) | null,
   initial: T,
@@ -29,8 +33,16 @@ export function useRequest<T>(
   const [loading, setLoading] = useState(Boolean(load));
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
+  const lastDeps = useRef<DependencyList | null>(null);
   useEffect(() => {
-    setData(initial);
+    const previous = lastDeps.current;
+    lastDeps.current = deps;
+    if (
+      previous &&
+      (previous.length !== deps.length ||
+        deps.some((value, index) => !Object.is(value, previous[index])))
+    )
+      setData(initial);
     setError("");
     setLoading(Boolean(load));
     if (!load) return;
@@ -48,7 +60,8 @@ export function useRequest<T>(
       });
     return () => controller.abort();
   }, [...deps, attempt]);
-  return { data, loading, error, retry: () => setAttempt((count) => count + 1) };
+  const retry = useCallback(() => setAttempt((count) => count + 1), []);
+  return { data, loading, error, retry };
 }
 
 /** 공개 문제 전체. 서버에 검색 API가 없어 목록·검색·필터를 클라이언트에서 처리한다. */
