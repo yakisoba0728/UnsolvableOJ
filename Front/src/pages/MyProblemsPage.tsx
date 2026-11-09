@@ -23,6 +23,11 @@ const statusLabel: Record<MyProblem["status"], string> = {
   PUBLISHED: "공개 중",
   ARCHIVED: "보관됨",
 };
+const changedNotice: Record<MyProblem["status"], string> = {
+  PUBLISHED: "문제를 공개했어요.",
+  DRAFT: "문제를 비공개로 전환했어요.",
+  ARCHIVED: "문제를 보관했어요.",
+};
 
 export function MyProblemsPage() {
   useDocumentTitle("내 문제");
@@ -64,7 +69,7 @@ export function MyProblemsPage() {
 
   async function changeStatus(
     problem: MyProblem,
-    status: "PUBLISHED" | "DRAFT",
+    status: MyProblem["status"],
   ) {
     const current = () => alive.current && sessionVersion === getSessionVersion();
     if (
@@ -73,6 +78,13 @@ export function MyProblemsPage() {
       busyRef.current ||
       (status === "PUBLISHED" && !isAdmin)
     ) return;
+    const question =
+      status === "ARCHIVED"
+        ? `‘${problem.title}’을(를) 보관할까요? 공개 목록에서 내려가고 새 제출을 받지 않아요. 보관을 해제하면 초안으로 돌아와요.`
+        : problem.status === "ARCHIVED"
+          ? `‘${problem.title}’의 보관을 해제할까요? 초안으로 돌아오며, 다시 공개하려면 관리자 검수가 필요해요.`
+          : "";
+    if (question && !window.confirm(question)) return;
     busyRef.current = true;
     setBusy(true);
     setError("");
@@ -90,9 +102,9 @@ export function MyProblemsPage() {
           ) ?? null,
       );
       setNotice(
-        status === "PUBLISHED"
-          ? "문제를 공개했어요."
-          : "문제를 비공개로 전환했어요.",
+        problem.status === "ARCHIVED"
+          ? "보관을 해제했어요. 초안으로 돌아왔어요."
+          : changedNotice[status],
       );
     } catch (cause) {
       if (current()) {
@@ -196,6 +208,20 @@ export function MyProblemsPage() {
                     비공개로 전환
                   </button>
                 ) : null}
+                {/* 보관 해제는 초안으로 돌아간다. 다시 공개하려면 관리자 검수를 거친다. */}
+                <button
+                  type="button"
+                  className="text-button"
+                  disabled={busy}
+                  onClick={() =>
+                    changeStatus(
+                      problem,
+                      problem.status === "ARCHIVED" ? "DRAFT" : "ARCHIVED",
+                    )
+                  }
+                >
+                  {problem.status === "ARCHIVED" ? "보관 해제" : "보관"}
+                </button>
               </div>
             </li>
           ))}
