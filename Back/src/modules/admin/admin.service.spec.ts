@@ -1,10 +1,12 @@
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, ForbiddenException } from '@nestjs/common';
 import type { Queue } from 'bullmq';
-import type { DataSource } from 'typeorm';
+import type { DataSource, Repository } from 'typeorm';
 import { describe, expect, it, vi } from 'vitest';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { UserRole } from '../users/user-role.enum.js';
+import type { User } from '../users/user.entity.js';
 import { AdminService } from './admin.service.js';
+import type { AuditEvent } from './audit-event.entity.js';
 
 describe('AdminService.changeRole', () => {
   const id = '12345678-abcd-4abc-8abc-123456789abc';
@@ -22,7 +24,12 @@ describe('AdminService.changeRole', () => {
       ),
     };
     return {
-      service: new AdminService(db as unknown as DataSource, {} as Queue),
+      service: new AdminService(
+        db as unknown as DataSource,
+        {} as Queue,
+        {} as Repository<User>,
+        {} as Repository<AuditEvent>,
+      ),
       db,
       manager,
     };
@@ -77,5 +84,26 @@ describe('AdminService.changeRole', () => {
         JSON.stringify({ from: UserRole.ADMIN, to: UserRole.AUTHOR }),
       ],
     );
+  });
+
+  it('rejects self-suspension before opening a transaction', async () => {
+    const { service, db } = setup();
+    await expect(
+      service.changeSuspension(id.toUpperCase(), true, actor),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(db.transaction).not.toHaveBeenCalled();
+  });
+
+  it('refuses to suspend when the actor is no longer an active admin', async () => {
+    const { service, manager } = setup();
+    const otherId = '23456789-abcd-4abc-8abc-123456789abc';
+    // 잠근 행에 수행자가 없다 = 그 사이 정지되었거나 관리자가 아니다.
+    manager.query.mockResolvedValueOnce([
+      { id: otherId, role: UserRole.ADMIN, suspendedAt: null },
+    ]);
+    await expect(
+      service.changeSuspension(otherId, true, actor),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(manager.query).toHaveBeenCalledOnce();
   });
 });

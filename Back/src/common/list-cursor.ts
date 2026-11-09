@@ -34,9 +34,11 @@ export function readListCursor(value?: string) {
   }
 }
 
+type ListTable = 'problems' | 'submissions' | 'users' | 'audit_events';
+
 export async function createListCursor(
   db: DataSource,
-  table: 'problems' | 'submissions',
+  table: ListTable,
   id: string,
 ) {
   // JavaScript Date drops PostgreSQL microseconds and would skip nearby rows.
@@ -55,28 +57,29 @@ export async function createListCursor(
 export async function findListPage<T extends { id: string; createdAt: Date }>(
   repository: Repository<T>,
   db: DataSource,
-  table: 'problems' | 'submissions',
+  table: ListTable,
   query: ListQuery,
-  where: FindOptionsWhere<T>,
+  /** 배열이면 OR 조건이다. */
+  where: FindOptionsWhere<T> | FindOptionsWhere<T>[],
   options: Pick<FindManyOptions<T>, 'select' | 'relations'>,
 ) {
   const cursor = readListCursor(query.cursor);
   const pageWhere = cursor
-    ? ([
+    ? ((Array.isArray(where) ? where : [where]).flatMap((branch) => [
         {
-          ...where,
+          ...branch,
           createdAt: Raw((alias) => `${alias} < :cursorTime::timestamptz`, {
             cursorTime: cursor.createdAt,
           }),
         },
         {
-          ...where,
+          ...branch,
           createdAt: Raw((alias) => `${alias} = :cursorTime::timestamptz`, {
             cursorTime: cursor.createdAt,
           }),
           id: LessThan(cursor.id),
         },
-      ] as FindOptionsWhere<T>[])
+      ]) as FindOptionsWhere<T>[])
     : where;
   const [rows, total] = await Promise.all([
     repository.find({

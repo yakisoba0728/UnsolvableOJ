@@ -26,6 +26,7 @@ const lazyPage = <K extends string, M extends Record<K, ComponentType<any>>>(
   load: () => Promise<M>,
   name: K,
 ) => lazy(() => load().then((module) => ({ default: module[name] })));
+const AdminPage = lazyPage(() => import("./pages/AdminPage"), "AdminPage");
 const AnalysisPage = lazyPage(() => import("./pages/AnalysisPage"), "AnalysisPage");
 const AnalysisQuestionPage = lazyPage(() => import("./pages/AnalysisQuestionPage"), "AnalysisQuestionPage");
 const AuthPage = lazyPage(() => import("./pages/AuthPage"), "AuthPage");
@@ -169,6 +170,18 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               <Route
                 path="/submissions/:id"
                 element={session ? <SubmissionPage key={session.user.id} /> : loginRedirect}
+              />
+              <Route
+                path="/admin/*"
+                element={
+                  session?.user.role === "ADMIN" ? (
+                    <AdminPage key={session.user.id} />
+                  ) : !session ? (
+                    loginRedirect
+                  ) : (
+                    <NotFoundPage />
+                  )
+                }
               />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

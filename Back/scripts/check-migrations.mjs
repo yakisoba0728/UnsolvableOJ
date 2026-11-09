@@ -306,6 +306,8 @@ try {
   const secret = 'migration-fixture-only-secret-at-least-32-characters';
   const jwt = new JwtService({ secret });
   const oldToken = await jwt.signAsync({ sub: owner.id, tokenVersion: 0 }, { expiresIn: '5m' });
+  // 현재 User 엔터티는 나중 마이그레이션의 정지 열도 읽으므로, 이 검사 동안만 그 열을 잠시 둔다.
+  await db.query('ALTER TABLE users ADD COLUMN suspended_at timestamptz');
   const strategy = new JwtStrategy(new ConfigService({ JWT_ACCESS_SECRET: secret }), db.getRepository(User));
   await db.query("UPDATE users SET token_version=1,role='ADMIN' WHERE id=$1", [owner.id]);
   const payload = await jwt.verifyAsync(oldToken);
@@ -314,6 +316,7 @@ try {
   assert.deepEqual(await db.query('SELECT * FROM migrations ORDER BY id'), migrationBefore);
   assert.deepEqual((await db.query('SELECT token_version,role FROM users WHERE id=$1', [owner.id]))[0], { token_version: 1, role: 'ADMIN' });
   await assert.rejects(strategy.validate(await jwt.verifyAsync(oldToken)), /다시 로그인/);
+  await db.query('ALTER TABLE users DROP COLUMN suspended_at');
   await db.query('DELETE FROM users');
   await db.undoLastMigration();
   await db.runMigrations();
@@ -359,6 +362,14 @@ try {
   await assert.rejects(db.undoLastMigration(), /Cannot roll back retained learning evidence/);
   assert.deepEqual(await db.query('SELECT * FROM migrations ORDER BY id'), learningMigrations);
   assert.ok((await db.query('SELECT completed_for_learning FROM submissions WHERE id=$1', [learningFixtures[0].id]))[0].completed_for_learning);
+
+  // 정지된 사용자가 있으면 정지 열을 지우지 않는다(되돌리면 다시 접근할 수 있게 된다).
+  await db.destroy();
+  db = await new DataSource(options).initialize();
+  await db.runMigrations();
+  await db.query('UPDATE users SET suspended_at=now() WHERE id=$1', [learner.id]);
+  await assert.rejects(db.undoLastMigration(), /Cannot roll back user suspension with suspended users/);
+  assert.ok((await db.query('SELECT suspended_at FROM users WHERE id=$1', [learner.id]))[0].suspended_at);
 
   // A full rollback is only valid for a genuinely fresh DB.
   await db.destroy();

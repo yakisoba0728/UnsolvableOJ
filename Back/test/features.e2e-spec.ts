@@ -405,7 +405,7 @@ describe('Backend features (e2e)', () => {
       .set(bearer(adminToken))
       .expect(200);
     expect(
-      audit.body.find(
+      audit.body.items.find(
         (event: { action: string; targetId: string }) =>
           event.action === 'user.role' && event.targetId === solver.user.id,
       ),
@@ -414,15 +414,15 @@ describe('Backend features (e2e)', () => {
       targetType: 'user',
       createdAt: expect.any(String),
     });
-    expect(audit.body[0]).not.toHaveProperty('created_at');
+    expect(audit.body.items[0]).not.toHaveProperty('created_at');
     const users = await request(app.getHttpServer())
       .get(`${base}/admin/users`)
       .set(bearer(adminToken))
       .expect(200);
     expect(
-      users.body.find((item: { id: string }) => item.id === solver.user.id),
+      users.body.items.find((item: { id: string }) => item.id === solver.user.id),
     ).toMatchObject({ createdAt: expect.any(String) });
-    expect(users.body[0]).not.toHaveProperty('created_at');
+    expect(users.body.items[0]).not.toHaveProperty('created_at');
     await request(app.getHttpServer())
       .patch(`${base}/problems/${problemId}/status`)
       .set(bearer(authorToken))

@@ -15,6 +15,7 @@ import { BackendHardening1790554000000 } from './migrations/1790554000000-backen
 import { Community1791200000000 } from './migrations/1791200000000-community.js';
 import { CommunityUi1791200001000 } from './migrations/1791200001000-community-ui.js';
 import { LearningEvidence1793001000000 } from './migrations/1793001000000-learning-evidence.js';
+import { UserSuspension1794100000000 } from './migrations/1794100000000-user-suspension.js';
 import { ProblemTagsEditorial1794200000000 } from './migrations/1794200000000-problem-tags-editorial.js';
 import { TestSubmissions1794400000000 } from './migrations/1794400000000-test-submissions.js';
 
@@ -38,6 +39,7 @@ export default new DataSource({
     CommunityUi1791200001000,
     Missions1793000000000,
     LearningEvidence1793001000000,
+    UserSuspension1794100000000,
     ProblemTagsEditorial1794200000000,
     TestSubmissions1794400000000,
   ],

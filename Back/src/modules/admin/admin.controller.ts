@@ -5,6 +5,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -15,6 +16,11 @@ import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { UserRole } from '../users/user-role.enum.js';
 import { AdminService } from './admin.service.js';
+import {
+  ChangeSuspensionDto,
+  ListAdminUsersQuery,
+  ListAuditQuery,
+} from './dto/admin-list.query.js';
 import { ChangeUserRoleDto } from './dto/change-user-role.dto.js';
 
 @ApiTags('admin')
@@ -26,8 +32,17 @@ export class AdminController {
   constructor(private readonly admin: AdminService) {}
 
   @Get('users')
-  users() {
-    return this.admin.users();
+  users(@Query() query: ListAdminUsersQuery) {
+    return this.admin.users(query);
+  }
+
+  @Patch('users/:id/suspension')
+  changeSuspension(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ChangeSuspensionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.admin.changeSuspension(id, dto.suspended, actor);
   }
 
   @Patch('users/:id/role')
@@ -40,8 +55,8 @@ export class AdminController {
   }
 
   @Get('audit')
-  audit() {
-    return this.admin.audit();
+  audit(@Query() query: ListAuditQuery) {
+    return this.admin.audit(query);
   }
 
   @Get('ops')
