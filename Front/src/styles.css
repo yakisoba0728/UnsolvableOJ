@@ -7905,7 +7905,8 @@ textarea {
   animation-timing-function: ease;
 }
 
-/* 문제 목록: 왼쪽 '전체 문제' 제목의 글자 윗선을 오른쪽 카드 윗선에 맞춘다(줄 높이 때문에 글자가 박스 위에서 살짝 아래로 내려와 보이던 것을 보정) */
-.problems-page .list-layout > section > .section-heading {
+/* 문제·코드 분석·커뮤니티 목록: 왼쪽 제목의 글자 윗선을 오른쪽 카드 윗선에 맞춘다(줄 높이 때문에 글자가 박스 위에서 살짝 아래로 내려와 보이던 것을 보정) */
+.list-layout > section > .section-heading,
+.community-layout > section > .section-heading {
   margin-top: -6px;
 }
