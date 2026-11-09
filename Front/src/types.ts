@@ -31,6 +31,8 @@ export interface User {
   level: number;
   xp: number;
   rating: number;
+  /** 관리자가 준 임시 비밀번호로 로그인했다. 비밀번호를 바꾸기 전에는 계정 설정만 쓸 수 있다. */
+  mustChangePassword?: boolean;
 }
 
 export interface Session {
@@ -185,4 +187,15 @@ export interface Page<T> {
   totalPages: number;
   /** 다음 페이지 커서(내용은 해석하지 않는다). null이면 끝이고, 옛 오프셋 방식 응답에는 없다. */
   nextCursor?: string | null;
+}
+
+/** 내 로그인 기기(로그인 한 번 = refresh token 계열 하나). 토큰 값은 오지 않는다. */
+export interface SessionDevice {
+  id: string;
+  createdAt: string;
+  /** 마지막으로 토큰을 갱신한 시각(사용 중이면 15분 안팎마다 바뀐다) */
+  lastUsedAt: string;
+  expiresAt: string;
+  remember: boolean;
+  current: boolean;
 }

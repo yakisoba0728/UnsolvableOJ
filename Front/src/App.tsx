@@ -116,6 +116,10 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               <div className="page-width empty-state">불러오는 중입니다…</div>
             }
           >
+            {/* 임시 비밀번호로 로그인했다면 비밀번호를 바꿀 때까지 계정 설정에 머문다(서버도 다른 API를 403으로 막는다). */}
+            {session?.user.mustChangePassword && pathname !== "/settings" ? (
+              <Navigate to="/settings" replace />
+            ) : (
             <Routes>
               <Route
                 path="/"
@@ -205,6 +209,7 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
+            )}
           </Suspense>
         </ErrorBoundary>
       </main>
