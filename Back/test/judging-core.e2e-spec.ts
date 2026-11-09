@@ -139,6 +139,18 @@ describe('Judging core: rejudge versions, staff access, test submissions (e2e)',
     const claim = await finish(submission.id, 3, 'ACCEPTED');
     expect(claim.testCases[0].expectedOutput).toBe('3\n');
     expect(await me()).toMatchObject({ xp: 10, solvedCount: 1 });
+    // 채점이 끝나면 제출자에게 알림이 한 건 생기고, 재채점이 끝날 때마다 다시 안 읽음이 된다.
+    const notifications = await http()
+      .get(`${base}/notifications`)
+      .set(bearer(solver.accessToken))
+      .expect(200);
+    const judged = notifications.body.items.filter(
+      (item: { type: string; submission?: { id: string } }) =>
+        item.type === 'JUDGED' && item.submission?.id === submission.id,
+    );
+    expect(judged).toEqual([
+      expect.objectContaining({ readAt: null, submission: expect.objectContaining({ status: 'ACCEPTED' }) }),
+    ]);
   });
 
   it('lets only the problem author and admins list and read other users’ submissions', async () => {

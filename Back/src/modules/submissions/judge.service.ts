@@ -15,6 +15,7 @@ import {
   JUDGE_WORKERS_KEY,
   type JudgeSubmissionJob,
 } from '../../common/queue.constants.js';
+import { notifySubmissionJudged } from '../notifications/notifications.service.js';
 import { ProblemDifficulty } from '../problems/problem.enums.js';
 import type { JudgeResultDto } from './dto/judge-result.dto.js';
 import { Submission } from './submission.entity.js';
@@ -235,6 +236,7 @@ export class JudgeService {
       submission.judgeLeaseExpiresAt = null;
       await manager.save(submission);
       await this.reconcileSolve(manager, submission);
+      await notifySubmissionJudged(manager, submission.id);
       return toSubmissionResponse(submission);
     });
   }
