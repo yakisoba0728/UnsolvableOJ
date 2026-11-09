@@ -317,7 +317,8 @@ export class ProblemsService {
         : {
             latest: `p.created_at ${high}, p.id ${high}`,
             difficulty: `p.difficulty ${low}, ${ties}`,
-            title: `p.title ${low}, ${ties}`,
+            // DB 기본 정렬 규칙(collation)은 서버마다 달라 순서가 바뀐다. 대소문자를 무시한 코드포인트 순으로 고정한다.
+            title: `lower(p.title) COLLATE "C" ${low}, p.title COLLATE "C" ${low}, ${ties}`,
             solvers: `COALESCE(stats.solver_count, 0) ${high}, ${ties}`,
             // 정답률이 없는(제출 없는) 문제는 뒤집어도 맨 뒤다.
             rate: `ROUND(100.0 * stats.accepted_count / NULLIF(stats.finished_count, 0), 1) ${high} NULLS LAST, ${ties}`,

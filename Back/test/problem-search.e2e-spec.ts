@@ -155,7 +155,8 @@ describe('Public problem search (e2e)', () => {
     expect(page1.body).not.toHaveProperty('nextCursor');
     expect(page2.body.items).toHaveLength(2);
     const all = [...titles(page1.body), ...titles(page2.body)];
-    expect(all).toEqual([...all].sort());
+    const byCode = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+    expect(all).toEqual([...all].sort((a, b) => byCode(a.toLowerCase(), b.toLowerCase()) || byCode(a, b)));
     expect(new Set(all).size).toBe(6);
 
     const reversed = await search({ q: suffix, sort: 'title', reverse: 'true' }).expect(200);
