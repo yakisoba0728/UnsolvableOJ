@@ -486,28 +486,6 @@ textarea {
   color: var(--color-ink-600);
   max-width: 420px;
 }
-.intro-decoration {
-  display: flex;
-  gap: 13px;
-  margin-top: 50px;
-  font:
-    11px "JetBrains Mono",
-    monospace;
-  /* 로그인 소개의 단계 표시(01 02 03): 장식이어도 읽을 수 있는 크기·대비로 */
-  font-size: 12px;
-  color: var(--color-ink-600);
-}
-.intro-decoration span {
-  width: 72px;
-  border-top: 2px solid var(--color-divider);
-  padding-top: 12px;
-  border-top-color: var(--color-border-strong);
-}
-.intro-decoration span:first-child {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  border-top-color: var(--color-primary);
-}
 .auth-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -1800,9 +1778,6 @@ button.heat-cell.selected {
   }
   .auth-intro h1 {
     font-size: 40px;
-  }
-  .intro-decoration {
-    display: none;
   }
   .auth-card {
     padding: 27px;
