@@ -16,9 +16,10 @@ import {
   useDocumentTitle,
 } from "../hooks";
 import { PostScroller } from "../components/PostScroller";
-import { LANGUAGE_LABELS } from "../types";
+import { BADGE_LABELS, LANGUAGE_LABELS } from "../types";
 import { difficultyOptions } from "../difficulty";
 import { calendarDate, parseCalendarDate } from "../calendar";
+import { userPath } from "../paths";
 
 const WEEKS_WIDE = 16;
 const WEEKS_NARROW = 12;
@@ -184,6 +185,16 @@ export function ProfilePage() {
       <PageHeader
         title="내 학습 기록"
         description="쌓아 온 실력과 꾸준함을 한눈에 확인하세요."
+        aside={
+          <div className="account-links">
+            <Link className="button button-small button-outline" to={userPath(profile.username)}>
+              공개 프로필
+            </Link>
+            <Link className="button button-small button-outline" to="/settings">
+              계정 설정
+            </Link>
+          </div>
+        }
       />
       {rankError || history.error || problemsError || communityPosts.error ? (
         <p className="error-message" role="alert">
@@ -214,11 +225,7 @@ export function ProfilePage() {
           <div aria-label="획득한 배지">
             {profile.badges?.map((b) => (
               <span className="pill" key={b.badge}>
-                {b.badge === "night-coder"
-                  ? "심야 코더"
-                  : b.badge === "seven-day-streak"
-                    ? "7일 연속 학습"
-                    : b.badge}
+                {BADGE_LABELS[b.badge] ?? b.badge}
               </span>
             ))}
           </div>
