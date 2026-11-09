@@ -8355,3 +8355,28 @@ label.check-row input[type="checkbox"] {
 .admin-table td a {
   overflow-wrap: anywhere;
 }
+
+/* ===== 기업 테스트 응시 대상 ===== */
+.ent-access {
+  margin-top: 24px;
+}
+.ent-access-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+label.check-row input[type="radio"] {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+}
+.ent-result-card {
+  margin-bottom: 24px;
+}
+.ent-result-card ul {
+  margin: 12px 0 0;
+  padding-left: 20px;
+}

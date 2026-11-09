@@ -64,6 +64,9 @@ const enterpriseTest = (patch: Partial<EnterpriseTest> & Pick<EnterpriseTest, "i
   durationMin: 60,
   problemIds: ["p1"],
   inviteCode: `invite-${patch.id}`,
+  inviteOnly: false,
+  invitees: [],
+  showScoreToCandidates: false,
   attemptCount: 0,
   createdAt: iso(-DAY),
   updatedAt: iso(-DAY),
@@ -96,7 +99,14 @@ async function mockEnterprise(page: Page, initial: EnterpriseTest[] = [], result
       return route.fulfill({ status: 201, json: created });
     }
     if (index < 0) return fail(route, 404, "테스트를 찾을 수 없습니다.");
-    if (sub === "results") return route.fulfill({ json: results[id] });
+    if (sub === "results")
+      return route.fulfill({
+        json: results[id] ?? {
+          test: tests[index],
+          summary: { candidates: tests[index].attemptCount, averageScore: null, perfect: 0 },
+          candidates: [],
+        },
+      });
     if (method === "GET") return route.fulfill({ json: tests[index] });
     if (method === "PATCH") {
       tests[index] = { ...tests[index], ...body, updatedAt: new Date().toISOString() };
@@ -369,7 +379,7 @@ test("the detail shows the invite link with a copy button and allows deleting be
 
   await expect(page.getByText("아직 응시한 사람이 없어요")).toBeVisible();
   await expect(page.locator(".ent-summary")).toContainText("0명");
-  // 응시자가 없으면 결과를 따로 부르지 않는다.
+  // 시작 전인 테스트는 결과를 따로 부르지 않는다.
   expect(requests.some((item) => item.path.endsWith("/results"))).toBe(false);
   await expect(page.getByRole("button", { name: "삭제", exact: true })).toBeVisible();
 });
@@ -604,4 +614,83 @@ test("the list says when a scheduled test starts today or tomorrow", async ({ pa
   await expect(period("오늘 저녁 시작")).toHaveText("오늘 오후 7시 시작 예정");
   await expect(period("내일 오후 시작")).toHaveText("내일 오후 2시 시작 예정");
   await expect(period("다음 주 시작")).toHaveText("10월27일 시작 예정");
+});
+
+test("an invite-only test sends its invitees and score sharing, and the detail shows how many were invited", async ({ page }) => {
+  const { requests } = await setup(page);
+  await page.goto("/enterprise/new");
+  await page.getByLabel(/테스트 이름/).fill("초대 전용 공채");
+  await page.getByRole("checkbox", { name: /두 수의 합/ }).check();
+  await page.getByRole("radio", { name: "초대한 사람만" }).check();
+  await page.getByRole("button", { name: "테스트 만들기" }).click();
+  await expect(page.getByText("초대할 사람의 사용자 이름이나 이메일을 적어 주세요.")).toBeVisible();
+  await expect(page.getByLabel("초대할 사람")).toBeFocused();
+
+  // 줄바꿈·쉼표로 나누고, 대소문자만 다른 중복은 한 번만 보낸다.
+  await page.getByLabel("초대할 사람").fill("kim_dev, lee@example.com\nKIM_DEV\n");
+  await expect(page.getByText("2 / 200명")).toBeVisible();
+  await page.getByRole("checkbox", { name: /자기 점수와 문제별 정답 여부/ }).check();
+  await page.getByRole("button", { name: "테스트 만들기" }).click();
+  await expect(page).toHaveURL(/\/enterprise\/t-new-1$/);
+  expect(requests.find((item) => item.method === "POST")?.body).toMatchObject({
+    inviteOnly: true,
+    invitees: ["kim_dev", "lee@example.com"],
+    showScoreToCandidates: true,
+  });
+  await expect(page.getByText("초대한 2명만 이 링크로 한 번 응시할 수 있어요.", { exact: false })).toBeVisible();
+  await page.getByText("초대 목록 보기").click();
+  await expect(page.getByRole("listitem").filter({ hasText: "lee@example.com" })).toBeVisible();
+
+  // 편집하면 저장된 목록을 그대로 보여 주고, 누구나로 바꾸면 목록을 비워 보낸다.
+  await page.getByRole("link", { name: "편집" }).click();
+  await expect(page.getByLabel("초대할 사람")).toHaveValue("kim_dev\nlee@example.com");
+  await page.getByRole("radio", { name: "링크를 아는 로그인 사용자 누구나" }).check();
+  await expect(page.getByLabel("초대할 사람")).toHaveCount(0);
+  await page.getByRole("button", { name: "변경 저장" }).click();
+  await expect(page).toHaveURL(/\/enterprise\/t-new-1$/);
+  expect(requests.find((item) => item.method === "PATCH")?.body).toMatchObject({ inviteOnly: false, invitees: [] });
+});
+
+test("a running test's results refresh every 30 seconds while the tab is visible", async ({ page }) => {
+  const running = enterpriseTest({ id: "t-live", title: "진행 중 공채", startsAt: iso(-HOUR), endsAt: iso(DAY), problemIds: ["p1"] });
+  await setup(page, [running]);
+  let candidates: TestResults["candidates"] = [];
+  await page.route("**/api/v1/enterprise/tests/t-live/results", (route) =>
+    route.fulfill({
+      json: {
+        test: running,
+        summary: { candidates: candidates.length, averageScore: candidates.length ? 100 : null, perfect: candidates.length },
+        candidates,
+      } satisfies TestResults,
+    }),
+  );
+  await page.clock.install();
+  await page.goto("/enterprise/t-live");
+  // 응시자 0명으로 열어도 결과를 받아 두고, 응시가 생기면 다음 갱신에 보인다.
+  await expect(page.getByRole("button", { name: "새로고침" })).toBeVisible();
+  await expect(page.getByText("아직 응시한 사람이 없어요")).toBeVisible();
+
+  candidates = [{
+    id: "a-1", startedAt: iso(-60_000), deadlineAt: iso(HOUR), finishedAt: null,
+    user: { id: "u-alice", username: "alice" }, solved: 1, score: 100,
+    problems: [{ problemId: "p1", solved: true, submissions: 1, submissionId: "s-1" }],
+  }];
+  await page.clock.fastForward(30_000);
+  await expect(page.locator(".ent-result-table tbody tr")).toHaveCount(1);
+  await expect(page.locator(".ent-summary")).toContainText("응시자1명");
+  await expect(page.getByRole("button", { name: "삭제", exact: true })).toHaveCount(0);
+
+  // 탭이 숨겨지면 쉬고, 돌아오면 바로 받는다.
+  let fetched = 0;
+  page.on("request", (request) => {
+    if (request.url().endsWith("/results")) fetched += 1;
+  });
+  await page.evaluate(() => Object.defineProperty(document, "hidden", { configurable: true, get: () => true }));
+  await page.clock.fastForward(60_000);
+  expect(fetched).toBe(0);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", { configurable: true, get: () => false });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect.poll(() => fetched).toBe(1);
 });

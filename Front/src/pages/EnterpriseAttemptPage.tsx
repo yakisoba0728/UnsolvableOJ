@@ -72,6 +72,17 @@ export function EnterpriseAttemptPage() {
     if (lastStatus && !judging) retry();
   }, [lastStatus, judging, retry]);
 
+  // 화면을 연 채로 마감되면 한 번 다시 받아, 공개된 점수가 있으면 바로 보여 준다.
+  const expired = data ? Date.parse(data.deadlineAt) <= now : null;
+  const sawOpen = useRef(false);
+  useEffect(() => {
+    if (expired === false) sawOpen.current = true;
+    else if (expired && sawOpen.current) {
+      sawOpen.current = false;
+      retry();
+    }
+  }, [expired, retry]);
+
   if (!session)
     return (
       <div className="page-width enterprise-page">
@@ -168,7 +179,27 @@ export function EnterpriseAttemptPage() {
           </div>
         }
       />
-      {closed ? (
+      {data.result ? (
+        <section className="form-card ent-card ent-result-card" aria-labelledby="ent-my-result">
+          <h2 id="ent-my-result">내 결과</h2>
+          <p>
+            <strong>{data.result.score}점</strong>{" "}
+            <span className="muted">
+              ({data.result.total}문제 중 {data.result.solved}문제 정답)
+            </span>
+          </p>
+          <ul>
+            {data.problems.map((item, position) => (
+              <li key={item.id}>
+                {position + 1}. {item.title} —{" "}
+                <span className={item.solved ? "verdict-good" : "verdict-bad"}>
+                  {item.solved ? "정답" : item.lastSubmissionId ? "미해결" : "미제출"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : closed ? (
         <p className="local-storage-notice" role="status">
           응시가 끝났어요. 제출한 코드와 결과는 아래에서 볼 수 있고, 점수는 테스트를 만든 담당자에게 전달돼요.
         </p>

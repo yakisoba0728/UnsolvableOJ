@@ -10,6 +10,12 @@ export interface EnterpriseTest {
   problemIds: string[];
   /** 응시 링크 코드: /enterprise/join/:code */
   inviteCode: string;
+  /** true면 invitees에 적은 사람만 응시할 수 있다. */
+  inviteOnly: boolean;
+  /** 초대한 사용자 이름과 이메일 */
+  invitees: string[];
+  /** 응시를 마친 응시자에게 자기 점수를 보여 줄지 */
+  showScoreToCandidates: boolean;
   attemptCount: number;
   createdAt: string;
   updatedAt: string;
@@ -50,6 +56,8 @@ export interface AttemptProblem {
 export interface AttemptView extends Attempt {
   test: PublicTest;
   problems: AttemptProblem[];
+  /** 담당자가 점수 공개를 켰고 응시가 끝났을 때만 온다. */
+  result: { solved: number; total: number; score: number } | null;
 }
 
 export interface TestResults {
@@ -83,7 +91,16 @@ export const LIMITS = {
   minDuration: 10,
   maxDuration: 600,
   maxProblems: 20,
+  maxInvitees: 200,
 } as const;
+
+/** 초대 목록 입력(줄바꿈·쉼표·공백 구분)을 대소문자 없이 중복을 뺀 목록으로 바꾼다. */
+export function parseInvitees(text: string) {
+  const unique = new Map<string, string>();
+  for (const value of text.split(/[\s,]+/))
+    if (value && !unique.has(value.toLowerCase())) unique.set(value.toLowerCase(), value);
+  return [...unique.values()];
+}
 
 export function testStatus(
   test: Pick<EnterpriseTest, "startsAt" | "endsAt">,
@@ -187,11 +204,15 @@ export interface TestDraft {
   endsAt: string;
   durationMin: string;
   problemIds: string[];
+  inviteOnly: boolean;
+  /** 입력 그대로의 초대 목록 */
+  invitees: string;
+  showScoreToCandidates: boolean;
 }
 
 export type TestErrors = Partial<
   Record<
-    "title" | "startsAt" | "endsAt" | "durationMin" | "problemIds" | "description",
+    "title" | "startsAt" | "endsAt" | "durationMin" | "problemIds" | "invitees" | "description",
     string
   >
 >;
@@ -232,6 +253,13 @@ export function validateDraft(draft: TestDraft, now = Date.now()): TestErrors {
   else if (draft.problemIds.length > LIMITS.maxProblems)
     errors.problemIds = `문제는 최대 ${LIMITS.maxProblems}개까지 고를 수 있어요.`;
 
+  if (draft.inviteOnly) {
+    const count = parseInvitees(draft.invitees).length;
+    if (count === 0) errors.invitees = "초대할 사람의 사용자 이름이나 이메일을 적어 주세요.";
+    else if (count > LIMITS.maxInvitees)
+      errors.invitees = `초대는 최대 ${LIMITS.maxInvitees}명까지 할 수 있어요.`;
+  }
+
   if (draft.description.length > LIMITS.description)
     errors.description = `안내 문구는 ${LIMITS.description}자 이하로 입력해 주세요.`;
   return errors;
@@ -246,6 +274,9 @@ export function draftToInput(draft: TestDraft) {
     endsAt: new Date(draft.endsAt).toISOString(),
     durationMin: Number(draft.durationMin),
     problemIds: draft.problemIds,
+    inviteOnly: draft.inviteOnly,
+    invitees: draft.inviteOnly ? parseInvitees(draft.invitees) : [],
+    showScoreToCandidates: draft.showScoreToCandidates,
   };
 }
 

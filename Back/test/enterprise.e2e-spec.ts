@@ -11,7 +11,9 @@ describe('Enterprise tests: server storage, invite link, attempts, results (e2e)
   const suffix = randomUUID().slice(0, 8);
   let owner: string;
   let outsider: string;
-  let candidate: { accessToken: string; user: { id: string } };
+  type Account = { accessToken: string; user: { id: string; username: string; email: string } };
+  let candidate: Account;
+  let outsiderAccount: Account;
   let other: string;
   const http = () => request(app.getHttpServer());
   const problem = async (token: string, slug: string, extra: Record<string, unknown> = {}) => {
@@ -47,7 +49,8 @@ describe('Enterprise tests: server storage, invite link, attempts, results (e2e)
     await app.listen(0, '127.0.0.1');
     db = app.get(DataSource);
     owner = (await register(app, 'entowner', suffix)).accessToken;
-    outsider = (await register(app, 'entoutsider', suffix)).accessToken;
+    outsiderAccount = await register(app, 'entoutsider', suffix);
+    outsider = outsiderAccount.accessToken;
     candidate = await register(app, 'entcand', suffix);
     other = (await register(app, 'entother', suffix)).accessToken;
   });
@@ -151,6 +154,9 @@ describe('Enterprise tests: server storage, invite link, attempts, results (e2e)
       .set(bearer(candidate.accessToken))
       .expect(200);
     expect(finished.body).toMatchObject({ id: attemptId, finishedAt: expect.any(String) });
+    // 점수 공개를 켜지 않은 테스트는 끝난 뒤에도 응시자에게 점수를 주지 않는다.
+    const closedView = await http().get(`${base}/enterprise/attempts/${attemptId}`).set(bearer(candidate.accessToken)).expect(200);
+    expect(closedView.body.result).toBeNull();
     await submit(candidate.accessToken, attemptId, privateProblem).expect(403);
     await http().patch(`${base}/enterprise/tests/${test.id}`).set(bearer(owner)).send({ title: 'x' }).expect(409);
     await http().delete(`${base}/enterprise/tests/${test.id}`).set(bearer(owner)).expect(409);
@@ -162,8 +168,9 @@ describe('Enterprise tests: server storage, invite link, attempts, results (e2e)
     const created = await http()
       .post(`${base}/enterprise/tests`)
       .set(bearer(owner))
-      .send({ title: '예정', startsAt: minutes(60), endsAt: minutes(120), durationMin: 30, problemIds: [publicProblem] })
+      .send({ title: '예정', description: '안내', startsAt: minutes(60), endsAt: minutes(120), durationMin: 30, problemIds: [publicProblem] })
       .expect(201);
+    expect(created.body).toMatchObject({ inviteOnly: false, invitees: [], showScoreToCandidates: false });
     await http()
       .post(`${base}/enterprise/join/${created.body.inviteCode}/start`)
       .set(bearer(other))
@@ -173,9 +180,100 @@ describe('Enterprise tests: server storage, invite link, attempts, results (e2e)
       .set(bearer(owner))
       .send({ title: '예정(수정)' })
       .expect(200);
-    expect(edited.body.title).toBe('예정(수정)');
+    // 보내지 않은 필드는 그대로 둔다(안내 문구가 빈 값으로 덮이지 않는다).
+    expect(edited.body).toMatchObject({ title: '예정(수정)', description: '안내' });
     await http().patch(`${base}/enterprise/tests/${created.body.id}`).set(bearer(other)).send({ title: 'x' }).expect(404);
     await http().delete(`${base}/enterprise/tests/${created.body.id}`).set(bearer(owner)).expect(200);
     await http().get(`${base}/enterprise/tests/${created.body.id}`).set(bearer(owner)).expect(404);
+  });
+
+  it('limits an invite-only test to invited accounts and shows candidates their score when allowed', async () => {
+    const publicProblem = await problem(outsider, 'ent-invite');
+    await db.query("UPDATE problems SET status = 'PUBLISHED' WHERE id = $1", [publicProblem]);
+    // 가입은 분당 5회로 묶여 있어 이미 만든 계정을 초대한다.
+    const byName = candidate;
+    const byEmail = outsiderAccount;
+    const body = {
+      title: '초대 전용',
+      startsAt: minutes(-1),
+      endsAt: minutes(60),
+      durationMin: 30,
+      problemIds: [publicProblem],
+      inviteOnly: true,
+      showScoreToCandidates: true,
+    };
+    const unknown = await http()
+      .post(`${base}/enterprise/tests`)
+      .set(bearer(owner))
+      .send({ ...body, invitees: [byName.user.username, `ghost_${suffix}`] })
+      .expect(400);
+    expect(unknown.body.message).toContain(`ghost_${suffix}`);
+    await http().post(`${base}/enterprise/tests`).set(bearer(owner)).send({ ...body, invitees: [' '] }).expect(400);
+    await http()
+      .post(`${base}/enterprise/tests`)
+      .set(bearer(owner))
+      .send({ ...body, invitees: Array.from({ length: 201 }, (_, index) => `x${index}@example.com`) })
+      .expect(400);
+
+    // 사용자 이름은 대소문자 없이, 이메일은 아직 응시 전인 계정의 이메일과 맞춘다.
+    const created = await http()
+      .post(`${base}/enterprise/tests`)
+      .set(bearer(owner))
+      .send({ ...body, invitees: [byName.user.username.toUpperCase(), byEmail.user.email.toUpperCase()] })
+      .expect(201);
+    expect(created.body).toMatchObject({
+      inviteOnly: true,
+      showScoreToCandidates: true,
+      invitees: [byName.user.username, byEmail.user.email],
+    });
+    const code = created.body.inviteCode as string;
+
+    // 초대받지 않은 사람에게는 링크가 없는 것과 같다.
+    await http().get(`${base}/enterprise/join/${code}`).set(bearer(other)).expect(404);
+    await http().post(`${base}/enterprise/join/${code}/start`).set(bearer(other)).expect(404);
+    const ownerInfo = await http().get(`${base}/enterprise/join/${code}`).set(bearer(owner)).expect(200);
+    expect(ownerInfo.body.isOwner).toBe(true);
+    await http().get(`${base}/enterprise/join/${code}`).set(bearer(byName.accessToken)).expect(200);
+    const viaEmail = await http().post(`${base}/enterprise/join/${code}/start`).set(bearer(byEmail.accessToken)).expect(201);
+    const started = await http().post(`${base}/enterprise/join/${code}/start`).set(bearer(byName.accessToken)).expect(201);
+    await http().get(`${base}/enterprise/attempts/${started.body.id}`).set(bearer(other)).expect(404);
+
+    const submitted = await submit(byName.accessToken, started.body.id, publicProblem).expect(202);
+    jobIds.push(`${submitted.body.id}-1`);
+    await db.query("UPDATE submissions SET status = 'ACCEPTED' WHERE id = $1", [submitted.body.id]);
+    // 응시 중에는 점수를 주지 않고, 끝난 뒤에만 준다.
+    const during = await http().get(`${base}/enterprise/attempts/${started.body.id}`).set(bearer(byName.accessToken)).expect(200);
+    expect(during.body.result).toBeNull();
+    await http().post(`${base}/enterprise/attempts/${started.body.id}/finish`).set(bearer(byName.accessToken)).expect(200);
+    const after = await http().get(`${base}/enterprise/attempts/${started.body.id}`).set(bearer(byName.accessToken)).expect(200);
+    expect(after.body.result).toEqual({ solved: 1, total: 1, score: 100 });
+    // 마감이 지난 응시도 끝난 것으로 본다.
+    await db.query("UPDATE enterprise_attempts SET deadline_at = now() - interval '1 second' WHERE id = $1", [viaEmail.body.id]);
+    const expired = await http().get(`${base}/enterprise/attempts/${viaEmail.body.id}`).set(bearer(byEmail.accessToken)).expect(200);
+    expect(expired.body.result).toEqual({ solved: 0, total: 1, score: 0 });
+  });
+
+  it('lets the owner switch a scheduled test to invite-only and back', async () => {
+    const publicProblem = await problem(outsider, 'ent-switch');
+    await db.query("UPDATE problems SET status = 'PUBLISHED' WHERE id = $1", [publicProblem]);
+    const created = await http()
+      .post(`${base}/enterprise/tests`)
+      .set(bearer(owner))
+      .send({ title: '전환', startsAt: minutes(60), endsAt: minutes(120), durationMin: 30, problemIds: [publicProblem] })
+      .expect(201);
+    const path = `${base}/enterprise/tests/${created.body.id}`;
+    const invited = await http()
+      .patch(path)
+      .set(bearer(owner))
+      .send({ inviteOnly: true, invitees: [`a@Example.com`, 'a@example.com'] })
+      .expect(200);
+    expect(invited.body).toMatchObject({ inviteOnly: true, invitees: ['a@example.com'] });
+    await http().get(`${base}/enterprise/join/${created.body.inviteCode}`).set(bearer(other)).expect(404);
+    const renamed = await http().patch(path).set(bearer(owner)).send({ title: '전환(수정)' }).expect(200);
+    expect(renamed.body).toMatchObject({ inviteOnly: true, invitees: ['a@example.com'] });
+    await http().patch(path).set(bearer(owner)).send({ invitees: [] }).expect(400);
+    const opened = await http().patch(path).set(bearer(owner)).send({ inviteOnly: false }).expect(200);
+    expect(opened.body).toMatchObject({ inviteOnly: false, invitees: [] });
+    await http().get(`${base}/enterprise/join/${created.body.inviteCode}`).set(bearer(other)).expect(200);
   });
 });

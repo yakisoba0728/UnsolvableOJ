@@ -40,6 +40,7 @@ const attemptView = (patch: Partial<AttemptView> = {}): AttemptView => ({
       lastStatus: null,
     },
   ],
+  result: null,
   ...patch,
 });
 
@@ -159,4 +160,24 @@ test("a wrong invite link says so without a retry button, and a guest is asked t
   await page.goto("/enterprise/join/nope");
   await expect(page.getByRole("alert")).toHaveText("응시 링크가 올바르지 않거나 삭제된 테스트예요.");
   await expect(page.getByRole("button", { name: "다시 시도" })).toHaveCount(0);
+});
+
+test("a finished candidate sees their own score only when the owner shares it", async ({ page }) => {
+  await signIn(page);
+  const done = { id: "a1", startedAt: iso(-3_600_000), deadlineAt: iso(-1_800_000), finishedAt: iso(-1_900_000) };
+  const second = { ...attemptView().problems[0], id: "p2", title: "수 정렬하기", lastSubmissionId: "s2" };
+  const view = attemptView({
+    ...done,
+    problems: [{ ...attemptView().problems[0], solved: true, lastSubmissionId: "s1" }, second],
+    result: { solved: 1, total: 2, score: 50 },
+  });
+  await page.route("**/api/v1/enterprise/attempts/a1", (route) => route.fulfill({ json: view }));
+  await page.route("**/api/v1/submissions/*", (route) => route.fulfill({ status: 404, json: { statusCode: 404, message: "없음" } }));
+  await page.goto("/enterprise/attempts/a1");
+  const card = page.getByRole("region", { name: "내 결과" });
+  await expect(card).toContainText("50점");
+  await expect(card).toContainText("2문제 중 1문제 정답");
+  await expect(card.getByRole("listitem").nth(0)).toContainText("두 수의 합 — 정답");
+  await expect(card.getByRole("listitem").nth(1)).toContainText("수 정렬하기 — 미해결");
+  await expect(page.getByText("점수는 테스트를 만든 담당자에게 전달돼요", { exact: false })).toHaveCount(0);
 });

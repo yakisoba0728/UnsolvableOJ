@@ -25,9 +25,14 @@ interface TestRow {
   duration_min: number;
   problem_ids: string[];
   invite_code: string;
+  invite_only: boolean;
+  invite_user_ids: string[];
+  invite_emails: string[];
+  show_score_to_candidates: boolean;
   created_at: Date;
   updated_at: Date;
   attempt_count?: number;
+  invite_usernames?: string[];
 }
 
 interface AttemptRow {
@@ -40,7 +45,13 @@ interface AttemptRow {
 }
 
 const NOT_FOUND = '테스트를 찾을 수 없습니다.';
-const TEST_COLUMNS = `t.*, (SELECT count(*)::int FROM enterprise_attempts a WHERE a.test_id = t.id) AS attempt_count`;
+const TEST_COLUMNS = `t.*, (SELECT count(*)::int FROM enterprise_attempts a WHERE a.test_id = t.id) AS attempt_count,
+  ARRAY(SELECT u.username FROM users u WHERE u.id = ANY(t.invite_user_ids) ORDER BY lower(u.username)) AS invite_usernames`;
+
+/** 초대 전용이면 만든 사람과 초대한 사람(계정 또는 계정 이메일)만 통과한다. user는 사용자 id 매개변수 자리. */
+const canJoin = (user: string) =>
+  `(NOT t.invite_only OR t.owner_id = ${user} OR ${user} = ANY(t.invite_user_ids)
+    OR EXISTS (SELECT 1 FROM users iu WHERE iu.id = ${user} AND iu.email = ANY(t.invite_emails)))`;
 
 const toTest = (row: TestRow) => ({
   id: row.id,
@@ -51,6 +62,9 @@ const toTest = (row: TestRow) => ({
   durationMin: row.duration_min,
   problemIds: row.problem_ids,
   inviteCode: row.invite_code,
+  inviteOnly: row.invite_only,
+  invitees: [...(row.invite_usernames ?? []), ...row.invite_emails],
+  showScoreToCandidates: row.show_score_to_candidates,
   attemptCount: row.attempt_count ?? 0,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
@@ -89,9 +103,11 @@ export class EnterpriseService {
     this.assertSchedule(dto.startsAt, dto.endsAt, dto.durationMin, true);
     return this.dataSource.transaction(async (manager) => {
       await this.assertProblems(manager, dto.problemIds, user);
+      const invite = await this.resolveInvitees(manager, dto.inviteOnly ?? false, dto.invitees ?? []);
       const [row]: TestRow[] = await manager.query(
-        `INSERT INTO enterprise_tests (owner_id, title, description, starts_at, ends_at, duration_min, problem_ids, invite_code)
-         VALUES ($1, $2, $3, $4, $5, $6, $7::uuid[], $8) RETURNING *`,
+        `INSERT INTO enterprise_tests (owner_id, title, description, starts_at, ends_at, duration_min, problem_ids, invite_code,
+           invite_only, invite_user_ids, invite_emails, show_score_to_candidates)
+         VALUES ($1, $2, $3, $4, $5, $6, $7::uuid[], $8, $9, $10::uuid[], $11::text[], $12) RETURNING id`,
         [
           user.id,
           dto.title.trim(),
@@ -101,9 +117,13 @@ export class EnterpriseService {
           dto.durationMin,
           dto.problemIds,
           randomBytes(12).toString('base64url'),
+          dto.inviteOnly ?? false,
+          invite.userIds,
+          invite.emails,
+          dto.showScoreToCandidates ?? false,
         ],
       );
-      return toTest(row);
+      return toTest(await this.owned(manager, row.id, user));
     });
   }
 
@@ -127,22 +147,44 @@ export class EnterpriseService {
       };
       this.assertSchedule(next.startsAt, next.endsAt, next.durationMin, true);
       if (dto.problemIds) await this.assertProblems(manager, dto.problemIds, user);
-      // TypeORM은 UPDATE ... RETURNING 결과를 [행 목록, 바뀐 수]로 돌려준다.
-      const [[row]]: [TestRow[], number] = await manager.query(
+      const inviteOnly = dto.inviteOnly ?? current.invite_only;
+      const invite =
+        dto.invitees || dto.inviteOnly !== undefined
+          ? await this.resolveInvitees(manager, inviteOnly, dto.invitees ?? toTest(current).invitees)
+          : { userIds: current.invite_user_ids, emails: current.invite_emails };
+      await manager.query(
         `UPDATE enterprise_tests SET title = $2, description = $3, starts_at = $4, ends_at = $5,
-           duration_min = $6, problem_ids = $7::uuid[], updated_at = now()
-         WHERE id = $1 RETURNING *`,
-        [id, next.title, next.description, next.startsAt, next.endsAt, next.durationMin, next.problemIds],
+           duration_min = $6, problem_ids = $7::uuid[], invite_only = $8, invite_user_ids = $9::uuid[],
+           invite_emails = $10::text[], show_score_to_candidates = $11, updated_at = now()
+         WHERE id = $1`,
+        [
+          id,
+          next.title,
+          next.description,
+          next.startsAt,
+          next.endsAt,
+          next.durationMin,
+          next.problemIds,
+          inviteOnly,
+          invite.userIds,
+          invite.emails,
+          dto.showScoreToCandidates ?? current.show_score_to_candidates,
+        ],
       );
-      return toTest(row);
+      return toTest(await this.owned(manager, id, user));
     });
   }
 
   async remove(id: string, user: AuthenticatedUser) {
     await this.dataSource.transaction(async (manager) => {
-      const test = await this.owned(manager, id, user, true);
+      await this.owned(manager, id, user, true);
       // 응시 기록이 있으면 지우지 않는다. 지우면 응시 제출이 시험과 끊겨 문제 작성자에게 보이게 된다.
-      if (test.attempt_count)
+      // 잠금 문장 안의 집계는 잠금을 기다리기 전 스냅샷이라 그사이 시작된 응시를 놓치므로, 잠근 뒤 다시 센다.
+      const [{ count }]: { count: number }[] = await manager.query(
+        'SELECT count(*)::int AS count FROM enterprise_attempts WHERE test_id = $1',
+        [id],
+      );
+      if (count)
         throw new ConflictException('응시 기록이 있는 테스트는 삭제할 수 없어요.');
       await manager.query('DELETE FROM enterprise_tests WHERE id = $1', [id]);
     });
@@ -199,7 +241,7 @@ export class EnterpriseService {
   }
 
   async joinInfo(code: string, user: AuthenticatedUser) {
-    const test = await this.byCode(this.dataSource.manager, code);
+    const test = await this.byCode(this.dataSource.manager, code, user);
     const [attempt]: AttemptRow[] = await this.dataSource.query(
       'SELECT * FROM enterprise_attempts WHERE test_id = $1 AND user_id = $2',
       [test.id, user.id],
@@ -214,7 +256,7 @@ export class EnterpriseService {
   /** 응시를 시작한다. 이미 시작했으면 그 응시를 그대로 돌려준다. */
   async start(code: string, user: AuthenticatedUser) {
     return this.dataSource.transaction(async (manager) => {
-      const test = await this.byCode(manager, code);
+      const test = await this.byCode(manager, code, user);
       const [existing]: AttemptRow[] = await manager.query(
         'SELECT * FROM enterprise_attempts WHERE test_id = $1 AND user_id = $2',
         [test.id, user.id],
@@ -285,9 +327,16 @@ export class EnterpriseService {
       [id],
     );
     const byProblem = new Map(statuses.map((status) => [status.problemId, status]));
+    const total = test.problem_ids.length;
+    const solved = statuses.filter((status) => status.solved).length;
     return {
       ...toAttempt(attempt),
       test: toPublicTest(test),
+      // 담당자가 공개를 켠 테스트만, 응시가 끝난 뒤에 점수를 준다. 점수 계산은 results()와 같다.
+      result:
+        attempt.closed && test.show_score_to_candidates
+          ? { solved, total, score: Math.round((solved / total) * 100) }
+          : null,
       problems: problems.map((problem) => ({
         ...problem,
         solved: byProblem.get(problem.id)?.solved ?? false,
@@ -307,8 +356,10 @@ export class EnterpriseService {
   }
 
   private async ownAttempt(id: string, user: AuthenticatedUser) {
-    const [attempt]: AttemptRow[] = await this.dataSource.query(
-      'SELECT * FROM enterprise_attempts WHERE id = $1 AND user_id = $2',
+    const [attempt]: (AttemptRow & { closed: boolean })[] = await this.dataSource.query(
+      `SELECT a.*, (a.finished_at IS NOT NULL OR a.deadline_at <= now()) AS closed
+         FROM enterprise_attempts a JOIN enterprise_tests t ON t.id = a.test_id
+        WHERE a.id = $1 AND a.user_id = $2 AND ${canJoin('$2')}`,
       [id, user.id],
     );
     if (!attempt) throw new NotFoundException('응시 기록을 찾을 수 없습니다.');
@@ -326,13 +377,41 @@ export class EnterpriseService {
     return row;
   }
 
-  private async byCode(manager: EntityManager, code: string) {
-    const [row]: TestRow[] = await manager.query(
-      'SELECT * FROM enterprise_tests WHERE invite_code = $1',
-      [code.slice(0, 32)],
+  private async byCode(manager: EntityManager, code: string, user: AuthenticatedUser) {
+    const [row]: (TestRow & { allowed: boolean })[] = await manager.query(
+      `SELECT t.*, ${canJoin('$2')} AS allowed FROM enterprise_tests t WHERE t.invite_code = $1`,
+      [code.slice(0, 32), user.id],
     );
-    if (!row) throw new NotFoundException('응시 링크가 올바르지 않거나 삭제된 테스트예요.');
+    // 초대받지 않은 사람에게는 테스트가 있다는 것도 알리지 않는다.
+    if (!row?.allowed) throw new NotFoundException('응시 링크가 올바르지 않거나 삭제된 테스트예요.');
     return row;
+  }
+
+  /** 초대 목록을 저장 형태로: 사용자 이름은 id로 바꾸고(없는 이름은 400), 이메일은 소문자로 둔다. */
+  private async resolveInvitees(manager: EntityManager, inviteOnly: boolean, invitees: string[]) {
+    if (!inviteOnly) return { userIds: [] as string[], emails: [] as string[] };
+    const names = new Map<string, string>();
+    const emails = new Set<string>();
+    for (const raw of invitees) {
+      const value = raw.trim();
+      if (value.includes('@')) emails.add(value.toLowerCase());
+      else if (value) names.set(value.toLowerCase(), value);
+    }
+    if (!names.size && !emails.size)
+      throw new BadRequestException('초대할 사람을 한 명 이상 적어 주세요.');
+    const users: { id: string; name: string }[] = names.size
+      ? await manager.query(
+          'SELECT id, lower(username) AS name FROM users WHERE lower(username) = ANY($1::text[])',
+          [[...names.keys()]],
+        )
+      : [];
+    const found = new Set(users.map((item) => item.name));
+    const missing = [...names].filter(([key]) => !found.has(key)).map(([, value]) => value);
+    if (missing.length)
+      throw new BadRequestException(
+        `없는 사용자 이름이 있어요: ${missing.slice(0, 10).join(', ')}${missing.length > 10 ? ` 외 ${missing.length - 10}명` : ''}`,
+      );
+    return { userIds: users.map((item) => item.id), emails: [...emails] };
   }
 
   private assertSchedule(startsAt: string, endsAt: string, durationMin: number, future: boolean) {
