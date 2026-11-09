@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { analysisQuestions } from "../analysis/questions";
+import {
+  useAnalysisQuestions,
+  type AnalysisQuestion as Question,
+  type AnalysisReveal,
+} from "../analysis/questions";
 import {
   analysisStatus,
   recordAnalysisAttempt,
@@ -18,15 +22,59 @@ const LETTERS = ["A", "B", "C", "D"];
 const fontKey = "unsolvable-oj-editor-font-v1";
 const FONT_MIN = 11;
 const FONT_MAX = 20;
-const total = analysisQuestions.length;
+
+type Result = { selected: number; correct: boolean } & AnalysisReveal;
+// 서버가 정답·해설을 함께 준 기록만 결과로 되살린다(예전 비로그인 기록에는 없다).
+const resultOf = (
+  item?: {
+    selected?: number;
+    correct: boolean;
+  } & Partial<AnalysisReveal>,
+): Result | null =>
+  item?.selected !== undefined &&
+  item.answer !== undefined &&
+  item.explanation &&
+  item.concepts
+    ? {
+        selected: item.selected,
+        correct: item.correct,
+        answer: item.answer,
+        explanation: item.explanation,
+        concepts: item.concepts,
+      }
+    : null;
 
 export function AnalysisQuestionPage() {
   const { id } = useParams();
   const { session } = useAuth();
   const userId = session?.user.id ?? "guest";
-  const index = analysisQuestions.findIndex((item) => item.id === id);
-  useDocumentTitle(index >= 0 ? analysisQuestions[index].title : "코드 분석");
+  const { questions, loading, error, retry } = useAnalysisQuestions();
+  const index = questions.findIndex((item) => item.id === id);
+  useDocumentTitle(index >= 0 ? questions[index].title : "코드 분석");
 
+  if (index < 0 && (loading || error))
+    return (
+      <div className="page-width">
+        <PageHeader
+          title="코드 분석"
+          back={{ to: "/analysis", label: "코드 분석" }}
+        />
+        {loading ? (
+          <p role="status">문제를 불러오는 중…</p>
+        ) : (
+          <div className="empty-state">
+            <p role="alert">{error}</p>
+            <button
+              type="button"
+              className="button button-outline"
+              onClick={retry}
+            >
+              다시 시도
+            </button>
+          </div>
+        )}
+      </div>
+    );
   if (index < 0)
     return (
       <div className="page-width">
@@ -48,6 +96,7 @@ export function AnalysisQuestionPage() {
       key={`${userId}:${id}`}
       userId={userId}
       signedIn={Boolean(session)}
+      questions={questions}
       index={index}
     />
   );
@@ -56,13 +105,16 @@ export function AnalysisQuestionPage() {
 function AnalysisQuestion({
   userId,
   signedIn,
+  questions,
   index,
 }: {
   userId: string;
   signedIn: boolean;
+  questions: Question[];
   index: number;
 }) {
-  const question = analysisQuestions[index];
+  const question = questions[index];
+  const total = questions.length;
   const { session } = useAuth();
   const { attempts, loading, error: historyError } = useAnalysisHistory();
   const [saveError, setSaveError] = useState("");
@@ -72,14 +124,13 @@ function AnalysisQuestion({
   const alive = useRef(true);
   const previous = analysisStatus(attempts, userId).latest.get(question.id);
   // 이미 푼 문제를 다시 열면 지난 결과를 그대로 보여 주고, 원하면 다시 풀 수 있다.
-  const [answer, setAnswer] = useState<{
-    selected: number;
-    correct: boolean;
-  } | null>(
-    previous && previous.selected !== undefined
-      ? { selected: previous.selected, correct: previous.correct }
-      : null,
-  );
+  const [answer, setAnswer] = useState<Result | null>(() => resultOf(previous));
+  // 다시 풀기로 접는 동안에도 해설이 보이도록 마지막 결과를 남겨 둔다.
+  const [shown, setShown] = useState<Result | null>(answer);
+  const reveal = (result: Result | null) => {
+    setAnswer(result);
+    if (result) setShown(result);
+  };
   const [picked, setPicked] = useState<number | null>(null);
   useEffect(() => {
     alive.current = true;
@@ -88,8 +139,8 @@ function AnalysisQuestion({
     };
   }, []);
   useEffect(() => {
-    if (!interacted.current && previous?.selected !== undefined)
-      setAnswer({ selected: previous.selected, correct: previous.correct });
+    const result = resultOf(previous);
+    if (!interacted.current && result) reveal(result);
   }, [previous]);
   const [fontSize, setFontSize] = useState(() => {
     try {
@@ -117,7 +168,7 @@ function AnalysisQuestion({
 
   const confirmed = answer !== null;
   const selected = answer ? answer.selected : picked;
-  const nextQuestion = analysisQuestions[index + 1];
+  const nextQuestion = questions[index + 1];
 
   async function confirm() {
     if (picked === null || confirmed || savingRef.current || loading) return;
@@ -126,18 +177,24 @@ function AnalysisQuestion({
     setSaving(true);
     setSaveError("");
     try {
-      let correct = picked === question.answer;
-      if (session) {
-        const result = await api<{ correct: boolean }>(
-          `/missions/analysis/${encodeURIComponent(question.id)}/attempts`,
-          { method: "POST", body: JSON.stringify({ selected: picked }) },
-          session.accessToken,
-        );
-        correct = result.correct;
-        window.dispatchEvent(new Event("analysis-saved"));
-      } else recordAnalysisAttempt(userId, question.id, correct, picked);
+      // 정답은 서버만 안다. 로그인하면 기록·미션에 반영하고, 비로그인 연습은 판정만 받아 이 브라우저에 남긴다.
+      const path = `/missions/analysis/${encodeURIComponent(question.id)}`;
+      const { correct, answer, explanation, concepts } = await api<Result>(
+        session ? `${path}/attempts` : `${path}/check`,
+        { method: "POST", body: JSON.stringify({ selected: picked }) },
+        session?.accessToken,
+      );
+      const result = {
+        selected: picked,
+        correct,
+        answer,
+        explanation,
+        concepts,
+      };
+      if (session) window.dispatchEvent(new Event("analysis-saved"));
+      else recordAnalysisAttempt(userId, question.id, correct, picked, result);
       if (!alive.current) return;
-      setAnswer({ selected: picked, correct });
+      reveal(result);
     } catch (cause) {
       if (alive.current)
         setSaveError(
@@ -180,7 +237,7 @@ function AnalysisQuestion({
 
   function solveAgain() {
     interacted.current = true;
-    setAnswer(null);
+    reveal(null);
     setPicked(null);
     questionRef.current?.focus({ preventScroll: true });
   }
@@ -188,13 +245,13 @@ function AnalysisQuestion({
   const lines = question.code.split("\n");
   const rightLabel = (i: number) => {
     if (!answer) return null;
-    if (i === question.answer)
+    if (i === answer.answer)
       return answer.selected === i ? "내 답 / 정답" : "정답";
     return answer.selected === i ? "내 답 / 오답" : null;
   };
   const optionState = (i: number) => {
     if (answer) {
-      if (i === question.answer) return "is-correct";
+      if (i === answer.answer) return "is-correct";
       if (i === answer.selected) return "is-wrong";
       return "";
     }
@@ -283,7 +340,7 @@ function AnalysisQuestion({
             <div className="analysis-options">
               {question.options.map((text, i) => {
                 const note = rightLabel(i);
-                const isAnswer = i === question.answer;
+                const isAnswer = i === answer?.answer;
                 return (
                   <div
                     key={`${question.id}-${i}`}
@@ -309,16 +366,17 @@ function AnalysisQuestion({
                         <span className="analysis-option-note">{note}</span>
                       ) : null}
                     </label>
-                    {isAnswer ? (
-                      <div
-                        className="analysis-reveal"
-                        data-open={answer ? "true" : "false"}
-                        aria-hidden={!answer}
-                      >
+                    {/* 정답 보기는 답을 확인해야 알 수 있으니, 모든 보기에 접힌 칸을 두어 펼침 애니메이션을 살린다. */}
+                    <div
+                      className="analysis-reveal"
+                      data-open={isAnswer ? "true" : "false"}
+                      aria-hidden={!isAnswer}
+                    >
+                      {shown?.answer === i ? (
                         <div className="analysis-reveal-inner">
                           <div className="analysis-reveal-body">
                             <div className="analysis-explain-body">
-                              {question.explanation.map((paragraph) => (
+                              {shown.explanation.map((paragraph) => (
                                 <p key={paragraph}>{paragraph}</p>
                               ))}
                             </div>
@@ -326,14 +384,14 @@ function AnalysisQuestion({
                               className="analysis-chips"
                               aria-label="관련 개념"
                             >
-                              {question.concepts.map((concept) => (
+                              {shown.concepts.map((concept) => (
                                 <li key={concept}>{concept}</li>
                               ))}
                             </ul>
                           </div>
                         </div>
-                      </div>
-                    ) : null}
+                      ) : null}
+                    </div>
                   </div>
                 );
               })}
@@ -343,7 +401,7 @@ function AnalysisQuestion({
             {answer
               ? answer.correct
                 ? "정답입니다."
-                : `오답입니다. 정답은 ${LETTERS[question.answer]}, ${question.options[question.answer]}입니다.`
+                : `오답입니다. 정답은 ${LETTERS[answer.answer]}, ${question.options[answer.answer]}입니다.`
               : ""}
           </p>
           {answer ? (

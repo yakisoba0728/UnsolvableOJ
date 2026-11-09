@@ -1,5 +1,9 @@
 import type { Page } from "@playwright/test";
-import { analysisQuestions } from "../src/analysis/questions";
+import {
+  analysisCatalog as analysisQuestions,
+  publicQuestions,
+  reveal,
+} from "../../Back/src/modules/missions/analysis-catalog";
 import type { MissionDashboard } from "../src/missions/api";
 
 export function dashboard(): MissionDashboard {
@@ -54,14 +58,37 @@ export function dashboard(): MissionDashboard {
     ],
   };
 }
+export { analysisQuestions };
+
+/** 로그인 없이 쓰는 문항 목록과 연습용 판정. 정답·해설은 판정 응답에만 담긴다. */
+export async function mockAnalysisQuestions(page: Page) {
+  await page.route("**/api/v1/missions/analysis/questions", (route) =>
+    route.fulfill({ json: publicQuestions }),
+  );
+  await page.route("**/api/v1/missions/analysis/*/check", async (route) => {
+    const id = new URL(route.request().url()).pathname.split("/").at(-2)!;
+    const q = analysisQuestions.find((q) => q.id === id)!;
+    const { selected } = route.request().postDataJSON();
+    await route.fulfill({
+      json: {
+        questionId: id,
+        selected,
+        correct: selected === q.answer,
+        ...reveal(q),
+      },
+    });
+  });
+}
+
 export async function mockMissions(page: Page, data = dashboard()) {
-  const attempts: {
+  await mockAnalysisQuestions(page);
+  const attempts: ({
     userId: string;
     questionId: string;
     selected: number;
     correct: boolean;
     at: string;
-  }[] = [];
+  } & ReturnType<typeof reveal>)[] = [];
   await page.route("**/api/v1/missions", (route) =>
     route.fulfill({ json: data }),
   );
@@ -78,6 +105,7 @@ export async function mockMissions(page: Page, data = dashboard()) {
       selected,
       correct: selected === q.answer,
       at: new Date().toISOString(),
+      ...reveal(q),
     };
     const index = attempts.findIndex((a) => a.questionId === id);
     if (index >= 0) attempts[index] = item;

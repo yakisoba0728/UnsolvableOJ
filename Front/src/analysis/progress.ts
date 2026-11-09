@@ -2,9 +2,13 @@ import { useEffect, useSyncExternalStore } from "react";
 import { useAuth } from "../auth";
 import { api } from "../api";
 import { useRequest } from "../hooks";
+import type { AnalysisReveal } from "./questions";
 
-/** 로그인한 기록은 서버에, 비로그인 연습 기록만 브라우저에 저장한다. */
-export interface AnalysisAttempt {
+/**
+ * 로그인한 기록은 서버에, 비로그인 연습 기록만 브라우저에 저장한다.
+ * 정답·해설(AnalysisReveal)은 답을 확인한 뒤 서버가 준 값이다. 예전 비로그인 기록에는 없다.
+ */
+export interface AnalysisAttempt extends Partial<AnalysisReveal> {
   /** 비로그인은 "guest" */
   userId: string;
   questionId: string;
@@ -18,6 +22,10 @@ export interface AnalysisAttempt {
 const storageKey = "unsolvable-oj-analysis-v1";
 const MAX_ATTEMPTS = 500;
 
+const strings = (value: unknown) =>
+  value === undefined ||
+  (Array.isArray(value) && value.every((item) => typeof item === "string"));
+
 const isAttempt = (value: unknown): value is AnalysisAttempt => {
   const attempt = value as Partial<AnalysisAttempt> | null;
   return (
@@ -26,7 +34,10 @@ const isAttempt = (value: unknown): value is AnalysisAttempt => {
     typeof attempt.questionId === "string" &&
     typeof attempt.correct === "boolean" &&
     typeof attempt.at === "string" &&
-    (attempt.selected === undefined || typeof attempt.selected === "number")
+    (attempt.selected === undefined || typeof attempt.selected === "number") &&
+    (attempt.answer === undefined || typeof attempt.answer === "number") &&
+    strings(attempt.explanation) &&
+    strings(attempt.concepts)
   );
 };
 
@@ -93,11 +104,19 @@ export function recordAnalysisAttempt(
   questionId: string,
   correct: boolean,
   selected: number,
+  reveal?: AnalysisReveal,
 ) {
   // 다른 탭에서 남긴 기록 위에 더해야 그 기록을 덮어쓰지 않는다.
   state = [
     ...(load() ?? state),
-    { userId, questionId, correct, selected, at: new Date().toISOString() },
+    {
+      userId,
+      questionId,
+      correct,
+      selected,
+      ...reveal,
+      at: new Date().toISOString(),
+    },
   ].slice(-MAX_ATTEMPTS);
   try {
     localStorage.setItem(storageKey, JSON.stringify(state));

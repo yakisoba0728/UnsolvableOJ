@@ -1,5 +1,4 @@
-import { readFileSync } from 'node:fs';
-import { analysisCatalog } from './analysis-catalog.js';
+import { analysisCatalog, publicQuestions } from './analysis-catalog.js';
 import { currentStreak, kstDay, periods } from './mission-policy.js';
 
 describe('mission calendar and learning catalog', () => {
@@ -42,12 +41,19 @@ describe('mission calendar and learning catalog', () => {
       start: '2026-10-26',
     });
   });
-  it('matches every published frontend analysis question and answer', () => {
-    const source = readFileSync('../Front/src/analysis/questions.ts', 'utf8');
-    const questions = [
-      ...source.matchAll(/id: "([^"]+)"[\s\S]*?answer: (\d)/g),
-    ].map((m) => ({ id: m[1], answer: Number(m[2]) }));
-    expect(questions.length).toBeGreaterThan(0);
-    expect(analysisCatalog).toEqual(questions);
+  it('keeps analysis answers valid and out of the public question list', () => {
+    expect(new Set(analysisCatalog.map((q) => q.id)).size).toBe(
+      analysisCatalog.length,
+    );
+    for (const q of analysisCatalog) {
+      expect(q.options[q.answer]).toBeDefined();
+      expect(q.explanation.length).toBeGreaterThan(0);
+    }
+    expect(publicQuestions).toHaveLength(analysisCatalog.length);
+    expect(
+      publicQuestions.some(
+        (q) => 'answer' in q || 'explanation' in q || 'concepts' in q,
+      ),
+    ).toBe(false);
   });
 });
