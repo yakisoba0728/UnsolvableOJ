@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import Markdown from "react-markdown";
+import { ProblemMarkdown } from "../components/ProblemMarkdown";
 import {
   Bookmark,
   ChevronDown,
@@ -648,7 +648,7 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
                         </form>
                       ) : (
                         <div className="markdown answer-body">
-                          <Markdown>{answer.body}</Markdown>
+                          <ProblemMarkdown>{answer.body}</ProblemMarkdown>
                         </div>
                       )}
                       <small className="muted">
@@ -704,7 +704,7 @@ function PostContent({
   return (
     <>
       <div className="markdown post-body">
-        <Markdown>{body}</Markdown>
+        <ProblemMarkdown>{body}</ProblemMarkdown>
       </div>
       {code ? (
         <div className="markdown post-body post-code">
