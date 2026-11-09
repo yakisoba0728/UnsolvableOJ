@@ -207,3 +207,12 @@ export interface SessionDevice {
   remember: boolean;
   current: boolean;
 }
+
+/** 공개 문제 목록 한 쪽과 칩 숫자(같은 묶음의 조건만 빼고 센 결과 수). solves는 로그인했을 때만 온다. */
+export type ProblemListPage = Page<ProblemSummary> & {
+  facets?: {
+    difficulties?: Record<string, number>;
+    solves?: Record<string, number> | null;
+    tags?: { tag: string; count: number }[];
+  };
+};

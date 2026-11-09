@@ -113,5 +113,9 @@ describe('Problem tags, editorial and stats (e2e)', () => {
       solverCount: 2,
       acceptanceRate: 66.7,
     });
+    // 미리 센 통계는 제출이 지워질 때도(사용자 삭제의 연쇄 삭제 등) 다시 센다.
+    await db.query('DELETE FROM submissions WHERE user_id = $1', [solverA.id]);
+    const after = await http().get(`${base}/problems/by-slug/meta-${suffix}`).expect(200);
+    expect(after.body).toMatchObject({ solverCount: 1, acceptanceRate: 50 });
   });
 });

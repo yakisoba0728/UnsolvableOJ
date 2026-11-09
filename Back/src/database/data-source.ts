@@ -24,6 +24,7 @@ import { EnterpriseTests1794600000000 } from './migrations/1794600000000-enterpr
 import { RefreshTokens1794700000000 } from './migrations/1794700000000-refresh-tokens.js';
 import { AccountSecurity1795000000000 } from './migrations/1795000000000-account-security.js';
 import { EnterpriseInvites1795100000000 } from './migrations/1795100000000-enterprise-invites.js';
+import { ProblemStats1795200000000 } from './migrations/1795200000000-problem-stats.js';
 import { TestResults1795300000000 } from './migrations/1795300000000-test-results.js';
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -55,6 +56,7 @@ export default new DataSource({
     RefreshTokens1794700000000,
     AccountSecurity1795000000000,
     EnterpriseInvites1795100000000,
+    ProblemStats1795200000000,
     TestResults1795300000000,
   ],
   synchronize: false,

@@ -318,19 +318,14 @@ export class ProblemsService {
             latest: `p.created_at ${high}, p.id ${high}`,
             difficulty: `p.difficulty ${low}, ${ties}`,
             title: `p.title ${low}, ${ties}`,
-            solvers: `stats.solvers ${high}, ${ties}`,
+            solvers: `COALESCE(stats.solver_count, 0) ${high}, ${ties}`,
             // 정답률이 없는(제출 없는) 문제는 뒤집어도 맨 뒤다.
-            rate: `stats.rate ${high} NULLS LAST, ${ties}`,
+            rate: `ROUND(100.0 * stats.accepted_count / NULLIF(stats.finished_count, 0), 1) ${high} NULLS LAST, ${ties}`,
           }[sort];
-    // shortcut: 푼 사람·정답률 정렬은 조건에 맞는 문제의 제출을 매번 집계한다. 느려지면 문제 행에 집계 열을 둔다.
+    // 문제별 집계는 제출 트리거가 problem_stats에 미리 센다(마이그레이션 1795200000000).
     const stats =
       sort === 'solvers' || sort === 'rate'
-        ? `LEFT JOIN LATERAL (SELECT
-             COUNT(DISTINCT user_id) FILTER (WHERE status = 'ACCEPTED') AS solvers,
-             ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'ACCEPTED') / NULLIF(COUNT(*), 0), 1) AS rate
-           FROM submissions
-           WHERE problem_id = p.id AND NOT is_test
-             AND status NOT IN ('QUEUED', 'JUDGING', 'SYSTEM_ERROR', 'CANCELLED')) stats ON TRUE`
+        ? 'LEFT JOIN problem_stats stats ON stats.problem_id = p.id'
         : '';
     const rows = await this.dataSource.query<
       {
@@ -372,22 +367,18 @@ export class ProblemsService {
     };
   }
 
-  // One indexed aggregate per page, not one submissions query per problem.
+  // 쪽마다 미리 센 통계를 한 번에 읽는다. 행이 없거나 끝난 제출이 없으면 정답률은 null이다.
   private async withStats<T extends { id: string }>(
     db: Pick<EntityManager, 'query'>,
     problems: T[],
   ) {
     const stats = problems.length
       ? await db.query<
-          { problemId: string; solverCount: number; acceptanceRate: number }[]
+          { problemId: string; solverCount: number; acceptanceRate: number | null }[]
         >(
-          `SELECT problem_id AS "problemId",
-             COUNT(DISTINCT user_id) FILTER (WHERE status = 'ACCEPTED')::int AS "solverCount",
-             ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'ACCEPTED') / COUNT(*), 1)::float8 AS "acceptanceRate"
-           FROM submissions
-           WHERE problem_id = ANY($1::uuid[]) AND NOT is_test
-             AND status NOT IN ('QUEUED', 'JUDGING', 'SYSTEM_ERROR', 'CANCELLED')
-           GROUP BY problem_id`,
+          `SELECT problem_id AS "problemId", solver_count AS "solverCount",
+             ROUND(100.0 * accepted_count / NULLIF(finished_count, 0), 1)::float8 AS "acceptanceRate"
+           FROM problem_stats WHERE problem_id = ANY($1::uuid[])`,
           [problems.map((problem) => problem.id)],
         )
       : [];

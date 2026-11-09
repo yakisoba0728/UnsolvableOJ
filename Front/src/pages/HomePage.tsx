@@ -12,8 +12,8 @@ import {
   learningByDay,
   submissionsByDay,
   useDocumentTitle,
-  useAllProblems,
   useMyStanding,
+  useProblemPage,
   useSubmissionHistory,
 } from "../hooks";
 import { LANGUAGES } from "../types";
@@ -34,7 +34,16 @@ export function HomePage() {
     retryProfile,
     retryRank,
   } = useMyStanding(session);
-  const { problems, loading, error, retry } = useAllProblems();
+  // 추천 7장(로그인하면 아직 해결하지 않은 문제)과 공개 문제 수만 받는다. 전체 목록은 받지 않는다.
+  const {
+    data: list,
+    loading,
+    error,
+    retry,
+  } = useProblemPage(
+    session ? "limit=7&solve=none,attempted" : "limit=7",
+    session,
+  );
   const history = useSubmissionHistory(session);
   // 실패한 요청만 다시 받는다. 성공한 카드까지 다시 불러오면 잠깐 비어 보인다.
   const retryFailed = () => {
@@ -51,9 +60,9 @@ export function HomePage() {
   // 내가 6위 밖이면 상위 5명 + 내 순위, 그 외에는 상위 6명 (어느 쪽이든 6줄로 카드 높이를 맞춘다)
   const topRankings = rankings.slice(0, myRank >= 5 ? 5 : 6);
 
-  const recommended = problems
-    .filter((problem) => !history.solved.has(problem.id))
-    .slice(0, 7); // 슬라이더는 이 7장 + "전체보기" 카드 = 총 8장
+  const recommended = list?.items ?? []; // 슬라이더는 이 7장 + "전체보기" 카드 = 총 8장
+  // 풀이 상태로 걸렀으면 그 조건을 뺀 수(solves[""])가 공개 문제 전체다.
+  const problemCount = list?.facets?.solves?.[""] ?? list?.total ?? 0;
   const name = session?.user.username;
 
   return (
@@ -89,7 +98,7 @@ export function HomePage() {
                   ) : error ? (
                     "—"
                   ) : (
-                    problems.length
+                    problemCount
                   )}
                 </strong>
                 <span>공개 문제</span>
@@ -315,7 +324,7 @@ export function HomePage() {
               →
             </span>
             <strong>전체보기</strong>
-            <small>{problems.length}개 문제 모두 보기</small>
+            <small>{problemCount}개 문제 모두 보기</small>
           </Link>
         </CardSlider>
       ) : (
@@ -329,7 +338,7 @@ export function HomePage() {
             </Link>
           </div>
           <div className="empty-state">
-            {problems.length
+            {problemCount
               ? "모든 문제를 해결했어요. 새 문제를 기다려 주세요."
               : "공개된 문제가 아직 없습니다."}
           </div>

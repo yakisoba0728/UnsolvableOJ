@@ -189,7 +189,7 @@ describe('public problem detail', () => {
       samples.map(({ input, expectedOutput }) => ({ input, expectedOutput })),
     );
     // Same aggregate as the list, read inside the detail snapshot transaction.
-    expect(query).toHaveBeenCalledWith(expect.stringContaining('FROM submissions'), [[ids[0]]]);
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('FROM problem_stats'), [[ids[0]]]);
     expect(result).toMatchObject({ solverCount: 3, acceptanceRate: 42.9 });
   });
 });
