@@ -1390,6 +1390,11 @@ input::placeholder, textarea::placeholder { color: var(--color-ink-600); opacity
 .history-list a span:nth-child(2) {
   flex: 1;
 }
+.history-panel > .text-button {
+  display: inline-block;
+  margin: 12px 12px 0;
+  font-size: 13px;
+}
 .code-panel {
   background: var(--color-code);
   border-color: var(--color-code);

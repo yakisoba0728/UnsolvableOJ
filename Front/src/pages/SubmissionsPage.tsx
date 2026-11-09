@@ -52,9 +52,12 @@ export function SubmissionsPage() {
   const rawDate = params.get("date") ?? "";
   const selectedDate = parseCalendarDate(rawDate) ? rawDate : "";
   const grouped = params.get("g") === "problem";
+  // 문제 화면의 "전체 보기"가 넘기는 문제 한정 조건
+  const problemId = params.get("problemId") ?? "";
 
   const keyword = urlQuery.trim().toLowerCase();
   const matchesBase = (item: Submission) =>
+    (!problemId || item.problem.id === problemId) &&
     (!selectedDate || calendarDate(new Date(item.createdAt)) === selectedDate) &&
     (!language || item.language === language) &&
     (!keyword || (item.problem.title ?? "").toLowerCase().includes(keyword));
@@ -89,12 +92,13 @@ export function SubmissionsPage() {
       .filter((item) => !seen.has(item.problem.id) && seen.add(item.problem.id))
       .map((item) => ({ item, count: counts.get(item.problem.id) ?? 1 }));
     return { rows: latest, filteredCount: latest.length, matchedCount: filtered.length };
-  }, [all, statuses.join(","), language, keyword, selectedDate, grouped]);
+  }, [all, statuses.join(","), language, keyword, selectedDate, grouped, problemId]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
   const visible = rows.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
-  const hasFilter = Boolean(statuses.length || language || keyword || selectedDate);
+  const hasFilter = Boolean(statuses.length || language || keyword || selectedDate || problemId);
+  const problemTitle = all.find((item) => item.problem.id === problemId)?.problem.title;
 
   return (
     <div className="page-width page-body submissions-page">
@@ -168,6 +172,14 @@ export function SubmissionsPage() {
           </div>
         </div>
       </div>
+      {problemId ? (
+        <p className="notice-inline">
+          {problemTitle ? `‘${problemTitle}’` : "선택한 문제"}의 제출만 보고 있어요.{" "}
+          <button type="button" className="inline-button" onClick={() => update({ problemId: null })}>
+            모든 문제 보기
+          </button>
+        </p>
+      ) : null}
       <div className="submission-date-filter">
         <label htmlFor="submission-date">제출 날짜 (기기 현지 시간)</label>
         <input id="submission-date" type="date" value={selectedDate} onChange={(event) => update({ date: event.target.value || null })} />

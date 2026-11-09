@@ -591,3 +591,42 @@ test("the verdict in the my-submissions list is plain coloured text, not a pill"
   expect(verdict).toEqual(await typography(".data-list .difficulty"));
   expect(verdict.weight).toBe("700");
 });
+
+test("the problem's submission history links to all of its submissions on the my-submissions page", async ({
+  page,
+}) => {
+  await authenticate(page);
+  const item = (id: string, problemId: string, title: string) => ({
+    id,
+    problem: { id: problemId, slug: problemId, title },
+    language: "PYTHON",
+    status: "ACCEPTED",
+    runtimeMs: 1,
+    memoryKb: 1024,
+    passedTestCases: 1,
+    totalTestCases: 1,
+    createdAt: problem.createdAt,
+  });
+  const items = [
+    item("mine-1", problem.id, problem.title),
+    item("mine-2", problem.id, problem.title),
+    item("other", "other-problem", "다른 문제"),
+  ];
+  await page.route("**/api/v1/submissions?*", (route) => {
+    const problemId = new URL(route.request().url()).searchParams.get("problemId");
+    const matched = items.filter((entry) => !problemId || entry.problem.id === problemId);
+    return route.fulfill({
+      json: { items: matched, page: 1, limit: 20, total: matched.length, totalPages: 1 },
+    });
+  });
+  await page.goto("/problems/view/sum");
+  await page.getByRole("tab", { name: "제출 내역" }).click();
+  await page.getByRole("link", { name: "전체 보기" }).click();
+  await expect(page).toHaveURL(new RegExp(`/submissions\\?problemId=${problem.id}$`));
+  await expect(page.getByText(`‘${problem.title}’의 제출만 보고 있어요.`)).toBeVisible();
+  await expect(page.locator(".history-row")).toHaveCount(2);
+  await expect(page.locator(".history-row", { hasText: "다른 문제" })).toHaveCount(0);
+  await page.getByRole("button", { name: "모든 문제 보기" }).click();
+  await expect(page).toHaveURL(/\/submissions$/);
+  await expect(page.locator(".history-row")).toHaveCount(3);
+});
