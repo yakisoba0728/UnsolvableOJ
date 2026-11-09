@@ -364,8 +364,13 @@ try {
   assert.ok((await db.query('SELECT completed_for_learning FROM submissions WHERE id=$1', [learningFixtures[0].id]))[0].completed_for_learning);
 
   // 정지된 사용자가 있으면 정지 열을 지우지 않는다(되돌리면 다시 접근할 수 있게 된다).
+  // 뒤에 마이그레이션이 더 붙어도 정지 마이그레이션을 마지막으로 두고 되돌린다.
   await db.destroy();
-  db = await new DataSource(options).initialize();
+  const suspension = configured.options.migrations.findIndex(
+    (migration) => migration.name === 'UserSuspension1794100000000',
+  );
+  assert.notEqual(suspension, -1);
+  db = await new DataSource({ ...options, migrations: configured.options.migrations.slice(0, suspension + 1) }).initialize();
   await db.runMigrations();
   await db.query('UPDATE users SET suspended_at=now() WHERE id=$1', [learner.id]);
   await assert.rejects(db.undoLastMigration(), /Cannot roll back user suspension with suspended users/);
