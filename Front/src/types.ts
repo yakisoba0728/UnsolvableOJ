@@ -104,6 +104,14 @@ export interface Submission {
     stdoutTruncated: boolean;
     stderrTruncated: boolean;
   }[];
+  /** 실행 순서대로의 테스트별 판정(첫 실패에서 멈춤). 이 기능 전의 제출은 빈 배열이거나 없다. */
+  testResults?: {
+    testCase: number;
+    isSample: boolean;
+    status: string;
+    runtimeMs: number;
+    memoryKb: number;
+  }[];
   createdAt: string;
   updatedAt: string;
 }

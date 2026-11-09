@@ -22,6 +22,7 @@ import { TestSubmissions1794400000000 } from './migrations/1794400000000-test-su
 import { PrivateProblems1794500000000 } from './migrations/1794500000000-private-problems.js';
 import { EnterpriseTests1794600000000 } from './migrations/1794600000000-enterprise-tests.js';
 import { RefreshTokens1794700000000 } from './migrations/1794700000000-refresh-tokens.js';
+import { TestResults1795300000000 } from './migrations/1795300000000-test-results.js';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -50,6 +51,7 @@ export default new DataSource({
     PrivateProblems1794500000000,
     EnterpriseTests1794600000000,
     RefreshTokens1794700000000,
+    TestResults1795300000000,
   ],
   synchronize: false,
 });

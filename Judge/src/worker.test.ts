@@ -14,7 +14,7 @@ const claim: Claim = {
 };
 const result: JudgeResult = {
   status: "ACCEPTED", runtimeMs: 2, memoryKb: 1000,
-  passedTestCases: 1, totalTestCases: 1, debugOutputs: [],
+  passedTestCases: 1, totalTestCases: 1, debugOutputs: [], testResults: [],
 };
 const path = "/api/v1/internal/judge/submissions/submission";
 
@@ -382,7 +382,7 @@ test("an ordinary judge failure reports SYSTEM_ERROR without exposing internal d
   assert.ok(report && typeof report.body === "string");
   assert.deepEqual(JSON.parse(report.body), {
     status: "SYSTEM_ERROR", runtimeMs: 0, memoryKb: 0,
-    passedTestCases: 0, totalTestCases: 1, debugOutputs: [], judgeMessage: "채점 중 시스템 오류가 발생했습니다.",
+    passedTestCases: 0, totalTestCases: 1, debugOutputs: [], testResults: [], judgeMessage: "채점 중 시스템 오류가 발생했습니다.",
   });
   assert.equal(h.errors.mock.callCount(), 1);
   assert.match(String(h.errors.mock.calls[0].arguments[1]), /e{1500}/);

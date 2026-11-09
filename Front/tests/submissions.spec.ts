@@ -321,6 +321,22 @@ test("a rejected submission shows each public case with input, expected and actu
             stderrTruncated: false,
           },
         ],
+        testResults: [
+          {
+            testCase: 2,
+            isSample: true,
+            status: "ACCEPTED",
+            runtimeMs: 7,
+            memoryKb: 2048,
+          },
+          {
+            testCase: 1,
+            isSample: false,
+            status: "WRONG_ANSWER",
+            runtimeMs: 10,
+            memoryKb: 1000,
+          },
+        ],
         createdAt: "2026-09-01T00:00:00Z",
         updatedAt: "2026-09-01T00:00:00Z",
       },
@@ -330,6 +346,11 @@ test("a rejected submission shows each public case with input, expected and actu
     route.fulfill({ json: [] }),
   );
   await page.goto("/submissions/wrong-id");
+  await expect(page.getByText("1번 테스트에서 실패")).toBeVisible();
+  const rows = page.locator(".test-results-table tbody tr");
+  await expect(rows).toHaveCount(2);
+  await expect(rows.nth(0)).toContainText("1비공개틀림10ms1.0MB");
+  await expect(rows.nth(1)).toContainText("2예제성공7ms2.0MB");
   const result = page.locator(".case-result");
   await expect(result.getByText("예제 1")).toBeVisible();
   await expect(result.getByText("기대 출력과 달라요")).toBeVisible();
@@ -374,6 +395,15 @@ test("a rejected submission is shown under the editor with each example compared
         stderrTruncated: false,
       },
     ],
+    testResults: [
+      {
+        testCase: 1,
+        isSample: true,
+        status: "WRONG_ANSWER",
+        runtimeMs: 10,
+        memoryKb: 1000,
+      },
+    ],
     createdAt: "2026-09-01T00:00:00Z",
     updatedAt: "2026-09-01T00:00:00Z",
   };
@@ -388,6 +418,10 @@ test("a rejected submission is shown under the editor with each example compared
   await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
   const panel = page.getByRole("region", { name: "채점 결과" });
   await expect(panel.getByText("기대 출력과 달라요")).toBeVisible();
+  await expect(panel.getByText("1번 테스트에서 실패")).toBeVisible();
+  await expect(panel.locator(".test-results-table tbody tr")).toContainText(
+    "1예제틀림10ms1.0MB",
+  );
   await expect(panel.locator(".io-block").nth(0)).toContainText("1 2");
   await expect(panel.locator(".io-block").nth(1)).toContainText("3");
   await expect(panel.locator(".io-block").nth(2)).toContainText("0");

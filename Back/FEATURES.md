@@ -66,7 +66,7 @@
 |---|---|---|
 | `POST /problems/:problemId/submissions` | 로그인 | 공개 문제에 제출하고 채점 큐 등록, HTTP 202 반환. 공개 전 문제는 소유 작성자/ADMIN만 검증용(`isTest`)으로 제출. 분당 20회, ADMIN이 아니면 채점 대기·진행 중인 제출은 계정당 3개까지(넘으면 429) |
 | `GET /submissions` | 로그인 | 내 제출 목록(검증용 제외), 문제 ID 필터, 페이지 조회 |
-| `GET /submissions/:id` | 제출자 본인, 문제 소유자/ADMIN | 판정·소스 코드·실행 정보·공개 예제 출력 |
+| `GET /submissions/:id` | 제출자 본인, 문제 소유자/ADMIN | 판정·소스 코드·실행 정보·테스트별 결과·공개 예제 출력 |
 | `GET /problems/:problemId/submissions` | 문제 소유자/ADMIN | 문제별 전체 제출(검증용 포함, 제출자 이름), 상태 필터, 페이지 조회. 소스는 상세에서만 |
 | `POST /submissions/:id/rejudge` | 문제 소유자/ADMIN | 재채점, HTTP 202 반환. 분당 20회, 일괄 재채점처럼 새 제출 뒤에 처리 |
 | `POST /problems/:problemId/rejudge` | 문제 소유자/ADMIN | 오래된 제출부터 최대 200건 재채점. `{ requeued, skipped, remaining, next }`를 돌려주며 `next`를 `after`로 넘겨 이어서 처리. 대기·채점 중인 제출은 건너뜀 |
@@ -82,6 +82,7 @@
 
 진행 상태는 QUEUED/JUDGING, 최종 상태는 ACCEPTED, WRONG_ANSWER, TIME_LIMIT_EXCEEDED, MEMORY_LIMIT_EXCEEDED, RUNTIME_ERROR, COMPILE_ERROR, OUTPUT_LIMIT_EXCEEDED, SYSTEM_ERROR, CANCELLED입니다. CANCELLED는 내부 결과 계약의 상태이며 사용자 취소 API는 없습니다.
 
+- 상세의 `testResults`에는 실행한 테스트마다 원래 테스트 번호(`testCase`, 1부터)·공개 예제 여부(`isSample`)·판정·시간(ms)·메모리(KB)를 실행 순서대로 반환합니다. 첫 실패에서 채점을 멈추므로 실패가 있으면 마지막 항목이 실패한 테스트이고, 그 뒤 테스트는 없습니다. 비공개 테스트는 번호와 판정·시간·메모리만 담고 입력·출력은 담지 않습니다. 목록에는 넣지 않고, 재채점 시 초기화하며, 이 기능 전의 제출과 구버전 워커가 채점한 제출은 빈 배열입니다.
 - 본인 상세의 `debugOutputs`에는 실행된 공개 예제 최대 5개의 stdout·stderr 앞 1,000바이트와 잘림 여부를 반환합니다. 비공개 테스트 출력은 숨기고 재채점 시 초기화합니다.
 - DB에 저장할 수 없는 NUL·불완전한 서로게이트는 진단 표시에서 대체 문자로 변환합니다. 실제 정답 비교에 사용하는 바이트는 바꾸지 않습니다.
 - 본인 상세의 `sampleTestCases`는 해당 출력과 대응하는 **제출 당시 버전**의 공개 예제 입력·기대 출력·원래 테스트 번호(`testCase`)를 반환합니다. 문제 수정·보관 후에도 최신 문제의 예제로 대체하지 않습니다. 버전이나 출력이 없으면 빈 배열이며 비공개 테스트는 포함하지 않습니다.
@@ -209,9 +210,10 @@
 | `GET /internal/judge/submissions/:id` | 채점 토큰 + 세대/시도 ID | 채점 권한 획득, 소스·제한·전체 테스트 반환 |
 | `PATCH /internal/judge/submissions/:id/heartbeat` | 동일 | 제출별 lease 연장 |
 | `PATCH /internal/judge/submissions/:id/release` | 동일 | 실행 서비스 장애로 채점하지 못한 lease 반납. 다음 세대로 재등록하며 복구 횟수를 1 쓰고, 이미 5번을 썼으면 SYSTEM_ERROR로 종료 |
-| `PATCH /internal/judge/submissions/:id/result` | 동일 | 최종 판정 저장과 XP 정산 |
+| `PATCH /internal/judge/submissions/:id/result` | 동일 | 최종 판정·테스트별 결과 저장과 XP 정산 |
 
 - `X-Judge-Token`을 상수 시간 비교로 인증합니다. 워커는 `X-Judge-Worker`, 채점 시도는 `X-Judge-Generation`·`X-Judge-Attempt`로 구분합니다.
+- 결과의 `testResults`는 선택 항목이라 구버전 워커의 결과도 받습니다. 최대 100개, 번호 1–1,000, 판정은 테스트 단위 상태(ACCEPTED·WRONG_ANSWER·TIME/MEMORY/OUTPUT_LIMIT_EXCEEDED·RUNTIME_ERROR), 시간 0–86,400,000ms, 메모리 0–1,000,000,000KB로 검증하고, 개수나 번호가 `totalTestCases`를 넘으면 400입니다.
 - PostgreSQL이 상태의 기준입니다. Redis/BullMQ에는 소스·비공개 테스트 대신 `submissionId`, `generation`만 전달합니다.
 - DB 잠금과 세대·시도 ID로 중복 claim과 오래된 결과를 거절합니다. 같은 시도의 동일 최종 판정 재전송은 허용하고 다른 판정으로 바꾸는 요청은 거절합니다.
 - lease는 60초, 워커·제출 heartbeat는 10초 간격입니다. 워커 목록에서 60초 이상 지난 항목을 정리합니다.
@@ -227,7 +229,7 @@
 - 기본 속도 제한은 IP·핸들러별 분당 100회이며 회원가입 5회, 로그인 10회, 비밀번호·사용자 이름 변경 각 5회, 제출 생성 20회입니다. 내부 채점 API는 제외합니다. 카운터는 Redis(`throttle:*` 키)에 저장해 API 인스턴스가 여러 개여도 같은 한도를 공유합니다.
 - 프록시 환경은 `TRUST_PROXY`로 신뢰할 프록시 IP/CIDR을 지정합니다. 기본값은 전달 헤더를 신뢰하지 않으며, 웹 프록시는 외부 IP 헤더를 덮어쓰고 요청 전체에 API와 같은 16MiB 제한을 적용합니다.
 - 환경 변수 스키마 검증(`NODE_ENV=production`에서는 `.env.example`의 `replace-this…` 예시 비밀키 거절), PostgreSQL SSL 옵션, Redis 주소·계정·DB 설정, API 바인딩 주소·포트 설정을 지원합니다.
-- 마이그레이션은 초기 스키마, 버전·채점 시도·해결 기록·감사 로그 추가, 기존 정답 XP/해결 기록 보정과 과거 채점 lease 복구, 공개 예제 실행 출력(`debug_outputs`) 저장, 제출별 XP 정답 근거(`accepted_for_xp`) 보존, 목록 통계·QUEUED 복구·랭킹 인덱스와 대소문자 무시 사용자 이름 고유 인덱스, lease 복구 횟수(`recovery_count`), 커뮤니티 글·답변·추천·저장·팔로우 테이블, 커뮤니티 신고·숨김·조회 기록과 알림 테이블을 제공합니다. 스키마 자동 동기화는 사용하지 않습니다.
+- 마이그레이션은 초기 스키마, 버전·채점 시도·해결 기록·감사 로그 추가, 기존 정답 XP/해결 기록 보정과 과거 채점 lease 복구, 공개 예제 실행 출력(`debug_outputs`)·테스트별 결과(`test_results`) 저장, 제출별 XP 정답 근거(`accepted_for_xp`) 보존, 목록 통계·QUEUED 복구·랭킹 인덱스와 대소문자 무시 사용자 이름 고유 인덱스, lease 복구 횟수(`recovery_count`), 커뮤니티 글·답변·추천·저장·팔로우 테이블, 커뮤니티 신고·숨김·조회 기록과 알림 테이블을 제공합니다. 스키마 자동 동기화는 사용하지 않습니다.
 - `npm run db:bootstrap:admin -- <email>`: 기존 계정을 관리자로 승격하고 토큰을 무효화합니다. 계정이 없으면 실패합니다.
 - `npm run db:seed:demo`: 데모 작성자·A+B 공개 문제·스냅샷과 무작위 비밀번호를 준비합니다. 재실행 시 데모 비밀번호와 토큰 버전이 변경됩니다.
 - lint, 단위 테스트, 빌드, PostgreSQL·Redis 기반 E2E 테스트 명령을 제공합니다.

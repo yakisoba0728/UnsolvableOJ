@@ -123,6 +123,37 @@ describe('Health and submission judging flow (e2e)', () => {
         stderrTruncated: false,
       },
     ];
+    const testResults = [
+      {
+        testCase: 1,
+        isSample: true,
+        status: 'ACCEPTED',
+        runtimeMs: 8,
+        memoryKb: 1024,
+      },
+      {
+        testCase: 2,
+        isSample: false,
+        status: 'ACCEPTED',
+        runtimeMs: 5,
+        memoryKb: 900,
+      },
+    ];
+    // 전체 테스트 수보다 큰 번호나 많은 항목은 거절한다.
+    for (const invalid of [
+      [{ ...testResults[0], testCase: 3 }],
+      [...testResults, testResults[0]],
+    ])
+      await request(app.getHttpServer())
+        .patch(`/api/v1/internal/judge/submissions/${submitted.body.id}/result`)
+        .set(judgeHeader)
+        .send({
+          status: 'ACCEPTED',
+          passedTestCases: 2,
+          totalTestCases: 2,
+          testResults: invalid,
+        })
+        .expect(400);
     const judged = await request(app.getHttpServer())
       .patch(`/api/v1/internal/judge/submissions/${submitted.body.id}/result`)
       .set(judgeHeader)
@@ -133,6 +164,7 @@ describe('Health and submission judging flow (e2e)', () => {
         runtimeMs: 8,
         memoryKb: 1024,
         debugOutputs,
+        testResults,
       })
       .expect(200);
     expect(judged.body.status).toBe('ACCEPTED');
@@ -181,6 +213,7 @@ describe('Health and submission judging flow (e2e)', () => {
     expect(mine.body.sourceCode).toContain('print(sum');
     expect(mine.body.status).toBe('ACCEPTED');
     expect(mine.body.debugOutputs).toEqual(debugOutputs);
+    expect(mine.body.testResults).toEqual(testResults);
     expect(mine.body.sampleTestCases).toEqual([
       { testCase: 1, input: '1 2\n', expectedOutput: '3\n' },
     ]);
@@ -190,6 +223,7 @@ describe('Health and submission judging flow (e2e)', () => {
       .set('Authorization', `Bearer ${solver.accessToken}`)
       .expect(200);
     expect(list.body.items[0]).not.toHaveProperty('debugOutputs');
+    expect(list.body.items[0]).not.toHaveProperty('testResults');
     expect(list.body.items[0]).not.toHaveProperty('sampleTestCases');
     expect(list.body.items[0]).not.toHaveProperty('sourceCode');
 
@@ -202,6 +236,7 @@ describe('Health and submission judging flow (e2e)', () => {
       .set('Authorization', `Bearer ${solver.accessToken}`)
       .expect(200);
     expect(requeued.body.debugOutputs).toEqual([]);
+    expect(requeued.body.testResults).toEqual([]);
     expect(await problemStats()).toMatchObject({
       solverCount: 1,
       acceptanceRate: 50,

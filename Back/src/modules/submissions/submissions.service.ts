@@ -115,6 +115,7 @@ export function toSubmissionResponse(
       ? {
           sourceCode: submission.sourceCode,
           debugOutputs: submission.debugOutputs ?? [],
+          testResults: submission.testResults ?? [],
         }
       : {}),
     createdAt: submission.createdAt,
@@ -156,6 +157,7 @@ function resetForRejudge(current: Submission, problem: Problem) {
   current.totalTestCases = 0;
   current.compileOutput = null;
   current.debugOutputs = [];
+  current.testResults = [];
   current.judgeMessage = null;
 }
 

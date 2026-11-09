@@ -202,6 +202,13 @@ export class JudgeService {
       throw new BadRequestException(
         '통과한 테스트 수가 전체 테스트 수보다 많습니다.',
       );
+    if (
+      (dto.testResults?.length ?? 0) > dto.totalTestCases ||
+      dto.testResults?.some(({ testCase }) => testCase > dto.totalTestCases)
+    )
+      throw new BadRequestException(
+        '테스트별 결과가 전체 테스트 수와 맞지 않습니다.',
+      );
     return this.dataSource.transaction(async (manager) => {
       // Serialize result/claim writes without blocking solve foreign-key checks.
       const submission = await manager
@@ -244,6 +251,15 @@ export class JudgeService {
         stdoutTruncated: output.stdoutTruncated,
         stderrTruncated: output.stderrTruncated,
       }));
+      submission.testResults = (dto.testResults ?? []).map(
+        ({ testCase, isSample, status, runtimeMs, memoryKb }) => ({
+          testCase,
+          isSample,
+          status,
+          runtimeMs,
+          memoryKb,
+        }),
+      );
       submission.judgeMessage =
         dto.judgeMessage == null
           ? null

@@ -24,6 +24,14 @@ export interface JudgeResult {
     stdoutTruncated: boolean;
     stderrTruncated: boolean;
   }[];
+  /** 실행한 테스트마다 원래 번호(1부터)·판정·시간·메모리. 첫 실패에서 멈추므로 마지막 항목이 실패한 테스트다. 입력·출력은 넣지 않는다. */
+  testResults: {
+    testCase: number;
+    isSample: boolean;
+    status: string;
+    runtimeMs: number;
+    memoryKb: number;
+  }[];
 }
 
 export interface SandboxConfig {
@@ -188,7 +196,7 @@ function sameOutput(actual: Buffer, expected: Buffer) {
 export async function judge(claim: Claim, config: SandboxConfig, cancellation?: AbortSignal): Promise<JudgeResult> {
   const verdict: JudgeResult = {
     status: "SYSTEM_ERROR", runtimeMs: 0, memoryKb: 0,
-    passedTestCases: 0, totalTestCases: claim.testCases.length, debugOutputs: [],
+    passedTestCases: 0, totalTestCases: claim.testCases.length, debugOutputs: [], testResults: [],
   };
   const language = Object.hasOwn(LANGUAGES, claim.language) ? LANGUAGES[claim.language] : undefined;
   if (!language) return { ...verdict, judgeMessage: "지원하지 않는 언어입니다." };
@@ -280,8 +288,10 @@ export async function judge(claim: Claim, config: SandboxConfig, cancellation?: 
         ["/usr/bin/prlimit", `--fsize=${OUTPUT_LIMIT}:${OUTPUT_LIMIT}`, "--", ...args],
         copyIn, claim.limits.timeMs, claim.limits.memoryMb, testCase.input,
       );
-      verdict.runtimeMs = Math.max(verdict.runtimeMs, Math.round(execution.runTime / 1_000_000));
-      verdict.memoryKb = Math.max(verdict.memoryKb, Math.ceil(execution.memory / 1024));
+      const runtimeMs = Math.round(execution.runTime / 1_000_000);
+      const memoryKb = Math.ceil(execution.memory / 1024);
+      verdict.runtimeMs = Math.max(verdict.runtimeMs, runtimeMs);
+      verdict.memoryKb = Math.max(verdict.memoryKb, memoryKb);
       if (testCase.isSample === true && verdict.debugOutputs.length < 5) {
         verdict.debugOutputs.push({
           testCase: testCase.index,
@@ -294,8 +304,9 @@ export async function judge(claim: Claim, config: SandboxConfig, cancellation?: 
           (stdout.length >= OUTPUT_LIMIT || stderr.length >= OUTPUT_LIMIT)) status = "OUTPUT_LIMIT_EXCEEDED";
       if (status === "RUNTIME_ERROR") verdict.judgeMessage = testCase.isSample === true
         ? stderr.subarray(0, 1000).toString("utf8") : "비공개 테스트에서 런타임 에러가 발생했습니다.";
+      if (status === "ACCEPTED" && !sameOutput(stdout, Buffer.from(testCase.expectedOutput))) status = "WRONG_ANSWER";
+      verdict.testResults.push({ testCase: testCase.index, isSample: testCase.isSample === true, status, runtimeMs, memoryKb });
       if (status !== "ACCEPTED") return { ...verdict, status };
-      if (!sameOutput(stdout, Buffer.from(testCase.expectedOutput))) return { ...verdict, status: "WRONG_ANSWER" };
       verdict.passedTestCases++;
     }
     return { ...verdict, status: "ACCEPTED" };

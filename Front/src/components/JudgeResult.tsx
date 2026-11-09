@@ -260,10 +260,66 @@ export function ResultNotices({ submission }: { submission: Submission }) {
   );
 }
 
-/** 공개 예제별 입력·기대 출력·내 출력 */
+/** 테스트별 판정 표와 공개 예제별 입력·기대 출력·내 출력 */
 export function CaseResults({ submission }: { submission: Submission }) {
+  const tests = submission.testResults ?? [];
+  const failed = tests.find((test) => test.status !== "ACCEPTED");
   return (
     <>
+      {tests.length > 0 ? (
+        <section className="source-section case-results">
+          <h2>테스트별 결과</h2>
+          {failed ? (
+            <p className="test-failed">
+              <strong>{failed.testCase}번 테스트에서 실패</strong> (
+              {failed.isSample ? "예제" : "비공개"},{" "}
+              {verdictLabel(failed.status)})
+            </p>
+          ) : null}
+          <p className="muted">
+            테스트는 예제부터 실행하고 첫 실패에서 멈춰요. 비공개 테스트는
+            번호와 판정, 시간, 메모리만 보여 드려요.
+          </p>
+          <div className="test-results-scroll">
+            <table className="test-results-table">
+              <thead>
+                <tr>
+                  <th scope="col">번호</th>
+                  <th scope="col">종류</th>
+                  <th scope="col">판정</th>
+                  <th scope="col">시간</th>
+                  <th scope="col">메모리</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...tests]
+                  .sort((left, right) => left.testCase - right.testCase)
+                  .map((test) => (
+                    <tr key={test.testCase}>
+                      <td>{test.testCase}</td>
+                      <td>
+                        <span
+                          className={`case-pill ${test.isSample ? "sample" : "hidden"}`}
+                        >
+                          {test.isSample ? "예제" : "비공개"}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`verdict verdict-${test.status.toLowerCase()}`}
+                        >
+                          {verdictLabel(test.status)}
+                        </span>
+                      </td>
+                      <td>{test.runtimeMs}ms</td>
+                      <td>{(test.memoryKb / 1024).toFixed(1)}MB</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
       {submission.debugOutputs && submission.debugOutputs.length > 0 ? (
         <section className="source-section case-results">
           <h2>케이스별 입력과 출력</h2>

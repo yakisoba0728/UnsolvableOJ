@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { DebugOutputDto } from './debug-output.dto.js';
+import { TestResultDto } from './test-result.dto.js';
 import { SubmissionStatus } from '../submission.enums.js';
 
 export class JudgeResultDto {
@@ -21,6 +22,14 @@ export class JudgeResultDto {
   @ValidateNested({ each: true })
   @Type(() => DebugOutputDto)
   debugOutputs?: DebugOutputDto[];
+
+  // 구버전 워커는 보내지 않는다. 문제당 테스트는 최대 100개.
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(100)
+  @ValidateNested({ each: true })
+  @Type(() => TestResultDto)
+  testResults?: TestResultDto[];
 
   @IsEnum(SubmissionStatus)
   status: SubmissionStatus;

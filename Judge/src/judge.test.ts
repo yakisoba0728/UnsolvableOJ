@@ -206,15 +206,17 @@ for (const [name, stdout, expected, status] of [
     const s = await sandbox(t, [{ stdout }]);
     const input = claim();
     input.testCases[0].expectedOutput = expected;
-    assert.equal((await judge(input, s.config)).status, status);
+    const result = await judge(input, s.config);
+    assert.equal(result.status, status);
+    assert.equal(result.testResults[0].status, status);
     assert.equal(s.files.size, 0);
   });
 }
 
 test("samples run first with original case numbers; hidden outputs never escape", async (t) => {
   const s = await sandbox(t, [
-    { stdout: "public\n" },
-    { status: "Nonzero Exit Status", exitStatus: 1, stderr: "hidden-secret" },
+    { stdout: "public\n", runTime: 12_000_000, memory: 8193 },
+    { status: "Nonzero Exit Status", exitStatus: 1, stderr: "hidden-secret", runTime: 3_000_000, memory: 2048 },
   ]);
   const input = claim({ testCases: [
     { input: "secret-input", expectedOutput: "secret-answer", isSample: false },
@@ -225,6 +227,11 @@ test("samples run first with original case numbers; hidden outputs never escape"
   assert.equal(result.passedTestCases, 1);
   assert.equal(result.debugOutputs.length, 1);
   assert.equal(result.debugOutputs[0].testCase, 2);
+  assert.deepEqual(result.testResults, [
+    { testCase: 2, isSample: true, status: "ACCEPTED", runtimeMs: 12, memoryKb: 9 },
+    { testCase: 1, isSample: false, status: "RUNTIME_ERROR", runtimeMs: 3, memoryKb: 2 },
+  ]);
+  assert.ok(!JSON.stringify(result).includes("secret-input"));
   assert.equal(s.commands[0].files[0].content, "public-input");
   assert.equal(s.commands[1].files[0].content, "secret-input");
   assert.ok(!JSON.stringify(result).includes("hidden-secret"));
@@ -260,6 +267,7 @@ for (const [upstream, expected] of [
     assert.equal(result.passedTestCases, 0);
     assert.equal(result.totalTestCases, 2);
     assert.equal(result.debugOutputs[0].stdout, "before failure");
+    assert.deepEqual(result.testResults.map(({ testCase, status }) => [testCase, status]), [[1, expected]]);
     assert.equal(s.commands.length, 1);
     assert.equal(s.files.size, 0);
   });

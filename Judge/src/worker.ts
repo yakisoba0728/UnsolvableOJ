@@ -133,6 +133,7 @@ export async function startWorker(
           passedTestCases: 0,
           totalTestCases: claim.testCases.length,
           debugOutputs: [],
+          testResults: [],
           judgeMessage: "채점 중 시스템 오류가 발생했습니다.",
         };
       }

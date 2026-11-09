@@ -13,6 +13,7 @@ import { Problem } from '../problems/problem.entity.js';
 import { User } from '../users/user.entity.js';
 import { SubmissionLanguage, SubmissionStatus } from './submission.enums.js';
 import type { DebugOutputDto } from './dto/debug-output.dto.js';
+import type { TestResultDto } from './dto/test-result.dto.js';
 
 @Entity({ name: 'submissions' })
 @Index('idx_submissions_user_created', ['userId', 'createdAt'])
@@ -24,6 +25,14 @@ export class Submission {
     default: () => "'[]'::jsonb",
   })
   debugOutputs: DebugOutputDto[];
+
+  // 실행 순서대로 담은 테스트별 판정(번호는 원래 테스트 번호). 이 기능 전의 제출은 빈 배열.
+  @Column({
+    name: 'test_results',
+    type: 'jsonb',
+    default: () => "'[]'::jsonb",
+  })
+  testResults: TestResultDto[];
 
   @PrimaryGeneratedColumn('uuid')
   id: string;

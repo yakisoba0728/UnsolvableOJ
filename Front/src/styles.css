@@ -4980,6 +4980,44 @@ h3 {
 .case-result > .io-block {
   margin-top: 12px;
 }
+.test-failed {
+  margin: 0;
+  color: var(--color-danger);
+}
+.test-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-size: 14px;
+  text-align: left;
+}
+.test-results-table th {
+  padding: 8px 14px;
+  background: var(--color-surface-muted);
+  color: var(--color-ink-600);
+  font-size: 13px;
+  font-weight: var(--weight-title);
+}
+.test-results-table td {
+  padding: 8px 14px;
+  border-top: 1px solid var(--color-divider);
+  font-variant-numeric: tabular-nums;
+}
+.test-results-table th,
+.test-results-table td {
+  white-space: nowrap;
+}
+.test-results-scroll {
+  overflow-x: auto;
+}
+@media (max-width: 520px) {
+  .test-results-table th,
+  .test-results-table td {
+    padding: 8px 6px;
+    font-size: 13px;
+  }
+}
 @media (max-width: 720px) {
   .case-io.three {
     grid-template-columns: 1fr;

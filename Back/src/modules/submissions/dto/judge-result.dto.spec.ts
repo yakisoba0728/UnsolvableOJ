@@ -12,10 +12,21 @@ const output = {
   stderrTruncated: false,
 };
 const verdict = { status: 'ACCEPTED', passedTestCases: 1, totalTestCases: 1 };
+const testResult = {
+  testCase: 1,
+  isSample: false,
+  status: 'WRONG_ANSWER',
+  runtimeMs: 12,
+  memoryKb: 2048,
+};
 
 describe('judge debug output validation', () => {
   it('accepts bounded output and results from older workers', async () => {
-    for (const body of [verdict, { ...verdict, debugOutputs: [output] }]) {
+    for (const body of [
+      verdict,
+      { ...verdict, debugOutputs: [output] },
+      { ...verdict, testResults: [testResult] },
+    ]) {
       expect(await validate(plainToInstance(JudgeResultDto, body))).toEqual([]);
     }
   });
@@ -32,6 +43,26 @@ describe('judge debug output validation', () => {
         (
           await validate(
             plainToInstance(JudgeResultDto, { ...verdict, debugOutputs }),
+          )
+        ).length,
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  it('rejects malformed and excessive test results', async () => {
+    for (const testResults of [
+      [{ ...testResult, testCase: 0 }],
+      [{ ...testResult, status: 'COMPILE_ERROR' }],
+      [{ ...testResult, runtimeMs: -1 }],
+      [{ ...testResult, memoryKb: 1_000_000_001 }],
+      [{ ...testResult, isSample: 'false' }],
+      [{ ...testResult, runtimeMs: 1.5 }],
+      Array(101).fill(testResult),
+    ]) {
+      expect(
+        (
+          await validate(
+            plainToInstance(JudgeResultDto, { ...verdict, testResults }),
           )
         ).length,
       ).toBeGreaterThan(0);
