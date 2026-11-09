@@ -47,6 +47,13 @@ for (const [name, service] of Object.entries(plan.services)) {
   assert.ok(service.mem_limit > 0, `${name} needs a memory budget`);
   assert.equal(service.privileged ?? false, name === 'go-judge');
   assert.equal(service.logging.options['max-file'], '3');
+  assert.ok(service.cpus > 0, `${name} needs a CPU budget`);
+  // The privileged sandbox enforces its own nested limits; every other service is hardened.
+  if (name !== 'go-judge') {
+    assert.deepEqual(service.security_opt, ['no-new-privileges:true'], `${name} security_opt`);
+    assert.deepEqual(service.cap_drop, ['ALL'], `${name} cap_drop`);
+    assert.ok(service.pids_limit > 0, `${name} needs a process budget`);
+  }
   if (service.build) {
     assert.ok(existsSync(join(service.build.context, 'Dockerfile')), `${name} build context`);
     assert.equal(normalize(service.build.context), normalize(join(root, {
@@ -86,6 +93,8 @@ assert.equal(back.environment.CORS_ORIGIN, required.PUBLIC_ORIGIN);
 assert.equal(back.environment.JUDGE_SERVICE_TOKEN, judge.environment.JUDGE_SERVICE_TOKEN);
 assert.equal(back.environment.REDIS_PASSWORD, judge.environment.REDIS_PASSWORD);
 assert.equal(redis.environment.REDIS_PASSWORD, judge.environment.REDIS_PASSWORD);
+// Command-line arguments are visible in host process listings.
+assert.ok(!redis.command.join(' ').includes('--requirepass'), 'Pass the Redis password through stdin config');
 assert.equal(sandbox.environment.ES_AUTH_TOKEN, judge.environment.GO_JUDGE_TOKEN);
 assert.equal(new URL(back.environment.DATABASE_URL).password, required.POSTGRES_PASSWORD);
 assert.equal(judge.environment.API_BASE_URL, 'http://back:3000/api/v1');

@@ -23,7 +23,8 @@ const sourceRecord = (id: number) => ({
   source: { sha256: 'fixture' },
 });
 
-describe('BOJ import and demo seed CLIs (isolated schema)', () => {
+// 모든 테스트가 새 Node 프로세스로 CLI를 1~4번 실행하므로, 부하가 높은 러너에서는 기본 5초를 넘길 수 있다.
+describe('BOJ import and demo seed CLIs (isolated schema)', { timeout: 60_000 }, () => {
   const schema = `script_fixes_${randomUUID().replaceAll('-', '')}`;
   let admin: DataSource;
   let db: DataSource;
