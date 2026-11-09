@@ -172,12 +172,14 @@ export function useMyStanding(session: Session | null) {
     "랭킹을 불러오지 못했습니다.",
     [session],
   );
+  const index = session
+    ? rankings.data.findIndex((entry) => entry.id === session.user.id)
+    : -1;
   return {
     profile: profile.data,
     rankings: rankings.data,
-    rank: session
-      ? rankings.data.findIndex((entry) => entry.id === session.user.id)
-      : -1,
+    // 0부터 센 순위. 상위 100명 목록에 없으면 프로필의 전체 순위를 쓴다.
+    rank: index >= 0 ? index : profile.data?.rank ? profile.data.rank - 1 : -1,
     profileLoading: profile.loading,
     rankLoading: rankings.loading,
     profileError: profile.error,

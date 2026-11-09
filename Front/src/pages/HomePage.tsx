@@ -127,15 +127,15 @@ export function HomePage() {
                   </span>
                 </li>
               ))}
-              {myRank >= 5 ? (
+              {myRank >= 5 && profile ? (
                 <li className="ranking-row current">
                   <span className="ranking-position">{myRank + 1}</span>
                   <span className="ranking-name">
-                    {rankings[myRank].username} · 나
-                    <small>Lv.{rankings[myRank].level}</small>
+                    {profile.username} · 나
+                    <small>Lv.{profile.level}</small>
                   </span>
                   <span className="ranking-xp">
-                    {rankings[myRank].xp.toLocaleString()} XP
+                    {profile.xp.toLocaleString()} XP
                   </span>
                 </li>
               ) : null}

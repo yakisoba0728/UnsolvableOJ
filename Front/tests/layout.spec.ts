@@ -51,6 +51,33 @@ test("home and profile do not show the never-computed rating", async ({ page }) 
   await expect(page.locator(".profile-stats")).not.toContainText("레이팅");
 });
 
+test("a user outside the top-100 ranking sees their overall rank instead of 'not ranked yet'", async ({ page }) => {
+  await authenticate(page);
+  await page.route("**/api/v1/users/me", (route) =>
+    route.fulfill({
+      json: { ...session.user, xp: 30, createdAt: "2026-09-01T00:00:00Z", solvedCount: 1, rank: 150 },
+    }),
+  );
+  await page.route("**/api/v1/rankings", (route) =>
+    route.fulfill({
+      json: Array.from({ length: 100 }, (_, i) => ({
+        id: `top-${i}`, username: `top${i}`, level: 9, xp: 10_000 - i, rating: 0, solvedCount: 50,
+      })),
+    }),
+  );
+  await page.route("**/api/v1/submissions?**", (route) =>
+    route.fulfill({ json: { items: [], page: 1, limit: 100, total: 0, totalPages: 1 } }),
+  );
+  await page.goto("/");
+  await expect(page.locator(".stat-tiles")).toContainText("랭킹 150위");
+  const mine = page.locator(".ranking-row.current");
+  await expect(mine).toContainText("150");
+  await expect(mine).toContainText(`${session.user.username} · 나`);
+  await expect(mine).toContainText("30 XP");
+  await page.goto("/profile");
+  await expect(page.locator(".profile-stats")).toContainText("#150");
+});
+
 test("the home problem slider stays inside the page container and fades only on the side that has more cards", async ({
   page,
 }) => {

@@ -11,7 +11,10 @@ export class UsersService {
       `
       SELECT u.id, u.email, u.username, u.role, u.level, u.xp, u.rating,
         u.created_at AS "createdAt",
-        (SELECT count(*)::integer FROM user_problem_solves s WHERE s.user_id = u.id) AS "solvedCount"
+        (SELECT count(*)::integer FROM user_problem_solves s WHERE s.user_id = u.id) AS "solvedCount",
+        -- 랭킹 API와 같은 정렬(xp 내림차순, 가입 순)로 센 1부터의 전체 순위. 상위 100명 밖이어도 알려 준다.
+        (SELECT count(*)::integer + 1 FROM users o
+          WHERE o.xp > u.xp OR (o.xp = u.xp AND o.created_at < u.created_at)) AS rank
       FROM users u WHERE u.id = $1
     `,
       [id],

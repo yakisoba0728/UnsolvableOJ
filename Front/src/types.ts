@@ -97,6 +97,8 @@ export interface UserProfile extends User {
   badges?: { badge: string; awardedAt: string }[];
   createdAt: string;
   solvedCount: number;
+  /** 1부터 센 전체 순위. /rankings(상위 100명) 밖의 사용자도 받는다. */
+  rank?: number;
 }
 
 export interface RankingEntry {
