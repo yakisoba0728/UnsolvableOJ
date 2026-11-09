@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
+import { DateTimePicker } from "../components/DateTimePicker";
 import { PageHeader } from "../components/PageHeader";
 import { deviceTimeZone, EnterpriseStorageNotice } from "../components/EnterpriseSchedule";
 import {
@@ -220,11 +221,10 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
                   <label className="field-label" htmlFor={fieldIds.startsAt}>
                     시작 일시
                   </label>
-                  <input
+                  <DateTimePicker
                     id={fieldIds.startsAt}
-                    type="datetime-local"
                     value={draft.startsAt}
-                    onChange={(event) => patch({ startsAt: event.target.value })}
+                    onChange={(value) => patch({ startsAt: value })}
                     {...aria("startsAt")}
                   />
                   {err("startsAt")}
@@ -233,11 +233,11 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
                   <label className="field-label" htmlFor={fieldIds.endsAt}>
                     종료 일시
                   </label>
-                  <input
+                  <DateTimePicker
                     id={fieldIds.endsAt}
-                    type="datetime-local"
                     value={draft.endsAt}
-                    onChange={(event) => patch({ endsAt: event.target.value })}
+                    onChange={(value) => patch({ endsAt: value })}
+                    align="right"
                     {...aria("endsAt")}
                   />
                   {err("endsAt")}

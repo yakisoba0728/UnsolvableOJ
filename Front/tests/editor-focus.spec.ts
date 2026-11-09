@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 for (const key of ["Tab", "Shift+Tab"]) {
-  test(`Escape then ${key} leaves the editor without editing or losing its draft`, async ({ page }) => {
+  test(`Escape then ${key} leaves the editor without editing or losing its draft`, async ({ page, browserName }) => {
     const editor = page.getByLabel("소스 코드");
     await editor.fill("private draft");
     await expect(editor).toHaveAccessibleDescription(/Esc 다음 Tab.*Shift\+Tab/);
@@ -23,7 +23,9 @@ for (const key of ["Tab", "Shift+Tab"]) {
     await expect(editor).toBeFocused();
     await page.keyboard.press(key);
     await expect(editor).not.toBeFocused();
-    expect(await page.evaluate(() => document.activeElement !== document.body)).toBe(true);
+    // WebKit은 기본 설정에서 Tab으로 링크·버튼에 포커스를 주지 않아(에디터 다음 요소가 링크뿐이면) 문서 밖으로 나가 body가 된다.
+    if (browserName !== "webkit")
+      expect(await page.evaluate(() => document.activeElement !== document.body)).toBe(true);
     await expect(editor).toHaveValue("private draft");
     expect(await page.evaluate(() => localStorage.getItem("unsolvable-oj-draft-v2:guest:focus:PYTHON"))).toBe("private draft");
   });

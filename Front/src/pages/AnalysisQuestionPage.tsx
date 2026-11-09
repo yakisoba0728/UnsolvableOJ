@@ -352,7 +352,8 @@ function AnalysisQuestion({
                 <Link to="/auth" state={{ from: analysisPath(question.id) }}>
                   로그인
                 </Link>
-                하면 푼 기록이 내 계정의 미션에 반영됩니다.
+                후 답을 확인한 문제부터 계정 미션에 반영됩니다. 로그인 전 풀이
+                기록은 이 브라우저에만 저장됩니다.
               </p>
             )
           ) : null}

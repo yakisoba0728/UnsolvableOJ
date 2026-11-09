@@ -164,7 +164,9 @@ function MissionDashboardView({ token }: { token?: string }) {
             <Link to="/auth" state={{ from: "/missions" }}>
               로그인
             </Link>
-            하면 서버에 저장된 진행률을 확인하고 보상을 받을 수 있어요.
+            하면 계정에 저장된 진행률을 확인하고 보상을 받을 수 있어요. 아래
+            진행률은 미션 안내를 위한 예시이며, 로그인 전 풀이 기록은 계정
+            미션에 반영되지 않아요.
           </p>
           <ul className="mission-grid">
             {buildMissions({ submissions: [], analysis: [], posts: [] }).map(

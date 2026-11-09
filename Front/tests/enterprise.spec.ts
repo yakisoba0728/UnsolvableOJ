@@ -31,6 +31,22 @@ const problems = [
   createdAt: "2026-09-01T00:00:00Z",
 }));
 
+/** 달력(DateTimePicker)을 열어 `YYYY-MM-DDTHH:mm` 값을 고른다. 시·분은 24시간제로 직접 입력한다. */
+async function pickDateTime(page: Page, label: string, value: string) {
+  const [, y, m, d, h, min] = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value)!.map(Number) as unknown as number[];
+  await page.getByLabel(label).click();
+  const dialog = page.getByRole("dialog", { name: "날짜와 시간 선택" });
+  const heading = dialog.locator(".dtp-head strong");
+  for (let i = 0; i < 36 && (await heading.innerText()) !== `${y}년 ${m}월`; i++) {
+    const [vy, vm] = (await heading.innerText()).match(/\d+/g)!.map(Number);
+    await dialog.getByRole("button", { name: vy * 12 + vm < y * 12 + m ? "다음 달" : "이전 달" }).click();
+  }
+  await dialog.getByRole("button", { name: `${y}년 ${m}월 ${d}일`, exact: true }).click();
+  await dialog.getByRole("textbox", { name: "시" }).fill(String(h));
+  await dialog.getByRole("textbox", { name: "분" }).fill(String(min));
+  await dialog.getByRole("button", { name: "확인" }).click();
+}
+
 async function signIn(page: Page) {
   await page.addInitScript(
     ({ key, saved }) => localStorage.setItem(key, JSON.stringify(saved)),
@@ -170,13 +186,13 @@ test("saving after the original start is rejected even if draft dates move into 
   const before = await page.evaluate((key) => localStorage.getItem(key), testsKey);
   await page.clock.fastForward(11_000);
   await page.getByLabel(/테스트 이름/).fill("시작 후 변경 시도");
-  await page.getByLabel("시작 일시").fill("2026-11-03T13:00");
-  await page.getByLabel("종료 일시").fill("2026-11-03T15:00");
+  await pickDateTime(page, "시작 일시", "2026-11-03T13:00");
+  await pickDateTime(page, "종료 일시", "2026-11-03T15:00");
   await page.getByRole("button", { name: "변경 저장", exact: true }).click();
   await expect(page.getByRole("alert")).toContainText("시작된 테스트는 수정할 수 없어요");
   await expect(page).toHaveURL(/\/enterprise\/t-edit\/edit$/);
   await expect(page.getByLabel(/테스트 이름/)).toHaveValue("시작 후 변경 시도");
-  await expect(page.getByLabel("시작 일시")).toHaveValue("2026-11-03T13:00");
+  await expect(page.getByLabel("시작 일시")).toContainText("2026. 11. 03. 13:00");
   expect(await page.evaluate((key) => localStorage.getItem(key), testsKey)).toBe(before);
 });
 
@@ -589,4 +605,39 @@ test("logging in from an edit link returns to that edit page", async ({ page }) 
   expect(await page.evaluate(() => (history.state?.usr as { from?: string } | undefined)?.from)).toBe(
     "/enterprise/t-1/edit",
   );
+});
+
+test("the date picker gives its days one tab stop, moves with arrow keys and closes when focus leaves", async ({ page, browserName }) => {
+  test.skip(browserName === "webkit", "WebKit은 기본 설정에서 Tab으로 버튼에 포커스를 주지 않는다");
+  await signIn(page);
+  await mockProblems(page);
+  await page.goto("/enterprise/new");
+  const start = page.getByLabel("시작 일시");
+  await start.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "날짜와 시간 선택" });
+  await page.keyboard.press("Tab"); // 이전 달
+  await page.keyboard.press("Tab"); // 다음 달
+  await page.keyboard.press("Tab"); // 날짜 칸 중 Tab이 멈추는 곳은 선택된 날 하나뿐
+  const selected = dialog.locator(".dtp-day.selected");
+  await expect(selected).toBeFocused();
+  const [sy, sm, sd] = (await selected.getAttribute("data-date"))!.split("-").map(Number);
+  const target = new Date(sy, sm, sd + 8);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowRight");
+  await expect(
+    dialog.getByRole("button", {
+      name: `${target.getFullYear()}년 ${target.getMonth() + 1}월 ${target.getDate()}일`,
+      exact: true,
+    }),
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Tab");
+  await expect(dialog.getByRole("textbox", { name: "시" })).toBeFocused();
+  await expect(start).toContainText(`${target.getFullYear()}. ${pad(target.getMonth() + 1)}. ${pad(target.getDate())}.`);
+
+  await page.getByLabel("종료 일시").focus();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toHaveCount(1);
 });
