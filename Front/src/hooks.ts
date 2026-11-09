@@ -28,6 +28,7 @@ export function useRequest<T>(
   const [data, setData] = useState(initial);
   const [loading, setLoading] = useState(Boolean(load));
   const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     setData(initial);
     setError("");
@@ -46,19 +47,20 @@ export function useRequest<T>(
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, deps);
-  return { data, loading, error };
+  }, [...deps, attempt]);
+  const retry = () => setAttempt((n) => n + 1);
+  return { data, loading, error, retry };
 }
 
 /** 공개 문제 전체. 서버에 검색 API가 없어 목록·검색·필터를 클라이언트에서 처리한다. */
 export function useAllProblems() {
-  const { data: problems, loading, error } = useRequest(
+  const { data: problems, loading, error, retry } = useRequest(
     (signal) => fetchAll<ProblemSummary>("/problems", signal),
     [],
     "문제를 불러오지 못했습니다.",
     [],
   );
-  return { problems, loading, error };
+  return { problems, loading, error, retry };
 }
 
 /** 내 제출 기록에서 해결/시도한 문제를 계산한다. */

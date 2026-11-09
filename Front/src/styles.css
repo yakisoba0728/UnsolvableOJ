@@ -7943,3 +7943,17 @@ textarea {
   background: var(--badge-expert-bg);
   color: var(--badge-expert-fg);
 }
+
+/* ===== 점검 보완: 320px 필터 절단 · placeholder 대비 ===== */
+.filter-groups .filter-bar {
+  min-width: 0;
+  max-width: 100%;
+}
+.filter-bar .slide-toggle {
+  min-width: 0;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-ink-600);
+  opacity: 1;
+}

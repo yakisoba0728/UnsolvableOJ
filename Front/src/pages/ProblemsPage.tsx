@@ -68,7 +68,7 @@ const statusChips: { value: "" | SolveState; label: string }[] = [
 export function ProblemsPage() {
   const { session } = useAuth();
   useDocumentTitle("문제 목록");
-  const { problems, loading, error } = useAllProblems();
+  const { problems, loading, error, retry } = useAllProblems();
   const history = useSubmissionHistory(session);
   const { profile, rank, profileLoading, rankLoading, profileError, rankError } =
     useMyStanding(session);
@@ -451,6 +451,14 @@ export function ProblemsPage() {
                   </Link>
                 </div>
               ))}
+            </div>
+          ) : error ? (
+            <div className="empty-state">
+              <strong>문제 목록을 불러오지 못했어요.</strong>
+              <p>잠시 후 다시 시도해 주세요. 문제가 없는 것은 아닙니다.</p>
+              <button type="button" className="button" onClick={retry}>
+                다시 시도
+              </button>
             </div>
           ) : (
             <div className="empty-state">
