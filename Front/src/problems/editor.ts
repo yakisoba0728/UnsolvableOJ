@@ -27,6 +27,8 @@ export interface ProblemForm {
   /** 쉼표로 구분한 태그 입력값 */
   tags: string;
   editorial: string;
+  /** 기업 테스트 전용(공개 목록에 나오지 않음). 예전 초안에는 없을 수 있다. */
+  isPrivate?: boolean;
   cases: CaseForm[];
 }
 
@@ -45,8 +47,9 @@ export function blankCase(isSample = true): CaseForm {
   };
 }
 
-export function blankForm(): ProblemForm {
+export function blankForm(isPrivate = false): ProblemForm {
   return {
+    isPrivate,
     title: "",
     slug: "",
     difficulty: "BEGINNER",

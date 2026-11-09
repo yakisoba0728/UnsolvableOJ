@@ -13,7 +13,7 @@ import {
   testStatus,
 } from "../enterprise/model";
 import { enterpriseActions, useEnterpriseTests } from "../enterprise/store";
-import { useAllProblems, useDocumentTitle, useNow } from "../hooks";
+import { useEnterpriseProblems, useDocumentTitle, useNow } from "../hooks";
 import { problemPath } from "../paths";
 import { difficultyLabel } from "../difficulty";
 
@@ -33,7 +33,7 @@ export function EnterpriseDetailPage() {
   const [saveError, setSaveError] = useState("");
   const now = useNow(10_000);
   const tests = useEnterpriseTests(session?.user.id);
-  const { problems, loading } = useAllProblems();
+  const { problems, loading } = useEnterpriseProblems(session);
   const test = tests.find((item) => item.id === id);
   useDocumentTitle(test?.title ?? "테스트 상세");
 
@@ -118,6 +118,9 @@ export function EnterpriseDetailPage() {
                   {problem ? (
                     <>
                       <span className="ent-problem-title">{problem.title}</span>
+                      {problem.isPrivate ? (
+                        <span className="case-pill status-private">기업 전용</span>
+                      ) : null}
                       <span
                         className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
                       >
@@ -126,9 +129,14 @@ export function EnterpriseDetailPage() {
                       <small>
                         {problem.timeLimitMs}ms · {problem.memoryLimitMb}MB
                       </small>
+                      {/* 기업 전용 문제는 공개 화면이 없어 출제 화면으로 연다. */}
                       <Link
                         className="button button-outline button-small"
-                        to={problemPath(problem.slug)}
+                        to={
+                          problem.isPrivate
+                            ? `/my-problems/${problem.id}/edit`
+                            : problemPath(problem.slug)
+                        }
                         aria-label={`${problem.title} 문제 보기`}
                       >
                         문제 보기

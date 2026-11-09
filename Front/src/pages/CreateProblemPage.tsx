@@ -6,7 +6,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { api, ApiError } from "../api";
 import { useAuth } from "../auth";
@@ -41,6 +41,7 @@ import type { Difficulty, Problem } from "../types";
 import { difficultyOptions } from "../difficulty";
 
 interface ManagedProblem extends Problem {
+  isPrivate?: boolean;
   testCases: {
     input: string;
     expectedOutput: string;
@@ -77,6 +78,7 @@ function toForm(problem: ManagedProblem): ProblemForm {
     source: parts.source,
     tags: (problem.tags ?? []).join(", "),
     editorial: problem.editorialMarkdown ?? "",
+    isPrivate: problem.isPrivate === true,
     cases: problem.testCases.length
       ? problem.testCases.map((item) => ({ ...blankCase(), ...item }))
       : [blankCase()],
@@ -110,7 +112,11 @@ export function CreateProblemPage() {
   const [draftScope] = useState(() => problemDraftScope(session!.user.id, id));
   const [recovery] = useState(() => readProblemDraft(draftScope));
   const restored = recovery.draft;
-  const [form, setForm] = useState<ProblemForm>(restored?.form ?? blankForm());
+  // 기업 테스트 화면의 "기업 전용 문제 만들기"는 ?private=1로 들어온다.
+  const [searchParams] = useSearchParams();
+  const [form, setForm] = useState<ProblemForm>(
+    restored?.form ?? blankForm(!editing && searchParams.get("private") === "1"),
+  );
   const [slugTouched, setSlugTouched] = useState(
     restored?.slugTouched ?? false,
   );
@@ -302,6 +308,7 @@ export function CreateProblemPage() {
       outputDescriptionMarkdown: form.outputDescription,
       editorialMarkdown: form.editorial,
       tags: parseTags(form.tags),
+      isPrivate: form.isPrivate === true,
       difficulty: form.difficulty,
       timeLimitMs: form.timeLimitMs,
       memoryLimitMb: form.memoryLimitMb,
@@ -344,7 +351,7 @@ export function CreateProblemPage() {
           body: JSON.stringify({
             slug: form.slug,
             ...content,
-            status: canPublish ? "PUBLISHED" : "DRAFT",
+            status: canPublish && !form.isPrivate ? "PUBLISHED" : "DRAFT",
           }),
         },
         session.accessToken,
@@ -648,6 +655,21 @@ export function CreateProblemPage() {
                   쉼표로 구분해 최대 10개, 각 30자까지 적어요. 문제 목록에서 태그로 찾을 수 있어요.
                 </span>
               )}
+            </div>
+            <div className="field-group span-2" id="f-private">
+              <label className="check-row" htmlFor="problem-private">
+                <input
+                  id="problem-private"
+                  type="checkbox"
+                  checked={form.isPrivate === true}
+                  aria-describedby="problem-private-help"
+                  onChange={(event) => patch({ isPrivate: event.target.checked })}
+                />
+                기업 테스트 전용 문제
+              </label>
+              <span className="field-help" id="problem-private-help">
+                공개 문제 목록에 나오지 않고 공개할 수 없어요. 내 기업 테스트에서만 출제할 수 있어요.
+              </span>
             </div>
           </div>
         </section>

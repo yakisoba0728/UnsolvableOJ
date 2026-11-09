@@ -15,7 +15,7 @@ import {
   type TestErrors,
 } from "../enterprise/model";
 import { enterpriseActions, useEnterpriseTests } from "../enterprise/store";
-import { useAllProblems, useDocumentTitle } from "../hooks";
+import { useDocumentTitle, useEnterpriseProblems } from "../hooks";
 import { difficultyLabel } from "../difficulty";
 
 const fieldIds: Record<keyof TestErrors, string> = {
@@ -121,7 +121,8 @@ function EnterpriseForm({ userId, id }: { userId: string; id?: string }) {
 
 function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseTest }) {
   const navigate = useNavigate();
-  const { problems, loading, error } = useAllProblems();
+  const { session } = useAuth();
+  const { problems, loading, error, privateError } = useEnterpriseProblems(session);
   const [draft, setDraft] = useState(() => initialDraft(existing));
   const [query, setQuery] = useState("");
   const [showErrors, setShowErrors] = useState(false);
@@ -329,6 +330,9 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
                         onChange={() => toggle(problem.id)}
                       />
                       <span className="ent-problem-title">{problem.title}</span>
+                      {problem.isPrivate ? (
+                        <span className="case-pill status-private">기업 전용</span>
+                      ) : null}
                       <span
                         className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
                       >
@@ -345,7 +349,16 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
               )}
             </div>
             {err("problemIds")}
-            <span className="field-help">선택한 순서대로 출제됩니다.</span>
+            {privateError ? (
+              <p className="error-message" role="status">
+                {privateError} 공개 문제는 그대로 고를 수 있어요.
+              </p>
+            ) : null}
+            <span className="field-help">
+              선택한 순서대로 출제됩니다. 이 테스트에서만 쓸 문제는{" "}
+              <Link to="/problems/new?private=1">기업 전용 문제로 만들어</Link>{" "}
+              함께 고를 수 있어요.
+            </span>
           </section>
         </div>
 

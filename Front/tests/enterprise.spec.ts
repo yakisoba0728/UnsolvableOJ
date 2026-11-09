@@ -59,6 +59,7 @@ async function signIn(page: Page) {
 }
 
 async function mockProblems(page: Page) {
+  await page.route("**/api/v1/problems/mine", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/problems?*", (route) =>
     route.fulfill({
       json: { items: problems, page: 1, limit: 1000, total: 3, totalPages: 1 },
@@ -640,4 +641,25 @@ test("the date picker gives its days one tab stop, moves with arrow keys and clo
   await page.getByLabel("종료 일시").focus();
   await page.keyboard.press("Enter");
   await expect(dialog).toHaveCount(1);
+});
+
+test("enterprise tests can include the company's own private problems alongside public ones", async ({ page }) => {
+  await signIn(page);
+  await mockProblems(page);
+  const mine = (id: string, title: string, isPrivate: boolean) => ({
+    id, slug: id, title, status: "DRAFT", isPrivate, difficulty: "MEDIUM",
+    timeLimitMs: 2000, memoryLimitMb: 256, currentVersion: 1,
+    createdAt: "2026-09-01T00:00:00Z", updatedAt: "2026-09-01T00:00:00Z",
+  });
+  await page.route("**/api/v1/problems/mine", (route) =>
+    route.fulfill({ json: [mine("company-only", "사내 전용 문제", true), mine("plain-draft", "일반 초안", false)] }),
+  );
+  await page.goto("/enterprise/new");
+  await expect(page.locator(".ent-problem", { hasText: "사내 전용 문제" })).toContainText("기업 전용");
+  await expect(page.locator(".ent-problem", { hasText: "두 수의 합" })).toBeVisible();
+  // 검수 전 일반 초안은 기업 테스트 후보가 아니다.
+  await expect(page.locator(".ent-problem", { hasText: "일반 초안" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "기업 전용 문제로 만들어" })).toHaveAttribute(
+    "href", "/problems/new?private=1",
+  );
 });

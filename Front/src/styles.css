@@ -4647,6 +4647,10 @@ h3 {
   background: var(--color-warning-soft);
   color: var(--color-warning);
 }
+.case-pill.status-private {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
 .case-pill.status-archived {
   background: var(--color-bg);
   color: var(--color-ink-600);

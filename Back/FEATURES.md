@@ -22,11 +22,14 @@
 | `GET /problems` | 공개 | 공개 문제 목록, 난이도·태그(`tag`) 필터, 페이지 조회, 문제별 푼 사람·정답률 |
 | `GET /problems/by-slug/:slug` | 공개 | 공개 문제 설명·제한·예제·태그·해설과 푼 사람·정답률 조회 |
 | `GET /problems/:slug` | 공개 | 기존 상세 주소의 호환 경로; `mine`은 관리 경로가 우선 |
-| `POST /problems` | AUTHOR/ADMIN | 문제·테스트케이스·최초 버전 생성; 공개 상태 생성은 ADMIN만 가능 |
-| `GET /problems/mine` | AUTHOR/ADMIN | 내 문제 최신 100개, ADMIN은 전체 중 최신 100개 |
+| `POST /problems` | 로그인 | 문제·테스트케이스·최초 버전 생성; 공개 상태 생성은 ADMIN만 가능. ADMIN이 아니면 공개되지 않은 문제는 계정당 50개까지 |
+| `GET /problems/mine` | 로그인 | 내 문제 최신 100개(`isPrivate` 포함), ADMIN은 전체 중 최신 100개 |
 | `GET /problems/:id/manage` | 문제 소유자/ADMIN | 비공개 테스트케이스를 포함한 관리 상세 |
 | `PATCH /problems/:id` | 문제 소유자/ADMIN | 내용·난이도·제한·테스트케이스 수정 및 버전 증가 |
-| `PATCH /problems/:id/status` | 문제 소유자/ADMIN | DRAFT·PUBLISHED·ARCHIVED 전환; PUBLISHED는 ADMIN만 가능 |
+| `PATCH /problems/:id/status` | 문제 소유자/ADMIN | DRAFT·PUBLISHED·ARCHIVED 전환; PUBLISHED는 ADMIN만 가능, 기업 전용 문제는 불가(400) |
+
+- 로그인한 누구나 문제를 만들 수 있습니다. 공개 목록에 올리려면 관리자 검수(PUBLISHED 전환)를 거칩니다. AUTHOR 역할은 기존 계정 호환용이며 출제 권한에 차이가 없습니다.
+- 기업 테스트 전용 문제(`isPrivate`)는 공개 목록·상세·일반 제출에 나오지 않고 공개로 바꿀 수 없습니다. 소유자·ADMIN만 관리하고 검증 제출할 수 있으며, 웹의 기업 테스트에서 공개 문제와 함께 출제할 수 있습니다. 공개 문제를 기업 전용으로 바꾸면(ADMIN 수정 포함) 초안으로 내려갑니다.
 
 - 본문·입력 설명·출력 설명을 Markdown으로 저장합니다. 난이도는 BEGINNER/EASY/MEDIUM/HARD/EXPERT입니다.
 - 태그(`tags`)는 자유 문자열 0–10개, 각 1–30자이며 앞뒤 공백을 지운 뒤 중복을 거절합니다. 목록의 `tag`는 대소문자를 포함해 정확히 일치하는 태그 하나로 거릅니다. 웹 목록은 전체를 받아 같은 조건으로 브라우저에서 거릅니다.

@@ -54,6 +54,8 @@ export interface ProblemSummary {
   solverCount?: number;
   /** 채점이 끝난 제출 중 정답 비율(0–100). 제출이 없으면 null */
   acceptanceRate?: number | null;
+  /** 기업 테스트 전용 문제(내 문제 목록에서만 옴) */
+  isPrivate?: boolean;
 }
 
 export interface Problem extends ProblemSummary {

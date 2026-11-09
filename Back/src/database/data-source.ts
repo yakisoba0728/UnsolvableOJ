@@ -18,6 +18,7 @@ import { LearningEvidence1793001000000 } from './migrations/1793001000000-learni
 import { UserSuspension1794100000000 } from './migrations/1794100000000-user-suspension.js';
 import { ProblemTagsEditorial1794200000000 } from './migrations/1794200000000-problem-tags-editorial.js';
 import { TestSubmissions1794400000000 } from './migrations/1794400000000-test-submissions.js';
+import { PrivateProblems1794500000000 } from './migrations/1794500000000-private-problems.js';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -42,6 +43,7 @@ export default new DataSource({
     UserSuspension1794100000000,
     ProblemTagsEditorial1794200000000,
     TestSubmissions1794400000000,
+    PrivateProblems1794500000000,
   ],
   synchronize: false,
 });

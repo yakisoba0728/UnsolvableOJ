@@ -86,6 +86,10 @@ export class ProblemContentDto {
   @IsEnum(ProblemDifficulty)
   difficulty: ProblemDifficulty;
 
+  /** 기업 테스트 전용(공개 목록·상세에 나오지 않음) */
+  @IsBoolean()
+  isPrivate: boolean;
+
   @IsInt()
   @Min(100)
   @Max(60_000)
@@ -120,4 +124,5 @@ export class CreateProblemDto extends ProblemContentDto {
   override memoryLimitMb = 256;
   override editorialMarkdown = '';
   override tags: string[] = [];
+  override isPrivate = false;
 }

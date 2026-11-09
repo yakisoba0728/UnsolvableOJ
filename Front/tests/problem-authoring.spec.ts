@@ -150,14 +150,40 @@ for (const boundary of ["token", "account", "page"] as const) {
   });
 }
 
-test("regular users cannot open the author form", async ({ page }) => {
-  await authenticate(page);
+test("any signed-in user can open the author form; signed-out visitors are sent to login", async ({ page }) => {
   await page.goto("/problems/new");
-  await expect(page).toHaveURL(/\/problems$/);
-  await expect(page.getByRole("link", { name: "문제 만들기" })).toHaveCount(0);
+  await expect(page).toHaveURL(/\/auth$/);
+  await authenticate(page);
+  await page.goto("/problems");
+  await page.locator("header").getByRole("link", { name: "문제 만들기", exact: true }).click();
+  await expect(page).toHaveURL(/\/problems\/new$/);
+  await expect(page.getByLabel("제목", { exact: true })).toBeVisible();
 });
 
-for (const role of ["AUTHOR", "ADMIN"] as const) {
+test("an enterprise-only problem is saved as a private draft even by an admin", async ({ page }) => {
+  await authenticate(page, "ADMIN");
+  let submitted: Record<string, unknown> | undefined;
+  await page.route("**/api/v1/problems/by-slug/company", (route) =>
+    route.fulfill({ status: 404, json: { message: "Not found" } }),
+  );
+  await page.route("**/api/v1/problems", async (route) => {
+    submitted = route.request().postDataJSON();
+    await route.fulfill({ status: 201, json: { ...problem, ...submitted, status: "DRAFT" } });
+  });
+  await page.goto("/problems/new?private=1");
+  await expect(page.getByLabel("기업 테스트 전용 문제")).toBeChecked();
+  await page.getByLabel("제목", { exact: true }).fill(problem.title);
+  await page.getByLabel("주소용 slug").fill("company");
+  await page.getByLabel("문제 본문 (Markdown)").fill(problem.statementMarkdown);
+  await page.getByLabel("입력 설명").fill("두 정수");
+  await page.getByLabel("출력 설명").fill("합");
+  await page.getByLabel("입력", { exact: true }).fill("1 2");
+  await page.getByLabel("기대 출력", { exact: true }).fill("3");
+  await page.getByRole("button", { name: /저장하기 →|게시하기 →/ }).click();
+  await expect.poll(() => submitted).toMatchObject({ isPrivate: true, status: "DRAFT" });
+});
+
+for (const role of ["USER", "AUTHOR", "ADMIN"] as const) {
   test(`${role} creates a problem with the appropriate publication status`, async ({
     page,
   }) => {
@@ -191,10 +217,10 @@ for (const role of ["AUTHOR", "ADMIN"] as const) {
     expect((await slugChecked).status()).toBe(404);
     await page
       .getByRole("button", {
-        name: role === "AUTHOR" ? "초안 저장하기 →" : "문제 게시하기 →",
+        name: role !== "ADMIN" ? "초안 저장하기 →" : "문제 게시하기 →",
       })
       .click();
-    if (role === "AUTHOR") {
+    if (role !== "ADMIN") {
       await expect(
         page.getByRole("heading", { name: "초안을 저장했습니다." }),
       ).toBeVisible();
@@ -206,7 +232,7 @@ for (const role of ["AUTHOR", "ADMIN"] as const) {
       ).toBeVisible();
     }
     expect(submitted).toMatchObject({
-      status: role === "AUTHOR" ? "DRAFT" : "PUBLISHED",
+      status: role !== "ADMIN" ? "DRAFT" : "PUBLISHED",
       timeLimitMs: 1000,
       memoryLimitMb: 256,
     });

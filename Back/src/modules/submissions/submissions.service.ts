@@ -123,10 +123,7 @@ const BULK_REJUDGE_LIMIT = 200;
 const BULK_REJUDGE_PRIORITY = 10;
 
 function canManage(problem: Pick<Problem, 'authorId'>, user: AuthenticatedUser) {
-  return (
-    user.role === UserRole.ADMIN ||
-    (user.role === UserRole.AUTHOR && problem.authorId === user.id)
-  );
+  return user.role === UserRole.ADMIN || problem.authorId === user.id;
 }
 
 function resetForRejudge(current: Submission, problem: Problem) {

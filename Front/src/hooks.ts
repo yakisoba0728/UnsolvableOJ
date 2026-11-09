@@ -62,6 +62,35 @@ export function useAllProblems() {
   return { problems, loading, error, retry };
 }
 
+/**
+ * 기업 테스트에 낼 수 있는 문제: 공개 문제와 내가 만든 기업 전용 문제.
+ * shortcut: 관리자는 /problems/mine이 모든 문제를 돌려주므로 다른 계정의 기업 전용 문제도 고를 수 있다.
+ */
+export function useEnterpriseProblems(session: Session | null) {
+  const publicProblems = useAllProblems();
+  const mine = useRequest(
+    session
+      ? (signal) =>
+          api<ProblemSummary[]>(
+            "/problems/mine",
+            { signal },
+            session.accessToken,
+          )
+      : null,
+    [],
+    "기업 전용 문제를 불러오지 못했습니다.",
+    [session],
+  );
+  const privateProblems = mine.data.filter((problem) => problem.isPrivate);
+  return {
+    problems: [...privateProblems, ...publicProblems.problems],
+    loading: publicProblems.loading || mine.loading,
+    // 기업 전용 문제를 못 불러와도 공개 문제로는 계속 고를 수 있게 따로 알린다.
+    error: publicProblems.error,
+    privateError: mine.error,
+  };
+}
+
 /** 내 제출 기록에서 해결/시도한 문제를 계산한다. */
 export function useSubmissionHistory(session: Session | null) {
   const { data: submissions, loading, error, retry } = useRequest(

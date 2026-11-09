@@ -13,6 +13,7 @@ interface MyProblem {
   slug: string;
   title: string;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  isPrivate?: boolean;
   difficulty: string;
   currentVersion: number;
   updatedAt: string;
@@ -170,11 +171,15 @@ export function MyProblemsPage() {
                   · /{problem.slug}
                 </span>
               </div>
-              <span
-                className={`case-pill status-${problem.status.toLowerCase()}`}
-              >
-                {statusLabel[problem.status]}
-              </span>
+              {problem.isPrivate ? (
+                <span className="case-pill status-private">기업 전용</span>
+              ) : (
+                <span
+                  className={`case-pill status-${problem.status.toLowerCase()}`}
+                >
+                  {statusLabel[problem.status]}
+                </span>
+              )}
               <div className="my-problem-actions">
                 <Link
                   className="button button-outline"
@@ -187,7 +192,8 @@ export function MyProblemsPage() {
                     문제 보기
                   </Link>
                 ) : null}
-                {isAdmin && problem.status === "DRAFT" ? (
+                {/* 기업 전용 문제는 공개할 수 없다(서버 규칙). */}
+                {isAdmin && problem.status === "DRAFT" && !problem.isPrivate ? (
                   <button
                     type="button"
                     className="button"

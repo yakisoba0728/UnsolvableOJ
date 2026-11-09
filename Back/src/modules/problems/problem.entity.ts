@@ -69,6 +69,10 @@ export class Problem {
   @Column({ name: 'author_id', type: 'uuid' })
   authorId: string;
 
+  // 기업 테스트 전용 문제. 공개 목록·상세에 나오지 않고 공개(PUBLISHED)로 바꿀 수 없다.
+  @Column({ name: 'is_private', type: 'boolean', default: false })
+  isPrivate: boolean;
+
   @ManyToOne(() => User, (user) => user.authoredProblems, {
     onDelete: 'RESTRICT',
   })

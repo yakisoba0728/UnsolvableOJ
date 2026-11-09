@@ -24,6 +24,10 @@ import { Problem } from './problem.entity.js';
 import { ProblemStatus } from './problem.enums.js';
 import { TestCase } from './test-case.entity.js';
 
+const UNPUBLISHED_LIMIT = 50;
+const PRIVATE_PUBLISH_MESSAGE =
+  '기업 전용 문제는 공개할 수 없습니다. 공개하려면 먼저 기업 전용을 해제하세요.';
+
 @Injectable()
 export class ProblemsService {
   constructor(
@@ -38,8 +42,22 @@ export class ProblemsService {
     ) {
       throw new ForbiddenException('문제 공개는 관리자 검수가 필요합니다.');
     }
+    if (dto.isPrivate && dto.status === ProblemStatus.PUBLISHED)
+      throw new BadRequestException(PRIVATE_PUBLISH_MESSAGE);
     try {
       return await this.dataSource.transaction(async (manager) => {
+        if (user.role !== UserRole.ADMIN) {
+          // 누구나 출제할 수 있으므로 검수 전 문제가 무한히 쌓이지 않게 막는다. 같은 계정의 동시 생성은 직렬화한다.
+          await manager.query('SELECT 1 FROM users WHERE id = $1 FOR UPDATE', [user.id]);
+          const [{ count }]: { count: number }[] = await manager.query(
+            "SELECT count(*)::int AS count FROM problems WHERE author_id = $1 AND status <> 'PUBLISHED'",
+            [user.id],
+          );
+          if (count >= UNPUBLISHED_LIMIT)
+            throw new ConflictException(
+              `공개되지 않은 문제(초안·보관·기업 전용)는 ${UNPUBLISHED_LIMIT}개까지 둘 수 있어요. 쓰지 않는 문제를 정리해 주세요.`,
+            );
+        }
         const problem = manager.create(Problem, {
           slug: dto.slug.toLowerCase(),
           title: dto.title,
@@ -49,6 +67,7 @@ export class ProblemsService {
           editorialMarkdown: dto.editorialMarkdown,
           tags: dto.tags,
           difficulty: dto.difficulty,
+          isPrivate: dto.isPrivate,
           status: dto.status,
           timeLimitMs: dto.timeLimitMs,
           memoryLimitMb: dto.memoryLimitMb,
@@ -77,7 +96,7 @@ export class ProblemsService {
           saved.id,
           { version: 1 },
         );
-        return this.toDetail(saved);
+        return { ...this.toDetail(saved), isPrivate: saved.isPrivate };
       });
     } catch (error: unknown) {
       if (isUniqueViolation(error))
@@ -128,9 +147,10 @@ export class ProblemsService {
           order: { order: 'ASC' },
         });
       }
+      if (dto.isPrivate !== undefined) problem.isPrivate = dto.isPrivate;
       if (
-        user.role !== UserRole.ADMIN &&
-        problem.status === ProblemStatus.PUBLISHED
+        problem.status === ProblemStatus.PUBLISHED &&
+        (user.role !== UserRole.ADMIN || problem.isPrivate)
       ) {
         problem.status = ProblemStatus.DRAFT;
       }
@@ -162,6 +182,8 @@ export class ProblemsService {
         .findOne({ where: { id }, lock: { mode: 'pessimistic_write' } });
       if (!problem) throw new NotFoundException('문제를 찾을 수 없습니다.');
       this.assertOwner(problem, user);
+      if (problem.isPrivate && status === ProblemStatus.PUBLISHED)
+        throw new BadRequestException(PRIVATE_PUBLISH_MESSAGE);
       const oldStatus = problem.status;
       problem.status = status;
       await manager.save(problem);
@@ -242,7 +264,10 @@ export class ProblemsService {
         slug: true,
         title: true,
         status: true,
+        isPrivate: true,
         difficulty: true,
+        timeLimitMs: true,
+        memoryLimitMb: true,
         currentVersion: true,
         updatedAt: true,
       },
@@ -337,6 +362,7 @@ export class ProblemsService {
   private toManagement(problem: Problem) {
     return {
       ...this.toDetail(problem),
+      isPrivate: problem.isPrivate,
       testCases: this.snapshot(problem).testCases,
     };
   }

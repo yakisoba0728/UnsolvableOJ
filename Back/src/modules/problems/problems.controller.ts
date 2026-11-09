@@ -11,11 +11,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
-import { Roles } from '../../common/decorators/roles.decorator.js';
-import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
-import { UserRole } from '../users/user-role.enum.js';
 import { CreateProblemDto } from './dto/create-problem.dto.js';
 import { UpdateProblemDto } from './dto/update-problem.dto.js';
 import { ChangeProblemStatusDto } from './dto/change-problem-status.dto.js';
@@ -34,16 +31,14 @@ export class ProblemsController {
 
   @Get('mine')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.AUTHOR, UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard)
   mine(@CurrentUser() user: AuthenticatedUser) {
     return this.problemsService.findMine(user);
   }
 
   @Get(':id/manage')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.AUTHOR, UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard)
   manage(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: AuthenticatedUser,
@@ -58,8 +53,7 @@ export class ProblemsController {
 
   @Post()
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.AUTHOR, UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard)
   create(
     @Body() dto: CreateProblemDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -69,8 +63,7 @@ export class ProblemsController {
 
   @Patch(':id')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.AUTHOR, UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard)
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateProblemDto,
@@ -81,8 +74,7 @@ export class ProblemsController {
 
   @Patch(':id/status')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.AUTHOR, UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard)
   changeStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ChangeProblemStatusDto,

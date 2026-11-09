@@ -15,9 +15,6 @@ import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-import { Roles } from '../../common/decorators/roles.decorator.js';
-import { RolesGuard } from '../../common/guards/roles.guard.js';
-import { UserRole } from '../users/user-role.enum.js';
 import { CreateSubmissionDto } from './dto/create-submission.dto.js';
 import {
   ListProblemSubmissionsQuery,
@@ -45,8 +42,6 @@ export class SubmissionsController {
   }
 
   @Get('problems/:problemId/submissions')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.AUTHOR, UserRole.ADMIN)
   findForProblem(
     @Param('problemId', ParseUUIDPipe) problemId: string,
     @CurrentUser() user: AuthenticatedUser,
@@ -56,8 +51,6 @@ export class SubmissionsController {
   }
 
   @Post('problems/:problemId/rejudge')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.AUTHOR, UserRole.ADMIN)
   @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @HttpCode(HttpStatus.ACCEPTED)
   rejudgeProblem(
@@ -85,8 +78,6 @@ export class SubmissionsController {
   }
 
   @Post('submissions/:id/rejudge')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.AUTHOR, UserRole.ADMIN)
   @HttpCode(HttpStatus.ACCEPTED)
   rejudge(
     @Param('id', ParseUUIDPipe) id: string,
