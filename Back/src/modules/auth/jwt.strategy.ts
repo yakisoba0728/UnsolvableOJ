@@ -28,6 +28,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
     // 정지할 때 token_version도 올리지만, 정지 중에는 어떤 토큰도 받지 않는다.
     if (current.suspendedAt) throw new UnauthorizedException(suspendedMessage);
-    return { id: current.id, role: current.role };
+    // 로그아웃·기기 로그아웃으로 끊긴 로그인의 access token은 만료 전이라도 받지 않는다.
+    if (payload.sid) {
+      const live: unknown[] = await this.users.query(
+        `SELECT 1 FROM refresh_tokens
+         WHERE family_id = $1 AND user_id = $2 AND revoked_at IS NULL AND expires_at > now() LIMIT 1`,
+        [payload.sid, current.id],
+      );
+      if (!live.length)
+        throw new UnauthorizedException('다시 로그인해야 합니다.');
+    }
+    return {
+      id: current.id,
+      role: current.role,
+      mustChangePassword: current.mustChangePassword,
+      sessionId: payload.sid,
+    };
   }
 }

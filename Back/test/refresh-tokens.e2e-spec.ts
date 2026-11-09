@@ -106,12 +106,68 @@ describe('Refresh tokens and temporary passwords (e2e)', () => {
     await refresh('not-a-real-token').expect(401);
   });
 
+  it('lists login devices without token values and logs out one or all other devices at once', async () => {
+    const [a, b, c] = [
+      await signIn(solver.email, { remember: true }),
+      await signIn(solver.email),
+      (await refresh(remembered.refreshToken).expect(200)).body as Session,
+    ];
+    remembered = c;
+    const list = async (token: string) =>
+      (await http().get(`${base}/auth/sessions`).set(bearer(token)).expect(200))
+        .body as {
+        id: string;
+        createdAt: string;
+        lastUsedAt: string;
+        remember: boolean;
+        current: boolean;
+      }[];
+    const devices = await list(a.accessToken);
+    expect(devices.length).toBeGreaterThanOrEqual(3);
+    expect(devices.filter((device) => device.current)).toHaveLength(1);
+    for (const device of devices)
+      expect(Object.keys(device).sort()).toEqual(
+        ['createdAt', 'current', 'expiresAt', 'id', 'lastUsedAt', 'remember'],
+      );
+    const serialized = JSON.stringify(devices);
+    for (const session of [a, b, c])
+      expect(serialized).not.toContain(session.refreshToken);
+    // 회전해도 같은 기기(계열)로 남고, 로그인한 시각은 처음 그대로다.
+    const ofC = (await list(c.accessToken)).find((device) => device.current)!;
+    expect(Date.parse(ofC.createdAt)).toBeLessThan(Date.parse(ofC.lastUsedAt));
+
+    // 남의 로그인은 끊지 못한다(같은 204지만 그대로 유효).
+    const current = devices.find((device) => device.current)!;
+    await http()
+      .delete(`${base}/auth/sessions/${current.id}`)
+      .set(bearer(adminSession.accessToken))
+      .expect(204);
+    await http().get(`${base}/users/me`).set(bearer(a.accessToken)).expect(200);
+
+    // b 기기만 로그아웃: b의 refresh token과 아직 만료되지 않은 access token이 바로 거절된다.
+    const ofB = (await list(b.accessToken)).find((device) => device.current)!;
+    await http()
+      .delete(`${base}/auth/sessions/${ofB.id}`)
+      .set(bearer(a.accessToken))
+      .expect(204);
+    await http().get(`${base}/users/me`).set(bearer(b.accessToken)).expect(401);
+    await refresh(b.refreshToken).expect(401);
+
+    // 다른 기기 모두 로그아웃: a만 남는다.
+    await http().delete(`${base}/auth/sessions`).set(bearer(a.accessToken)).expect(204);
+    await http().get(`${base}/users/me`).set(bearer(c.accessToken)).expect(401);
+    expect((await list(a.accessToken)).map((device) => device.current)).toEqual([true]);
+    remembered = (await refresh(a.refreshToken).expect(200)).body;
+  });
+
   it('logout revokes the refresh token and answers the same for unknown tokens', async () => {
     await http()
       .post(`${base}/auth/logout`)
       .send({ refreshToken: remembered.refreshToken })
       .expect(204);
     await refresh(remembered.refreshToken).expect(401);
+    // 로그아웃한 로그인의 access token도 만료를 기다리지 않고 거절한다.
+    await http().get(`${base}/users/me`).set(bearer(remembered.accessToken)).expect(401);
     await http()
       .post(`${base}/auth/logout`)
       .send({ refreshToken: 'unknown-token' })
@@ -189,7 +245,27 @@ describe('Refresh tokens and temporary passwords (e2e)', () => {
     await refresh(targetSession.refreshToken).expect(401);
     expect(await tokenRows(target.id)).toEqual([{ revoked: true }]);
     const fresh = await signIn(target.email, {}, body.temporaryPassword);
-    expect(fresh.user.id).toBe(target.id);
+    expect(fresh.user).toMatchObject({ id: target.id, mustChangePassword: true });
+
+    // 비밀번호를 바꾸기 전에는 계정 API(비밀번호·로그인 기기) 밖의 요청을 403으로 막는다(401이면 웹이 로그아웃시킨다).
+    const me = (token: string) =>
+      http().get(`${base}/users/me`).set(bearer(token));
+    const blocked = await me(fresh.accessToken).expect(403);
+    expect(blocked.body.message).toContain('비밀번호를 먼저 바꿔');
+    await http().get(`${base}/auth/sessions`).set(bearer(fresh.accessToken)).expect(200);
+    // 갱신해도 표시는 남는다.
+    const rotated: Session = (await refresh(fresh.refreshToken).expect(200)).body;
+    expect(rotated.user).toMatchObject({ mustChangePassword: true });
+    const { body: changed } = await http()
+      .patch(`${base}/auth/password`)
+      .set(bearer(rotated.accessToken))
+      .send({
+        currentPassword: body.temporaryPassword,
+        newPassword: 'chosen-password-789',
+      })
+      .expect(200);
+    expect(changed.user.mustChangePassword).toBe(false);
+    await me(changed.accessToken).expect(200);
 
     const [audit] = await db.query<{ actor: string; details: object }[]>(
       `SELECT actor_id AS actor, details FROM audit_events

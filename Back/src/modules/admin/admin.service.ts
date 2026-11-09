@@ -152,7 +152,7 @@ export class AdminService {
     const passwordHash = await this.passwordHasher.hash(temporaryPassword);
     return this.db.transaction(async (manager) => {
       const [rows]: [{ id: string }[], number] = await manager.query(
-        'UPDATE users SET password_hash = $1, token_version = token_version + 1, updated_at = now() WHERE id = $2 RETURNING id',
+        'UPDATE users SET password_hash = $1, token_version = token_version + 1, must_change_password = true, updated_at = now() WHERE id = $2 RETURNING id',
         [passwordHash, id],
       );
       if (!rows.length) throw new NotFoundException('사용자를 찾을 수 없습니다.');
