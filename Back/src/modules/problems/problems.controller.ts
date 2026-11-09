@@ -12,6 +12,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { CreateProblemDto } from './dto/create-problem.dto.js';
 import { UpdateProblemDto } from './dto/update-problem.dto.js';
@@ -25,8 +26,12 @@ export class ProblemsController {
   constructor(private readonly problemsService: ProblemsService) {}
 
   @Get()
-  findAll(@Query() query: ListProblemsQuery) {
-    return this.problemsService.findAll(query);
+  @UseGuards(OptionalJwtAuthGuard)
+  findAll(
+    @Query() query: ListProblemsQuery,
+    @CurrentUser() user: AuthenticatedUser | undefined,
+  ) {
+    return this.problemsService.findAll(query, user);
   }
 
   @Get('mine')

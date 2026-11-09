@@ -4,6 +4,7 @@ import {
   authenticate,
   mockCommunityApi,
   mockProblemApi,
+  mockProblemList,
   problem,
 } from "./fixtures";
 
@@ -43,19 +44,15 @@ for (const slug of ["new", "mine"]) {
 }
 
 test("difficulty changes reset pagination", async ({ page }) => {
-  // 목록은 공개 문제를 모두 받아 브라우저에서 나눈다. 41문제 = 입문 16 + 어려움 25.
+  // 서버가 쪽을 나눈다. 41문제 = 입문 16 + 어려움 25.
   const items = Array.from({ length: 41 }, (_, index) => ({
     ...problem,
     id: `problem-${index}`,
     slug: `problem-${index}`,
     title: `문제 ${index}`,
-    difficulty: index < 16 ? "BEGINNER" : "HARD",
+    difficulty: index < 16 ? ("BEGINNER" as const) : ("HARD" as const),
   }));
-  await page.route("**/api/v1/problems?*", (route) =>
-    route.fulfill({
-      json: { items, total: items.length, totalPages: 1, page: 1, limit: 100 },
-    }),
-  );
+  await mockProblemList(page, items);
   await page.goto("/problems");
   await page.getByRole("button", { name: "다음", exact: true }).click();
   await expect(page).toHaveURL(/[?&]page=2(&|$)/);
@@ -100,21 +97,11 @@ test("the problem list has a reverse-order button that is replaced by the shuffl
     difficulty,
     createdAt: at,
   });
-  await page.route("**/api/v1/problems?*", (route) =>
-    route.fulfill({
-      json: {
-        items: [
-          make("p-a", "가 문제", "HARD", "2026-09-01T00:00:00Z"),
-          make("p-b", "나 문제", "BEGINNER", "2026-09-03T00:00:00Z"),
-          make("p-c", "다 문제", "MEDIUM", "2026-09-02T00:00:00Z"),
-        ],
-        page: 1,
-        limit: 100,
-        total: 3,
-        totalPages: 1,
-      },
-    }),
-  );
+  await mockProblemList(page, [
+    make("p-a", "가 문제", "HARD", "2026-09-01T00:00:00Z"),
+    make("p-b", "나 문제", "BEGINNER", "2026-09-03T00:00:00Z"),
+    make("p-c", "다 문제", "MEDIUM", "2026-09-02T00:00:00Z"),
+  ]);
   // 화면이 다시 그려질 때까지 자동으로 기다리며 순서를 확인한다.
   const expectTitles = (expected: string[]) =>
     expect(page.locator(".problem-row .problem-title strong")).toHaveText(
@@ -316,21 +303,14 @@ test("the problem list and the community list show the page range the same way",
   page,
 }) => {
   await authenticate(page);
-  await page.route(/\/api\/v1\/problems(\?.*)?$/, (route) =>
-    route.fulfill({
-      json: {
-        items: Array.from({ length: 25 }, (_, index) => ({
-          ...problem,
-          id: `p-${index}`,
-          slug: `p-${index}`,
-          title: `문제 ${index + 1}`,
-        })),
-        page: 1,
-        limit: 100,
-        total: 25,
-        totalPages: 1,
-      },
-    }),
+  await mockProblemList(
+    page,
+    Array.from({ length: 25 }, (_, index) => ({
+      ...problem,
+      id: `p-${index}`,
+      slug: `p-${index}`,
+      title: `문제 ${index + 1}`,
+    })),
   );
   const posts = Array.from({ length: 12 }, (_, index) => ({
     id: `r-${index}`,
@@ -370,4 +350,147 @@ test("the problem list and the community list show the page range the same way",
 
   // 글씨 모양도 같다
   expect(communityLook).toEqual(problemLook);
+});
+
+const many = Array.from({ length: 30 }, (_, index) => ({
+  ...problem,
+  id: `s-${index}`,
+  slug: `search-${index}`,
+  title: `탐색 ${index}`,
+  difficulty: index % 2 ? ("HARD" as const) : ("BEGINNER" as const),
+  tags: index % 3 ? [] : ["그래프"],
+  createdAt: new Date(Date.UTC(2026, 8, 1, 0, index)).toISOString(),
+}));
+
+test("search, filters and pages go to the server, debounced, and stay in the address", async ({
+  page,
+}) => {
+  const requests = await mockProblemList(page, many);
+  await page.goto("/problems");
+  await expect(page.locator(".total-count")).toHaveText("1 - 20/30");
+  // 전체를 한꺼번에 받지 않고 한 쪽만 받는다.
+  expect(requests.at(-1)?.get("limit")).toBe("20");
+
+  const search = page.getByRole("searchbox", { name: "문제 검색" });
+  await search.pressSequentially("탐색 2", { delay: 20 });
+  await expect(page).toHaveURL(/[?&]q=%ED%83%90%EC%83%89\+2(&|$)/);
+  // 탐색 2, 탐색 20–29
+  await expect(page.locator(".total-count")).toHaveText("1 - 11/11");
+  // 입력이 멈춘 뒤에만 보낸다: 중간 글자로 보낸 검색은 없다.
+  const sent = requests.map((params) => params.get("q")).filter(Boolean);
+  expect(sent).toEqual(["탐색 2"]);
+
+  await page
+    .getByRole("group", { name: "난이도 필터" })
+    .getByRole("button", { name: /^어려움/ })
+    .click();
+  await expect(page).toHaveURL(/[?&]d=HARD(&|$)/);
+  await expect(page.locator(".total-count")).toHaveText("1 - 5/5");
+  expect(requests.at(-1)?.get("difficulty")).toBe("HARD");
+  expect(requests.at(-1)?.get("q")).toBe("탐색 2");
+  // 칩 숫자는 서버가 센 값이다(검색어는 그대로, 난이도 조건만 빼고).
+  await expect(
+    page
+      .getByRole("group", { name: "난이도 필터" })
+      .getByRole("button", { name: /^입문/ }),
+  ).toContainText("6");
+
+  // 다른 화면에 갔다가 뒤로 오면 같은 조건과 결과가 돌아온다.
+  await page.goto("/community");
+  await page.goBack();
+  await expect(page).toHaveURL(/[?&]d=HARD(&|$)/);
+  await expect(search).toHaveValue("탐색 2");
+  await expect(page.locator(".total-count")).toHaveText("1 - 5/5");
+
+  // 결과보다 뒤의 쪽을 가리키는 주소는 마지막 쪽으로 옮긴다.
+  await page.goto("/problems?page=9");
+  await expect(page).toHaveURL(/[?&]page=2(&|$)/);
+  await expect(page.locator(".total-count")).toHaveText("21 - 30/30");
+});
+
+test("a slow earlier response never replaces the newer filter's results", async ({
+  page,
+}) => {
+  let release: () => void = () => undefined;
+  const gate = new Promise<void>((resolve) => (release = resolve));
+  const requests = await mockProblemList(page, many);
+  // 검색어만 있는 요청은 늦게 돌려준다. 그 사이 조건을 바꾸면 앞선 응답은 쓰이지 않아야 한다.
+  await page.route(
+    (url) =>
+      url.pathname === "/api/v1/problems" &&
+      url.searchParams.has("q") &&
+      !url.searchParams.has("difficulty"),
+    async (route) => {
+      await gate;
+      await route
+        .fulfill({
+          json: { items: [many[0]], page: 1, limit: 20, total: 1, totalPages: 1 },
+        })
+        .catch(() => undefined);
+    },
+  );
+  await page.goto("/problems?q=%ED%83%90%EC%83%89");
+  await expect(page.locator(".skeleton-rows")).toBeVisible();
+  await page
+    .getByRole("group", { name: "난이도 필터" })
+    .getByRole("button", { name: /^어려움/ })
+    .click();
+  await expect(page.locator(".total-count")).toHaveText("1 - 15/15");
+  release();
+  await page.waitForTimeout(200);
+  await expect(page.locator(".total-count")).toHaveText("1 - 15/15");
+  expect(requests.at(-1)?.get("difficulty")).toBe("HARD");
+});
+
+test("solve-state filters are asked of the server for a signed-in user", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.route("**/api/v1/submissions?*", (route) =>
+    route.fulfill({
+      json: { items: [], page: 1, limit: 1000, total: 0, totalPages: 0, nextCursor: null },
+    }),
+  );
+  const requests = await mockProblemList(page, many, {
+    "s-0": "solved",
+    "s-1": "attempted",
+  });
+  await page.goto("/problems");
+  const solve = page.getByRole("group", { name: "풀이 상태 필터" });
+  await expect(solve.getByRole("button", { name: /^해결/ })).toContainText("1");
+  await solve.getByRole("button", { name: /^미해결/ }).click();
+  await expect(page).toHaveURL(/[?&]s=none(&|$)/);
+  await expect(page.locator(".total-count")).toHaveText("1 - 20/28");
+  expect(requests.at(-1)?.get("solve")).toBe("none");
+});
+
+test("a failed list request shows the error with a retry that keeps the conditions", async ({
+  page,
+}) => {
+  let fail = true;
+  const requests: string[] = [];
+  await page.route(
+    (url) => url.pathname === "/api/v1/problems",
+    (route) => {
+      requests.push(route.request().url());
+      if (fail)
+        return route.fulfill({
+          status: 500,
+          json: { message: "잠시 후 다시 시도해 주세요." },
+        });
+      return route.fulfill({
+        json: { items: [problem], page: 1, limit: 20, total: 1, totalPages: 1 },
+      });
+    },
+  );
+  await page.goto("/problems?q=%ED%95%A9&d=BEGINNER");
+  const alert = page.getByRole("alert");
+  await expect(alert).toContainText("잠시 후 다시 시도해 주세요.");
+  await expect(page.locator(".empty-state")).toHaveCount(0);
+  fail = false;
+  await alert.getByRole("button", { name: "다시 시도" }).click();
+  await expect(page.locator("a.problem-row")).toHaveCount(1);
+  const last = new URL(requests.at(-1)!).searchParams;
+  expect(last.get("q")).toBe("합");
+  expect(last.get("difficulty")).toBe("BEGINNER");
 });

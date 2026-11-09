@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import type { Problem, Role, Session } from "../src/types";
+import type { Problem, ProblemSummary, Role, Session } from "../src/types";
 
 export const storageKey = "unsolvable-oj-session-v1";
 export const session: Session = {
@@ -51,13 +51,121 @@ export async function authenticate(
   );
 }
 
+/**
+ * 공개 문제 목록 API(GET /problems)의 응답을 서버 규칙대로 만든다:
+ * q(제목·slug, 대소문자 무시)·difficulty·tag·solve로 거르고, sort·reverse·seed로 정렬하고, page·limit로 자르고,
+ * 칩 숫자(facets)는 같은 묶음의 조건만 빼고 센다. Back/src/modules/problems/problems.service.ts findAll과 맞춘다.
+ * states는 로그인 사용자의 문제별 풀이 상태(없으면 미해결)다.
+ */
+export function problemListResponse(
+  all: ProblemSummary[],
+  url: URL,
+  states: Record<string, "solved" | "attempted"> = {},
+) {
+  const get = (key: string) => url.searchParams.get(key) ?? "";
+  const list = (key: string) => get(key).split(",").filter(Boolean);
+  const keyword = get("q").trim().toLowerCase();
+  const difficulties = list("difficulty");
+  const solves = list("solve");
+  const tag = get("tag");
+  const stateOf = (item: ProblemSummary) => states[item.id] ?? "none";
+  const matches = (item: ProblemSummary, skip: string | null) =>
+    (!keyword ||
+      item.title.toLowerCase().includes(keyword) ||
+      item.slug.toLowerCase().includes(keyword)) &&
+    (skip === "tag" || !tag || (item.tags ?? []).includes(tag)) &&
+    (skip === "difficulty" ||
+      !difficulties.length ||
+      difficulties.includes(item.difficulty)) &&
+    (skip === "solve" || !solves.length || solves.includes(stateOf(item)));
+  const count = (skip: string, test: (item: ProblemSummary) => boolean) =>
+    all.filter((item) => matches(item, skip) && test(item)).length;
+  const sort = get("sort") || "latest";
+  const dir = get("reverse") === "true" ? -1 : 1;
+  const latest = (a: ProblemSummary, b: ProblemSummary) =>
+    b.createdAt.localeCompare(a.createdAt);
+  const levels = ["BEGINNER", "EASY", "MEDIUM", "HARD", "EXPERT"];
+  const compare: Record<string, (a: ProblemSummary, b: ProblemSummary) => number> = {
+    latest: (a, b) => latest(a, b) * dir,
+    difficulty: (a, b) =>
+      (levels.indexOf(a.difficulty) - levels.indexOf(b.difficulty)) * dir ||
+      latest(a, b),
+    title: (a, b) => a.title.localeCompare(b.title, "ko") * dir || latest(a, b),
+    solvers: (a, b) =>
+      ((b.solverCount ?? 0) - (a.solverCount ?? 0)) * dir || latest(a, b),
+    rate: (a, b) =>
+      a.acceptanceRate == null || b.acceptanceRate == null
+        ? Number(a.acceptanceRate == null) - Number(b.acceptanceRate == null)
+        : (b.acceptanceRate - a.acceptanceRate) * dir || latest(a, b),
+    // 서버는 seed로 md5 순서를 만든다. 여기서는 같은 seed면 같은 순서이기만 하면 된다.
+    random: (a, b) =>
+      hash(a.id + get("seed")) - hash(b.id + get("seed")) ||
+      a.id.localeCompare(b.id),
+  };
+  const filtered = all.filter((item) => matches(item, null)).sort(compare[sort]);
+  const pageNumber = Number(get("page") || 1);
+  const limit = Number(get("limit") || 20);
+  const tags = [...new Set(all.flatMap((item) => item.tags ?? []))].map((name) => ({
+    tag: name,
+    count: count("tag", (item) => (item.tags ?? []).includes(name)),
+  }));
+  return {
+    items: filtered.slice((pageNumber - 1) * limit, pageNumber * limit),
+    page: pageNumber,
+    limit,
+    total: filtered.length,
+    totalPages: Math.ceil(filtered.length / limit),
+    facets: {
+      difficulties: Object.fromEntries(
+        ["", ...levels].map((level) => [
+          level,
+          count("difficulty", (item) => !level || item.difficulty === level),
+        ]),
+      ),
+      solves: url.searchParams.has("solve") || Object.keys(states).length
+        ? Object.fromEntries(
+            ["", "none", "attempted", "solved"].map((state) => [
+              state,
+              count("solve", (item) => !state || stateOf(item) === state),
+            ]),
+          )
+        : null,
+      tags,
+    },
+  };
+}
+
+function hash(text: string) {
+  let value = 0;
+  for (const char of text) value = (Math.imul(value, 31) + char.charCodeAt(0)) | 0;
+  return value;
+}
+
+/** GET /problems 목록만 흉내 낸다(상세 등 다른 경로는 건드리지 않는다). requests로 보낸 조건을 확인한다. */
+export async function mockProblemList(
+  page: Page,
+  items: ProblemSummary[],
+  states?: Record<string, "solved" | "attempted">,
+) {
+  const requests: URLSearchParams[] = [];
+  await page.route(
+    (url) => url.pathname === "/api/v1/problems",
+    (route) => {
+      if (route.request().method() !== "GET") return route.fallback();
+      const url = new URL(route.request().url());
+      requests.push(url.searchParams);
+      return route.fulfill({ json: problemListResponse(items, url, states) });
+    },
+  );
+  return requests;
+}
+
 export async function mockProblemApi(page: Page) {
   await page.route("**/api/v1/**", async (route) => {
-    const path = new URL(route.request().url()).pathname;
+    const url = new URL(route.request().url());
+    const path = url.pathname;
     if (path === "/api/v1/problems") {
-      await route.fulfill({
-        json: { items: [problem], page: 1, limit: 20, total: 1, totalPages: 1 },
-      });
+      await route.fulfill({ json: problemListResponse([problem], url) });
     } else if (path.startsWith("/api/v1/problems/by-slug/")) {
       await route.fulfill({
         json: { ...problem, slug: path.split("/").at(-1) },

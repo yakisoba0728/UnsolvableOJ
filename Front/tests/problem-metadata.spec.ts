@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { authenticate, mockProblemApi, problem } from "./fixtures";
+import { authenticate, mockProblemApi, mockProblemList, problem } from "./fixtures";
 
 const tagged = {
   ...problem,
@@ -43,11 +43,7 @@ test("problem list filters by tag from the URL-backed tag select", async ({
     { ...problem, id: "b", slug: "b", title: "수학 문제", tags: ["수학"] },
     { ...problem, id: "c", slug: "c", title: "태그 없는 문제" },
   ];
-  await page.route("**/api/v1/problems?*", (route) =>
-    route.fulfill({
-      json: { items, total: 3, totalPages: 1, page: 1, limit: 1000 },
-    }),
-  );
+  await mockProblemList(page, items);
   await page.goto("/problems");
   await page.getByRole("combobox", { name: "태그 필터" }).click();
   await page.getByRole("option", { name: "그래프 (1)", exact: true }).click();
