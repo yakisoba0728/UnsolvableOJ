@@ -62,7 +62,8 @@ export function SettingsPage() {
       return setPasswordStatus({ ...idle, error: "새 비밀번호가 서로 다릅니다." });
     const changed = await send(
       "/auth/password",
-      { currentPassword, newPassword },
+      // 비밀번호를 바꾸면 refresh token도 모두 새로 받으므로 지금의 로그인 유지 여부를 이어 간다.
+      { currentPassword, newPassword, ...(session!.remember ? { remember: true } : {}) },
       setPasswordStatus,
       "비밀번호를 바꿨습니다. 다른 기기에서는 다시 로그인해야 합니다.",
     );

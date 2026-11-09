@@ -21,6 +21,7 @@ describe('AuthService.register importer identity reservation', () => {
         rating: 0,
       })),
       save: vi.fn().mockResolvedValue(undefined),
+      manager: { query: vi.fn().mockResolvedValue([]) },
     };
     const passwordHasher = { hash: vi.fn().mockResolvedValue('hashed-password') };
     const jwt = { signAsync: vi.fn().mockResolvedValue('access-token') };

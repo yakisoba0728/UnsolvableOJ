@@ -1,6 +1,13 @@
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
 export const unauthorizedEvent = "unsolvable-oj:unauthorized";
 
+type TokenRefresher = (staleToken: string) => Promise<string | null>;
+let refreshAccessToken: TokenRefresher | null = null;
+/** auth.tsx가 등록한다. null은 새 토큰을 받을 수 없다는 뜻(로그아웃), 예외는 일시 오류(세션 유지)다. */
+export function setTokenRefresher(refresher: TokenRefresher | null) {
+  refreshAccessToken = refresher;
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -15,6 +22,7 @@ export async function api<T>(
   path: string,
   options: RequestInit = {},
   token?: string,
+  retried = false,
 ): Promise<T> {
   const response = await fetch(`${baseUrl}${path}`, {
     ...options,
@@ -37,9 +45,16 @@ export async function api<T>(
       response.status,
       "서버 응답을 확인할 수 없습니다. 백엔드 주소(VITE_API_BASE_URL) 설정을 확인해 주세요.",
     );
-  // 토큰이 무효가 됐다(역할 변경·만료 등). 로그인 상태를 정리하도록 알린다.
-  if (response.status === 401 && token)
-    window.dispatchEvent(new CustomEvent(unauthorizedEvent, { detail: token }));
+  // 토큰이 무효가 됐다(만료·역할 변경 등). 한 번 새 토큰을 받아 다시 보내고, 받을 수 없으면 로그인 상태를 정리하도록 알린다.
+  if (response.status === 401 && token) {
+    const fresh =
+      retried || !refreshAccessToken
+        ? null
+        : await refreshAccessToken(token).catch(() => undefined);
+    if (fresh) return api<T>(path, options, fresh, true);
+    if (fresh === null)
+      window.dispatchEvent(new CustomEvent(unauthorizedEvent, { detail: token }));
+  }
   if (!response.ok) {
     const detail = data?.message;
     const retryAfter = response.headers.get("Retry-After");

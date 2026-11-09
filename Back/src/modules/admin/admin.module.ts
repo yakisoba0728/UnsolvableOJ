@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JUDGE_QUEUE } from '../../common/queue.constants.js';
+import { PasswordHasher } from '../auth/password-hasher.service.js';
 import { User } from '../users/user.entity.js';
 import { AuditEvent } from './audit-event.entity.js';
 import { AdminController } from './admin.controller.js';
@@ -15,6 +16,6 @@ import { AdminService } from './admin.service.js';
     TypeOrmModule.forFeature([User, AuditEvent]),
   ],
   controllers: [AdminController],
-  providers: [AdminService],
+  providers: [AdminService, PasswordHasher],
 })
 export class AdminModule {}
