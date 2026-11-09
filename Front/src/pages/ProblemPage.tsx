@@ -124,7 +124,7 @@ function OwnedProblemPage() {
   }
   const { session } = useAuth();
   const ownerId = session?.user.id ?? null;
-  const { submission: result, error: resultError } = useSubmissionResult(
+  const { submission: result, error: resultError, ...resultRefresh } = useSubmissionResult(
     submissionId,
     session,
   );
@@ -650,6 +650,7 @@ function OwnedProblemPage() {
               <JudgePanel
                 result={result}
                 error={resultError}
+                refresh={resultRefresh}
                 open={panelOpen}
                 height={panelHeight}
                 onHeightChange={setPanelHeight}

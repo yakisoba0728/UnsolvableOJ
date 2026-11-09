@@ -397,7 +397,7 @@ test.describe("community post: delete own post and answer layout", () => {
       ],
     });
 
-  test("the answer editor and the answer list are separate cards, editor first, with no separate write-answer button", async ({
+  test("the answer list precedes the separate editor and a shortcut focuses writing", async ({
     page,
   }) => {
     await authenticate(page);
@@ -412,7 +412,9 @@ test.describe("community post: delete own post and answer layout", () => {
     await expect(listCard.locator(".answer-editor")).toHaveCount(0);
     const writeTop = (await writeCard.boundingBox())!.y;
     const listTop = (await listCard.boundingBox())!.y;
-    expect(writeTop).toBeLessThan(listTop);
+    expect(listTop).toBeLessThan(writeTop);
+    await page.getByRole("button", { name: "답변 작성으로 이동 ↓", exact: true }).click();
+    await expect(writeCard.locator("textarea")).toBeFocused();
     // 남의 글에는 글 관리(⋮) 메뉴가 없다
     await expect(page.getByRole("button", { name: "글 관리" })).toHaveCount(0);
     // 조회수는 아이콘과 숫자로 보인다
@@ -839,7 +841,7 @@ test.describe("community API", () => {
       })),
     });
     await page.goto("/community/many");
-    await page.getByRole("button", { name: /^답변 20/ }).click();
+    await expect(page.getByRole("button", { name: /^답변 20/ })).toHaveAttribute("aria-expanded", "true");
     await expect(page.locator(".answer")).toHaveCount(20);
     await expect(page.getByRole("navigation", { name: /페이지/ })).toHaveCount(0);
     await page.getByLabel("답변 내용").fill("스물한 번째 답변입니다.");
@@ -861,7 +863,7 @@ test.describe("community API", () => {
       ],
     });
     await page.goto("/community/q-1");
-    await page.getByRole("button", { name: /^답변 2/ }).click();
+    await expect(page.getByRole("button", { name: /^답변 2/ })).toHaveAttribute("aria-expanded", "true");
     // 남의 답변은 관리 메뉴가 없다.
     await expect(
       page.locator("#their-a").getByRole("button", { name: "답변 관리" }),

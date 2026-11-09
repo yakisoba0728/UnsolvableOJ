@@ -159,9 +159,9 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               <Route path="/analysis/:id" element={<AnalysisQuestionPage />} />
               <Route path="/missions" element={<MissionsPage />} />
               <Route path="/enterprise" element={<EnterprisePage />} />
-              <Route path="/enterprise/new" element={<EnterpriseFormPage />} />
+              <Route path="/enterprise/new" element={session ? <EnterpriseFormPage key={session.user.id} /> : loginRedirect} />
               <Route path="/enterprise/:id" element={<EnterpriseDetailPage />} />
-              <Route path="/enterprise/:id/edit" element={<EnterpriseFormPage />} />
+              <Route path="/enterprise/:id/edit" element={session ? <EnterpriseFormPage key={`${session.user.id}:${pathname}`} /> : loginRedirect} />
               <Route
                 path="/submissions"
                 element={session ? <SubmissionsPage key={session.user.id} /> : loginRedirect}

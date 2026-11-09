@@ -14,21 +14,23 @@ import { Select } from "../components/Select";
 import { SlideToggle } from "../components/SlideToggle";
 import { Skeleton, SkeletonRows } from "../components/Skeleton";
 import { LANGUAGE_LABELS, type Submission } from "../types";
+import { calendarDate, parseCalendarDate } from "../calendar";
 
 const PAGE_SIZE = 20;
 
-type StatusGroup = "" | "accepted" | "wrong" | "pending";
+type StatusGroup = "" | "accepted" | "wrong" | "pending" | "system";
 const groupOf = (status: string): StatusGroup =>
   status === "ACCEPTED"
     ? "accepted"
     : status === "QUEUED" || status === "JUDGING"
       ? "pending"
-      : "wrong";
+      : status === "SYSTEM_ERROR" ? "system" : "wrong";
 const statusChips: { value: StatusGroup; label: string }[] = [
   { value: "", label: "전체" },
   { value: "accepted", label: "성공" },
   { value: "wrong", label: "틀림·오류" },
   { value: "pending", label: "채점 중" },
+  { value: "system", label: "시스템 오류" },
 ];
 
 export function SubmissionsPage() {
@@ -44,13 +46,16 @@ export function SubmissionsPage() {
   const statuses = (params.get("s") ?? "")
     .split(",")
     .filter((value): value is StatusGroup =>
-      ["accepted", "wrong", "pending"].includes(value),
+      ["accepted", "wrong", "pending", "system"].includes(value),
     );
   const language = params.get("l") ?? "";
+  const rawDate = params.get("date") ?? "";
+  const selectedDate = parseCalendarDate(rawDate) ? rawDate : "";
   const grouped = params.get("g") === "problem";
 
   const keyword = urlQuery.trim().toLowerCase();
   const matchesBase = (item: Submission) =>
+    (!selectedDate || calendarDate(new Date(item.createdAt)) === selectedDate) &&
     (!language || item.language === language) &&
     (!keyword || (item.problem.title ?? "").toLowerCase().includes(keyword));
   // 칩의 숫자는 "그 칩을 눌렀을 때의 결과 수"가 되도록 상태 조건만 빼고 센다.
@@ -64,16 +69,17 @@ export function SubmissionsPage() {
     [all],
   );
 
-  const { rows, filteredCount } = useMemo(() => {
+  const { rows, filteredCount, matchedCount } = useMemo(() => {
     const filtered = all.filter(
       (item) =>
         matchesBase(item) &&
         (!statuses.length || statuses.includes(groupOf(item.status))),
-    );
+    ).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
     if (!grouped)
       return {
         rows: filtered.map((item) => ({ item, count: 0 })),
         filteredCount: filtered.length,
+        matchedCount: filtered.length,
       };
     const counts = new Map<string, number>();
     for (const item of filtered)
@@ -82,23 +88,23 @@ export function SubmissionsPage() {
     const latest = filtered
       .filter((item) => !seen.has(item.problem.id) && seen.add(item.problem.id))
       .map((item) => ({ item, count: counts.get(item.problem.id) ?? 1 }));
-    return { rows: latest, filteredCount: latest.length };
-  }, [all, statuses.join(","), language, keyword, grouped]);
+    return { rows: latest, filteredCount: latest.length, matchedCount: filtered.length };
+  }, [all, statuses.join(","), language, keyword, selectedDate, grouped]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
   const visible = rows.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
-  const hasFilter = Boolean(statuses.length || language || keyword);
+  const hasFilter = Boolean(statuses.length || language || keyword || selectedDate);
 
   return (
-    <div className="page-width page-body">
+    <div className="page-width page-body submissions-page">
       <PageHeader
         title="내 제출"
         badge={
           loading ? (
             <Skeleton width={48} height={24} radius={999} />
           ) : (
-            <span className="pill">{filteredCount}건</span>
+            <span className="pill">{filteredCount}{grouped ? "문제" : "건"}</span>
           )
         }
         description="제출한 코드와 판정을 확인하세요."
@@ -162,8 +168,13 @@ export function SubmissionsPage() {
           </div>
         </div>
       </div>
-      <p className="sr-only" role="status" aria-live="polite">
-        {loading ? "" : `${filteredCount}건`}
+      <div className="submission-date-filter">
+        <label htmlFor="submission-date">제출 날짜 (기기 현지 시간)</label>
+        <input id="submission-date" type="date" value={selectedDate} onChange={(event) => update({ date: event.target.value || null })} />
+        {selectedDate ? <button type="button" className="text-button" onClick={() => update({ date: null })}>날짜 해제</button> : null}
+      </div>
+      <p className="submission-count-summary muted" role="status" aria-live="polite">
+        {loading || error ? "" : `전체 제출 ${all.length}건 · 조건 일치 ${matchedCount}건${grouped ? ` · 표시 ${rows.length}문제 (현재 조건 안에서 문제별 최신 제출)` : ""}`}
       </p>
       {error ? (
         <p className="error-message" role="alert">
@@ -226,8 +237,9 @@ export function SubmissionsPage() {
         </div>
       ) : (
         <div className="empty-state">
-          아직 제출이 없습니다.{" "}
-          <Link to="/problems">첫 문제를 골라보세요.</Link>
+          <strong>아직 제출한 풀이가 없어요.</strong>
+          <p>문제를 골라 첫 풀이를 제출하면 여기에 기록됩니다.</p>
+          <Link className="button" to="/problems">문제 둘러보기</Link>
         </div>
       )}
       {!loading ? (

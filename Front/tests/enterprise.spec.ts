@@ -289,7 +289,8 @@ test("signed-out visitors see a login prompt instead of tests", async ({ page })
   await expect(page.getByRole("button", { name: /새 테스트 만들기/ })).toHaveCount(0);
   await expect(page.locator(".ent-table")).toHaveCount(0);
   await page.goto("/enterprise/new");
-  await expect(page.getByText("로그인하고 코드 테스트를 만들어 보세요")).toBeVisible();
+  await expect(page).toHaveURL(/\/auth$/);
+  expect(await page.evaluate(() => history.state?.usr?.from)).toBe("/enterprise/new");
 });
 
 test("empty state invites the first test", async ({ page }) => {
@@ -339,8 +340,8 @@ test("dashboard groups tests by status and offers the right management action", 
   await expect(page.getByRole("progressbar")).toHaveCount(0);
   // 하루 안에 끝나는 테스트(진행 중 공채)만 시간이 붙고, 여러 날에 걸친 테스트는 날짜만 보인다.
   await expect(rows.nth(0).locator(".ent-period")).toContainText(/\d{2}:\d{2}부터, \d{2}:\d{2}까지/);
-  await expect(rows.nth(1).locator(".ent-period")).not.toContainText(/\d{2}:\d{2}/);
-  await expect(rows.nth(2).locator(".ent-period")).not.toContainText(/\d{2}:\d{2}/);
+  await expect(rows.nth(1).locator(".ent-period > span")).not.toContainText(/\d{2}:\d{2}/);
+  await expect(rows.nth(2).locator(".ent-period > span")).not.toContainText(/\d{2}:\d{2}/);
   await expect(rows.nth(0).getByRole("link", { name: /상세 보기/ })).toBeVisible();
   await expect(rows.nth(1)).toContainText("다음 주 공채");
   await expect(rows.nth(1)).toContainText("시작 예정");
@@ -576,7 +577,7 @@ test("the list says when a scheduled test starts today or tomorrow", async ({
   await signIn(page);
   await page.goto("/enterprise");
   const period = (title: string) =>
-    page.locator(".ent-table tbody tr", { hasText: title }).locator(".ent-period");
+    page.locator(".ent-table tbody tr", { hasText: title }).locator(".ent-period > span");
   await expect(period("오늘 저녁 시작")).toHaveText("오늘 오후 7시 시작 예정");
   await expect(period("내일 오후 시작")).toHaveText("내일 오후 2시 시작 예정");
   await expect(period("다음 주 시작")).toHaveText("10월27일 시작 예정");
@@ -600,7 +601,6 @@ test("saving in one tab keeps tests another tab created while this one was elsew
 
 test("logging in from an edit link returns to that edit page", async ({ page }) => {
   await page.goto("/enterprise/t-1/edit");
-  await page.getByRole("link", { name: /로그인하기/ }).click();
   await expect(page).toHaveURL(/\/auth$/);
   expect(await page.evaluate(() => (history.state?.usr as { from?: string } | undefined)?.from)).toBe(
     "/enterprise/t-1/edit",

@@ -365,7 +365,7 @@ test("K13: vote, follow, answer vote and acceptance failures show errors without
   expect([...api.voted, ...api.following]).toEqual([]);
 
   await page.goto("/community/my-question");
-  await page.getByRole("button", { name: "답변 1", exact: true }).click();
+  await expect(page.getByRole("button", { name: "답변 1", exact: true })).toHaveAttribute("aria-expanded", "true");
   await page.locator(".answer-vote").click();
   await expect(page.locator(".answer-vote")).toHaveAttribute("aria-pressed", "false");
   await page.getByRole("button", { name: "채택하기", exact: true }).click();
@@ -426,6 +426,8 @@ test("the collapsed answers toggle controls the answer list only while it is ren
   await seed(page);
   await page.goto("/community/my-question");
   const toggle = page.getByRole("button", { name: /^답변 1/ });
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await toggle.click();
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await expect(toggle).not.toHaveAttribute("aria-controls", /.*/);
   await toggle.click();

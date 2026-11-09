@@ -6,6 +6,7 @@ import { App } from "./App";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { initMonitoring } from "./monitoring";
 import "./styles.css";
+import "./ui-harmony.css";
 
 initMonitoring();
 

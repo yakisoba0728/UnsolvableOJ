@@ -61,7 +61,7 @@ export function PostScroller({
   }
 
   return (
-    <section className="panel post-scroller" aria-label={title}>
+    <section className={`panel post-scroller${maxIndex === 0 ? " has-static-posts" : ""}`} aria-label={title}>
       <div className="section-heading compact">
         <div>
           <h2>{title}</h2>
@@ -73,7 +73,7 @@ export function PostScroller({
                 ? `${index + 1}–${index + VISIBLE} / ${posts.length}`
                 : `${posts.length} / ${posts.length}`}
             </span>
-            <button
+            {maxIndex > 0 ? <><button
               type="button"
               className="scroller-button"
               aria-label="이전 글"
@@ -120,7 +120,7 @@ export function PostScroller({
                   strokeLinejoin="round"
                 />
               </svg>
-            </button>
+            </button></> : null}
           </div>
         ) : null}
       </div>
@@ -128,7 +128,7 @@ export function PostScroller({
         <div
           className="scroller-view"
           ref={viewRef}
-          tabIndex={0}
+          tabIndex={maxIndex > 0 ? 0 : undefined}
           aria-label={`${title} 목록`}
         >
           {posts.map((post) => (

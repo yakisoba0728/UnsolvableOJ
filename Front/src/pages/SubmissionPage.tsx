@@ -13,6 +13,7 @@ import {
 } from "../hooks";
 import {
   CaseResults,
+  JudgeRefreshNotice,
   ResultNotices,
   ResultSummary,
   useSubmissionResult,
@@ -21,7 +22,8 @@ import {
 export function SubmissionPage() {
   const { id } = useParams();
   const { session } = useAuth();
-  const { submission, error } = useSubmissionResult(id ?? null, session);
+  const resultState = useSubmissionResult(id ?? null, session);
+  const { submission, error } = resultState;
   useDocumentTitle(
     submission
       ? `${submission.problem.title ?? "제출"} 채점 결과`
@@ -35,9 +37,7 @@ export function SubmissionPage() {
   if (error && !submission)
     return (
       <div className="page-width empty-state">
-        <p className="error-message" role="alert">
-          {error}
-        </p>
+        <JudgeRefreshNotice {...resultState} />
         <Link to="/submissions">내 제출로</Link>
       </div>
     );
@@ -61,11 +61,7 @@ export function SubmissionPage() {
         title={submission.problem.title ?? "제출 결과"}
         description={`제출 ${submission.id.slice(0, 8).toUpperCase()} · ${new Date(submission.createdAt).toLocaleString("ko-KR")}`}
       />
-      {error ? (
-        <p className="error-message" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <JudgeRefreshNotice {...resultState} />
       <ResultSummary submission={submission} />
       {submission.status === "ACCEPTED" && !history.loading && !history.error ? (
         <section className="streak-card" aria-label="연속 학습">

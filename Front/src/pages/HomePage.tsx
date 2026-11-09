@@ -161,7 +161,7 @@ export function HomePage() {
       ) : session ? (
         <section className="daily-card" aria-label="오늘의 목표">
           <div className="daily-goal">
-            <h2>오늘의 목표</h2>
+            <h2>오늘의 기본 목표</h2>
             <p>
               {todaySolved >= DAILY_GOAL
                 ? "오늘 목표를 달성했어요. 한 문제 더 도전해 볼까요?"
@@ -184,6 +184,7 @@ export function HomePage() {
             <small>
               {Math.min(todaySolved, DAILY_GOAL)} / {DAILY_GOAL}
             </small>
+            <p className="goal-rule muted">하루 1문제 기본 목표입니다. 미션의 추가 도전과는 별개예요.</p>
           </div>
           <WeekStrip counts={dayCounts} />
         </section>

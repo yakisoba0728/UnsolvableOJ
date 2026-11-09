@@ -101,7 +101,7 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
   const [actionError, setActionError] = useState("");
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useFlashNotice();
-  const [answersOpen, setAnswersOpen] = useState(false);
+  const [answersOpen, setAnswersOpen] = useState(true);
   // 한 번에 답변 하나만 고친다.
   const [editing, setEditing] = useState<{ id: string; text: string } | null>(
     null,
@@ -116,7 +116,7 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
       : null;
     if (!element) return;
     scrollTarget.current = "";
-    element.scrollIntoView({ block: "center", behavior: "smooth" });
+    element.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }, [data]);
 
   // 다른 글로 옮기면 그 글의 작성 중 답변을 불러온다.
@@ -124,7 +124,7 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
     setAnswerDraft({ ownerId, postId: id, text: readAnswerDraft(ownerId, id) });
     setError("");
     setActionError("");
-    setAnswersOpen(false);
+    setAnswersOpen(true);
     setEditing(null);
   }, [id, ownerId]);
   useEffect(() => {
@@ -459,6 +459,11 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
               {post.views.toLocaleString()}
             </p>
             <div className="post-actions">
+              <button type="button" className="button button-outline" disabled={pending} onClick={() => {
+                const target = document.getElementById("answer-write");
+                target?.scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+                (editorRef.current ?? target)?.focus({ preventScroll: true });
+              }}>답변 작성으로 이동 ↓</button>
               <button
                 type="button"
                 className={`button post-vote ${interaction.voted ? "" : "button-soft"}`}
@@ -488,48 +493,6 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
               </button>
             </div>
           </article>
-
-          <section className="post-card answer-write-card" aria-label="답변 작성">
-            <form className="answer-editor" onSubmit={submit} noValidate>
-              <h2 className="answer-editor-title">답변 작성</h2>
-              <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
-              {session ? (
-                <>
-                  <textarea
-                    ref={editorRef}
-                    rows={6}
-                    maxLength={10_000}
-                    aria-label="답변 내용"
-                    aria-invalid={Boolean(error)}
-                    placeholder="답변을 입력하세요."
-                    value={draft}
-                    disabled={pending}
-                    onChange={(event) => onDraftChange(event.target.value)}
-                  />
-                  {error ? (
-                    <p className="error-message" role="alert">
-                      {error}
-                    </p>
-                  ) : null}
-                  <div className="answer-footer">
-                    <span className="muted">
-                      등록 전까지 작성 내용을 유지합니다.
-                    </span>
-                    <button className="button" disabled={pending}>
-                      {pending ? "등록 중…" : "답변 등록"}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <p className="login-prompt">
-                  답변을 남기려면 로그인해 주세요.{" "}
-                  <Link to="/auth" state={{ from: `/community/${id}` }}>
-                    로그인하기
-                  </Link>
-                </p>
-              )}
-            </form>
-          </section>
 
           <section className="post-card answers-card" aria-label="답변">
             <h2 className="post-section-title">
@@ -707,6 +670,20 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
                 onChange={setAnswerPage}
               />
             ) : null}
+          </section>
+          <section className="post-card answer-write-card" id="answer-write" tabIndex={-1} aria-label="답변 작성">
+            <form className="answer-editor" onSubmit={submit} noValidate>
+              <h2 className="answer-editor-title">답변 작성</h2>
+              <p className="muted">풀이 과정과 근거를 함께 설명해 주세요.</p>
+              {session ? <>
+                <textarea ref={editorRef} rows={6} maxLength={10_000} aria-label="답변 내용" aria-invalid={Boolean(error)} placeholder="답변을 입력하세요." value={draft} disabled={pending} onChange={(event) => onDraftChange(event.target.value)} />
+                {error ? <p className="error-message" role="alert">{error}</p> : null}
+                <div className="answer-footer">
+                  <span className="muted">등록 전까지 작성 내용을 유지합니다.</span>
+                  <button className="button" disabled={pending}>{pending ? "등록 중…" : "답변 등록"}</button>
+                </div>
+              </> : <p className="login-prompt">답변을 남기려면 로그인해 주세요.{" "}<Link to="/auth" state={{ from: `/community/${id}` }}>로그인하기</Link></p>}
+            </form>
           </section>
         </div>
       </div>

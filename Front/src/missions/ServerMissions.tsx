@@ -128,12 +128,22 @@ function MissionDashboardView({ token }: { token?: string }) {
     );
   };
 
+  const missionGroup = (period: "day" | "week" | "month") => (
+    <section key={period} className={`mission-group mission-group-${period}`}>
+      <h2>{{ day: "오늘", week: "이번 주", month: "이번 달" }[period]}</h2>
+      <ul className="mission-grid">{data?.items
+        .filter((m) => m.period === period && m.id !== "bonus")
+        .map((m) => card(m))}</ul>
+    </section>
+  );
+
   return (
     <div className="page-width missions-page">
       <PageHeader
         title="오늘의 도전"
         description="오늘 풀 문제부터 이번 달 목표까지 한곳에서 확인하세요."
       />
+      <p className="mission-goal-note muted">홈의 하루 1문제는 기본 목표이며, 일일 미션은 별도의 추가 도전입니다. 보상은 아래 수령 상태를 확인해 주세요.</p>
       {message && <p role="status">{message}</p>}
       {claimError && (
         <p className="error-message" role="alert">
@@ -173,6 +183,7 @@ function MissionDashboardView({ token }: { token?: string }) {
       ) : (
         data && (
           <>
+            {missionGroup("day")}
             <div className="mission-top">
               <SeasonRing
                 title="이번 달 보상 수령"
@@ -184,28 +195,7 @@ function MissionDashboardView({ token }: { token?: string }) {
                 .filter((m) => m.id === "streak" || m.id === "bonus")
                 .map((m) => card(m, true))}
             </div>
-            {(["day", "week", "month"] as const).map((period) => (
-              <section
-                key={period}
-                className={`mission-group mission-group-${period}`}
-              >
-                <h2>
-                  {
-                    {
-                      day: "오늘",
-                      week: "이번 주",
-                      month: "이번 달",
-                      streak: "연속 학습",
-                    }[period]
-                  }
-                </h2>
-                <ul className="mission-grid">
-                  {data.items
-                    .filter((m) => m.period === period && m.id !== "bonus")
-                    .map((m) => card(m))}
-                </ul>
-              </section>
-            ))}
+            {(["week", "month"] as const).map(missionGroup)}
             <section aria-label="획득한 배지">
               <h2>획득한 배지</h2>
               {data.badges.length ? (

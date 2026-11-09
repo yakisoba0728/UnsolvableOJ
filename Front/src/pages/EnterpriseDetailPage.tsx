@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
+import { EnterpriseSchedule, EnterpriseStorageNotice } from "../components/EnterpriseSchedule";
 import {
   formatEnd,
   formatPeriod,
@@ -102,6 +103,7 @@ export function EnterpriseDetailPage() {
       />
 
       <div className="ent-detail-grid">
+        <div className="ent-schedule-detail"><EnterpriseStorageNotice /><EnterpriseSchedule test={test} /></div>
         <section className="form-card ent-card" aria-labelledby="ent-problems-title">
           <div className="ent-pick-head">
             <h2 id="ent-problems-title">출제 문제</h2>
