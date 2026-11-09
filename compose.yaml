@@ -91,6 +91,8 @@ services:
   judge:
     build:
       context: ./Judge
+    # healthcheck가 멈춘 워커를 종료하려면 node가 PID 1이 아니어야 합니다.
+    init: true
     environment:
       API_BASE_URL: http://back:3000/api/v1
       JUDGE_SERVICE_TOKEN: local-dev-only-judge-service-token-0123456789

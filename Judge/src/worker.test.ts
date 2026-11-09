@@ -333,8 +333,11 @@ test("only successful worker heartbeats refresh the container health file", asyn
   assert.equal((await stat(file)).mtimeMs, 0);
   presence = 200;
   await h.heartbeat();
-  await setImmediate();
-  assert.ok((await stat(file)).mtimeMs > 0);
+  // writeFile은 threadpool에서 끝나므로 잠시 기다립니다.
+  for (let i = 0; (await stat(file)).mtimeMs === 0; i++) {
+    assert.ok(i < 100, "heartbeat file was not refreshed");
+    await new Promise((resolve) => globalThis.setTimeout(resolve, 10));
+  }
 });
 
 test("transient worker presence failures neither stop the worker nor abort active judging", async (t) => {

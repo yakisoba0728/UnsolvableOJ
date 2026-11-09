@@ -93,6 +93,8 @@ assert.equal(judge.environment.GO_JUDGE_URL, 'http://go-judge:5050');
 assert.ok(sandbox.command.includes('-parallelism=2'));
 assert.equal(judge.depends_on['go-judge'].condition, 'service_healthy');
 assert.equal(judge.stop_grace_period, '2m0s');
+// The image healthcheck can only kill a hung worker when node is not PID 1.
+assert.equal(judge.init, true);
 
 // Changing worker parallelism also changes the sandbox's execution capacity.
 const resized = config({ JUDGE_CONCURRENCY: '1' });
@@ -109,6 +111,7 @@ const executor = (overrides = {}) => JSON.parse(execFileSync('docker', [
   'compose', '--env-file', 'Judge/deploy/.env.example', '-f', 'Judge/deploy/compose.yaml', 'config', '--format', 'json',
 ], { cwd: root, env: { ...executorEnv, ...overrides }, encoding: 'utf8', stdio: 'pipe' }));
 checkSandboxBudget(executor());
+assert.equal(executor().services.judge.init, true);
 checkSandboxBudget(executor({ JUDGE_CONCURRENCY: '3', SANDBOX_MEMORY_LIMIT: '14g' }));
 assert.throws(() => checkSandboxBudget(executor({ JUDGE_CONCURRENCY: '3' })), /headroom/);
 console.log('Production Compose: required settings, private networking, persistence, resource budgets and worker wiring passed.');
