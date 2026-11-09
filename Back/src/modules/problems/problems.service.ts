@@ -26,7 +26,7 @@ import { TestCase } from './test-case.entity.js';
 
 const DRAFT_LIMIT = 50;
 // 출제는 누구나 하므로 제출 하나가 채점기를 잡는 최악의 시간(시간 제한 × 테스트 수)을 묶는다(관리자 제외).
-export const JUDGE_BUDGET_MS = 60_000;
+export const JUDGE_BUDGET_MS = 120_000;
 const PRIVATE_PUBLISH_MESSAGE =
   '기업 전용 문제는 공개할 수 없습니다. 공개하려면 먼저 기업 전용을 해제하세요.';
 

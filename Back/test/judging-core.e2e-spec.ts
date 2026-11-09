@@ -304,8 +304,7 @@ describe('Judging core: rejudge versions, staff access, test submissions (e2e)',
   it('a released lease is requeued on the next generation and uses one recovery up to the cap', async () => {
     const problemId = await createProblem('release');
     await publish(problemId);
-    // 앞선 테스트가 남긴 solver의 대기 제출이 대기 상한에 걸리지 않게 관리자로 제출한다.
-    const submission = await submit(problemId, adminToken);
+    const submission = await submit(problemId, solver.accessToken);
     jobIds.push(`${submission.id}-2`);
     const attempt = randomUUID();
     const path = `${base}/internal/judge/submissions/${submission.id}`;
@@ -345,12 +344,15 @@ describe('Judging core: rejudge versions, staff access, test submissions (e2e)',
       .send({ language: 'PYTHON', sourceCode: 'print(3)' })
       .expect(429);
     expect(blocked.body.message).toContain('3개');
-    // 하나가 끝나면 다시 제출할 수 있다.
-    await db.query(
-      "UPDATE submissions SET status = 'ACCEPTED' WHERE id = (SELECT id FROM submissions WHERE user_id = $1 LIMIT 1)",
-      [limiter.user.id],
-    );
-    await submit(problemId, limiter.accessToken);
+    // 끝난 제출을 재채점해 다시 줄 세워도 제출자의 대기로 세지 않는다.
+    await db.query("UPDATE submissions SET status = 'ACCEPTED' WHERE user_id = $1", [limiter.user.id]);
+    const rejudged = await http()
+      .post(`${base}/problems/${problemId}/rejudge`)
+      .set(bearer(authorToken))
+      .send({})
+      .expect(202);
+    expect(rejudged.body.requeued).toBeGreaterThanOrEqual(3);
+    for (let i = 0; i < 3; i += 1) await submit(problemId, limiter.accessToken);
 
     const tooSlow = {
       slug: `budget-${suffix}`,
@@ -359,7 +361,7 @@ describe('Judging core: rejudge versions, staff access, test submissions (e2e)',
       inputDescriptionMarkdown: 'numbers',
       outputDescriptionMarkdown: 'sum',
       difficulty: 'BEGINNER',
-      timeLimitMs: 30_000,
+      timeLimitMs: 50_000,
       testCases: [1, 2, 3].map(() => ({ input: '1 2\n', expectedOutput: '3\n', isSample: false })),
     };
     await http().post(`${base}/problems`).set(bearer(authorToken)).send(tooSlow).expect(400);
@@ -369,7 +371,7 @@ describe('Judging core: rejudge versions, staff access, test submissions (e2e)',
       .set(bearer(authorToken))
       .send({
         timeLimitMs: 60_000,
-        testCases: [1, 2].map(() => ({ input: '1 2\n', expectedOutput: '3\n', isSample: true })),
+        testCases: [1, 2, 3].map(() => ({ input: '1 2\n', expectedOutput: '3\n', isSample: true })),
       })
       .expect(400);
     await http()

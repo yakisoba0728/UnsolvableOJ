@@ -181,8 +181,9 @@ export class SubmissionsService {
       if (user.role !== UserRole.ADMIN) {
         // 같은 계정의 동시 제출을 직렬화해 상한을 넘지 않게 한다.
         await manager.query('SELECT 1 FROM users WHERE id = $1 FOR UPDATE', [user.id]);
+        // 재채점·복구로 다시 줄 선 제출(generation > 1)은 제출자가 만든 대기가 아니므로 세지 않는다.
         const [{ count }]: { count: number }[] = await manager.query(
-          "SELECT count(*)::int AS count FROM submissions WHERE user_id = $1 AND status IN ('QUEUED', 'JUDGING')",
+          "SELECT count(*)::int AS count FROM submissions WHERE user_id = $1 AND status IN ('QUEUED', 'JUDGING') AND judge_generation = 1",
           [user.id],
         );
         if (count >= PENDING_SUBMISSION_LIMIT)
