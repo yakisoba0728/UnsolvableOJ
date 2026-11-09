@@ -301,10 +301,11 @@ describe('Judging core: rejudge versions, staff access, test submissions (e2e)',
     expect(audit[0].count).toBe(2);
   });
 
-  it('a released lease is requeued on the next generation without using a recovery', async () => {
+  it('a released lease is requeued on the next generation and uses one recovery up to the cap', async () => {
     const problemId = await createProblem('release');
     await publish(problemId);
-    const submission = await submit(problemId, solver.accessToken);
+    // 앞선 테스트가 남긴 solver의 대기 제출이 대기 상한에 걸리지 않게 관리자로 제출한다.
+    const submission = await submit(problemId, adminToken);
     jobIds.push(`${submission.id}-2`);
     const attempt = randomUUID();
     const path = `${base}/internal/judge/submissions/${submission.id}`;
@@ -316,8 +317,65 @@ describe('Judging core: rejudge versions, staff access, test submissions (e2e)',
       'SELECT status, judge_generation, recovery_count FROM submissions WHERE id=$1',
       [submission.id],
     );
-    expect(row).toEqual({ status: 'QUEUED', judge_generation: 2, recovery_count: 0 });
+    expect(row).toEqual({ status: 'QUEUED', judge_generation: 2, recovery_count: 1 });
     expect(await queue.getJob(`${submission.id}-2`)).toBeTruthy();
     await http().get(path).set(judge(1, randomUUID())).expect(409);
+
+    // 반납이 반복되면 복구 상한에서 멈춘다.
+    await db.query('UPDATE submissions SET recovery_count = 5 WHERE id = $1', [submission.id]);
+    const last = randomUUID();
+    await http().get(path).set(judge(2, last)).expect(200);
+    await http().patch(`${path}/release`).set(judge(2, last)).expect(200);
+    const [stopped] = await db.query(
+      'SELECT status, judge_generation, recovery_count FROM submissions WHERE id=$1',
+      [submission.id],
+    );
+    expect(stopped).toEqual({ status: 'SYSTEM_ERROR', judge_generation: 3, recovery_count: 6 });
+    expect(await queue.getJob(`${submission.id}-3`)).toBeFalsy();
+  });
+
+  it('caps pending submissions per account and the per-submission judging budget for non-admins', async () => {
+    const problemId = await createProblem('pending-cap');
+    await publish(problemId);
+    const limiter = await register(app, 'jcpending', suffix);
+    for (let i = 0; i < 3; i += 1) await submit(problemId, limiter.accessToken);
+    const blocked = await http()
+      .post(`${base}/problems/${problemId}/submissions`)
+      .set(bearer(limiter.accessToken))
+      .send({ language: 'PYTHON', sourceCode: 'print(3)' })
+      .expect(429);
+    expect(blocked.body.message).toContain('3개');
+    // 하나가 끝나면 다시 제출할 수 있다.
+    await db.query(
+      "UPDATE submissions SET status = 'ACCEPTED' WHERE id = (SELECT id FROM submissions WHERE user_id = $1 LIMIT 1)",
+      [limiter.user.id],
+    );
+    await submit(problemId, limiter.accessToken);
+
+    const tooSlow = {
+      slug: `budget-${suffix}`,
+      title: 'budget',
+      statementMarkdown: 'sum',
+      inputDescriptionMarkdown: 'numbers',
+      outputDescriptionMarkdown: 'sum',
+      difficulty: 'BEGINNER',
+      timeLimitMs: 30_000,
+      testCases: [1, 2, 3].map(() => ({ input: '1 2\n', expectedOutput: '3\n', isSample: false })),
+    };
+    await http().post(`${base}/problems`).set(bearer(authorToken)).send(tooSlow).expect(400);
+    await http().post(`${base}/problems`).set(bearer(adminToken)).send(tooSlow).expect(201);
+    await http()
+      .patch(`${base}/problems/${problemId}`)
+      .set(bearer(authorToken))
+      .send({
+        timeLimitMs: 60_000,
+        testCases: [1, 2].map(() => ({ input: '1 2\n', expectedOutput: '3\n', isSample: true })),
+      })
+      .expect(400);
+    await http()
+      .patch(`${base}/problems/${problemId}`)
+      .set(bearer(authorToken))
+      .send({ timeLimitMs: 60_000 })
+      .expect(200);
   });
 });

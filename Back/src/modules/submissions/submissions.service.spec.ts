@@ -57,7 +57,14 @@ describe('SubmissionsService queue failure', () => {
       const service = new SubmissionsService(
         submissions as unknown as Repository<Submission>,
         problems as unknown as Repository<Problem>,
-        {} as DataSource,
+        {
+          // 대기 중인 제출 수는 0, 저장은 같은 저장소 목으로 넘긴다.
+          transaction: (work: (manager: object) => unknown) =>
+            work({
+              query: vi.fn(async () => [{ count: 0 }]),
+              getRepository: () => submissions,
+            }),
+        } as unknown as DataSource,
         queue as unknown as Queue,
       );
 

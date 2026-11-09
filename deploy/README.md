@@ -22,11 +22,11 @@
 
 ## Dokploy 설정
 
-현재 배포 대상은 `https://judge.yaki.kr`, 초기 배포 브랜치는 `codex/dokploy-production`입니다. 기존 서버의 Cloudflare HTTPS → Traefik HTTP 경로를 그대로 사용하므로 이 환경의 Dokploy domain은 **`https=false`, certificate `none`, service `front`, port `80`**으로 설정합니다. 브라우저 연결은 Cloudflare에서 HTTPS로 보호됩니다. 서버 원본까지의 연결 보호는 기존 Cloudflare 연결 방식에 따르므로 별도로 확인하세요. 아래의 Let's Encrypt 설정은 Cloudflare 터널/프록시를 거치지 않고 Traefik에서 직접 TLS를 종료할 때 사용합니다.
+현재 배포 대상은 `https://judge.yaki.kr`, 배포 브랜치는 `main`입니다. 기존 서버의 Cloudflare HTTPS → Traefik HTTP 경로를 그대로 사용하므로 이 환경의 Dokploy domain은 **`https=false`, certificate `none`, service `front`, port `80`**으로 설정합니다. 브라우저 연결은 Cloudflare에서 HTTPS로 보호됩니다. 서버 원본까지의 연결 보호는 기존 Cloudflare 연결 방식에 따르므로 별도로 확인하세요. 아래의 Let's Encrypt 설정은 Cloudflare 터널/프록시를 거치지 않고 Traefik에서 직접 TLS를 종료할 때 사용합니다.
 
 1. GitHub에 이 변경을 반영하고 Dokploy의 GitHub 연결이 `yakisoba0728/UnsolvableOJ` 저장소에 접근할 수 있도록 설정합니다.
 2. 새 프로젝트 `UnsolvableOJ` → production 환경 → Docker Compose 서비스를 만듭니다. 기존 서비스는 재사용하지 않습니다.
-3. Provider는 GitHub, 저장소는 위 저장소, 초기 브랜치는 `codex/dokploy-production`, Compose Path는 `./deploy/compose.yaml`로 설정합니다. PR을 main에 반영하고 CI를 확인한 뒤 브랜치를 `main`으로 전환할 수 있습니다. 빌드 context의 `../Back`, `../Front`, `../Judge`는 Compose 파일 위치 기준입니다. 루트 개발용 Compose와 합치지 마세요.
+3. Provider는 GitHub, 저장소는 위 저장소, 브랜치는 `main`, Compose Path는 `./deploy/compose.yaml`로 설정합니다. main의 CI가 통과한 것을 확인한 뒤 배포합니다. 빌드 context의 `../Back`, `../Front`, `../Judge`는 Compose 파일 위치 기준입니다. 루트 개발용 Compose와 합치지 마세요.
 4. 이 파일은 외부 `dokploy-network`에 front만 직접 연결합니다. Dokploy의 **Isolated Deployments는 끄고**, 해당 네트워크가 있는지 확인합니다.
 5. 호스트 터미널에서 다음 명령으로 Traefik 네트워크의 실제 IPv4 subnet을 확인합니다. CIDR을 추측하거나 `0.0.0.0/0`을 사용하지 마세요.
 

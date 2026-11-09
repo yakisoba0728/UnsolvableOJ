@@ -78,6 +78,7 @@ export class SubmissionsController {
   }
 
   @Post('submissions/:id/rejudge')
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @HttpCode(HttpStatus.ACCEPTED)
   rejudge(
     @Param('id', ParseUUIDPipe) id: string,

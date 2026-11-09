@@ -146,27 +146,42 @@ export class JudgeService {
   }
 
   /**
-   * 실행 서비스 장애로 채점하지 못한 시도의 lease를 반납한다. 워커 탓이 아니므로 복구 횟수를 올리지 않고
-   * 다음 generation으로 다시 큐에 넣는다.
+   * 실행 서비스 장애로 채점하지 못한 시도의 lease를 반납하고 다음 generation으로 다시 큐에 넣는다.
+   * 워커는 장애가 풀릴 때까지 새 작업을 잡지 않으므로 장애 한 번에 제출당 한 번만 센다.
    */
   async releaseLease(id: string, generation: number, attemptId: string) {
     this.validateAttempt(generation, attemptId);
+    const fence =
+      'id = :id AND judge_generation = :generation AND judge_attempt_id = :attemptId AND status = :status';
+    const params = { id, generation, attemptId, status: SubmissionStatus.JUDGING };
+    const lease = {
+      judgeGeneration: generation + 1,
+      judgeAttemptId: null,
+      judgeLeaseExpiresAt: null,
+      recoveryCount: () => 'recovery_count + 1',
+    };
+    // 반납도 복구 횟수를 쓴다. 실행 서비스를 매번 넘어뜨리는 제출이 슬롯을 끝없이 다시 잡지 못하게 한다.
     const released = await this.submissions
       .createQueryBuilder()
       .update()
-      .set({
-        status: SubmissionStatus.QUEUED,
-        judgeGeneration: generation + 1,
-        judgeAttemptId: null,
-        judgeLeaseExpiresAt: null,
-      })
-      .where(
-        'id = :id AND judge_generation = :generation AND judge_attempt_id = :attemptId AND status = :status',
-        { id, generation, attemptId, status: SubmissionStatus.JUDGING },
-      )
+      .set({ ...lease, status: SubmissionStatus.QUEUED })
+      .where(`${fence} AND recovery_count < :max`, { ...params, max: MAX_LEASE_RECOVERIES })
       .execute();
-    if (released.affected !== 1)
-      throw new ConflictException('채점 권한이 만료되었습니다.');
+    if (released.affected !== 1) {
+      const stopped = await this.submissions
+        .createQueryBuilder()
+        .update()
+        .set({
+          ...lease,
+          status: SubmissionStatus.SYSTEM_ERROR,
+          judgeMessage: '채점이 반복해서 중단되어 종료했습니다.',
+        })
+        .where(fence, params)
+        .execute();
+      if (stopped.affected !== 1)
+        throw new ConflictException('채점 권한이 만료되었습니다.');
+      return { generation: generation + 1 };
+    }
     // 큐 등록에 실패해도 QUEUED 복구 타이머가 다시 넣는다.
     await enqueueJudge(this.judgeQueue, id, generation + 1).catch((error) =>
       console.error('Judge requeue after release failed:', error),

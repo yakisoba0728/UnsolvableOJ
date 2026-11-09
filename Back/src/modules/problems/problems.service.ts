@@ -24,7 +24,9 @@ import { Problem } from './problem.entity.js';
 import { ProblemStatus } from './problem.enums.js';
 import { TestCase } from './test-case.entity.js';
 
-const UNPUBLISHED_LIMIT = 50;
+const DRAFT_LIMIT = 50;
+// 출제는 누구나 하므로 제출 하나가 채점기를 잡는 최악의 시간(시간 제한 × 테스트 수)을 묶는다(관리자 제외).
+export const JUDGE_BUDGET_MS = 60_000;
 const PRIVATE_PUBLISH_MESSAGE =
   '기업 전용 문제는 공개할 수 없습니다. 공개하려면 먼저 기업 전용을 해제하세요.';
 
@@ -36,6 +38,7 @@ export class ProblemsService {
   ) {}
 
   async create(dto: CreateProblemDto, user: AuthenticatedUser) {
+    this.assertJudgeBudget(dto.timeLimitMs, dto.testCases.length, user);
     if (
       dto.status === ProblemStatus.PUBLISHED &&
       user.role !== UserRole.ADMIN
@@ -46,18 +49,7 @@ export class ProblemsService {
       throw new BadRequestException(PRIVATE_PUBLISH_MESSAGE);
     try {
       return await this.dataSource.transaction(async (manager) => {
-        if (user.role !== UserRole.ADMIN) {
-          // 누구나 출제할 수 있으므로 검수 전 문제가 무한히 쌓이지 않게 막는다. 같은 계정의 동시 생성은 직렬화한다.
-          await manager.query('SELECT 1 FROM users WHERE id = $1 FOR UPDATE', [user.id]);
-          const [{ count }]: { count: number }[] = await manager.query(
-            "SELECT count(*)::int AS count FROM problems WHERE author_id = $1 AND status <> 'PUBLISHED'",
-            [user.id],
-          );
-          if (count >= UNPUBLISHED_LIMIT)
-            throw new ConflictException(
-              `공개되지 않은 문제(초안·보관·기업 전용)는 ${UNPUBLISHED_LIMIT}개까지 둘 수 있어요. 쓰지 않는 문제를 정리해 주세요.`,
-            );
-        }
+        await this.assertDraftRoom(manager, user);
         const problem = manager.create(Problem, {
           slug: dto.slug.toLowerCase(),
           title: dto.title,
@@ -147,6 +139,7 @@ export class ProblemsService {
           order: { order: 'ASC' },
         });
       }
+      this.assertJudgeBudget(problem.timeLimitMs, problem.testCases.length, user);
       if (dto.isPrivate !== undefined) problem.isPrivate = dto.isPrivate;
       if (
         problem.status === ProblemStatus.PUBLISHED &&
@@ -185,6 +178,9 @@ export class ProblemsService {
       if (problem.isPrivate && status === ProblemStatus.PUBLISHED)
         throw new BadRequestException(PRIVATE_PUBLISH_MESSAGE);
       const oldStatus = problem.status;
+      // 보관했다가 되살려 초안 상한을 넘기지 못하게 한다.
+      if (status === ProblemStatus.DRAFT && oldStatus !== ProblemStatus.DRAFT)
+        await this.assertDraftRoom(manager, user);
       problem.status = status;
       await manager.save(problem);
       await recordAudit(manager, user.id, 'problem.status', 'problem', id, {
@@ -307,6 +303,28 @@ export class ProblemsService {
       const [detail] = await this.withStats(manager, [this.toDetail(problem)]);
       return detail;
     });
+  }
+
+  /** 검수 대기(초안)가 무한히 쌓이지 않게 한다. 보관한 문제는 세지 않으므로 보관이 정리 수단이다. */
+  private async assertDraftRoom(manager: EntityManager, user: AuthenticatedUser) {
+    if (user.role === UserRole.ADMIN) return;
+    // 같은 계정의 동시 생성·전환을 직렬화한다.
+    await manager.query('SELECT 1 FROM users WHERE id = $1 FOR UPDATE', [user.id]);
+    const [{ count }]: { count: number }[] = await manager.query(
+      "SELECT count(*)::int AS count FROM problems WHERE author_id = $1 AND status = 'DRAFT'",
+      [user.id],
+    );
+    if (count >= DRAFT_LIMIT)
+      throw new ConflictException(
+        `초안(기업 전용 포함)은 ${DRAFT_LIMIT}개까지 둘 수 있어요. 쓰지 않는 문제는 보관해 주세요.`,
+      );
+  }
+
+  private assertJudgeBudget(timeLimitMs: number, testCount: number, user: AuthenticatedUser) {
+    if (user.role !== UserRole.ADMIN && timeLimitMs * testCount > JUDGE_BUDGET_MS)
+      throw new BadRequestException(
+        `시간 제한 × 테스트 개수는 ${JUDGE_BUDGET_MS / 1000}초를 넘을 수 없어요. 시간 제한을 줄이거나 테스트를 합쳐 주세요.`,
+      );
   }
 
   private assertOwner(problem: Problem, user: AuthenticatedUser) {

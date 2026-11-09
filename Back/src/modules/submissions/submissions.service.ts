@@ -1,5 +1,7 @@
 import {
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   ServiceUnavailableException,
@@ -76,8 +78,9 @@ export function enqueueJudge(
   queue: Queue<JudgeSubmissionJob>,
   submissionId: string,
   generation: number,
+  priority?: number,
 ) {
-  const job = judgeJob(submissionId, generation);
+  const job = judgeJob(submissionId, generation, priority);
   return queue.add(job.name, job.data, job.opts);
 }
 
@@ -121,6 +124,8 @@ const BULK_REJUDGE_LIMIT = 200;
 // BullMQ는 priority 없는 작업을 먼저 꺼내므로, 일괄 재채점이 새 제출 앞을 막지 않는다.
 // shortcut: 복구 타이머가 다시 넣은 작업은 priority를 잃는다. 일괄 재채점이 잦아지면 작업에 priority를 저장한다.
 const BULK_REJUDGE_PRIORITY = 10;
+// 한 사람이 채점기 슬롯을 오래 붙잡지 못하게 동시에 기다리는 제출 수를 묶는다(관리자 제외).
+export const PENDING_SUBMISSION_LIMIT = 3;
 
 function canManage(problem: Pick<Problem, 'authorId'>, user: AuthenticatedUser) {
   return user.role === UserRole.ADMIN || problem.authorId === user.id;
@@ -172,18 +177,34 @@ export class SubmissionsService {
     const isTest = problem?.status !== ProblemStatus.PUBLISHED;
     if (!problem || (isTest && !canManage(problem, user)))
       throw new NotFoundException('제출할 문제를 찾을 수 없습니다.');
-    const submission = await this.submissions.save(
-      this.submissions.create({
-        problemId,
-        userId: user.id,
-        language: dto.language,
-        sourceCode: dto.sourceCode,
-        problemVersion: problem.currentVersion,
-        judgeGeneration: 1,
-        status: SubmissionStatus.QUEUED,
-        isTest,
-      }),
-    );
+    const submission = await this.dataSource.transaction(async (manager) => {
+      if (user.role !== UserRole.ADMIN) {
+        // 같은 계정의 동시 제출을 직렬화해 상한을 넘지 않게 한다.
+        await manager.query('SELECT 1 FROM users WHERE id = $1 FOR UPDATE', [user.id]);
+        const [{ count }]: { count: number }[] = await manager.query(
+          "SELECT count(*)::int AS count FROM submissions WHERE user_id = $1 AND status IN ('QUEUED', 'JUDGING')",
+          [user.id],
+        );
+        if (count >= PENDING_SUBMISSION_LIMIT)
+          throw new HttpException(
+            `채점을 기다리는 제출이 ${PENDING_SUBMISSION_LIMIT}개 있어요. 결과가 나온 뒤 다시 제출해 주세요.`,
+            HttpStatus.TOO_MANY_REQUESTS,
+          );
+      }
+      const repository = manager.getRepository(Submission);
+      return repository.save(
+        repository.create({
+          problemId,
+          userId: user.id,
+          language: dto.language,
+          sourceCode: dto.sourceCode,
+          problemVersion: problem.currentVersion,
+          judgeGeneration: 1,
+          status: SubmissionStatus.QUEUED,
+          isTest,
+        }),
+      );
+    });
     try {
       await enqueueJudge(this.judgeQueue, submission.id, 1);
     } catch {
@@ -303,7 +324,13 @@ export class SubmissionsService {
       return current;
     });
     try {
-      await enqueueJudge(this.judgeQueue, id, submission.judgeGeneration);
+      // 재채점은 일괄 재채점처럼 새 제출 뒤로 보낸다.
+      await enqueueJudge(
+        this.judgeQueue,
+        id,
+        submission.judgeGeneration,
+        BULK_REJUDGE_PRIORITY,
+      );
     } catch {
       throw new ServiceUnavailableException(
         '재채점 큐 등록에 실패했습니다. 복구 작업이 다시 시도합니다.',

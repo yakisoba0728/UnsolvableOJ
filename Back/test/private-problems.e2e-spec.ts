@@ -98,4 +98,29 @@ describe('Enterprise-only (private) problems (e2e)', () => {
     expect(relocked.body).toMatchObject({ isPrivate: true, status: 'DRAFT' });
     await http().get(`${base}/problems/company-${suffix}`).expect(404);
   });
+
+  it('caps drafts at 50 per non-admin; archiving frees a slot and unarchiving is checked', async () => {
+    const writer = (await register(app, 'ppdrafts', suffix)).accessToken;
+    const ids: string[] = [];
+    for (let i = 0; i < 50; i += 1) {
+      const created = await http()
+        .post(`${base}/problems`)
+        .set(bearer(writer))
+        .send(body(`draft-${i}`, { isPrivate: i % 2 === 0 }))
+        .expect(201);
+      ids.push(created.body.id as string);
+    }
+    await http().post(`${base}/problems`).set(bearer(writer)).send(body('draft-over')).expect(409);
+    await http()
+      .patch(`${base}/problems/${ids[0]}/status`)
+      .set(bearer(writer))
+      .send({ status: 'ARCHIVED' })
+      .expect(200);
+    await http().post(`${base}/problems`).set(bearer(writer)).send(body('draft-after')).expect(201);
+    await http()
+      .patch(`${base}/problems/${ids[0]}/status`)
+      .set(bearer(writer))
+      .send({ status: 'DRAFT' })
+      .expect(409);
+  });
 });

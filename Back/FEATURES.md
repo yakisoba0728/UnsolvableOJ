@@ -1,6 +1,6 @@
 # 백엔드 기능 목록
 
-현재 컨트롤러·서비스·운영 스크립트를 기준으로 작성했습니다. API 기본 경로는 `/api/v1`이며 표에서는 생략합니다. `로그인`은 USER·AUTHOR·ADMIN 모두, `문제 소유자`는 AUTHOR이면서 해당 문제를 작성한 사용자를 뜻합니다. ADMIN은 모든 문제를 관리할 수 있습니다.
+현재 컨트롤러·서비스·운영 스크립트를 기준으로 작성했습니다. API 기본 경로는 `/api/v1`이며 표에서는 생략합니다. `로그인`은 USER·AUTHOR·ADMIN 모두, `문제 소유자`는 역할과 상관없이 해당 문제를 작성한 사용자를 뜻합니다. ADMIN은 모든 문제를 관리할 수 있습니다.
 
 ## 1. 계정과 인증
 
@@ -27,14 +27,14 @@
 | `GET /problems` | 공개 | 공개 문제 목록, 난이도·태그(`tag`) 필터, 페이지 조회, 문제별 푼 사람·정답률 |
 | `GET /problems/by-slug/:slug` | 공개 | 공개 문제 설명·제한·예제·태그·해설과 푼 사람·정답률 조회 |
 | `GET /problems/:slug` | 공개 | 기존 상세 주소의 호환 경로; `mine`은 관리 경로가 우선 |
-| `POST /problems` | 로그인 | 문제·테스트케이스·최초 버전 생성; 공개 상태 생성은 ADMIN만 가능. ADMIN이 아니면 공개되지 않은 문제는 계정당 50개까지 |
+| `POST /problems` | 로그인 | 문제·테스트케이스·최초 버전 생성; 공개 상태 생성은 ADMIN만 가능. ADMIN이 아니면 초안(기업 전용 포함)은 계정당 50개까지(보관 문제는 세지 않음, 보관에서 초안으로 되돌릴 때도 검사), 시간 제한 × 테스트 개수는 60초까지(수정할 때도 검사) |
 | `GET /problems/mine` | 로그인 | 내 문제 최신 100개(`isPrivate` 포함), ADMIN은 전체 중 최신 100개 |
 | `GET /problems/:id/manage` | 문제 소유자/ADMIN | 비공개 테스트케이스를 포함한 관리 상세 |
 | `PATCH /problems/:id` | 문제 소유자/ADMIN | 내용·난이도·제한·테스트케이스 수정 및 버전 증가 |
 | `PATCH /problems/:id/status` | 문제 소유자/ADMIN | DRAFT·PUBLISHED·ARCHIVED 전환; PUBLISHED는 ADMIN만 가능, 기업 전용 문제는 불가(400) |
 
 - 로그인한 누구나 문제를 만들 수 있습니다. 공개 목록에 올리려면 관리자 검수(PUBLISHED 전환)를 거칩니다. AUTHOR 역할은 기존 계정 호환용이며 출제 권한에 차이가 없습니다.
-- 기업 테스트 전용 문제(`isPrivate`)는 공개 목록·상세·일반 제출에 나오지 않고 공개로 바꿀 수 없습니다. 소유자·ADMIN만 관리하고 검증 제출할 수 있으며, 웹의 기업 테스트에서 공개 문제와 함께 출제할 수 있습니다. 공개 문제를 기업 전용으로 바꾸면(ADMIN 수정 포함) 초안으로 내려갑니다.
+- 기업 테스트 전용 문제(`isPrivate`)는 공개 목록·상세·일반 제출에 나오지 않고 공개로 바꿀 수 없습니다. 소유자·ADMIN만 관리하고 검증 제출할 수 있으며, 웹의 기업 테스트 화면에서 공개 문제와 함께 고를 수 있지만, 응시자가 이 문제를 열고 제출하는 서버 경로는 아직 없습니다. 공개 문제를 기업 전용으로 바꾸면(ADMIN 수정 포함) 초안으로 내려갑니다.
 
 - 본문·입력 설명·출력 설명을 Markdown으로 저장합니다. 난이도는 BEGINNER/EASY/MEDIUM/HARD/EXPERT입니다.
 - 태그(`tags`)는 자유 문자열 0–10개, 각 1–30자이며 앞뒤 공백을 지운 뒤 중복을 거절합니다. 목록의 `tag`는 대소문자를 포함해 정확히 일치하는 태그 하나로 거릅니다. 웹 목록은 전체를 받아 같은 조건으로 브라우저에서 거릅니다.
@@ -55,16 +55,16 @@
 
 | API | 권한 | 기능 |
 |---|---|---|
-| `POST /problems/:problemId/submissions` | 로그인 | 공개 문제에 제출하고 채점 큐 등록, HTTP 202 반환. 공개 전 문제는 소유 작성자/ADMIN만 검증용(`isTest`)으로 제출 |
+| `POST /problems/:problemId/submissions` | 로그인 | 공개 문제에 제출하고 채점 큐 등록, HTTP 202 반환. 공개 전 문제는 소유 작성자/ADMIN만 검증용(`isTest`)으로 제출. 분당 20회, ADMIN이 아니면 채점 대기·진행 중인 제출은 계정당 3개까지(넘으면 429) |
 | `GET /submissions` | 로그인 | 내 제출 목록(검증용 제외), 문제 ID 필터, 페이지 조회 |
 | `GET /submissions/:id` | 제출자 본인, 문제 소유자/ADMIN | 판정·소스 코드·실행 정보·공개 예제 출력 |
 | `GET /problems/:problemId/submissions` | 문제 소유자/ADMIN | 문제별 전체 제출(검증용 포함, 제출자 이름), 상태 필터, 페이지 조회. 소스는 상세에서만 |
-| `POST /submissions/:id/rejudge` | 문제 소유자/ADMIN | 재채점, HTTP 202 반환 |
+| `POST /submissions/:id/rejudge` | 문제 소유자/ADMIN | 재채점, HTTP 202 반환. 분당 20회, 일괄 재채점처럼 새 제출 뒤에 처리 |
 | `POST /problems/:problemId/rejudge` | 문제 소유자/ADMIN | 오래된 제출부터 최대 200건 재채점. `{ requeued, skipped, remaining, next }`를 돌려주며 `next`를 `after`로 넘겨 이어서 처리. 대기·채점 중인 제출은 건너뜀 |
 
 - 지원 언어는 C/CPP/JAVA/PYTHON/JAVASCRIPT/TYPESCRIPT/GO/RUST, 소스 크기는 1–200,000자입니다.
 - 제출 생성 당시 문제 버전으로 채점합니다. 재채점은 공개 중인 문제면 **현재 버전**(고친 테스트)으로, 초안·보관 문제면 검수 전 테스트가 다른 사용자의 결과·XP를 바꾸지 않도록 제출 당시 버전으로 돌립니다. 검증용 제출은 항상 현재 버전입니다.
-- 일괄 재채점 작업은 BullMQ priority를 붙여 새 제출보다 뒤에 처리합니다(복구 타이머가 다시 넣은 작업은 priority 없음).
+- 단건·일괄 재채점 작업은 BullMQ priority를 붙여 새 제출보다 뒤에 처리합니다(복구 타이머가 다시 넣은 작업은 priority 없음).
 - 검증용 제출(`isTest`)은 해결 기록·XP·미션·문제 통계·내 제출 목록(학습 기록)에 넣지 않습니다. 문제를 나중에 공개해도 소급하지 않습니다.
 - 목록은 최신 제출순(동일 시각이면 ID 내림차순), 기본 20개·최대 1,000개입니다. `nextCursor`·`cursor` 이어 읽기도 지원하며, 이때 기존 페이지 번호(최대 1,000,000)의 OFFSET은 적용하지 않습니다. 목록 쿼리는 소스·디버그 출력을 읽지 않습니다. 소스는 본인과 해당 문제의 소유 작성자·ADMIN 상세에만 반환하고, 그 외 사용자의 상세 조회는 404입니다.
 - 응답에는 상태, 문제 버전, 채점 세대, 실행 시간·메모리, 통과/전체 테스트 수, 컴파일 출력, 채점 메시지, 생성/수정 시각이 포함됩니다.
@@ -168,7 +168,7 @@
 | `PUT /read-all` | 모두 읽음 |
 
 - 종류: `ANSWER`(남이 내 글에 답변), `ACCEPTED`(내 답변이 채택됨, 답변당 한 번), `JUDGED`(내 제출 채점 완료). 글·답변·제출이 지워지면 알림도 지워집니다.
-- 채점 완료 알림은 `notifications.service.ts`의 `notifySubmissionJudged(manager, submissionId)`로 만듭니다. 제출당 하나이며 다시 부르면 안 읽음·최신 시각으로 올립니다. 채점 결과 저장 경로에는 아직 연결되지 않았습니다.
+- 채점 완료 알림은 `notifications.service.ts`의 `notifySubmissionJudged(manager, submissionId)`로 만듭니다. 제출당 하나이며 다시 부르면 안 읽음·최신 시각으로 올립니다. 채점 결과를 저장할 때(재채점 포함) 호출합니다.
 - 웹 헤더의 알림 종은 탭이 보일 때만 1분마다 안 읽은 수를 확인합니다.
 
 ## 7. 채점기 내부 API와 복구
@@ -178,7 +178,7 @@
 | `POST /internal/judge/heartbeat` | 채점 토큰 + 워커 UUID | 워커 생존 상태 갱신 |
 | `GET /internal/judge/submissions/:id` | 채점 토큰 + 세대/시도 ID | 채점 권한 획득, 소스·제한·전체 테스트 반환 |
 | `PATCH /internal/judge/submissions/:id/heartbeat` | 동일 | 제출별 lease 연장 |
-| `PATCH /internal/judge/submissions/:id/release` | 동일 | 실행 서비스 장애로 채점하지 못한 lease 반납. 복구 횟수를 쓰지 않고 다음 세대로 재등록 |
+| `PATCH /internal/judge/submissions/:id/release` | 동일 | 실행 서비스 장애로 채점하지 못한 lease 반납. 다음 세대로 재등록하며 복구 횟수를 1 쓰고, 이미 5번을 썼으면 SYSTEM_ERROR로 종료 |
 | `PATCH /internal/judge/submissions/:id/result` | 동일 | 최종 판정 저장과 XP 정산 |
 
 - `X-Judge-Token`을 상수 시간 비교로 인증합니다. 워커는 `X-Judge-Worker`, 채점 시도는 `X-Judge-Generation`·`X-Judge-Attempt`로 구분합니다.
