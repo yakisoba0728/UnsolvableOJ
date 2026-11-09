@@ -15,6 +15,7 @@ import { BackendHardening1790554000000 } from './migrations/1790554000000-backen
 import { Community1791200000000 } from './migrations/1791200000000-community.js';
 import { CommunityUi1791200001000 } from './migrations/1791200001000-community-ui.js';
 import { LearningEvidence1793001000000 } from './migrations/1793001000000-learning-evidence.js';
+import { ProblemTagsEditorial1794200000000 } from './migrations/1794200000000-problem-tags-editorial.js';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -36,6 +37,7 @@ export default new DataSource({
     CommunityUi1791200001000,
     Missions1793000000000,
     LearningEvidence1793001000000,
+    ProblemTagsEditorial1794200000000,
   ],
   synchronize: false,
 });

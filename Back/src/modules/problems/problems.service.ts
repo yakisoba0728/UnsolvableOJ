@@ -6,7 +6,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, type FindOptionsWhere } from 'typeorm';
+import {
+  ArrayContains,
+  DataSource,
+  Repository,
+  type EntityManager,
+  type FindOptionsWhere,
+} from 'typeorm';
 import { isUniqueViolation, recordAudit } from '../../common/database.js';
 import { findListPage } from '../../common/list-cursor.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
@@ -40,6 +46,8 @@ export class ProblemsService {
           statementMarkdown: dto.statementMarkdown,
           inputDescriptionMarkdown: dto.inputDescriptionMarkdown,
           outputDescriptionMarkdown: dto.outputDescriptionMarkdown,
+          editorialMarkdown: dto.editorialMarkdown,
+          tags: dto.tags,
           difficulty: dto.difficulty,
           status: dto.status,
           timeLimitMs: dto.timeLimitMs,
@@ -92,6 +100,8 @@ export class ProblemsService {
         'statementMarkdown',
         'inputDescriptionMarkdown',
         'outputDescriptionMarkdown',
+        'editorialMarkdown',
+        'tags',
         'difficulty',
         'timeLimitMs',
         'memoryLimitMb',
@@ -168,6 +178,7 @@ export class ProblemsService {
       status: ProblemStatus.PUBLISHED,
     };
     if (query.difficulty) where.difficulty = query.difficulty;
+    if (query.tag) where.tags = ArrayContains([query.tag]);
     const page = await findListPage(
       this.problems,
       this.dataSource,
@@ -180,6 +191,7 @@ export class ProblemsService {
           slug: true,
           title: true,
           difficulty: true,
+          tags: true,
           timeLimitMs: true,
           memoryLimitMb: true,
           currentVersion: true,
@@ -187,9 +199,19 @@ export class ProblemsService {
         },
       },
     );
-    // One indexed aggregate per page, not one submissions query per problem.
-    const stats = page.items.length
-      ? await this.dataSource.query<
+    return {
+      ...page,
+      items: await this.withStats(this.dataSource, page.items),
+    };
+  }
+
+  // One indexed aggregate per page, not one submissions query per problem.
+  private async withStats<T extends { id: string }>(
+    db: Pick<EntityManager, 'query'>,
+    problems: T[],
+  ) {
+    const stats = problems.length
+      ? await db.query<
           { problemId: string; solverCount: number; acceptanceRate: number }[]
         >(
           `SELECT problem_id AS "problemId",
@@ -199,19 +221,16 @@ export class ProblemsService {
            WHERE problem_id = ANY($1::uuid[])
              AND status NOT IN ('QUEUED', 'JUDGING', 'SYSTEM_ERROR', 'CANCELLED')
            GROUP BY problem_id`,
-          [page.items.map((problem) => problem.id)],
+          [problems.map((problem) => problem.id)],
         )
       : [];
     const byProblem = new Map(stats.map((item) => [item.problemId, item]));
-    return {
-      ...page,
-      items: page.items.map((problem) =>
-        Object.assign(problem, {
-          solverCount: byProblem.get(problem.id)?.solverCount ?? 0,
-          acceptanceRate: byProblem.get(problem.id)?.acceptanceRate ?? null,
-        }),
-      ),
-    };
+    return problems.map((problem) =>
+      Object.assign(problem, {
+        solverCount: byProblem.get(problem.id)?.solverCount ?? 0,
+        acceptanceRate: byProblem.get(problem.id)?.acceptanceRate ?? null,
+      }),
+    );
   }
 
   async findMine(user: AuthenticatedUser) {
@@ -260,7 +279,8 @@ export class ProblemsService {
         where: { problemId: problem.id, isSample: true },
         order: { order: 'ASC' },
       });
-      return this.toDetail(problem);
+      const [detail] = await this.withStats(manager, [this.toDetail(problem)]);
+      return detail;
     });
   }
 
@@ -275,6 +295,8 @@ export class ProblemsService {
       statementMarkdown: problem.statementMarkdown,
       inputDescriptionMarkdown: problem.inputDescriptionMarkdown,
       outputDescriptionMarkdown: problem.outputDescriptionMarkdown,
+      editorialMarkdown: problem.editorialMarkdown,
+      tags: problem.tags,
       difficulty: problem.difficulty,
       timeLimitMs: problem.timeLimitMs,
       memoryLimitMb: problem.memoryLimitMb,
@@ -297,6 +319,8 @@ export class ProblemsService {
       statementMarkdown: problem.statementMarkdown,
       inputDescriptionMarkdown: problem.inputDescriptionMarkdown,
       outputDescriptionMarkdown: problem.outputDescriptionMarkdown,
+      editorialMarkdown: problem.editorialMarkdown,
+      tags: problem.tags,
       difficulty: problem.difficulty,
       status: problem.status,
       timeLimitMs: problem.timeLimitMs,

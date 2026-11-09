@@ -77,6 +77,17 @@ describe('public problem continuation', () => {
     );
   });
 
+  it('filters by tag with array containment and keeps the visibility filter', async () => {
+    const { service, repository } = fixture([]);
+    await service.findAll(
+      Object.assign(new ListProblemsQuery(), { tag: '그래프' }),
+    );
+    const { where } = repository.find.mock.calls[0][0];
+    expect(where.status).toBe(ProblemStatus.PUBLISHED);
+    expect((where.tags as FindOperator<string[]>).type).toBe('arrayContains');
+    expect((where.tags as FindOperator<string[]>).value).toEqual(['그래프']);
+  });
+
   it('rejects malformed cursors before accessing the database', async () => {
     const { service, repository, query } = fixture([]);
     await expect(
@@ -122,7 +133,7 @@ describe('public problem detail', () => {
         {
           transaction: vi.fn(async (isolation, run) => {
             expect(isolation).toBe('REPEATABLE READ');
-            return run({ findOneBy, find });
+            return run({ findOneBy, find, query: vi.fn().mockResolvedValue([]) });
           }),
         } as unknown as DataSource,
       );
@@ -142,11 +153,16 @@ describe('public problem detail', () => {
   ])('loads only sample cases and returns %j', async (samples) => {
     const findOneBy = vi.fn().mockResolvedValue({ id: ids[0], slug: 'sum' });
     const find = vi.fn().mockResolvedValue(samples);
+    const query = vi
+      .fn()
+      .mockResolvedValue([
+        { problemId: ids[0], solverCount: 3, acceptanceRate: 42.9 },
+      ]);
     const service = new ProblemsService(
       {} as Repository<Problem>,
       { transaction: vi.fn(async (isolation, run) => {
         expect(isolation).toBe('REPEATABLE READ');
-        return run({ findOneBy, find });
+        return run({ findOneBy, find, query });
       }) } as unknown as DataSource,
     );
     const result = await service.findPublishedBySlug('SUM');
@@ -161,6 +177,9 @@ describe('public problem detail', () => {
     expect(result.samples).toEqual(
       samples.map(({ input, expectedOutput }) => ({ input, expectedOutput })),
     );
+    // Same aggregate as the list, read inside the detail snapshot transaction.
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('FROM submissions'), [[ids[0]]]);
+    expect(result).toMatchObject({ solverCount: 3, acceptanceRate: 42.9 });
   });
 });
 

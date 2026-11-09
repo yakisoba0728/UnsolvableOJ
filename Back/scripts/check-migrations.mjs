@@ -326,7 +326,11 @@ try {
   const learningFixtures = [];
   // Upgrade to just before the new evidence migration before inserting legacy rows.
   await db.destroy();
-  db = await new DataSource({ ...options, migrations: configured.options.migrations.slice(0, -1) }).initialize();
+  const learning = configured.options.migrations.findIndex(
+    (migration) => migration.name === 'LearningEvidence1793001000000',
+  );
+  assert.notEqual(learning, -1);
+  db = await new DataSource({ ...options, migrations: configured.options.migrations.slice(0, learning) }).initialize();
   await db.runMigrations();
   for (const status of ['ACCEPTED','WRONG_ANSWER','COMPILE_ERROR','RUNTIME_ERROR','TIME_LIMIT_EXCEEDED','MEMORY_LIMIT_EXCEEDED','OUTPUT_LIMIT_EXCEEDED','QUEUED','JUDGING','SYSTEM_ERROR','CANCELLED']) {
     const [row] = await db.query(`INSERT INTO submissions(user_id,problem_id,language,source_code,status)
@@ -343,7 +347,7 @@ try {
   const beforeLearning = await db.query('SELECT xp,level FROM users WHERE id=$1', [learner.id]);
   const ledgerBeforeLearning = await db.query('SELECT * FROM user_problem_solves');
   await db.destroy();
-  db = await new DataSource(options).initialize();
+  db = await new DataSource({ ...options, migrations: configured.options.migrations.slice(0, learning + 1) }).initialize();
   assert.equal((await db.runMigrations()).length, 1);
   for (const fixture of learningFixtures) assert.equal(
     (await db.query('SELECT completed_for_learning FROM submissions WHERE id=$1', [fixture.id]))[0].completed_for_learning,

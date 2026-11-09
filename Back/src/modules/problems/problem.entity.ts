@@ -36,6 +36,12 @@ export class Problem {
   @Column({ name: 'output_description_md', type: 'text', default: '' })
   outputDescriptionMarkdown: string;
 
+  @Column({ name: 'editorial_md', type: 'text', default: '' })
+  editorialMarkdown: string;
+
+  @Column({ type: 'text', array: true, default: () => "'{}'" })
+  tags: string[];
+
   @Column({
     type: 'enum',
     enum: ProblemDifficulty,
