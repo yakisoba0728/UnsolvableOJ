@@ -85,6 +85,8 @@ describe('Refresh tokens and temporary passwords (e2e)', () => {
       [short.refreshToken, long.refreshToken],
     );
     expect(stored.count).toBe(0);
+    // 가입 때 받은 토큰도 회전된다.
+    solverSession = (await refresh(short.refreshToken).expect(200)).body;
   });
 
   it('rotates on refresh and revokes the whole family when a used token comes back', async () => {
