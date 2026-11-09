@@ -105,6 +105,11 @@ export class CommunityQuery {
   @IsIn(['true', 'false'])
   includePinned?: string;
 
+  /** true면 내가 팔로우한 작성자의 글만(로그인 필요) */
+  @IsOptional()
+  @IsIn(['true', 'false'])
+  following?: string;
+
   @IsOptional()
   @IsIn(['latest', 'votes', 'answers', 'views'])
   sort?: 'latest' | 'votes' | 'answers' | 'views';
@@ -134,6 +139,33 @@ export class CommunityQuery {
   @MaxLength(100, { each: true })
   @IsPostgresText({ each: true })
   tag?: string[];
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100_000)
+  page = 1;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(50)
+  limit = 20;
+}
+
+export class CommunityReportDto {
+  @Transform(trim)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  @IsPostgresText()
+  reason: string;
+}
+
+export class CommunityReportQuery {
+  @IsOptional()
+  @IsIn(['open', 'resolved', 'all'])
+  status?: 'open' | 'resolved' | 'all';
 
   @Type(() => Number)
   @IsInt()

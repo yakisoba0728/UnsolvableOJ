@@ -77,6 +77,8 @@ export function CommunityPage() {
     ? params.get("sort")!
     : "latest";
   const problemId = params.get("problemId");
+  // 팔로잉 필터는 로그인했을 때만 쓴다(서버가 내 팔로우 목록으로 거른다).
+  const followingOnly = Boolean(session) && params.get("following") === "1";
   const selectedTags = tagsOf(params);
   const size = PAGE_SIZE;
 
@@ -123,12 +125,14 @@ export function CommunityPage() {
   if (keyword) query.set("q", keyword);
   selectedTags.forEach((tag) => query.append("tag", tag));
   if (problemId) query.set("problemId", problemId);
+  if (followingOnly) query.set("following", "true");
   const {
     data: remote,
     loading,
     error: loadError,
   } = useRequest<Page<CommunityPost>>(
-    (signal) => listPosts(query, signal),
+    (signal) =>
+      listPosts(query, signal, followingOnly ? session?.accessToken : undefined),
     { items: [], total: 0, page: 1, totalPages: 0 },
     "글 목록을 불러오지 못했어요.",
     [query.toString(), retry],
@@ -159,7 +163,8 @@ export function CommunityPage() {
     statuses.length ||
     selectedTags.length ||
     keyword ||
-    problemId,
+    problemId ||
+    followingOnly,
   );
 
   function write(initialCategory?: CategoryKey) {
@@ -286,6 +291,23 @@ export function CommunityPage() {
               onChangeValues={(next) => update({ s: next.join(",") || null })}
             />
           </div>
+          {session ? (
+            <div className="filter-bar">
+              <span className="filter-label">작성자</span>
+              <SlideToggle
+                ariaLabel="작성자 필터"
+                value={followingOnly ? "following" : ""}
+                options={[
+                  { value: "", label: "전체" },
+                  { value: "following", label: "팔로잉" },
+                ]}
+                defaultValue=""
+                onChange={(next) =>
+                  update({ following: next === "following" ? "1" : null })
+                }
+              />
+            </div>
+          ) : null}
         </div>
       </div>
 

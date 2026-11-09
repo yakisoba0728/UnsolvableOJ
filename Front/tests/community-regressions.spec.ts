@@ -206,12 +206,13 @@ for (const kind of ["answer", "post"] as const) {
 
 test("successful PUT followed by GET 503 keeps the post but shows stale-state warning and retry", async ({ page }) => {
   const state = await seed(page);
-  await page.goto("/community/my-question");
-  await expect(page.getByRole("heading", { name: mine.title, exact: true })).toBeVisible();
-  state.fail = (method, path) => method === "GET" && path === "/my-question" ? 503 : undefined;
+  // 내 글은 추천할 수 없으므로 남의 글로 확인한다.
+  await page.goto("/community/other");
+  await expect(page.getByRole("heading", { name: other.title, exact: true })).toBeVisible();
+  state.fail = (method, path) => method === "GET" && path === "/other" ? 503 : undefined;
   await page.getByRole("button", { name: "추천 0", exact: true }).click();
   await expect(page.getByRole("alert")).toContainText("아래는 이전에 불러온 내용");
-  await expect(page.getByRole("heading", { name: mine.title, exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: other.title, exact: true })).toBeVisible();
   state.fail = () => undefined;
   await page.getByRole("button", { name: "다시 시도", exact: true }).click();
   await expect(page.getByRole("alert")).toHaveCount(0);

@@ -71,6 +71,63 @@ export async function mockProblemApi(page: Page) {
   });
 }
 
+/** 알림 API(/notifications)를 메모리에서 흉내 낸다. requests로 안 읽은 수 확인 횟수 등을 본다. */
+export async function mockNotificationsApi(
+  page: Page,
+  items: { id: string; type: string; read?: boolean; post?: { id: string; title: string }; actor?: string; submission?: { id: string; status: string; problemTitle: string } }[] = [],
+) {
+  const state = {
+    items: items.map((item, index) => ({
+      id: item.id,
+      type: item.type,
+      readAt: item.read ? "2026-10-01T00:00:00Z" : null,
+      createdAt: new Date(Date.UTC(2026, 9, 5, 0, 10 - index)).toISOString(),
+      commentId: null,
+      actor: item.actor ? { id: item.actor, username: item.actor } : null,
+      post: item.post ?? null,
+      submission: item.submission ?? null,
+    })),
+    requests: [] as string[],
+  };
+  const unread = () => state.items.filter((item) => !item.readAt).length;
+  await page.route(
+    (url) => url.pathname.startsWith("/api/v1/notifications"),
+    async (route) => {
+      const request = route.request();
+      const url = new URL(request.url());
+      const path = url.pathname.replace("/api/v1/notifications", "");
+      state.requests.push(`${request.method()} ${path}${url.search}`);
+      if (!request.headers()["authorization"])
+        return route.fulfill({ status: 401, json: { message: "로그인이 필요합니다." } });
+      if (path === "/unread-count") return route.fulfill({ json: { unread: unread() } });
+      if (path === "/read-all") {
+        state.items.forEach((item) => (item.readAt ??= new Date().toISOString()));
+        return route.fulfill({ json: { unread: 0 } });
+      }
+      const read = path.match(/^\/([^/]+)\/read$/);
+      if (read) {
+        const item = state.items.find((other) => other.id === read[1]);
+        if (!item) return route.fulfill({ status: 404, json: { message: "알림을 찾을 수 없습니다." } });
+        item.readAt ??= new Date().toISOString();
+        return route.fulfill({ json: { unread: unread() } });
+      }
+      const limit = Number(url.searchParams.get("limit") ?? 20);
+      const pageNumber = Number(url.searchParams.get("page") ?? 1);
+      return route.fulfill({
+        json: {
+          items: state.items.slice((pageNumber - 1) * limit, pageNumber * limit),
+          total: state.items.length,
+          unread: unread(),
+          page: pageNumber,
+          limit,
+          totalPages: Math.ceil(state.items.length / limit),
+        },
+      });
+    },
+  );
+  return state;
+}
+
 export async function readAll(page: Page, path: string, token?: string) {
   return page.evaluate(async ({ path, token }) => {
     const modulePath = "/src/pagination.ts";
@@ -95,6 +152,8 @@ export interface SeedPost {
   problem?: { id: string; slug: string; title: string } | null;
   /** 채택한 답변 id */
   accepted?: string | null;
+  /** 관리자가 숨김 */
+  hidden?: boolean;
 }
 export interface SeedAnswer {
   id: string;
@@ -103,6 +162,7 @@ export interface SeedAnswer {
   author?: string;
   createdAt?: string;
   upvotes?: number;
+  hidden?: boolean;
 }
 
 /**
@@ -138,6 +198,7 @@ export async function mockCommunityApi(
       language: "",
       problem: null,
       accepted: null,
+      hidden: false,
       ...post,
     })),
     answers: (seed.answers ?? []).map((answer, index) => ({
@@ -145,8 +206,11 @@ export async function mockCommunityApi(
       author: me,
       createdAt: new Date(Date.UTC(2026, 9, 2, 0, index)).toISOString(),
       upvotes: 0,
+      hidden: false,
       ...answer,
     })),
+    /** 받은 신고: 글은 글 id, 답변은 답변 id */
+    reports: [] as { target: string; reason: string }[],
     voted: new Set(seed.voted ?? []),
     saved: new Set(seed.saved ?? []),
     following: new Set(seed.following ?? []),
@@ -174,6 +238,7 @@ export async function mockCommunityApi(
     updatedAt: post.createdAt,
     voteCount: post.upvotes + (state.voted.has(post.id) ? 1 : 0),
     commentCount: answersOf(post.id).length,
+    hidden: post.hidden,
     ...(full ? { body: post.body, code: post.code, language: post.language } : {}),
   });
 
@@ -190,7 +255,10 @@ export async function mockCommunityApi(
         tags.every((tag) =>
           post.tags.some((item) => item.toLowerCase() === tag),
         ) &&
-        (!query.get("problemId") || post.problem?.id === query.get("problemId")),
+        (!query.get("problemId") || post.problem?.id === query.get("problemId")) &&
+        // 숨긴 글은 공개 목록에서 빠진다. following=true면 내가 팔로우한 작성자의 글만 남긴다.
+        !post.hidden &&
+        (query.get("following") !== "true" || state.following.has(post.author)),
     );
     const accepted = (post: (typeof state.posts)[number]) =>
       Boolean(post.accepted);
@@ -291,6 +359,7 @@ export async function mockCommunityApi(
           upvotes: 0,
           views: 0,
           accepted: null,
+          hidden: false,
         };
         state.posts.unshift(post);
         return reply(toApi(post), 201);
@@ -331,7 +400,19 @@ export async function mockCommunityApi(
               (answer) => answer.id === item.accepted && answer.author === post.author,
             ),
           ).length,
+          followers: state.following.has(post.author) ? 1 : 0,
+          following: 0,
         });
+      // 신고: /:id/report 또는 /:id/comments/:answerId/report. 같은 대상은 한 번만.
+      if (action === "report" || answerAction === "report") {
+        const target = action === "report" ? id : answerId;
+        if (state.reports.some((report) => report.target === target))
+          return reply({ message: "이미 신고했습니다." }, 409);
+        state.reports.push({ target, reason: (body as { reason: string }).reason });
+        return reply({ ok: true }, 201);
+      }
+      if (action === "vote" && method === "PUT" && post.author === me)
+        return reply({ message: "자신의 글은 추천할 수 없습니다." }, 400);
       if (action === "interaction")
         return reply({
           voted: state.voted.has(id),
@@ -366,6 +447,7 @@ export async function mockCommunityApi(
             author: me,
             createdAt: new Date().toISOString(),
             upvotes: 0,
+            hidden: false,
           };
           state.answers.push(answer);
           return reply({ id: answer.id }, 201);
@@ -388,6 +470,7 @@ export async function mockCommunityApi(
               createdAt: answer.createdAt,
               updatedAt: answer.createdAt,
               voteCount: answer.upvotes + (state.voted.has(answer.id) ? 1 : 0),
+              hidden: answer.hidden,
             })),
           total: items.length,
           page: pageNumber,

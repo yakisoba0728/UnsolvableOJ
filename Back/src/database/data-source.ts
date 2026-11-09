@@ -17,6 +17,7 @@ import { CommunityUi1791200001000 } from './migrations/1791200001000-community-u
 import { LearningEvidence1793001000000 } from './migrations/1793001000000-learning-evidence.js';
 import { UserSuspension1794100000000 } from './migrations/1794100000000-user-suspension.js';
 import { ProblemTagsEditorial1794200000000 } from './migrations/1794200000000-problem-tags-editorial.js';
+import { CommunityModerationNotifications1794300000000 } from './migrations/1794300000000-community-moderation-notifications.js';
 import { TestSubmissions1794400000000 } from './migrations/1794400000000-test-submissions.js';
 import { PrivateProblems1794500000000 } from './migrations/1794500000000-private-problems.js';
 
@@ -42,6 +43,7 @@ export default new DataSource({
     LearningEvidence1793001000000,
     UserSuspension1794100000000,
     ProblemTagsEditorial1794200000000,
+    CommunityModerationNotifications1794300000000,
     TestSubmissions1794400000000,
     PrivateProblems1794500000000,
   ],

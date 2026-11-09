@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronUp,
   Eye,
+  Flag,
   Pencil,
   ThumbsUp,
   Trash2,
@@ -29,6 +30,7 @@ import {
   relativeTime,
   writeAnswerDraft,
 } from "../community/store";
+import { ReportDialog } from "../community/ReportDialog";
 import { categoryLabel } from "../community/types";
 import { useDocumentTitle, useFlashNotice } from "../hooks";
 import { problemPath } from "../paths";
@@ -84,7 +86,8 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
   useEffect(() => {
     if (!post || viewed.current === id) return;
     viewed.current = id;
-    void api(`${postUrl(id)}/view`, { method: "POST" }).catch(() => {});
+    // 로그인했으면 같은 사람의 조회를 계정 기준으로 한 번만 센다.
+    void api(`${postUrl(id)}/view`, { method: "POST" }, token).catch(() => {});
   }, [id, post]);
   useDocumentTitle(post ? post.title : "커뮤니티");
 
@@ -107,6 +110,11 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
     null,
   );
   const [editError, setEditError] = useState("");
+  // 신고 창: 글 주소 뒤에 붙는 신고 경로와 대상 이름
+  const [reporting, setReporting] = useState<{
+    path: string;
+    label: string;
+  } | null>(null);
   const editorRef = useRef<HTMLTextAreaElement>(null);
   // 새 답변은 다시 불러온 뒤에야 화면에 생기므로, 그때 그 답변으로 스크롤한다.
   const scrollTarget = useRef("");
@@ -361,7 +369,7 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
                 {categoryLabel(post.category)}
                 {post.tags[0] ? ` · ${post.tags[0]}` : ""}
               </span>
-              {canDelete ? (
+              {session ? (
                 <ActionMenu
                   label="글 관리"
                   items={[
@@ -375,17 +383,33 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
                               navigate(`/community/${post.id}/edit`),
                           },
                         ]
+                      : [
+                          {
+                            label: "신고",
+                            icon: <Flag size={15} aria-hidden="true" />,
+                            onSelect: () =>
+                              setReporting({ path: "/report", label: "글" }),
+                          },
+                        ]),
+                    ...(canDelete
+                      ? [
+                          {
+                            label: "삭제",
+                            icon: <Trash2 size={15} aria-hidden="true" />,
+                            danger: true,
+                            onSelect: () => void deletePost(),
+                          },
+                        ]
                       : []),
-                    {
-                      label: "삭제",
-                      icon: <Trash2 size={15} aria-hidden="true" />,
-                      danger: true,
-                      onSelect: () => void deletePost(),
-                    },
                   ]}
                 />
               ) : null}
             </div>
+            {post.hidden ? (
+              <p className="error-message" role="status">
+                관리자가 숨긴 글이에요. 작성자와 관리자에게만 보여요.
+              </p>
+            ) : null}
             <div className="post-byline">
               <div className="post-author-line">
                 <span className="post-avatar" aria-hidden="true">
@@ -398,7 +422,8 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
                   </span>
                   <small className="muted">
                     채택 답변 {authorStats.acceptedAnswers} · 작성 글{" "}
-                    {authorStats.posts}
+                    {authorStats.posts} · 팔로워 {authorStats.followers} ·
+                    팔로잉 {authorStats.following}
                   </small>
                 </span>
               </div>
@@ -468,7 +493,9 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
                 type="button"
                 className={`button post-vote ${interaction.voted ? "" : "button-soft"}`}
                 aria-pressed={interaction.voted}
-                disabled={pending}
+                // 내 글은 추천할 수 없다. 예전에 해 둔 추천은 취소할 수 있게 둔다.
+                disabled={pending || (isMine && !interaction.voted)}
+                title={isMine ? "내 글은 추천할 수 없어요" : undefined}
                 onClick={() =>
                   void act("/vote", interaction.voted ? "DELETE" : "PUT")
                 }
@@ -537,13 +564,21 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
                           {accepted ? (
                             <span className="answer-accepted">채택된 답변</span>
                           ) : null}
+                          {answer.hidden ? (
+                            <span className="answer-hidden">
+                              관리자가 숨긴 답변
+                            </span>
+                          ) : null}
                         </span>
                         <span className="answer-tools">
                           <button
                             type="button"
                             className="answer-vote"
                             aria-pressed={voted}
-                            disabled={pending}
+                            disabled={pending || (mineAnswer && !voted)}
+                            title={
+                              mineAnswer ? "내 답변은 추천할 수 없어요" : undefined
+                            }
                             onClick={() =>
                               void act(
                                 `/comments/${answer.id}/vote`,
@@ -571,7 +606,7 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
                               {accepted ? "채택 취소" : "채택하기"}
                             </button>
                           ) : null}
-                          {mineAnswer || isAdmin ? (
+                          {session ? (
                             <ActionMenu
                               label="답변 관리"
                               items={[
@@ -592,13 +627,32 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
                                         },
                                       },
                                     ]
+                                  : [
+                                      {
+                                        label: "신고",
+                                        icon: (
+                                          <Flag size={15} aria-hidden="true" />
+                                        ),
+                                        onSelect: () =>
+                                          setReporting({
+                                            path: `/comments/${answer.id}/report`,
+                                            label: "답변",
+                                          }),
+                                      },
+                                    ]),
+                                ...(mineAnswer || isAdmin
+                                  ? [
+                                      {
+                                        label: "삭제",
+                                        icon: (
+                                          <Trash2 size={15} aria-hidden="true" />
+                                        ),
+                                        danger: true,
+                                        onSelect: () =>
+                                          void deleteAnswer(answer.id),
+                                      },
+                                    ]
                                   : []),
-                                {
-                                  label: "삭제",
-                                  icon: <Trash2 size={15} aria-hidden="true" />,
-                                  danger: true,
-                                  onSelect: () => void deleteAnswer(answer.id),
-                                },
                               ]}
                             />
                           ) : null}
@@ -687,6 +741,20 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
           </section>
         </div>
       </div>
+      {reporting && session ? (
+        <ReportDialog
+          postId={id}
+          path={reporting.path}
+          label={reporting.label}
+          token={session.accessToken}
+          onClose={() => setReporting(null)}
+          onReported={() => {
+            setReporting(null);
+            setActionError("");
+            setNotice("신고를 접수했어요. 관리자가 확인할게요.");
+          }}
+        />
+      ) : null}
     </div>
   );
 }

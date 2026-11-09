@@ -40,6 +40,8 @@ export interface CommunityPost {
   upvotes: number;
   views: number;
   pinned?: boolean;
+  /** 관리자가 숨김(작성자·관리자에게만 보인다) */
+  hidden?: boolean;
 }
 
 export interface CommunityAnswer {
@@ -50,9 +52,12 @@ export interface CommunityAnswer {
   body: string;
   createdAt: string;
   upvotes: number;
+  hidden?: boolean;
 }
 
 export interface AuthorStats {
   acceptedAnswers: number;
   posts: number;
+  followers: number;
+  following: number;
 }

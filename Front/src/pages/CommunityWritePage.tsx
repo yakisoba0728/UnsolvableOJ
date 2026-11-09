@@ -69,7 +69,7 @@ export function CommunityWritePage({ getNavigationVersion }: { getNavigationVers
   const { session } = useAuth();
   // 수정 모드: 글을 받아 온 뒤 폼을 연다. 내가 쓴 글만 고칠 수 있다.
   const { data: original, loading, error } = useRequest<CommunityPost | null>(
-    editingId ? (signal) => getPost(editingId, signal) : null,
+    editingId ? (signal) => getPost(editingId, signal, session?.accessToken) : null,
     null,
     "글을 불러오지 못했어요.",
     [editingId],
