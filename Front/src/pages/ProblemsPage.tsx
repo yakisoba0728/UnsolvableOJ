@@ -135,7 +135,8 @@ export function ProblemsPage() {
     page: String(page),
     limit: String(PAGE_SIZE),
   });
-  if (keyword) request.set("q", keyword.slice(0, SEARCH_MAX));
+  // 글자(코드 포인트) 단위로 자른다: 서로게이트 쌍이 잘리면 서버가 거절한다.
+  if (keyword) request.set("q", Array.from(keyword).slice(0, SEARCH_MAX).join(""));
   if (selectedDifficulties.length)
     request.set("difficulty", selectedDifficulties.join(","));
   if (selectedTag) request.set("tag", selectedTag);
@@ -190,12 +191,13 @@ export function ProblemsPage() {
   const current = page;
   // 주소의 쪽이 결과보다 뒤면(결과가 줄었거나 손으로 고친 주소) 마지막 쪽으로 옮긴다.
   useEffect(() => {
-    if (!loading && !error && page > totalPages)
+    // list.page가 같아야 지금 주소의 응답이다(조건이 막 바뀐 렌더에는 앞선 응답이 남아 있다).
+    if (!loading && !error && list.page === page && page > totalPages)
       update(
         { page: totalPages === 1 ? null : String(totalPages) },
         { resetPage: false },
       );
-  }, [loading, error, page, totalPages]);
+  }, [loading, error, list.page, page, totalPages]);
   const hasFilter = Boolean(
     selectedDifficulties.length || statuses.length || keyword || selectedTag,
   );
