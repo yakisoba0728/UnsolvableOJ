@@ -233,7 +233,8 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
                   <DateTimePicker
                     id={fieldIds.endsAt}
                     value={draft.endsAt}
-                    onChange={(value) => patch({ endsAt: value })} align="right"
+                    onChange={(value) => patch({ endsAt: value })}
+                    align="right"
                     {...aria("endsAt")}
                   />
                   {err("endsAt")}

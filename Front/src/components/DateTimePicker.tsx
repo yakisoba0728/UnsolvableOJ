@@ -1,4 +1,11 @@
-import { useEffect, useId, useRef, useState, type RefObject } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type RefObject,
+} from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 
 interface DateTimePickerProps {
@@ -118,7 +125,10 @@ export function DateTimePicker({
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const minuteRef = useRef<HTMLInputElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  // 방향키로 옮긴 날짜. 날짜 칸 중 이 칸 하나만 Tab으로 들어간다.
+  const [active, setActive] = useState<{ y: number; m: number; d: number } | null>(null);
   const selected = parse(value);
   const today = new Date();
   const [view, setView] = useState(() => ({
@@ -128,7 +138,8 @@ export function DateTimePicker({
 
   useEffect(() => {
     if (!open) return;
-    const onPointerDown = (event: PointerEvent) => {
+    // 바깥을 누르거나 키보드로 바깥(다른 달력 포함)에 포커스가 가면 닫는다.
+    const onOutside = (event: Event) => {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
@@ -137,10 +148,12 @@ export function DateTimePicker({
         buttonRef.current?.focus();
       }
     };
-    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("pointerdown", onOutside);
+    document.addEventListener("focusin", onOutside);
     document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("pointerdown", onOutside);
+      document.removeEventListener("focusin", onOutside);
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
@@ -153,6 +166,7 @@ export function DateTimePicker({
         y: base?.y ?? now.getFullYear(),
         m: base?.m ?? now.getMonth(),
       });
+      setActive(null);
     }
     setOpen(!open);
   };
@@ -206,6 +220,32 @@ export function DateTimePicker({
     c.y === today.getFullYear() &&
     c.m === today.getMonth() &&
     c.d === today.getDate();
+  const tabDay = [active, selected].find(
+    (c) => c && c.y === view.y && c.m === view.m,
+  ) ?? { y: view.y, m: view.m, d: 1 };
+
+  useEffect(() => {
+    if (!active) return;
+    gridRef.current
+      ?.querySelector<HTMLButtonElement>(
+        `[data-date="${active.y}-${active.m}-${active.d}"]`,
+      )
+      ?.focus();
+  }, [active]);
+
+  const moveDay = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[
+      event.key
+    ];
+    const date = (event.target as HTMLElement).dataset.date;
+    if (!step || !date) return;
+    event.preventDefault();
+    const [y, m, d] = date.split("-").map(Number);
+    const next = new Date(y, m, d + step);
+    const cell = { y: next.getFullYear(), m: next.getMonth(), d: next.getDate() };
+    setActive(cell);
+    setView({ y: cell.y, m: cell.m });
+  };
   const isSelected = (c: { y: number; m: number; d: number }) =>
     !!selected &&
     c.y === selected.y &&
@@ -263,9 +303,9 @@ export function DateTimePicker({
                 </button>
               </div>
             </div>
-            <div className="dtp-grid" role="grid">
+            <div className="dtp-grid" ref={gridRef} onKeyDown={moveDay}>
               {WEEKDAYS.map((day) => (
-                <span className="dtp-weekday" key={day} role="columnheader">
+                <span className="dtp-weekday" key={day} aria-hidden="true">
                   {day}
                 </span>
               ))}
@@ -273,6 +313,14 @@ export function DateTimePicker({
                 <button
                   type="button"
                   key={`${cell.y}-${cell.m}-${cell.d}`}
+                  data-date={`${cell.y}-${cell.m}-${cell.d}`}
+                  tabIndex={
+                    cell.y === tabDay.y &&
+                    cell.m === tabDay.m &&
+                    cell.d === tabDay.d
+                      ? 0
+                      : -1
+                  }
                   className={`dtp-day${cell.m !== view.m ? " outside" : ""}${
                     isToday(cell) ? " today" : ""
                   }${isSelected(cell) ? " selected" : ""}`}

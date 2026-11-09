@@ -606,3 +606,38 @@ test("logging in from an edit link returns to that edit page", async ({ page }) 
     "/enterprise/t-1/edit",
   );
 });
+
+test("the date picker gives its days one tab stop, moves with arrow keys and closes when focus leaves", async ({ page, browserName }) => {
+  test.skip(browserName === "webkit", "WebKit은 기본 설정에서 Tab으로 버튼에 포커스를 주지 않는다");
+  await signIn(page);
+  await mockProblems(page);
+  await page.goto("/enterprise/new");
+  const start = page.getByLabel("시작 일시");
+  await start.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "날짜와 시간 선택" });
+  await page.keyboard.press("Tab"); // 이전 달
+  await page.keyboard.press("Tab"); // 다음 달
+  await page.keyboard.press("Tab"); // 날짜 칸 중 Tab이 멈추는 곳은 선택된 날 하나뿐
+  const selected = dialog.locator(".dtp-day.selected");
+  await expect(selected).toBeFocused();
+  const [sy, sm, sd] = (await selected.getAttribute("data-date"))!.split("-").map(Number);
+  const target = new Date(sy, sm, sd + 8);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowRight");
+  await expect(
+    dialog.getByRole("button", {
+      name: `${target.getFullYear()}년 ${target.getMonth() + 1}월 ${target.getDate()}일`,
+      exact: true,
+    }),
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Tab");
+  await expect(dialog.getByRole("textbox", { name: "시" })).toBeFocused();
+  await expect(start).toContainText(`${target.getFullYear()}. ${pad(target.getMonth() + 1)}. ${pad(target.getDate())}.`);
+
+  await page.getByLabel("종료 일시").focus();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toHaveCount(1);
+});
