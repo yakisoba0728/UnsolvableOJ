@@ -19,7 +19,11 @@ import { Roles } from '../../common/decorators/roles.decorator.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { UserRole } from '../users/user-role.enum.js';
 import { CreateSubmissionDto } from './dto/create-submission.dto.js';
-import { ListSubmissionsQuery } from './dto/list-submissions.query.js';
+import {
+  ListProblemSubmissionsQuery,
+  ListSubmissionsQuery,
+  RejudgeProblemDto,
+} from './dto/list-submissions.query.js';
 import { SubmissionsService } from './submissions.service.js';
 
 @ApiTags('submissions')
@@ -38,6 +42,30 @@ export class SubmissionsController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.submissionsService.create(problemId, dto, user);
+  }
+
+  @Get('problems/:problemId/submissions')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.AUTHOR, UserRole.ADMIN)
+  findForProblem(
+    @Param('problemId', ParseUUIDPipe) problemId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ListProblemSubmissionsQuery,
+  ) {
+    return this.submissionsService.findForProblem(problemId, user, query);
+  }
+
+  @Post('problems/:problemId/rejudge')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.AUTHOR, UserRole.ADMIN)
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
+  @HttpCode(HttpStatus.ACCEPTED)
+  rejudgeProblem(
+    @Param('problemId', ParseUUIDPipe) problemId: string,
+    @Body() dto: RejudgeProblemDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.submissionsService.rejudgeProblem(problemId, user, dto.after);
   }
 
   @Get('submissions')

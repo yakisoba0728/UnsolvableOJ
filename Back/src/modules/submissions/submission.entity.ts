@@ -105,6 +105,10 @@ export class Submission {
   @Column({ name: 'recovery_count', type: 'integer', default: 0 })
   recoveryCount: number;
 
+  // 공개 전 문제를 작성자·관리자가 검증한 제출. XP·미션·통계에 넣지 않는다.
+  @Column({ name: 'is_test', type: 'boolean', default: false })
+  isTest: boolean;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

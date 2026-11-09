@@ -196,7 +196,7 @@ export class ProblemsService {
              COUNT(DISTINCT user_id) FILTER (WHERE status = 'ACCEPTED')::int AS "solverCount",
              ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'ACCEPTED') / COUNT(*), 1)::float8 AS "acceptanceRate"
            FROM submissions
-           WHERE problem_id = ANY($1::uuid[])
+           WHERE problem_id = ANY($1::uuid[]) AND NOT is_test
              AND status NOT IN ('QUEUED', 'JUDGING', 'SYSTEM_ERROR', 'CANCELLED')
            GROUP BY problem_id`,
           [page.items.map((problem) => problem.id)],

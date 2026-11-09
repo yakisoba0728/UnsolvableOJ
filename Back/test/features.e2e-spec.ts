@@ -319,10 +319,11 @@ describe('Backend features (e2e)', () => {
       { testCase: 1, input: '1 2\n', expectedOutput: '3\n' },
     ]);
     expect(JSON.stringify(oldDetail.body)).not.toContain('5 7');
+    // 문제 작성자는 재채점 대상을 확인하려고 남의 제출도 볼 수 있다.
     await request(app.getHttpServer())
       .get(`${base}/submissions/${submissionId}`)
       .set(bearer(authorToken))
-      .expect(404);
+      .expect(200);
     expect(
       (
         await request(app.getHttpServer())
@@ -344,6 +345,8 @@ describe('Backend features (e2e)', () => {
       .set(bearer(authorToken))
       .expect(202);
     expect(rejudge.body.judgeGeneration).toBe(2);
+    // 문제가 공개 중이므로 재채점은 고친 현재 버전(v2)의 테스트로 돈다.
+    expect(rejudge.body.problemVersion).toBe(2);
     expect(
       (
         await request(app.getHttpServer())
@@ -358,10 +361,13 @@ describe('Backend features (e2e)', () => {
       .send({ status: 'ACCEPTED', passedTestCases: 2, totalTestCases: 2 })
       .expect(409);
     const thirdAttempt = randomUUID();
-    await request(app.getHttpServer())
+    const rejudgeClaim = await request(app.getHttpServer())
       .get(path)
       .set(judge(2, thirdAttempt))
       .expect(200);
+    expect(
+      rejudgeClaim.body.testCases.map((item: { input: string }) => item.input),
+    ).toEqual(['9 9\n']);
     await request(app.getHttpServer())
       .patch(`${path}/result`)
       .set(judge(2, thirdAttempt))

@@ -142,7 +142,7 @@ describe('stable submission traversal', () => {
       expect.objectContaining({ skip: 0, take: 3 }),
     );
     expect(submissions.count).toHaveBeenLastCalledWith({
-      where: { userId: user.id },
+      where: { userId: user.id, isTest: false },
     });
     expect(db.query).toHaveBeenCalledTimes(1);
   });
@@ -177,7 +177,7 @@ describe('stable submission traversal', () => {
       });
     }
     expect(submissions.count).toHaveBeenLastCalledWith({
-      where: { userId: user.id, problemId },
+      where: { userId: user.id, isTest: false, problemId },
     });
   });
 

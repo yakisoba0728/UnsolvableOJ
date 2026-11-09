@@ -537,7 +537,7 @@ describe('submission debug output lifecycle', () => {
     );
     expect(repository.findOne).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: submission.id, userId: user.id },
+        where: { id: submission.id },
       }),
     );
   });

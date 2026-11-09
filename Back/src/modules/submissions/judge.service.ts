@@ -204,11 +204,14 @@ export class JudgeService {
       }
       if (submission.status !== SubmissionStatus.JUDGING)
         throw new ConflictException('채점 중인 제출이 아닙니다.');
-      if (dto.status === SubmissionStatus.ACCEPTED)
-        submission.acceptedForXp = true;
-      else if (REJECTED_STATUSES.has(dto.status))
-        submission.acceptedForXp = false;
-      if (learningStatuses.has(dto.status)) submission.completedForLearning = true;
+      if (!submission.isTest) {
+        if (dto.status === SubmissionStatus.ACCEPTED)
+          submission.acceptedForXp = true;
+        else if (REJECTED_STATUSES.has(dto.status))
+          submission.acceptedForXp = false;
+        if (learningStatuses.has(dto.status))
+          submission.completedForLearning = true;
+      }
       submission.status = dto.status;
       submission.runtimeMs = dto.runtimeMs ?? null;
       submission.memoryKb = dto.memoryKb ?? null;
@@ -254,6 +257,8 @@ export class JudgeService {
     manager: DataSource['manager'],
     submission: Submission,
   ) {
+    // 검증용 제출은 해결 기록·XP를 만들지도, 대신하지도 않는다.
+    if (submission.isTest) return;
     if (
       submission.status !== SubmissionStatus.ACCEPTED &&
       !REJECTED_STATUSES.has(submission.status)
@@ -281,7 +286,7 @@ export class JudgeService {
     }
     if (rows[0]?.accepted_submission_id !== submission.id) return;
     const alternatives: { id: string }[] = await manager.query(
-      "SELECT id FROM submissions WHERE user_id = $1 AND problem_id = $2 AND (accepted_for_xp = true OR status = 'ACCEPTED') ORDER BY created_at, id LIMIT 1",
+      "SELECT id FROM submissions WHERE user_id = $1 AND problem_id = $2 AND NOT is_test AND (accepted_for_xp = true OR status = 'ACCEPTED') ORDER BY created_at, id LIMIT 1",
       [submission.userId, submission.problemId],
     );
     if (alternatives[0])

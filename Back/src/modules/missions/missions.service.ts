@@ -215,12 +215,12 @@ export class MissionsService {
     }[] = await m.query(
       `
       SELECT
-        (SELECT count(DISTINCT problem_id)::int FROM submissions WHERE user_id=$1 AND (accepted_for_xp OR status='ACCEPTED') AND created_at >= $2 AND created_at < $3) AS daily,
-        (SELECT count(DISTINCT problem_id)::int FROM submissions WHERE user_id=$1 AND (accepted_for_xp OR status='ACCEPTED') AND created_at >= $4 AND created_at < $3) AS weekly,
-        (SELECT count(*)::int FROM submissions WHERE user_id=$1 AND (completed_for_learning OR status::text IN ${learningVerdicts}) AND created_at >= $2 AND created_at < LEAST($3,$2::timestamptz+interval '6 hours')) AS night,
+        (SELECT count(DISTINCT problem_id)::int FROM submissions WHERE user_id=$1 AND NOT is_test AND (accepted_for_xp OR status='ACCEPTED') AND created_at >= $2 AND created_at < $3) AS daily,
+        (SELECT count(DISTINCT problem_id)::int FROM submissions WHERE user_id=$1 AND NOT is_test AND (accepted_for_xp OR status='ACCEPTED') AND created_at >= $4 AND created_at < $3) AS weekly,
+        (SELECT count(*)::int FROM submissions WHERE user_id=$1 AND NOT is_test AND (completed_for_learning OR status::text IN ${learningVerdicts}) AND created_at >= $2 AND created_at < LEAST($3,$2::timestamptz+interval '6 hours')) AS night,
         (SELECT count(*)::int FROM community_posts WHERE author_id=$1 AND category='SOLUTION' AND created_at >= $5 AND created_at < $3) AS community,
         (SELECT count(*)::int FROM analysis_attempts WHERE user_id=$1 AND day=$6::date) AS analysis,
-        ARRAY(SELECT DISTINCT to_char(created_at AT TIME ZONE 'Asia/Seoul','YYYY-MM-DD') FROM submissions WHERE user_id=$1 AND (completed_for_learning OR status::text IN ${learningVerdicts}) AND created_at < $3) AS days
+        ARRAY(SELECT DISTINCT to_char(created_at AT TIME ZONE 'Asia/Seoul','YYYY-MM-DD') FROM submissions WHERE user_id=$1 AND NOT is_test AND (completed_for_learning OR status::text IN ${learningVerdicts}) AND created_at < $3) AS days
     `,
       [userId, p.start, now, p.week, p.month, p.day],
     );

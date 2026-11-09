@@ -43,14 +43,18 @@
 
 | API | 권한 | 기능 |
 |---|---|---|
-| `POST /problems/:problemId/submissions` | 로그인 | 공개 문제에 제출하고 채점 큐 등록, HTTP 202 반환 |
-| `GET /submissions` | 로그인 | 내 제출 목록, 문제 ID 필터, 페이지 조회 |
-| `GET /submissions/:id` | 제출자 본인 | 판정·소스 코드·실행 정보·공개 예제 출력 |
-| `POST /submissions/:id/rejudge` | 문제 소유자/ADMIN | 원래 문제 버전으로 재채점, HTTP 202 반환 |
+| `POST /problems/:problemId/submissions` | 로그인 | 공개 문제에 제출하고 채점 큐 등록, HTTP 202 반환. 공개 전 문제는 소유 작성자/ADMIN만 검증용(`isTest`)으로 제출 |
+| `GET /submissions` | 로그인 | 내 제출 목록(검증용 제외), 문제 ID 필터, 페이지 조회 |
+| `GET /submissions/:id` | 제출자 본인, 문제 소유자/ADMIN | 판정·소스 코드·실행 정보·공개 예제 출력 |
+| `GET /problems/:problemId/submissions` | 문제 소유자/ADMIN | 문제별 전체 제출(검증용 포함, 제출자 이름), 상태 필터, 페이지 조회. 소스는 상세에서만 |
+| `POST /submissions/:id/rejudge` | 문제 소유자/ADMIN | 재채점, HTTP 202 반환 |
+| `POST /problems/:problemId/rejudge` | 문제 소유자/ADMIN | 오래된 제출부터 최대 200건 재채점. `{ requeued, skipped, remaining, next }`를 돌려주며 `next`를 `after`로 넘겨 이어서 처리. 대기·채점 중인 제출은 건너뜀 |
 
 - 지원 언어는 C/CPP/JAVA/PYTHON/JAVASCRIPT/TYPESCRIPT/GO/RUST, 소스 크기는 1–200,000자입니다.
-- 제출 생성 당시 문제 버전을 고정합니다. 이후 수정·비공개 전환에도 원래 제한과 테스트케이스로 채점합니다.
-- 목록은 최신 제출순(동일 시각이면 ID 내림차순), 기본 20개·최대 1,000개입니다. `nextCursor`·`cursor` 이어 읽기도 지원하며, 이때 기존 페이지 번호(최대 1,000,000)의 OFFSET은 적용하지 않습니다. 목록 쿼리는 소스·디버그 출력을 읽지 않습니다. 소스는 본인 상세에만 반환하고 다른 사용자의 상세 조회는 404입니다.
+- 제출 생성 당시 문제 버전으로 채점합니다. 재채점은 공개 중인 문제면 **현재 버전**(고친 테스트)으로, 초안·보관 문제면 검수 전 테스트가 다른 사용자의 결과·XP를 바꾸지 않도록 제출 당시 버전으로 돌립니다. 검증용 제출은 항상 현재 버전입니다.
+- 일괄 재채점 작업은 BullMQ priority를 붙여 새 제출보다 뒤에 처리합니다(복구 타이머가 다시 넣은 작업은 priority 없음).
+- 검증용 제출(`isTest`)은 해결 기록·XP·미션·문제 통계·내 제출 목록(학습 기록)에 넣지 않습니다. 문제를 나중에 공개해도 소급하지 않습니다.
+- 목록은 최신 제출순(동일 시각이면 ID 내림차순), 기본 20개·최대 1,000개입니다. `nextCursor`·`cursor` 이어 읽기도 지원하며, 이때 기존 페이지 번호(최대 1,000,000)의 OFFSET은 적용하지 않습니다. 목록 쿼리는 소스·디버그 출력을 읽지 않습니다. 소스는 본인과 해당 문제의 소유 작성자·ADMIN 상세에만 반환하고, 그 외 사용자의 상세 조회는 404입니다.
 - 응답에는 상태, 문제 버전, 채점 세대, 실행 시간·메모리, 통과/전체 테스트 수, 컴파일 출력, 채점 메시지, 생성/수정 시각이 포함됩니다.
 - 재채점은 세대를 증가시키고 이전 시도·판정 정보를 초기화합니다. 이전 워커가 뒤늦게 보낸 결과는 거절합니다.
 - 최초 큐 등록 실패는 SYSTEM_ERROR로 저장하고 503을 반환합니다. 재채점 큐 등록 실패는 복구 작업이 재시도하도록 QUEUED를 유지합니다.
@@ -125,6 +129,7 @@
 | `POST /internal/judge/heartbeat` | 채점 토큰 + 워커 UUID | 워커 생존 상태 갱신 |
 | `GET /internal/judge/submissions/:id` | 채점 토큰 + 세대/시도 ID | 채점 권한 획득, 소스·제한·전체 테스트 반환 |
 | `PATCH /internal/judge/submissions/:id/heartbeat` | 동일 | 제출별 lease 연장 |
+| `PATCH /internal/judge/submissions/:id/release` | 동일 | 실행 서비스 장애로 채점하지 못한 lease 반납. 복구 횟수를 쓰지 않고 다음 세대로 재등록 |
 | `PATCH /internal/judge/submissions/:id/result` | 동일 | 최종 판정 저장과 XP 정산 |
 
 - `X-Judge-Token`을 상수 시간 비교로 인증합니다. 워커는 `X-Judge-Worker`, 채점 시도는 `X-Judge-Generation`·`X-Judge-Attempt`로 구분합니다.
