@@ -1,6 +1,6 @@
 import { Bell } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { api } from "../api";
 import { relativeTime } from "../community/store";
 import { verdictLabel } from "../verdict";
@@ -61,7 +61,6 @@ export function NotificationBell({ token }: { token: string }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
-  const { pathname } = useLocation();
 
   useEffect(() => {
     let timer: number | undefined;
@@ -102,7 +101,6 @@ export function NotificationBell({ token }: { token: string }) {
   useEffect(() => {
     if (open) void load(1);
   }, [open]);
-  useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
