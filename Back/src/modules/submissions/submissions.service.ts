@@ -11,6 +11,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import type { Queue } from 'bullmq';
 import {
   DataSource,
+  IsNull,
   Repository,
   type EntityManager,
   type FindOptionsWhere,
@@ -134,7 +135,8 @@ function canManage(problem: Pick<Problem, 'authorId'>, user: AuthenticatedUser) 
 function resetForRejudge(current: Submission, problem: Problem) {
   // 공개 문제와 검증용 제출은 현재 버전으로 다시 채점한다. 비공개(초안·보관) 문제의 일반 제출은
   // 검수 전 테스트가 다른 사용자의 결과·XP를 바꾸지 않도록 제출 당시 버전을 유지한다.
-  if (problem.status === ProblemStatus.PUBLISHED || current.isTest)
+  // 기업 테스트 응시 제출은 응시 당시 문제로 공정하게 다시 채점한다.
+  if ((problem.status === ProblemStatus.PUBLISHED || current.isTest) && !current.attemptId)
     current.problemVersion = problem.currentVersion;
   current.judgeGeneration += 1;
   current.judgeAttemptId = null;
@@ -177,6 +179,37 @@ export class SubmissionsService {
     const isTest = problem?.status !== ProblemStatus.PUBLISHED;
     if (!problem || (isTest && !canManage(problem, user)))
       throw new NotFoundException('제출할 문제를 찾을 수 없습니다.');
+    return this.submitNew(problemId, problem.currentVersion, isTest, null, dto, user);
+  }
+
+  /** 기업 테스트 응시 중 제출. 응시자 본인이 마감 전에, 그 시험의 문제에만 낼 수 있다. */
+  async createForAttempt(
+    attemptId: string,
+    problemId: string,
+    dto: CreateSubmissionDto,
+    user: AuthenticatedUser,
+  ) {
+    const [row]: { open: boolean; version: number }[] = await this.dataSource.query(
+      `SELECT a.finished_at IS NULL AND a.deadline_at > now() AS open, p.current_version AS version
+         FROM enterprise_attempts a
+         JOIN enterprise_tests t ON t.id = a.test_id
+         JOIN problems p ON p.id = $2
+        WHERE a.id = $1 AND a.user_id = $3 AND $2 = ANY(t.problem_ids)`,
+      [attemptId, problemId, user.id],
+    );
+    if (!row) throw new NotFoundException('제출할 문제를 찾을 수 없습니다.');
+    if (!row.open) throw new ForbiddenException('응시 시간이 끝나 더 제출할 수 없어요.');
+    return this.submitNew(problemId, row.version, true, attemptId, dto, user);
+  }
+
+  private async submitNew(
+    problemId: string,
+    problemVersion: number,
+    isTest: boolean,
+    attemptId: string | null,
+    dto: CreateSubmissionDto,
+    user: AuthenticatedUser,
+  ) {
     const submission = await this.dataSource.transaction(async (manager) => {
       if (user.role !== UserRole.ADMIN) {
         // 같은 계정의 동시 제출을 직렬화해 상한을 넘지 않게 한다.
@@ -199,10 +232,11 @@ export class SubmissionsService {
           userId: user.id,
           language: dto.language,
           sourceCode: dto.sourceCode,
-          problemVersion: problem.currentVersion,
+          problemVersion,
           judgeGeneration: 1,
           status: SubmissionStatus.QUEUED,
           isTest,
+          attemptId,
         }),
       );
     });
@@ -263,16 +297,24 @@ export class SubmissionsService {
       items: page.items.map((item) => toSubmissionResponse(item)),
     };
   }
+  private async canRead(submission: Submission, user: AuthenticatedUser) {
+    if (submission.userId === user.id || user.role === UserRole.ADMIN) return true;
+    if (!submission.attemptId) return canManage(submission.problem, user);
+    const owner: unknown[] = await this.dataSource.query(
+      'SELECT 1 FROM enterprise_attempts a JOIN enterprise_tests t ON t.id = a.test_id WHERE a.id = $1 AND t.owner_id = $2',
+      [submission.attemptId, user.id],
+    );
+    return owner.length > 0;
+  }
+
   async findMineById(id: string, user: AuthenticatedUser) {
     const submission = await this.submissions.findOne({
       where: { id },
       relations: { problem: true },
     });
-    // 남의 제출은 그 문제의 작성자와 관리자만 본다. 존재 여부를 드러내지 않도록 403 대신 404.
-    if (
-      !submission ||
-      (submission.userId !== user.id && !canManage(submission.problem, user))
-    )
+    // 남의 제출은 그 문제의 작성자와 관리자만 본다. 기업 테스트 응시 제출은 문제 작성자 대신
+    // 그 시험을 만든 사람이 본다. 존재 여부를 드러내지 않도록 403 대신 404.
+    if (!submission || !(await this.canRead(submission, user)))
       throw new NotFoundException('제출을 찾을 수 없습니다.');
     const sampleTestCases: {
       testCase: number;
@@ -310,7 +352,8 @@ export class SubmissionsService {
       const problem = await manager.findOneByOrFail(Problem, {
         id: current.problemId,
       });
-      if (!canManage(problem, user))
+      // 기업 테스트 응시 제출은 공개 문제 작성자가 건드리지 못하게 관리자만 다시 채점한다.
+      if (current.attemptId ? user.role !== UserRole.ADMIN : !canManage(problem, user))
         throw new ForbiddenException('재채점 권한이 없습니다.');
       resetForRejudge(current, problem);
       await manager.save(current);
@@ -350,7 +393,8 @@ export class SubmissionsService {
     if (!problem) throw new NotFoundException('문제를 찾을 수 없습니다.');
     if (!canManage(problem, user))
       throw new ForbiddenException('이 문제의 제출을 볼 권한이 없습니다.');
-    const where: FindOptionsWhere<Submission> = { problemId };
+    // 기업 테스트 응시 제출은 공개 문제 작성자에게 보이지 않는다(시험을 만든 사람만 결과에서 본다).
+    const where: FindOptionsWhere<Submission> = { problemId, attemptId: IsNull() };
     if (query.status) where.status = query.status;
     const page = await findListPage(
       this.submissions,
@@ -431,7 +475,8 @@ export class SubmissionsService {
       for (const current of batch) {
         if (
           current.status === SubmissionStatus.QUEUED ||
-          current.status === SubmissionStatus.JUDGING
+          current.status === SubmissionStatus.JUDGING ||
+          current.attemptId
         )
           continue;
         resetForRejudge(current, problem);

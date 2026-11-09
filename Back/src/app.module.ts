@@ -18,6 +18,7 @@ import { ProblemsModule } from './modules/problems/problems.module.js';
 import { SubmissionsModule } from './modules/submissions/submissions.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { UsersModule } from './modules/users/users.module.js';
+import { EnterpriseModule } from './modules/enterprise/enterprise.module.js';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { UsersModule } from './modules/users/users.module.js';
     SubmissionsModule,
     AdminModule,
     UsersModule,
+    EnterpriseModule,
     CommunityModule,
     MissionsModule,
     NotificationsModule,

@@ -109,6 +109,10 @@ export class Submission {
   @Column({ name: 'is_test', type: 'boolean', default: false })
   isTest: boolean;
 
+  // 기업 테스트 응시 중 낸 제출이면 그 응시. 응시 제출은 isTest이기도 하다.
+  @Column({ name: 'attempt_id', type: 'uuid', nullable: true })
+  attemptId: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

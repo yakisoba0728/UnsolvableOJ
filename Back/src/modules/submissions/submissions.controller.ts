@@ -41,6 +41,18 @@ export class SubmissionsController {
     return this.submissionsService.create(problemId, dto, user);
   }
 
+  @Post('enterprise/attempts/:attemptId/problems/:problemId/submissions')
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
+  @HttpCode(HttpStatus.ACCEPTED)
+  createForAttempt(
+    @Param('attemptId', ParseUUIDPipe) attemptId: string,
+    @Param('problemId', ParseUUIDPipe) problemId: string,
+    @Body() dto: CreateSubmissionDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.submissionsService.createForAttempt(attemptId, problemId, dto, user);
+  }
+
   @Get('problems/:problemId/submissions')
   findForProblem(
     @Param('problemId', ParseUUIDPipe) problemId: string,
