@@ -3,16 +3,6 @@ import type { EnterpriseTest } from "../enterprise/model";
 export const deviceTimeZone = () =>
   Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-export function EnterpriseStorageNotice() {
-  return (
-    <p className="local-storage-notice" role="note">
-      기업 테스트는 이 계정의 현재 브라우저에만 저장되며 다른 기기·사용자와
-      공유되지 않습니다. 일정상 상태만 표시하며 실제 응시·결과 수집은 아직
-      제공되지 않습니다.
-    </p>
-  );
-}
-
 export function EnterpriseSchedule({
   test,
   compact = false,

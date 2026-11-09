@@ -146,6 +146,7 @@ export class EnterpriseService {
         throw new ConflictException('응시 기록이 있는 테스트는 삭제할 수 없어요.');
       await manager.query('DELETE FROM enterprise_tests WHERE id = $1', [id]);
     });
+    return { id };
   }
 
   /** 응시자별 문제 정답 여부와 점수. 점수는 맞힌 문제 비율(0~100)이다. */

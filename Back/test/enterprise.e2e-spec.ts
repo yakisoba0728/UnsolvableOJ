@@ -175,7 +175,7 @@ describe('Enterprise tests: server storage, invite link, attempts, results (e2e)
       .expect(200);
     expect(edited.body.title).toBe('예정(수정)');
     await http().patch(`${base}/enterprise/tests/${created.body.id}`).set(bearer(other)).send({ title: 'x' }).expect(404);
-    await http().delete(`${base}/enterprise/tests/${created.body.id}`).set(bearer(owner)).expect(204);
+    await http().delete(`${base}/enterprise/tests/${created.body.id}`).set(bearer(owner)).expect(200);
     await http().get(`${base}/enterprise/tests/${created.body.id}`).set(bearer(owner)).expect(404);
   });
 });

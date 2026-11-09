@@ -53,8 +53,9 @@ export class EnterpriseController {
     return this.enterprise.update(id, dto, user);
   }
 
+  // 웹 api()는 빈 응답을 오류로 보므로 204 대신 지운 id를 돌려준다.
   @Delete('tests/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.enterprise.remove(id, user);
   }

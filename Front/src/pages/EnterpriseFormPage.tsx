@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { DateTimePicker } from "../components/DateTimePicker";
 import { PageHeader } from "../components/PageHeader";
-import { deviceTimeZone, EnterpriseStorageNotice } from "../components/EnterpriseSchedule";
+import { deviceTimeZone } from "../components/EnterpriseSchedule";
 import {
   LIMITS,
   draftToInput,
@@ -14,7 +14,7 @@ import {
   type TestDraft,
   type TestErrors,
 } from "../enterprise/model";
-import { enterpriseActions, useEnterpriseTests } from "../enterprise/store";
+import { enterpriseApi, useEnterpriseTest } from "../enterprise/api";
 import { useDocumentTitle, useEnterpriseProblems } from "../hooks";
 import { difficultyLabel } from "../difficulty";
 
@@ -86,21 +86,33 @@ export function EnterpriseFormPage() {
       </Notice>
     );
   // 계정이나 주소가 바뀔 때만 새 폼을 연다. 다른 탭의 변경으로 작성 중인 입력을 버리지 않는다.
-  return <EnterpriseForm key={`${session.user.id}:${id ?? "new"}`} userId={session.user.id} id={id} />;
+  return <EnterpriseForm key={`${session.user.id}:${id ?? "new"}`} token={session.accessToken} id={id} />;
 }
 
-function EnterpriseForm({ userId, id }: { userId: string; id?: string }) {
-  const tests = useEnterpriseTests(userId);
-  const [opened] = useState(() => {
-    const existing = id ? tests.find((test) => test.id === id) : undefined;
-    return { existing, editable: !existing || testStatus(existing) === "scheduled" };
-  });
-  const { existing, editable } = opened;
+function EnterpriseForm({ token, id }: { token: string; id?: string }) {
+  const { session } = useAuth();
+  const { data: existing, loading, error, retry } = useEnterpriseTest(session, id);
+  const editable = !existing || testStatus(existing) === "scheduled";
+  if (id && loading && !existing)
+    return (
+      <Notice title="테스트 편집">
+        <p role="status">테스트를 불러오는 중…</p>
+      </Notice>
+    );
+  if (id && error && !existing && !/찾을 수 없/.test(error))
+    return (
+      <Notice title="테스트 편집">
+        <strong role="alert">{error}</strong>
+        <button className="button" onClick={retry}>
+          다시 시도
+        </button>
+      </Notice>
+    );
   if (id && !existing)
     return (
       <Notice title="테스트 편집">
         <strong>테스트를 찾을 수 없어요</strong>
-        <p>삭제되었거나 이 브라우저에서 만든 테스트가 아닙니다.</p>
+        <p>삭제되었거나 이 계정이 만든 테스트가 아닙니다.</p>
         <Link className="button" to="/enterprise">
           기업 테스트로 <span aria-hidden="true">→</span>
         </Link>
@@ -116,10 +128,10 @@ function EnterpriseForm({ userId, id }: { userId: string; id?: string }) {
         </Link>
       </Notice>
     );
-  return <TestForm userId={userId} existing={existing} />;
+  return <TestForm token={token} existing={existing ?? undefined} />;
 }
 
-function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseTest }) {
+function TestForm({ token, existing }: { token: string; existing?: EnterpriseTest }) {
   const navigate = useNavigate();
   const { session } = useAuth();
   const { problems, loading, error, privateError } = useEnterpriseProblems(session);
@@ -127,6 +139,7 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
   const [query, setQuery] = useState("");
   const [showErrors, setShowErrors] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [saving, setSaving] = useState(false);
   const errors = showErrors ? validateDraft(draft) : {};
   const patch = (next: Partial<TestDraft>) => setDraft((prev) => ({ ...prev, ...next }));
 
@@ -146,8 +159,9 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
         : [...draft.problemIds, id],
     });
 
-  function submit(event: FormEvent) {
+  async function submit(event: FormEvent) {
     event.preventDefault();
+    if (saving) return;
     setSaveError("");
     setShowErrors(true);
     const found = validateDraft(draft);
@@ -157,19 +171,20 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
       return;
     }
     const input = draftToInput(draft);
-    if (existing) {
-      const error = enterpriseActions.update(userId, existing, input);
-      if (error) {
-        setSaveError(error);
-        return;
-      }
+    setSaving(true);
+    try {
+      const saved = existing
+        ? await enterpriseApi.update(token, existing.id, input)
+        : await enterpriseApi.create(token, input);
+      navigate(`/enterprise/${saved.id}`);
+    } catch (cause) {
+      // 입력은 그대로 두고 서버가 알려 준 이유를 보여 준다.
+      setSaveError(
+        `${cause instanceof Error ? cause.message : "테스트를 저장하지 못했어요."} 입력한 내용은 유지했어요.`,
+      );
+    } finally {
+      setSaving(false);
     }
-    const saved = existing ?? enterpriseActions.create(userId, input);
-    if (!saved) {
-      setSaveError("이 브라우저에 저장하지 못했어요. 입력한 내용은 유지했으니 저장 공간·권한을 확인하고 다시 시도해 주세요.");
-      return;
-    }
-    navigate(`/enterprise/${saved.id}`);
   }
 
   const err = (key: keyof TestErrors) =>
@@ -192,7 +207,6 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
         back={{ to: existing ? `/enterprise/${existing.id}` : "/enterprise", label: existing ? "테스트 상세" : "기업 테스트" }}
       />
       <form className="ent-form" onSubmit={submit} noValidate>
-        <EnterpriseStorageNotice />
         <p className="muted schedule-zone">입력 기준 시간대: {deviceTimeZone()} (이 기기의 현지 시간)</p>
         <div className="ent-form-grid">
           <section className="form-card ent-card" aria-labelledby="ent-basic">
@@ -369,8 +383,8 @@ function TestForm({ userId, existing }: { userId: string; existing?: EnterpriseT
           >
             취소
           </Link>
-          <button className="button" type="submit">
-            {existing ? "변경 저장" : "테스트 만들기"}
+          <button className="button" type="submit" disabled={saving}>
+            {saving ? "저장하는 중…" : existing ? "변경 저장" : "테스트 만들기"}
           </button>
         </div>
       </form>

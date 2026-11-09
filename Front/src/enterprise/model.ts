@@ -8,8 +8,59 @@ export interface EnterpriseTest {
   durationMin: number;
   /** 출제 순서대로의 문제 id */
   problemIds: string[];
+  /** 응시 링크 코드: /enterprise/join/:code */
+  inviteCode: string;
+  attemptCount: number;
   createdAt: string;
   updatedAt: string;
+}
+
+/** 응시자가 링크에서 보는 정보 */
+export interface PublicTest {
+  title: string;
+  description: string;
+  startsAt: string;
+  endsAt: string;
+  durationMin: number;
+  problemCount: number;
+}
+
+export interface Attempt {
+  id: string;
+  startedAt: string;
+  deadlineAt: string;
+  finishedAt: string | null;
+}
+
+export interface AttemptProblem {
+  id: string;
+  title: string;
+  difficulty: string;
+  statementMarkdown: string;
+  inputDescriptionMarkdown: string;
+  outputDescriptionMarkdown: string;
+  timeLimitMs: number;
+  memoryLimitMb: number;
+  samples: { input: string; expectedOutput: string }[];
+  solved: boolean;
+  lastSubmissionId: string | null;
+  lastStatus: string | null;
+}
+
+export interface AttemptView extends Attempt {
+  test: PublicTest;
+  problems: AttemptProblem[];
+}
+
+export interface TestResults {
+  test: EnterpriseTest;
+  summary: { candidates: number; averageScore: number | null; perfect: number };
+  candidates: (Attempt & {
+    user: { id: string; username: string };
+    problems: { problemId: string; solved: boolean; submissions: number; submissionId: string }[];
+    solved: number;
+    score: number;
+  })[];
 }
 
 export type TestStatus = "scheduled" | "running" | "closed";

@@ -7543,7 +7543,8 @@ textarea {
 }
 .ent-problem-list li {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) auto auto auto;
+  /* 번호·제목 뒤에 기업 전용 배지·난이도·제한·보기 버튼이 붙는다(배지는 없을 수 있음). */
+  grid-template-columns: 28px minmax(0, 1fr) repeat(4, auto);
   align-items: center;
   gap: 12px;
   padding: 14px 0;
@@ -7584,7 +7585,7 @@ textarea {
     grid-template-columns: minmax(0, 1fr);
   }
   .ent-problem-list li {
-    grid-template-columns: 28px minmax(0, 1fr) auto auto;
+    grid-template-columns: 28px minmax(0, 1fr) repeat(3, auto);
   }
   .ent-problem-list small {
     display: none;
@@ -8203,4 +8204,96 @@ label.check-row input[type="checkbox"] {
   max-width: min(100%, 46ch);
   margin-inline: auto;
   text-align: left;
+}
+
+/* 기업 테스트: 응시 현황·링크·결과, 응시 화면 */
+.ent-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.ent-summary dt {
+  color: var(--color-ink-400);
+  font-size: 13px;
+}
+.ent-summary dd {
+  margin: 4px 0 0;
+  font-weight: var(--weight-title);
+}
+.ent-invite {
+  margin: 0 0 8px;
+}
+.ent-invite code {
+  display: block;
+  overflow-wrap: anywhere;
+  font: 13px var(--font-mono);
+}
+.ent-results {
+  margin-top: 24px;
+}
+.ent-result-table {
+  width: 100%;
+}
+.verdict-good {
+  color: var(--color-success);
+}
+.verdict-bad {
+  color: var(--color-danger);
+}
+.ent-join {
+  align-items: flex-start;
+  text-align: left;
+}
+.ent-join .ent-summary {
+  width: 100%;
+}
+/* 빈 상태 문단은 가운데로 모이므로, 왼쪽 정렬된 응시 안내에서는 왼쪽에 붙인다. */
+.ent-join p {
+  margin-inline: 0;
+  max-width: 60ch;
+}
+.ent-timer {
+  margin: 0;
+  font: 600 16px var(--font-mono);
+  white-space: nowrap;
+}
+.ent-timer-low {
+  color: var(--color-danger);
+}
+.ent-attempt-tabs {
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.ent-attempt-tabs .tab-button[aria-current="true"] {
+  border-color: currentColor;
+  font-weight: var(--weight-title);
+}
+.ent-solved {
+  color: var(--color-success);
+}
+.ent-attempt-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.ent-attempt-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 480px;
+}
+.ent-attempt-editor > :nth-child(2) {
+  flex: 1;
+}
+.ent-verdict {
+  margin: 0;
+  font-size: 14px;
+}
+@media (max-width: 900px) {
+  .ent-attempt-grid,
+  .ent-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

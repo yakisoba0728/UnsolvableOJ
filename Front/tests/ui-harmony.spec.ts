@@ -401,7 +401,7 @@ test("a stopped poll keeps the last result and manual retry only reads without r
   expect(writes).toEqual([]);
 });
 
-test("enterprise discloses local storage and exact dates while keeping the compact summary", async ({
+test("enterprise shows exact dates and the time zone while keeping the compact summary", async ({
   page,
 }) => {
   const record = {
@@ -412,21 +412,15 @@ test("enterprise discloses local storage and exact dates while keeping the compa
     endsAt: "2026-12-03T14:30:00Z",
     durationMin: 60,
     problemIds: [problem.id],
+    inviteCode: "invite-code-0001",
+    attemptCount: 0,
     createdAt: now.toISOString(),
     updatedAt: now.toISOString(),
   };
-  await page.addInitScript(
-    (record) =>
-      localStorage.setItem(
-        "unsolvable-oj-enterprise-v1",
-        JSON.stringify({ solver: [record] }),
-      ),
-    record,
-  );
+  // 기업 테스트는 서버에 저장되므로 목록·상세 API를 흉내 낸다.
+  await page.route("**/api/v1/enterprise/tests", (route) => route.fulfill({ json: [record] }));
+  await page.route("**/api/v1/enterprise/tests/schedule", (route) => route.fulfill({ json: record }));
   await page.goto("/enterprise");
-  await expect(page.locator(".local-storage-notice")).toContainText(
-    "다른 기기·사용자와 공유되지 않습니다",
-  );
   await expect(page.locator(".ent-period > span")).not.toContainText(
     /\d{2}:\d{2}/,
   );

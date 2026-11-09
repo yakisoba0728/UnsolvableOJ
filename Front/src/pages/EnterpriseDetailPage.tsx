@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
-import { EnterpriseSchedule, EnterpriseStorageNotice } from "../components/EnterpriseSchedule";
+import { CopyButton } from "../components/CopyButton";
+import { EnterpriseSchedule } from "../components/EnterpriseSchedule";
 import {
   formatEnd,
   formatPeriod,
@@ -12,7 +13,7 @@ import {
   statusPillClass,
   testStatus,
 } from "../enterprise/model";
-import { enterpriseActions, useEnterpriseTests } from "../enterprise/store";
+import { enterpriseApi, inviteUrl, useEnterpriseTest, useTestResults } from "../enterprise/api";
 import { useEnterpriseProblems, useDocumentTitle, useNow } from "../hooks";
 import { problemPath } from "../paths";
 import { difficultyLabel } from "../difficulty";
@@ -32,9 +33,9 @@ export function EnterpriseDetailPage() {
   const navigate = useNavigate();
   const [saveError, setSaveError] = useState("");
   const now = useNow(10_000);
-  const tests = useEnterpriseTests(session?.user.id);
+  const { data: test, loading: testLoading, error: testError, retry } = useEnterpriseTest(session, id);
   const { problems, loading } = useEnterpriseProblems(session);
-  const test = tests.find((item) => item.id === id);
+  const results = useTestResults(session, id, Boolean(test?.attemptCount));
   useDocumentTitle(test?.title ?? "테스트 상세");
 
   if (!session)
@@ -46,11 +47,26 @@ export function EnterpriseDetailPage() {
         </Link>
       </Missing>
     );
+  if (!test && testLoading)
+    return (
+      <Missing>
+        <p role="status">테스트를 불러오는 중…</p>
+      </Missing>
+    );
+  if (!test && testError && !/찾을 수 없/.test(testError))
+    return (
+      <Missing>
+        <strong role="alert">{testError}</strong>
+        <button className="button" onClick={retry}>
+          다시 시도
+        </button>
+      </Missing>
+    );
   if (!test)
     return (
       <Missing>
         <strong>테스트를 찾을 수 없어요</strong>
-        <p>삭제되었거나 이 브라우저에서 만든 테스트가 아닙니다.</p>
+        <p>삭제되었거나 이 계정이 만든 테스트가 아닙니다.</p>
         <Link className="button" to="/enterprise">
           기업 테스트로 <span aria-hidden="true">→</span>
         </Link>
@@ -66,19 +82,22 @@ export function EnterpriseDetailPage() {
         ? `마감까지 ${remainingText(Date.parse(test.endsAt) - now)}`
         : `${formatEnd(test)}에 마감됐어요`;
 
-  function remove() {
+  async function remove() {
     if (
       !window.confirm(
         `‘${test!.title}’ 테스트를 삭제할까요? 삭제하면 되돌릴 수 없어요.`,
       )
     )
       return;
-    if (!enterpriseActions.remove(session!.user.id, test!.id)) {
-      setSaveError("테스트를 삭제하지 못했어요. 저장 공간·권한을 확인하고 다시 시도해 주세요.");
-      return;
+    try {
+      await enterpriseApi.remove(session!.accessToken, test!.id);
+      navigate("/enterprise");
+    } catch (cause) {
+      setSaveError(cause instanceof Error ? cause.message : "테스트를 삭제하지 못했어요.");
     }
-    navigate("/enterprise");
   }
+  const link = inviteUrl(test.inviteCode);
+  const summary = results.data?.summary;
 
   return (
     <div className="page-width enterprise-page">
@@ -95,15 +114,18 @@ export function EnterpriseDetailPage() {
                 편집
               </Link>
             ) : null}
-            <button className="button button-outline ent-danger" onClick={remove}>
-              삭제
-            </button>
+            {/* 응시 기록이 있으면 서버가 삭제를 거절하므로 버튼을 두지 않는다. */}
+            {test.attemptCount === 0 ? (
+              <button className="button button-outline ent-danger" onClick={() => void remove()}>
+                삭제
+              </button>
+            ) : null}
           </div>
         }
       />
 
       <div className="ent-detail-grid">
-        <div className="ent-schedule-detail"><EnterpriseStorageNotice /><EnterpriseSchedule test={test} /></div>
+        <div className="ent-schedule-detail"><EnterpriseSchedule test={test} /></div>
         <section className="form-card ent-card" aria-labelledby="ent-problems-title">
           <div className="ent-pick-head">
             <h2 id="ent-problems-title">출제 문제</h2>
@@ -157,8 +179,30 @@ export function EnterpriseDetailPage() {
           <section className="form-card ent-card" aria-labelledby="ent-status-title">
             <h2 id="ent-status-title">응시 현황</h2>
             <p className="ent-time">{timeLine}</p>
+            <dl className="ent-summary">
+              <div>
+                <dt>응시자</dt>
+                <dd>{test.attemptCount}명</dd>
+              </div>
+              <div>
+                <dt>평균 점수</dt>
+                <dd>{summary?.averageScore != null ? `${summary.averageScore}점` : "—"}</dd>
+              </div>
+              <div>
+                <dt>전부 맞힌 사람</dt>
+                <dd>{summary ? `${summary.perfect}명` : "—"}</dd>
+              </div>
+            </dl>
+          </section>
+          <section className="form-card ent-card" aria-labelledby="ent-invite-title">
+            <h2 id="ent-invite-title">응시 링크</h2>
+            <p className="ent-invite">
+              <code>{link}</code>
+            </p>
+            <CopyButton text={link} label="링크 복사" />
             <p className="muted ent-note">
-              응시자 수·점수·합격률은 응시 기능이 열린 뒤 이곳에 표시됩니다.
+              로그인한 사람은 누구나 이 링크로 한 번 응시할 수 있어요. 응시
+              기간 안에 시작하면 그때부터 {test.durationMin}분이 주어집니다.
             </p>
           </section>
           {test.description ? (
@@ -169,6 +213,81 @@ export function EnterpriseDetailPage() {
           ) : null}
         </aside>
       </div>
+
+      <section className="form-card ent-card ent-results" aria-labelledby="ent-results-title">
+        <div className="ent-pick-head">
+          <h2 id="ent-results-title">응시 결과</h2>
+          {results.data ? (
+            <button className="button button-outline button-small" onClick={results.retry}>
+              새로고침
+            </button>
+          ) : null}
+        </div>
+        {!test.attemptCount ? (
+          <p className="muted">아직 응시한 사람이 없어요. 응시 링크를 보내 보세요.</p>
+        ) : results.error && !results.data ? (
+          <p className="error-message" role="alert">
+            {results.error}{" "}
+            <button className="text-button" onClick={results.retry}>
+              다시 시도
+            </button>
+          </p>
+        ) : !results.data ? (
+          <p className="muted" role="status">결과를 불러오는 중…</p>
+        ) : (
+          <table className="ent-table ent-result-table">
+            <thead>
+              <tr>
+                <th scope="col">응시자</th>
+                <th scope="col">점수</th>
+                {test.problemIds.map((problemId, index) => (
+                  <th scope="col" key={problemId}>
+                    {index + 1}번
+                  </th>
+                ))}
+                <th scope="col">상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              {results.data.candidates.map((candidate) => {
+                const byProblem = new Map(candidate.problems.map((item) => [item.problemId, item]));
+                const done = candidate.finishedAt || Date.parse(candidate.deadlineAt) <= now;
+                return (
+                  <tr key={candidate.id}>
+                    <td>
+                      <Link to={`/users/${candidate.user.username}`}>{candidate.user.username}</Link>
+                    </td>
+                    <td>
+                      <strong>{candidate.score}점</strong>
+                      <small className="muted"> ({candidate.solved}/{test.problemIds.length})</small>
+                    </td>
+                    {test.problemIds.map((problemId, index) => {
+                      const item = byProblem.get(problemId);
+                      return (
+                        <td key={problemId}>
+                          {item ? (
+                            <Link
+                              to={`/submissions/${item.submissionId}`}
+                              aria-label={`${candidate.user.username} ${index + 1}번 제출 보기`}
+                              className={item.solved ? "verdict-good" : "verdict-bad"}
+                            >
+                              {item.solved ? "정답" : "미해결"}
+                              <small className="muted"> · {item.submissions}회</small>
+                            </Link>
+                          ) : (
+                            <span className="muted">미제출</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td>{done ? "종료" : "응시 중"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </section>
     </div>
   );
 }

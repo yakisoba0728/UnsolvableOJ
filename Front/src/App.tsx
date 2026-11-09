@@ -35,6 +35,8 @@ const CommunityPostPage = lazyPage(() => import("./pages/CommunityPostPage"), "C
 const CommunityWritePage = lazyPage(() => import("./pages/CommunityWritePage"), "CommunityWritePage");
 const CreateProblemPage = lazyPage(() => import("./pages/CreateProblemPage"), "CreateProblemPage");
 const EnterpriseDetailPage = lazyPage(() => import("./pages/EnterpriseDetailPage"), "EnterpriseDetailPage");
+const EnterpriseJoinPage = lazyPage(() => import("./pages/EnterpriseJoinPage"), "EnterpriseJoinPage");
+const EnterpriseAttemptPage = lazyPage(() => import("./pages/EnterpriseAttemptPage"), "EnterpriseAttemptPage");
 const EnterpriseFormPage = lazyPage(() => import("./pages/EnterpriseFormPage"), "EnterpriseFormPage");
 const EnterprisePage = lazyPage(() => import("./pages/EnterprisePage"), "EnterprisePage");
 const MissionsPage = lazyPage(() => import("./pages/MissionsPage"), "MissionsPage");
@@ -171,6 +173,8 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               <Route path="/enterprise" element={<EnterprisePage />} />
               <Route path="/enterprise/new" element={session ? <EnterpriseFormPage key={session.user.id} /> : loginRedirect} />
               <Route path="/enterprise/:id" element={<EnterpriseDetailPage />} />
+              <Route path="/enterprise/join/:code" element={<EnterpriseJoinPage />} />
+              <Route path="/enterprise/attempts/:id" element={<EnterpriseAttemptPage />} />
               <Route path="/enterprise/:id/edit" element={session ? <EnterpriseFormPage key={`${session.user.id}:${pathname}`} /> : loginRedirect} />
               <Route
                 path="/submissions"

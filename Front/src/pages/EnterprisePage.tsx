@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
-import { EnterpriseSchedule, EnterpriseStorageNotice } from "../components/EnterpriseSchedule";
+import { EnterpriseSchedule } from "../components/EnterpriseSchedule";
 import {
   formatPeriod,
   formatStart,
@@ -13,7 +13,7 @@ import {
   type EnterpriseTest,
   type TestStatus,
 } from "../enterprise/model";
-import { useEnterpriseTests } from "../enterprise/store";
+import { useEnterpriseTests } from "../enterprise/api";
 import { useDocumentTitle, useNow } from "../hooks";
 
 function periodCell(test: EnterpriseTest, status: TestStatus, now: number) {
@@ -26,9 +26,12 @@ export function EnterprisePage() {
   useDocumentTitle("기업 테스트");
   const { session } = useAuth();
   const now = useNow();
-  const tests = sortTests(useEnterpriseTests(session?.user.id), now);
+  const { data, loading, error, retry } = useEnterpriseTests(session);
+  const tests = sortTests(data, now);
   const running = tests.filter((test) => testStatus(test, now) === "running").length;
   const scheduled = tests.filter((test) => testStatus(test, now) === "scheduled").length;
+  const closed = tests.length - running - scheduled;
+  const candidates = tests.reduce((sum, test) => sum + test.attemptCount, 0);
 
   const create = session ? (
     <Link className="button" to="/enterprise/new">
@@ -40,21 +43,31 @@ export function EnterprisePage() {
     <div className="page-width enterprise-page">
       <PageHeader
         title="기업 코드 테스트"
-        description="문제와 일정을 이 브라우저에서 구성합니다. 실제 응시·결과 수집은 준비 중입니다."
+        description="문제와 일정을 정하고 응시 링크를 보내면, 응시자의 풀이와 점수를 모아 볼 수 있어요."
         aside={create}
       />
-      <EnterpriseStorageNotice />
 
       {!session ? (
         <div className="empty-state ent-empty">
           <strong>로그인하고 코드 테스트를 만들어 보세요</strong>
           <p>
             공개된 문제 중에서 문제를 고르고, 응시 기간과 제한 시간을 정해
-            테스트 구성을 이 브라우저에 저장할 수 있어요.
+            응시 링크로 지원자에게 보낼 수 있어요.
           </p>
           <Link className="button" to="/auth" state={{ from: "/enterprise" }}>
             로그인하기 <span aria-hidden="true">→</span>
           </Link>
+        </div>
+      ) : error && !data.length ? (
+        <div className="empty-state ent-empty" role="alert">
+          <strong>{error}</strong>
+          <button className="button" onClick={retry}>
+            다시 시도
+          </button>
+        </div>
+      ) : loading && !data.length ? (
+        <div className="empty-state ent-empty" role="status">
+          테스트를 불러오는 중…
         </div>
       ) : tests.length === 0 ? (
         <div className="empty-state ent-empty">
@@ -77,18 +90,13 @@ export function EnterprisePage() {
             </div>
             <div className="stat-tile">
               <small>총 응시자</small>
-              <strong>—</strong>
-              <span>응시 기능 연동 후</span>
+              <strong>{candidates}</strong>
+              <span>모든 테스트 합계</span>
             </div>
             <div className="stat-tile">
-              <small>평균 점수</small>
-              <strong>—</strong>
-              <span>응시 기능 연동 후</span>
-            </div>
-            <div className="stat-tile">
-              <small>합격률</small>
-              <strong>—</strong>
-              <span>응시 기능 연동 후</span>
+              <small>마감된 테스트</small>
+              <strong>{closed}</strong>
+              <span>상세에서 결과 확인</span>
             </div>
           </div>
 
@@ -96,7 +104,7 @@ export function EnterprisePage() {
             <div className="section-heading compact">
               <h2 id="ent-recent">최근 테스트</h2>
               <span className="muted">
-                {tests.length}건 · 지표는 전체 테스트 집계 기준
+                {tests.length}건
               </span>
             </div>
             <table className="ent-table">
@@ -117,7 +125,9 @@ export function EnterprisePage() {
                         <Link className="ent-name" to={`/enterprise/${test.id}`}>
                           {test.title}
                         </Link>
-                        <small>{metaLine(test)}</small>
+                        <small>
+                          {metaLine(test)} · 응시 {test.attemptCount}명
+                        </small>
                       </td>
                       <td className="ent-period">{periodCell(test, status, now)}<EnterpriseSchedule test={test} compact /></td>
                       <td>
@@ -144,8 +154,8 @@ export function EnterprisePage() {
               </tbody>
             </table>
             <p className="mission-note">
-              예정된 테스트는 편집할 수 있고, 시작된 테스트는 상세에서 출제
-              문제와 기간을 확인할 수 있습니다.
+              예정된 테스트는 편집할 수 있어요. 응시 링크와 응시 결과는 상세
+              화면에서 확인합니다.
             </p>
           </section>
         </>
