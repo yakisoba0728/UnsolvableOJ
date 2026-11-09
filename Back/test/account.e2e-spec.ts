@@ -76,7 +76,7 @@ describe('Account (e2e)', () => {
     await http().get(`${base}/users/nobody_${suffix}`).expect(404);
   });
 
-  it('pages rankings with the same rank as /users/me and keeps the default top-100 array', async () => {
+  it('pages rankings with rank numbers and keeps the default top-100 array', async () => {
     await db.query(
       `INSERT INTO users(email, username, password_hash, xp)
        SELECT 'rk' || n || '-' || $1 || '@example.com', 'rk' || n || '_' || $1, 'x', 10 - n
