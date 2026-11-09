@@ -852,6 +852,21 @@ input::placeholder, textarea::placeholder { color: var(--color-ink-600); opacity
   font-family: "JetBrains Mono", monospace;
   font-size: 13px;
 }
+.sample-grid label.case-file {
+  display: inline-block;
+  align-self: flex-start;
+  color: var(--color-primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+.case-file:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.case-file-error {
+  grid-column: 1 / -1;
+  margin: 0;
+}
 .continue-card {
   border: 1px solid var(--color-border);
   display: flex;

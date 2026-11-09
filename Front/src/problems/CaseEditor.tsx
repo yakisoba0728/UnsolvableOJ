@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { SlideToggle } from "../components/SlideToggle";
 import type { CaseAction, CaseForm } from "./editor";
 
@@ -5,6 +6,9 @@ const caseKindOptions = [
   { value: "sample", label: "예제" },
   { value: "hidden", label: "숨김" },
 ];
+
+// 서버의 테스트케이스 입력·기대 출력 최대 길이(1,000,000자). 바이트는 글자 수 이상이라 이 크기 안이면 넘지 않는다.
+const MAX_CASE_FILE_BYTES = 1_000_000;
 
 const lineCount = (text: string) =>
   text ? text.replace(/\n$/, "").split("\n").length : 0;
@@ -23,6 +27,38 @@ export function CaseEditor({
   onEdit: (action: CaseAction) => void;
 }) {
   const kind = testCase.isSample ? "sample" : "hidden";
+  const [fileError, setFileError] = useState("");
+
+  async function loadFile(field: "input" | "expectedOutput", file?: File) {
+    if (!file) return;
+    if (file.size > MAX_CASE_FILE_BYTES) {
+      setFileError(`${file.name} 파일이 1MB(1,000,000바이트)를 넘어 불러오지 않았어요.`);
+      return;
+    }
+    try {
+      const text = await file.text();
+      setFileError("");
+      onEdit({ type: "update", key: testCase.key, change: { [field]: text } });
+    } catch {
+      setFileError(`${file.name} 파일을 읽지 못했어요. 기존 내용은 그대로예요.`);
+    }
+  }
+  const fileLoader = (field: "input" | "expectedOutput", name: string) => (
+    <label className="case-file">
+      파일에서 불러오기
+      <input
+        type="file"
+        className="sr-only"
+        accept=".in,.out,.ans,.txt,text/plain"
+        aria-label={`테스트 ${index + 1} ${name} 파일에서 불러오기`}
+        onChange={(event) => {
+          void loadFile(field, event.target.files?.[0]);
+          // 같은 파일을 다시 골라도 불러오도록 비운다.
+          event.target.value = "";
+        }}
+      />
+    </label>
+  );
   return (
     <div
       className={`case-editor ${kind}`}
@@ -132,6 +168,7 @@ export function CaseEditor({
             <span className="field-help">
               {lineCount(testCase.input)}줄
             </span>
+            {fileLoader("input", "입력")}
           </div>
           <div className="code-field">
             <label>
@@ -161,7 +198,13 @@ export function CaseEditor({
                 {lineCount(testCase.expectedOutput)}줄
               </span>
             )}
+            {fileLoader("expectedOutput", "기대 출력")}
           </div>
+          {fileError ? (
+            <p className="field-error case-file-error" role="alert">
+              {fileError}
+            </p>
+          ) : null}
         </div>
       )}
     </div>

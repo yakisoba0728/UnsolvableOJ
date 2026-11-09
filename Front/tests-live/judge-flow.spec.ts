@@ -39,7 +39,7 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
   await page.getByLabel("입력 설명").fill("두 정수 a, b");
   await page.getByLabel("출력 설명").fill("a + b");
   await page.getByLabel("입력", { exact: true }).fill("1 2");
-  await page.getByLabel("기대 출력").fill("3");
+  await page.getByLabel("기대 출력", { exact: true }).fill("3");
   await page.getByRole("button", { name: "+ 숨김 케이스 추가", exact: true }).click();
   await page.getByRole("textbox", { name: "입력", exact: true }).nth(1).fill("5 7");
   await page.getByRole("textbox", { name: "기대 출력", exact: true }).nth(1).fill("12");

@@ -187,7 +187,7 @@ for (const role of ["AUTHOR", "ADMIN"] as const) {
     await page.getByLabel("입력 설명").fill("두 정수");
     await page.getByLabel("출력 설명").fill("합");
     await page.getByLabel("입력", { exact: true }).fill("1 2");
-    await page.getByLabel("기대 출력").fill("3");
+    await page.getByLabel("기대 출력", { exact: true }).fill("3");
     expect((await slugChecked).status()).toBe(404);
     await page
       .getByRole("button", {
@@ -266,6 +266,35 @@ test.describe("problem editor", () => {
       .click();
     await expect(page.getByText("예제 1개", { exact: true })).toBeVisible();
     await expect(page.getByText("숨김 1개", { exact: true })).toBeVisible();
+  });
+
+  test("a test case's input and expected output can be loaded from text files within the size limit", async ({
+    page,
+  }) => {
+    await authenticate(page, "AUTHOR");
+    await page.goto("/problems/new");
+    const file = (name: string, text: string) => ({
+      name,
+      mimeType: "text/plain",
+      buffer: Buffer.from(text),
+    });
+    await page
+      .getByLabel("테스트 1 입력 파일에서 불러오기")
+      .setInputFiles(file("1.in", "3 4\n"));
+    await page
+      .getByLabel("테스트 1 기대 출력 파일에서 불러오기")
+      .setInputFiles(file("1.out", "7\n"));
+    const [input, output] = [0, 1].map((at) => page.locator(".case-editor textarea").nth(at));
+    await expect(input).toHaveValue("3 4\n");
+    await expect(output).toHaveValue("7\n");
+
+    await page
+      .getByLabel("테스트 1 입력 파일에서 불러오기")
+      .setInputFiles(file("big.in", "x".repeat(1_000_001)));
+    await expect(page.getByRole("alert")).toHaveText(
+      "big.in 파일이 1MB(1,000,000바이트)를 넘어 불러오지 않았어요.",
+    );
+    await expect(input).toHaveValue("3 4\n");
   });
 
   test("the form opens and autosaves without crypto.randomUUID (plain HTTP)", async ({
