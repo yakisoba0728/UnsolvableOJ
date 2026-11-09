@@ -7686,3 +7686,11 @@ textarea {
   flex: none;
   white-space: nowrap;
 }
+
+/* 라이트/다크 전환: 테마를 바꿀 때 화면 전체가 서서히 겹쳐 바뀐다(View Transitions, src/theme.ts). */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.45s;
+  animation-timing-function: ease;
+}

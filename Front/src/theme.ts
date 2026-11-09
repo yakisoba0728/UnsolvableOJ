@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 
 export type Theme = "light" | "dark";
 
@@ -55,6 +56,21 @@ export function useTheme() {
       localStorage.setItem(storageKey, next);
     } catch {
       /* 저장소를 쓸 수 없어도 이번 방문에는 적용한다 */
+    }
+    // 화면을 통째로 크로스페이드한다(요소마다 전환을 걸면 상속되는 글자색이 겹쳐 깜빡인다).
+    // 지원하지 않거나 모션 줄이기 설정이면 바로 바꾼다.
+    const start = (
+      document as Document & {
+        startViewTransition?: (update: () => void) => unknown;
+      }
+    ).startViewTransition?.bind(document);
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    // 상태 갱신을 콜백 안에서 끝내야 브라우저가 바뀌기 전 화면을 캡처한다.
+    if (start && !reduce) {
+      start(() => flushSync(() => setTheme(next)));
+      return;
     }
     setTheme(next);
   }, [theme]);
