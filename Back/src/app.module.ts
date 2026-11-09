@@ -6,9 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { Redis } from 'ioredis';
 import { databaseConnectionOptions } from './config/database.config.js';
 import { envValidationSchema } from './config/env.validation.js';
 import { redisConnection } from './config/redis.config.js';
+import { RedisThrottlerStorage } from './config/redis-throttler.storage.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { ProblemsModule } from './modules/problems/problems.module.js';
@@ -40,7 +42,14 @@ import { UsersModule } from './modules/users/users.module.js';
         connection: redisConnection(config),
       }),
     }),
-    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 100 }]),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        throttlers: [{ name: 'default', ttl: 60_000, limit: 100 }],
+        storage: new RedisThrottlerStorage(new Redis(redisConnection(config))),
+      }),
+    }),
     AuthModule,
     HealthModule,
     ProblemsModule,
