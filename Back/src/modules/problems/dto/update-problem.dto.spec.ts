@@ -32,6 +32,49 @@ describe('Problem DTO validation', () => {
     },
   );
 
+  it('trims tags and defaults tags/editorial on create only', async () => {
+    const created = await pipe.transform(
+      {
+        slug: 'tagged',
+        title: 'Tagged',
+        statementMarkdown: '',
+        inputDescriptionMarkdown: '',
+        outputDescriptionMarkdown: '',
+        difficulty: 'BEGINNER',
+        testCases: [{ input: '', expectedOutput: '', isSample: true }],
+      },
+      { type: 'body', metatype: CreateProblemDto },
+    );
+    expect(created).toMatchObject({ tags: [], editorialMarkdown: '' });
+    const updated = await pipe.transform(
+      { tags: [' 수학 ', '그래프'], editorialMarkdown: '# 해설' },
+      { type: 'body', metatype: UpdateProblemDto },
+    );
+    expect(updated).toEqual({
+      tags: ['수학', '그래프'],
+      editorialMarkdown: '# 해설',
+    });
+  });
+
+  it.each([
+    { name: 'null tags', body: { tags: null } },
+    { name: 'non-array tags', body: { tags: '수학' } },
+    { name: 'blank tag', body: { tags: ['  '] } },
+    { name: 'long tag', body: { tags: ['가'.repeat(31)] } },
+    { name: 'too many tags', body: { tags: Array.from({ length: 11 }, (_, i) => `t${i}`) } },
+    { name: 'duplicate after trim', body: { tags: ['dp', ' dp'] } },
+    { name: 'non-string tag', body: { tags: [1] } },
+    { name: 'NUL tag', body: { tags: ['a\0b'] } },
+    { name: 'unpaired surrogate tag', body: { tags: ['a\uD800'] } },
+    { name: 'null editorial', body: { editorialMarkdown: null } },
+    { name: 'long editorial', body: { editorialMarkdown: 'a'.repeat(100_001) } },
+    { name: 'NUL editorial', body: { editorialMarkdown: 'a\0' } },
+  ])('rejects $name', async ({ body }) => {
+    await expect(
+      pipe.transform(body, { type: 'body', metatype: UpdateProblemDto }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
   it('rejects a null status instead of overwriting the DRAFT default', async () => {
     await expect(
       pipe.transform(

@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMinSize,
   ArrayMaxSize,
+  ArrayUnique,
   IsArray,
   IsBoolean,
   IsEnum,
@@ -64,6 +65,24 @@ export class ProblemContentDto {
   @IsPostgresText()
   outputDescriptionMarkdown: string;
 
+  @IsString()
+  @MaxLength(100_000)
+  @IsPostgresText()
+  editorialMarkdown: string;
+
+  @Transform(({ value }: { value: unknown }) =>
+    Array.isArray(value)
+      ? value.map((tag: unknown) => (typeof tag === 'string' ? tag.trim() : tag))
+      : value,
+  )
+  @IsArray()
+  @ArrayMaxSize(10)
+  @ArrayUnique()
+  @IsString({ each: true })
+  @Length(1, 30, { each: true })
+  @IsPostgresText({ each: true })
+  tags: string[];
+
   @IsEnum(ProblemDifficulty)
   difficulty: ProblemDifficulty;
 
@@ -99,4 +118,6 @@ export class CreateProblemDto extends ProblemContentDto {
 
   override timeLimitMs = 1000;
   override memoryLimitMb = 256;
+  override editorialMarkdown = '';
+  override tags: string[] = [];
 }

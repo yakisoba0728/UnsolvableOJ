@@ -36,8 +36,9 @@ import {
   type SplitState,
 } from "../solveSplit";
 import { difficultyLabel } from "../difficulty";
+import { fetchAll } from "../pagination";
 
-type Tab = "statement" | "history";
+type Tab = "statement" | "history" | "editorial";
 
 const fontKey = "unsolvable-oj-editor-font-v1";
 const FONT_MIN = 11;
@@ -93,6 +94,9 @@ function OwnedProblemPage() {
   const [tab, setTab] = useState<Tab>("statement");
   const [history, setHistory] = useState<Submission[] | null>(null);
   const [historyFailed, setHistoryFailed] = useState(false);
+  // 해설: 푼 문제면 바로 보여 주고, 아니면 '스포일러 보기'를 누른 문제만 보여 준다.
+  const [solved, setSolved] = useState<boolean | null>(null);
+  const [revealedFor, setRevealedFor] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   // 불러온 초안은 저장 시각을 모른다(이번에 저장하기 전까지 시각 없이 표시).
   const [draftLoaded, setDraftLoaded] = useState(false);
@@ -229,7 +233,29 @@ function OwnedProblemPage() {
   }, [tab, session, problem, finishedId]);
 
   useEffect(() => {
+    if (tab !== "editorial" || !problem) return;
+    if (!session) {
+      setSolved(false);
+      return;
+    }
+    const controller = new AbortController();
+    setSolved(null);
+    fetchAll<Submission>(
+      `/submissions?problemId=${problem.id}`,
+      controller.signal,
+      session.accessToken,
+    )
+      .then((items) =>
+        setSolved(items.some((item) => item.status === "ACCEPTED")),
+      )
+      // 확인하지 못하면 안 푼 것으로 보고 스포일러 확인을 거친다.
+      .catch(() => !controller.signal.aborted && setSolved(false));
+    return () => controller.abort();
+  }, [tab, session, problem, finishedId]);
+
+  useEffect(() => {
     setSubmissionId(null);
+    setTab((current) => (current === "editorial" ? "statement" : current));
     const controller = new AbortController();
     setError("");
     setProblem(null);
@@ -440,6 +466,18 @@ function OwnedProblemPage() {
             >
               제출 내역
             </button>
+            {problem.editorialMarkdown ? (
+              <button
+                role="tab"
+                id="problem-tab-editorial"
+                aria-selected={tab === "editorial"}
+                aria-controls={tab === "editorial" ? "problem-tabpanel" : undefined}
+                className={`tab-button ${tab === "editorial" ? "active" : ""}`}
+                onClick={() => setTab("editorial")}
+              >
+                해설
+              </button>
+            ) : null}
           </div>
           {tab === "statement" ? (
             <article
@@ -458,7 +496,30 @@ function OwnedProblemPage() {
                 <span>
                   <strong>예제</strong> {problem.samples.length}개
                 </span>
+                <span>
+                  <strong>푼 사람</strong> {problem.solverCount ?? 0}명
+                </span>
+                <span>
+                  <strong>정답률</strong>{" "}
+                  {problem.acceptanceRate == null
+                    ? "—"
+                    : `${problem.acceptanceRate}%`}
+                </span>
               </div>
+              {problem.tags?.length ? (
+                <ul className="problem-tags" aria-label="태그">
+                  {problem.tags.map((tag) => (
+                    <li key={tag}>
+                      <Link
+                        className="pill"
+                        to={`/problems?t=${encodeURIComponent(tag)}`}
+                      >
+                        #{tag}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
               <section>
                 <h2>문제</h2>
                 <div className="markdown">
@@ -500,6 +561,41 @@ function OwnedProblemPage() {
                   </div>
                 </section>
               ))}
+            </article>
+          ) : tab === "editorial" ? (
+            <article
+              className="problem-content"
+              role="tabpanel"
+              id="problem-tabpanel"
+              aria-labelledby="problem-tab-editorial"
+            >
+              {solved || revealedFor === problem.id ? (
+                <section>
+                  <h2>해설</h2>
+                  <div className="markdown">
+                    <ProblemMarkdown>{problem.editorialMarkdown ?? ""}</ProblemMarkdown>
+                  </div>
+                </section>
+              ) : solved === null ? (
+                <SkeletonRegion label="풀이 기록을 확인하는 중입니다">
+                  <Skeleton height={40} />
+                </SkeletonRegion>
+              ) : (
+                <div className="empty-state editorial-gate">
+                  <strong>아직 이 문제를 해결하지 않았어요.</strong>
+                  <p>
+                    해설에는 풀이 방법이 그대로 들어 있어요. 직접 풀어 보면
+                    해설이 바로 열려요.
+                  </p>
+                  <button
+                    type="button"
+                    className="button button-outline"
+                    onClick={() => setRevealedFor(problem.id)}
+                  >
+                    스포일러 보기
+                  </button>
+                </div>
+              )}
             </article>
           ) : (
             <div
