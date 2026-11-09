@@ -7949,3 +7949,105 @@ textarea {
   animation-duration: 0.45s;
   animation-timing-function: ease;
 }
+
+/* 헤더 알림 종과 목록 */
+.notification-bell {
+  position: relative;
+}
+.notification-bell > .icon-button {
+  position: relative;
+}
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+.notification-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  width: min(360px, calc(100vw - 24px));
+  max-height: min(480px, 70vh);
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 14%);
+  white-space: normal;
+}
+.notification-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.notification-list a {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  border-radius: var(--radius-control);
+  color: var(--color-ink-700);
+  font-size: 14px;
+  text-decoration: none;
+}
+.notification-list a:hover,
+.notification-list a:focus-visible {
+  background: var(--color-surface-muted);
+}
+.notification-list .unread a {
+  color: var(--color-ink-900);
+  font-weight: var(--weight-label);
+}
+
+/* 신고 창과 숨김 표시 */
+.report-dialog {
+  width: min(440px, calc(100vw - 32px));
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  color: var(--color-ink-900);
+}
+.report-dialog::backdrop {
+  background: rgb(15 23 42 / 45%);
+}
+.report-dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.report-dialog h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.report-dialog textarea {
+  width: 100%;
+  resize: vertical;
+}
+.answer-hidden {
+  margin-left: 12px;
+  color: var(--color-danger);
+  font-size: 13px;
+}

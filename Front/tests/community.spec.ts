@@ -415,8 +415,10 @@ test.describe("community post: delete own post and answer layout", () => {
     expect(listTop).toBeLessThan(writeTop);
     await page.getByRole("button", { name: "답변 작성으로 이동 ↓", exact: true }).click();
     await expect(writeCard.locator("textarea")).toBeFocused();
-    // 남의 글에는 글 관리(⋮) 메뉴가 없다
-    await expect(page.getByRole("button", { name: "글 관리" })).toHaveCount(0);
+    // 남의 글의 글 관리(⋮) 메뉴에는 신고만 있다
+    await page.getByRole("button", { name: "글 관리" }).click();
+    await expect(page.getByRole("menuitem")).toHaveText(["신고"]);
+    await page.keyboard.press("Escape");
     // 조회수는 아이콘과 숫자로 보인다
     await expect(page.getByLabel("조회 3")).toBeVisible();
   });
@@ -806,8 +808,13 @@ test.describe("community API", () => {
     await page.goto("/community/..%2F..%2Fadmin%2Fusers");
     await expect(page.getByText("글을 찾을 수 없어요.")).toBeVisible();
     expect(paths.length).toBeGreaterThan(0);
+    // 헤더 알림 종의 안 읽은 수 확인은 글 주소와 상관없는 고정 경로다.
     expect(
-      paths.filter((path) => !path.startsWith("/api/v1/community/posts/")),
+      paths.filter(
+        (path) =>
+          !path.startsWith("/api/v1/community/posts/") &&
+          path !== "/api/v1/notifications/unread-count",
+      ),
     ).toEqual([]);
   });
 
@@ -864,10 +871,10 @@ test.describe("community API", () => {
     });
     await page.goto("/community/q-1");
     await expect(page.getByRole("button", { name: /^답변 2/ })).toHaveAttribute("aria-expanded", "true");
-    // 남의 답변은 관리 메뉴가 없다.
-    await expect(
-      page.locator("#their-a").getByRole("button", { name: "답변 관리" }),
-    ).toHaveCount(0);
+    // 남의 답변 메뉴에는 신고만 있다.
+    await page.locator("#their-a").getByRole("button", { name: "답변 관리" }).click();
+    await expect(page.getByRole("menuitem")).toHaveText(["신고"]);
+    await page.keyboard.press("Escape");
 
     const mine = page.locator("#mine-a");
     await mine.getByRole("button", { name: "답변 관리" }).click();

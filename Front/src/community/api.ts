@@ -23,6 +23,7 @@ interface ApiPost {
   voteCount: number;
   commentCount: number;
   acceptedCommentId: string | null;
+  hidden?: boolean;
 }
 interface ApiComment {
   id: string;
@@ -30,6 +31,7 @@ interface ApiComment {
   body: string;
   createdAt: string;
   voteCount: number;
+  hidden?: boolean;
   author: ApiPost["author"];
 }
 export interface Page<T> {
@@ -76,21 +78,32 @@ export function convertPost(p: ApiPost): CommunityPost {
     pinned: p.category === "NOTICE",
   };
 }
-export async function listPosts(query: URLSearchParams, signal?: AbortSignal) {
-  const result = await api<Page<ApiPost>>(`${endpoint}?${query}`, { signal });
+// 공개 조회도 로그인했으면 토큰을 보낸다(팔로잉 목록, 숨겨진 내 글·답변).
+export async function listPosts(
+  query: URLSearchParams,
+  signal?: AbortSignal,
+  token?: string,
+) {
+  const result = await api<Page<ApiPost>>(
+    `${endpoint}?${query}`,
+    { signal },
+    token,
+  );
   return { ...result, items: result.items.map(convertPost) };
 }
-export async function getPost(id: string, signal?: AbortSignal) {
-  return convertPost(await api<ApiPost>(postUrl(id), { signal }));
+export async function getPost(id: string, signal?: AbortSignal, token?: string) {
+  return convertPost(await api<ApiPost>(postUrl(id), { signal }, token));
 }
 export async function getComments(
   id: string,
   page: number,
   signal?: AbortSignal,
+  token?: string,
 ): Promise<Page<CommunityAnswer>> {
   const result = await api<Page<ApiComment>>(
     `${postUrl(id)}/comments?page=${page}&limit=20`,
     { signal },
+    token,
   );
   return {
     ...result,
@@ -135,9 +148,9 @@ export async function getPostPage(
   signal: AbortSignal,
 ) {
   const [post, answers, stats, interaction] = await Promise.all([
-    getPost(id, signal),
-    getComments(id, answerPage, signal),
-    api<AuthorStats>(`${postUrl(id)}/author-stats`, { signal }),
+    getPost(id, signal, token),
+    getComments(id, answerPage, signal, token),
+    api<AuthorStats>(`${postUrl(id)}/author-stats`, { signal }, token),
     token
       ? api<Interaction>(`${postUrl(id)}/interaction`, { signal }, token)
       : emptyInteraction,

@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { canAuthor, useAuth } from "../auth";
+import { NotificationBell } from "./NotificationBell";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function SiteHeader({
@@ -130,6 +131,7 @@ export function SiteHeader({
           <ThemeToggle />
           {session ? (
             <>
+              <NotificationBell token={session.accessToken} />
               <Link
                 className="account-link"
                 to="/profile"
