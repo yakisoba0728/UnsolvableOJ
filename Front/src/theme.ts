@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 
 export type Theme = "light" | "dark";
 
@@ -66,7 +67,11 @@ export function useTheme() {
     const reduce = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    if (start && !reduce) start(() => apply(next));
+    // 상태 갱신을 콜백 안에서 끝내야 브라우저가 바뀌기 전 화면을 캡처한다.
+    if (start && !reduce) {
+      start(() => flushSync(() => setTheme(next)));
+      return;
+    }
     setTheme(next);
   }, [theme]);
 

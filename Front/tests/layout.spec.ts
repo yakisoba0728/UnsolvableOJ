@@ -260,3 +260,24 @@ test("keyboard users can skip the header to the main content", async ({ page }) 
   await page.keyboard.press("Enter");
   await expect(page.locator("main")).toBeFocused();
 });
+
+test("the theme toggle crossfades from the theme shown before the click", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light", reducedMotion: "no-preference" });
+  await page.goto("/");
+  const supported = await page.evaluate(() => {
+    const doc = document as unknown as { startViewTransition?: (update: () => void) => unknown };
+    const start = doc.startViewTransition?.bind(doc);
+    if (!start) return false;
+    // 브라우저는 콜백 직전에 이전 화면을 캡처하므로, 그때 테마가 아직 바뀌지 않았어야 한다.
+    doc.startViewTransition = (update) =>
+      start(() => {
+        document.documentElement.dataset.themeBeforeUpdate = document.documentElement.dataset.theme;
+        update();
+      });
+    return true;
+  });
+  test.skip(!supported, "View Transitions API 미지원 브라우저");
+  await page.getByRole("button", { name: "다크 모드" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme-before-update", "light");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+});
