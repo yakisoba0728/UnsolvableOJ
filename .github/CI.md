@@ -1,6 +1,8 @@
 # CI 운영
 
-`main` 대상 PR과 `main` push는 빠른 기본 검사를 실행합니다. GitHub 제공 `ubuntu-24.04` 러너 한 개, Node 24와 npm 캐시를 사용하며 결과 이름은 `CI required`를 유지합니다. 같은 PR·수동 실행의 이전 실행은 취소하지만, `main` push는 커밋마다 결과가 남도록 취소하지 않습니다. 수동 전체 검사는 PR 검사와 서로 취소하지 않습니다.
+`main` 대상 PR과 `main` push는 빠른 기본 검사를 실행합니다. GitHub 제공 `ubuntu-24.04` 러너 한 개, Node 24와 npm 캐시를 사용하며 결과 이름은 `CI required`를 유지합니다. 같은 PR·수동 실행의 이전 실행은 취소하지만, `main` push는 커밋마다 결과가 남도록 취소하지 않습니다. 수동·야간 전체 검사는 PR 검사와 서로 취소하지 않습니다.
+
+모든 실행에는 별도 작업 `Dependency audit`도 함께 돌아갑니다. Back·Front·Judge 각각 `npm audit --omit=dev --audit-level=high`로 운영 의존성의 high/critical 취약점만 실패로 처리하고 low/moderate는 로그로만 남깁니다. lockfile만 읽으므로 의존성을 설치하지 않습니다. 새 권고가 공개되면 코드 변경 없이도 실패할 수 있으며 `CI required`와는 별개입니다. 보호 규칙에 넣을지는 별도로 결정하세요.
 
 ## 기본 검사
 
@@ -15,9 +17,9 @@ Chromium headless shell만 설치하며 Playwright 워커는 2개입니다. 기�
 
 기존 main의 성공 실행은 총 약 29분 중 브라우저 777개 검사가 24.3분을 사용했습니다. 기본 검사는 같은 UI를 세 브라우저에서 직렬로 반복하던 부분을 줄였습니다. 실제 시간은 Actions 결과에서 확인합니다.
 
-## 수동 전체 검사
+## 전체 검사(야간·수동)
 
-Actions → CI → Run workflow에서 full을 켜거나 다음 명령을 실행합니다.
+매일 03:00 KST(18:00 UTC)에 `main`에서 아래 전체 검사가 자동으로 실행됩니다. GitHub는 schedule을 기본 브랜치에서만 실행하고, 저장소에 60일간 활동이 없으면 일시 중지하며, 부하가 많을 때 시작이 늦어질 수 있습니다. 수동으로는 Actions → CI → Run workflow에서 full을 켜거나 다음 명령을 실행합니다.
 
 ```sh
 gh workflow run ci.yml --ref main -f full=true
