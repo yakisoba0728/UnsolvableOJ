@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -10,6 +11,10 @@ import { Repository } from 'typeorm';
 import { isUniqueViolation } from '../../common/database.js';
 import { User } from '../users/user.entity.js';
 import type { AccessTokenPayload } from './auth.types.js';
+import type {
+  ChangePasswordDto,
+  ChangeUsernameDto,
+} from './dto/account.dto.js';
 import type { LoginDto } from './dto/login.dto.js';
 import type { RegisterDto } from './dto/register.dto.js';
 import { PasswordHasher } from './password-hasher.service.js';
@@ -70,6 +75,39 @@ export class AuthService {
     }
 
     return this.issueSession(user);
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.users.findOneByOrFail({ id: userId });
+    // 401이면 웹이 로그아웃시키므로, 틀린 현재 비밀번호는 입력 오류(400)로 돌려준다.
+    if (
+      !(await this.passwordHasher.verify(dto.currentPassword, user.passwordHash))
+    ) {
+      throw new BadRequestException('현재 비밀번호가 올바르지 않습니다.');
+    }
+    // 다른 기기의 JWT를 모두 무효화하고, 요청한 쪽에는 새 토큰을 준다.
+    await this.users.query(
+      'UPDATE users SET password_hash = $1, token_version = token_version + 1, updated_at = now() WHERE id = $2',
+      [await this.passwordHasher.hash(dto.newPassword), userId],
+    );
+    return this.issueSession(await this.users.findOneByOrFail({ id: userId }));
+  }
+
+  async changeUsername(userId: string, dto: ChangeUsernameDto) {
+    const username = dto.username.trim();
+    if (username.toLowerCase() === 'boj_import') {
+      throw new ConflictException('이미 사용 중인 사용자 이름입니다.');
+    }
+    try {
+      await this.users.update({ id: userId }, { username });
+    } catch (error: unknown) {
+      if (isUniqueViolation(error)) {
+        throw new ConflictException('이미 사용 중인 사용자 이름입니다.');
+      }
+      throw error;
+    }
+    // JWT의 username을 새 이름으로 맞춘 토큰을 준다(기존 토큰은 그대로 유효).
+    return this.issueSession(await this.users.findOneByOrFail({ id: userId }));
   }
 
   private async issueSession(user: User) {
