@@ -7905,10 +7905,16 @@ textarea {
   animation-timing-function: ease;
 }
 
-/* 문제·코드 분석·커뮤니티: 오른쪽 카드 윗선을 왼쪽 목록 박스 윗선(제목 31px + 간격 12px 아래)에 맞춘다. 한 줄로 쌓이는 1100px 이하에서는 적용하지 않는다. */
+/* 문제·코드 분석·커뮤니티: 오른쪽 카드 윗선을 왼쪽 목록 박스 윗선에 맞춘다.
+   제목 줄은 '기본 순서로' 버튼이 붙어도 높이가 변하지 않게 39px로 고정하고, 카드는 그 높이+간격(12px)만큼 내린다.
+   한 줄로 쌓이는 1100px 이하에서는 적용하지 않는다. */
 @media (min-width: 1101px) {
+  .list-layout > section > .section-heading,
+  .community-layout > section > .section-heading {
+    min-height: 39px;
+  }
   .list-layout > .side-stack,
   .community-layout > .side-stack {
-    margin-top: 43px;
+    margin-top: 51px;
   }
 }
