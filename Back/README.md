@@ -17,7 +17,7 @@ NestJS, PostgreSQL, Redis로 구성한 UnsolvableOJ 웹 백엔드입니다. Post
 - 문제 수정 시 불변 버전 스냅샷 저장, 공개·보관 상태 관리
 - 채점 세대·시도 ID·lease 기반 중복 처리 방지와 재채점
 - 첫 정답 XP·레벨·랭킹, 재채점 결과에 따른 XP 정산
-- 관리자 역할 변경, 감사 로그, 큐·워커 운영 조회
+- 관리자 사용자 검색·역할 변경·계정 정지, 감사 로그 검색, 큐·워커 운영 조회
 - PostgreSQL 마이그레이션
 - 입력 검증, CORS, 보안 헤더, 요청 속도 제한
 - Swagger와 PostgreSQL/Redis 상태 확인
@@ -79,7 +79,7 @@ npm run db:bootstrap:admin -- admin@example.com
 
 로컬 데모용으로는 `npm run db:seed:demo`를 사용할 수 있습니다. `A + B` 문제와 작성자 계정을 만들고 무작위 비밀번호를 터미널에 출력합니다. 재실행하면 작성자 비밀번호가 회전합니다.
 작성자·문제·테스트케이스·v1 스냅샷은 하나의 트랜잭션으로 저장합니다. 과거 실행 중단으로 v1이 없는 경우 현재 버전이 1이고 저장된 테스트케이스가 있을 때만 순서대로 읽어 복구합니다. 이미 수정된 v2 이상의 내용으로 과거 v1을 만들지 않으며, 비어 있거나 누락된 기존 버전 이력은 오류로 중단하므로 운영자가 검증된 백업에서 복구해야 합니다. 정상적인 기존 불변 스냅샷은 재실행으로 변경하지 않습니다. 실패한 실행은 데모 계정 비밀번호도 변경하지 않습니다.
-관리자는 `PATCH /api/v1/admin/users/:id/role`로 작성자와 관리자 역할을 지정할 수 있습니다. 역할 변경 시 기존 access token은 즉시 무효화됩니다.
+관리자는 `PATCH /api/v1/admin/users/:id/role`로 작성자와 관리자 역할을 지정할 수 있습니다. 역할 변경 시 기존 access token은 즉시 무효화됩니다. `PATCH /api/v1/admin/users/:id/suspension`으로 계정을 정지하면 기존 토큰이 무효화되고 해제할 때까지 로그인할 수 없습니다. 웹의 `/admin` 화면(관리자에게만 보임)에서 사용자 검색·역할 변경·정지, 감사 로그, 운영 상태를 볼 수 있습니다.
 
 ## 기본 연습 문제 등록
 
@@ -141,9 +141,10 @@ npm run db:import:boj -- --dataset /path/to/boj_dataset --audit /path/to/boj_imp
 | `GET`   | `/api/v1/rankings`                 | 없음         | XP 상위 100명                            |
 | `GET`   | `/api/v1/community/posts`          | 없음         | 커뮤니티 글 목록과 분류·상태별 개수      |
 | `POST`  | `/api/v1/community/posts`          | USER         | 커뮤니티 글 작성(공지는 ADMIN만)         |
-| `GET`   | `/api/v1/admin/users`              | ADMIN        | 최근 사용자 100명                        |
+| `GET`   | `/api/v1/admin/users`              | ADMIN        | 사용자 검색(이름·이메일·역할)과 페이지   |
 | `PATCH` | `/api/v1/admin/users/:id/role`     | ADMIN        | 역할 변경                                |
-| `GET`   | `/api/v1/admin/audit`              | ADMIN        | 최근 변경 이력 100건                     |
+| `PATCH` | `/api/v1/admin/users/:id/suspension` | ADMIN      | 계정 정지·해제(정지 시 토큰 무효화)      |
+| `GET`   | `/api/v1/admin/audit`              | ADMIN        | 변경 이력(동작·수행자·대상 필터)과 페이지 |
 | `GET`   | `/api/v1/admin/ops`                | ADMIN        | 큐 상태·실패 작업·워커 상태              |
 
 문제 수정은 `currentVersion`을 증가시키고 당시 제한과 테스트케이스를 `problem_versions`에 저장합니다. 작성자가 공개 문제를 수정하면 다시 초안이 되어 관리자 재검수가 필요합니다. 제출은 생성 당시 버전을 참조하므로 이후 수정·보관에도 원래 기준으로 채점합니다. 공개 조회에는 예제만 반환합니다.
