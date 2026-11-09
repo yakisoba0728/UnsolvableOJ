@@ -31,7 +31,7 @@ jobs:
     timeout-minutes: ${{ inputs.full && 40 || 15 }}
     services:
       postgres:
-        image: postgres:17
+        image: postgres:17.11
         env:
           POSTGRES_USER: unsolvable
           POSTGRES_PASSWORD: ci_disposable_password
@@ -44,7 +44,7 @@ jobs:
           --health-cmd "pg_isready -U unsolvable -d unsolvable_ci"
           --health-interval 3s --health-timeout 3s --health-retries 10
       redis:
-        image: redis:8
+        image: redis:8.10.3
         ports:
           - '127.0.0.1::6379'
         options: >-

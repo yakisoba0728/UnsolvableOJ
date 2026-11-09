@@ -8,7 +8,7 @@ x-logging: &logging
 
 services:
   postgres:
-    image: postgres:17-alpine
+    image: postgres:17.11-alpine
     restart: unless-stopped
     mem_limit: ${POSTGRES_MEMORY_LIMIT:-1g}
     environment:
@@ -26,7 +26,7 @@ services:
     logging: *logging
 
   redis:
-    image: redis:8-alpine
+    image: redis:8.10.3-alpine
     restart: unless-stopped
     mem_limit: ${REDIS_MEMORY_LIMIT:-512m}
     environment:
