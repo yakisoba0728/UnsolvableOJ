@@ -64,7 +64,10 @@ export function useRequest<T>(
   return { data, loading, error, retry };
 }
 
-/** 공개 문제 전체. 서버에 검색 API가 없어 목록·검색·필터를 클라이언트에서 처리한다. */
+/**
+ * 공개 문제 전체를 이어 읽는다. 문제 목록 화면은 서버에서 검색·필터·쪽을 받으므로 쓰지 않고,
+ * 전체가 필요한 곳(홈 추천·프로필 난이도 통계·XP 부스트 추천·기업 테스트 문제 고르기)만 쓴다.
+ */
 export function useAllProblems() {
   const { data: problems, loading, error, retry } = useRequest(
     (signal) => fetchAll<ProblemSummary>("/problems", signal),

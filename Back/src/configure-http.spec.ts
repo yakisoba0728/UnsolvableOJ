@@ -11,6 +11,7 @@ import { configureHttp, JSON_BODY_LIMIT } from './configure-http.js';
 import { ProblemsController } from './modules/problems/problems.controller.js';
 import { ProblemsService } from './modules/problems/problems.service.js';
 import { JwtAuthGuard } from './modules/auth/jwt-auth.guard.js';
+import { OptionalJwtAuthGuard } from './modules/auth/optional-jwt-auth.guard.js';
 import { RolesGuard } from './common/guards/roles.guard.js';
 
 describe('Public problem routes and HTTP limits', () => {
@@ -33,6 +34,8 @@ describe('Public problem routes and HTTP limits', () => {
       .useValue({ canActivate: () => false })
       .overrideGuard(RolesGuard)
       .useValue({ canActivate: () => false })
+      .overrideGuard(OptionalJwtAuthGuard)
+      .useValue({ canActivate: () => true })
       .compile();
     app = module.createNestApplication<NestExpressApplication>({
       bodyParser: false,

@@ -1,5 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
-import type { DataSource, FindOperator, Repository } from 'typeorm';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import type { DataSource, Repository } from 'typeorm';
 import { readListCursor } from '../../common/list-cursor.js';
 import { ListProblemsQuery } from './dto/list-problems.query.js';
 import type { Problem } from './problem.entity.js';
@@ -15,16 +15,21 @@ const encode = (id: string) =>
   Buffer.from(JSON.stringify([time, id])).toString('base64url');
 
 function fixture(rows: { id: string }[]) {
-  const repository = {
-    find: vi.fn().mockResolvedValue(rows),
-    count: vi.fn().mockResolvedValue(10),
-  };
-  const query = vi.fn(async (sql: string) =>
-    sql.includes('to_char') ? [{ createdAt: time }] : [],
-  );
+  const repository = {};
+  // 목록은 SQL 한 벌(개수 묶음·태그·쪽·통계)로 읽는다. SQL 내용으로 어떤 쿼리인지 가린다.
+  const query = vi.fn(async (sql: string, _params: unknown[] = []) => {
+    if (sql.includes('to_char')) return [{ createdAt: time }];
+    if (sql.includes('GROUP BY 1, 2'))
+      return [{ difficulty: 'BEGINNER', state: 'none', count: 10 }];
+    if (sql.includes('unnest') || sql.includes('problem_id = ANY')) return [];
+    return rows;
+  });
+  const listSql = () =>
+    query.mock.calls.find(([sql]) => sql.includes('ORDER BY') && sql.includes('OFFSET')) as [string, unknown[]];
   return {
     repository,
     query,
+    listSql,
     service: new ProblemsService(
       repository as unknown as Repository<Problem>,
       { query } as unknown as DataSource,
@@ -32,28 +37,20 @@ function fixture(rows: { id: string }[]) {
   };
 }
 
-describe('public problem continuation', () => {
+const list = (values: Partial<ListProblemsQuery>) =>
+  Object.assign(new ListProblemsQuery(), values);
+
+describe('public problem list', () => {
   it('uses an exact-time cursor instead of moving offsets and retains visibility filters', async () => {
-    const { service, repository } = fixture(ids.map((id) => ({ id })));
+    const { service, listSql } = fixture(ids.map((id) => ({ id })));
     const result = await service.findAll(
-      Object.assign(new ListProblemsQuery(), {
-        page: 9,
-        limit: 2,
-        cursor: encode(ids[2]),
-      }),
+      list({ page: 9, limit: 2, cursor: encode(ids[2]) }),
     );
-    const options = repository.find.mock.calls[0][0];
-    expect(options).toMatchObject({ skip: 0, take: 3 });
-    const [older, tied] = options.where;
-    expect(older.status).toBe(ProblemStatus.PUBLISHED);
-    expect(tied.status).toBe(ProblemStatus.PUBLISHED);
-    expect(
-      (older.createdAt as FindOperator<Date>).objectLiteralParameters,
-    ).toEqual({ cursorTime: time });
-    expect((tied.id as FindOperator<string>).value).toBe(ids[2]);
-    expect(repository.count).toHaveBeenCalledWith({
-      where: { status: ProblemStatus.PUBLISHED },
-    });
+    const [sql, params] = listSql();
+    expect(sql).toContain("p.status = 'PUBLISHED' AND NOT p.is_private");
+    expect(sql).toContain('(p.created_at, p.id) < ($1::timestamptz, $2::uuid)');
+    expect(params).toEqual([time, ids[2], 3, 0]);
+    expect(result.total).toBe(10);
     expect(result.items.map((item) => item.id)).toEqual(ids.slice(0, 2));
     expect(readListCursor(result.nextCursor!)).toEqual({
       createdAt: time,
@@ -62,41 +59,55 @@ describe('public problem continuation', () => {
   });
 
   it('keeps legacy page offsets and does not manufacture a cursor on the last page', async () => {
-    const { service, repository, query } = fixture([{ id: ids[0] }]);
-    const result = await service.findAll(
-      Object.assign(new ListProblemsQuery(), { page: 2, limit: 2 }),
-    );
-    expect(repository.find).toHaveBeenCalledWith(
-      expect.objectContaining({ skip: 2, take: 3 }),
-    );
+    const { service, query, listSql } = fixture([{ id: ids[0] }]);
+    const result = await service.findAll(list({ page: 2, limit: 2 }));
+    expect(listSql()[1]).toEqual([3, 2]);
     expect(result).toMatchObject({ total: 10, totalPages: 5, nextCursor: null });
-    expect(query).toHaveBeenCalledTimes(1);
     expect(query).not.toHaveBeenCalledWith(
       expect.stringContaining('to_char'),
       expect.anything(),
     );
   });
 
-  it('filters by tag with array containment and keeps the visibility filter', async () => {
-    const { service, repository } = fixture([]);
-    await service.findAll(
-      Object.assign(new ListProblemsQuery(), { tag: '그래프' }),
+  it('omits the cursor for other sorts so clients page by number', async () => {
+    const { service } = fixture(ids.map((id) => ({ id })));
+    const result = await service.findAll(list({ limit: 2, sort: 'title' }));
+    expect(result).not.toHaveProperty('nextCursor');
+    await expect(
+      service.findAll(list({ sort: 'latest', reverse: 'true', cursor: encode(ids[0]) })),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('filters by tag and keeps the visibility filter', async () => {
+    const { service, listSql } = fixture([]);
+    await service.findAll(list({ tag: '그래프' }));
+    const [sql, params] = listSql();
+    expect(sql).toContain("p.status = 'PUBLISHED' AND NOT p.is_private");
+    expect(sql).toContain('$1 = ANY(p.tags)');
+    expect(params[0]).toBe('그래프');
+  });
+
+  it('escapes LIKE wildcards in the search word', async () => {
+    const { service, listSql } = fixture([]);
+    await service.findAll(list({ q: ' 100%_\\a ' }));
+    const [sql, params] = listSql();
+    expect(sql).toContain("p.title ILIKE $1 ESCAPE '\\'");
+    expect(params[0]).toBe('%100\\%\\_\\\\a%');
+  });
+
+  it('requires a login to filter by solve state', async () => {
+    const { service, query } = fixture([]);
+    await expect(service.findAll(list({ solve: ['solved'] }))).rejects.toThrow(
+      UnauthorizedException,
     );
-    const { where } = repository.find.mock.calls[0][0];
-    expect(where.status).toBe(ProblemStatus.PUBLISHED);
-    expect((where.tags as FindOperator<string[]>).type).toBe('arrayContains');
-    expect((where.tags as FindOperator<string[]>).value).toEqual(['그래프']);
+    expect(query).not.toHaveBeenCalled();
   });
 
   it('rejects malformed cursors before accessing the database', async () => {
-    const { service, repository, query } = fixture([]);
+    const { service, query } = fixture([]);
     await expect(
-      service.findAll(
-        Object.assign(new ListProblemsQuery(), { cursor: 'invalid' }),
-      ),
+      service.findAll(list({ cursor: 'invalid' })),
     ).rejects.toThrow(BadRequestException);
-    expect(repository.find).not.toHaveBeenCalled();
-    expect(repository.count).not.toHaveBeenCalled();
     expect(query).not.toHaveBeenCalled();
   });
 });

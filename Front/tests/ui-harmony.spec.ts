@@ -3,6 +3,7 @@ import {
   authenticate,
   mockCommunityApi,
   mockProblemApi,
+  mockProblemList,
   problem,
   session,
 } from "./fixtures";
@@ -116,20 +117,9 @@ test("PR focus/input/error styles work in light and dark without a disabled text
 test("Select lists have names and pagination buttons have explicit type and page names", async ({
   page,
 }) => {
-  await page.route("**/api/v1/problems?*", (route) =>
-    route.fulfill({
-      json: {
-        items: Array.from({ length: 45 }, (_, i) => ({
-          ...problem,
-          id: `p${i}`,
-          slug: `p${i}`,
-        })),
-        total: 45,
-        page: 1,
-        limit: 100,
-        totalPages: 1,
-      },
-    }),
+  await mockProblemList(
+    page,
+    Array.from({ length: 45 }, (_, i) => ({ ...problem, id: `p${i}`, slug: `p${i}` })),
   );
   await page.goto("/problems");
   const select = page.getByRole("combobox").first();

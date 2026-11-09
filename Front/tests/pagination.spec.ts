@@ -1,49 +1,30 @@
 import { expect, test } from "@playwright/test";
-import { readAll } from "./fixtures";
+import { mockProblemList, readAll } from "./fixtures";
 
-test("all imported problems remain searchable beyond five pages", async ({
+test("the problem list asks the server for one page and searches all imported problems there", async ({
   page,
 }) => {
   const total = 9744;
-  const requested = new Set<number>();
-  await page.route("**/api/v1/problems?*", (route) => {
-    const query = new URL(route.request().url()).searchParams;
-    const current = Number(query.get("page"));
-    const limit = Number(query.get("limit"));
-    requested.add(current);
-    const start = (current - 1) * limit;
-    return route.fulfill({
-      json: {
-        page: current,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-        items: Array.from(
-          { length: Math.min(limit, total - start) },
-          (_, offset) => ({
-            id: `p-${start + offset}`,
-            slug: `problem-${start + offset}`,
-            title:
-              start + offset === total - 1
-                ? "마지막문제"
-                : `문제 ${start + offset}`,
-            difficulty: "BEGINNER",
-            timeLimitMs: 1000,
-            memoryLimitMb: 256,
-            createdAt: "2026-09-28T00:00:00Z",
-          }),
-        ),
-      },
-    });
-  });
+  const items = Array.from({ length: total }, (_, index) => ({
+    id: `p-${index}`,
+    slug: `problem-${index}`,
+    title: index === total - 1 ? "마지막문제" : `문제 ${index}`,
+    difficulty: "BEGINNER" as const,
+    timeLimitMs: 1000,
+    memoryLimitMb: 256,
+    createdAt: "2026-09-28T00:00:00Z",
+  }));
+  const requests = await mockProblemList(page, items);
   await page.goto("/problems");
   await expect(page.locator(".total-count")).toHaveText("1 - 20/9744");
-  expect([...requested].sort((a, b) => a - b)).toEqual(
-    Array.from({ length: 10 }, (_, i) => i + 1),
-  );
+  // 전체를 이어 읽지 않는다: 첫 쪽 20개만 받는다(개발 모드 StrictMode는 같은 요청을 한 번 더 보내고 앞의 것을 취소한다).
+  expect(
+    new Set(requests.map((query) => `${query.get("page")}/${query.get("limit")}`)),
+  ).toEqual(new Set(["1/20"]));
   await page.getByRole("searchbox", { name: "문제 검색" }).fill("마지막문제");
   await expect(page.locator("a.problem-row")).toHaveCount(1);
   await expect(page.locator("a.problem-row")).toContainText("마지막문제");
+  expect(requests.at(-1)?.get("q")).toBe("마지막문제");
 });
 
 test("paginated history reads beyond page five with authentication", async ({

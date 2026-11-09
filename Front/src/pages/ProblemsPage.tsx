@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { api } from "../api";
 import { Link } from "react-router-dom";
 import { canAuthor, useAuth } from "../auth";
 import { BrandArt } from "../components/BrandArt";
@@ -16,10 +17,9 @@ import {
   type SolveState,
 } from "../components/ProblemStatus";
 import {
-  useAllProblems,
   useDocumentTitle,
-  pickNextProblem,
   pickResume,
+  useRequest,
   useMyStanding,
   useSlashFocus,
   useStickyTop,
@@ -27,8 +27,8 @@ import {
   useUrlFilters,
 } from "../hooks";
 import { problemPath } from "../paths";
-import { newSeed, seededShuffle } from "../shuffle";
-import type { Difficulty, ProblemSummary } from "../types";
+import { newSeed } from "../shuffle";
+import type { Difficulty, Page, ProblemSummary } from "../types";
 import {
   DIFFICULTIES as order,
   difficultyLabel,
@@ -36,6 +36,24 @@ import {
 } from "../difficulty";
 
 const PAGE_SIZE = 20;
+/** 서버의 검색어 길이 상한 */
+const SEARCH_MAX = 100;
+
+/** 목록 한 쪽과 칩 숫자(같은 묶음의 조건만 빼고 센 결과 수). solves는 로그인했을 때만 온다. */
+type ProblemListPage = Page<ProblemSummary> & {
+  facets?: {
+    difficulties?: Record<string, number>;
+    solves?: Record<string, number> | null;
+    tags?: { tag: string; count: number }[];
+  };
+};
+const EMPTY_PAGE: ProblemListPage = {
+  items: [],
+  page: 1,
+  limit: PAGE_SIZE,
+  total: 0,
+  totalPages: 0,
+};
 
 const sorts = [
   { value: "latest", label: "최신순" },
@@ -68,7 +86,6 @@ const statusChips: { value: "" | SolveState; label: string }[] = [
 export function ProblemsPage() {
   const { session } = useAuth();
   useDocumentTitle("문제 목록");
-  const { problems, loading, error, retry } = useAllProblems();
   const history = useSubmissionHistory(session);
   const { profile, rank, profileLoading, rankLoading, profileError, rankError, retryProfile, retryRank } =
     useMyStanding(session);
@@ -97,104 +114,70 @@ export function ProblemsPage() {
   const selectedTag = params.get("t") ?? "";
   const rawSort = params.get("sort") ?? "latest";
   const legacySort = legacySorts[rawSort];
-  const sort = legacySort?.sort ?? rawSort;
+  // 모르는 정렬 이름은 서버가 거절하므로 기본 정렬로 읽는다.
+  const sort = sorts.some((item) => item.value === (legacySort?.sort ?? rawSort))
+    ? (legacySort?.sort ?? rawSort)
+    : "latest";
   // 기본 순서(최신순=최신 먼저, 난이도순=쉬운 것 먼저, 푼 사람순=많은 순, 정답률순=높은 순)를 뒤집은 상태
   const reversed =
     (params.get("rev") === "1") !== Boolean(legacySort?.reversed);
-  const seed = Number(params.get("seed")) || 1;
+  // 서버가 받는 범위(1 이상 2^31-1 이하의 정수)로 맞춘다.
+  const seed = Math.floor(Math.abs(Number(params.get("seed")))) % 2147483647 || 1;
 
-  const keyword = urlQuery.trim().toLowerCase();
+  const keyword = urlQuery.trim();
   const isSingle = (value: string) =>
     selectedDifficulties.length === 1 && selectedDifficulties[0] === value;
   const stateOf = (problem: ProblemSummary) =>
     solveState(problem.id, history.solved, history.attempted);
 
-  // skip: 해당 그룹의 조건만 빼고 센다 → 칩의 숫자가 "그 칩을 눌렀을 때의 결과 수"가 된다
-  const matches = (
-    problem: ProblemSummary,
-    skip: "difficulty" | "status" | "tag" | null,
-  ) => {
-    if (
-      skip !== "tag" &&
-      selectedTag &&
-      !(problem.tags ?? []).includes(selectedTag)
-    )
-      return false;
-    if (
-      skip !== "difficulty" &&
-      selectedDifficulties.length &&
-      !selectedDifficulties.includes(problem.difficulty)
-    )
-      return false;
-    if (
-      skip !== "status" &&
-      statuses.length &&
-      !statuses.includes(stateOf(problem))
-    )
-      return false;
-    return (
-      !keyword ||
-      problem.title.toLowerCase().includes(keyword) ||
-      problem.slug.toLowerCase().includes(keyword)
-    );
-  };
-
-  const filtered = useMemo(() => {
-    // 무작위: 전체를 한 번 섞은 뒤 필터를 적용한다. 필터를 바꿔도 상대 순서가 유지된다.
-    const base =
-      sort === "random" ? seededShuffle(problems, seed) : [...problems];
-    const dir = reversed ? -1 : 1;
-    if (sort === "difficulty")
-      base.sort(
-        (a, b) =>
-          (order.indexOf(a.difficulty) - order.indexOf(b.difficulty)) * dir,
-      );
-    else if (sort === "title")
-      base.sort((a, b) => a.title.localeCompare(b.title, "ko") * dir);
-    else if (sort === "solvers")
-      base.sort((a, b) => ((b.solverCount ?? 0) - (a.solverCount ?? 0)) * dir);
-    else if (sort === "rate")
-      // 정답률이 없는(제출 없는) 문제는 뒤집어도 맨 뒤에 둔다.
-      base.sort((a, b) => {
-        if (a.acceptanceRate == null || b.acceptanceRate == null)
-          return (
-            Number(a.acceptanceRate == null) - Number(b.acceptanceRate == null)
-          );
-        return (b.acceptanceRate - a.acceptanceRate) * dir;
-      });
-    else if (sort !== "random")
-      base.sort((a, b) => b.createdAt.localeCompare(a.createdAt) * dir);
-    return base.filter((problem) => matches(problem, null));
-  }, [
-    problems,
-    sort,
-    reversed,
-    seed,
-    params,
-    history.solved,
-    history.attempted,
-  ]);
+  // 검색·필터·정렬·쪽은 서버가 처리한다. 조건이 바뀌면 useRequest가 앞선 요청을 취소하고 다시 받는다.
+  const request = new URLSearchParams({
+    page: String(page),
+    limit: String(PAGE_SIZE),
+  });
+  // 글자(코드 포인트) 단위로 자른다: 서로게이트 쌍이 잘리면 서버가 거절한다.
+  if (keyword) request.set("q", Array.from(keyword).slice(0, SEARCH_MAX).join(""));
+  if (selectedDifficulties.length)
+    request.set("difficulty", selectedDifficulties.join(","));
+  if (selectedTag) request.set("tag", selectedTag);
+  if (statuses.length) request.set("solve", statuses.join(","));
+  if (sort !== "latest") request.set("sort", sort);
+  if (sort === "random") request.set("seed", String(seed));
+  else if (reversed) request.set("reverse", "true");
+  const requestKey = request.toString();
+  const {
+    data: list,
+    loading,
+    error,
+    retry,
+  } = useRequest(
+    (signal) =>
+      api<ProblemListPage>(
+        `/problems?${requestKey}`,
+        { signal },
+        session?.accessToken,
+      ),
+    EMPTY_PAGE,
+    "문제를 불러오지 못했습니다.",
+    [requestKey, session],
+  );
+  const problems = list.items;
+  // 태그 목록은 다시 받는 동안에도 앞서 받은 것을 보여 준다(고르는 칸이 사라졌다 생기지 않게).
+  const lastTags = useRef<{ tag: string; count: number }[]>([]);
+  if (!loading && list.facets?.tags) lastTags.current = list.facets.tags;
 
   const statusCount = (value: "" | SolveState) =>
-    problems.filter(
-      (p) => matches(p, "status") && (!value || stateOf(p) === value),
-    ).length;
+    list.facets?.solves?.[value] ?? 0;
   const difficultyCount = (value: Difficulty | "") =>
-    problems.filter(
-      (p) => matches(p, "difficulty") && (!value || p.difficulty === value),
-    ).length;
+    list.facets?.difficulties?.[value] ?? 0;
 
-  // 태그 목록은 받아 온 문제에서 모은다. 숫자는 태그 외의 조건을 적용한 결과 수다.
-  const tagCounts = new Map<string, number>();
-  for (const problem of problems)
-    if (matches(problem, "tag"))
-      for (const tag of problem.tags ?? [])
-        tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
-  const knownTags = new Set(problems.flatMap((problem) => problem.tags ?? []));
-  if (selectedTag) knownTags.add(selectedTag);
+  const tagCounts = new Map(
+    lastTags.current.map((item) => [item.tag, item.count]),
+  );
+  if (selectedTag && !tagCounts.has(selectedTag)) tagCounts.set(selectedTag, 0);
   const tagOptions = [
     { value: "", label: "모든 태그" },
-    ...[...knownTags]
+    ...[...tagCounts.keys()]
       .sort(
         (a, b) =>
           (tagCounts.get(b) ?? 0) - (tagCounts.get(a) ?? 0) ||
@@ -203,43 +186,73 @@ export function ProblemsPage() {
       .map((tag) => ({ value: tag, label: `${tag} (${tagCounts.get(tag) ?? 0})` })),
   ];
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const current = Math.min(page, totalPages);
-  const visible = filtered.slice(
-    (current - 1) * PAGE_SIZE,
-    current * PAGE_SIZE,
-  );
+  const total = list.total;
+  const totalPages = Math.max(1, list.totalPages);
+  const current = page;
+  // 주소의 쪽이 결과보다 뒤면(결과가 줄었거나 손으로 고친 주소) 마지막 쪽으로 옮긴다.
+  useEffect(() => {
+    // list.page가 같아야 지금 주소의 응답이다(조건이 막 바뀐 렌더에는 앞선 응답이 남아 있다).
+    if (!loading && !error && list.page === page && page > totalPages)
+      update(
+        { page: totalPages === 1 ? null : String(totalPages) },
+        { resetPage: false },
+      );
+  }, [loading, error, list.page, page, totalPages]);
   const hasFilter = Boolean(
     selectedDifficulties.length || statuses.length || keyword || selectedTag,
   );
 
   // 이어 풀 문제(시도했지만 못 푼 가장 최근 문제). 없으면 가장 쉬운 안 푼 문제.
+  // 둘 다 서버에 내 풀이 상태로 물어본다: 풀이 중인 공개 문제 전체, 없으면 가장 쉬운 미해결 문제 하나.
+  const continuation = useRequest(
+    session
+      ? async (signal) => {
+          const ask = (query: string) =>
+            api<ProblemListPage>(
+              `/problems?${query}`,
+              { signal },
+              session.accessToken,
+            ).then((result) => result.items);
+          const attempted = await ask("solve=attempted&limit=1000");
+          return {
+            attempted,
+            next: attempted.length
+              ? null
+              : ((await ask("solve=none&sort=difficulty&limit=1"))[0] ?? null),
+          };
+        }
+      : null,
+    { attempted: [] as ProblemSummary[], next: null as ProblemSummary | null },
+    "이어 풀 문제를 불러오지 못했습니다.",
+    [session],
+  );
   const recommendationsReady =
-    !loading && !error && !history.loading && !history.error;
+    !continuation.loading &&
+    !continuation.error &&
+    !history.loading &&
+    !history.error;
   const resume = recommendationsReady
-    ? pickResume(history.submissions, history.solved, problems)
+    ? pickResume(
+        history.submissions,
+        history.solved,
+        continuation.data.attempted,
+      )
     : null;
   const resumeProblem = resume
-    ? problems.find((problem) => problem.id === resume.problem.id)
+    ? continuation.data.attempted.find(
+        (problem) => problem.id === resume.problem.id,
+      )
     : undefined;
-  const next =
-    recommendationsReady && !resume
-      ? pickNextProblem(problems, history.solved)
-      : null;
-  const continueTarget = resumeProblem
+  const next = recommendationsReady && !resume ? continuation.data.next : null;
+  const continueProblem = resumeProblem ?? next;
+  const continueTarget = continueProblem
     ? {
-        slug: resumeProblem.slug,
-        title: resumeProblem.title,
-        label: "이어서 풀기",
+        slug: continueProblem.slug,
+        title: continueProblem.title,
+        label: resumeProblem ? "이어서 풀기" : "다음 문제 풀기",
       }
-    : next
-      ? { slug: next.slug, title: next.title, label: "다음 문제 풀기" }
-      : null;
-
-  const continueDifficulty = continueTarget
-    ? problems.find((problem) => problem.slug === continueTarget.slug)
-        ?.difficulty
-    : undefined;
+    : null;
+  const continueDifficulty = continueProblem?.difficulty;
 
   // 목록을 무작위 순서로 섞는다(이동하지 않는다). 선택한 조건 안에서 섞인다.
   function shuffle() {
@@ -287,6 +300,7 @@ export function ProblemsPage() {
               placeholder="문제 제목 검색"
               aria-label="문제 검색"
               aria-keyshortcuts="/"
+              maxLength={SEARCH_MAX}
               value={queryText}
               onChange={(event) => setQueryText(event.target.value)}
             />
@@ -317,7 +331,7 @@ export function ProblemsPage() {
               <SlideToggle
                 multiple
                 ariaLabel="풀이 상태 필터"
-                countsLoading={loading || history.loading}
+                countsLoading={loading}
                 values={statuses}
                 options={statusChips.map((item) => ({
                   value: item.value,
@@ -365,7 +379,7 @@ export function ProblemsPage() {
                 setSpinKey((key) => key + 1);
                 shuffle();
               }}
-              disabled={filtered.length < 2}
+              disabled={total < 2}
             >
               <ShuffleIcon playKey={spinKey} />
             </button>
@@ -380,7 +394,7 @@ export function ProblemsPage() {
                 setReverseKey((key) => key + 1);
                 reverseOrder();
               }}
-              disabled={filtered.length < 2}
+              disabled={total < 2}
             >
               <ReverseIcon playKey={reverseKey} />
             </button>
@@ -432,26 +446,18 @@ export function ProblemsPage() {
               {loading ? (
                 <Skeleton width={80} height={14} />
               ) : (
-                pageRange(
-                  (current - 1) * PAGE_SIZE,
-                  visible.length,
-                  filtered.length,
-                )
+                pageRange((current - 1) * PAGE_SIZE, problems.length, total)
               )}
             </span>
             {loading ? null : (
               <span className="sr-only">
-                {pageRangeTitle(
-                  (current - 1) * PAGE_SIZE,
-                  visible.length,
-                  filtered.length,
-                )}
+                {pageRangeTitle((current - 1) * PAGE_SIZE, problems.length, total)}
               </span>
             )}
           </div>
           {loading ? (
             <SkeletonRows count={8} />
-          ) : visible.length ? (
+          ) : problems.length ? (
             <div className="problem-list data-list list-problems">
               <div className="problem-head" aria-hidden="true">
                 <span>문제</span>
@@ -459,7 +465,7 @@ export function ProblemsPage() {
                 <span>푼 사람</span>
                 <span>정답률</span>
               </div>
-              {visible.map((problem) => (
+              {problems.map((problem) => (
                 <div className="problem-row-wrap" key={problem.id}>
                   {/* 프로그래머스처럼 문제는 새 탭에서 열어, 목록의 검색·필터·쪽 위치를 그대로 둔다. */}
                   <Link
@@ -502,7 +508,7 @@ export function ProblemsPage() {
                 <>
                   <strong>조건에 맞는 문제가 없어요.</strong>
                   <p>
-                    {keyword ? `‘${urlQuery.trim()}’ 검색어와 ` : ""}선택한
+                    {keyword ? `‘${keyword}’ 검색어와 ` : ""}선택한
                     필터를 유지한 채 결과가 없습니다. 조건을 줄여 다시
                     찾아보세요.
                   </p>
