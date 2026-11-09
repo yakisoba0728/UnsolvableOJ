@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # 매일 03:00 KST(18:00 UTC)에 main에서 전체 검사를 실행한다.
+  schedule:
+    - cron: '0 18 * * *'
   workflow_dispatch:
     inputs:
       full:
@@ -25,13 +28,35 @@ defaults:
     shell: bash
 
 jobs:
+  audit:
+    # 운영 의존성의 high/critical 취약점만 실패로 본다. low/moderate는 보고만 한다.
+    name: Dependency audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - name: npm audit (production dependencies)
+        run: |
+          status=0
+          for package in Back Front Judge; do
+            echo "::group::$package"
+            npm audit --prefix "$package" --omit=dev --audit-level=high || status=1
+            echo "::endgroup::"
+          done
+          exit "$status"
+
   check:
     name: CI required
     runs-on: ubuntu-24.04
-    timeout-minutes: ${{ inputs.full && 40 || 15 }}
+    timeout-minutes: ${{ (inputs.full || github.event_name == 'schedule') && 40 || 15 }}
     services:
       postgres:
-        image: postgres:17
+        image: postgres:17.11
         env:
           POSTGRES_USER: unsolvable
           POSTGRES_PASSWORD: ci_disposable_password
@@ -44,7 +69,7 @@ jobs:
           --health-cmd "pg_isready -U unsolvable -d unsolvable_ci"
           --health-interval 3s --health-timeout 3s --health-retries 10
       redis:
-        image: redis:8
+        image: redis:8.10.3
         ports:
           - '127.0.0.1::6379'
         options: >-
@@ -76,13 +101,13 @@ jobs:
       - name: Production Compose configuration
         run: node scripts/check-production-compose.mjs
       - name: Chromium regression tests
-        if: ${{ !inputs.full }}
+        if: ${{ !(inputs.full || github.event_name == 'schedule') }}
         working-directory: Front
         run: |
           npx --no-install playwright install --with-deps --only-shell chromium
           npm run test:e2e -- --project=unit --project=chromium --workers=2
       - name: Full browser regression tests
-        if: ${{ inputs.full }}
+        if: ${{ (inputs.full || github.event_name == 'schedule') }}
         working-directory: Front
         run: |
           npx --no-install playwright install --with-deps --only-shell chromium firefox webkit
@@ -92,7 +117,7 @@ jobs:
           npm run check --prefix Judge
           python3 -m unittest discover -s Judge/runtime -p 'test_*.py'
       - name: go-judge language and isolation regression tests
-        if: ${{ inputs.full }}
+        if: ${{ (inputs.full || github.event_name == 'schedule') }}
         env:
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: |
@@ -114,7 +139,7 @@ jobs:
           node scripts/check-migrations.mjs
           node scripts/run-integration.mjs e2e
       - name: Native judging pipeline
-        if: ${{ inputs.full }}
+        if: ${{ (inputs.full || github.event_name == 'schedule') }}
         working-directory: Back
         env:
           NODE_ENV: test
@@ -127,7 +152,7 @@ jobs:
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: node scripts/run-integration.mjs pipeline
       - name: Full Compose browser flow
-        if: ${{ inputs.full }}
+        if: ${{ (inputs.full || github.event_name == 'schedule') }}
         run: node scripts/check-compose.mjs --production
       - name: Failed browser test artifacts (disposable test data only)
         if: ${{ failure() }}
@@ -143,8 +168,8 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Sandbox failure logs
-        if: ${{ failure() && inputs.full }}
+        if: ${{ failure() && (inputs.full || github.event_name == 'schedule') }}
         run: docker compose logs --no-color go-judge
       - name: Stop sandbox
-        if: ${{ always() && inputs.full }}
+        if: ${{ always() && (inputs.full || github.event_name == 'schedule') }}
         run: docker compose stop go-judge

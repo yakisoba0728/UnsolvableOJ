@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:17-alpine
+    image: postgres:17.11-alpine
     environment:
       POSTGRES_DB: unsolvable_oj
       POSTGRES_USER: unsolvable
@@ -16,7 +16,7 @@ services:
       retries: 10
 
   redis:
-    image: redis:8-alpine
+    image: redis:8.10.3-alpine
     command: redis-server --appendonly yes
     ports:
       - "127.0.0.1:6379:6379"
@@ -91,6 +91,8 @@ services:
   judge:
     build:
       context: ./Judge
+    # healthcheck가 멈춘 워커를 종료하려면 node가 PID 1이 아니어야 합니다.
+    init: true
     environment:
       API_BASE_URL: http://back:3000/api/v1
       JUDGE_SERVICE_TOKEN: local-dev-only-judge-service-token-0123456789

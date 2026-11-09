@@ -2,6 +2,7 @@ import { getQueueToken } from '@nestjs/bullmq';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import type { Queue } from 'bullmq';
+import { Redis } from 'ioredis';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
 import { JUDGE_QUEUE } from '../src/common/queue.constants.js';
@@ -11,7 +12,23 @@ export const base = '/api/v1';
 export const bearer = (token: string) => ({ Authorization: `Bearer ${token}` });
 const password = 'test-password-123';
 
+// 속도 제한 카운터는 Redis에 남으므로, 앞선 파일의 요청 수를 물려받지 않게 앱마다 비운다.
+async function resetThrottle() {
+  const redis = new Redis({
+    host: process.env.REDIS_HOST,
+    port: Number(process.env.REDIS_PORT),
+    db: Number(process.env.REDIS_DB),
+  });
+  try {
+    const keys = await redis.keys('throttle:*');
+    if (keys.length) await redis.del(...keys);
+  } finally {
+    await redis.quit();
+  }
+}
+
 export async function createApp() {
+  await resetThrottle();
   const module = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();

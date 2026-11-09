@@ -21,6 +21,8 @@ services:
       - -copy-out-limit=64m
   judge:
     build: ..
+    # healthcheck가 멈춘 워커를 종료하려면 node가 PID 1이 아니어야 합니다.
+    init: true
     mem_limit: ${JUDGE_MEMORY_LIMIT:-512m}
     restart: unless-stopped
     # 종료 시 진행 중인 채점을 마치도록 기다립니다(기본 10초면 채점 중 SIGKILL).

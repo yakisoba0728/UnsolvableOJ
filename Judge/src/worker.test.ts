@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm, stat, utimes } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import timers, { setImmediate } from "node:timers/promises";
 import { test, type TestContext } from "node:test";
 import { SandboxUnavailableError, type Claim, type JudgeResult, type judge } from "./judge.js";
@@ -100,8 +103,8 @@ function harness(
   });
   return {
     requests, intervals, sleeps, consumer, consume, errors, logs,
-    start: (token = "unit-token") => startWorker(
-      { url: "http://api.test/api/v1", token },
+    start: (token = "unit-token", heartbeatFile?: string) => startWorker(
+      { url: "http://api.test/api/v1", token, heartbeatFile },
       { url: "http://sandbox.test", token: "sandbox-token" },
       consume, runJudge,
     ),
@@ -314,6 +317,29 @@ test("a lease HTTP 409 remains definitive even if discarding its response body f
   await invocation;
   assert.match(String(signal?.reason), /HTTP 409/);
   assert.equal(h.requests.filter((request) => request.path.endsWith("/result")).length, 0);
+});
+
+test("only successful worker heartbeats refresh the container health file", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "judge-heartbeat-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const file = join(dir, "heartbeat");
+  let presence = 200;
+  const h = harness(t, (request) => Response.json({}, {
+    status: request.path === "/api/v1/internal/judge/heartbeat" ? presence : 200,
+  }));
+  const running = await h.start("unit-token", file);
+  t.after(() => running.close());
+  await utimes(file, 0, 0);
+  presence = 503;
+  await h.heartbeat();
+  assert.equal((await stat(file)).mtimeMs, 0);
+  presence = 200;
+  await h.heartbeat();
+  // writeFile은 threadpool에서 끝나므로 잠시 기다립니다.
+  for (let i = 0; (await stat(file)).mtimeMs === 0; i++) {
+    assert.ok(i < 100, "heartbeat file was not refreshed");
+    await new Promise((resolve) => globalThis.setTimeout(resolve, 10));
+  }
 });
 
 test("transient worker presence failures neither stop the worker nor abort active judging", async (t) => {
