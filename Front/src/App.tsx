@@ -41,6 +41,9 @@ const MyProblemsPage = lazyPage(() => import("./pages/MyProblemsPage"), "MyProbl
 const ProblemPage = lazyPage(() => import("./pages/ProblemPage"), "ProblemPage");
 const ProblemsPage = lazyPage(() => import("./pages/ProblemsPage"), "ProblemsPage");
 const ProfilePage = lazyPage(() => import("./pages/ProfilePage"), "ProfilePage");
+const RankingsPage = lazyPage(() => import("./pages/RankingsPage"), "RankingsPage");
+const SettingsPage = lazyPage(() => import("./pages/SettingsPage"), "SettingsPage");
+const UserPage = lazyPage(() => import("./pages/UserPage"), "UserPage");
 const SubmissionPage = lazyPage(() => import("./pages/SubmissionPage"), "SubmissionPage");
 const SubmissionsPage = lazyPage(() => import("./pages/SubmissionsPage"), "SubmissionsPage");
 
@@ -132,6 +135,12 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
                 path="/profile"
                 element={session ? <ProfilePage key={session.user.id} /> : loginRedirect}
               />
+              <Route
+                path="/settings"
+                element={session ? <SettingsPage key={session.user.id} /> : loginRedirect}
+              />
+              <Route path="/rankings" element={<RankingsPage />} />
+              <Route path="/users/:username" element={<UserPage />} />
               <Route path="/community" element={<CommunityPage />} />
               {/* 계정이나 글이 바뀌면 이전 작성자의 폼 상태를 재사용하지 않는다. */}
               <Route

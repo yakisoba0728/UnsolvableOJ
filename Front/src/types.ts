@@ -108,7 +108,30 @@ export interface RankingEntry {
   xp: number;
   rating: number;
   solvedCount: number;
+  /** 1부터 센 전체 순위(XP 내림차순, 가입 순) */
+  rank?: number;
 }
+
+/** GET /users/:username. 이메일·역할은 공개하지 않는다. */
+export interface PublicProfile {
+  id: string;
+  username: string;
+  level: number;
+  xp: number;
+  rank: number;
+  /** 비공개 전환된 문제까지 센 전체 해결 수(랭킹과 같은 기준) */
+  solvedCount: number;
+  createdAt: string;
+  badges: { badge: string; awardedAt: string }[];
+  /** 공개 문제 중 해결한 문제, 최근 해결 순 */
+  solvedProblems: { id: string; slug: string; title: string; difficulty: Difficulty; solvedAt: string }[];
+}
+
+/** 미션 배지 id의 화면 이름. 모르는 id는 호출하는 쪽에서 그대로 보여 준다. */
+export const BADGE_LABELS: Record<string, string> = {
+  "night-coder": "심야 코더",
+  "seven-day-streak": "7일 연속 학습",
+};
 
 export interface Page<T> {
   items: T[];

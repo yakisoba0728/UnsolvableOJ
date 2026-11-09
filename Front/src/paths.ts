@@ -4,3 +4,7 @@ export const problemPath = (slug: string) =>
 /** 코드 분석 문제 화면 주소 */
 export const analysisPath = (id: string) =>
   `/analysis/${encodeURIComponent(id)}`;
+
+/** 공개 프로필 주소 */
+export const userPath = (username: string) =>
+  `/users/${encodeURIComponent(username)}`;

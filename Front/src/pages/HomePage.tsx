@@ -17,7 +17,7 @@ import {
   useSubmissionHistory,
 } from "../hooks";
 import { LANGUAGES } from "../types";
-import { problemPath } from "../paths";
+import { problemPath, userPath } from "../paths";
 import { difficultyLabel } from "../difficulty";
 
 export function HomePage() {
@@ -95,7 +95,9 @@ export function HomePage() {
         <section className="ranking-card" aria-label="랭킹">
           <div className="ranking-card-heading">
             <h2>랭킹</h2>
-            <span className="muted">XP 기준</span>
+            <span className="muted">
+              XP 기준 · <Link to="/rankings">전체 보기</Link>
+            </span>
           </div>
           {rankLoading ? (
             <SkeletonRegion
@@ -119,7 +121,7 @@ export function HomePage() {
                 >
                   <span className="ranking-position">{index + 1}</span>
                   <span className="ranking-name">
-                    {entry.username}
+                    <Link to={userPath(entry.username)}>{entry.username}</Link>
                     <small>Lv.{entry.level}</small>
                   </span>
                   <span className="ranking-xp">
@@ -131,7 +133,7 @@ export function HomePage() {
                 <li className="ranking-row current">
                   <span className="ranking-position">{myRank + 1}</span>
                   <span className="ranking-name">
-                    {profile.username} · 나
+                    <Link to={userPath(profile.username)}>{profile.username}</Link> · 나
                     <small>Lv.{profile.level}</small>
                   </span>
                   <span className="ranking-xp">

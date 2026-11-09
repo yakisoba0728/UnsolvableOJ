@@ -31,7 +31,7 @@ import {
 } from "../community/store";
 import { categoryLabel } from "../community/types";
 import { useDocumentTitle, useFlashNotice } from "../hooks";
-import { problemPath } from "../paths";
+import { problemPath, userPath } from "../paths";
 
 const MIN_ANSWER = 5;
 const ANSWER_PAGE_SIZE = 20;
@@ -392,7 +392,9 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
                   {post.author.name.slice(0, 1)}
                 </span>
                 <span className="post-author-text">
-                  <strong>{post.author.name}</strong>
+                  <strong>
+                    <Link to={userPath(post.author.name)}>{post.author.name}</Link>
+                  </strong>
                   <span className="muted">
                     {post.author.tier} · {relativeTime(post.createdAt)}
                   </span>
@@ -533,7 +535,8 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
                     >
                       <div className="answer-head">
                         <span>
-                          {answer.author.name} · {answer.author.tier}
+                          <Link to={userPath(answer.author.name)}>{answer.author.name}</Link>{" "}
+                          · {answer.author.tier}
                           {accepted ? (
                             <span className="answer-accepted">채택된 답변</span>
                           ) : null}
