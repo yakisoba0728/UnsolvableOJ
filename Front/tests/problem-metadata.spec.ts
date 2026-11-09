@@ -114,7 +114,7 @@ test("authors save deduplicated tags and the editorial", async ({ page }) => {
   await page.getByText("해설 (선택)").click();
   await page.getByLabel("해설 (Markdown)").fill("## 풀이");
   await page.getByLabel("입력", { exact: true }).fill("1 2");
-  await page.getByLabel("기대 출력").fill("3");
+  await page.getByLabel("기대 출력", { exact: true }).fill("3");
   await page.getByRole("button", { name: "문제 게시하기 →" }).click();
   await expect(page).toHaveURL(/\/problems\/view\/new$/);
   expect(submitted).toMatchObject({

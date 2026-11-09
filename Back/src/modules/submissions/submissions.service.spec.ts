@@ -447,7 +447,12 @@ describe('submission debug output lifecycle', () => {
       expect(submission.acceptedForXp).toBe(accepted);
       expect(submission.completedForLearning).toBe(accepted);
       expect(manager.save).toHaveBeenCalledTimes(1);
-      expect(manager.query).not.toHaveBeenCalled();
+      // 해결 기록·XP는 건드리지 않고 채점 완료 알림만 한 번 남긴다(같은 판정 재전송은 쓰지 않음).
+      expect(manager.query).toHaveBeenCalledTimes(1);
+      expect(manager.query).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO notifications'),
+        [submission.id],
+      );
     },
   );
 
