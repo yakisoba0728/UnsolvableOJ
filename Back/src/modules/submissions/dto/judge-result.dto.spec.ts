@@ -57,7 +57,8 @@ describe('judge debug output validation', () => {
       [{ ...testResult, memoryKb: 1_000_000_001 }],
       [{ ...testResult, isSample: 'false' }],
       [{ ...testResult, runtimeMs: 1.5 }],
-      Array(101).fill(testResult),
+      Array(10_001).fill(testResult),
+      [{ ...testResult, testCase: 10_001 }],
     ]) {
       expect(
         (

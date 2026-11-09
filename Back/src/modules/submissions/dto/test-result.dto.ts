@@ -5,7 +5,7 @@ import { SubmissionStatus } from '../submission.enums.js';
 export class TestResultDto {
   @IsInt()
   @Min(1)
-  @Max(1000)
+  @Max(10_000)
   testCase: number;
 
   @IsBoolean()
