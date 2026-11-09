@@ -191,8 +191,13 @@ test("a non-finite workload cannot create an infinite deadline", async () => {
 
 for (const [name, stdout, expected, status] of [
   ["trailing ASCII whitespace", "3\t\r\n ", "3\n", "ACCEPTED"],
-  ["internal whitespace", "3 \n4\n", "3\n4\n", "WRONG_ANSWER"],
-  ["internal CRLF", "3\r\n4\n", "3\n4\n", "WRONG_ANSWER"],
+  ["trailing spaces on each line", "3 \n4\t\n", "3\n4\n", "ACCEPTED"],
+  ["expected output with trailing spaces", "3\n4", "3 \n4  \n\n", "ACCEPTED"],
+  ["CRLF line endings", "3\r\n4\r\n", "3\n4\n", "ACCEPTED"],
+  ["whitespace inside a line", "3  4\n", "3 4\n", "WRONG_ANSWER"],
+  ["leading whitespace", " 3\n", "3\n", "WRONG_ANSWER"],
+  ["blank line between lines", "3\n\n4\n", "3\n4\n", "WRONG_ANSWER"],
+  ["missing line", "3\n", "3\n4\n", "WRONG_ANSWER"],
   ["non-ASCII whitespace", "3\u00a0", "3", "WRONG_ANSWER"],
   ["invalid UTF-8", Buffer.from([0xff]), "\ufffd", "WRONG_ANSWER"],
   ["NUL bytes", Buffer.from([51, 0]), "3", "WRONG_ANSWER"],

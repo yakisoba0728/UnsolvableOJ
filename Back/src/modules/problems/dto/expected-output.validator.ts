@@ -9,7 +9,7 @@ export class ExpectedOutputValidator implements ValidatorConstraintInterface {
   validate(value: unknown): boolean {
     if (typeof value !== 'string') return false;
     let end = value.length;
-    // Match the judge's byte-wise rstrip, not JavaScript's Unicode trimEnd.
+    // The judge's byte-wise rstrip of the whole output (an upper bound of its per-line rstrip), not JavaScript's Unicode trimEnd.
     while (end > 0 && /[\t\n\v\f\r ]/.test(value[end - 1])) end--;
     return Buffer.byteLength(value.slice(0, end), 'utf8') <= 999_999;
   }
