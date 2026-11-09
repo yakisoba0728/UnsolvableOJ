@@ -209,7 +209,14 @@ export function NotificationBell({ token }: { token: string }) {
                 const { to, text } = describe(item);
                 return (
                   <li key={item.id} className={item.readAt ? "" : "unread"}>
-                    <Link to={to} onClick={() => markRead(item)}>
+                    <Link
+                      to={to}
+                      onClick={() => {
+                        markRead(item);
+                        // 지연 로딩 화면은 주소 변경이 늦게 반영되므로 누르는 즉시 닫는다.
+                        setOpen(false);
+                      }}
+                    >
                       <span>{text}</span>
                       <small className="muted">
                         {item.readAt ? "" : "새 알림 · "}

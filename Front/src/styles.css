@@ -222,7 +222,8 @@ p {
 }
 .button:active:not(:disabled) { transform: translateY(0) scale(0.98); }
 .button-small {
-  min-height: 37px;
+  /* 헤더의 아이콘 버튼(40px)과 같은 줄에 놓여 높이를 맞춘다 */
+  min-height: 40px;
   padding: 0 16px;
   font-size: 13px;
 }
@@ -1137,7 +1138,8 @@ input::placeholder, textarea::placeholder { color: var(--color-ink-600); opacity
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-top: 8px;
+  /* 제목 줄 수가 달라도 카드 아랫줄을 맞춘다 */
+  margin-top: auto;
 }
 
 /* 문제 목록 */
@@ -2604,7 +2606,8 @@ input,
     row-gap: 4px;
   }
   .solve-heading h1 {
-    flex: 1 1 0;
+    /* 0으로 두면 난이도 배지가 남긴 폭에 제목이 한 단어씩 꺾인다 */
+    flex: 1 1 100%;
     min-width: 0;
   }
 }
@@ -4805,7 +4808,10 @@ h3 {
   gap: 8px;
 }
 /* 내 문제 */
+/* 행마다 따로 grid면 열 폭이 행마다 달라 상태·버튼 위치가 어긋나므로 목록이 열을 정하고 행은 subgrid로 따른다 */
 .my-problem-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -4815,7 +4821,8 @@ h3 {
 }
 .my-problem-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: center;
   gap: 16px;
   padding: 16px 20px;
@@ -4872,9 +4879,12 @@ h3 {
   .editor-actions {
     justify-content: flex-end;
   }
+  .my-problem-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .my-problem-row {
-    grid-template-columns: 1fr;
     gap: 10px;
+    justify-items: start;
   }
   .step-nav {
     top: 68px;
@@ -7300,33 +7310,6 @@ textarea {
   color: var(--color-primary);
   font-variant-numeric: tabular-nums;
 }
-/* 연속 학습: 진행 막대와 이번 주 기록을 가로로 */
-.mission-streak {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 24px;
-  min-height: 0;
-}
-.mission-streak-main {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-}
-.mission-streak-week {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 12px;
-  align-self: stretch;
-  padding-left: 24px;
-  border-left: 1px solid var(--color-divider);
-}
-.mission-streak-week small {
-  color: var(--color-ink-600);
-  font-size: 13px;
-}
 .mission-deadline {
   font-size: 13px;
   font-variant-numeric: tabular-nums;
@@ -7367,18 +7350,6 @@ textarea {
 @media (max-width: 720px) {
   .mission-grid {
     grid-template-columns: minmax(0, 1fr);
-  }
-}
-/* 연속 학습 카드가 좁아지는 구간(두 칸 배치 821~1259px)과 폰에서는 막대 아래로 요일 기록을 내린다 */
-@media (max-width: 720px), (min-width: 821px) and (max-width: 1259px) {
-  .mission-streak {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
-  }
-  .mission-streak-week {
-    padding: 16px 0 0;
-    border-left: 0;
-    border-top: 1px solid var(--color-divider);
   }
 }
 @media (max-width: 600px) {
@@ -7480,7 +7451,7 @@ textarea {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   gap: 24px;
-  align-items: start;
+  align-items: stretch;
 }
 .ent-card h2 {
   margin: 0 0 20px;
@@ -7718,29 +7689,6 @@ textarea {
   }
 }
 
-/* 연속 학습 카드가 XP 두 배 카드와 같은 폭이라, 카드 안 요일 기록은 조금 작게 그린다 */
-.mission-streak-week .week-strip {
-  gap: 6px;
-}
-.mission-streak-week .week-strip i {
-  width: 26px;
-  height: 26px;
-}
-.mission-streak-week .week-strip li {
-  gap: 4px;
-  font-size: 12px;
-}
-/* 설명 문구가 열 폭을 키우지 않고 요일 기록 폭에 맞춰 줄바꿈된다 */
-.mission-streak-week small {
-  width: 0;
-  min-width: 100%;
-}
-@media (max-width: 720px), (min-width: 821px) and (max-width: 1259px) {
-  .mission-streak-week small {
-    width: auto;
-    min-width: 0;
-  }
-}
 
 /* 커뮤니티 API 연동: 문제 화면의 커뮤니티 링크, 본문 코드 블록과 좁은 화면 넘침 */
 .community-problem-links {
@@ -8222,4 +8170,37 @@ textarea {
 .settings-panel h2 {
   font-size: 16px;
   margin: 0 0 16px;
+}
+
+/* ===== 정렬 보정 ===== */
+/* 체크박스 한 줄 선택지: 기본 입력 규칙(폭 100%·높이 44px)과 폼 label의 세로 배치(.form-grid label)를 덮는다 */
+label.check-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-weight: var(--weight-label);
+}
+label.check-row input[type="checkbox"] {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+}
+/* 열 폭이 행끼리 공유되므로 상태 배지는 글자 폭으로 둔다 */
+.my-problem-row > .case-pill {
+  justify-self: start;
+}
+/* 좁은 화면 하단 고정 바의 버튼 글자가 두 줄로 꺾이지 않게 한다 */
+.editor-actions > * {
+  white-space: nowrap;
+}
+/* 빈 상태·오류 안내 문단: 상자는 가운데에 두되, 여러 줄이면 왼쪽 정렬로 읽히게 한다(한 줄이면 상자가 글자 폭이라 그대로 가운데) */
+.empty-state p,
+.ent-empty p,
+.not-found-state p,
+.notfound-page p {
+  width: fit-content;
+  max-width: min(100%, 46ch);
+  margin-inline: auto;
+  text-align: left;
 }

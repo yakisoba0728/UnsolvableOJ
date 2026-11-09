@@ -141,7 +141,6 @@
   color: var(--color-primary);
 }
 .profile-post-pair {
-  align-items: start;
   flex: 0 0 auto;
   gap: var(--panel-gap);
 }
