@@ -8379,6 +8379,7 @@ label.check-row input[type="radio"] {
 .ent-result-card ul {
   margin: 12px 0 0;
   padding-left: 20px;
+}
 /* ===== 계정 설정: 로그인 기기 ===== */
 .session-list {
   list-style: none;
