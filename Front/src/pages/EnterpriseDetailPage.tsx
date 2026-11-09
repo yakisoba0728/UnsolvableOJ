@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
@@ -35,7 +35,23 @@ export function EnterpriseDetailPage() {
   const now = useNow(10_000);
   const { data: test, loading: testLoading, error: testError, retry } = useEnterpriseTest(session, id);
   const { problems, loading } = useEnterpriseProblems(session);
-  const results = useTestResults(session, id, Boolean(test?.attemptCount));
+  const liveStatus = test ? testStatus(test, now) : null;
+  // 응시자가 아직 없어도 시작된 테스트는 결과를 받아, 응시가 생기면 바로 보이게 한다.
+  const results = useTestResults(session, id, liveStatus !== null && liveStatus !== "scheduled");
+  const refreshResults = results.retry;
+  // 진행 중에는 30초마다 다시 받는다. 탭이 숨겨져 있으면 쉬고, 돌아오면 바로 받는다.
+  useEffect(() => {
+    if (liveStatus !== "running") return;
+    const refresh = () => {
+      if (!document.hidden) refreshResults();
+    };
+    const timer = setInterval(refresh, 30_000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [liveStatus, refreshResults]);
   useDocumentTitle(test?.title ?? "테스트 상세");
 
   if (!session)
@@ -98,6 +114,8 @@ export function EnterpriseDetailPage() {
   }
   const link = inviteUrl(test.inviteCode);
   const summary = results.data?.summary;
+  // 테스트 정보는 처음 연 때의 값이라, 자동 갱신되는 결과의 응시자 수를 우선한다.
+  const attemptCount = summary?.candidates ?? test.attemptCount;
 
   return (
     <div className="page-width enterprise-page">
@@ -115,7 +133,7 @@ export function EnterpriseDetailPage() {
               </Link>
             ) : null}
             {/* 응시 기록이 있으면 서버가 삭제를 거절하므로 버튼을 두지 않는다. */}
-            {test.attemptCount === 0 ? (
+            {attemptCount === 0 ? (
               <button className="button button-outline ent-danger" onClick={() => void remove()}>
                 삭제
               </button>
@@ -182,7 +200,7 @@ export function EnterpriseDetailPage() {
             <dl className="ent-summary">
               <div>
                 <dt>응시자</dt>
-                <dd>{test.attemptCount}명</dd>
+                <dd>{attemptCount}명</dd>
               </div>
               <div>
                 <dt>평균 점수</dt>
@@ -201,9 +219,22 @@ export function EnterpriseDetailPage() {
             </p>
             <CopyButton text={link} label="링크 복사" />
             <p className="muted ent-note">
-              로그인한 사람은 누구나 이 링크로 한 번 응시할 수 있어요. 응시
-              기간 안에 시작하면 그때부터 {test.durationMin}분이 주어집니다.
+              {test.inviteOnly
+                ? `초대한 ${test.invitees.length}명만 이 링크로 한 번 응시할 수 있어요.`
+                : "로그인한 사람은 누구나 이 링크로 한 번 응시할 수 있어요."}{" "}
+              응시 기간 안에 시작하면 그때부터 {test.durationMin}분이 주어집니다.
+              {test.showScoreToCandidates ? " 응시를 마친 사람은 자기 점수를 볼 수 있어요." : ""}
             </p>
+            {test.inviteOnly ? (
+              <details className="ent-note">
+                <summary>초대 목록 보기</summary>
+                <ul>
+                  {test.invitees.map((invitee) => (
+                    <li key={invitee}>{invitee}</li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
           </section>
           {test.description ? (
             <section className="form-card ent-card" aria-labelledby="ent-guide-title">
@@ -223,7 +254,7 @@ export function EnterpriseDetailPage() {
             </button>
           ) : null}
         </div>
-        {!test.attemptCount ? (
+        {!attemptCount ? (
           <p className="muted">아직 응시한 사람이 없어요. 응시 링크를 보내 보세요.</p>
         ) : results.error && !results.data ? (
           <p className="error-message" role="alert">

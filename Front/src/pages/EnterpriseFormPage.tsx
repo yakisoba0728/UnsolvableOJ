@@ -7,6 +7,7 @@ import { deviceTimeZone } from "../components/EnterpriseSchedule";
 import {
   LIMITS,
   draftToInput,
+  parseInvitees,
   testStatus,
   toLocalInput,
   validateDraft,
@@ -24,6 +25,7 @@ const fieldIds: Record<keyof TestErrors, string> = {
   endsAt: "ent-end",
   durationMin: "ent-duration",
   problemIds: "ent-problems",
+  invitees: "ent-invitees",
   description: "ent-description",
 };
 const fieldOrder: (keyof TestErrors)[] = [
@@ -32,6 +34,7 @@ const fieldOrder: (keyof TestErrors)[] = [
   "endsAt",
   "durationMin",
   "problemIds",
+  "invitees",
   "description",
 ];
 
@@ -44,6 +47,9 @@ function initialDraft(existing?: EnterpriseTest): TestDraft {
       endsAt: toLocalInput(new Date(existing.endsAt)),
       durationMin: String(existing.durationMin),
       problemIds: existing.problemIds,
+      inviteOnly: existing.inviteOnly,
+      invitees: existing.invitees.join("\n"),
+      showScoreToCandidates: existing.showScoreToCandidates,
     };
   const start = new Date();
   start.setHours(start.getHours() + 1, 0, 0, 0);
@@ -55,6 +61,9 @@ function initialDraft(existing?: EnterpriseTest): TestDraft {
     endsAt: toLocalInput(end),
     durationMin: "90",
     problemIds: [],
+    inviteOnly: false,
+    invitees: "",
+    showScoreToCandidates: false,
   };
 }
 
@@ -375,6 +384,65 @@ function TestForm({ token, existing }: { token: string; existing?: EnterpriseTes
             </span>
           </section>
         </div>
+
+        <section className="form-card ent-card ent-access" aria-labelledby="ent-access">
+          <h2 id="ent-access">응시 대상</h2>
+          <div className="form-stack">
+            <fieldset className="ent-access-choice">
+              <legend className="sr-only">응시할 수 있는 사람</legend>
+              <label className="check-row">
+                <input
+                  type="radio"
+                  name="ent-access"
+                  checked={!draft.inviteOnly}
+                  onChange={() => patch({ inviteOnly: false })}
+                />
+                링크를 아는 로그인 사용자 누구나
+              </label>
+              <label className="check-row">
+                <input
+                  type="radio"
+                  name="ent-access"
+                  checked={draft.inviteOnly}
+                  onChange={() => patch({ inviteOnly: true })}
+                />
+                초대한 사람만
+              </label>
+            </fieldset>
+            {draft.inviteOnly ? (
+              <div className="field-group">
+                <div className="label-row">
+                  <label className="field-label" htmlFor={fieldIds.invitees}>
+                    초대할 사람
+                  </label>
+                  <span className="field-help" aria-live="polite">
+                    {parseInvitees(draft.invitees).length} / {LIMITS.maxInvitees}명
+                  </span>
+                </div>
+                <textarea
+                  id={fieldIds.invitees}
+                  rows={5}
+                  value={draft.invitees}
+                  placeholder={"사용자 이름 또는 이메일\n예: kim_dev, lee@example.com"}
+                  onChange={(event) => patch({ invitees: event.target.value })}
+                  {...aria("invitees")}
+                />
+                <span className="field-help">
+                  줄바꿈이나 쉼표로 구분해요. 이메일로 초대하면 그 이메일로 가입한 계정이 응시할 수 있어요.
+                </span>
+                {err("invitees")}
+              </div>
+            ) : null}
+            <label className="check-row">
+              <input
+                type="checkbox"
+                checked={draft.showScoreToCandidates}
+                onChange={(event) => patch({ showScoreToCandidates: event.target.checked })}
+              />
+              응시를 마친 사람에게 자기 점수와 문제별 정답 여부 보여 주기
+            </label>
+          </div>
+        </section>
 
         <div className="ent-form-actions">
           <Link
