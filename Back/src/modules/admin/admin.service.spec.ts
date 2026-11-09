@@ -3,6 +3,7 @@ import type { Queue } from 'bullmq';
 import type { DataSource, Repository } from 'typeorm';
 import { describe, expect, it, vi } from 'vitest';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
+import type { PasswordHasher } from '../auth/password-hasher.service.js';
 import { UserRole } from '../users/user-role.enum.js';
 import type { User } from '../users/user.entity.js';
 import { AdminService } from './admin.service.js';
@@ -29,6 +30,7 @@ describe('AdminService.changeRole', () => {
         {} as Queue,
         {} as Repository<User>,
         {} as Repository<AuditEvent>,
+        {} as PasswordHasher,
       ),
       db,
       manager,

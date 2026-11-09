@@ -37,6 +37,11 @@ export interface Session {
   accessToken: string;
   tokenType: string;
   expiresIn: string;
+  /** 로그인·가입·refresh·비밀번호 변경 응답에만 있다. 사용자 이름 변경 응답은 지금 것을 이어 쓴다. */
+  refreshToken?: string;
+  refreshTokenExpiresAt?: string;
+  /** 로그인 유지(30일) 여부. 아니면 refresh token은 12시간 유효하다. */
+  remember?: boolean;
   user: User;
 }
 

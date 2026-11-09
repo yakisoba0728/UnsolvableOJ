@@ -25,6 +25,7 @@ const roleLabels: Record<Role, string> = {
 const actionLabels: Record<string, string> = {
   "user.role": "역할 변경",
   "user.suspend": "계정 정지",
+  "user.temporary_password": "임시 비밀번호 발급",
   "user.unsuspend": "정지 해제",
   "problem.create": "문제 생성",
   "problem.update": "문제 수정",

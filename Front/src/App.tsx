@@ -14,6 +14,7 @@ import {
   useNavigationType,
   useNavigate,
 } from "react-router-dom";
+import { api } from "./api";
 import { canAuthor, useAuth } from "./auth";
 import { HomePage } from "./pages/HomePage";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -98,6 +99,12 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
         links={menu}
         onSignOut={() => {
           signedOutRef.current = true;
+          // 서버의 refresh token도 끊는다. 실패해도(오프라인 등) 이 브라우저에서는 로그아웃한다.
+          if (session?.refreshToken)
+            void api("/auth/logout", {
+              method: "POST",
+              body: JSON.stringify({ refreshToken: session.refreshToken }),
+            }).catch(() => {});
           setSession(null);
           navigate("/");
         }}

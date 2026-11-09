@@ -5,6 +5,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -52,6 +53,14 @@ export class AdminController {
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     return this.admin.changeRole(id, dto.role, actor);
+  }
+
+  @Post('users/:id/temporary-password')
+  issueTemporaryPassword(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.admin.issueTemporaryPassword(id, actor);
   }
 
   @Get('audit')

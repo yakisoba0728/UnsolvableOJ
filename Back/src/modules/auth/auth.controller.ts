@@ -13,7 +13,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { AuthService } from './auth.service.js';
 import type { AuthenticatedUser } from './auth.types.js';
 import { ChangePasswordDto, ChangeUsernameDto } from './dto/account.dto.js';
-import { LoginDto } from './dto/login.dto.js';
+import { LoginDto, RefreshTokenDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 
@@ -33,6 +33,20 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('refresh')
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
+  @HttpCode(HttpStatus.OK)
+  refresh(@Body() dto: RefreshTokenDto) {
+    return this.authService.refresh(dto.refreshToken);
+  }
+
+  @Post('logout')
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  logout(@Body() dto: RefreshTokenDto) {
+    return this.authService.logout(dto.refreshToken);
   }
 
   @Patch('password')

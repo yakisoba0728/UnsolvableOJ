@@ -32,6 +32,7 @@ export function AuthPage({ getNavigationVersion }: { getNavigationVersion: () =>
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
   const [touched, setTouched] = useState<Record<Field, boolean>>({
     email: false,
     username: false,
@@ -112,7 +113,7 @@ export function AuthPage({ getNavigationVersion }: { getNavigationVersion: () =>
         body: JSON.stringify(
           mode === "register"
             ? { email, username, password }
-            : { email, password },
+            : { email, password, ...(remember ? { remember: true } : {}) },
         ),
       });
       if (!ownsRequest()) return;
@@ -215,6 +216,24 @@ export function AuthPage({ getNavigationVersion }: { getNavigationVersion: () =>
             {fieldError("password") ??
               (register ? <span className="field-help">10자 이상</span> : null)}
           </div>
+          {register ? null : (
+            <>
+              <label className="check-row">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(event) => setRemember(event.target.checked)}
+                />
+                로그인 유지
+              </label>
+              <p className="field-help">
+                {remember
+                  ? "30일 동안 로그인 상태를 유지합니다. 공용 기기에서는 끄세요."
+                  : "사이트를 12시간 쓰지 않으면 다시 로그인해야 합니다."}{" "}
+                비밀번호를 잊었다면 관리자에게 임시 비밀번호를 요청하세요.
+              </p>
+            </>
+          )}
           {error ? (
             <p className="error-message" role="alert">
               {error}

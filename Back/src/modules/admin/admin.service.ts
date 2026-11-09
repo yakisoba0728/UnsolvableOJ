@@ -7,6 +7,7 @@ import {
 import { InjectQueue } from '@nestjs/bullmq';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import type { Queue } from 'bullmq';
+import { randomBytes } from 'node:crypto';
 import { DataSource, ILike, Repository, type FindOptionsWhere } from 'typeorm';
 import { recordAudit } from '../../common/database.js';
 import { findListPage } from '../../common/list-cursor.js';
@@ -15,7 +16,9 @@ import {
   JUDGE_WORKER_ONLINE_MS,
   JUDGE_WORKERS_KEY,
 } from '../../common/queue.constants.js';
+import { revokeRefreshTokens } from '../auth/auth.service.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
+import { PasswordHasher } from '../auth/password-hasher.service.js';
 import { UserRole } from '../users/user-role.enum.js';
 import { User } from '../users/user.entity.js';
 import { AuditEvent } from './audit-event.entity.js';
@@ -32,6 +35,7 @@ export class AdminService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(AuditEvent)
     private readonly auditRepository: Repository<AuditEvent>,
+    private readonly passwordHasher: PasswordHasher,
   ) {}
 
   async users(query: ListAdminUsersQuery) {
@@ -134,6 +138,34 @@ export class AdminService {
         });
       }
       return { id, role };
+    });
+  }
+
+  /** 이메일 없이 비밀번호를 되찾게 임시 비밀번호를 만든다. 기존 JWT·refresh token은 모두 끊는다. */
+  async issueTemporaryPassword(id: string, actor: AuthenticatedUser) {
+    if (id.toLowerCase() === actor.id.toLowerCase())
+      throw new ConflictException(
+        '자신의 비밀번호는 계정 설정에서 바꿔 주세요.',
+      );
+    // 18바이트 = base64url 24자(144비트). 응답으로 한 번만 보여 주고 감사 기록에는 남기지 않는다.
+    const temporaryPassword = randomBytes(18).toString('base64url');
+    const passwordHash = await this.passwordHasher.hash(temporaryPassword);
+    return this.db.transaction(async (manager) => {
+      const [rows]: [{ id: string }[], number] = await manager.query(
+        'UPDATE users SET password_hash = $1, token_version = token_version + 1, updated_at = now() WHERE id = $2 RETURNING id',
+        [passwordHash, id],
+      );
+      if (!rows.length) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+      await revokeRefreshTokens(manager, id);
+      await recordAudit(
+        manager,
+        actor.id,
+        'user.temporary_password',
+        'user',
+        id,
+        {},
+      );
+      return { temporaryPassword };
     });
   }
 
