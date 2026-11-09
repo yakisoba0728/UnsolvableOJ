@@ -48,6 +48,8 @@ export interface ProblemSummary {
   timeLimitMs: number;
   memoryLimitMb: number;
   createdAt: string;
+  /** 분류 태그(예: 수학, 그래프). 옛 응답에는 없을 수 있다. */
+  tags?: string[];
   /** 정답을 받은 사용자 수 */
   solverCount?: number;
   /** 채점이 끝난 제출 중 정답 비율(0–100). 제출이 없으면 null */
@@ -58,6 +60,8 @@ export interface Problem extends ProblemSummary {
   statementMarkdown: string;
   inputDescriptionMarkdown: string;
   outputDescriptionMarkdown: string;
+  /** 해설(Markdown). 없으면 빈 문자열 */
+  editorialMarkdown?: string;
   status: string;
   samples: { input: string; expectedOutput: string }[];
   updatedAt: string;

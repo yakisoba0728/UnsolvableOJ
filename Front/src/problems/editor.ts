@@ -24,6 +24,9 @@ export interface ProblemForm {
   outputDescription: string;
   hint: string;
   source: string;
+  /** 쉼표로 구분한 태그 입력값 */
+  tags: string;
+  editorial: string;
   cases: CaseForm[];
 }
 
@@ -54,6 +57,8 @@ export function blankForm(): ProblemForm {
     outputDescription: "",
     hint: "",
     source: "",
+    tags: "",
+    editorial: "",
     cases: [blankCase()],
   };
 }
@@ -97,6 +102,14 @@ export function splitStatement(text: string) {
   return { statement: rest, hint, source };
 }
 
+// ---- 태그: 서버 규칙(최대 10개, 1–30자, 중복 불가)과 같다 ----
+export const TAG_LIMIT = 10;
+export const TAG_MAX = 30;
+
+export function parseTags(text: string) {
+  return [...new Set(text.split(",").map((tag) => tag.trim()).filter(Boolean))];
+}
+
 // ---- 검증 ----
 export interface FormErrors {
   title?: string;
@@ -106,6 +119,7 @@ export interface FormErrors {
   statement?: string;
   inputDescription?: string;
   outputDescription?: string;
+  tags?: string;
   testCases?: string;
   /** 케이스 key → 메시지 */
   cases: Record<string, string>;
@@ -138,6 +152,11 @@ export function validate(form: ProblemForm, needsSlug: boolean): FormErrors {
       "입력 형식을 설명해 주세요. 입력이 없다면 “입력은 없다.”라고 적어 주세요.";
   if (!form.outputDescription.trim())
     errors.outputDescription = "출력 형식을 설명해 주세요.";
+  const tags = parseTags(form.tags);
+  if (tags.length > TAG_LIMIT)
+    errors.tags = `태그는 ${TAG_LIMIT}개까지 붙일 수 있어요.`;
+  else if (tags.some((tag) => tag.length > TAG_MAX))
+    errors.tags = `태그 하나는 ${TAG_MAX}자 이하로 적어 주세요.`;
   if (!form.cases.length)
     errors.testCases = "테스트케이스를 하나 이상 만들어 주세요.";
   return errors;
@@ -206,6 +225,7 @@ function firstErrorTarget(next: FormErrors, slugTaken: boolean) {
   if (next.title) return "title";
   if (next.slug || slugTaken) return "slug";
   if (next.timeLimitMs || next.memoryLimitMb) return "limits";
+  if (next.tags) return "tags";
   if (next.statement) return "statement";
   if (next.inputDescription) return "input-desc";
   if (next.outputDescription) return "output-desc";
@@ -241,6 +261,7 @@ export function reviewForm(
       ok: !errors.timeLimitMs && !errors.memoryLimitMb,
       target: "limits",
     },
+    { label: "태그 (선택)", ok: !errors.tags, target: "tags" },
     { label: "문제 본문", ok: !errors.statement, target: "statement" },
     { label: "입력 설명", ok: !errors.inputDescription, target: "input-desc" },
     {
@@ -270,7 +291,8 @@ export function reviewForm(
     !errors.title &&
     (editing || (!errors.slug && !slugTaken)) &&
     !errors.timeLimitMs &&
-    !errors.memoryLimitMb;
+    !errors.memoryLimitMb &&
+    !errors.tags;
   const stepDone: Record<string, boolean> = {
     "sec-basic": basicOk,
     "sec-statement":
@@ -327,6 +349,11 @@ function isDraft(value: unknown): value is ProblemDraft {
         "title", "slug", "statement", "inputDescription",
         "outputDescription", "hint", "source",
       ].every((key) => typeof form[key as keyof ProblemForm] === "string") &&
+      // 태그·해설 칸이 생기기 전의 초안도 열리게 한다(읽을 때 빈 값으로 채운다).
+      ["tags", "editorial"].every(
+        (key) => form[key as keyof ProblemForm] === undefined ||
+          typeof form[key as keyof ProblemForm] === "string",
+      ) &&
       DIFFICULTIES.includes(form.difficulty) &&
       typeof form.timeLimitMs === "number" &&
       typeof form.memoryLimitMb === "number" &&
@@ -351,6 +378,7 @@ export function readProblemDraft(scope: string): DraftRead {
     if (!raw || raw === "null") return { draft: null, failed: false };
     const value: unknown = JSON.parse(raw);
     if (!isDraft(value)) return { draft: null, failed: true };
+    value.form = { ...blankForm(), ...value.form };
     const result = { draft: value, failed: false };
     drafts.set(scope, result);
     return result;
@@ -397,6 +425,8 @@ export function isPristine(form: ProblemForm) {
     !form.outputDescription.trim() &&
     !form.hint.trim() &&
     !form.source.trim() &&
+    !form.tags.trim() &&
+    !form.editorial.trim() &&
     form.difficulty === "BEGINNER" &&
     form.timeLimitMs === 1000 &&
     form.memoryLimitMb === 256 &&

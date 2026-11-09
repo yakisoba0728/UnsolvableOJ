@@ -94,6 +94,7 @@ export function ProblemsPage() {
     .filter((value): value is SolveState =>
       ["solved", "attempted", "none"].includes(value),
     );
+  const selectedTag = params.get("t") ?? "";
   const rawSort = params.get("sort") ?? "latest";
   const legacySort = legacySorts[rawSort];
   const sort = legacySort?.sort ?? rawSort;
@@ -111,8 +112,14 @@ export function ProblemsPage() {
   // skip: 해당 그룹의 조건만 빼고 센다 → 칩의 숫자가 "그 칩을 눌렀을 때의 결과 수"가 된다
   const matches = (
     problem: ProblemSummary,
-    skip: "difficulty" | "status" | null,
+    skip: "difficulty" | "status" | "tag" | null,
   ) => {
+    if (
+      skip !== "tag" &&
+      selectedTag &&
+      !(problem.tags ?? []).includes(selectedTag)
+    )
+      return false;
     if (
       skip !== "difficulty" &&
       selectedDifficulties.length &&
@@ -177,6 +184,25 @@ export function ProblemsPage() {
       (p) => matches(p, "difficulty") && (!value || p.difficulty === value),
     ).length;
 
+  // 태그 목록은 받아 온 문제에서 모은다. 숫자는 태그 외의 조건을 적용한 결과 수다.
+  const tagCounts = new Map<string, number>();
+  for (const problem of problems)
+    if (matches(problem, "tag"))
+      for (const tag of problem.tags ?? [])
+        tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+  const knownTags = new Set(problems.flatMap((problem) => problem.tags ?? []));
+  if (selectedTag) knownTags.add(selectedTag);
+  const tagOptions = [
+    { value: "", label: "모든 태그" },
+    ...[...knownTags]
+      .sort(
+        (a, b) =>
+          (tagCounts.get(b) ?? 0) - (tagCounts.get(a) ?? 0) ||
+          a.localeCompare(b, "ko"),
+      )
+      .map((tag) => ({ value: tag, label: `${tag} (${tagCounts.get(tag) ?? 0})` })),
+  ];
+
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
   const visible = filtered.slice(
@@ -184,7 +210,7 @@ export function ProblemsPage() {
     current * PAGE_SIZE,
   );
   const hasFilter = Boolean(
-    selectedDifficulties.length || statuses.length || keyword,
+    selectedDifficulties.length || statuses.length || keyword || selectedTag,
   );
 
   // 이어 풀 문제(시도했지만 못 푼 가장 최근 문제). 없으면 가장 쉬운 안 푼 문제.
@@ -265,6 +291,14 @@ export function ProblemsPage() {
               onChange={(event) => setQueryText(event.target.value)}
             />
           </div>
+          {tagOptions.length > 1 ? (
+            <Select
+              ariaLabel="태그 필터"
+              value={selectedTag}
+              options={tagOptions}
+              onChange={(next) => update({ t: next || null })}
+            />
+          ) : null}
           <Select
             ariaLabel="정렬"
             value={sort}

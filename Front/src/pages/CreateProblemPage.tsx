@@ -25,6 +25,7 @@ import {
   composeStatement,
   editCases,
   isPristine,
+  parseTags,
   problemDraftScope,
   readProblemDraft,
   reviewForm,
@@ -74,6 +75,8 @@ function toForm(problem: ManagedProblem): ProblemForm {
     outputDescription: problem.outputDescriptionMarkdown,
     hint: parts.hint,
     source: parts.source,
+    tags: (problem.tags ?? []).join(", "),
+    editorial: problem.editorialMarkdown ?? "",
     cases: problem.testCases.length
       ? problem.testCases.map((item) => ({ ...blankCase(), ...item }))
       : [blankCase()],
@@ -297,6 +300,8 @@ export function CreateProblemPage() {
       statementMarkdown: composeStatement(form),
       inputDescriptionMarkdown: form.inputDescription,
       outputDescriptionMarkdown: form.outputDescription,
+      editorialMarkdown: form.editorial,
+      tags: parseTags(form.tags),
       difficulty: form.difficulty,
       timeLimitMs: form.timeLimitMs,
       memoryLimitMb: form.memoryLimitMb,
@@ -622,6 +627,28 @@ export function CreateProblemPage() {
                 </span>
               ) : null}
             </div>
+            <div className="field-group span-2" id="f-tags">
+              <label htmlFor="problem-tags" className="field-label">
+                태그 (선택)
+              </label>
+              <input
+                id="problem-tags"
+                value={form.tags}
+                placeholder="예: 구현, 수학, 그래프"
+                aria-invalid={Boolean(shown.tags)}
+                aria-describedby={shown.tags ? undefined : "problem-tags-help"}
+                onChange={(event) => patch({ tags: event.target.value })}
+              />
+              {shown.tags ? (
+                <span className="field-error" role="alert">
+                  {shown.tags}
+                </span>
+              ) : (
+                <span className="field-help" id="problem-tags-help">
+                  쉼표로 구분해 최대 10개, 각 30자까지 적어요. 문제 목록에서 태그로 찾을 수 있어요.
+                </span>
+              )}
+            </div>
           </div>
         </section>
 
@@ -690,6 +717,19 @@ export function CreateProblemPage() {
                     onChange={(event) => patch({ source: event.target.value })}
                   />
                 </div>
+              </div>
+            </details>
+            <details className="optional-box" open={Boolean(form.editorial)}>
+              <summary>해설 (선택)</summary>
+              <div className="form-stack">
+                <MarkdownField
+                  id="editorial"
+                  label="해설 (Markdown)"
+                  rows={6}
+                  value={form.editorial}
+                  onChange={(editorial) => patch({ editorial })}
+                  help="문제를 푼 사람에게 바로 보이고, 아직 못 푼 사람은 ‘스포일러 보기’를 눌러야 볼 수 있어요."
+                />
               </div>
             </details>
           </div>
