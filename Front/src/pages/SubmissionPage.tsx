@@ -44,9 +44,12 @@ export function SubmissionPage() {
     "",
     [isAuthor, session?.accessToken],
   );
+  // 기업 테스트 응시 제출은 서버가 ADMIN에게만 재채점을 허용한다.
   const canRejudge =
     session?.user.role === "ADMIN" ||
-    (isAuthor && mine.data.some((item) => item.id === submission?.problem.id));
+    (isAuthor &&
+      !submission?.attemptId &&
+      mine.data.some((item) => item.id === submission?.problem.id));
   const [rejudging, setRejudging] = useState(false);
   const [rejudgeError, setRejudgeError] = useState("");
   async function rejudge() {

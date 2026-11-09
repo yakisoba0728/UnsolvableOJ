@@ -102,6 +102,7 @@ export function toSubmissionResponse(
     status: submission.status,
     completedForLearning: submission.completedForLearning === true,
     isTest: submission.isTest === true,
+    attemptId: submission.attemptId ?? null,
     problemVersion: submission.problemVersion,
     judgeGeneration: submission.judgeGeneration,
     runtimeMs: submission.runtimeMs,

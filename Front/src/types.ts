@@ -81,6 +81,8 @@ export interface Submission {
   status: string;
   /** 검증용·기업 테스트 응시 제출: 학습 기록에 들어가지 않는다. */
   isTest?: boolean;
+  /** 기업 테스트 응시 중 낸 제출이면 그 응시 ID */
+  attemptId?: string | null;
   completedForLearning?: boolean;
   runtimeMs: number | null;
   memoryKb: number | null;
