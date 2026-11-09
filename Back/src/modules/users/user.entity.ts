@@ -52,6 +52,10 @@ export class User {
   @Column({ name: 'suspended_at', type: 'timestamptz', nullable: true })
   suspendedAt: Date | null;
 
+  /** 관리자가 임시 비밀번호를 준 뒤 아직 스스로 바꾸지 않았다(계정 API 밖의 요청 거절). */
+  @Column({ name: 'must_change_password', type: 'boolean', default: false })
+  mustChangePassword: boolean;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

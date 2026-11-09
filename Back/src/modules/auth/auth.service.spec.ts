@@ -1,4 +1,4 @@
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 import type { JwtService } from '@nestjs/jwt';
 import type { Repository } from 'typeorm';
@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { UserRole } from '../users/user-role.enum.js';
 import type { User } from '../users/user.entity.js';
 import { AuthService } from './auth.service.js';
-import type { PasswordHasher } from './password-hasher.service.js';
+import { PasswordHasher } from './password-hasher.service.js';
 
 describe('AuthService.register importer identity reservation', () => {
   function setup() {
@@ -77,5 +77,24 @@ describe('AuthService.register importer identity reservation', () => {
       email: 'human@unsolvable.local',
       role: UserRole.USER,
     });
+  });
+});
+
+describe('AuthService.login timing', () => {
+  it('pays the same scrypt verification for an unknown email as for a wrong password', async () => {
+    const users = { findOneBy: vi.fn().mockResolvedValue(null) };
+    const hasher = new PasswordHasher();
+    const verify = vi.spyOn(hasher, 'verify');
+    const service = new AuthService(
+      users as unknown as Repository<User>,
+      hasher,
+      {} as JwtService,
+      {} as ConfigService,
+    );
+    await expect(
+      service.login({ email: 'nobody@example.com', password: 'whatever-123' }),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(verify).toHaveBeenCalledOnce();
+    expect(verify.mock.calls[0][1]).toMatch(/^scrypt\$/);
   });
 });

@@ -38,6 +38,8 @@ export async function api<T>(
       throw new TypeError("서버에 연결하지 못했습니다. 네트워크 연결을 확인해 주세요.");
     throw cause;
   });
+  // 본문 없는 성공(로그아웃·기기 로그아웃의 204)은 SPA 대체 응답과 구분해 그대로 성공으로 본다.
+  if (response.status === 204) return undefined as T;
   const data = await response.json().catch(() => null);
   // 백엔드가 없거나 주소가 틀리면 SPA의 index.html(200)이 돌아온다. 빈 값을 성공으로 넘기지 않는다.
   if (response.ok && data === null)

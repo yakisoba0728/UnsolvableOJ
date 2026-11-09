@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { JwtService, type JwtSignOptions } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, type EntityManager } from 'typeorm';
@@ -20,6 +20,15 @@ import type {
 import type { LoginDto } from './dto/login.dto.js';
 import type { RegisterDto } from './dto/register.dto.js';
 import { PasswordHasher } from './password-hasher.service.js';
+
+export interface SessionDevice {
+  id: string;
+  createdAt: Date;
+  lastUsedAt: Date;
+  expiresAt: Date;
+  remember: boolean;
+  current: boolean;
+}
 
 export const suspendedMessage = '정지된 계정입니다. 관리자에게 문의해 주세요.';
 
@@ -43,6 +52,9 @@ export function revokeRefreshTokens(
 
 @Injectable()
 export class AuthService {
+  /** 없는 이메일에도 같은 scrypt 비용을 치르게 하는 비교용 해시(응답 시간으로 가입 여부를 떠보지 못하게). */
+  private dummyHash?: Promise<string>;
+
   constructor(
     @InjectRepository(User)
     private readonly users: Repository<User>,
@@ -87,10 +99,12 @@ export class AuthService {
     const user = await this.users.findOneBy({
       email: dto.email.trim().toLowerCase(),
     });
-    if (
-      !user ||
-      !(await this.passwordHasher.verify(dto.password, user.passwordHash))
-    ) {
+    this.dummyHash ??= this.passwordHasher.hash(randomBytes(16).toString('hex'));
+    const valid = await this.passwordHasher.verify(
+      dto.password,
+      user?.passwordHash ?? (await this.dummyHash),
+    );
+    if (!user || !valid) {
       throw new UnauthorizedException(
         '이메일 또는 비밀번호가 올바르지 않습니다.',
       );
@@ -111,12 +125,13 @@ export class AuthService {
         id: string;
         userId: string;
         familyId: string;
+        familyCreatedAt: Date;
         tokenVersion: number;
         remember: boolean;
         revoked: boolean;
         expired: boolean;
       }[] = await manager.query(
-        `SELECT id, user_id AS "userId", family_id AS "familyId", token_version AS "tokenVersion", remember,
+        `SELECT id, user_id AS "userId", family_id AS "familyId", family_created_at AS "familyCreatedAt", token_version AS "tokenVersion", remember,
                 revoked_at IS NOT NULL AS revoked, expires_at <= now() AS expired
          FROM refresh_tokens WHERE token_hash = $1 FOR UPDATE`,
         [hashRefreshToken(token)],
@@ -143,7 +158,10 @@ export class AuthService {
       );
       return this.issueSession(
         user,
-        await this.createRefreshToken(manager, user, row.remember, row.familyId),
+        await this.createRefreshToken(manager, user, row.remember, {
+          id: row.familyId,
+          createdAt: row.familyCreatedAt,
+        }),
       );
     });
     // 계열 폐기가 커밋된 뒤에 거절한다(트랜잭션 안에서 던지면 폐기도 되돌려진다).
@@ -170,7 +188,7 @@ export class AuthService {
     }
     // 다른 기기의 JWT·refresh token을 모두 무효화하고, 요청한 쪽에는 새 토큰을 준다.
     await this.users.query(
-      'UPDATE users SET password_hash = $1, token_version = token_version + 1, updated_at = now() WHERE id = $2',
+      'UPDATE users SET password_hash = $1, token_version = token_version + 1, must_change_password = false, updated_at = now() WHERE id = $2',
       [await this.passwordHasher.hash(dto.newPassword), userId],
     );
     await revokeRefreshTokens(this.users.manager, userId);
@@ -181,7 +199,11 @@ export class AuthService {
     );
   }
 
-  async changeUsername(userId: string, dto: ChangeUsernameDto) {
+  async changeUsername(
+    userId: string,
+    dto: ChangeUsernameDto,
+    sessionId?: string,
+  ) {
     const username = dto.username.trim();
     if (username.toLowerCase() === 'boj_import') {
       throw new ConflictException('이미 사용 중인 사용자 이름입니다.');
@@ -195,14 +217,47 @@ export class AuthService {
       throw error;
     }
     // JWT의 username을 새 이름으로 맞춘 토큰을 준다(기존 토큰과 refresh token은 그대로 유효해 새 refresh token은 주지 않는다).
-    return this.issueSession(await this.users.findOneByOrFail({ id: userId }));
+    return this.issueSession(
+      await this.users.findOneByOrFail({ id: userId }),
+      undefined,
+      sessionId,
+    );
+  }
+
+  /** 살아 있는 로그인(계열)마다 지금 refresh token 한 행만 있다. 토큰 값·해시는 내보내지 않는다. */
+  async sessions(userId: string, currentId?: string): Promise<SessionDevice[]> {
+    const rows: Omit<SessionDevice, 'current'>[] = await this.users.query(
+      `SELECT family_id AS id, family_created_at AS "createdAt", created_at AS "lastUsedAt",
+              expires_at AS "expiresAt", remember
+       FROM refresh_tokens
+       WHERE user_id = $1 AND revoked_at IS NULL AND expires_at > now()
+       ORDER BY created_at DESC`,
+      [userId],
+    );
+    return rows.map((row) => ({ ...row, current: row.id === currentId }));
+  }
+
+  /** 내 로그인 하나를 끝낸다. 남의 계열 id여도 같은 응답이다(user_id 조건으로 막는다). */
+  async revokeSession(userId: string, id: string) {
+    await this.users.query(
+      'UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = $1 AND family_id = $2 AND revoked_at IS NULL',
+      [userId, id],
+    );
+  }
+
+  /** 지금 기기를 뺀 내 로그인을 모두 끝낸다. */
+  async revokeOtherSessions(userId: string, currentId?: string) {
+    await this.users.query(
+      'UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = $1 AND family_id IS DISTINCT FROM $2::uuid AND revoked_at IS NULL',
+      [userId, currentId ?? null],
+    );
   }
 
   private async createRefreshToken(
     manager: EntityManager,
     user: User,
     remember: boolean,
-    familyId?: string,
+    family?: { id: string; createdAt: Date },
   ) {
     const refreshToken = randomBytes(32).toString('base64url');
     const expiresAt = new Date(Date.now() + refreshLifetimeMs(remember));
@@ -211,12 +266,14 @@ export class AuthService {
       'DELETE FROM refresh_tokens WHERE user_id = $1 AND expires_at <= now()',
       [user.id],
     );
+    const familyId = family?.id ?? randomUUID();
     await manager.query(
-      `INSERT INTO refresh_tokens (user_id, family_id, token_hash, token_version, remember, expires_at)
-       VALUES ($1, COALESCE($2::uuid, gen_random_uuid()), $3, $4, $5, $6)`,
-      [user.id, familyId ?? null, hashRefreshToken(refreshToken), user.tokenVersion, remember, expiresAt],
+      `INSERT INTO refresh_tokens (user_id, family_id, family_created_at, token_hash, token_version, remember, expires_at)
+       VALUES ($1, $2, COALESCE($3::timestamptz, now()), $4, $5, $6, $7)`,
+      [user.id, familyId, family?.createdAt ?? null, hashRefreshToken(refreshToken), user.tokenVersion, remember, expiresAt],
     );
     return {
+      familyId,
       refreshToken,
       refreshTokenExpiresAt: expiresAt.toISOString(),
       remember,
@@ -226,13 +283,17 @@ export class AuthService {
   private async issueSession(
     user: User,
     refresh?: Awaited<ReturnType<AuthService['createRefreshToken']>>,
+    sessionId?: string,
   ) {
+    const { familyId, ...refreshFields } = refresh ?? {};
+    const sid = familyId ?? sessionId;
     const payload: AccessTokenPayload = {
       sub: user.id,
       email: user.email,
       username: user.username,
       role: user.role,
       tokenVersion: user.tokenVersion,
+      ...(sid ? { sid } : {}),
     };
     const expiresIn = this.config.get<string>(
       'JWT_ACCESS_EXPIRES_IN',
@@ -243,7 +304,7 @@ export class AuthService {
       accessToken: await this.jwt.signAsync(payload, { expiresIn }),
       tokenType: 'Bearer',
       expiresIn,
-      ...refresh,
+      ...refreshFields,
       user: {
         id: user.id,
         email: user.email,
@@ -252,6 +313,7 @@ export class AuthService {
         level: user.level,
         xp: user.xp,
         rating: user.rating,
+        mustChangePassword: user.mustChangePassword,
       },
     };
   }
