@@ -1,17 +1,25 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { createHash } from 'node:crypto';
 import { DataSource, type EntityManager } from 'typeorm';
 import { recordAudit } from '../../common/database.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
+import {
+  notifyAccepted,
+  notifyAnswer,
+} from '../notifications/notifications.service.js';
 import { UserRole } from '../users/user-role.enum.js';
 import {
   CommunityCategory,
   type CommunityPostDto,
   type CommunityQuery,
+  type CommunityReportQuery,
 } from './community.dto.js';
 
 export interface Post {
@@ -24,6 +32,7 @@ export interface Post {
   language: string;
   problemId: string | null;
   acceptedCommentId: string | null;
+  hidden: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -31,30 +40,47 @@ export interface Comment {
   id: string;
   authorId: string;
   body: string;
+  hidden: boolean;
   createdAt: string;
   updatedAt: string;
 }
 const columns = `p.id, p.author_id AS "authorId", p.category, p.tags, p.views, p.title, p.body, p.code, p.language,
-  p.accepted_comment_id AS "acceptedCommentId",
+  p.accepted_comment_id AS "acceptedCommentId", p.hidden_at IS NOT NULL AS hidden,
   p.created_at AS "createdAt", p.updated_at AS "updatedAt"`;
 const summaryColumns = `p.id, p.author_id AS "authorId", p.category, p.tags, p.views, p.title,
-  p.accepted_comment_id AS "acceptedCommentId", p.created_at AS "createdAt", p.updated_at AS "updatedAt"`;
+  p.accepted_comment_id AS "acceptedCommentId", p.hidden_at IS NOT NULL AS hidden,
+  p.created_at AS "createdAt", p.updated_at AS "updatedAt"`;
 const publicDetails = `jsonb_build_object('id', u.id, 'username', u.username, 'level', u.level) AS author,
   CASE WHEN pr.id IS NOT NULL THEN jsonb_build_object('id', pr.id, 'slug', pr.slug, 'title', pr.title) ELSE NULL END AS problem,
-  (SELECT count(*)::int FROM community_comments c WHERE c.post_id=p.id) AS "commentCount",
+  (SELECT count(*)::int FROM community_comments c WHERE c.post_id=p.id AND c.hidden_at IS NULL) AS "commentCount",
   (SELECT count(*)::int FROM community_votes v WHERE v.post_id=p.id) AS "voteCount"`;
 const joins = `JOIN users u ON u.id=p.author_id LEFT JOIN problems pr ON pr.id=p.problem_id AND pr.status='PUBLISHED'`;
+/** 관리자가 숨긴 글·답변은 작성자와 관리자에게만 보인다. */
+const canSee = (
+  row: { hidden: boolean; authorId: string },
+  user?: AuthenticatedUser,
+) => !row.hidden || row.authorId === user?.id || user?.role === UserRole.ADMIN;
 
 @Injectable()
 export class CommunityService {
   constructor(private readonly db: DataSource) {}
 
-  async list(query: CommunityQuery) {
+  async list(query: CommunityQuery, viewer?: AuthenticatedUser) {
     const params: unknown[] = [];
-    const baseConditions: string[] = [];
+    // 숨긴 글은 공개 목록에 넣지 않는다. 작성자는 내 글 목록(mine)에서 본다.
+    const baseConditions = ['p.hidden_at IS NULL'];
+    if (query.following === 'true') {
+      if (!viewer) throw new UnauthorizedException('로그인이 필요합니다.');
+      params.push(viewer.id);
+      baseConditions.push(
+        `p.author_id IN (SELECT author_id FROM community_follows WHERE user_id=$${params.length})`,
+      );
+    }
     if (query.problemId) {
       params.push(query.problemId);
-      baseConditions.push(`EXISTS(SELECT 1 FROM problems visible_problem WHERE visible_problem.id=p.problem_id AND visible_problem.status='PUBLISHED' AND visible_problem.id=$${params.length})`);
+      baseConditions.push(
+        `EXISTS(SELECT 1 FROM problems visible_problem WHERE visible_problem.id=p.problem_id AND visible_problem.status='PUBLISHED' AND visible_problem.id=$${params.length})`,
+      );
     }
     // 검색어는 제목에서만 찾고, 태그는 고른 태그를 모두 가진 글만 남긴다(대소문자 무시).
     if (query.q) {
@@ -67,9 +93,7 @@ export class CommunityService {
         `EXISTS(SELECT 1 FROM unnest(p.tags) t WHERE lower(t)=lower($${params.length}))`,
       );
     }
-    const baseWhere = baseConditions.length
-      ? 'WHERE ' + baseConditions.join(' AND ')
-      : '';
+    const baseWhere = 'WHERE ' + baseConditions.join(' AND ');
     const groups: {
       category: CommunityCategory;
       accepted: boolean;
@@ -126,7 +150,7 @@ export class CommunityService {
           : `(${filters})`,
       );
     }
-    const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
+    const where = 'WHERE ' + conditions.join(' AND ');
     const [{ total }]: { total: number }[] = await this.db.query(
       `SELECT count(*)::int AS total FROM community_posts p ${where}`,
       params,
@@ -157,6 +181,8 @@ export class CommunityService {
   async mine(user: AuthenticatedUser) {
     // shortcut: 최근 100편씩만 돌려준다. 프로필에서 더 넘겨 봐야 하면 쪽 단위로 바꾼다.
     const recent = 'ORDER BY p.created_at DESC, p.id DESC LIMIT 100';
+    // 내가 쓴 글은 숨겨졌어도 보여 주고, 남의 숨긴 글은 추천·저장 목록에서 뺀다.
+    const visible = '(p.hidden_at IS NULL OR p.author_id=$1)';
     const [written, voted, saved, follows] = await Promise.all([
       this.db.query(
         `SELECT ${summaryColumns}, ${publicDetails} FROM community_posts p ${joins} WHERE p.author_id=$1 ${recent}`,
@@ -164,12 +190,12 @@ export class CommunityService {
       ) as Promise<Post[]>,
       this.db.query(
         `SELECT ${summaryColumns}, ${publicDetails} FROM community_posts p ${joins}
-        JOIN community_votes v ON v.post_id=p.id AND v.user_id=$1 ${recent}`,
+        JOIN community_votes v ON v.post_id=p.id AND v.user_id=$1 WHERE ${visible} ${recent}`,
         [user.id],
       ) as Promise<Post[]>,
       this.db.query(
         `SELECT ${summaryColumns}, ${publicDetails} FROM community_posts p ${joins}
-        JOIN community_saved s ON s.post_id=p.id AND s.user_id=$1 ${recent}`,
+        JOIN community_saved s ON s.post_id=p.id AND s.user_id=$1 WHERE ${visible} ${recent}`,
         [user.id],
       ) as Promise<Post[]>,
       this.db.query(
@@ -185,28 +211,37 @@ export class CommunityService {
     };
   }
 
-  async detail(id: string) {
+  async detail(id: string, viewer?: AuthenticatedUser) {
     const [post]: Post[] = await this.db.query(
       `SELECT ${columns}, pr.id AS "problemId", ${publicDetails} FROM community_posts p ${joins} WHERE p.id=$1`,
       [id],
     );
-    if (!post) throw new NotFoundException('게시글을 찾을 수 없습니다.');
+    if (!post || !canSee(post, viewer))
+      throw new NotFoundException('게시글을 찾을 수 없습니다.');
     return post;
   }
 
-  async comments(id: string, query: CommunityQuery) {
-    await this.detail(id);
+  async comments(
+    id: string,
+    query: CommunityQuery,
+    viewer?: AuthenticatedUser,
+  ) {
+    await this.detail(id, viewer);
+    const visible = '(c.hidden_at IS NULL OR c.author_id=$2::uuid OR $3)';
+    const params = [id, viewer?.id ?? null, viewer?.role === UserRole.ADMIN];
     const [count]: { total: number }[] = await this.db.query(
-      'SELECT count(*)::int AS total FROM community_comments WHERE post_id=$1',
-      [id],
+      `SELECT count(*)::int AS total FROM community_comments c WHERE c.post_id=$1 AND ${visible}`,
+      params,
     );
     const items: Comment[] = await this.db.query(
       `SELECT c.id, c.body, c.author_id AS "authorId", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
+      c.hidden_at IS NOT NULL AS hidden,
       jsonb_build_object('id', u.id, 'username', u.username, 'level', u.level) AS author,
       (SELECT count(*)::int FROM community_comment_votes v WHERE v.comment_id=c.id) AS "voteCount"
       FROM community_comments c JOIN users u ON u.id=c.author_id
-      WHERE c.post_id=$1 ORDER BY (c.id=(SELECT accepted_comment_id FROM community_posts WHERE id=$1)) DESC NULLS LAST, c.created_at, c.id LIMIT $2 OFFSET $3`,
-      [id, query.limit, (query.page - 1) * query.limit],
+      WHERE c.post_id=$1 AND ${visible}
+      ORDER BY (c.id=(SELECT accepted_comment_id FROM community_posts WHERE id=$1)) DESC NULLS LAST, c.created_at, c.id LIMIT $4 OFFSET $5`,
+      [...params, query.limit, (query.page - 1) * query.limit],
     );
     return {
       items,
@@ -255,16 +290,38 @@ export class CommunityService {
       );
       return post.id;
     });
-    return this.detail(id);
+    return this.detail(id, user);
   }
 
-  private async lock(manager: EntityManager, id: string) {
+  /** 글을 잠근다. 숨긴 글은 작성자·관리자가 아니면 없는 글로 본다. */
+  private async lock(
+    manager: EntityManager,
+    id: string,
+    user: AuthenticatedUser,
+  ) {
     const [post]: Post[] = await manager.query(
       `SELECT ${columns}, p.problem_id AS "problemId" FROM community_posts p WHERE id=$1 FOR UPDATE`,
       [id],
     );
-    if (!post) throw new NotFoundException('게시글을 찾을 수 없습니다.');
+    if (!post || !canSee(post, user))
+      throw new NotFoundException('게시글을 찾을 수 없습니다.');
     return post;
+  }
+  /** 글에 딸린 답변. 숨긴 답변은 작성자·관리자가 아니면 없는 답변으로 본다. */
+  private async findComment(
+    manager: EntityManager,
+    id: string,
+    commentId: string,
+    user: AuthenticatedUser,
+  ) {
+    const [comment]: { authorId: string; hidden: boolean }[] =
+      await manager.query(
+        'SELECT author_id AS "authorId", hidden_at IS NOT NULL AS hidden FROM community_comments WHERE id=$1 AND post_id=$2',
+        [commentId, id],
+      );
+    if (!comment || !canSee(comment, user))
+      throw new NotFoundException('답변을 찾을 수 없습니다.');
+    return comment;
   }
   private owner(authorId: string, user: AuthenticatedUser, allowAdmin = false) {
     if (authorId !== user.id && !(allowAdmin && user.role === UserRole.ADMIN))
@@ -273,7 +330,7 @@ export class CommunityService {
 
   async update(id: string, dto: CommunityPostDto, user: AuthenticatedUser) {
     await this.db.transaction(async (manager) => {
-      const post = await this.lock(manager, id);
+      const post = await this.lock(manager, id, user);
       this.owner(post.authorId, user);
       this.noticePermission(dto, user);
       if (post.category !== dto.category)
@@ -292,11 +349,11 @@ export class CommunityService {
         ],
       );
     });
-    return this.detail(id);
+    return this.detail(id, user);
   }
   async remove(id: string, user: AuthenticatedUser) {
     await this.db.transaction(async (manager) => {
-      const post = await this.lock(manager, id);
+      const post = await this.lock(manager, id, user);
       this.owner(post.authorId, user, true);
       await manager.query(
         'UPDATE community_posts SET accepted_comment_id=NULL WHERE id=$1',
@@ -317,11 +374,12 @@ export class CommunityService {
   }
   async addComment(id: string, body: string, user: AuthenticatedUser) {
     return this.db.transaction(async (manager) => {
-      await this.lock(manager, id);
+      const post = await this.lock(manager, id, user);
       const [comment]: { id: string }[] = await manager.query(
         'INSERT INTO community_comments(post_id,author_id,body) VALUES($1,$2,$3) RETURNING id',
         [id, user.id, body],
       );
+      await notifyAnswer(manager, post.authorId, user.id, id, comment.id);
       return comment;
     });
   }
@@ -332,12 +390,8 @@ export class CommunityService {
     user: AuthenticatedUser,
   ) {
     await this.db.transaction(async (manager) => {
-      await this.lock(manager, id);
-      const [comment]: { authorId: string }[] = await manager.query(
-        'SELECT author_id AS "authorId" FROM community_comments WHERE id=$1 AND post_id=$2',
-        [commentId, id],
-      );
-      if (!comment) throw new NotFoundException('답변을 찾을 수 없습니다.');
+      await this.lock(manager, id, user);
+      const comment = await this.findComment(manager, id, commentId, user);
       this.owner(comment.authorId, user, body === null);
       if (body === null) {
         await manager.query('DELETE FROM community_comments WHERE id=$1', [
@@ -362,34 +416,33 @@ export class CommunityService {
   }
   async accept(id: string, commentId: string | null, user: AuthenticatedUser) {
     await this.db.transaction(async (manager) => {
-      const post = await this.lock(manager, id);
+      const post = await this.lock(manager, id, user);
       this.owner(post.authorId, user);
       if (post.category !== CommunityCategory.QUESTION)
         throw new BadRequestException('질문에서만 답변을 채택할 수 있습니다.');
-      if (commentId) {
-        const rows: { id: string }[] = await manager.query(
-          'SELECT id FROM community_comments WHERE id=$1 AND post_id=$2',
-          [commentId, id],
-        );
-        if (!rows.length)
-          throw new NotFoundException('이 질문의 답변이 아닙니다.');
-      }
+      const comment = commentId
+        ? await this.findComment(manager, id, commentId, user)
+        : null;
       await manager.query(
         'UPDATE community_posts SET accepted_comment_id=$2,updated_at=now() WHERE id=$1',
         [id, commentId],
       );
+      if (comment && commentId)
+        await notifyAccepted(manager, comment.authorId, user.id, id, commentId);
     });
-    return this.detail(id);
+    return this.detail(id, user);
   }
   async vote(id: string, user: AuthenticatedUser, enabled: boolean) {
     await this.db.transaction(async (manager) => {
-      await this.lock(manager, id);
-      if (enabled)
+      const post = await this.lock(manager, id, user);
+      if (enabled) {
+        if (post.authorId === user.id)
+          throw new BadRequestException('자신의 글은 추천할 수 없습니다.');
         await manager.query(
           'INSERT INTO community_votes(post_id,user_id) VALUES($1,$2) ON CONFLICT DO NOTHING',
           [id, user.id],
         );
-      else
+      } else
         await manager.query(
           'DELETE FROM community_votes WHERE post_id=$1 AND user_id=$2',
           [id, user.id],
@@ -398,7 +451,7 @@ export class CommunityService {
     return this.voteState(id, user);
   }
   async voteState(id: string, user: AuthenticatedUser) {
-    await this.detail(id);
+    await this.detail(id, user);
     const [state]: { voted: boolean; voteCount: number }[] =
       await this.db.query(
         `SELECT
@@ -415,24 +468,43 @@ export class CommunityService {
     )
       throw new ForbiddenException('공지 작성은 관리자만 가능합니다.');
   }
-  async view(id: string) {
+  /**
+   * 같은 사람(로그인 사용자, 아니면 IP)의 조회는 하루에 한 번만 센다. 원래 값 대신 해시만 저장한다.
+   * shortcut: 다시 조회되지 않는 글의 지난 기록은 남는다(글·사람당 한 줄). 커지면 주기적으로 지운다.
+   */
+  async view(id: string, viewerKey: string, viewer?: AuthenticatedUser) {
+    await this.detail(id, viewer);
+    const hash = createHash('sha256').update(viewerKey).digest('hex');
     await this.db.query(
-      'UPDATE community_posts SET views=views+1 WHERE id=$1',
+      `DELETE FROM community_post_views WHERE post_id=$1 AND viewed_at < now() - interval '1 day'`,
       [id],
     );
-    return this.detail(id);
+    await this.db.query(
+      `WITH fresh AS (
+        INSERT INTO community_post_views(post_id,viewer) VALUES($1,$2) ON CONFLICT DO NOTHING RETURNING 1
+      ) UPDATE community_posts SET views=views+1 WHERE id=$1 AND EXISTS(SELECT 1 FROM fresh)`,
+      [id, hash],
+    );
+    return this.detail(id, viewer);
   }
-  async authorStats(id: string) {
-    const post = await this.detail(id);
+  async authorStats(id: string, viewer?: AuthenticatedUser) {
+    const post = await this.detail(id, viewer);
     const [stats] = await this.db.query(
-      `SELECT (SELECT count(*)::int FROM community_posts WHERE author_id=$1) AS posts,
-      (SELECT count(*)::int FROM community_posts p JOIN community_comments c ON c.id=p.accepted_comment_id WHERE c.author_id=$1) AS "acceptedAnswers"`,
+      `SELECT (SELECT count(*)::int FROM community_posts WHERE author_id=$1 AND hidden_at IS NULL) AS posts,
+      (SELECT count(*)::int FROM community_posts p JOIN community_comments c ON c.id=p.accepted_comment_id WHERE c.author_id=$1) AS "acceptedAnswers",
+      (SELECT count(*)::int FROM community_follows WHERE author_id=$1) AS followers,
+      (SELECT count(*)::int FROM community_follows WHERE user_id=$1) AS following`,
       [post.authorId],
     );
-    return stats as { posts: number; acceptedAnswers: number };
+    return stats as {
+      posts: number;
+      acceptedAnswers: number;
+      followers: number;
+      following: number;
+    };
   }
   async interaction(id: string, user: AuthenticatedUser) {
-    const post = await this.detail(id);
+    const post = await this.detail(id, user);
     const [state] = await this.db.query(
       `SELECT
       EXISTS(SELECT 1 FROM community_votes WHERE post_id=$1 AND user_id=$2) AS voted,
@@ -455,7 +527,7 @@ export class CommunityService {
     enabled: boolean,
   ) {
     await this.db.transaction(async (manager) => {
-      const post = await this.lock(manager, id);
+      const post = await this.lock(manager, id, user);
       if (kind === 'follow' && post.authorId === user.id)
         throw new BadRequestException('자신을 팔로우할 수 없습니다.');
       const table = kind === 'saved' ? 'community_saved' : 'community_follows';
@@ -481,22 +553,136 @@ export class CommunityService {
     enabled: boolean,
   ) {
     await this.db.transaction(async (manager) => {
-      await this.lock(manager, id);
-      const rows: { id: string }[] = await manager.query(
-        'SELECT id FROM community_comments WHERE id=$1 AND post_id=$2',
-        [commentId, id],
-      );
-      if (!rows.length) throw new NotFoundException('답변을 찾을 수 없습니다.');
-      if (enabled)
+      await this.lock(manager, id, user);
+      const comment = await this.findComment(manager, id, commentId, user);
+      if (enabled) {
+        if (comment.authorId === user.id)
+          throw new BadRequestException('자신의 답변은 추천할 수 없습니다.');
         await manager.query(
           'INSERT INTO community_comment_votes(comment_id,user_id) VALUES($1,$2) ON CONFLICT DO NOTHING',
           [commentId, user.id],
         );
-      else
+      } else
         await manager.query(
           'DELETE FROM community_comment_votes WHERE comment_id=$1 AND user_id=$2',
           [commentId, user.id],
         );
+    });
+    return { ok: true };
+  }
+
+  /** 글(commentId가 없으면) 또는 답변을 신고한다. 한 사람이 같은 대상을 한 번만 신고할 수 있다. */
+  async report(
+    id: string,
+    commentId: string | null,
+    reason: string,
+    user: AuthenticatedUser,
+  ) {
+    await this.db.transaction(async (manager) => {
+      const post = await this.lock(manager, id, user);
+      const authorId = commentId
+        ? (await this.findComment(manager, id, commentId, user)).authorId
+        : post.authorId;
+      if (authorId === user.id)
+        throw new BadRequestException('자신의 글은 신고할 수 없습니다.');
+      const inserted: unknown[] = await manager.query(
+        `INSERT INTO community_reports(reporter_id,post_id,comment_id,reason) VALUES($1,$2,$3,$4)
+        ON CONFLICT DO NOTHING RETURNING id`,
+        [user.id, commentId ? null : id, commentId, reason],
+      );
+      if (!inserted.length) throw new ConflictException('이미 신고했습니다.');
+    });
+    return { ok: true };
+  }
+
+  /** 관리자용 신고 목록. 기본은 처리 전 신고를 최신순으로 */
+  async reports(query: CommunityReportQuery) {
+    const where =
+      query.status === 'all'
+        ? ''
+        : query.status === 'resolved'
+          ? 'WHERE r.resolved_at IS NOT NULL'
+          : 'WHERE r.resolved_at IS NULL';
+    const [[{ total }], items] = await Promise.all([
+      this.db.query(
+        `SELECT count(*)::int AS total FROM community_reports r ${where}`,
+      ) as Promise<{ total: number }[]>,
+      this.db.query(
+        `SELECT r.id, r.reason, r.created_at AS "createdAt", r.resolved_at AS "resolvedAt",
+        CASE WHEN r.comment_id IS NULL THEN 'POST' ELSE 'COMMENT' END AS "targetType",
+        jsonb_build_object('id', ru.id, 'username', ru.username) AS reporter,
+        jsonb_build_object('id', au.id, 'username', au.username) AS author,
+        jsonb_build_object('id', p.id, 'title', p.title, 'hidden', p.hidden_at IS NOT NULL) AS post,
+        CASE WHEN c.id IS NOT NULL THEN jsonb_build_object('id', c.id, 'body', left(c.body, 300), 'hidden', c.hidden_at IS NOT NULL) END AS comment
+        FROM community_reports r
+        JOIN users ru ON ru.id=r.reporter_id
+        LEFT JOIN community_comments c ON c.id=r.comment_id
+        JOIN community_posts p ON p.id=coalesce(r.post_id, c.post_id)
+        JOIN users au ON au.id=coalesce(c.author_id, p.author_id)
+        ${where} ORDER BY r.created_at DESC, r.id DESC LIMIT $1 OFFSET $2`,
+        [query.limit, (query.page - 1) * query.limit],
+      ) as Promise<unknown[]>,
+    ]);
+    return {
+      items,
+      total,
+      page: query.page,
+      limit: query.limit,
+      totalPages: Math.ceil(total / query.limit),
+    };
+  }
+
+  /** 관리자가 글·답변을 숨기거나 되살린다. 데이터는 지우지 않고, 그 대상의 처리 전 신고를 처리됨으로 바꾼다. */
+  async setHidden(
+    kind: 'post' | 'comment',
+    id: string,
+    hidden: boolean,
+    admin: AuthenticatedUser,
+  ) {
+    const table = kind === 'post' ? 'community_posts' : 'community_comments';
+    await this.db.transaction(async (manager) => {
+      const [rows]: [{ authorId: string }[], number] = await manager.query(
+        `UPDATE ${table} SET hidden_at=CASE WHEN $2::boolean THEN coalesce(hidden_at, now()) END WHERE id=$1 RETURNING author_id AS "authorId"`,
+        [id, hidden],
+      );
+      if (!rows.length)
+        throw new NotFoundException(
+          kind === 'post'
+            ? '게시글을 찾을 수 없습니다.'
+            : '답변을 찾을 수 없습니다.',
+        );
+      await manager.query(
+        `UPDATE community_reports SET resolved_at=now() WHERE ${kind}_id=$1 AND resolved_at IS NULL`,
+        [id],
+      );
+      await recordAudit(
+        manager,
+        admin.id,
+        `community_${kind}.${hidden ? 'hide' : 'unhide'}`,
+        `community_${kind}`,
+        id,
+        { authorId: rows[0].authorId },
+      );
+    });
+    return { ok: true, hidden };
+  }
+
+  /** 숨기지 않고 신고만 처리됨으로 닫는다. */
+  async resolveReport(id: string, admin: AuthenticatedUser) {
+    await this.db.transaction(async (manager) => {
+      const [rows]: [unknown[], number] = await manager.query(
+        'UPDATE community_reports SET resolved_at=coalesce(resolved_at, now()) WHERE id=$1 RETURNING id',
+        [id],
+      );
+      if (!rows.length) throw new NotFoundException('신고를 찾을 수 없습니다.');
+      await recordAudit(
+        manager,
+        admin.id,
+        'community_report.resolve',
+        'community_report',
+        id,
+        {},
+      );
     });
     return { ok: true };
   }
