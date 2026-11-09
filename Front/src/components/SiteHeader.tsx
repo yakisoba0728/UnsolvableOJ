@@ -116,6 +116,7 @@ export function SiteHeader({
               문제 만들기
             </NavLink>
           ) : null}
+          {role === "ADMIN" ? <NavLink to="/admin">관리</NavLink> : null}
           <span
             className={`nav-indicator ${indicatorReady ? "ready" : ""}`}
             aria-hidden="true"

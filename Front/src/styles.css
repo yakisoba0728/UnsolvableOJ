@@ -7942,6 +7942,89 @@ textarea {
   }
 }
 
+/* 관리 화면(/admin) */
+.admin-tabs {
+  padding: 0;
+  margin-bottom: 24px;
+}
+.admin-count {
+  min-height: 20px;
+  margin: 16px 0 12px;
+  font-size: 13px;
+}
+.admin-table + .pagination {
+  margin-top: 24px;
+}
+.admin-table td:first-child strong {
+  color: var(--color-ink-900);
+}
+.admin-self {
+  margin-left: 8px;
+  padding: 1px 8px;
+}
+.admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.admin-chip {
+  cursor: pointer;
+}
+.admin-details {
+  font-size: 12px;
+  color: var(--color-ink-600);
+  word-break: break-all;
+}
+.admin-ops-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.admin-ops-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.admin-page section h2 {
+  font-size: 17px;
+  margin: 0 0 12px;
+}
+.admin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+}
+.admin-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+.admin-list li + li {
+  border-top: 1px solid var(--color-divider);
+}
+@media (max-width: 700px) {
+  /* 표 머리글이 숨으므로 뜻이 모호한 칸에 이름을 붙인다. */
+  .admin-table td[data-label]::before {
+    content: attr(data-label) " · ";
+    color: var(--color-ink-600);
+    font-size: 13px;
+    font-weight: normal;
+  }
+  .admin-ops-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-page .stat-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* 라이트/다크 전환: 테마를 바꿀 때 화면 전체가 서서히 겹쳐 바뀐다(View Transitions, src/theme.ts). */
 ::view-transition-group(root),
 ::view-transition-old(root),

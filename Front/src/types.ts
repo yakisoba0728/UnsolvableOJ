@@ -110,6 +110,35 @@ export interface RankingEntry {
   solvedCount: number;
 }
 
+/** GET /admin/users 항목 */
+export interface AdminUser extends User {
+  /** 값이 있으면 정지된 계정 */
+  suspendedAt: string | null;
+  createdAt: string;
+}
+
+/** GET /admin/audit 항목. 이름은 사용자가 삭제됐거나 대상이 사용자가 아니면 null */
+export interface AdminAuditEvent {
+  id: string;
+  actorId: string | null;
+  actorUsername: string | null;
+  action: string;
+  targetType: string;
+  targetId: string;
+  targetUsername: string | null;
+  details: Record<string, unknown>;
+  createdAt: string;
+}
+
+/** GET /admin/ops */
+export interface AdminOps {
+  queue: Record<"waiting" | "active" | "delayed" | "failed" | "completed", number>;
+  submissions: { status: string; count: number }[];
+  workers: { id: string; lastSeenAt: string }[];
+  recentFailedJobs: { id: string; failedReason: string; attemptsMade: number }[];
+  timestamp: string;
+}
+
 export interface Page<T> {
   items: T[];
   page: number;
