@@ -4,6 +4,12 @@
 
 모든 실행에는 별도 작업 `Dependency audit`도 함께 돌아갑니다. Back·Front·Judge 각각 `npm audit --omit=dev --audit-level=high`로 운영 의존성의 high/critical 취약점만 실패로 처리하고 low/moderate는 로그로만 남깁니다. lockfile만 읽으므로 의존성을 설치하지 않습니다. 새 권고가 공개되면 코드 변경 없이도 실패할 수 있으며 `CI required`와는 별개입니다. 보호 규칙에 넣을지는 별도로 결정하세요.
 
+`Docker image (back|front|judge|runtime)` 작업은 운영 Dockerfile(`Back`, `Front`, `Judge`, `Judge/runtime`)을 빌드만 합니다. 이미지를 레지스트리에 올리거나 러너에 내보내지 않고 BuildKit 레이어를 GitHub Actions 캐시(`type=gha`, 이미지별 scope)에만 남깁니다. PR은 base와, `main` push는 직전 커밋과 비교해 해당 디렉터리나 `ci.yml`이 바뀐 항목만 빌드하고, 바뀌지 않은 항목은 빌드 단계를 건너뛴 채 성공으로 끝납니다. 비교할 커밋이 없는 새 브랜치·야간·수동 실행은 모두 빌드합니다. 이 작업은 `CI required`와 독립적이라 `CI required` 결과에 영향을 주지 않습니다. 보호 규칙에 넣으려면 4개 항목을 각각 required로 지정하세요(건너뛴 항목도 성공으로 보고됩니다). 실행 이미지 캐시는 수 GB가 될 수 있고 저장소 캐시 한도(기본 10 GB)를 넘으면 오래된 npm·이미지 캐시부터 밀려납니다.
+
+## 의존성 업데이트
+
+`.github/dependabot.yml`이 매주 월요일 09:00 KST에 npm(Back·Front·Judge), GitHub Actions, Dockerfile 기본 이미지의 버전 업데이트를 엽니다. npm은 디렉터리마다 minor/patch 묶음과 major 묶음, Actions와 Docker는 각각 한 묶음으로 PR 수를 줄입니다. Docker 기본 이미지의 major 변경과 `criyle/go-judge`(라이선스 ADD URL·checksum이 버전에 고정됨)는 제외하므로 직접 올립니다. 보안 업데이트는 이 일정과 별개로 열립니다. 실행 이미지(`Judge/runtime`) 변경 PR은 병합 전에 전체 검사를 실행하세요.
+
 ## 기본 검사
 
 - 백엔드 lint·타입·단위 테스트·빌드, BOJ 변환·통합 실행기·기본 문제 정답 데이터 검사
@@ -12,8 +18,9 @@
 - 브라우저 없는 unit 프로젝트는 한 번, 모든 UI 회귀 검사는 Chromium에서 실행
 - 워커 빌드·모의 HTTP 계약 검사와 Python 실행기 healthcheck 검사
 - 임시 PostgreSQL/Redis에서 DB 마이그레이션 왕복과 API 통합 검사
+- 운영 Compose 검사는 go-judge를 뺀 서비스의 `no-new-privileges`·`cap_drop: [ALL]`·pids/CPU 상한과 Redis 비밀번호가 명령 인자에 없는지도 확인
 
-Chromium headless shell만 설치하며 Playwright 워커는 2개입니다. 기본 작업 제한은 15분이며 개별 테스트 제한이나 재시도 횟수를 늘리지 않습니다. 백엔드는 한 번 빌드한 결과를 DB 검사에서도 재사용합니다.
+Chromium headless shell만 설치하며 Playwright 워커는 2개입니다. 기본 작업 제한은 15분이며 재시도 횟수를 늘리지 않습니다. 개별 테스트 제한은 CLI 프로세스를 여러 번 띄우는 `Back/test/boj-seed.e2e-spec.ts`만 60초로 둡니다. 백엔드는 한 번 빌드한 결과를 DB 검사에서도 재사용합니다.
 
 기존 main의 성공 실행은 총 약 29분 중 브라우저 777개 검사가 24.3분을 사용했습니다. 기본 검사는 같은 UI를 세 브라우저에서 직렬로 반복하던 부분을 줄였습니다. 실제 시간은 Actions 결과에서 확인합니다.
 

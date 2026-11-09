@@ -18,6 +18,9 @@
 - go-judge는 중첩 sandbox를 위해 `privileged: true`가 필요합니다. 컨테이너 네트워크와 자원 제한은 별도 VM의 격리를 대신하지 않습니다. 실행기나 커널이 뚫리면 같은 호스트의 DB 및 기존 Dokploy 프로젝트도 영향을 받을 수 있습니다. 이 구성은 소유자가 선택한 동일 호스트 배치이며, 호스트 격리가 필요해지면 [별도 실행 노드 구성](../Judge/deploy/README.md)으로 이전하세요.
 - 실행기는 private cgroup namespace를 사용하며 `memswap_limit`을 `mem_limit`과 같게 설정해 Docker가 시작 전에 swap을 금지합니다. swap이 켜진 cgroup v2에서는 실제 `memory.swap.max=0`도 healthcheck로 확인합니다. 이 제한을 적용할 수 없는 호스트에서는 기동을 중단합니다. 실패할 때 `-no-fallback`이나 seccomp를 해제하지 마세요.
 - 기본 메모리 상한 합계는 약 **13.375 GiB**입니다(sandbox 10 GiB 포함). 최소 16 GiB급 호스트를 출발점으로 OS, Dokploy, 기존 프로젝트, Docker 빌드용 여유를 별도로 확보하세요. 배포 전 실제 여유 RAM·CPU·디스크를 확인하세요. 상한은 예약이나 호스트 용량 보장이 아닙니다.
+- CPU 상한 기본값은 postgres 2, back 2, redis 1, judge 1, front 1, postgres-backup 0.5, go-judge 2(`*_CPUS`로 변경)입니다. 값이 호스트 CPU 수보다 크면 컨테이너가 생성되지 않으므로 2코어 미만 호스트에서는 낮추세요.
+- go-judge를 뺀 서비스는 `no-new-privileges`, `cap_drop: [ALL]`, `pids_limit`을 사용합니다. 진입점이 root에서 권한을 내리는 이미지만 필요한 capability를 되돌립니다(postgres: CHOWN·DAC_OVERRIDE·FOWNER·SETGID·SETUID, front/nginx: CHOWN·SETGID·SETUID·NET_BIND_SERVICE, redis: DAC_OVERRIDE). back·judge는 `node` 사용자로 실행되어 capability가 없습니다. redis는 이전부터 셸 명령으로 실행되어 root로 동작합니다(이미지 진입점의 사용자 전환과 모듈 자동 로드를 거치지 않음). 비밀번호는 명령 인자 대신 표준 입력 설정으로 넘기므로 `REDIS_PASSWORD`에 큰따옴표·역슬래시를 쓰지 마세요(hex 권장).
+- go-judge에는 위 설정을 적용하지 않습니다. 중첩 sandbox를 위해 privileged가 필요하고, 실행 단위 pids·메모리는 go-judge가 자체 cgroup으로 제한하며, 컨테이너 단위 pids 상한은 JVM·컴파일러 스레드 때문에 정상 채점을 실패시킬 수 있습니다.
 - 동시 채점은 기본 2개, go-judge CPU 상한은 2 CPU입니다. 문제당 최대 4096 MiB(컴파일 1 GiB)를 지원하므로 sandbox는 **4 GiB × 동시성 + 2 GiB 서비스/캐시 여유** 이상으로 설정하세요. 예: 동시성 3이면 14 GiB. 캐시 증가·커널/런타임 오버헤드까지 엄밀히 보장하는 scheduler는 없으므로 최대 부하에서 OOM·캐시·재시작을 모니터링하고 여유를 늘리세요. Redis는 기본 256 MB에서 `noeviction`으로 새 쓰기를 거절합니다.
 
 ## Dokploy 설정
@@ -63,7 +66,7 @@
 
 - PostgreSQL, PostgreSQL 백업, Redis는 프로젝트별 named volume을 사용합니다. Dokploy 서비스나 Compose 프로젝트 이름을 바꾸면 다른 볼륨이 선택될 수 있으므로 이름을 유지하세요. `docker compose down -v`와 볼륨 prune은 운영 복구에 사용하지 않습니다.
 - `postgres-backup` 서비스가 기동할 때와 이후 24시간마다 `pg_dump -Fc`로 `postgres-backups` 볼륨에 `unsolvable-oj-<UTC 시각>.dump`(권한 600)를 만듭니다. 덤프가 성공했을 때만 `BACKUP_KEEP_DAYS`일(기본 7일)보다 오래된 파일을 지우므로 실패가 이어져도 기존 백업은 남습니다. 26시간 안에 성공한 덤프가 없으면 healthcheck가 unhealthy가 됩니다. 이 서비스는 `data` 네트워크에만 연결되고 포트를 공개하지 않습니다.
-- 백업 볼륨은 **같은 호스트**에 있으므로 디스크·호스트 장애에는 대비하지 못합니다. 최초 공개 전과 이후 정기적으로 덤프를 서버 외부 저장소로 복사하세요(자동 원격 전송은 아직 없습니다). 아래 `<backup-container>`, `<postgres-container>`는 `docker ps`로 확인한 실제 컨테이너 이름입니다.
+- 백업 볼륨은 **같은 호스트**에 있으므로 디스크·호스트 장애에는 대비하지 못합니다. 최초 공개 전에 아래 [서버 밖 백업 복사](#서버-밖-백업-복사)를 설정하세요(저장소에는 원격 전송 코드가 없습니다). 아래 `<backup-container>`, `<postgres-container>`는 `docker ps`로 확인한 실제 컨테이너 이름입니다.
 
   ```sh
   # 백업 목록과 외부 복사. 권한을 제한한 호스트 디렉터리에서 실행합니다.
@@ -91,12 +94,73 @@
   docker exec <backup-container> pg_restore --no-owner --exit-on-error -d unsolvable_oj /backups/unsolvable-oj-<시각>.dump
   ```
 
-  외부에 보관한 덤프로 복원할 때는 `docker cp ./unsolvable-oj-<시각>.dump <backup-container>:/backups/`로 먼저 넣습니다.
+  외부에 보관한 덤프로 복원할 때는 마지막 명령 대신 표준 입력으로 넘깁니다. 백업 컨테이너는 capability가 없어 `docker cp`로 넣은 호스트 사용자 소유 파일(권한 600)을 읽지 못합니다.
+
+  ```sh
+  docker exec -i <backup-container> pg_restore --no-owner --exit-on-error -d unsolvable_oj < ./unsolvable-oj-<시각>.dump
+  ```
 
 - PostgreSQL이 초기화된 뒤 `POSTGRES_PASSWORD`만 바꾸면 DB 계정 비밀번호는 바뀌지 않습니다. 계정과 접속 설정을 함께 갱신하세요. JWT 비밀키 변경은 기존 로그인을 무효화합니다. Judge/Redis/실행기 토큰도 소비자와 함께 변경해야 합니다.
 - 기존 CI는 검사만 수행합니다. 첫 운영 검증 후 배포 자동화를 연결할 때는 **CI 성공한 커밋만 배포**하도록 연결하세요. Dokploy의 push 자동 배포를 단순히 켜면 CI가 끝나기 전에 배포될 수 있습니다.
 - 업데이트 전 DB 백업과 이전 정상 커밋을 기록합니다. 이미지 롤백은 마이그레이션을 자동으로 되돌리지 않습니다. 스키마 호환성을 확인하고 필요한 경우 검증한 복원 절차를 사용하세요.
 - 워커는 종료 시 진행 중인 채점을 기다리지만 2분 이후 강제 종료될 수 있습니다. 긴 작업은 lease 만료 뒤 재처리될 수 있으므로 배포 중 큐와 워커 상태를 확인하세요. 로그는 컨테이너당 10 MB × 3개로 순환하며 실행기 로그 접근 권한을 제한합니다.
+- `deploy/compose.yaml`의 서비스 설정(보안 옵션, CPU·pids 상한, 명령)이 바뀌면 다음 배포에서 해당 컨테이너가 다시 만들어집니다. 볼륨 데이터는 유지되지만 잠시 중단되므로 트래픽이 적은 시간에 배포하고, 직후 7개 서비스의 healthcheck와 `/api/v1/health`를 확인하세요.
+
+## 서버 밖 백업 복사
+
+`postgres-backups` 볼륨의 덤프를 호스트 cron으로 다른 저장소에 복사합니다. 덤프에는 계정·제출 데이터가 들어 있으므로 암호화된 대상이나 접근을 제한한 별도 서버에만 보냅니다. 아래 명령은 호스트 root 셸 기준입니다.
+
+1. 백업 볼륨의 호스트 경로를 확인합니다. Dokploy 프로젝트 이름이 앞에 붙습니다.
+
+   ```sh
+   docker volume ls --filter name=postgres-backups
+   docker volume inspect <volume-name> --format '{{ .Mountpoint }}'
+   ```
+
+2. 둘 중 하나로 복사 대상을 준비합니다.
+   - **rclone(오브젝트 스토리지)**: `rclone config`로 S3/B2 등 원격을 만들고 그 위에 `crypt` 원격(예: `oj-backup-crypt:`)을 만듭니다. 설정 파일은 root 전용(600)으로 두고, crypt 비밀번호는 서버 밖(비밀번호 관리자 등)에도 보관합니다. 잃어버리면 백업을 복호화할 수 없습니다. 가능하면 버킷에 삭제 보호(버전 관리·object lock)를 켜고, 서버의 키에는 쓰기만 주세요.
+   - **rsync(다른 서버)**: 백업 전용 계정과 SSH 키를 만들고 대상 디렉터리를 700으로 둡니다. 키는 가능하면 `authorized_keys`의 `command=`/`rrsync`로 해당 디렉터리 쓰기만 허용합니다.
+
+3. 복사 명령을 직접 한 번 실행해 확인한 뒤 cron에 등록합니다. 덤프는 컨테이너 기동 시각 기준 24시간마다 만들어지므로 6시간마다 실행합니다. 완성된 `.dump`만 복사하고 작성 중인 `.partial`은 제외합니다.
+
+   ```sh
+   SRC=<위에서 확인한 Mountpoint>
+   # rclone: 이미 올린 파일은 바꾸지 않고, 30일이 지난 원격 파일만 지웁니다.
+   rclone copy "$SRC" oj-backup-crypt:unsolvable-oj --include 'unsolvable-oj-*.dump' --immutable
+   rclone delete oj-backup-crypt:unsolvable-oj --min-age 30d
+   # 또는 rsync: --delete 없이 보내 서버의 7일 보존과 별개로 원격에 남깁니다. 원격 보존 정리는 대상 서버에서 합니다.
+   rsync -a --chmod=D700,F600 --include='unsolvable-oj-*.dump' --exclude='*' "$SRC"/ backup@<backup-host>:/srv/unsolvable-oj/
+   ```
+
+   ```cron
+   15 */6 * * * root <위 명령을 담은 스크립트> >> /var/log/unsolvable-oj-offsite.log 2>&1
+   ```
+
+4. 주 1회 원격의 최신 파일 시각을 확인합니다(`rclone lsl oj-backup-crypt:unsolvable-oj | sort -k2,3 | tail -1` 또는 대상 서버의 `ls -lt`). 30시간보다 오래되었으면 서버의 `postgres-backup` healthcheck와 cron 로그를 확인합니다. 서버 디스크가 사라져도 남는지가 목적이므로 다른 장애 영역(다른 업체·리전)을 고르세요.
+
+### 복원 연습
+
+분기마다, 그리고 PostgreSQL major 버전을 올리기 전에 **서버 밖 사본**으로 복원을 연습합니다. 운영 DB·운영 볼륨·운영 Compose 프로젝트는 사용하지 않습니다. 운영 서버가 아닌 장비에서 하는 것이 가장 좋습니다.
+
+```sh
+umask 077
+mkdir -p ./restore-drill && cd ./restore-drill
+rclone copy oj-backup-crypt:unsolvable-oj/unsolvable-oj-<시각>.dump .   # 또는 scp로 대상 서버에서 받기
+pg_restore --list unsolvable-oj-<시각>.dump > /dev/null                 # 파일 손상 확인(로컬에 pg_restore가 없으면 아래 컨테이너에서 실행)
+# 운영과 같은 major 버전의 일회용 DB. 네트워크 없이 띄우고 비밀번호는 연습용입니다.
+docker run -d --name oj-restore-drill --network none \
+  -e POSTGRES_USER=unsolvable -e POSTGRES_DB=unsolvable_oj -e POSTGRES_PASSWORD=restore-drill-only \
+  postgres:17.11-alpine
+until docker exec oj-restore-drill pg_isready -h 127.0.0.1 -U unsolvable -d unsolvable_oj; do sleep 1; done
+time docker exec -i oj-restore-drill pg_restore -U unsolvable --no-owner --exit-on-error -d unsolvable_oj < unsolvable-oj-<시각>.dump
+docker exec oj-restore-drill psql -U unsolvable -d unsolvable_oj \
+  -c 'SELECT count(*) AS users FROM users' -c 'SELECT count(*) AS problems FROM problems' \
+  -c 'SELECT count(*) AS submissions, max(created_at) AS latest FROM submissions'
+docker rm -f oj-restore-drill
+cd .. && rm -rf ./restore-drill
+```
+
+`pg_isready`는 TCP(`-h 127.0.0.1`)로 확인해야 초기화용 임시 서버가 아닌 실제 서버를 기다립니다. 덤프 시각, 복원 소요 시간, 행 수와 최신 제출 시각을 기록하고 운영 관리자 화면의 수치와 대략 맞는지 비교합니다. 복원이 실패하거나 최신 시각이 예상보다 오래되었으면 서버 밖 복사부터 다시 점검하세요.
 
 ## 로컬 검증
 

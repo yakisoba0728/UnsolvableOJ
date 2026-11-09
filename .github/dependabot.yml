@@ -1,0 +1,47 @@
+# 주 1회(월요일 09:00 KST) 버전 업데이트를 묶어서 엽니다. 보안 업데이트는 이 일정과 별개로 열립니다.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directories: [/Back, /Front, /Judge]
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Seoul
+    open-pull-requests-limit: 6
+    groups:
+      # 디렉터리마다 minor/patch 묶음 하나, major 묶음 하나를 넘지 않습니다.
+      npm-minor-patch:
+        update-types: [minor, patch]
+      npm-major:
+        update-types: [major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Seoul
+    open-pull-requests-limit: 2
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directories: [/Back, /Front, /Judge, /Judge/runtime]
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Seoul
+    open-pull-requests-limit: 4
+    groups:
+      docker-images:
+        patterns: ["*"]
+    ignore:
+      # Node·nginx·Ubuntu의 major 변경은 런타임 호환성 검토와 함께 직접 올립니다.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      # Judge/runtime/Dockerfile의 라이선스 ADD URL·checksum이 v1.13.3에 고정되어 있어 함께 직접 올립니다.
+      - dependency-name: criyle/go-judge

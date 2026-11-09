@@ -6,11 +6,21 @@ x-logging: &logging
     max-size: "10m"
     max-file: "3"
 
+# go-judge를 뺀 모든 서비스에 적용합니다. 이미지별로 실제로 필요한 권한만 cap_add로 되돌립니다.
+x-hardening: &hardening
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+
 services:
   postgres:
     image: postgres:17.11-alpine
     restart: unless-stopped
+    <<: *hardening
+    # 진입점이 데이터 디렉터리 소유권을 맞춘 뒤 postgres 사용자로 내려갈 때 필요한 권한입니다.
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
     mem_limit: ${POSTGRES_MEMORY_LIMIT:-1g}
+    cpus: ${POSTGRES_CPUS:-2.0}
+    pids_limit: 256
     environment:
       POSTGRES_DB: unsolvable_oj
       POSTGRES_USER: unsolvable
@@ -30,7 +40,11 @@ services:
     image: postgres:17.11-alpine
     init: true
     restart: unless-stopped
+    # root로 실행되지만 추가 권한 없이 자기 소유의 백업 볼륨만 씁니다.
+    <<: *hardening
     mem_limit: ${BACKUP_MEMORY_LIMIT:-256m}
+    cpus: ${BACKUP_CPUS:-0.5}
+    pids_limit: 64
     environment:
       PGHOST: postgres
       PGUSER: unsolvable
@@ -73,14 +87,24 @@ services:
   redis:
     image: redis:8.10.3-alpine
     restart: unless-stopped
+    <<: *hardening
+    # 셸로 바로 실행해 지금까지처럼 root로 동작합니다. 이미지가 만든 redis 소유 /data에 쓰려면 이 권한만 필요합니다.
+    cap_add: [DAC_OVERRIDE]
     mem_limit: ${REDIS_MEMORY_LIMIT:-512m}
+    cpus: ${REDIS_CPUS:-1.0}
+    pids_limit: 64
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:?Set a private Redis password}
       REDIS_MAXMEMORY: ${REDIS_MAXMEMORY:-256mb}
     command:
       - /bin/sh
       - -ec
-      - exec redis-server --appendonly yes --maxmemory "$$REDIS_MAXMEMORY" --maxmemory-policy noeviction --requirepass "$$REDIS_PASSWORD"
+      # 비밀번호를 명령 인자 대신 표준 입력 설정으로 넘겨 프로세스 목록에 남기지 않습니다.
+      # 설정 문법상 비밀번호에 큰따옴표·역슬래시를 쓰지 마세요(hex 권장).
+      - |
+        exec redis-server - --appendonly yes --maxmemory "$$REDIS_MAXMEMORY" --maxmemory-policy noeviction <<EOF
+        requirepass "$$REDIS_PASSWORD"
+        EOF
     volumes:
       - redis-data:/data
     networks: [data]
@@ -96,7 +120,10 @@ services:
       context: ../Back
     init: true
     restart: unless-stopped
+    <<: *hardening
     mem_limit: ${BACK_MEMORY_LIMIT:-1g}
+    cpus: ${BACK_CPUS:-2.0}
+    pids_limit: 256
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
@@ -131,6 +158,8 @@ services:
     build:
       context: ../Judge/runtime
     privileged: true
+    # no-new-privileges·cap_drop·pids_limit은 적용하지 않습니다. 중첩 sandbox가 자체 cgroup으로 제한하며
+    # 컨테이너 단위 pids 상한은 JVM·컴파일러 스레드 때문에 정상 채점을 실패시킬 수 있습니다.
     restart: unless-stopped
     shm_size: 512m
     mem_limit: ${SANDBOX_MEMORY_LIMIT:-10g}
@@ -157,7 +186,10 @@ services:
       context: ../Judge
     init: true
     restart: unless-stopped
+    <<: *hardening
     mem_limit: ${JUDGE_MEMORY_LIMIT:-512m}
+    cpus: ${JUDGE_CPUS:-1.0}
+    pids_limit: 128
     stop_grace_period: 2m
     environment:
       API_BASE_URL: http://back:3000/api/v1
@@ -186,7 +218,13 @@ services:
         VITE_API_BASE_URL: /api/v1
         VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
     restart: unless-stopped
+    <<: *hardening
+    # nginx master(root)가 작업 프로세스를 nginx 사용자로 띄우고 80번 포트를 엽니다.
+    cap_add: [CHOWN, SETGID, SETUID, NET_BIND_SERVICE]
     mem_limit: ${FRONT_MEMORY_LIMIT:-128m}
+    cpus: ${FRONT_CPUS:-1.0}
+    # nginx 작업 프로세스 수는 호스트 CPU 수를 따릅니다.
+    pids_limit: 128
     environment:
       # Obtain the real subnet from docker network inspect dokploy-network.
       TRUSTED_PROXY_CIDR: ${TRUSTED_PROXY_CIDR:?Set the Dokploy Traefik network subnet}
