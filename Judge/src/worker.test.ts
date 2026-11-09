@@ -38,6 +38,7 @@ function harness(
   t: TestContext,
   handle: (request: ApiRequest) => Response | Promise<Response> = () => Response.json({ ok: true }),
   runJudge: typeof judge = async () => result,
+  sandboxState = { healthy: true },
 ) {
   const requests: ApiRequest[] = [];
   const intervals = new Map<ReturnType<typeof setInterval>, () => void>();
@@ -78,6 +79,7 @@ function harness(
     options?.signal?.throwIfAborted();
     const url = new URL(input);
     if (url.host === "sandbox.test") {
+      if (!sandboxState.healthy) return new Response(null, { status: 503 });
       if (url.pathname === "/version") return Response.json({ os: "linux" });
       if (url.pathname === "/config") return Response.json({ runnerConfig: {
         cgroupType: 2, seccomp: true, workDir: "/w", cgroupControllers: ["cpu", "memory", "pids"],
@@ -360,15 +362,67 @@ test("an ordinary judge failure reports SYSTEM_ERROR without exposing internal d
   assert.match(String(h.errors.mock.calls[0].arguments[1]), /e{1500}/);
 });
 
-test("a transient sandbox failure reports nothing and leaves the lease to expire", async (t) => {
-  const h = harness(t, undefined, async () => { throw new SandboxUnavailableError("go-judge POST run: HTTP 503"); });
+test("a sandbox outage releases the lease and pauses claims and presence until the sandbox recovers", async (t) => {
+  const sandbox = { healthy: true };
+  let runs = 0;
+  const h = harness(t, undefined, async () => {
+    if (++runs > 1) return result;
+    sandbox.healthy = false;
+    throw new SandboxUnavailableError("go-judge POST run: HTTP 503");
+  }, sandbox);
+  const running = await h.start();
+  t.after(() => running.close());
+  const count = (suffix: string, method?: string) => h.requests.filter((request) =>
+    request.path.endsWith(suffix) && (!method || request.method === method)).length;
+  const settle = async () => { for (let i = 0; i < 20; i++) await setImmediate(); };
+
+  await h.process();
+  const release = h.requests.find((request) => request.path === `${path}/release`);
+  assert.equal(release?.method, "PATCH");
+  assert.equal(release?.headers.get("X-Judge-Generation"), "7");
+  assert.equal(count("/result"), 0);
+
+  // 복구 전에는 다음 작업이 lease를 잡지 않고, 운영 조회용 존재 신호도 보내지 않는다.
+  const presence = count("/internal/judge/heartbeat");
+  const next = h.process();
+  await settle();
+  assert.equal(count("/submission", "GET"), 1);
+  await h.heartbeat();
+  assert.equal(count("/internal/judge/heartbeat"), presence);
+
+  assert.equal(h.sleeps[0]?.ms, 5_000);
+  h.sleeps[0].resolve();
+  await settle();
+  assert.equal(h.sleeps[1]?.ms, 10_000, "a failed health check backs off");
+  assert.equal(count("/submission", "GET"), 1);
+  sandbox.healthy = true;
+  h.sleeps[1].resolve();
+  await next;
+  assert.equal(count("/submission", "GET"), 2);
+  assert.equal(count("/result"), 1);
+  await h.heartbeat();
+  assert.equal(count("/internal/judge/heartbeat"), presence + 1);
+});
+
+test("if the lease cannot be released, the sandbox error fails the job and the lease expires as before", async (t) => {
+  const h = harness(t, (request) => request.path.endsWith("/release")
+    ? Response.json({}, { status: 503 }) : Response.json({ ok: true }),
+  async () => { throw new SandboxUnavailableError("go-judge POST run: HTTP 503"); });
   const running = await h.start();
   t.after(() => running.close());
   await assert.rejects(h.process(), SandboxUnavailableError);
   assert.equal(h.requests.filter((request) => request.path.endsWith("/result")).length, 0);
-  assert.equal(h.intervals.size, 1, "only the worker heartbeat remains after the lease heartbeat stops");
-  assert.equal(h.errors.mock.callCount(), 1);
   assert.equal(h.consumer.close.mock.callCount(), 0);
+});
+
+test("closing during a sandbox outage fails waiting jobs instead of hanging", async (t) => {
+  const h = harness(t, undefined, async () => { throw new SandboxUnavailableError("go-judge POST run: HTTP 503"); });
+  const running = await h.start();
+  await h.process();
+  const waiting = h.process();
+  await running.close();
+  await assert.rejects(waiting);
+  assert.equal(h.requests.filter((request) => request.path === path && request.method === "GET").length, 1);
 });
 
 test("the consuming worker is constructed only after an authenticated API heartbeat", async (t) => {

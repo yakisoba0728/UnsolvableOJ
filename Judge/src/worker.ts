@@ -27,6 +27,26 @@ export async function startWorker(
   let worker: Pick<Worker, "close"> | undefined;
   let workerHeartbeat: ReturnType<typeof setInterval> | undefined;
   let authenticationFailure: JudgeApiError | undefined;
+  const stopping = new AbortController();
+  let sandboxOutage: Promise<void> | undefined;
+
+  // 실행 서비스가 멈추면 새 작업을 꺼내 lease를 소모하지 않도록, 복구될 때까지 채점을 멈추고 상태를 확인한다.
+  function waitForSandbox() {
+    sandboxOutage ??= (async () => {
+      console.error("Sandbox unavailable; pausing judging until it recovers");
+      for (let delay = 5_000; ; delay = Math.min(delay * 2, 60_000)) {
+        await timers.setTimeout(delay, undefined, { signal: stopping.signal });
+        try {
+          await checkSandbox(sandbox);
+          console.log("Sandbox recovered; resuming judging");
+          return;
+        } catch (error) {
+          console.error("Sandbox still unavailable:", error);
+        }
+      }
+    })().finally(() => { sandboxOutage = undefined; });
+    return sandboxOutage;
+  }
 
   async function callApi(path: string, method = "GET", body?: unknown, attempt?: { generation: number; attemptId: string }, cancellation?: AbortSignal) {
     if (authenticationFailure) throw authenticationFailure;
@@ -63,6 +83,8 @@ export async function startWorker(
   await checkSandbox(sandbox);
   await callApi("/internal/judge/heartbeat", "POST");
   worker = consume(async (job) => {
+    // 장애 중이면 lease를 잡기 전에 기다린다. 종료 중이면 작업을 실패시켜 BullMQ가 나중에 다시 시도하게 한다.
+    if (sandboxOutage) await sandboxOutage;
     const path = `/internal/judge/submissions/${job.data.submissionId}`;
     const attempt = { generation: job.data.generation, attemptId: randomUUID() };
     const cancellation = new AbortController();
@@ -87,8 +109,16 @@ export async function startWorker(
       } catch (error) {
         if (cancellation.signal.aborted) return;
         console.error(`Judge failed for ${job.data.submissionId}:`, error);
-        // 결과를 보내지 않고 lease를 만료시키면 API 복구가 다음 generation으로 다시 큐에 넣습니다(제출당 5회 뒤에는 API가 SYSTEM_ERROR로 끝냄).
-        if (error instanceof SandboxUnavailableError) throw error;
+        if (error instanceof SandboxUnavailableError) {
+          // lease를 반납하면 API가 복구 횟수를 쓰지 않고 다음 generation으로 다시 큐에 넣는다.
+          // 반납에 실패하면 예전처럼 lease 만료 복구에 맡긴다(제출당 5회 뒤에는 API가 SYSTEM_ERROR로 끝냄).
+          void waitForSandbox().catch(() => {});
+          await callApi(`${path}/release`, "PATCH", undefined, attempt, cancellation.signal).catch((releaseError) => {
+            console.error(`Judge lease release failed for ${job.data.submissionId}:`, releaseError);
+            throw error;
+          });
+          return;
+        }
         result = {
           status: "SYSTEM_ERROR",
           runtimeMs: 0,
@@ -125,6 +155,8 @@ export async function startWorker(
     }
   });
   workerHeartbeat = setInterval(() => {
+    // 실행 서비스 장애 중에는 존재 신호를 멈춰 운영 조회에 채점 가능한 워커로 보이지 않게 한다.
+    if (sandboxOutage) return;
     void callApi("/internal/judge/heartbeat", "POST").catch((error) => {
       if (!authenticationFailure) console.error("Worker heartbeat failed:", error);
     });
@@ -134,6 +166,7 @@ export async function startWorker(
   return {
     async close() {
       clearInterval(workerHeartbeat);
+      stopping.abort();
       await worker!.close();
     },
   };

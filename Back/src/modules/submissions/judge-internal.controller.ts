@@ -46,6 +46,15 @@ export class JudgeInternalController {
     return this.judgeService.renewLease(id, Number(generation), attemptId);
   }
 
+  @Patch('submissions/:id/release')
+  releaseLease(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Headers('x-judge-generation') generation: string,
+    @Headers('x-judge-attempt') attemptId: string,
+  ) {
+    return this.judgeService.releaseLease(id, Number(generation), attemptId);
+  }
+
   @Patch('submissions/:id/result')
   recordResult(
     @Param('id', ParseUUIDPipe) id: string,

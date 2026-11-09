@@ -144,6 +144,35 @@ export class JudgeService {
     return { leaseExpiresAt: new Date(Date.now() + LEASE_MS).toISOString() };
   }
 
+  /**
+   * 실행 서비스 장애로 채점하지 못한 시도의 lease를 반납한다. 워커 탓이 아니므로 복구 횟수를 올리지 않고
+   * 다음 generation으로 다시 큐에 넣는다.
+   */
+  async releaseLease(id: string, generation: number, attemptId: string) {
+    this.validateAttempt(generation, attemptId);
+    const released = await this.submissions
+      .createQueryBuilder()
+      .update()
+      .set({
+        status: SubmissionStatus.QUEUED,
+        judgeGeneration: generation + 1,
+        judgeAttemptId: null,
+        judgeLeaseExpiresAt: null,
+      })
+      .where(
+        'id = :id AND judge_generation = :generation AND judge_attempt_id = :attemptId AND status = :status',
+        { id, generation, attemptId, status: SubmissionStatus.JUDGING },
+      )
+      .execute();
+    if (released.affected !== 1)
+      throw new ConflictException('채점 권한이 만료되었습니다.');
+    // 큐 등록에 실패해도 QUEUED 복구 타이머가 다시 넣는다.
+    await enqueueJudge(this.judgeQueue, id, generation + 1).catch((error) =>
+      console.error('Judge requeue after release failed:', error),
+    );
+    return { generation: generation + 1 };
+  }
+
   async recordJudgeResult(
     id: string,
     generation: number,
