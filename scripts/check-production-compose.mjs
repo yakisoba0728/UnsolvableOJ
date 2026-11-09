@@ -39,7 +39,7 @@ for (const name of Object.keys(required)) {
 const plan = config();
 checkSandboxBudget(plan);
 assert.deepEqual(Object.keys(plan.services).sort(), [
-  'back', 'front', 'go-judge', 'judge', 'postgres', 'redis',
+  'back', 'front', 'go-judge', 'judge', 'postgres', 'postgres-backup', 'redis',
 ]);
 for (const [name, service] of Object.entries(plan.services)) {
   assert.equal(service.ports?.length ?? 0, 0, `${name} publishes a host port`);
@@ -53,7 +53,7 @@ for (const [name, service] of Object.entries(plan.services)) {
       front: 'Front', back: 'Back', judge: 'Judge', 'go-judge': 'Judge/runtime',
     }[name])));
   }
-  if (!['postgres', 'redis'].includes(name)) {
+  if (!['postgres', 'postgres-backup', 'redis'].includes(name)) {
     assert.equal(service.volumes?.length ?? 0, 0, `${name} mounts persistent host data`);
   } else {
     assert.equal(service.volumes.length, 1);
@@ -61,7 +61,14 @@ for (const [name, service] of Object.entries(plan.services)) {
   }
 }
 
-const { front, back, judge, redis } = plan.services;
+const { front, back, judge, redis, postgres } = plan.services;
+const backup = plan.services['postgres-backup'];
+// pg_dump must match the server major version, and backups stay on the private data network.
+assert.equal(backup.image, postgres.image);
+assert.deepEqual(Object.keys(backup.networks), ['data']);
+assert.equal(backup.environment.PGPASSWORD, required.POSTGRES_PASSWORD);
+assert.equal(backup.volumes[0].source, 'postgres-backups');
+assert.equal(backup.depends_on.postgres.condition, 'service_healthy');
 const sandbox = plan.services['go-judge'];
 assert.equal(plan.networks.sandbox.internal, true);
 assert.equal(plan.networks['dokploy-network'].external, true);

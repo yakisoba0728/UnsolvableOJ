@@ -32,7 +32,7 @@ gh workflow run ci.yml --ref main -f full=true
 
 실행 이미지·격리 설정·Dockerfile·배포 경로 변경이나 릴리스 전에는 전체 검사를 실행하세요. 기본 검사 성공이 세 브라우저와 실제 채점 환경의 전체 검증까지 의미하지는 않습니다. 수동 검사는 선택한 ref를 실행하므로 검사할 브랜치를 지정합니다.
 
-운영 Compose 테스트도 일회용 localhost ingress를 사용하므로 실제 Traefik·Cloudflare·DNS·HTTPS 경로 검증은 아닙니다. 기본 예산은 sandbox 10 GiB, 전체 13.125 GiB 상한이며 일반 CI 흐름은 최대 메모리 동시 부하를 검증하지 않습니다.
+운영 Compose 테스트도 일회용 localhost ingress를 사용하므로 실제 Traefik·Cloudflare·DNS·HTTPS 경로 검증은 아닙니다. 기본 예산은 sandbox 10 GiB, 전체 13.375 GiB 상한이며 일반 CI 흐름은 최대 메모리 동시 부하를 검증하지 않습니다.
 
 실패 시 `browser-failure-<attempt>` artifact에 `Front/test-results/`, `Front/playwright-report/`, live-browser trace/screenshots/HTML/JUnit만 7일 보관합니다. 빈 경로는 실패시키지 않습니다. 테스트용 일회용/fixture 계정만 사용하고 실제 계정·개인 브라우저 프로필·운영 credentials를 이 검사에 넣지 마세요. trace에는 요청/응답과 화면이 포함될 수 있습니다.
 

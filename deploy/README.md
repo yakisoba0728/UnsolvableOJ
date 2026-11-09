@@ -1,6 +1,6 @@
 # Dokploy 운영 배포 · 동일 호스트
 
-`deploy/compose.yaml`은 Front, Back, PostgreSQL, Redis, Judge, go-judge를 **같은 Docker 호스트**에 배포합니다. Dokploy에서는 **Docker Compose** 모드를 사용합니다. `build`를 지원하지 않는 Docker Stack 모드는 사용하지 않습니다.
+`deploy/compose.yaml`은 Front, Back, PostgreSQL(+백업), Redis, Judge, go-judge를 **같은 Docker 호스트**에 배포합니다. Dokploy에서는 **Docker Compose** 모드를 사용합니다. `build`를 지원하지 않는 Docker Stack 모드는 사용하지 않습니다.
 
 ```text
 인터넷 → Dokploy Traefik / HTTPS → front:80 → back:3000
@@ -17,7 +17,7 @@
 - Linux Docker, Compose 2.24.4 이상, cgroup v2의 cpu/memory/pids controller와 seccomp가 필요합니다. Docker Desktop에서도 검증할 수 있지만 운영 대상은 Linux 서버입니다.
 - go-judge는 중첩 sandbox를 위해 `privileged: true`가 필요합니다. 컨테이너 네트워크와 자원 제한은 별도 VM의 격리를 대신하지 않습니다. 실행기나 커널이 뚫리면 같은 호스트의 DB 및 기존 Dokploy 프로젝트도 영향을 받을 수 있습니다. 이 구성은 소유자가 선택한 동일 호스트 배치이며, 호스트 격리가 필요해지면 [별도 실행 노드 구성](../Judge/deploy/README.md)으로 이전하세요.
 - 실행기는 private cgroup namespace를 사용하며 `memswap_limit`을 `mem_limit`과 같게 설정해 Docker가 시작 전에 swap을 금지합니다. swap이 켜진 cgroup v2에서는 실제 `memory.swap.max=0`도 healthcheck로 확인합니다. 이 제한을 적용할 수 없는 호스트에서는 기동을 중단합니다. 실패할 때 `-no-fallback`이나 seccomp를 해제하지 마세요.
-- 기본 메모리 상한 합계는 약 **13.125 GiB**입니다(sandbox 10 GiB 포함). 최소 16 GiB급 호스트를 출발점으로 OS, Dokploy, 기존 프로젝트, Docker 빌드용 여유를 별도로 확보하세요. 배포 전 실제 여유 RAM·CPU·디스크를 확인하세요. 상한은 예약이나 호스트 용량 보장이 아닙니다.
+- 기본 메모리 상한 합계는 약 **13.375 GiB**입니다(sandbox 10 GiB 포함). 최소 16 GiB급 호스트를 출발점으로 OS, Dokploy, 기존 프로젝트, Docker 빌드용 여유를 별도로 확보하세요. 배포 전 실제 여유 RAM·CPU·디스크를 확인하세요. 상한은 예약이나 호스트 용량 보장이 아닙니다.
 - 동시 채점은 기본 2개, go-judge CPU 상한은 2 CPU입니다. 문제당 최대 4096 MiB(컴파일 1 GiB)를 지원하므로 sandbox는 **4 GiB × 동시성 + 2 GiB 서비스/캐시 여유** 이상으로 설정하세요. 예: 동시성 3이면 14 GiB. 캐시 증가·커널/런타임 오버헤드까지 엄밀히 보장하는 scheduler는 없으므로 최대 부하에서 OOM·캐시·재시작을 모니터링하고 여유를 늘리세요. Redis는 기본 256 MB에서 `noeviction`으로 새 쓰기를 거절합니다.
 
 ## Dokploy 설정
@@ -47,7 +47,7 @@
 
 ## 최초 배포 확인
 
-1. 6개 서비스가 실행되는지 확인합니다. postgres, redis, back, front와 go-judge의 healthcheck가 통과해야 합니다. back은 시작할 때 미적용 TypeORM 마이그레이션을 실행하며 실패하면 정상 상태가 되지 않습니다.
+1. 7개 서비스가 실행되는지 확인합니다. postgres, postgres-backup, redis, back, front, judge와 go-judge의 healthcheck가 통과해야 합니다. judge는 API heartbeat가 성공할 때마다 `/tmp/judge-heartbeat`를 갱신하며, 2분 넘게 갱신되지 않으면 healthcheck가 워커 프로세스를 종료해 restart 정책으로 다시 시작합니다(Compose는 unhealthy만으로 재시작하지 않습니다). back이 오래 내려가 있어도 같은 방식으로 재시작을 반복하다 back이 돌아오면 정상화됩니다. back은 시작할 때 미적용 TypeORM 마이그레이션을 실행하며 실패하면 정상 상태가 되지 않습니다.
 2. `https://<도메인>/`과 `/api/v1/health`를 확인합니다. `/api/v1/internal/judge/heartbeat` 같은 내부 경로는 공개 nginx를 통해 접근하면 404여야 합니다. 워커는 `http://back:3000/api/v1`로 직접 통신합니다.
 3. 웹에서 관리자용 계정을 회원가입한 뒤 Dokploy의 **back 컨테이너 터미널**에서 다음 명령을 실행하고 다시 로그인합니다. 운영 이미지에는 개발용 빌드 도구가 없으므로 `npm run db:bootstrap:admin` 대신 이미 빌드된 스크립트를 직접 실행합니다.
 
@@ -61,16 +61,37 @@
 
 ## 백업·업데이트·복구
 
-- PostgreSQL과 Redis는 프로젝트별 named volume을 사용합니다. Dokploy 서비스나 Compose 프로젝트 이름을 바꾸면 다른 볼륨이 선택될 수 있으므로 이름을 유지하세요. `docker compose down -v`와 볼륨 prune은 운영 복구에 사용하지 않습니다.
-- 최초 공개 전 PostgreSQL의 정기 백업을 서버 외부 저장소로 보내고 복원도 확인합니다. 컨테이너 터미널의 화면 출력을 백업 파일로 오해하지 마세요. 호스트에서 실제 컨테이너 ID를 지정한 예시는 다음과 같습니다.
+- PostgreSQL, PostgreSQL 백업, Redis는 프로젝트별 named volume을 사용합니다. Dokploy 서비스나 Compose 프로젝트 이름을 바꾸면 다른 볼륨이 선택될 수 있으므로 이름을 유지하세요. `docker compose down -v`와 볼륨 prune은 운영 복구에 사용하지 않습니다.
+- `postgres-backup` 서비스가 기동할 때와 이후 24시간마다 `pg_dump -Fc`로 `postgres-backups` 볼륨에 `unsolvable-oj-<UTC 시각>.dump`(권한 600)를 만듭니다. 덤프가 성공했을 때만 `BACKUP_KEEP_DAYS`일(기본 7일)보다 오래된 파일을 지우므로 실패가 이어져도 기존 백업은 남습니다. 26시간 안에 성공한 덤프가 없으면 healthcheck가 unhealthy가 됩니다. 이 서비스는 `data` 네트워크에만 연결되고 포트를 공개하지 않습니다.
+- 백업 볼륨은 **같은 호스트**에 있으므로 디스크·호스트 장애에는 대비하지 못합니다. 최초 공개 전과 이후 정기적으로 덤프를 서버 외부 저장소로 복사하세요(자동 원격 전송은 아직 없습니다). 아래 `<backup-container>`, `<postgres-container>`는 `docker ps`로 확인한 실제 컨테이너 이름입니다.
 
   ```sh
-  # 권한을 제한한 호스트 백업 디렉터리에서 실행합니다.
+  # 백업 목록과 외부 복사. 권한을 제한한 호스트 디렉터리에서 실행합니다.
+  docker exec <backup-container> ls -l /backups
   umask 077
-  docker exec <postgres-container-id> pg_dump -U unsolvable -d unsolvable_oj -Fc > unsolvable-oj.dump
-  # 서비스 중인 DB 대신 별도로 만든 복원 확인용 DB에 복원합니다.
-  docker exec -i <restore-postgres-container-id> pg_restore -U unsolvable -d unsolvable_restore --no-owner < unsolvable-oj.dump
+  docker cp <backup-container>:/backups/unsolvable-oj-<시각>.dump .
+  # 즉시 백업이 필요하면(예: 업데이트 직전) 서비스를 재시작합니다. 새 덤프가 만들어집니다.
+  docker restart <backup-container>
   ```
+
+- 복원 확인은 서비스 중인 DB 대신 임시 DB에서 합니다. 백업 컨테이너에 접속 정보(`PGHOST` 등)가 설정되어 있으므로 그대로 실행할 수 있습니다.
+
+  ```sh
+  docker exec <backup-container> createdb unsolvable_restore
+  docker exec <backup-container> pg_restore --no-owner --exit-on-error -d unsolvable_restore /backups/unsolvable-oj-<시각>.dump
+  docker exec <backup-container> psql -d unsolvable_restore -c 'SELECT count(*) FROM users'
+  docker exec <backup-container> dropdb unsolvable_restore
+  ```
+
+- 실제 복원은 Dokploy에서 **front, back, judge를 중지**한 뒤 DB를 다시 만들고 덤프를 넣습니다. `pg_restore --clean`은 덤프에 없는 이후 테이블을 남기므로 DB 자체를 다시 만듭니다. 복원 후 back을 먼저 시작해 마이그레이션이 성공하는지 확인하고 judge, front를 시작합니다. 대기 중이던 Redis 큐 작업은 복원된 DB와 맞지 않을 수 있으므로 관리자 ops 화면에서 큐 상태를 확인하세요.
+
+  ```sh
+  docker exec <backup-container> dropdb --force unsolvable_oj
+  docker exec <backup-container> createdb unsolvable_oj
+  docker exec <backup-container> pg_restore --no-owner --exit-on-error -d unsolvable_oj /backups/unsolvable-oj-<시각>.dump
+  ```
+
+  외부에 보관한 덤프로 복원할 때는 `docker cp ./unsolvable-oj-<시각>.dump <backup-container>:/backups/`로 먼저 넣습니다.
 
 - PostgreSQL이 초기화된 뒤 `POSTGRES_PASSWORD`만 바꾸면 DB 계정 비밀번호는 바뀌지 않습니다. 계정과 접속 설정을 함께 갱신하세요. JWT 비밀키 변경은 기존 로그인을 무효화합니다. Judge/Redis/실행기 토큰도 소비자와 함께 변경해야 합니다.
 - 기존 CI는 검사만 수행합니다. 첫 운영 검증 후 배포 자동화를 연결할 때는 **CI 성공한 커밋만 배포**하도록 연결하세요. Dokploy의 push 자동 배포를 단순히 켜면 CI가 끝나기 전에 배포될 수 있습니다.

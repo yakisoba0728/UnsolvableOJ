@@ -1,5 +1,5 @@
 # Dokploy: Docker Compose mode, repository root as the checkout directory.
-# All six services run on one host; sandbox has no public ports or data mounts.
+# All seven services run on one host; sandbox has no public ports or data mounts.
 x-logging: &logging
   driver: json-file
   options:
@@ -23,6 +23,51 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    logging: *logging
+
+  # 하루 한 번(그리고 기동할 때마다) 같은 호스트의 볼륨에 pg_dump하고 BACKUP_KEEP_DAYS일보다 오래된 덤프를 지웁니다.
+  postgres-backup:
+    image: postgres:17.11-alpine
+    init: true
+    restart: unless-stopped
+    mem_limit: ${BACKUP_MEMORY_LIMIT:-256m}
+    environment:
+      PGHOST: postgres
+      PGUSER: unsolvable
+      PGDATABASE: unsolvable_oj
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set a random hex PostgreSQL password}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-7}
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        umask 077
+        while :; do
+          file="/backups/unsolvable-oj-$$(date -u +%Y%m%dT%H%M%SZ).dump"
+          # 실패한 덤프로 정상 백업을 밀어내지 않도록 성공했을 때만 보존 기간을 적용합니다.
+          if pg_dump -Fc -f "$$file.partial"; then
+            mv "$$file.partial" "$$file"
+            find /backups -name 'unsolvable-oj-*' -mtime +"$$BACKUP_KEEP_DAYS" -delete
+            echo "Backup written: $$file"
+          else
+            rm -f "$$file.partial"
+            echo "Backup failed" >&2
+          fi
+          sleep 86400
+        done
+    volumes:
+      - postgres-backups:/backups
+    networks: [data]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # 26시간 안에 성공한 덤프가 없으면 unhealthy로 표시합니다.
+      test: ["CMD-SHELL", "find /backups -name 'unsolvable-oj-*.dump' -mmin -1560 | grep -q ."]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
     logging: *logging
 
   redis:
@@ -160,6 +205,7 @@ services:
 
 volumes:
   postgres-data:
+  postgres-backups:
   redis-data:
 
 networks:
