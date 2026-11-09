@@ -6,6 +6,8 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.e2e-spec.ts'],
+    // 모든 파일이 같은 DB를 쓰므로, 한 파일의 정리(문제 삭제·TRUNCATE)가 다른 파일의 진행 중 쿼리를 깨지 않게 순서대로 실행한다.
+    fileParallelism: false,
     env: {
       NODE_ENV: 'test',
       DATABASE_URL: integrationDatabaseUrl(),
