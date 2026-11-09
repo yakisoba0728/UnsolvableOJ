@@ -31,7 +31,7 @@ export function SubmissionPage() {
   );
   // 연속 학습 카드는 정답일 때만 보이므로 그때만 전체 제출 기록을 받는다.
   const history = useSubmissionHistory(
-    submission?.status === "ACCEPTED" ? session : null,
+    submission?.status === "ACCEPTED" && !submission.isTest ? session : null,
   );
 
   if (error && !submission)
@@ -63,12 +63,13 @@ export function SubmissionPage() {
       />
       <JudgeRefreshNotice {...resultState} />
       <ResultSummary submission={submission} />
-      {submission.status === "ACCEPTED" && !history.loading && !history.error ? (
+      {submission.status === "ACCEPTED" &&
+      !submission.isTest &&
+      !history.loading &&
+      !history.error ? (
         <section className="streak-card" aria-label="연속 학습">
           <div className="streak-text">
-            <strong>
-              {streakDays(learningByDay(history.submissions))}일
-            </strong>
+            <strong>{streakDays(learningByDay(history.submissions))}일</strong>
             <span>연속 학습 중이에요. 내일도 이어가 보세요!</span>
           </div>
           <WeekStrip counts={submissionsByDay(history.submissions)} />
@@ -84,32 +85,35 @@ export function SubmissionPage() {
         </div>
         <pre className="source-code">{submission.sourceCode}</pre>
       </section>
-      <div className="card-actions result-actions">
-        {submission.status === "ACCEPTED" ? (
-          <>
-            <Link className="button" to="/problems">
-              다음 문제 찾기
-            </Link>
-            <Link className="button button-outline" to="/profile">
-              내 학습 기록
-            </Link>
-          </>
-        ) : (
-          <>
-            {submission.problem.slug ? (
-              <Link
-                className="button"
-                to={problemPath(submission.problem.slug)}
-              >
-                코드 수정하기
+      {/* 검증용·기업 테스트 제출은 학습 흐름(다음 문제·코드 수정)과 무관하고, 기업 전용 문제는 공개 화면이 없다. */}
+      {submission.isTest ? null : (
+        <div className="card-actions result-actions">
+          {submission.status === "ACCEPTED" ? (
+            <>
+              <Link className="button" to="/problems">
+                다음 문제 찾기
               </Link>
-            ) : null}
-            <Link className="button button-outline" to="/submissions">
-              제출 내역
-            </Link>
-          </>
-        )}
-      </div>
+              <Link className="button button-outline" to="/profile">
+                내 학습 기록
+              </Link>
+            </>
+          ) : (
+            <>
+              {submission.problem.slug ? (
+                <Link
+                  className="button"
+                  to={problemPath(submission.problem.slug)}
+                >
+                  코드 수정하기
+                </Link>
+              ) : null}
+              <Link className="button button-outline" to="/submissions">
+                제출 내역
+              </Link>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

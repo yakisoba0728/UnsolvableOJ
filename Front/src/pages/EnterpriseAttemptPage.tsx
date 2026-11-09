@@ -39,7 +39,8 @@ export function EnterpriseAttemptPage() {
   const { id = "" } = useParams();
   const { session } = useAuth();
   const token = session?.accessToken;
-  const now = useNow(1_000);
+  // 본문·편집기를 매초 다시 그리지 않도록 초 단위 표시는 AttemptTimer가 맡는다.
+  const now = useNow(5_000);
   const { data, loading, error, retry } = useRequest<AttemptView | null>(
     token ? (signal) => api(`/enterprise/attempts/${id}`, { signal }, token) : null,
     null,
@@ -158,9 +159,7 @@ export function EnterpriseAttemptPage() {
         description={`${data.problems.length}문항 · 맞힌 문제 ${solved}개`}
         aside={
           <div className="ent-actions">
-            <p className={`ent-timer${!closed && remaining < 5 * 60_000 ? " ent-timer-low" : ""}`} role="timer" aria-live="off">
-              {closed ? "응시 종료" : `남은 시간 ${remainingText(remaining)}`}
-            </p>
+            <AttemptTimer deadlineAt={data.deadlineAt} finished={Boolean(data.finishedAt)} />
             {closed ? null : (
               <button className="button button-outline" onClick={() => void finish()} disabled={finishing}>
                 시험 종료
@@ -283,5 +282,16 @@ export function EnterpriseAttemptPage() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+function AttemptTimer({ deadlineAt, finished }: { deadlineAt: string; finished: boolean }) {
+  const now = useNow(1_000);
+  const remaining = Date.parse(deadlineAt) - now;
+  const closed = finished || remaining <= 0;
+  return (
+    <p className={`ent-timer${!closed && remaining < 5 * 60_000 ? " ent-timer-low" : ""}`} role="timer" aria-live="off">
+      {closed ? "응시 종료" : `남은 시간 ${remainingText(remaining)}`}
+    </p>
   );
 }

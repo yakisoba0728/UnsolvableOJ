@@ -74,6 +74,8 @@ export interface Submission {
   problem: { id: string; slug?: string; title?: string };
   language: Language;
   status: string;
+  /** 검증용·기업 테스트 응시 제출: 학습 기록에 들어가지 않는다. */
+  isTest?: boolean;
   completedForLearning?: boolean;
   runtimeMs: number | null;
   memoryKb: number | null;
