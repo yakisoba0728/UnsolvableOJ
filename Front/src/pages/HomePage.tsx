@@ -31,9 +31,18 @@ export function HomePage() {
     rankLoading,
     profileError,
     rankError,
+    retryProfile,
+    retryRank,
   } = useMyStanding(session);
-  const { problems, loading, error } = useAllProblems();
+  const { problems, loading, error, retry } = useAllProblems();
   const history = useSubmissionHistory(session);
+  // 실패한 요청만 다시 받는다. 성공한 카드까지 다시 불러오면 잠깐 비어 보인다.
+  const retryFailed = () => {
+    if (error) retry();
+    if (profileError) retryProfile();
+    if (rankError) retryRank();
+    if (history.error) history.retry();
+  };
 
   const dayCounts = submissionsByDay(history.submissions);
   const streak = streakDays(learningByDay(history.submissions));
@@ -56,7 +65,10 @@ export function HomePage() {
 
       {error || profileError || rankError || history.error ? (
         <p className="error-message" role="alert">
-          {error || profileError || rankError || history.error}
+          {error || profileError || rankError || history.error}{" "}
+          <button type="button" className="inline-button" onClick={retryFailed}>
+            다시 시도
+          </button>
         </p>
       ) : null}
 
@@ -74,6 +86,8 @@ export function HomePage() {
                 <strong>
                   {loading ? (
                     <Skeleton width={28} height={22} />
+                  ) : error ? (
+                    "—"
                   ) : (
                     problems.length
                   )}

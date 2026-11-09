@@ -16,11 +16,11 @@ test("status changes lock every row, reject repeated clicks and unlock after fai
   const b = page.locator(".my-problem-row", { hasText: "문제 B" });
   await a.getByRole("button", { name: "비공개로 전환" }).click();
   await expect.poll(() => pending.length).toBe(1);
-  await expect(a.getByRole("button")).toBeDisabled();
-  await expect(b.getByRole("button")).toBeDisabled();
+  await expect(a.getByRole("button", { name: "비공개로 전환" })).toBeDisabled();
+  await expect(b.getByRole("button", { name: "비공개로 전환" })).toBeDisabled();
   // 일반 포인터 클릭은 disabled 버튼에서 요청을 만들지 않아야 한다.
   for (const row of [b, a]) {
-    const box = await row.getByRole("button").boundingBox();
+    const box = await row.getByRole("button", { name: "비공개로 전환" }).boundingBox();
     if (!box) throw new Error("상태 버튼을 찾지 못했습니다.");
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   }
@@ -28,8 +28,8 @@ test("status changes lock every row, reject repeated clicks and unlock after fai
   await pending[0].fulfill({ status: 403, json: { message: "상태 변경 권한이 없습니다." } });
   await expect(page.getByRole("alert")).toHaveText("상태 변경 권한이 없습니다.");
   await expect(a).toContainText("공개 중");
-  await expect(a.getByRole("button")).toBeEnabled();
-  await expect(b.getByRole("button")).toBeEnabled();
+  await expect(a.getByRole("button", { name: "비공개로 전환" })).toBeEnabled();
+  await expect(b.getByRole("button", { name: "비공개로 전환" })).toBeEnabled();
   await b.getByRole("button", { name: "비공개로 전환" }).click();
   await expect.poll(() => pending.length).toBe(2);
   expect(pending[1].request().url()).toContain("/problems/b/status");
@@ -37,12 +37,59 @@ test("status changes lock every row, reject repeated clicks and unlock after fai
   await pending[1].fulfill({ json: { id: "b", status: "DRAFT", currentVersion: 1 } });
   await expect(b).toContainText("초안 · 검수 대기");
   await expect(page.getByRole("alert")).toHaveCount(0);
-  await expect(a.getByRole("button")).toBeEnabled();
+  await expect(a.getByRole("button", { name: "비공개로 전환" })).toBeEnabled();
   await a.getByRole("button", { name: "비공개로 전환" }).click();
   await expect.poll(() => pending.length).toBe(3);
   await pending[2].fulfill({ json: { id: "a", status: "DRAFT", currentVersion: 1 } });
   await expect(a).toContainText("초안 · 검수 대기");
   await expect(a.getByRole("button", { name: "공개하기", exact: true })).toBeEnabled();
+});
+
+test("authors archive a problem only after confirming and can unarchive it back to a draft", async ({ page }) => {
+  await authenticate(page, "AUTHOR");
+  await page.route("**/api/v1/problems/mine", (route) => route.fulfill({ json: [
+    { ...problem, id: "a", title: "문제 A", currentVersion: 1 },
+  ] }));
+  const sent: unknown[] = [];
+  await page.route("**/api/v1/problems/a/status", async (route) => {
+    const body = route.request().postDataJSON() as { status: string };
+    sent.push(body);
+    await route.fulfill({ json: { id: "a", status: body.status, currentVersion: 1 } });
+  });
+  await page.goto("/my-problems");
+  const row = page.locator(".my-problem-row", { hasText: "문제 A" });
+  const dialogs: string[] = [];
+  let accept = false;
+  page.on("dialog", (dialog) => {
+    dialogs.push(dialog.message());
+    void (accept ? dialog.accept() : dialog.dismiss());
+  });
+  await row.getByRole("button", { name: "보관", exact: true }).click();
+  await expect.poll(() => dialogs.length).toBe(1);
+  expect(dialogs[0]).toContain("문제 A");
+  expect(sent).toHaveLength(0);
+  await expect(row).toContainText("공개 중");
+
+  accept = true;
+  await row.getByRole("button", { name: "보관", exact: true }).click();
+  await expect(row).toContainText("보관됨");
+  expect(sent).toEqual([{ status: "ARCHIVED" }]);
+  await expect(page.getByRole("status")).toHaveText("문제를 보관했어요.");
+  await expect(row.getByRole("link", { name: "문제 보기" })).toHaveCount(0);
+
+  accept = false;
+  await row.getByRole("button", { name: "보관 해제" }).click();
+  await expect.poll(() => dialogs.length).toBe(3);
+  expect(dialogs[2]).toContain("보관을 해제할까요?");
+  expect(sent).toHaveLength(1);
+  await expect(row).toContainText("보관됨");
+
+  accept = true;
+  await row.getByRole("button", { name: "보관 해제" }).click();
+  await expect(row).toContainText("초안 · 검수 대기");
+  expect(sent).toEqual([{ status: "ARCHIVED" }, { status: "DRAFT" }]);
+  await expect(page.getByRole("status")).toHaveText("보관을 해제했어요. 초안으로 돌아왔어요.");
+  expect(dialogs).toHaveLength(4);
 });
 
 for (const boundary of ["token", "account", "page"] as const) {
@@ -140,7 +187,7 @@ for (const role of ["AUTHOR", "ADMIN"] as const) {
     await page.getByLabel("입력 설명").fill("두 정수");
     await page.getByLabel("출력 설명").fill("합");
     await page.getByLabel("입력", { exact: true }).fill("1 2");
-    await page.getByLabel("기대 출력").fill("3");
+    await page.getByLabel("기대 출력", { exact: true }).fill("3");
     expect((await slugChecked).status()).toBe(404);
     await page
       .getByRole("button", {
@@ -219,6 +266,35 @@ test.describe("problem editor", () => {
       .click();
     await expect(page.getByText("예제 1개", { exact: true })).toBeVisible();
     await expect(page.getByText("숨김 1개", { exact: true })).toBeVisible();
+  });
+
+  test("a test case's input and expected output can be loaded from text files within the size limit", async ({
+    page,
+  }) => {
+    await authenticate(page, "AUTHOR");
+    await page.goto("/problems/new");
+    const file = (name: string, text: string) => ({
+      name,
+      mimeType: "text/plain",
+      buffer: Buffer.from(text),
+    });
+    await page
+      .getByLabel("테스트 1 입력 파일에서 불러오기")
+      .setInputFiles(file("1.in", "3 4\n"));
+    await page
+      .getByLabel("테스트 1 기대 출력 파일에서 불러오기")
+      .setInputFiles(file("1.out", "7\n"));
+    const [input, output] = [0, 1].map((at) => page.locator(".case-editor textarea").nth(at));
+    await expect(input).toHaveValue("3 4\n");
+    await expect(output).toHaveValue("7\n");
+
+    await page
+      .getByLabel("테스트 1 입력 파일에서 불러오기")
+      .setInputFiles(file("big.in", "x".repeat(1_000_001)));
+    await expect(page.getByRole("alert")).toHaveText(
+      "big.in 파일이 1MB(1,000,000바이트)를 넘어 불러오지 않았어요.",
+    );
+    await expect(input).toHaveValue("3 4\n");
   });
 
   test("the form opens and autosaves without crypto.randomUUID (plain HTTP)", async ({

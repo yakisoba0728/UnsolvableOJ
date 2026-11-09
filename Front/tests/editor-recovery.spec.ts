@@ -63,7 +63,7 @@ for (const output of ["", " \n\t"]) {
     await page.goto("/problems/new");
     await fillProblem(page);
     await page.getByRole("radiogroup", { name: "테스트 1 공개 여부" }).getByText("숨김", { exact: true }).click();
-    await page.getByLabel("기대 출력").fill(output);
+    await page.getByLabel("기대 출력", { exact: true }).fill(output);
     await expect(page.getByText(/공개 예제가 없어요/)).toBeVisible();
     await page.getByRole("button", { name: "초안 저장하기 →" }).click();
     await expect(page.getByRole("heading", { name: "초안을 저장했습니다." })).toBeVisible();

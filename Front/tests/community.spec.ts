@@ -121,6 +121,25 @@ test("the write page puts tags and a narrow category on one row and the save hin
   }
 });
 
+test("posts and answers render tables, strikethrough and math like problem statements, without unsafe HTML", async ({
+  page,
+}) => {
+  const markdown =
+    "| a | b |\n|---|---|\n| 1 | 2 |\n\n~~취소~~ 그리고 $x^2$\n\n<img src=x onerror=\"window.__xss=1\">";
+  await mockCommunityApi(page, {
+    posts: [{ id: "md", title: "마크다운 글", body: markdown, author: "other" }],
+    answers: [{ id: "md-a", postId: "md", body: markdown, author: "other" }],
+  });
+  await page.goto("/community/md");
+  for (const body of [page.locator(".post-body").first(), page.locator(".answer-body").first()]) {
+    await expect(body.locator("table td")).toHaveText(["1", "2"]);
+    await expect(body.locator("del")).toHaveText("취소");
+    await expect(body.locator(".katex")).toHaveCount(1);
+    await expect(body.locator("img")).not.toHaveAttribute("onerror", /.*/);
+  }
+  expect(await page.evaluate(() => (window as { __xss?: number }).__xss)).toBeUndefined();
+});
+
 test("the write page shows field problems while typing like sign-up, has a tall body and a markdown preview", async ({
   page,
 }) => {

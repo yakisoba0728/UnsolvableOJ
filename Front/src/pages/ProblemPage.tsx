@@ -619,26 +619,31 @@ function OwnedProblemPage() {
                   <Skeleton height={40} />
                 </SkeletonRegion>
               ) : history.length ? (
-                <ul className="history-list">
-                  {history.map((item) => (
-                    <li key={item.id}>
-                      <Link to={`/submissions/${item.id}`}>
-                        <span
-                          className={`verdict verdict-${item.status.toLowerCase()}`}
-                        >
-                          {verdictLabel(item.status)}
-                        </span>
-                        <span>
-                          {LANGUAGE_LABELS[item.language] ?? item.language} ·{" "}
-                          {new Date(item.createdAt).toLocaleString("ko-KR")}
-                        </span>
-                        <span className="muted">
-                          {item.passedTestCases}/{item.totalTestCases}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <ul className="history-list">
+                    {history.map((item) => (
+                      <li key={item.id}>
+                        <Link to={`/submissions/${item.id}`}>
+                          <span
+                            className={`verdict verdict-${item.status.toLowerCase()}`}
+                          >
+                            {verdictLabel(item.status)}
+                          </span>
+                          <span>
+                            {LANGUAGE_LABELS[item.language] ?? item.language} ·{" "}
+                            {new Date(item.createdAt).toLocaleString("ko-KR")}
+                          </span>
+                          <span className="muted">
+                            {item.passedTestCases}/{item.totalTestCases}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link className="text-button" to={`/submissions?problemId=${encodeURIComponent(problem.id)}`}>
+                    전체 보기
+                  </Link>
+                </>
               ) : (
                 <p className="muted">
                   아직 이 문제를 제출하지 않았습니다. 오른쪽에서 코드를 작성해

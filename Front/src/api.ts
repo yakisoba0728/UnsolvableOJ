@@ -23,6 +23,12 @@ export async function api<T>(
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
+  }).catch((cause: unknown) => {
+    // 연결 실패는 브라우저마다 다른 영어 문구("Failed to fetch")의 TypeError다. 화면에 그대로 보이지 않게 바꾸되,
+    // 일시 오류로 다시 시도하는 쪽(JudgeResult)이 구분할 수 있도록 TypeError는 유지한다. 취소(AbortError)는 그대로 둔다.
+    if (cause instanceof TypeError)
+      throw new TypeError("서버에 연결하지 못했습니다. 네트워크 연결을 확인해 주세요.");
+    throw cause;
   });
   const data = await response.json().catch(() => null);
   // 백엔드가 없거나 주소가 틀리면 SPA의 index.html(200)이 돌아온다. 빈 값을 성공으로 넘기지 않는다.

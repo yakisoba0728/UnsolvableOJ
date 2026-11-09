@@ -736,11 +736,12 @@ for (const path of ["/my-problems", "/profile", "/"] as const) {
       await expect(page.locator(".my-problem-row")).toHaveCount(0);
       await expect(page.getByText(privateTitle, { exact: true })).toHaveCount(0);
     } else if (path === "/profile") {
-      await expect(page.getByRole("alert")).toHaveText(message);
+      // 실패 안내 옆에는 다시 시도 버튼만 붙는다.
+      await expect(page.getByRole("alert")).toHaveText(`${message} 다시 시도`);
       await expect(page.locator(".profile-card")).toHaveCount(0);
       await expect(page.getByText(`@${privateName}`, { exact: true })).toHaveCount(0);
     } else {
-      await expect(page.getByRole("alert")).toHaveText(message);
+      await expect(page.getByRole("alert")).toHaveText(`${message} 다시 시도`);
       await expect(page.locator('.stat-tiles[aria-busy="true"]')).toHaveCount(0);
       await expect(page.locator(".stat-tile")).toHaveCount(0);
       await expect(page.locator(".brand-art text")).toHaveCount(0);

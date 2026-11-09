@@ -13,7 +13,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom";
-import Markdown from "react-markdown";
+import { ProblemMarkdown } from "../components/ProblemMarkdown";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
@@ -623,11 +623,11 @@ function WriteForm({ original, getNavigationVersion }: { original?: CommunityPos
                 onBlur={() => touch("body")}
               />
             ) : (
-              // 글 상세 화면과 같은 방식(.markdown.post-body, react-markdown)으로 그려서, 올렸을 때의 모습을 그대로 보여 준다.
+              // 글 상세 화면과 같은 방식(.markdown.post-body, 문제와 같은 ProblemMarkdown)으로 그려서, 올렸을 때의 모습을 그대로 보여 준다.
               <div className="md-preview write-body-preview">
                 {body.trim() ? (
                   <div className="markdown post-body">
-                    <Markdown>{body}</Markdown>
+                    <ProblemMarkdown>{body}</ProblemMarkdown>
                   </div>
                 ) : (
                   <p className="muted">
