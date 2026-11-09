@@ -28,7 +28,7 @@ import {
 } from "../hooks";
 import { problemPath } from "../paths";
 import { newSeed } from "../shuffle";
-import type { Difficulty, Page, ProblemSummary } from "../types";
+import type { Difficulty, ProblemListPage, ProblemSummary } from "../types";
 import {
   DIFFICULTIES as order,
   difficultyLabel,
@@ -39,14 +39,6 @@ const PAGE_SIZE = 20;
 /** 서버의 검색어 길이 상한 */
 const SEARCH_MAX = 100;
 
-/** 목록 한 쪽과 칩 숫자(같은 묶음의 조건만 빼고 센 결과 수). solves는 로그인했을 때만 온다. */
-type ProblemListPage = Page<ProblemSummary> & {
-  facets?: {
-    difficulties?: Record<string, number>;
-    solves?: Record<string, number> | null;
-    tags?: { tag: string; count: number }[];
-  };
-};
 const EMPTY_PAGE: ProblemListPage = {
   items: [],
   page: 1,

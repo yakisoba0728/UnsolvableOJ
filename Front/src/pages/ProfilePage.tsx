@@ -9,9 +9,9 @@ import {
   streakDays,
   learningByDay,
   submissionsByDay,
-  useAllProblems,
   useMyCommunityPosts,
   useMyStanding,
+  useProblemPage,
   useSubmissionHistory,
   useDocumentTitle,
 } from "../hooks";
@@ -52,12 +52,13 @@ export function ProfilePage() {
   const communityPosts = useMyCommunityPosts(session);
   const [selected, setSelected] = useState(dayKey(new Date()));
   const history = useSubmissionHistory(session);
+  // 푼 공개 문제의 난이도별 수는 목록 API의 칩 숫자로 받는다(문제 전체를 받지 않는다).
   const {
-    problems,
+    data: solvedList,
     loading: problemsLoading,
     error: problemsError,
     retry: retryProblems,
-  } = useAllProblems();
+  } = useProblemPage("limit=1&solve=solved", session);
   // 넓은 화면에서는 폭을 채우도록 주 수를 늘리고, 좁은 화면에서는 가로 스크롤이 생기지 않게 줄인다.
   const [weeks, setWeeks] = useState(() =>
     window.matchMedia("(max-width: 650px)").matches ? WEEKS_NARROW : WEEKS_WIDE,
@@ -94,22 +95,8 @@ export function ProfilePage() {
   const accuracy = totalSubmissions
     ? Math.round((acceptedSubmissions / totalSubmissions) * 100)
     : null;
-  const difficultyById = new Map(
-    problems.map((problem) => [problem.id, problem.difficulty]),
-  );
-  const solvedByDifficulty = new Map<string, number>();
-  for (const id of history.solved) {
-    const difficulty = difficultyById.get(id);
-    if (difficulty)
-      solvedByDifficulty.set(
-        difficulty,
-        (solvedByDifficulty.get(difficulty) ?? 0) + 1,
-      );
-  }
-  const solvedTotal = [...solvedByDifficulty.values()].reduce(
-    (sum, count) => sum + count,
-    0,
-  );
+  const solvedByDifficulty = solvedList?.facets?.difficulties ?? {};
+  const solvedTotal = solvedByDifficulty[""] ?? 0;
   const languageCounts = new Map<string, number>();
   for (const item of history.submissions)
     languageCounts.set(
@@ -476,7 +463,7 @@ export function ProfilePage() {
             </div>
             <ul className="lang-stats">
               {difficultyOptions.map((row) => {
-                const count = solvedByDifficulty.get(row.value) ?? 0;
+                const count = solvedByDifficulty[row.value] ?? 0;
                 const percent = solvedTotal
                   ? Math.round((count / solvedTotal) * 100)
                   : 0;

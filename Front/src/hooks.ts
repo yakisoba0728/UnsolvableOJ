@@ -12,6 +12,7 @@ import { getMyPosts } from "./community/api";
 import { fetchAll } from "./pagination";
 import { DIFFICULTIES } from "./difficulty";
 import type {
+  ProblemListPage,
   ProblemSummary,
   RankingEntry,
   Session,
@@ -65,8 +66,8 @@ export function useRequest<T>(
 }
 
 /**
- * 공개 문제 전체를 이어 읽는다. 문제 목록 화면은 서버에서 검색·필터·쪽을 받으므로 쓰지 않고,
- * 전체가 필요한 곳(홈 추천·프로필 난이도 통계·XP 부스트 추천·기업 테스트 문제 고르기)만 쓴다.
+ * 공개 문제 전체를 이어 읽는다. 문제 수만큼 무거우므로 전체가 꼭 필요한 기업 테스트 문제 고르기만 쓴다.
+ * 요약만 필요한 곳(홈 추천·프로필 난이도 통계)은 useProblemPage로 한 쪽과 칩 숫자만 받는다.
  */
 export function useAllProblems() {
   const { data: problems, loading, error, retry } = useRequest(
@@ -76,6 +77,19 @@ export function useAllProblems() {
     [],
   );
   return { problems, loading, error, retry };
+}
+
+/**
+ * 공개 문제 목록 한 쪽과 칩 숫자(facets). query는 GET /problems의 조건이다(solve는 로그인 필요).
+ */
+export function useProblemPage(query: string, session: Session | null) {
+  return useRequest<ProblemListPage | null>(
+    (signal) =>
+      api<ProblemListPage>(`/problems?${query}`, { signal }, session?.accessToken),
+    null,
+    "문제를 불러오지 못했습니다.",
+    [query, session],
+  );
 }
 
 /**
