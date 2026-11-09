@@ -102,10 +102,13 @@ test("code analysis: sort by difficulty and reverse the order", async ({ page })
 
   // 무작위는 다시 섞기 버튼으로 바뀌고, 같은 주소는 같은 순서를 만든다.
   await page.goto("/analysis?sort=random&seed=7");
+  // allInnerTexts는 기다리지 않으므로 목록이 그려진 뒤에 읽고, 새로고침 뒤에는 자동 대기 단언으로 비교한다.
+  await expect(rows(page).first()).toBeVisible();
   const titles = await rows(page).locator("strong").allInnerTexts();
+  expect(titles.length).toBeGreaterThan(1);
   await expect(page.getByRole("button", { name: "무작위로 다시 섞기" })).toBeVisible();
   await page.reload();
-  expect(await rows(page).locator("strong").allInnerTexts()).toEqual(titles);
+  await expect(rows(page).locator("strong")).toHaveText(titles);
 });
 
 test("code analysis: pick a question, confirm, read the explanation and move on", async ({
