@@ -1,8 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  analysisQuestions,
   analysisTopics,
+  useAnalysisQuestions,
   type AnalysisQuestion,
   type AnalysisTopic,
 } from "../analysis/questions";
@@ -37,11 +37,6 @@ const difficultyOptions: Difficulty[] = [
   "HARD",
   "EXPERT",
 ];
-// 문제 은행에 실제로 있는 난이도만 필터에 보여 준다.
-const difficulties = difficultyOptions.filter((value) =>
-  analysisQuestions.some((item) => item.difficulty === value),
-);
-
 const PAGE_SIZE = 20;
 
 const sorts = [
@@ -58,8 +53,6 @@ const statusChips: { value: "" | SolveState; label: string }[] = [
   { value: "solved", label: "해결" },
 ];
 
-const total = analysisQuestions.length;
-
 /**
  * 문제 목록과 같은 방식: 검색어·난이도·분류·상태·정렬·순서 뒤집기·페이지를 URL에 저장해
  * 문제를 열었다가 뒤로 가도 같은 목록이 복원된다.
@@ -69,6 +62,17 @@ export function AnalysisPage() {
   const { session } = useAuth();
   const userId = session?.user.id ?? "guest";
   const { attempts, error: historyError } = useAnalysisHistory();
+  const {
+    questions: analysisQuestions,
+    loading,
+    error: questionsError,
+    retry,
+  } = useAnalysisQuestions();
+  const total = analysisQuestions.length;
+  // 문제 은행에 실제로 있는 난이도만 필터에 보여 준다.
+  const difficulties = difficultyOptions.filter((value) =>
+    analysisQuestions.some((item) => item.difficulty === value),
+  );
   const { solved, attempted } = useMemo(
     () => analysisStatus(attempts, userId),
     [attempts, userId],
@@ -139,7 +143,7 @@ export function AnalysisPage() {
       base.sort((a, b) => a.title.localeCompare(b.title, "ko") * dir);
     else if (sort === "default" && reversed) base.reverse();
     return base.filter((item) => matches(item, null));
-  }, [sort, reversed, seed, params, solved, attempted]);
+  }, [analysisQuestions, sort, reversed, seed, params, solved, attempted]);
 
   const count = (
     skip: "difficulty" | "topic" | "status",
@@ -394,6 +398,19 @@ export function AnalysisPage() {
                 </div>
               ))}
             </div>
+          ) : loading ? (
+            <p className="muted">문제를 불러오는 중…</p>
+          ) : questionsError ? (
+            <div className="empty-state">
+              <strong>{questionsError}</strong>
+              <button
+                type="button"
+                className="button button-outline"
+                onClick={retry}
+              >
+                다시 시도
+              </button>
+            </div>
           ) : (
             <div className="empty-state">
               <strong>조건에 맞는 문제가 없어요.</strong>
@@ -463,11 +480,11 @@ export function AnalysisPage() {
                   <span aria-hidden="true">→</span>
                 </Link>
               </div>
-            ) : (
+            ) : total ? (
               <p className="muted analysis-all-done">
                 모든 문제를 해결했어요. 이번에는 직접 코드를 짜 볼까요?
               </p>
-            )}
+            ) : null}
           </div>
           <div className="guide-card">
             <h2>나에게 맞는 문제 찾기</h2>

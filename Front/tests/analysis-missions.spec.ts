@@ -1,6 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
-import { mockMissions } from "./mission-fixtures";
-import { analysisQuestions } from "../src/analysis/questions";
+import {
+  analysisQuestions,
+  mockAnalysisQuestions,
+  mockMissions,
+} from "./mission-fixtures";
 import type { Session, Submission } from "../src/types";
 
 const storageKey = "unsolvable-oj-session-v1";
@@ -28,6 +31,9 @@ async function authenticate(page: Page) {
 }
 
 const rows = (page: Page) => page.locator(".problem-row");
+
+// 문항은 서버에서 받는다. 비로그인 연습의 판정도 서버(목)가 한다.
+test.beforeEach(({ page }) => mockAnalysisQuestions(page));
 
 async function solve(page: Page, option: number) {
   await page.locator(".analysis-option").nth(option).click();
@@ -215,6 +221,31 @@ test("code analysis: unknown question ids show a way back", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "문제를 찾을 수 없어요" })).toBeVisible();
   await page.getByRole("link", { name: /문제 목록으로/ }).click();
   await expect(page).toHaveURL("/analysis");
+});
+
+test("code analysis: answers come only from the server's check after confirming", async ({
+  page,
+}) => {
+  const [first] = analysisQuestions;
+  let failed = true;
+  await page.route("**/api/v1/missions/analysis/questions", (route) =>
+    failed
+      ? route.fulfill({ status: 503, json: { message: "문항 서버 점검 중" } })
+      : route.fallback(),
+  );
+  await page.goto(`/analysis/${first.id}`);
+  await expect(page.getByRole("alert")).toContainText("문항 서버 점검 중");
+  failed = false;
+  await page.getByRole("button", { name: "다시 시도" }).click();
+  await expect(page.getByRole("heading", { name: first.title, level: 1 })).toBeVisible();
+  // 확인 전에는 화면에 해설이 없고, 비로그인 판정은 기록 없는 check API로 간다.
+  await expect(page.locator(".analysis-explain-body")).toHaveCount(0);
+  const check = page.waitForRequest((request) =>
+    request.url().endsWith(`/missions/analysis/${first.id}/check`),
+  );
+  await solve(page, first.answer);
+  expect((await check).postDataJSON()).toEqual({ selected: first.answer });
+  await expect(page.locator(".analysis-explain-body")).toContainText(first.explanation[0]);
 });
 
 test("code analysis: records are kept per user and counted once per question for missions", async ({

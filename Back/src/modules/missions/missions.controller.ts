@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Param,
   ParseUUIDPipe,
   Post,
@@ -13,6 +14,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { publicQuestions } from './analysis-catalog.js';
 import { MissionsService } from './missions.service.js';
 class AnalysisAnswerDto {
   @IsInt() @Min(0) @Max(3) selected: number;
@@ -44,5 +46,21 @@ export class MissionsController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.service.answer(user.id, id, dto.selected);
+  }
+}
+
+/** 코드 분석 문항(정답·해설 제외)과 비로그인 연습용 판정. 로그인 없이 쓸 수 있다. */
+@ApiTags('missions')
+@Controller('missions/analysis')
+export class AnalysisQuestionsController {
+  constructor(private readonly service: MissionsService) {}
+  @Get('questions') questions() {
+    return publicQuestions;
+  }
+  @Post(':id/check')
+  @HttpCode(200)
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  check(@Param('id') id: string, @Body() dto: AnalysisAnswerDto) {
+    return this.service.check(id, dto.selected);
   }
 }

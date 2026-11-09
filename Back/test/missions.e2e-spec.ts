@@ -202,6 +202,77 @@ describe('missions (real PostgreSQL transactions and HTTP)', () => {
       1,
     );
   });
+  it('serves analysis questions without answers and reveals them only after an answer', async () => {
+    const root = '/api/v1/missions/analysis';
+    const server = app.getHttpServer();
+    const slice = analysisCatalog.find((q) => q.id === 'slice')!;
+    const questions = await request(server)
+      .get(`${root}/questions`)
+      .expect(200);
+    expect(questions.body).toHaveLength(analysisCatalog.length);
+    expect(questions.body[0]).toMatchObject({
+      id: 'slice',
+      options: slice.options,
+    });
+    expect(JSON.stringify(questions.body)).not.toMatch(
+      /"(answer|explanation|concepts)"/,
+    );
+    expect(JSON.stringify(questions.body)).not.toContain(slice.explanation[0]);
+    // Guest practice: judged without an account, nothing is recorded.
+    const guest = await request(server)
+      .post(`${root}/slice/check`)
+      .send({ selected: 0 })
+      .expect(200);
+    expect(guest.body).toEqual({
+      questionId: 'slice',
+      selected: 0,
+      correct: false,
+      answer: slice.answer,
+      explanation: slice.explanation,
+      concepts: slice.concepts,
+    });
+    await request(server)
+      .post(`${root}/slice/check`)
+      .send({ selected: 4 })
+      .expect(400);
+    await request(server)
+      .post(`${root}/slice/check`)
+      .send({ selected: 0, correct: true })
+      .expect(400);
+    await request(server)
+      .post(`${root}/unknown/check`)
+      .send({ selected: 0 })
+      .expect(404);
+    await request(server)
+      .post(`${root}/slice/check`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ selected: slice.answer })
+      .expect(200);
+    expect(await service.attempts(userId)).toEqual([]);
+    // Signed-in answers return the reveal and the history keeps it for reopening.
+    const saved = await request(server)
+      .post(`${root}/slice/attempts`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ selected: slice.answer })
+      .expect(201);
+    expect(saved.body).toMatchObject({
+      correct: true,
+      answer: slice.answer,
+      explanation: slice.explanation,
+    });
+    const history = await request(server)
+      .get(`${root}/attempts`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(history.body).toEqual([
+      expect.objectContaining({
+        questionId: 'slice',
+        selected: slice.answer,
+        answer: slice.answer,
+        concepts: slice.concepts,
+      }),
+    ]);
+  });
   it('awards once under concurrent claims, preserves existing XP and persists across new service instances', async () => {
     await db.query('UPDATE users SET xp=90 WHERE id=$1', [userId]);
     const mission = await analysisReady();
@@ -304,19 +375,37 @@ describe('missions (real PostgreSQL transactions and HTTP)', () => {
       expect(mission.current).toBe(2);
       expect(mission.completedAt).toBeTruthy();
       // Two prior rows count; the third, later in the same millisecond, does not.
-      await db.query("DELETE FROM community_posts WHERE author_id=$1 AND created_at < '2026-10-15T16:00:00.123000Z'", [userId]);
-      expect((await list()).items.find((m) => m.id === 'community')?.current).toBe(1);
-      await expect(service.claim(userId, mission.stateId)).rejects.toThrow('아직');
-      await db.query("UPDATE community_posts SET created_at='2026-10-15T16:00:00.123038Z' WHERE author_id=$1", [userId]);
+      await db.query(
+        "DELETE FROM community_posts WHERE author_id=$1 AND created_at < '2026-10-15T16:00:00.123000Z'",
+        [userId],
+      );
+      expect(
+        (await list()).items.find((m) => m.id === 'community')?.current,
+      ).toBe(1);
+      await expect(service.claim(userId, mission.stateId)).rejects.toThrow(
+        '아직',
+      );
+      await db.query(
+        "UPDATE community_posts SET created_at='2026-10-15T16:00:00.123038Z' WHERE author_id=$1",
+        [userId],
+      );
       await service.claim(userId, mission.stateId);
       await service.answer(userId, 'slice', 2);
-      const [precision] = await db.query(`SELECT
+      const [precision] = await db.query(
+        `SELECT
         completed_at=$2::timestamptz AS completed, claimed_at=$2::timestamptz AS claimed,
         u.updated_at=$2::timestamptz AS updated,
         a.created_at=$2::timestamptz AND a.updated_at=$2::timestamptz AS analysis
         FROM mission_states s JOIN users u ON u.id=s.user_id
-        JOIN analysis_attempts a ON a.user_id=u.id WHERE s.id=$1`, [mission.stateId, clock]);
-      expect(precision).toEqual({ completed: true, claimed: true, updated: true, analysis: true });
+        JOIN analysis_attempts a ON a.user_id=u.id WHERE s.id=$1`,
+        [mission.stateId, clock],
+      );
+      expect(precision).toEqual({
+        completed: true,
+        claimed: true,
+        updated: true,
+        analysis: true,
+      });
     });
   });
   it('grants the streak XP and unique badge once per continuous run', async () => {
@@ -422,11 +511,15 @@ describe('missions (real PostgreSQL transactions and HTTP)', () => {
   it('awards two genuine runs separated by an initial QUEUED day, without duplicating the badge', async () => {
     const at = (day: number) => new Date(Date.UTC(2026, 9, day, 3));
     for (let day = 1; day <= 7; day++) await submit(at(day), 'WRONG_ANSWER');
-    const first = await withMissionClock(db, '2026-10-07T04:00:00Z', async () => {
-      const mission = (await list()).items.find((m) => m.id === 'streak')!;
-      expect((await service.claim(userId, mission.stateId)).xp).toBe(120);
-      return mission;
-    });
+    const first = await withMissionClock(
+      db,
+      '2026-10-07T04:00:00Z',
+      async () => {
+        const mission = (await list()).items.find((m) => m.id === 'streak')!;
+        expect((await service.claim(userId, mission.stateId)).xp).toBe(120);
+        return mission;
+      },
+    );
     await submit(at(8), 'QUEUED');
     for (let day = 9; day <= 15; day++) await submit(at(day), 'COMPILE_ERROR');
     await withMissionClock(db, '2026-10-15T04:00:00Z', async () => {
@@ -435,8 +528,12 @@ describe('missions (real PostgreSQL transactions and HTTP)', () => {
       expect(second.current).toBe(7);
       const receipt = await service.claim(userId, second.stateId);
       expect(receipt.xp).toBe(240);
-      expect(receipt.badges.filter((b) => b.badge === 'seven-day-streak')).toHaveLength(1);
-      expect((await service.claim(userId, second.stateId)).alreadyClaimed).toBe(true);
+      expect(
+        receipt.badges.filter((b) => b.badge === 'seven-day-streak'),
+      ).toHaveLength(1);
+      expect((await service.claim(userId, second.stateId)).alreadyClaimed).toBe(
+        true,
+      );
     });
   });
   it('does not advertise a badge when no bonus problem is available', async () => {

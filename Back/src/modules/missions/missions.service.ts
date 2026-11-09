@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, type EntityManager } from 'typeorm';
-import { analysisCatalog } from './analysis-catalog.js';
+import { analysisCatalog, reveal } from './analysis-catalog.js';
 import {
   badgeNames,
   currentStreak,
@@ -298,10 +298,24 @@ export class MissionsService {
     return result;
   }
 
-  async answer(userId: string, questionId: string, selected: number) {
+  private question(questionId: string) {
     const question = analysisCatalog.find((q) => q.id === questionId);
     if (!question) throw new NotFoundException('분석 문제를 찾을 수 없습니다.');
-    return this.locked(userId, async (m, now) => {
+    return question;
+  }
+  /** 비로그인 연습용 판정. 기록·XP를 남기지 않는다. */
+  check(questionId: string, selected: number) {
+    const question = this.question(questionId);
+    return {
+      questionId,
+      selected,
+      correct: question.answer === selected,
+      ...reveal(question),
+    };
+  }
+  async answer(userId: string, questionId: string, selected: number) {
+    const question = this.question(questionId);
+    const row = await this.locked(userId, async (m, now) => {
       const [row] = await m.query(
         `INSERT INTO analysis_attempts(user_id,question_id,day,selected,correct,solved,created_at,updated_at)
         VALUES($1,$2,$3,$4,$5,$5,$6,$6)
@@ -319,13 +333,19 @@ export class MissionsService {
       );
       return row;
     });
+    return { ...row, ...reveal(question) };
   }
-  attempts(userId: string) {
-    return this.db.query(
+  async attempts(userId: string) {
+    const rows: { questionId: string }[] = await this.db.query(
       `SELECT DISTINCT ON (question_id) user_id AS "userId",question_id AS "questionId",selected,correct,
       bool_or(solved) OVER (PARTITION BY question_id) AS solved,updated_at AS at
       FROM analysis_attempts WHERE user_id=$1 ORDER BY question_id,updated_at DESC`,
       [userId],
     );
+    // 이미 답한 문제를 다시 열면 내 답과 함께 정답·해설을 보여 준다.
+    return rows.map((row) => {
+      const question = analysisCatalog.find((q) => q.id === row.questionId);
+      return question ? { ...row, ...reveal(question) } : row;
+    });
   }
 }
