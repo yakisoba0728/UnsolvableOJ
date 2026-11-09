@@ -10,6 +10,15 @@ const unitSpecs = [
   "solve-split.spec.ts",
 ];
 
+// 오래 걸리는 다중 탭·지연 로딩 회귀 시나리오. 로컬 기본 실행(npm run test:e2e)에서는 빼고
+// CI와 npm run test:e2e:full에서 돌린다.
+const slowSpecs = [
+  "community-regressions.spec.ts",
+  "data-regressions.spec.ts",
+  "editor-recovery.spec.ts",
+  "ui-harmony.spec.ts",
+];
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
@@ -28,7 +37,8 @@ export default defineConfig({
   },
   projects: [
     { name: "unit", testMatch: unitSpecs },
-    { name: "chromium", testIgnore: unitSpecs, use: { ...devices["Desktop Chrome"] } },
+    { name: "chromium", testIgnore: [...unitSpecs, ...slowSpecs], use: { ...devices["Desktop Chrome"] } },
+    { name: "chromium-slow", testMatch: slowSpecs, use: { ...devices["Desktop Chrome"] } },
     { name: "firefox", testIgnore: unitSpecs, use: { ...devices["Desktop Firefox"] } },
     { name: "webkit", testIgnore: unitSpecs, use: { ...devices["Desktop Safari"] } },
   ],

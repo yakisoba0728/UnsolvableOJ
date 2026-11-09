@@ -105,13 +105,13 @@ jobs:
         working-directory: Front
         run: |
           npx --no-install playwright install --with-deps --only-shell chromium
-          npm run test:e2e -- --project=unit --project=chromium --workers=2
+          npx --no-install playwright test --project=unit --project=chromium --project=chromium-slow --workers=2
       - name: Full browser regression tests
         if: ${{ (inputs.full || github.event_name == 'schedule') }}
         working-directory: Front
         run: |
           npx --no-install playwright install --with-deps --only-shell chromium firefox webkit
-          npm run test:e2e -- --workers=2
+          npx --no-install playwright test --workers=2
       - name: Worker build and protocol regression tests
         run: |
           npm run check --prefix Judge

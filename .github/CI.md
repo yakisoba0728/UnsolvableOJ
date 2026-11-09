@@ -56,7 +56,9 @@ npm run check --prefix Judge
 node scripts/check-production-compose.mjs
 cd Front
 npx playwright install --with-deps --only-shell chromium
-npm run test:e2e -- --project=unit --project=chromium --workers=2
+# CI와 같은 범위(빠른 세트 + 느린 회귀 세트). 로컬의 npm run test:e2e는 빠른 세트(unit·chromium)만,
+# npm run test:e2e:full은 Firefox·WebKit까지 모든 project를 실행합니다.
+npx playwright test --project=unit --project=chromium --project=chromium-slow --workers=2
 cd ..
 ```
 
