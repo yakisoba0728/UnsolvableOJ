@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -13,6 +14,8 @@ import type { AccessTokenPayload } from './auth.types.js';
 import type { LoginDto } from './dto/login.dto.js';
 import type { RegisterDto } from './dto/register.dto.js';
 import { PasswordHasher } from './password-hasher.service.js';
+
+export const suspendedMessage = '정지된 계정입니다. 관리자에게 문의해 주세요.';
 
 @Injectable()
 export class AuthService {
@@ -68,6 +71,8 @@ export class AuthService {
         '이메일 또는 비밀번호가 올바르지 않습니다.',
       );
     }
+    // 비밀번호를 확인한 뒤에만 알려, 정지 여부로 계정 존재를 떠볼 수 없게 한다.
+    if (user.suspendedAt) throw new ForbiddenException(suspendedMessage);
 
     return this.issueSession(user);
   }

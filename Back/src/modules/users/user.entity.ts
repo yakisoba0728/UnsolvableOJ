@@ -48,6 +48,10 @@ export class User {
   @Column({ name: 'token_version', type: 'integer', default: 0 })
   tokenVersion: number;
 
+  /** 값이 있으면 정지된 계정이다(로그인·토큰 사용 불가). */
+  @Column({ name: 'suspended_at', type: 'timestamptz', nullable: true })
+  suspendedAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
