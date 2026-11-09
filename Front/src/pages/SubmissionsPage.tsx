@@ -39,7 +39,7 @@ export function SubmissionsPage() {
   const { params, update, urlQuery, queryText, setQueryText, page } =
     useUrlFilters();
   // 서버가 문제명·판정·언어 검색을 지원하지 않아, 전체 이력을 받아 이 화면에서 거른다.
-  const { submissions: all, loading, error } = useSubmissionHistory(session);
+  const { submissions: all, loading, error, retry } = useSubmissionHistory(session);
   const searchRef = useRef<HTMLInputElement>(null);
   useSlashFocus(searchRef);
 
@@ -178,12 +178,15 @@ export function SubmissionsPage() {
       </p>
       {error ? (
         <p className="error-message" role="alert">
-          {error}
+          {error}{" "}
+          <button type="button" className="inline-button" onClick={retry}>
+            다시 시도
+          </button>
         </p>
       ) : null}
       {loading ? (
         <SkeletonRows count={8} columns={6} />
-      ) : visible.length ? (
+      ) : error ? null : visible.length ? (
         <div className="problem-list data-list list-history">
           <div className="history-head" aria-hidden="true">
             <span>문제</span>

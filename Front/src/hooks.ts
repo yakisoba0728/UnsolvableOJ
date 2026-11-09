@@ -18,7 +18,7 @@ import type {
   UserProfile,
 } from "./types";
 
-/** load가 있으면 요청해 결과·로딩·오류를 돌려준다. deps가 바뀌면 이전 요청을 취소하고 다시 받는다. */
+/** load가 있으면 요청해 결과·로딩·오류를 돌려준다. deps가 바뀌거나 retry를 부르면 이전 요청을 취소하고 다시 받는다. */
 export function useRequest<T>(
   load: ((signal: AbortSignal) => Promise<T>) | null,
   initial: T,
@@ -28,6 +28,7 @@ export function useRequest<T>(
   const [data, setData] = useState(initial);
   const [loading, setLoading] = useState(Boolean(load));
   const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     setData(initial);
     setError("");
@@ -46,24 +47,24 @@ export function useRequest<T>(
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, deps);
-  return { data, loading, error };
+  }, [...deps, attempt]);
+  return { data, loading, error, retry: () => setAttempt((count) => count + 1) };
 }
 
 /** 공개 문제 전체. 서버에 검색 API가 없어 목록·검색·필터를 클라이언트에서 처리한다. */
 export function useAllProblems() {
-  const { data: problems, loading, error } = useRequest(
+  const { data: problems, loading, error, retry } = useRequest(
     (signal) => fetchAll<ProblemSummary>("/problems", signal),
     [],
     "문제를 불러오지 못했습니다.",
     [],
   );
-  return { problems, loading, error };
+  return { problems, loading, error, retry };
 }
 
 /** 내 제출 기록에서 해결/시도한 문제를 계산한다. */
 export function useSubmissionHistory(session: Session | null) {
-  const { data: submissions, loading, error } = useRequest(
+  const { data: submissions, loading, error, retry } = useRequest(
     session
       ? (signal) =>
           fetchAll<Submission>("/submissions", signal, session.accessToken)
@@ -78,7 +79,7 @@ export function useSubmissionHistory(session: Session | null) {
     attempted.add(item.problem.id);
     if (item.status === "ACCEPTED") solved.add(item.problem.id);
   }
-  return { submissions, solved, attempted, loading, error };
+  return { submissions, solved, attempted, loading, error, retry };
 }
 
 /** 내가 쓴 글·추천한 글·저장한 글과 팔로우한 작성자 id (프로필·미션·커뮤니티 목록) */
@@ -184,6 +185,8 @@ export function useMyStanding(session: Session | null) {
     rankLoading: rankings.loading,
     profileError: profile.error,
     rankError: rankings.error,
+    retryProfile: profile.retry,
+    retryRank: rankings.retry,
   };
 }
 

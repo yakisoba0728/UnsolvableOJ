@@ -68,9 +68,9 @@ const statusChips: { value: "" | SolveState; label: string }[] = [
 export function ProblemsPage() {
   const { session } = useAuth();
   useDocumentTitle("문제 목록");
-  const { problems, loading, error } = useAllProblems();
+  const { problems, loading, error, retry } = useAllProblems();
   const history = useSubmissionHistory(session);
-  const { profile, rank, profileLoading, rankLoading, profileError, rankError } =
+  const { profile, rank, profileLoading, rankLoading, profileError, rankError, retryProfile, retryRank } =
     useMyStanding(session);
   const { params, update, urlQuery, queryText, setQueryText, page } =
     useUrlFilters();
@@ -356,7 +356,17 @@ export function ProblemsPage() {
 
       {error || history.error ? (
         <p className="error-message" role="alert">
-          {error || history.error}
+          {error || history.error}{" "}
+          <button
+            type="button"
+            className="inline-button"
+            onClick={() => {
+              if (error) retry();
+              if (history.error) history.retry();
+            }}
+          >
+            다시 시도
+          </button>
         </p>
       ) : null}
 
@@ -452,7 +462,7 @@ export function ProblemsPage() {
                 </div>
               ))}
             </div>
-          ) : (
+          ) : error ? null : (
             <div className="empty-state">
               {hasFilter ? (
                 <>
@@ -497,12 +507,18 @@ export function ProblemsPage() {
           ) : null}
           {session && profileError ? (
             <p className="error-message" role="alert">
-              {profileError}
+              {profileError}{" "}
+              <button type="button" className="inline-button" onClick={retryProfile}>
+                다시 시도
+              </button>
             </p>
           ) : null}
           {session && rankError ? (
             <p className="error-message" role="alert">
-              {rankError}
+              {rankError}{" "}
+              <button type="button" className="inline-button" onClick={retryRank}>
+                다시 시도
+              </button>
             </p>
           ) : null}
           {profile ? (

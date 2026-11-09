@@ -46,7 +46,7 @@ function heatLevel(count: number) {
 export function ProfilePage() {
   useDocumentTitle("내 학습 기록");
   const { session } = useAuth();
-  const { profile, rank, rankLoading, profileError, rankError } =
+  const { profile, rank, rankLoading, profileError, rankError, retryProfile, retryRank } =
     useMyStanding(session);
   const communityPosts = useMyCommunityPosts(session);
   const [selected, setSelected] = useState(dayKey(new Date()));
@@ -55,6 +55,7 @@ export function ProfilePage() {
     problems,
     loading: problemsLoading,
     error: problemsError,
+    retry: retryProblems,
   } = useAllProblems();
   // 넓은 화면에서는 폭을 채우도록 주 수를 늘리고, 좁은 화면에서는 가로 스크롤이 생기지 않게 줄인다.
   const [weeks, setWeeks] = useState(() =>
@@ -134,7 +135,10 @@ export function ProfilePage() {
     return (
       <div className="page-width standalone-section">
         <p className="error-message" role="alert">
-          {profileError}
+          {profileError}{" "}
+          <button type="button" className="inline-button" onClick={retryProfile}>
+            다시 시도
+          </button>
         </p>
       </div>
     );
@@ -181,9 +185,21 @@ export function ProfilePage() {
         title="내 학습 기록"
         description="쌓아 온 실력과 꾸준함을 한눈에 확인하세요."
       />
-      {rankError || history.error || problemsError ? (
+      {rankError || history.error || problemsError || communityPosts.error ? (
         <p className="error-message" role="alert">
-          {rankError || history.error || problemsError}
+          {rankError || history.error || problemsError || communityPosts.error}{" "}
+          <button
+            type="button"
+            className="inline-button"
+            onClick={() => {
+              if (rankError) retryRank();
+              if (history.error) history.retry();
+              if (problemsError) retryProblems();
+              if (communityPosts.error) communityPosts.retry();
+            }}
+          >
+            다시 시도
+          </button>
         </p>
       ) : null}
 
