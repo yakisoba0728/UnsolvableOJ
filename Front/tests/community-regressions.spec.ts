@@ -554,7 +554,9 @@ test("K15: session expiry preserves the latest edit before the autosave delay", 
   await page.getByLabel(/^제목/).fill("만료 직전 제목");
   await page.getByLabel(/^본문/).fill("만료 직전 본문");
   await page.clock.runFor(1_001);
-  expect(JSON.parse((await readStored(page, editDraftKey))!)).toMatchObject({ title: "만료 직전 제목", body: "만료 직전 본문" });
+  // 만료로 화면이 내려가며 저장하는 일은 React 커밋 뒤라, 타이머가 돈 직후가 아니라 저장될 때까지 기다린다.
+  await expect.poll(async () => JSON.parse((await readStored(page, editDraftKey)) ?? "null"))
+    .toMatchObject({ title: "만료 직전 제목", body: "만료 직전 본문" });
   await page.clock.resume();
   await expect(page).toHaveURL(/\/auth$/);
   await page.getByLabel("이메일").fill(session.user.email);

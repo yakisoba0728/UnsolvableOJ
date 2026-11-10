@@ -191,6 +191,8 @@ test("code analysis: coming back to a solved question keeps the result and allow
 
 test("code analysis: keyboard choices reveal the answer, preserve focus and respect modified shortcuts", async ({ page }) => {
   const [first] = analysisQuestions;
+  // 해설이 펼쳐지며 html의 smooth 스크롤이 이어지면 WebKit에서 '다시 풀기' 클릭이 빗나간다.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`/analysis/${first.id}`);
   const question = page.locator(".analysis-question");
   await expect(page.locator('.analysis-reveal[data-open="true"]')).toHaveCount(0);
