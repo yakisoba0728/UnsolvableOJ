@@ -26,15 +26,7 @@ import {
   type Submission,
 } from "../types";
 import { problemPath } from "../paths";
-import {
-  DEFAULT_SPLIT,
-  HANDLE_WIDTH,
-  resolveSplit,
-  splitFromKey,
-  splitFromPointer,
-  type SplitMode,
-  type SplitState,
-} from "../solveSplit";
+import { useSolveSplit } from "../useSolveSplit";
 import { DifficultyBadge } from "../components/DifficultyBadge";
 
 type Tab = "statement" | "history";
@@ -42,6 +34,7 @@ type Tab = "statement" | "history";
 const fontKey = "unsolvable-oj-editor-font-v1";
 const FONT_MIN = 11;
 const FONT_MAX = 20;
+const FONT_DEFAULT = 13;
 
 /** Tab으로 넣은 들여쓰기 한 단계의 위치 목록(초안 옆에 저장해, 새로고침 뒤에도 Backspace가 한 단계씩 지운다). */
 function unitsKey(ownerId: string | null, problemId: string, language: Language) {
@@ -59,6 +52,28 @@ function readUnits(ownerId: string | null, problemId: string, language: Language
   } catch {
     return [];
   }
+}
+
+/** 편집기 글꼴 크기. 이 브라우저에 기억하고, 저장할 수 없어도 이번 방문에는 적용한다. */
+function useEditorFontSize() {
+  const [fontSize, setFontSize] = useState(() => {
+    try {
+      const saved = Number(localStorage.getItem(fontKey));
+      return saved >= FONT_MIN && saved <= FONT_MAX ? saved : FONT_DEFAULT;
+    } catch {
+      return FONT_DEFAULT;
+    }
+  });
+  function changeFont(step: number) {
+    const next = Math.min(FONT_MAX, Math.max(FONT_MIN, fontSize + step));
+    setFontSize(next);
+    try {
+      localStorage.setItem(fontKey, String(next));
+    } catch {
+      /* 저장소를 쓸 수 없어도 이번 방문에는 적용한다 */
+    }
+  }
+  return [fontSize, changeFont] as const;
 }
 
 export function ProblemPage() {
@@ -90,19 +105,9 @@ function OwnedProblemPage() {
   // 이 화면에서 채점 중이거나 방금 채점한 제출(결과는 코드 창 아래에 바로 보여 준다)
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(true);
-  const gridRef = useRef<HTMLDivElement>(null);
-  // 문제 설명·코드 작성 폭은 저장하지 않는다: 화면을 열 때마다 기본 비율로 시작한다.
-  const [split, setSplit] = useState<SplitState>(DEFAULT_SPLIT);
-  const splitRef = useRef(split);
-  const [gridWidth, setGridWidth] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  // 끌던 중 손잡이가 사라져도(다른 문제로 이동 등) 끌기 상태가 남지 않게 정리하는 함수
-  const endDragRef = useRef<(() => void) | null>(null);
   // 패널은 결과를 닫거나 다른 문제로 옮기면 사라지지만, 조절한 높이는 이 화면에 있는 동안 유지한다.
   const [panelHeight, setPanelHeight] = useState(readPanelHeight);
   const [tab, setTab] = useState<Tab>("statement");
-  const [history, setHistory] = useState<Submission[] | null>(null);
-  const [historyFailed, setHistoryFailed] = useState(false);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   // 불러온 초안은 저장 시각을 모른다(이번에 저장하기 전까지 시각 없이 표시).
   const [draftLoaded, setDraftLoaded] = useState(false);
@@ -114,24 +119,7 @@ function OwnedProblemPage() {
   // 값이 바뀔 때마다(입력·붙여넣기·실행 취소 포함) 따라 움직이게 하며, Backspace·Delete가 한 단계씩 지우는 데 쓴다.
   const unitsRef = useRef<number[]>([]);
   const unitsBaseRef = useRef("");
-  // 글꼴 크기: 이 브라우저에 기억한다.
-  const [fontSize, setFontSize] = useState(() => {
-    try {
-      const saved = Number(localStorage.getItem(fontKey));
-      return saved >= FONT_MIN && saved <= FONT_MAX ? saved : 13;
-    } catch {
-      return 13;
-    }
-  });
-  function changeFont(step: number) {
-    const next = Math.min(FONT_MAX, Math.max(FONT_MIN, fontSize + step));
-    setFontSize(next);
-    try {
-      localStorage.setItem(fontKey, String(next));
-    } catch {
-      /* 저장소를 쓸 수 없어도 이번 방문에는 적용한다 */
-    }
-  }
+  const [fontSize, changeFont] = useEditorFontSize();
   const { session } = useAuth();
   const ownerId = session?.user.id ?? null;
   const { submission: result, error: resultError } = useSubmissionResult(
@@ -147,24 +135,8 @@ function OwnedProblemPage() {
   }, [session]);
   const finishedId = result && !isJudging(result) ? result.id : null;
 
-  // 두 패널을 담은 영역의 폭을 지켜봐서, 창이 줄어 한쪽이 너무 좁아지면 그 패널을 숨긴다.
-  useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
-    const update = () => setGridWidth(grid.getBoundingClientRect().width);
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(grid);
-    return () => observer.disconnect();
-  }, [problem?.id]);
-
-  // 다른 문제로 옮겨 가면 폭을 기본으로 되돌리고, 끌던 중이었다면 끌기를 끝낸다.
-  useEffect(() => {
-    endDragRef.current?.();
-    splitRef.current = DEFAULT_SPLIT;
-    setSplit(DEFAULT_SPLIT);
-    return () => endDragRef.current?.();
-  }, [problem?.id]);
+  // 문제 설명·코드 작성 폭 조절. 다른 문제로 옮기면 기본 비율로 돌아간다.
+  const split = useSolveSplit(problem?.id);
 
   // 문제가 바뀌거나 불러와지면 저장된 초안을 복원한다.
   useEffect(() => {
@@ -247,23 +219,6 @@ function OwnedProblemPage() {
       /* 저장할 수 없어도 편집은 그대로 동작한다 */
     }
   }, [source]);
-
-  useEffect(() => {
-    if (tab !== "history" || !session || !problem) return;
-    const controller = new AbortController();
-    setHistory(null);
-    setHistoryFailed(false);
-    api<Page<Submission>>(
-      `/submissions?problemId=${problem.id}&page=1&limit=20`,
-      { signal: controller.signal },
-      session.accessToken,
-    )
-      .then((data) => setHistory(data.items))
-      .catch(() => {
-        if (!controller.signal.aborted) setHistoryFailed(true);
-      });
-    return () => controller.abort();
-  }, [tab, session, problem, finishedId]);
 
   useEffect(() => {
     setSubmissionId(null);
@@ -353,187 +308,46 @@ function OwnedProblemPage() {
       </div>
     );
 
-  // 지금 화면 폭에서 실제로 보이는 모습(둘 다 / 문제 설명만 / 코드 작성만)과 그에 맞는 열 크기.
-  // 열 크기는 CSS 변수로 넘기고, 1100px 이하의 위아래 쌓이는 배치에서는 CSS가 이 값을 무시한다.
-  const splitMode: SplitMode =
-    gridWidth > 0
-      ? resolveSplit(split, gridWidth)
-      : split.collapsed === "statement"
-        ? "code"
-        : split.collapsed === "code"
-          ? "statement"
-          : "split";
-  const splitColumns =
-    splitMode === "code"
-      ? `0px ${HANDLE_WIDTH}px minmax(0, 1fr)`
-      : splitMode === "statement"
-        ? `minmax(0, 1fr) ${HANDLE_WIDTH}px 0px`
-        : `minmax(0, ${Math.round(split.ratio * 1000)}fr) ${HANDLE_WIDTH}px minmax(0, ${Math.round((1 - split.ratio) * 1000)}fr)`;
-  const splitPercent =
-    splitMode === "code"
-      ? 0
-      : splitMode === "statement"
-        ? 100
-        : Math.round(split.ratio * 100);
-
-  function applySplit(next: SplitState) {
-    splitRef.current = next;
-    setSplit(next);
-  }
-
-  function startSplitDrag(event: React.PointerEvent<HTMLDivElement>) {
-    const grid = gridRef.current;
-    // 보조 버튼과 두 번째 손가락의 입력은 무시한다
-    if (!grid || event.button !== 0 || !event.isPrimary) return;
-    event.preventDefault();
-    // 어떤 이유로 끝나지 못한 이전 끌기가 있으면 정리하고 새로 시작한다(이후 끌기가 막히지 않게)
-    endDragRef.current?.();
-    const handle = event.currentTarget;
-    const pointerId = event.pointerId;
-    handle.setPointerCapture(pointerId);
-    // 끌기를 시작해도 키보드로 이어서 조절할 수 있게 손잡이가 초점을 받는다
-    handle.focus({ preventScroll: true });
-    setDragging(true);
-    const move = (moveEvent: PointerEvent) => {
-      if (moveEvent.pointerId !== pointerId) return;
-      const rect = grid.getBoundingClientRect();
-      applySplit(
-        splitFromPointer(
-          moveEvent.clientX - rect.left,
-          rect.width,
-          splitRef.current,
-        ),
-      );
-    };
-    const end = () => {
-      handle.removeEventListener("pointermove", move);
-      handle.removeEventListener("pointerup", end);
-      handle.removeEventListener("pointercancel", end);
-      handle.removeEventListener("lostpointercapture", end);
-      endDragRef.current = null;
-      setDragging(false);
-    };
-    handle.addEventListener("pointermove", move);
-    handle.addEventListener("pointerup", end);
-    handle.addEventListener("pointercancel", end);
-    handle.addEventListener("lostpointercapture", end);
-    endDragRef.current = end;
-  }
-
-  function onSplitKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    if (event.altKey || event.ctrlKey || event.metaKey) return;
-    const next = splitFromKey(event.key, gridWidth || 1, splitRef.current);
-    if (!next) return;
-    event.preventDefault();
-    applySplit(next);
+  function resetSource() {
+    const initial = starter(language);
+    codeEditorRef.current?.reset(initial);
+    // 처음 상태로 돌아가므로 기억한 Tab 단위도 비운다.
+    unitsRef.current = [];
+    unitsBaseRef.current = initial;
+    setSource(initial);
+    setSaveFailed(!resetSourceDraft(ownerId, problem!.id, language, initial));
+    setSavedAt(null);
+    setDraftLoaded(false);
   }
 
   return (
     <div className="solve-page">
-      <div className="solve-heading">
-        <h1>{problem.title}</h1>
-        <nav className="community-problem-links" aria-label="문제 커뮤니티">
-          <Link to={`/community?c=question&problemId=${problem.id}`}>질문 보기</Link>
-          <Link to={`/community?c=solution&problemId=${problem.id}`}>풀이 공유</Link>
-          <Link
-            to={`/community/new?c=question&problemId=${problem.id}`}
-            state={{ problem: { id: problem.id, title: problem.title } }}
-          >
-            질문 작성
-          </Link>
-        </nav>
-        <DifficultyBadge difficulty={problem.difficulty} />
-      </div>
+      <SolveHeading problem={problem} />
       <div
-        ref={gridRef}
-        className={`solve-grid is-${splitMode}${dragging ? " is-dragging" : ""}`}
-        style={{ "--solve-columns": splitColumns } as React.CSSProperties}
+        ref={split.gridRef}
+        className={`solve-grid is-${split.mode}${split.dragging ? " is-dragging" : ""}`}
+        style={{ "--solve-columns": split.columns } as React.CSSProperties}
       >
         <section
-          className={`solve-panel statement-panel${splitMode === "code" ? " is-hidden" : ""}`}
+          className={`solve-panel statement-panel${split.mode === "code" ? " is-hidden" : ""}`}
         >
           <div className="tab-list" role="tablist" aria-label="문제 보기">
-            <button
-              role="tab"
-              id="problem-tab-statement"
-              aria-selected={tab === "statement"}
-              aria-controls={tab === "statement" ? "problem-tabpanel" : undefined}
-              className={`tab-button ${tab === "statement" ? "active" : ""}`}
-              onClick={() => setTab("statement")}
-            >
-              문제 설명
-            </button>
-            <button
-              role="tab"
-              id="problem-tab-history"
-              aria-selected={tab === "history"}
-              aria-controls={tab === "history" ? "problem-tabpanel" : undefined}
-              className={`tab-button ${tab === "history" ? "active" : ""}`}
-              onClick={() => setTab("history")}
-            >
-              제출 내역
-            </button>
+            {tabs.map((item) => (
+              <button
+                key={item.key}
+                role="tab"
+                id={`problem-tab-${item.key}`}
+                aria-selected={tab === item.key}
+                aria-controls={tab === item.key ? "problem-tabpanel" : undefined}
+                className={`tab-button ${tab === item.key ? "active" : ""}`}
+                onClick={() => setTab(item.key)}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
           {tab === "statement" ? (
-            <article
-              className="problem-content"
-              role="tabpanel"
-              id="problem-tabpanel"
-              aria-labelledby="problem-tab-statement"
-            >
-              <div className="meta-strip">
-                <span>
-                  <strong>시간</strong> {problem.timeLimitMs}ms
-                </span>
-                <span>
-                  <strong>메모리</strong> {problem.memoryLimitMb}MB
-                </span>
-                <span>
-                  <strong>예제</strong> {problem.samples.length}개
-                </span>
-              </div>
-              <section>
-                <h2>문제</h2>
-                <div className="markdown">
-                  <ProblemMarkdown>{problem.statementMarkdown}</ProblemMarkdown>
-                </div>
-              </section>
-              {problem.inputDescriptionMarkdown ? (
-                <section>
-                  <h2>입력</h2>
-                  <div className="markdown">
-                    <ProblemMarkdown>
-                      {problem.inputDescriptionMarkdown}
-                    </ProblemMarkdown>
-                  </div>
-                </section>
-              ) : null}
-              {problem.outputDescriptionMarkdown ? (
-                <section>
-                  <h2>출력</h2>
-                  <div className="markdown">
-                    <ProblemMarkdown>
-                      {problem.outputDescriptionMarkdown}
-                    </ProblemMarkdown>
-                  </div>
-                </section>
-              ) : null}
-              {problem.samples.map((sample, index) => (
-                <section key={index}>
-                  <h2>예제 {index + 1}</h2>
-                  <div className="sample-grid">
-                    <div>
-                      <h3>입력</h3>
-                      <pre>{sample.input}</pre>
-                    </div>
-                    <div>
-                      <h3>출력</h3>
-                      <pre>{sample.expectedOutput}</pre>
-                    </div>
-                  </div>
-                </section>
-              ))}
-            </article>
+            <ProblemStatement problem={problem} />
           ) : (
             <div
               className="history-panel"
@@ -541,45 +355,16 @@ function OwnedProblemPage() {
               id="problem-tabpanel"
               aria-labelledby="problem-tab-history"
             >
-              {!session ? (
-                <p className="muted">
-                  로그인하면 이 문제의 제출 내역이 여기에 표시됩니다.
-                </p>
-              ) : historyFailed ? (
-                <p className="error-message" role="alert">
-                  제출 내역을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
-                </p>
-              ) : history === null ? (
-                <SkeletonRegion label="제출 내역을 불러오는 중입니다">
-                  <Skeleton height={40} style={{ marginBottom: 10 }} />
-                  <Skeleton height={40} style={{ marginBottom: 10 }} />
-                  <Skeleton height={40} />
-                </SkeletonRegion>
-              ) : history.length ? (
-                <ul className="history-list">
-                  {history.map((item) => (
-                    <li key={item.id}>
-                      <Link to={`/submissions/${item.id}`}>
-                        <span
-                          className={`verdict verdict-${item.status.toLowerCase()}`}
-                        >
-                          {verdictLabel(item.status)}
-                        </span>
-                        <span>
-                          {LANGUAGE_LABELS[item.language] ?? item.language} ·{" "}
-                          {new Date(item.createdAt).toLocaleString("ko-KR")}
-                        </span>
-                        <span className="muted">
-                          {item.passedTestCases}/{item.totalTestCases}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+              {session ? (
+                <SubmissionHistory
+                  problem={problem}
+                  token={session.accessToken}
+                  // 이 화면에서 채점이 끝날 때마다 다시 받는다.
+                  refreshKey={finishedId}
+                />
               ) : (
                 <p className="muted">
-                  아직 이 문제를 제출하지 않았습니다. 오른쪽에서 코드를 작성해
-                  제출해 보세요.
+                  로그인하면 이 문제의 제출 내역이 여기에 표시됩니다.
                 </p>
               )}
             </div>
@@ -593,17 +378,17 @@ function OwnedProblemPage() {
           aria-label="문제 설명과 코드 작성 크기 조절"
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-valuenow={splitPercent}
+          aria-valuenow={split.percent}
           tabIndex={0}
           title="좌우로 끌어 크기를 조절해요. 너무 줄이면 그 쪽이 사라지고, 끌어서 다시 열 수 있어요. (←→ 키, 더블클릭으로 원래대로)"
-          onPointerDown={startSplitDrag}
-          onKeyDown={onSplitKeyDown}
-          onDoubleClick={() => applySplit(DEFAULT_SPLIT)}
+          onPointerDown={split.startDrag}
+          onKeyDown={split.onKeyDown}
+          onDoubleClick={split.reset}
         >
           <span className="solve-resizer-grip" aria-hidden="true" />
         </div>
         <section
-          className={`solve-panel code-panel${splitMode === "statement" ? " is-hidden" : ""}`}
+          className={`solve-panel code-panel${split.mode === "statement" ? " is-hidden" : ""}`}
           aria-label="코드 작성"
         >
           <div className="code-toolbar">
@@ -618,53 +403,16 @@ function OwnedProblemPage() {
               onChange={(next) => setLanguage(next as Language)}
             />
             <span className="save-state" role="status">
-              {saveFailed
-                ? "초안을 읽거나 저장하지 못했어요. 현재 내용은 메모리에만 남아 새로고침 후 복구되지 않을 수 있어요."
-                : savedAt
-                  ? `초안 저장됨 · ${savedTime(savedAt)}`
-                  : draftLoaded
-                    ? "저장된 초안을 불러왔어요"
-                    : "자동 저장 대기"}
+              {saveStateText(saveFailed, savedAt, draftLoaded)}
             </span>
             <span className="cursor-info" aria-live="off">
               줄 {cursor.line}, 열 {cursor.column}
             </span>
-            <span className="font-controls" role="group" aria-label="글꼴 크기">
-              <button
-                type="button"
-                className="font-button"
-                aria-label="글꼴 작게"
-                disabled={fontSize <= FONT_MIN}
-                onClick={() => changeFont(-1)}
-              >
-                A−
-              </button>
-              <span className="font-size" aria-hidden="true">
-                {fontSize}
-              </span>
-              <button
-                type="button"
-                className="font-button"
-                aria-label="글꼴 크게"
-                disabled={fontSize >= FONT_MAX}
-                onClick={() => changeFont(1)}
-              >
-                A+
-              </button>
-            </span>
+            <FontControls fontSize={fontSize} onChange={changeFont} />
             <button
               type="button"
               className="text-button light reset-button"
-              onClick={() => {
-                codeEditorRef.current?.reset(starter(language));
-                // 처음 상태로 돌아가므로 기억한 Tab 단위도 비운다.
-                unitsRef.current = [];
-                unitsBaseRef.current = starter(language);
-                setSource(starter(language));
-                setSaveFailed(!resetSourceDraft(ownerId, problem.id, language, starter(language)));
-                setSavedAt(null);
-                setDraftLoaded(false);
-              }}
+              onClick={resetSource}
             >
               초기화
             </button>
@@ -701,45 +449,248 @@ function OwnedProblemPage() {
               Enter/Tab 적용, 스니펫은 Tab으로 다음 칸 · Esc 다음 Tab 또는
               Shift+Tab으로 편집기 밖 이동
             </p>
-            <div className="code-actions">
-              {session ? (
-                <>
-                  <span className="editor-note">
-                    {source.trim() ? (
-                      <>
-                        제출하면 전체 테스트 케이스로 채점합니다 ·{" "}
-                        <kbd>Ctrl/⌘ + Enter</kbd>
-                      </>
-                    ) : (
-                      "코드를 입력하면 제출할 수 있어요."
-                    )}
-                  </span>
-                  <button
-                    className="button"
-                    disabled={submitting || !source.trim()}
-                  >
-                    {submitting ? "제출 중…" : "제출하고 채점하기 →"}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <span className="editor-note">
-                    코드를 제출하려면 로그인해 주세요. 작성 중인 코드는 이
-                    브라우저에 저장됩니다.
-                  </span>
-                  <Link
-                    className="button"
-                    to="/auth"
-                    state={{ from: problemPath(problem.slug) }}
-                  >
-                    로그인하고 풀기
-                  </Link>
-                </>
-              )}
-            </div>
+            <SubmitActions
+              signedIn={Boolean(session)}
+              hasCode={Boolean(source.trim())}
+              submitting={submitting}
+              loginFrom={problemPath(problem.slug)}
+            />
           </form>
         </section>
       </div>
+    </div>
+  );
+}
+
+const tabs: { key: Tab; label: string }[] = [
+  { key: "statement", label: "문제 설명" },
+  { key: "history", label: "제출 내역" },
+];
+
+function saveStateText(failed: boolean, savedAt: Date | null, loaded: boolean) {
+  if (failed)
+    return "초안을 읽거나 저장하지 못했어요. 현재 내용은 메모리에만 남아 새로고침 후 복구되지 않을 수 있어요.";
+  if (savedAt) return `초안 저장됨 · ${savedTime(savedAt)}`;
+  return loaded ? "저장된 초안을 불러왔어요" : "자동 저장 대기";
+}
+
+/** 제목줄: 이 문제의 커뮤니티 링크와 난이도 */
+function SolveHeading({ problem }: { problem: Problem }) {
+  return (
+    <div className="solve-heading">
+      <h1>{problem.title}</h1>
+      <nav className="community-problem-links" aria-label="문제 커뮤니티">
+        <Link to={`/community?c=question&problemId=${problem.id}`}>질문 보기</Link>
+        <Link to={`/community?c=solution&problemId=${problem.id}`}>풀이 공유</Link>
+        <Link
+          to={`/community/new?c=question&problemId=${problem.id}`}
+          state={{ problem: { id: problem.id, title: problem.title } }}
+        >
+          질문 작성
+        </Link>
+      </nav>
+      <DifficultyBadge difficulty={problem.difficulty} />
+    </div>
+  );
+}
+
+function ProblemStatement({ problem }: { problem: Problem }) {
+  const sections = [
+    { title: "문제", body: problem.statementMarkdown },
+    { title: "입력", body: problem.inputDescriptionMarkdown },
+    { title: "출력", body: problem.outputDescriptionMarkdown },
+  ];
+  return (
+    <article
+      className="problem-content"
+      role="tabpanel"
+      id="problem-tabpanel"
+      aria-labelledby="problem-tab-statement"
+    >
+      <div className="meta-strip">
+        <span>
+          <strong>시간</strong> {problem.timeLimitMs}ms
+        </span>
+        <span>
+          <strong>메모리</strong> {problem.memoryLimitMb}MB
+        </span>
+        <span>
+          <strong>예제</strong> {problem.samples.length}개
+        </span>
+      </div>
+      {sections.map((section, index) =>
+        // 문제 설명은 늘 보이고, 입력·출력 설명은 있을 때만 보인다.
+        index === 0 || section.body ? (
+          <section key={section.title}>
+            <h2>{section.title}</h2>
+            <div className="markdown">
+              <ProblemMarkdown>{section.body}</ProblemMarkdown>
+            </div>
+          </section>
+        ) : null,
+      )}
+      {problem.samples.map((sample, index) => (
+        <section key={index}>
+          <h2>예제 {index + 1}</h2>
+          <div className="sample-grid">
+            <div>
+              <h3>입력</h3>
+              <pre>{sample.input}</pre>
+            </div>
+            <div>
+              <h3>출력</h3>
+              <pre>{sample.expectedOutput}</pre>
+            </div>
+          </div>
+        </section>
+      ))}
+    </article>
+  );
+}
+
+/** 이 문제의 내 최근 제출 20개. 탭을 열 때와 refreshKey가 바뀔 때 다시 받는다. */
+function SubmissionHistory({
+  problem,
+  token,
+  refreshKey,
+}: {
+  problem: Problem;
+  token: string;
+  refreshKey: string | null;
+}) {
+  const [history, setHistory] = useState<Submission[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    setHistory(null);
+    setFailed(false);
+    api<Page<Submission>>(
+      `/submissions?problemId=${problem.id}&page=1&limit=20`,
+      { signal: controller.signal },
+      token,
+    )
+      .then((data) => setHistory(data.items))
+      .catch(() => {
+        if (!controller.signal.aborted) setFailed(true);
+      });
+    return () => controller.abort();
+  }, [token, problem, refreshKey]);
+
+  if (failed)
+    return (
+      <p className="error-message" role="alert">
+        제출 내역을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
+      </p>
+    );
+  if (history === null)
+    return (
+      <SkeletonRegion label="제출 내역을 불러오는 중입니다">
+        <Skeleton height={40} style={{ marginBottom: 10 }} />
+        <Skeleton height={40} style={{ marginBottom: 10 }} />
+        <Skeleton height={40} />
+      </SkeletonRegion>
+    );
+  if (!history.length)
+    return (
+      <p className="muted">
+        아직 이 문제를 제출하지 않았습니다. 오른쪽에서 코드를 작성해 제출해
+        보세요.
+      </p>
+    );
+  return (
+    <ul className="history-list">
+      {history.map((item) => (
+        <li key={item.id}>
+          <Link to={`/submissions/${item.id}`}>
+            <span className={`verdict verdict-${item.status.toLowerCase()}`}>
+              {verdictLabel(item.status)}
+            </span>
+            <span>
+              {LANGUAGE_LABELS[item.language] ?? item.language} ·{" "}
+              {new Date(item.createdAt).toLocaleString("ko-KR")}
+            </span>
+            <span className="muted">
+              {item.passedTestCases}/{item.totalTestCases}
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function FontControls({
+  fontSize,
+  onChange,
+}: {
+  fontSize: number;
+  onChange: (step: number) => void;
+}) {
+  return (
+    <span className="font-controls" role="group" aria-label="글꼴 크기">
+      <button
+        type="button"
+        className="font-button"
+        aria-label="글꼴 작게"
+        disabled={fontSize <= FONT_MIN}
+        onClick={() => onChange(-1)}
+      >
+        A−
+      </button>
+      <span className="font-size" aria-hidden="true">
+        {fontSize}
+      </span>
+      <button
+        type="button"
+        className="font-button"
+        aria-label="글꼴 크게"
+        disabled={fontSize >= FONT_MAX}
+        onClick={() => onChange(1)}
+      >
+        A+
+      </button>
+    </span>
+  );
+}
+
+function SubmitActions({
+  signedIn,
+  hasCode,
+  submitting,
+  loginFrom,
+}: {
+  signedIn: boolean;
+  hasCode: boolean;
+  submitting: boolean;
+  loginFrom: string;
+}) {
+  if (!signedIn)
+    return (
+      <div className="code-actions">
+        <span className="editor-note">
+          코드를 제출하려면 로그인해 주세요. 작성 중인 코드는 이 브라우저에
+          저장됩니다.
+        </span>
+        <Link className="button" to="/auth" state={{ from: loginFrom }}>
+          로그인하고 풀기
+        </Link>
+      </div>
+    );
+  return (
+    <div className="code-actions">
+      <span className="editor-note">
+        {hasCode ? (
+          <>
+            제출하면 전체 테스트 케이스로 채점합니다 ·{" "}
+            <kbd>Ctrl/⌘ + Enter</kbd>
+          </>
+        ) : (
+          "코드를 입력하면 제출할 수 있어요."
+        )}
+      </span>
+      <button className="button" disabled={submitting || !hasCode}>
+        {submitting ? "제출 중…" : "제출하고 채점하기 →"}
+      </button>
     </div>
   );
 }
