@@ -101,26 +101,49 @@ test("a rejected refresh signs the user out", async ({ page }) => {
   expect(await saved(page)).toBeNull();
 });
 
-test("tabs refreshing an expired access token at once share one rotation", async ({ page }) => {
-  await seed(page, Date.now() - 1000);
-  const second = await page.context().newPage();
-  let calls = 0;
-  for (const tab of [page, second]) {
-    await mockAuthorizedApi(tab, []);
-    // 서버처럼 쓴 refresh token이 다시 오면 거절한다. 두 탭이 같은 토큰을 보내면 한쪽이 로그아웃된다.
-    await tab.route("**/api/v1/auth/refresh", async (route) => {
-      calls += 1;
-      const { refreshToken } = route.request().postDataJSON() as { refreshToken: string };
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return refreshToken === "r1" && calls === 1
-        ? route.fulfill({ json: refreshed("new-access", "r2") })
-        : route.fulfill({ status: 401, json: { message: "다시 로그인해야 합니다." } });
-    });
-  }
-  await Promise.all([page.goto("/"), second.goto("/")]);
-  for (const tab of [page, second]) {
-    await expect(tab.getByRole("button", { name: "로그아웃" })).toBeVisible();
-    await expect.poll(async () => (await saved(tab))?.session.accessToken).toBe("new-access");
-  }
-  expect(calls).toBe(1);
-});
+// Web Locks가 있어도 Firefox는 앞 탭이 저장한 새 토큰을 잠금을 넘겨받은 탭에 늦게 보여 줄 수 있다.
+// 잠금을 없애고 첫 회전 응답을 붙잡아, 다른 탭이 새 토큰을 보기 전에 같은 r1의 거절을 받는 경쟁을 매번 재현한다.
+for (const locks of [true, false])
+  test(`tabs refreshing an expired access token at once keep one login${locks ? "" : " without Web Locks"}`, async ({ page }) => {
+    await seed(page, Date.now() - 1000);
+    if (!locks)
+      await page.context().addInitScript(() => {
+        delete (Navigator.prototype as { locks?: unknown }).locks;
+      });
+    const second = await page.context().newPage();
+    let rotated = false;
+    let rejected = false;
+    let release = () => {};
+    const released = new Promise<void>((resolve) => (release = resolve));
+    for (const tab of [page, second]) {
+      await mockAuthorizedApi(tab, []);
+      // 서버처럼 r1은 한 번만 회전하고, 방금 회전한 r1이 다시 오면 로그인을 끊지 않고 409를 준다.
+      await tab.route("**/api/v1/auth/refresh", async (route) => {
+        const { refreshToken } = route.request().postDataJSON() as { refreshToken: string };
+        if (refreshToken === "r1" && !rotated) {
+          rotated = true;
+          await released;
+          return route.fulfill({ json: refreshed("new-access", "r2") });
+        }
+        rejected = true;
+        return refreshToken === "r1"
+          ? route.fulfill({ status: 409, json: { message: "다른 탭에서 방금 로그인을 갱신했습니다." } })
+          : route.fulfill({ status: 401, json: { message: "다시 로그인해야 합니다." } });
+      });
+    }
+    await Promise.all([page.goto("/"), second.goto("/")]);
+    if (!locks) {
+      // 거절받은 탭이 저장된 세션을 지우면(옛 401 처리) 회전 중인 탭까지 로그아웃된다.
+      await expect.poll(() => rejected).toBe(true);
+      await page.waitForTimeout(500);
+      for (const tab of [page, second])
+        expect((await saved(tab))?.session.refreshToken).toBe("r1");
+    }
+    release();
+    for (const tab of [page, second]) {
+      await expect(tab.getByRole("button", { name: "로그아웃" })).toBeVisible();
+      await expect
+        .poll(async () => (await saved(tab))?.session)
+        .toMatchObject({ accessToken: "new-access", refreshToken: "r2" });
+    }
+  });
