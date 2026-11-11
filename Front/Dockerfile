@@ -10,7 +10,7 @@ ARG VITE_SENTRY_DSN=
 ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN
 RUN npm run build
 
-FROM nginx:1.27.5-alpine AS runtime
+FROM nginx:1.31.8-alpine AS runtime
 ENV TRUSTED_PROXY_CIDR=127.0.0.1/32
 ENV TRUSTED_PROXY_HOP_CIDR=127.0.0.1/32
 COPY --from=build /app/dist /usr/share/nginx/html
