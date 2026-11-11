@@ -50,9 +50,12 @@ const SettingsPage = lazyPage(() => import("./pages/SettingsPage"), "SettingsPag
 const UserPage = lazyPage(() => import("./pages/UserPage"), "UserPage");
 const SubmissionPage = lazyPage(() => import("./pages/SubmissionPage"), "SubmissionPage");
 const SubmissionsPage = lazyPage(() => import("./pages/SubmissionsPage"), "SubmissionsPage");
+const VibePage = lazyPage(() => import("./pages/VibePage"), "VibePage");
+const VibeWorkspacePage = lazyPage(() => import("./pages/VibeWorkspacePage"), "VibeWorkspacePage");
 
 const menu = [
   { path: "/analysis", label: "코드 분석" },
+  { path: "/vibe", label: "바이브코딩" },
   { path: "/community", label: "커뮤니티" },
   { path: "/missions", label: "미션" },
   { path: "/enterprise", label: "기업 테스트" },
@@ -179,6 +182,8 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               />
               <Route path="/community/:id" element={<CommunityPostPage key={`${session?.user.id}:${session?.accessToken}:${pathname}`} getNavigationVersion={getNavigationVersion} />} />
               <Route path="/analysis" element={<AnalysisPage />} />
+              <Route path="/vibe" element={<VibePage key={session?.user.id ?? 'guest'} />} />
+              <Route path="/vibe/attempts/:id" element={session ? <VibeWorkspacePage key={`${session.user.id}:${pathname}`} /> : loginRedirect} />
               <Route path="/analysis/:id" element={<AnalysisQuestionPage />} />
               <Route path="/missions" element={<MissionsPage />} />
               <Route path="/enterprise" element={<EnterprisePage />} />

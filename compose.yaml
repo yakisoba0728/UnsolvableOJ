@@ -51,6 +51,11 @@ services:
       JWT_ACCESS_EXPIRES_IN: 15m
       # Must match the judge service's JUDGE_SERVICE_TOKEN below.
       JUDGE_SERVICE_TOKEN: local-dev-only-judge-service-token-0123456789
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      VIBE_AI_MODEL: gpt-6-luna
+      VIBE_SANDBOX_URL: http://go-judge:5050
+      VIBE_SANDBOX_TOKEN: ${GO_JUDGE_TOKEN:-local-dev-only-go-judge-token-0123456789abcdef}
+    networks: [default, sandbox]
     ports:
       - "127.0.0.1:3000:3000"
     depends_on:
@@ -87,7 +92,7 @@ services:
       - "127.0.0.1:5050:5050"
     networks: [sandbox]
 
-  # Only the worker can reach both the application and sandbox networks.
+  # The worker judges submissions; the API sends bounded vibe-project runs to the sandbox.
   judge:
     build:
       context: ./Judge

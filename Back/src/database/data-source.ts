@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { VibeCoding1795400000000 } from './migrations/1795400000000-vibe-coding.js';
 import { Missions1793000000000 } from './migrations/1793000000000-missions.js';
 import { DebugOutputs1790552000000 } from './migrations/1790552000000-debug-outputs.js';
 import { DataSource } from 'typeorm';
@@ -34,7 +35,10 @@ if (!databaseUrl) {
 
 export default new DataSource({
   type: 'postgres',
-  ...databaseConnectionOptions(databaseUrl, process.env.DATABASE_SSL === 'true'),
+  ...databaseConnectionOptions(
+    databaseUrl,
+    process.env.DATABASE_SSL === 'true',
+  ),
   entities: [User, Problem, TestCase, Submission],
   migrations: [
     InitialSchema1726916400000,
@@ -58,6 +62,7 @@ export default new DataSource({
     EnterpriseInvites1795100000000,
     ProblemStats1795200000000,
     TestResults1795300000000,
+    VibeCoding1795400000000,
   ],
   synchronize: false,
 });

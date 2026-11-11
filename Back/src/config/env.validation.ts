@@ -14,6 +14,13 @@ const secret = Joi.string()
   });
 
 export const envValidationSchema = Joi.object({
+  OPENAI_API_KEY: Joi.string().allow('').optional(),
+  VIBE_AI_MODEL: Joi.string().valid('gpt-6-luna').default('gpt-6-luna'),
+  VIBE_SANDBOX_URL: Joi.string()
+    .uri({ scheme: ['http', 'https'] })
+    .allow('')
+    .default(''),
+  VIBE_SANDBOX_TOKEN: Joi.string().allow('').default(''),
   NODE_ENV: Joi.string()
     .valid('development', 'test', 'production')
     .default('development'),

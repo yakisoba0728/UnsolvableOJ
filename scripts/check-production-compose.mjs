@@ -99,6 +99,11 @@ assert.equal(sandbox.environment.ES_AUTH_TOKEN, judge.environment.GO_JUDGE_TOKEN
 assert.equal(new URL(back.environment.DATABASE_URL).password, required.POSTGRES_PASSWORD);
 assert.equal(judge.environment.API_BASE_URL, 'http://back:3000/api/v1');
 assert.equal(judge.environment.GO_JUDGE_URL, 'http://go-judge:5050');
+assert.equal(back.environment.VIBE_SANDBOX_URL, 'http://go-judge:5050');
+assert.equal(back.environment.VIBE_SANDBOX_TOKEN, sandbox.environment.ES_AUTH_TOKEN);
+assert.equal(back.environment.VIBE_AI_MODEL, 'gpt-6-luna');
+assert.ok('sandbox' in back.networks);
+assert.ok(!('OPENAI_API_KEY' in front.environment));
 assert.ok(sandbox.command.includes('-parallelism=2'));
 assert.equal(judge.depends_on['go-judge'].condition, 'service_healthy');
 assert.equal(judge.stop_grace_period, '2m0s');
