@@ -18,6 +18,7 @@ import {
 } from './vibe.catalog.js';
 import { VibeAi } from './vibe.ai.js';
 import { canJoinEnterprise } from '../enterprise/enterprise-access.js';
+import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { VibeRunner } from './vibe.runner.js';
 import type {
   ProjectFiles,
@@ -187,16 +188,43 @@ export class VibeService {
       return this.view(await this.owned(row.id, userId, manager));
     });
   }
-  async review(id: string, userId: string) {
-    const row = await this.owned(id, userId);
+  /** Read retained assessment evidence using staff authority, not a candidate's current invitation.
+   * This is deliberately separate from owned(), which still protects candidate operations.
+   */
+  private async staffOwned(
+    id: string,
+    userId: string,
+    staff: AuthenticatedUser,
+  ) {
+    const [row]: VibeAttemptRow[] = await this.db.query(
+      `SELECT v.*, LEAST(v.deadline_at,a.deadline_at,t.ends_at) AS deadline_at, t.id AS enterprise_test_id,
+        (a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now()) AS enterprise_closed,
+        (t.show_score_to_candidates AND (a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now())) AS score_visible
+       FROM vibe_attempts v JOIN enterprise_attempts a ON a.id=v.enterprise_attempt_id JOIN enterprise_tests t ON t.id=a.test_id
+       JOIN users reviewer ON reviewer.id=$3
+       WHERE v.id=$1 AND v.user_id=$2 AND (t.owner_id=reviewer.id OR reviewer.role='ADMIN')
+         AND reviewer.deleted_at IS NULL AND reviewer.suspended_at IS NULL
+         AND ($4::integer IS NULL OR reviewer.token_version=$4)`,
+      [id, userId, staff.id, staff.tokenVersion ?? null],
+    );
+    if (!row) throw new NotFoundException('응시 과제를 찾을 수 없습니다.');
+    return row;
+  }
+  async reviewForStaff(id: string, userId: string, staff: AuthenticatedUser) {
+    const row = await this.staffOwned(id, userId, staff);
     const revisions = await this.db.query(
       'SELECT revision,action,paths,message_id AS "messageId",created_at AS "createdAt" FROM vibe_revisions WHERE attempt_id=$1 ORDER BY revision',
       [id],
     );
     return { ...this.view(row, true), revisions };
   }
-  async revision(id: string, userId: string, revision: number) {
-    await this.owned(id, userId);
+  async revisionForStaff(
+    id: string,
+    userId: string,
+    revision: number,
+    staff: AuthenticatedUser,
+  ) {
+    await this.staffOwned(id, userId, staff);
     const rows: { revision: number; files: ProjectFiles }[] =
       await this.db.query(
         'SELECT revision,files FROM vibe_revisions WHERE attempt_id=$1 AND revision<=$2 ORDER BY revision DESC LIMIT 2',

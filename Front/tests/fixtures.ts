@@ -164,6 +164,9 @@ export async function mockProblemApi(page: Page) {
   await page.route("**/api/v1/**", async (route) => {
     const url = new URL(route.request().url());
     const path = url.pathname;
+    if (path === "/api/v1/email/preferences") {
+      return route.fulfill({ json: { verified: false, answer: false, accepted: false, enabled: false } });
+    }
     if (path === "/api/v1/problems") {
       await route.fulfill({ json: problemListResponse([problem], url) });
     } else if (path.startsWith("/api/v1/problems/by-slug/")) {

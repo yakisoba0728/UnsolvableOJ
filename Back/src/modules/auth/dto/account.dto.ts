@@ -5,6 +5,7 @@ import {
   IsString,
   Length,
   MaxLength,
+  Matches,
 } from 'class-validator';
 import { RegisterDto } from './register.dto.js';
 
@@ -20,7 +21,8 @@ export class ChangePasswordDto {
   newPassword: string;
 
   @ApiPropertyOptional({
-    description: '새로 받을 refresh token의 로그인 유지 여부(기존 토큰은 모두 폐기)',
+    description:
+      '새로 받을 refresh token의 로그인 유지 여부(기존 토큰은 모두 폐기)',
   })
   @IsOptional()
   @IsBoolean()
@@ -29,3 +31,8 @@ export class ChangePasswordDto {
 
 /** 가입과 같은 사용자 이름 규칙(영문·숫자·밑줄 3–30자)을 쓴다. */
 export class ChangeUsernameDto extends PickType(RegisterDto, ['username']) {}
+
+export class WithdrawAccountDto {
+  @IsString() @Length(10, 128) currentPassword: string;
+  @IsString() @Matches(/^회원 탈퇴$/) confirmation: string;
+}

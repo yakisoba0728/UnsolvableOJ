@@ -22,10 +22,16 @@ const canRefresh = (session: Session) =>
   typeof session.refreshToken === "string" &&
   Date.parse(session.refreshTokenExpiresAt ?? "") > Date.now();
 
-/** 저장된 세션을 만료와 관계없이 읽는다. */
-function readSaved(): SavedSession | null {
+type StorageSnapshot = { readable: boolean; saved: SavedSession | null };
+/** A denied storage read is different from a logout that successfully removed the key. */
+function readSavedSnapshot(): StorageSnapshot {
+  let raw: string | null;
   try {
-    const raw = localStorage.getItem(storageKey);
+    raw = localStorage.getItem(storageKey);
+  } catch {
+    return { readable: false, saved: null };
+  }
+  try {
     const saved = raw ? (JSON.parse(raw) as SavedSession) : null;
     if (
       saved &&
@@ -34,11 +40,14 @@ function readSaved(): SavedSession | null {
       typeof saved.session.user?.id === "string" &&
       typeof saved.session.user.username === "string"
     )
-      return saved;
-    return null;
+      return { readable: true, saved };
   } catch {
-    return null;
+    /* Malformed stored data is readable, but is not an active login. */
   }
+  return { readable: true, saved: null };
+}
+function readSaved() {
+  return readSavedSnapshot().saved;
 }
 
 // 읽는 쪽에서 만료된 값을 지우지 않는다: 읽는 사이 다른 탭이 새 값으로 바꿨을 수 있다.
@@ -59,10 +68,48 @@ function expiryTime(session: Session): number {
   );
 }
 
+/** Client-side request lineage only; the server still verifies every JWT. */
+function sameLoginFamily(
+  previous: SavedSession | null,
+  next: SavedSession | null,
+) {
+  if (!previous || !next || previous.session.user.id !== next.session.user.id)
+    return false;
+  if (previous.session.accessToken === next.session.accessToken) return true;
+  const claims = (session: Session) => {
+    try {
+      const part = session.accessToken.split(".")[1];
+      if (!part) return null;
+      const value = JSON.parse(
+        atob(part.replace(/-/g, "+").replace(/_/g, "/")),
+      ) as { sub?: unknown; sid?: unknown; tokenVersion?: unknown };
+      return value.sub === session.user.id &&
+        typeof value.sid === "string" &&
+        value.sid.length > 0 &&
+        Number.isInteger(value.tokenVersion)
+        ? value
+        : null;
+    } catch {
+      return null;
+    }
+  };
+  const a = claims(previous.session),
+    b = claims(next.session);
+  return Boolean(
+    a &&
+    b &&
+    a.sub === b.sub &&
+    a.sid === b.sid &&
+    a.tokenVersion === b.tokenVersion,
+  );
+}
+
 interface AuthContextValue {
   session: Session | null;
   setSession: (session: Session | null) => void;
   getSessionVersion: () => number;
+  /** Changes for logout/login/account changes, but not a rotation of this login. */
+  getSessionIdentityVersion: () => number;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -70,91 +117,202 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [saved, update] = useState<SavedSession | null>(storedSession);
   const current = useRef(saved);
+  const memoryOnly = useRef(false);
+  const failedWriteBaseline = useRef<string | undefined>(undefined);
   const sessionVersion = useRef(0);
+  const identityVersion = useRef(0);
+  const knownTokens = useRef(
+    new Map<string, number>(saved ? [[saved.session.accessToken, 0]] : []),
+  );
   const getSessionVersion = useCallback(() => sessionVersion.current, []);
-  const updateSession = useCallback((next: SavedSession | null) => {
-    if (JSON.stringify(current.current) === JSON.stringify(next)) return;
-    current.current = next;
-    sessionVersion.current += 1;
-    update(next);
-  }, []);
-  const setSession = useCallback((next: Session | null) => {
-    const previous = (readSaved() ?? current.current)?.session;
-    // 사용자 이름 변경처럼 refresh token 없이 온 같은 사용자의 세션은 지금 refresh token을 이어 쓴다.
-    if (next && !next.refreshToken && previous?.refreshToken && previous.user.id === next.user.id)
-      next = {
-        ...next,
-        refreshToken: previous.refreshToken,
-        refreshTokenExpiresAt: previous.refreshTokenExpiresAt,
-        remember: previous.remember,
-      };
-    const value = next ? { session: next, expiresAt: expiryTime(next) } : null;
-    try {
-      if (value) localStorage.setItem(storageKey, JSON.stringify(value));
-      else localStorage.removeItem(storageKey);
-    } catch {
-      /* 저장소를 쓸 수 없어도(쿠키 차단·용량 초과) 이번 방문의 로그인·로그아웃은 반영한다 */
-    }
-    updateSession(value);
-  }, [updateSession]);
-  const refreshing = useRef<Promise<string | null> | null>(null);
+  const getSessionIdentityVersion = useCallback(
+    () => identityVersion.current,
+    [],
+  );
+  const updateSession = useCallback(
+    (next: SavedSession | null, preserveIdentity = false) => {
+      if (JSON.stringify(current.current) === JSON.stringify(next)) return;
+      if (!preserveIdentity) identityVersion.current += 1;
+      current.current = next;
+      if (next) {
+        knownTokens.current.delete(next.session.accessToken);
+        knownTokens.current.set(
+          next.session.accessToken,
+          identityVersion.current,
+        );
+        // Keep only recent rotations so old, unrelated tokens cannot gain a new lineage.
+        while (knownTokens.current.size > 32)
+          knownTokens.current.delete(knownTokens.current.keys().next().value!);
+      }
+      sessionVersion.current += 1;
+      update(next);
+    },
+    [],
+  );
+  const saveSession = useCallback(
+    (next: Session | null, preserveIdentity = false) => {
+      const previous = (readSaved() ?? current.current)?.session;
+      // Username updates may omit refresh credentials; only the same user can inherit them.
+      if (
+        next &&
+        !next.refreshToken &&
+        previous?.refreshToken &&
+        previous.user.id === next.user.id
+      )
+        next = {
+          ...next,
+          refreshToken: previous.refreshToken,
+          refreshTokenExpiresAt: previous.refreshTokenExpiresAt,
+          remember: previous.remember,
+        };
+      const value = next
+        ? { session: next, expiresAt: expiryTime(next) }
+        : null;
+      const baseline = readSavedSnapshot();
+      try {
+        if (value) localStorage.setItem(storageKey, JSON.stringify(value));
+        else localStorage.removeItem(storageKey);
+        memoryOnly.current = false;
+        failedWriteBaseline.current = undefined;
+      } catch {
+        memoryOnly.current = value !== null;
+        failedWriteBaseline.current =
+          value !== null && baseline.readable
+            ? JSON.stringify(baseline.saved)
+            : undefined;
+        /* In-memory login/logout still works when browser storage is blocked. */
+      }
+      updateSession(
+        value,
+        preserveIdentity && current.current?.session.user.id === next?.user.id,
+      );
+    },
+    [updateSession],
+  );
+  const setSession = useCallback(
+    (next: Session | null) => saveSession(next),
+    [saveSession],
+  );
+  const refreshing = useRef<{
+    identity: number;
+    promise: Promise<string | null>;
+  } | null>(null);
   const refresh = useCallback(
-    (staleToken: string) => {
-      const run = async (): Promise<string | null> => {
-        // 다른 탭이나 이 탭의 앞선 갱신이 이미 새 토큰을 받았다면 같은 refresh token을 다시 쓰지 않는다
-        // (서버는 쓴 토큰이 다시 오면 탈취로 보고 그 로그인을 모두 끊는다).
-        const latest = readSaved() ?? current.current;
-        // 그사이 다른 계정으로 바뀌었다면 그 계정의 토큰으로 이 요청을 다시 보내지 않는다.
-        const sameUser = (other: SavedSession) =>
-          other.session.user.id === current.current?.session.user.id;
+    (staleToken: string): Promise<string | null> => {
+      const identity = identityVersion.current;
+      if (!current.current || knownTokens.current.get(staleToken) !== identity)
+        return Promise.resolve(null);
+      if (refreshing.current?.identity === identity)
+        return refreshing.current.promise;
+      const stillCurrent = () => identityVersion.current === identity;
+      const belongs = (other: SavedSession | null): other is SavedSession =>
+        Boolean(
+          other &&
+          stillCurrent() &&
+          other.session.user.id === current.current?.session.user.id &&
+          (knownTokens.current.get(other.session.accessToken) === identity ||
+            sameLoginFamily(current.current, other)),
+        );
+      const unchangedFailedWrite = (snapshot: StorageSnapshot) =>
+        memoryOnly.current &&
+        snapshot.readable &&
+        failedWriteBaseline.current === JSON.stringify(snapshot.saved);
+      const reconcileStorage = (snapshot: StorageSnapshot) => {
+        // An unsuccessful write can leave a different, older login behind. It
+        // is not a new external login until the stored snapshot actually changes.
+        if (unchangedFailedWrite(snapshot)) return true;
+        if (!snapshot.readable) return true; // Preserve the supported storage-denied memory fallback.
+        const next =
+          snapshot.saved &&
+          (snapshot.saved.expiresAt > Date.now() ||
+            canRefresh(snapshot.saved.session))
+            ? snapshot.saved
+            : null;
         if (
-          latest &&
-          sameUser(latest) &&
+          (!snapshot.saved && !memoryOnly.current) ||
+          (snapshot.saved && !belongs(snapshot.saved))
+        ) {
+          memoryOnly.current = false;
+          // Adopt without writing. Otherwise api()'s stale 401 event could erase a
+          // different tab's new login while our in-memory view is still outdated.
+          updateSession(next, sameLoginFamily(current.current, next));
+          return false;
+        }
+        return true;
+      };
+      const run = async (): Promise<string | null> => {
+        if (!stillCurrent()) return null;
+        const before = readSavedSnapshot();
+        if (!reconcileStorage(before)) return null;
+        const latest = unchangedFailedWrite(before)
+          ? current.current
+          : (before.saved ?? current.current);
+        if (!belongs(latest)) return null;
+        if (
           latest.session.accessToken !== staleToken &&
           latest.expiresAt > Date.now()
         ) {
-          updateSession(latest);
+          updateSession(latest, true);
           return latest.session.accessToken;
         }
-        if (!latest || !sameUser(latest) || !canRefresh(latest.session)) return null;
+        if (!canRefresh(latest.session)) return null;
         const used = latest.session.refreshToken;
         try {
           const next = await api<Session>("/auth/refresh", {
             method: "POST",
             body: JSON.stringify({ refreshToken: used }),
           });
-          setSession(next);
+          // A pending refresh must never revive a logout or replace a newer login.
+          if (
+            !stillCurrent() ||
+            next.user.id !== current.current?.session.user.id
+          )
+            return null;
+          const after = readSavedSnapshot();
+          if (!reconcileStorage(after)) return null;
+          if (
+            belongs(after.saved) &&
+            after.saved.session.refreshToken !== used &&
+            after.saved.expiresAt > Date.now()
+          ) {
+            updateSession(after.saved, true);
+            return after.saved.session.accessToken;
+          }
+          saveSession(next, true);
           return next.accessToken;
         } catch (cause) {
-          // 잠금을 못 쓰거나 다른 탭의 저장이 늦게 보이는 브라우저(Firefox)에서 다른 탭이 먼저 회전했다면 그 탭이 저장한 세션을 쓴다.
-          // 아직 안 보이면 서버는 409를 주고, 세션을 지우지 않은 채 던져 storage 이벤트로 새 세션을 받는다.
-          const after = readSaved();
+          if (!stillCurrent()) return null;
+          const snapshot = readSavedSnapshot();
+          if (!reconcileStorage(snapshot)) return null;
+          const after = snapshot.saved;
           if (
-            after &&
-            sameUser(after) &&
+            belongs(after) &&
             after.session.refreshToken !== used &&
             after.expiresAt > Date.now()
           ) {
-            updateSession(after);
+            updateSession(after, true);
             return after.session.accessToken;
           }
-          if (cause instanceof ApiError && (cause.status === 400 || cause.status === 401)) {
-            if (current.current?.session.refreshToken === used) setSession(null);
+          if (
+            cause instanceof ApiError &&
+            (cause.status === 400 || cause.status === 401)
+          ) {
+            if (current.current?.session.refreshToken === used)
+              setSession(null);
             return null;
           }
           throw cause;
         }
       };
-      // 탭 안에서는 진행 중인 갱신을 함께 기다리고, 탭 사이에서는 Web Locks로 한 번에 하나만 갱신한다.
-      refreshing.current ??= ("locks" in navigator
-        ? navigator.locks.request(refreshLock, run)
-        : run()
+      const promise = (
+        "locks" in navigator ? navigator.locks.request(refreshLock, run) : run()
       ).finally(() => {
-        refreshing.current = null;
+        if (refreshing.current?.promise === promise) refreshing.current = null;
       });
-      return refreshing.current;
+      refreshing.current = { identity, promise };
+      return promise;
     },
-    [setSession, updateSession],
+    [saveSession, setSession, updateSession],
   );
   useEffect(() => {
     setTokenRefresher(refresh);
@@ -163,7 +321,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // 이미 다른 토큰으로 바뀐 뒤 늦게 도착한 401은 새 로그인을 지우지 않는다.
     const signOut = (event: Event) => {
-      if ((event as CustomEvent<string>).detail === current.current?.session.accessToken)
+      if (
+        (event as CustomEvent<string>).detail ===
+        current.current?.session.accessToken
+      )
         setSession(null);
     };
     window.addEventListener(unauthorizedEvent, signOut);
@@ -177,7 +338,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           (event.key !== storageKey && event.key !== null))
       )
         return;
-      updateSession(storedSession());
+      const snapshot = readSavedSnapshot();
+      if (!snapshot.readable) return;
+      const next =
+        snapshot.saved &&
+        (snapshot.saved.expiresAt > Date.now() ||
+          canRefresh(snapshot.saved.session))
+          ? snapshot.saved
+          : null;
+      memoryOnly.current = false;
+      updateSession(next, sameLoginFamily(current.current, next));
     };
     window.addEventListener("storage", synchronize);
     synchronize();
@@ -185,17 +355,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [updateSession]);
   useEffect(() => {
     if (!saved) return;
+    const identity = identityVersion.current;
+    const ownsTimer = () =>
+      identityVersion.current === identity &&
+      current.current?.session.accessToken === saved.session.accessToken;
+    const synchronizeIfCurrent = () => {
+      if (!ownsTimer()) return;
+      const snapshot = readSavedSnapshot();
+      if (
+        !snapshot.readable ||
+        (memoryOnly.current &&
+          failedWriteBaseline.current === JSON.stringify(snapshot.saved))
+      )
+        return;
+      const next =
+        snapshot.saved &&
+        (snapshot.saved.expiresAt > Date.now() ||
+          canRefresh(snapshot.saved.session))
+          ? snapshot.saved
+          : null;
+      memoryOnly.current = false;
+      updateSession(next, sameLoginFamily(current.current, next));
+    };
     const refreshable = Boolean(saved.session.refreshToken);
     const timer = setTimeout(
       () => {
-        // refresh token이 있으면 access token이 끝나기 1분 전에 갱신한다. 일시 오류면 다음 401에서 다시 시도한다.
+        if (!ownsTimer()) return;
         if (refreshable)
           void refresh(saved.session.accessToken).then(
-            (token) => token ?? updateSession(storedSession()),
+            (token) => {
+              if (!token) synchronizeIfCurrent();
+            },
             () => {},
           );
-        // storage 이벤트가 오기 전에 다른 탭이 새 세션으로 바꿨을 수 있어 저장소를 다시 읽는다.
-        else updateSession(storedSession());
+        else synchronizeIfCurrent();
       },
       Math.min(
         2_147_483_647,
@@ -206,7 +399,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [saved, refresh, updateSession]);
   return (
     <AuthContext.Provider
-      value={{ session: saved?.session ?? null, setSession, getSessionVersion }}
+      value={{
+        session: saved?.session ?? null,
+        setSession,
+        getSessionVersion,
+        getSessionIdentityVersion,
+      }}
     >
       {children}
     </AuthContext.Provider>

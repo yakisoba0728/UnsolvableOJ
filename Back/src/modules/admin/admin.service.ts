@@ -8,7 +8,14 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import type { Queue } from 'bullmq';
 import { randomBytes } from 'node:crypto';
-import { DataSource, ILike, Repository, type FindOptionsWhere } from 'typeorm';
+import {
+  DataSource,
+  ILike,
+  IsNull,
+  Repository,
+  type EntityManager,
+  type FindOptionsWhere,
+} from 'typeorm';
 import { recordAudit } from '../../common/database.js';
 import { findListPage } from '../../common/list-cursor.js';
 import {
@@ -40,8 +47,8 @@ export class AdminService {
 
   async users(query: ListAdminUsersQuery) {
     const where: FindOptionsWhere<User> = query.role
-      ? { role: query.role }
-      : {};
+      ? { role: query.role, deletedAt: IsNull() }
+      : { deletedAt: IsNull() };
     const text = query.q?.trim();
     // LIKE의 기본 이스케이프 문자(\)로 %·_를 글자 그대로 찾는다.
     const pattern = text && `%${text.replace(/[\\%_]/g, '\\$&')}%`;
@@ -81,17 +88,33 @@ export class AdminService {
       throw new ConflictException('자신의 계정을 정지할 수 없습니다.');
     return this.db.transaction(async (manager) => {
       // 대상과 활성 관리자를 한 문장에서 같은 순서로 잠가, 관리자끼리 동시에 서로 정지해도 교착되거나 둘 다 정지되지 않는다.
-      const rows: { id: string; role: UserRole; suspendedAt: Date | null }[] =
-        await manager.query(
-          `SELECT id, role, suspended_at AS "suspendedAt" FROM users
-           WHERE id = $1 OR (role = 'ADMIN' AND suspended_at IS NULL)
+      const rows: {
+        id: string;
+        role: UserRole;
+        suspendedAt: Date | null;
+        deletedAt: Date | null;
+        tokenVersion: number;
+      }[] = await manager.query(
+        `SELECT id, role, suspended_at AS "suspendedAt", deleted_at AS "deletedAt", token_version AS "tokenVersion" FROM users
+           WHERE id = $1 OR (role = 'ADMIN' AND suspended_at IS NULL AND deleted_at IS NULL)
            ORDER BY id FOR UPDATE`,
-          [id],
-        );
+        [id],
+      );
       const target = rows.find((row) => row.id === id.toLowerCase());
-      if (!target) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+      if (!target || target.deletedAt)
+        throw new NotFoundException('사용자를 찾을 수 없습니다.');
       // 수행자가 잠근 시점에도 활성 관리자여야 한다. 자신은 정지할 수 없으니 최소 한 명(수행자)의 관리자가 남는다.
-      if (!rows.some((row) => row.id === actor.id.toLowerCase()))
+      if (
+        !rows.some(
+          (row) =>
+            row.id === actor.id.toLowerCase() &&
+            row.role === UserRole.ADMIN &&
+            !row.suspendedAt &&
+            !row.deletedAt &&
+            (actor.tokenVersion === undefined ||
+              row.tokenVersion === actor.tokenVersion),
+        )
+      )
         throw new ForbiddenException(
           '관리자 권한이 바뀌었거나 정지되었습니다. 다시 로그인해 주세요.',
         );
@@ -122,11 +145,8 @@ export class AdminService {
     if (id.toLowerCase() === actor.id.toLowerCase() && role !== UserRole.ADMIN)
       throw new ConflictException('자신의 관리자 권한을 해제할 수 없습니다.');
     return this.db.transaction(async (manager) => {
-      const rows: { role: UserRole }[] = await manager.query(
-        'SELECT role FROM users WHERE id = $1 FOR UPDATE',
-        [id],
-      );
-      if (!rows[0]) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+      const target = await this.lockAdminTarget(manager, id, actor);
+      const rows = [target];
       if (rows[0].role !== role) {
         await manager.query(
           'UPDATE users SET role = $1, token_version = token_version + 1, updated_at = now() WHERE id = $2',
@@ -151,11 +171,13 @@ export class AdminService {
     const temporaryPassword = randomBytes(18).toString('base64url');
     const passwordHash = await this.passwordHasher.hash(temporaryPassword);
     return this.db.transaction(async (manager) => {
+      await this.lockAdminTarget(manager, id, actor);
       const [rows]: [{ id: string }[], number] = await manager.query(
         'UPDATE users SET password_hash = $1, token_version = token_version + 1, must_change_password = true, updated_at = now() WHERE id = $2 RETURNING id',
         [passwordHash, id],
       );
-      if (!rows.length) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+      if (!rows.length)
+        throw new NotFoundException('사용자를 찾을 수 없습니다.');
       await revokeRefreshTokens(manager, id);
       await recordAudit(
         manager,
@@ -167,6 +189,37 @@ export class AdminService {
       );
       return { temporaryPassword };
     });
+  }
+
+  private async lockAdminTarget(
+    manager: EntityManager,
+    id: string,
+    actor: AuthenticatedUser,
+  ) {
+    const rows: {
+      id: string;
+      role: UserRole;
+      deletedAt: Date | null;
+      suspendedAt: Date | null;
+      tokenVersion: number;
+    }[] = await manager.query(
+      'SELECT id,role,deleted_at AS "deletedAt",suspended_at AS "suspendedAt",token_version AS "tokenVersion" FROM users WHERE id=ANY($1::uuid[]) ORDER BY id FOR UPDATE',
+      [[id, actor.id]],
+    );
+    const current = rows.find((row) => row.id === actor.id.toLowerCase());
+    if (
+      !current ||
+      current.role !== UserRole.ADMIN ||
+      current.deletedAt ||
+      current.suspendedAt ||
+      (actor.tokenVersion !== undefined &&
+        current.tokenVersion !== actor.tokenVersion)
+    )
+      throw new ForbiddenException('관리자 권한을 다시 확인해 주세요.');
+    const target = rows.find((row) => row.id === id.toLowerCase());
+    if (!target || target.deletedAt)
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    return target;
   }
 
   async audit(query: ListAuditQuery) {

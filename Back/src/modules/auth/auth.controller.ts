@@ -16,7 +16,11 @@ import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { AuthService } from './auth.service.js';
 import type { AuthenticatedUser } from './auth.types.js';
-import { ChangePasswordDto, ChangeUsernameDto } from './dto/account.dto.js';
+import {
+  ChangePasswordDto,
+  ChangeUsernameDto,
+  WithdrawAccountDto,
+} from './dto/account.dto.js';
 import { LoginDto, RefreshTokenDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { AllowPendingPasswordChange, JwtAuthGuard } from './jwt-auth.guard.js';
@@ -63,7 +67,7 @@ export class AuthController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: ChangePasswordDto,
   ) {
-    return this.authService.changePassword(user.id, dto);
+    return this.authService.changePassword(user.id, dto, user.tokenVersion);
   }
 
   @Patch('username')
@@ -74,7 +78,24 @@ export class AuthController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: ChangeUsernameDto,
   ) {
-    return this.authService.changeUsername(user.id, dto, user.sessionId);
+    return this.authService.changeUsername(
+      user.id,
+      dto,
+      user.sessionId,
+      user.tokenVersion,
+    );
+  }
+
+  @Delete('account')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  withdraw(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: WithdrawAccountDto,
+  ) {
+    return this.authService.withdraw(user, dto.currentPassword);
   }
 
   /** 내 로그인 기기 목록. 지금 요청한 기기에 current: true. */

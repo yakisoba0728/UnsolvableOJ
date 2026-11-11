@@ -1,3 +1,5 @@
+import { CommunityEmail1795600001000 } from './migrations/1795600001000-community-email.js';
+import { AccountWithdrawal1795600000000 } from './migrations/1795600000000-account-withdrawal.js';
 import 'dotenv/config';
 import { EnterpriseVibe1795500000000 } from './migrations/1795500000000-enterprise-vibe.js';
 import { VibeCoding1795400000000 } from './migrations/1795400000000-vibe-coding.js';
@@ -65,6 +67,8 @@ export default new DataSource({
     TestResults1795300000000,
     VibeCoding1795400000000,
     EnterpriseVibe1795500000000,
+    AccountWithdrawal1795600000000,
+    CommunityEmail1795600001000,
   ],
   synchronize: false,
 });

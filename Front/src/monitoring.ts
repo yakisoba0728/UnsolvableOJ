@@ -1,3 +1,4 @@
+import { isEmailActionPath, redactTelemetry } from "./monitoringPrivacy";
 import * as Sentry from "@sentry/react";
 
 /**
@@ -7,11 +8,21 @@ import * as Sentry from "@sentry/react";
 const dsn = import.meta.env.VITE_SENTRY_DSN as string | undefined;
 
 export function initMonitoring() {
-  if (!dsn) return;
+  if (!dsn || isEmailActionPath(window.location.pathname)) return;
   Sentry.init({
     dsn,
     environment: import.meta.env.MODE,
     tracesSampleRate: 0,
+    // A mail token must not leave the browser through errors, fetch breadcrumbs,
+    // or a navigation breadcrumb retained after returning to another page.
+    beforeBreadcrumb: (breadcrumb) =>
+      isEmailActionPath(window.location.pathname)
+        ? null
+        : redactTelemetry(breadcrumb),
+    beforeSend: (event) =>
+      isEmailActionPath(window.location.pathname)
+        ? null
+        : redactTelemetry(event),
     // ResizeObserver 경고와 브라우저 확장 프로그램 오류처럼 우리 코드와 무관한 잡음 제외
     ignoreErrors: [
       "ResizeObserver loop limit exceeded",
@@ -22,7 +33,7 @@ export function initMonitoring() {
 }
 
 export function reportError(error: unknown, componentStack?: string | null) {
-  if (!dsn) return;
+  if (!dsn || isEmailActionPath(window.location.pathname)) return;
   Sentry.captureException(error, {
     contexts: componentStack ? { react: { componentStack } } : undefined,
   });

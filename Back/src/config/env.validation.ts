@@ -1,3 +1,4 @@
+// oxlint-disable unicorn/no-thenable -- Joi conditional schemas intentionally use the then property.
 import Joi from 'joi';
 
 // .env.example의 자리표시자는 운영에서 거절합니다. local-dev-only 값은 로컬 Compose·CI용이라 허용합니다.
@@ -45,6 +46,42 @@ export const envValidationSchema = Joi.object({
     .messages({
       'string.pattern.base':
         '{#label}은 15m처럼 양의 정수와 s·m·h·d 단위여야 합니다',
+    }),
+  EMAIL_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),
+  EMAIL_WORKER_ENABLED: Joi.boolean()
+    .truthy('true')
+    .falsy('false')
+    .default(true),
+  EMAIL_API_KEY: Joi.string().when('EMAIL_ENABLED', {
+    is: true,
+    then: Joi.required(),
+    otherwise: Joi.optional().allow(''),
+  }),
+  EMAIL_FROM: Joi.string()
+    .email()
+    .when('EMAIL_ENABLED', {
+      is: true,
+      then: Joi.required(),
+      otherwise: Joi.optional().allow(''),
+    }),
+  EMAIL_APP_ORIGIN: Joi.string()
+    .uri({ scheme: ['https'] })
+    .pattern(/^https:\/\/[^/?#@]+$/)
+    .when('EMAIL_ENABLED', {
+      is: true,
+      then: Joi.required(),
+      otherwise: Joi.optional().allow(''),
+    }),
+  EMAIL_TOKEN_SECRET: Joi.string()
+    .min(32)
+    .when('NODE_ENV', {
+      is: 'production',
+      then: Joi.string().pattern(/^replace-this/, { invert: true }),
+    })
+    .when('EMAIL_ENABLED', {
+      is: true,
+      then: Joi.required(),
+      otherwise: Joi.optional().allow(''),
     }),
   JUDGE_SERVICE_TOKEN: secret,
 });

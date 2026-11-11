@@ -12,7 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, type EntityManager } from 'typeorm';
 import { isUniqueViolation } from '../../common/database.js';
 import { User } from '../users/user.entity.js';
-import type { AccessTokenPayload } from './auth.types.js';
+import type { AccessTokenPayload, AuthenticatedUser } from './auth.types.js';
 import type {
   ChangePasswordDto,
   ChangeUsernameDto,
@@ -69,7 +69,8 @@ export class AuthService {
     // 이름 고유성은 lower(username) 인덱스로 대소문자 없이 판단하므로 예약 이름도 같은 기준으로 막습니다.
     if (
       email === 'boj-import@unsolvable.local' ||
-      username.toLowerCase() === 'boj_import'
+      username.toLowerCase() === 'boj_import' ||
+      email.endsWith('@deleted.invalid')
     ) {
       throw new ConflictException(
         '이미 사용 중인 이메일 또는 사용자 이름입니다.',
@@ -92,19 +93,24 @@ export class AuthService {
       throw error;
     }
 
-    return this.issueSession(user, await this.createRefreshToken(this.users.manager, user, false));
+    return this.issueSession(
+      user,
+      await this.createRefreshToken(this.users.manager, user, false),
+    );
   }
 
   async login(dto: LoginDto) {
     const user = await this.users.findOneBy({
       email: dto.email.trim().toLowerCase(),
     });
-    this.dummyHash ??= this.passwordHasher.hash(randomBytes(16).toString('hex'));
+    this.dummyHash ??= this.passwordHasher.hash(
+      randomBytes(16).toString('hex'),
+    );
     const valid = await this.passwordHasher.verify(
       dto.password,
       user?.passwordHash ?? (await this.dummyHash),
     );
-    if (!user || !valid) {
+    if (!user || user.deletedAt || !valid) {
       throw new UnauthorizedException(
         '이메일 또는 비밀번호가 올바르지 않습니다.',
       );
@@ -112,15 +118,40 @@ export class AuthService {
     // 비밀번호를 확인한 뒤에만 알려, 정지 여부로 계정 존재를 떠볼 수 없게 한다.
     if (user.suspendedAt) throw new ForbiddenException(suspendedMessage);
 
-    return this.issueSession(
-      user,
-      await this.createRefreshToken(this.users.manager, user, dto.remember ?? false),
-    );
+    return this.users.manager.transaction(async (manager) => {
+      const current = await this.lockActiveUser(
+        manager,
+        user.id,
+        user.tokenVersion,
+      );
+      if (current.passwordHash !== user.passwordHash)
+        throw new UnauthorizedException('다시 로그인해 주세요.');
+      return this.issueSession(
+        current,
+        await this.createRefreshToken(manager, current, dto.remember ?? false),
+      );
+    });
   }
 
   /** refresh token을 회전한다: 쓴 토큰은 폐기하고 같은 계열의 새 토큰을 준다. */
   async refresh(token: string) {
     const issued = await this.users.manager.transaction(async (manager) => {
+      // Determine the owner without a row lock, then lock user before any refresh row.
+      // Withdrawal/password changes use the same order, avoiding user/token deadlocks.
+      const [owner]: { user_id: string }[] = await manager.query(
+        'SELECT user_id FROM refresh_tokens WHERE token_hash=$1',
+        [hashRefreshToken(token)],
+      );
+      if (!owner) return null;
+      const user = await manager.findOne(User, {
+        where: { id: owner.user_id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!user) return null;
+      if (user.deletedAt || user.suspendedAt) {
+        await revokeRefreshTokens(manager, user.id);
+        return null;
+      }
       const [row]: {
         id: string;
         userId: string;
@@ -138,6 +169,13 @@ export class AuthService {
         [hashRefreshToken(token)],
       );
       if (!row || row.expired) return null;
+      if (user.tokenVersion !== row.tokenVersion) {
+        await manager.query(
+          'UPDATE refresh_tokens SET revoked_at=now() WHERE family_id=$1 AND revoked_at IS NULL',
+          [row.familyId],
+        );
+        return null;
+      }
       // 여러 탭이 거의 동시에 갱신하면 앞 탭이 저장한 새 토큰이 늦게 보여(Firefox의 localStorage) 방금 회전한 토큰이 다시 온다.
       // 짧은 유예 안이고 계열에 다음 토큰이 살아 있으면 계열을 끊지 않고 새 토큰도 주지 않는다(409).
       // 따로 묻는 이유: 위 SELECT가 행 잠금을 기다렸다면 그 스냅샷에는 앞 요청이 만든 다음 토큰이 보이지 않는다.
@@ -148,12 +186,11 @@ export class AuthService {
         );
         if (live) return 'rotated' as const;
       }
-      const user = await manager.findOneBy(User, { id: row.userId });
       // 이미 쓴(폐기된) 토큰이 다시 오면 탈취로 보고 그 계열을 모두 끊는다.
       // 역할 변경·정지·비밀번호 변경(token_version 증가)과 정지 중인 계정도 계열을 끝낸다.
       if (
         row.revoked ||
-        !user ||
+        user.deletedAt ||
         user.suspendedAt ||
         user.tokenVersion !== row.tokenVersion
       ) {
@@ -184,57 +221,167 @@ export class AuthService {
 
   /** 이 토큰이 속한 로그인(계열)을 끝낸다. 모르는 토큰이어도 같은 응답이다. */
   async logout(token: string) {
-    await this.users.query(
-      `UPDATE refresh_tokens SET revoked_at = now()
-       WHERE family_id = (SELECT family_id FROM refresh_tokens WHERE token_hash = $1) AND revoked_at IS NULL`,
-      [hashRefreshToken(token)],
-    );
+    const [owner]: { user_id: string; family_id: string }[] =
+      await this.users.query(
+        'SELECT user_id,family_id FROM refresh_tokens WHERE token_hash=$1',
+        [hashRefreshToken(token)],
+      );
+    if (!owner) return;
+    await this.withSessionOwnerLock(owner.user_id, async (manager) => {
+      await manager.query(
+        'UPDATE refresh_tokens SET revoked_at=now() WHERE family_id=$1 AND user_id=$2 AND revoked_at IS NULL',
+        [owner.family_id, owner.user_id],
+      );
+    });
   }
 
-  async changePassword(userId: string, dto: ChangePasswordDto) {
-    const user = await this.users.findOneByOrFail({ id: userId });
-    // 401이면 웹이 로그아웃시키므로, 틀린 현재 비밀번호는 입력 오류(400)로 돌려준다.
+  /** Refresh rotation and revocation share a user-first lock order.
+   * Taking the lock before UPDATE obtains a fresh statement snapshot, so a
+   * successor inserted by an earlier rotation cannot escape revocation.
+   */
+  private async withSessionOwnerLock(
+    userId: string,
+    run: (manager: EntityManager) => Promise<void>,
+  ) {
+    await this.users.manager.transaction(async (manager) => {
+      await manager.query('SELECT id FROM users WHERE id=$1 FOR UPDATE', [
+        userId,
+      ]);
+      await run(manager);
+    });
+  }
+
+  private async lockActiveUser(
+    manager: EntityManager,
+    id: string,
+    expectedVersion?: number,
+  ) {
+    const user = await manager.findOne(User, {
+      where: { id },
+      lock: { mode: 'pessimistic_write' },
+    });
     if (
-      !(await this.passwordHasher.verify(dto.currentPassword, user.passwordHash))
-    ) {
-      throw new BadRequestException('현재 비밀번호가 올바르지 않습니다.');
-    }
-    // 다른 기기의 JWT·refresh token을 모두 무효화하고, 요청한 쪽에는 새 토큰을 준다.
-    await this.users.query(
-      'UPDATE users SET password_hash = $1, token_version = token_version + 1, must_change_password = false, updated_at = now() WHERE id = $2',
-      [await this.passwordHasher.hash(dto.newPassword), userId],
-    );
-    await revokeRefreshTokens(this.users.manager, userId);
-    const updated = await this.users.findOneByOrFail({ id: userId });
-    return this.issueSession(
-      updated,
-      await this.createRefreshToken(this.users.manager, updated, dto.remember ?? false),
-    );
+      !user ||
+      user.deletedAt ||
+      user.suspendedAt ||
+      (expectedVersion !== undefined && user.tokenVersion !== expectedVersion)
+    )
+      throw new UnauthorizedException('다시 로그인해야 합니다.');
+    return user;
+  }
+
+  async changePassword(
+    userId: string,
+    dto: ChangePasswordDto,
+    expectedVersion?: number,
+  ) {
+    const hash = await this.passwordHasher.hash(dto.newPassword);
+    return this.users.manager.transaction(async (manager) => {
+      const user = await this.lockActiveUser(manager, userId, expectedVersion);
+      if (
+        !(await this.passwordHasher.verify(
+          dto.currentPassword,
+          user.passwordHash,
+        ))
+      )
+        throw new BadRequestException('현재 비밀번호가 올바르지 않습니다.');
+      await manager.query(
+        'UPDATE users SET password_hash=$1, token_version=token_version+1, must_change_password=false, updated_at=clock_timestamp() WHERE id=$2',
+        [hash, userId],
+      );
+      await revokeRefreshTokens(manager, userId);
+      const updated = await manager.findOneByOrFail(User, { id: userId });
+      return this.issueSession(
+        updated,
+        await this.createRefreshToken(manager, updated, dto.remember ?? false),
+      );
+    });
   }
 
   async changeUsername(
     userId: string,
     dto: ChangeUsernameDto,
     sessionId?: string,
+    expectedVersion?: number,
   ) {
     const username = dto.username.trim();
-    if (username.toLowerCase() === 'boj_import') {
+    if (username.toLowerCase() === 'boj_import')
       throw new ConflictException('이미 사용 중인 사용자 이름입니다.');
-    }
     try {
-      await this.users.update({ id: userId }, { username });
+      return await this.users.manager.transaction(async (manager) => {
+        const user = await this.lockActiveUser(
+          manager,
+          userId,
+          expectedVersion,
+        );
+        await manager.update(User, { id: userId }, { username });
+        return this.issueSession(
+          Object.assign(user, { username }),
+          undefined,
+          sessionId,
+        );
+      });
     } catch (error: unknown) {
-      if (isUniqueViolation(error)) {
+      if (isUniqueViolation(error))
         throw new ConflictException('이미 사용 중인 사용자 이름입니다.');
-      }
       throw error;
     }
-    // JWT의 username을 새 이름으로 맞춘 토큰을 준다(기존 토큰과 refresh token은 그대로 유효해 새 refresh token은 주지 않는다).
-    return this.issueSession(
-      await this.users.findOneByOrFail({ id: userId }),
-      undefined,
-      sessionId,
+  }
+
+  async withdraw(actor: AuthenticatedUser, password: string) {
+    const discardedHash = await this.passwordHasher.hash(
+      randomBytes(32).toString('base64url'),
     );
+    await this.users.manager.transaction(async (manager) => {
+      const user = await this.lockActiveUser(
+        manager,
+        actor.id,
+        actor.tokenVersion,
+      );
+      if (user.role === 'ADMIN')
+        throw new ConflictException(
+          '관리자는 다른 관리자에게 권한 해제를 요청한 뒤 탈퇴해 주세요.',
+        );
+      if (user.mustChangePassword)
+        throw new ForbiddenException(
+          '임시 비밀번호를 먼저 변경한 뒤 탈퇴해 주세요.',
+        );
+      if (!(await this.passwordHasher.verify(password, user.passwordHash)))
+        throw new BadRequestException('현재 비밀번호가 올바르지 않습니다.');
+      // Preserve user UUID and authored content, but remove recoverable login identity.
+      await manager.query(
+        `UPDATE users SET deleted_at=clock_timestamp(),
+        email=$3, username=$4,
+        password_hash=$2, role='USER', suspended_at=NULL, must_change_password=false,
+        token_version=token_version+1, email_verified_at=NULL, updated_at=clock_timestamp() WHERE id=$1`,
+        [
+          user.id,
+          discardedHash,
+          `${user.id}.${randomUUID()}@deleted.invalid`,
+          '탈퇴한사용자_' +
+            Buffer.from(user.id.replaceAll('-', ''), 'hex').toString(
+              'base64url',
+            ),
+        ],
+      );
+      await revokeRefreshTokens(manager, user.id);
+      // An email must not transfer existing invitations to a new account registering it.
+      await manager.query(
+        `UPDATE enterprise_tests SET invite_emails=array_remove(invite_emails,$1),
+        invite_user_ids=array_remove(invite_user_ids,$2::uuid) WHERE $1=ANY(invite_emails) OR $2::uuid=ANY(invite_user_ids)`,
+        [user.email, user.id],
+      );
+      await manager.query('DELETE FROM community_saved WHERE user_id=$1', [
+        user.id,
+      ]);
+      await manager.query(
+        'DELETE FROM community_follows WHERE user_id=$1 OR author_id=$1',
+        [user.id],
+      );
+      await manager.query('DELETE FROM notifications WHERE user_id=$1', [
+        user.id,
+      ]);
+    });
   }
 
   /** 살아 있는 로그인(계열)마다 지금 refresh token 한 행만 있다. 토큰 값·해시는 내보내지 않는다. */
@@ -252,18 +399,22 @@ export class AuthService {
 
   /** 내 로그인 하나를 끝낸다. 남의 계열 id여도 같은 응답이다(user_id 조건으로 막는다). */
   async revokeSession(userId: string, id: string) {
-    await this.users.query(
-      'UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = $1 AND family_id = $2 AND revoked_at IS NULL',
-      [userId, id],
-    );
+    await this.withSessionOwnerLock(userId, async (manager) => {
+      await manager.query(
+        'UPDATE refresh_tokens SET revoked_at=now() WHERE user_id=$1 AND family_id=$2 AND revoked_at IS NULL',
+        [userId, id],
+      );
+    });
   }
 
   /** 지금 기기를 뺀 내 로그인을 모두 끝낸다. */
   async revokeOtherSessions(userId: string, currentId?: string) {
-    await this.users.query(
-      'UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = $1 AND family_id IS DISTINCT FROM $2::uuid AND revoked_at IS NULL',
-      [userId, currentId ?? null],
-    );
+    await this.withSessionOwnerLock(userId, async (manager) => {
+      await manager.query(
+        'UPDATE refresh_tokens SET revoked_at=now() WHERE user_id=$1 AND family_id IS DISTINCT FROM $2::uuid AND revoked_at IS NULL',
+        [userId, currentId ?? null],
+      );
+    });
   }
 
   private async createRefreshToken(
@@ -283,7 +434,15 @@ export class AuthService {
     await manager.query(
       `INSERT INTO refresh_tokens (user_id, family_id, family_created_at, token_hash, token_version, remember, expires_at)
        VALUES ($1, $2, COALESCE($3::timestamptz, now()), $4, $5, $6, $7)`,
-      [user.id, familyId, family?.createdAt ?? null, hashRefreshToken(refreshToken), user.tokenVersion, remember, expiresAt],
+      [
+        user.id,
+        familyId,
+        family?.createdAt ?? null,
+        hashRefreshToken(refreshToken),
+        user.tokenVersion,
+        remember,
+        expiresAt,
+      ],
     );
     return {
       familyId,

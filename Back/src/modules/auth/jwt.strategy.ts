@@ -23,7 +23,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: AccessTokenPayload): Promise<AuthenticatedUser> {
     const current = await this.users.findOneBy({ id: payload.sub });
-    if (!current || current.tokenVersion !== payload.tokenVersion) {
+    if (
+      !current ||
+      current.deletedAt ||
+      current.tokenVersion !== payload.tokenVersion
+    ) {
       throw new UnauthorizedException('다시 로그인해야 합니다.');
     }
     // 정지할 때 token_version도 올리지만, 정지 중에는 어떤 토큰도 받지 않는다.
@@ -40,6 +44,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
     return {
       id: current.id,
+      tokenVersion: current.tokenVersion,
       role: current.role,
       mustChangePassword: current.mustChangePassword,
       sessionId: payload.sid,
