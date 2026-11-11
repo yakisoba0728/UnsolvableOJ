@@ -8,6 +8,7 @@ export interface EnterpriseTest {
   durationMin: number;
   /** 출제 순서대로의 문제 id */
   problemIds: string[];
+  vibeChallengeIds?: string[];
   /** 응시 링크 코드: /enterprise/join/:code */
   inviteCode: string;
   /** true면 invitees에 적은 사람만 응시할 수 있다. */
@@ -56,18 +57,39 @@ export interface AttemptProblem {
 export interface AttemptView extends Attempt {
   test: PublicTest;
   problems: AttemptProblem[];
+  vibeTasks?: EnterpriseVibeTask[];
   /** 담당자가 점수 공개를 켰고 응시가 끝났을 때만 온다. */
-  result: { solved: number; total: number; score: number } | null;
+  result: { solved: number; total: number; score: number | null } | null;
+}
+
+export interface EnterpriseVibeTask {
+  challengeId: string;
+  title: string;
+  id: string | null;
+  submittedAt: string | null;
+  score: number | null;
+  status: string;
 }
 
 export interface TestResults {
   test: EnterpriseTest;
-  summary: { candidates: number; averageScore: number | null; perfect: number };
+  summary: {
+    candidates: number;
+    averageScore: number | null;
+    perfect: number;
+    pending?: number;
+  };
   candidates: (Attempt & {
     user: { id: string; username: string };
-    problems: { problemId: string; solved: boolean; submissions: number; submissionId: string }[];
+    problems: {
+      problemId: string;
+      solved: boolean;
+      submissions: number;
+      submissionId: string;
+    }[];
     solved: number;
-    score: number;
+    score: number | null;
+    vibeTasks?: EnterpriseVibeTask[];
   })[];
 }
 
@@ -98,7 +120,8 @@ export const LIMITS = {
 export function parseInvitees(text: string) {
   const unique = new Map<string, string>();
   for (const value of text.split(/[\s,]+/))
-    if (value && !unique.has(value.toLowerCase())) unique.set(value.toLowerCase(), value);
+    if (value && !unique.has(value.toLowerCase()))
+      unique.set(value.toLowerCase(), value);
   return [...unique.values()];
 }
 
@@ -131,7 +154,8 @@ const sameDay = (a: Date, b: Date) =>
   a.getMonth() === b.getMonth() &&
   a.getDate() === b.getDate();
 const dateText = (date: Date) => `${date.getMonth() + 1}월${date.getDate()}일`;
-const timeText = (date: Date) => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+const timeText = (date: Date) =>
+  `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 
 /** 시작과 마감이 같은 날이면 하루짜리 테스트다. */
 export const isSingleDay = (test: Period) =>
@@ -176,7 +200,9 @@ export function formatStart(test: Period, now = Date.now()) {
 /** 마감 시점 글자: 하루짜리만 시간을 붙인다. */
 export function formatEnd(test: Period) {
   const end = new Date(test.endsAt);
-  return isSingleDay(test) ? `${dateText(end)} ${timeText(end)}` : dateText(end);
+  return isSingleDay(test)
+    ? `${dateText(end)} ${timeText(end)}`
+    : dateText(end);
 }
 
 /** `<input type="datetime-local">` 값 */
@@ -193,8 +219,10 @@ export function remainingText(ms: number) {
   return `${minutes}분`;
 }
 
-export const metaLine = (test: Pick<EnterpriseTest, "problemIds" | "durationMin">) =>
-  `${test.problemIds.length}문항 · ${test.durationMin}분`;
+export const metaLine = (
+  test: Pick<EnterpriseTest, "problemIds" | "durationMin" | "vibeChallengeIds">,
+) =>
+  `${test.problemIds.length + (test.vibeChallengeIds?.length ?? 0)}문항 · ${test.durationMin}분`;
 
 /** 폼에서 편집 중인 값. 날짜는 datetime-local 문자열, 시간은 입력 그대로의 문자열이다. */
 export interface TestDraft {
@@ -204,6 +232,7 @@ export interface TestDraft {
   endsAt: string;
   durationMin: string;
   problemIds: string[];
+  vibeChallengeIds?: string[];
   inviteOnly: boolean;
   /** 입력 그대로의 초대 목록 */
   invitees: string;
@@ -212,7 +241,13 @@ export interface TestDraft {
 
 export type TestErrors = Partial<
   Record<
-    "title" | "startsAt" | "endsAt" | "durationMin" | "problemIds" | "invitees" | "description",
+    | "title"
+    | "startsAt"
+    | "endsAt"
+    | "durationMin"
+    | "problemIds"
+    | "invitees"
+    | "description",
     string
   >
 >;
@@ -245,17 +280,25 @@ export function validateDraft(draft: TestDraft, now = Date.now()): TestErrors {
     duration > LIMITS.maxDuration
   )
     errors.durationMin = `제한 시간은 ${LIMITS.minDuration}~${LIMITS.maxDuration}분 사이의 정수로 입력해 주세요.`;
-  else if (start !== null && end !== null && end > start && duration * 60_000 > end - start)
+  else if (
+    start !== null &&
+    end !== null &&
+    end > start &&
+    duration * 60_000 > end - start
+  )
     errors.durationMin = "제한 시간은 응시 기간보다 길 수 없어요.";
 
-  if (draft.problemIds.length === 0)
+  const taskCount =
+    draft.problemIds.length + (draft.vibeChallengeIds?.length ?? 0);
+  if (taskCount === 0)
     errors.problemIds = "출제할 문제를 하나 이상 골라 주세요.";
-  else if (draft.problemIds.length > LIMITS.maxProblems)
+  else if (taskCount > LIMITS.maxProblems)
     errors.problemIds = `문제는 최대 ${LIMITS.maxProblems}개까지 고를 수 있어요.`;
 
   if (draft.inviteOnly) {
     const count = parseInvitees(draft.invitees).length;
-    if (count === 0) errors.invitees = "초대할 사람의 사용자 이름이나 이메일을 적어 주세요.";
+    if (count === 0)
+      errors.invitees = "초대할 사람의 사용자 이름이나 이메일을 적어 주세요.";
     else if (count > LIMITS.maxInvitees)
       errors.invitees = `초대는 최대 ${LIMITS.maxInvitees}명까지 할 수 있어요.`;
   }
@@ -274,6 +317,7 @@ export function draftToInput(draft: TestDraft) {
     endsAt: new Date(draft.endsAt).toISOString(),
     durationMin: Number(draft.durationMin),
     problemIds: draft.problemIds,
+    vibeChallengeIds: draft.vibeChallengeIds ?? [],
     inviteOnly: draft.inviteOnly,
     invitees: draft.inviteOnly ? parseInvitees(draft.invitees) : [],
     showScoreToCandidates: draft.showScoreToCandidates,
@@ -284,7 +328,11 @@ export type TestInput = ReturnType<typeof draftToInput>;
 
 /** 진행 중 → 예정(가까운 순) → 마감(최근 순) */
 export function sortTests(tests: EnterpriseTest[], now = Date.now()) {
-  const rank: Record<TestStatus, number> = { running: 0, scheduled: 1, closed: 2 };
+  const rank: Record<TestStatus, number> = {
+    running: 0,
+    scheduled: 1,
+    closed: 2,
+  };
   return [...tests].sort((a, b) => {
     const sa = testStatus(a, now);
     const sb = testStatus(b, now);

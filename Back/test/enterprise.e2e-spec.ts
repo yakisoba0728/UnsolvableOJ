@@ -142,7 +142,7 @@ describe('Enterprise tests: server storage, invite link, attempts, results (e2e)
     expect(sourceForOwner.body.sourceCode).toBe('print(3)');
 
     const results = await http().get(`${base}/enterprise/tests/${test.id}/results`).set(bearer(owner)).expect(200);
-    expect(results.body.summary).toEqual({ candidates: 1, averageScore: 50, perfect: 0 });
+    expect(results.body.summary).toEqual({ candidates: 1, averageScore: 50, perfect: 0, pending: 0 });
     expect(results.body.candidates[0]).toMatchObject({ solved: 1, score: 50, user: { id: candidate.user.id } });
     await http().get(`${base}/enterprise/tests/${test.id}/results`).set(bearer(other)).expect(404);
     const mine = await http().get(`${base}/submissions`).set(bearer(candidate.accessToken)).expect(200);

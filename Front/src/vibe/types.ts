@@ -62,6 +62,12 @@ export interface VibeSummary {
 export interface VibeAttempt {
   id: string;
   challenge: Challenge;
+  enterprise?: {
+    testId: string;
+    attemptId: string;
+    finished: boolean;
+    scoreVisible: boolean;
+  } | null;
   revision: number;
   startedAt: string;
   deadlineAt: string;
@@ -88,4 +94,16 @@ export interface VibeAttempt {
 export interface VibeCatalog {
   items: Challenge[];
   availability: { ai: boolean; runner: boolean };
+}
+
+export interface VibeReview extends VibeAttempt {
+  candidate: { id: string; username: string };
+  canGrade: boolean;
+  revisions: {
+    revision: number;
+    action: string;
+    paths: string[];
+    createdAt: string;
+    messageId: string | null;
+  }[];
 }

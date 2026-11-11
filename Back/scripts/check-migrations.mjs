@@ -396,8 +396,21 @@ try {
     configured.options.migrations.length,
   );
   assert.equal(await db.showMigrations(), false);
+  // Preserve the current files of pre-enterprise practices; refuse a rollback that would unlink company assessments.
+  await db.undoLastMigration();
+  const [vibeUser] = await db.query("INSERT INTO users(email,username,password_hash) VALUES('vibe-migration@example.com','vibe_migration','unused') RETURNING id");
+  const files = { 'src/search.ts': 'export const searchPosts = () => [];' };
+  const [practice] = await db.query("INSERT INTO vibe_attempts(user_id,challenge_id,revision,state,model) VALUES($1,'post-search-v1',2,$2,'test-model') RETURNING id", [vibeUser.id, JSON.stringify({ files })]);
+  assert.equal((await db.runMigrations()).length, 1);
+  const [baseline] = await db.query('SELECT revision,action,files FROM vibe_revisions WHERE attempt_id=$1', [practice.id]);
+  assert.deepEqual(baseline, { revision: 2, action: 'baseline', files });
+  await db.query("INSERT INTO enterprise_tests(owner_id,title,starts_at,ends_at,duration_min,problem_ids,vibe_challenge_ids,invite_code) VALUES($1,'Vibe migration',now(),now()+interval '1 hour',30,'{}',ARRAY['post-search-v1'],'vibe-migration')", [vibeUser.id]);
+  const migrationsBeforeVibeRollback = await db.query('SELECT * FROM migrations ORDER BY id');
+  await assert.rejects(db.undoLastMigration(), /Enterprise vibe records exist/);
+  assert.deepEqual(await db.query('SELECT * FROM migrations ORDER BY id'), migrationsBeforeVibeRollback);
+  assert.deepEqual((await db.query('SELECT files FROM vibe_revisions WHERE attempt_id=$1', [practice.id]))[0].files, files);
   console.log(
-    'Migrations: legacy upgrade, snapshots, solve/XP idempotency, acceptance and learning evidence backfill/refusal, username case refusal, partial rollback, foundations version/token refusal (signed revoked JWT remains rejected), and fresh install/rollback/reapply passed.',
+    'Migrations: legacy upgrade, snapshots, solve/XP idempotency, acceptance and learning evidence backfill/refusal, username case refusal, partial rollback, foundations version/token refusal (signed revoked JWT remains rejected), fresh install/rollback/reapply, vibe history backfill and enterprise rollback refusal passed.',
   );
 } finally {
   if (db?.isInitialized) await db.destroy();

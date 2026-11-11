@@ -52,7 +52,7 @@ export class VibeAi {
   private settings(model: string) {
     if (!this.available)
       throw new ServiceUnavailableException(
-        'AI 연결이 아직 설정되지 않았습니다.',
+        '코딩 파트너 연결이 아직 설정되지 않았습니다.',
       );
     return {
       model: createOpenAI({
@@ -146,7 +146,7 @@ export class VibeAi {
       };
     } catch {
       throw new ServiceUnavailableException(
-        'AI 응답을 받지 못했습니다. 코드는 저장되어 있으며 다시 질문할 수 있습니다.',
+        '답변을 받지 못했습니다. 코드는 저장되어 있으며 다시 질문할 수 있습니다.',
       );
     }
   }

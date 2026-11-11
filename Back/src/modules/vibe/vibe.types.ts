@@ -63,6 +63,10 @@ export interface VibeAttemptRow {
   started_at: Date;
   deadline_at: Date;
   submitted_at: Date | null;
+  enterprise_attempt_id: string | null;
+  enterprise_test_id?: string;
+  enterprise_closed?: boolean;
+  score_visible?: boolean;
   operation_id: string | null;
   busy_until: Date | null;
 }

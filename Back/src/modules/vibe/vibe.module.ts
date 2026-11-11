@@ -9,5 +9,6 @@ import { VibeRunner } from './vibe.runner.js';
   imports: [PassportModule.register({})],
   controllers: [VibeController],
   providers: [VibeService, VibeAi, VibeRunner],
+  exports: [VibeService],
 })
 export class VibeModule {}

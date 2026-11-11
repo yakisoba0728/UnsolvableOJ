@@ -17,6 +17,7 @@ import {
   validateFiles,
 } from './vibe.catalog.js';
 import { VibeAi } from './vibe.ai.js';
+import { canJoinEnterprise } from '../enterprise/enterprise-access.js';
 import { VibeRunner } from './vibe.runner.js';
 import type {
   ProjectFiles,
@@ -43,15 +44,26 @@ export class VibeService {
   }
   async list(userId: string) {
     return this.db.query(
-      `SELECT id, challenge_id AS "challengeId", started_at AS "startedAt", deadline_at AS "deadlineAt", submitted_at AS "submittedAt", CASE WHEN jsonb_typeof(state->'report')='object' THEN (state->'report')-'model' END AS report FROM vibe_attempts WHERE user_id=$1 ORDER BY started_at DESC LIMIT 20`,
+      `SELECT id, challenge_id AS "challengeId", started_at AS "startedAt", deadline_at AS "deadlineAt", submitted_at AS "submittedAt", CASE WHEN jsonb_typeof(state->'report')='object' THEN (state->'report')-'model' END AS report FROM vibe_attempts WHERE user_id=$1 AND enterprise_attempt_id IS NULL ORDER BY started_at DESC LIMIT 20`,
       [userId],
     );
   }
-  private view(row: VibeAttemptRow) {
-    const report = row.state.report;
+  private view(row: VibeAttemptRow, reviewer = false) {
+    const report =
+      !row.enterprise_attempt_id || row.score_visible || reviewer
+        ? row.state.report
+        : null;
     return {
       id: row.id,
       challenge,
+      enterprise: row.enterprise_attempt_id
+        ? {
+            testId: row.enterprise_test_id,
+            attemptId: row.enterprise_attempt_id,
+            finished: row.enterprise_closed,
+            scoreVisible: row.score_visible,
+          }
+        : null,
       revision: row.revision,
       startedAt: row.started_at,
       deadlineAt: row.deadline_at,
@@ -85,12 +97,133 @@ export class VibeService {
     manager: EntityManager = this.db.manager,
     lock = false,
   ) {
+    // Parent first: ending an exam and editing its workspace must use the same lock order.
+    if (lock)
+      await manager.query(
+        'SELECT a.id FROM enterprise_attempts a JOIN vibe_attempts v ON v.enterprise_attempt_id=a.id WHERE v.id=$1 AND v.user_id=$2 FOR UPDATE OF a',
+        [id, userId],
+      );
     const [row]: VibeAttemptRow[] = await manager.query(
-      `SELECT * FROM vibe_attempts WHERE id=$1 AND user_id=$2${lock ? ' FOR UPDATE' : ''}`,
+      `SELECT v.*, LEAST(v.deadline_at,a.deadline_at,t.ends_at) AS deadline_at, t.id AS enterprise_test_id,
+        coalesce(a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now(),false) AS enterprise_closed,
+        coalesce(t.show_score_to_candidates AND (a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now()),false) AS score_visible
+       FROM vibe_attempts v LEFT JOIN enterprise_attempts a ON a.id=v.enterprise_attempt_id LEFT JOIN enterprise_tests t ON t.id=a.test_id
+       WHERE v.id=$1 AND v.user_id=$2 AND (v.enterprise_attempt_id IS NULL OR ${canJoinEnterprise('$2')})${lock ? ' FOR UPDATE OF v' : ''}`,
       [id, userId],
     );
     if (!row) throw new NotFoundException('연습 기록을 찾을 수 없습니다.');
     return row;
+  }
+  private initialState(): VibeState {
+    return {
+      files: editableFiles(),
+      messages: [],
+      events: [],
+      runs: [],
+      undo: null,
+      report: null,
+      aiRequests: 0,
+      evaluations: 0,
+    };
+  }
+  private async snapshot(
+    manager: EntityManager,
+    row: VibeAttemptRow,
+    action: string,
+    paths: string[] = [],
+    messageId?: string,
+  ) {
+    await manager.query(
+      'INSERT INTO vibe_revisions(attempt_id,revision,action,files,paths,message_id) VALUES($1,$2,$3,$4,$5,$6)',
+      [
+        row.id,
+        row.revision,
+        action,
+        JSON.stringify(row.state.files),
+        paths,
+        messageId ?? null,
+      ],
+    );
+  }
+  async startEnterprise(examId: string, challengeId: string, userId: string) {
+    return this.db.transaction(async (manager) => {
+      const [exam]: {
+        deadline_at: Date;
+        closed: boolean;
+        vibe_challenge_ids: string[];
+      }[] = await manager.query(
+        `SELECT LEAST(a.deadline_at,t.ends_at) AS deadline_at, (a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now()) AS closed, t.vibe_challenge_ids
+         FROM enterprise_attempts a JOIN enterprise_tests t ON t.id=a.test_id WHERE a.id=$1 AND a.user_id=$2 AND ${canJoinEnterprise('$2')} FOR UPDATE OF a`,
+        [examId, userId],
+      );
+      if (
+        !exam ||
+        !exam.vibe_challenge_ids.includes(challengeId) ||
+        challengeId !== challenge.id
+      )
+        throw new NotFoundException('응시 과제를 찾을 수 없습니다.');
+      const [existing]: VibeAttemptRow[] = await manager.query(
+        'SELECT * FROM vibe_attempts WHERE enterprise_attempt_id=$1 AND challenge_id=$2',
+        [examId, challengeId],
+      );
+      if (existing)
+        return this.view(await this.owned(existing.id, userId, manager));
+      if (exam.closed)
+        throw new ConflictException(
+          '응시가 끝나 새 과제를 시작할 수 없습니다.',
+        );
+      const [row]: VibeAttemptRow[] = await manager.query(
+        'INSERT INTO vibe_attempts(user_id,challenge_id,state,model,enterprise_attempt_id,deadline_at) VALUES($1,$2,$3,$4,$5,$6) RETURNING *',
+        [
+          userId,
+          challengeId,
+          JSON.stringify(this.initialState()),
+          this.ai.model,
+          examId,
+          exam.deadline_at,
+        ],
+      );
+      await this.snapshot(manager, row, 'initial');
+      return this.view(await this.owned(row.id, userId, manager));
+    });
+  }
+  async review(id: string, userId: string) {
+    const row = await this.owned(id, userId);
+    const revisions = await this.db.query(
+      'SELECT revision,action,paths,message_id AS "messageId",created_at AS "createdAt" FROM vibe_revisions WHERE attempt_id=$1 ORDER BY revision',
+      [id],
+    );
+    return { ...this.view(row, true), revisions };
+  }
+  async revision(id: string, userId: string, revision: number) {
+    await this.owned(id, userId);
+    const rows: { revision: number; files: ProjectFiles }[] =
+      await this.db.query(
+        'SELECT revision,files FROM vibe_revisions WHERE attempt_id=$1 AND revision<=$2 ORDER BY revision DESC LIMIT 2',
+        [id, revision],
+      );
+    if (rows[0]?.revision !== revision)
+      throw new NotFoundException('수정 기록을 찾을 수 없습니다.');
+    return {
+      revision,
+      files: rows[0].files,
+      previousFiles: rows[1]?.files ?? rows[0].files,
+    };
+  }
+  async finalize(id: string, userId: string) {
+    const row = await this.owned(id, userId);
+    if (!row.submitted_at) return this.run(id, userId, row.revision, true);
+    if (row.state.report?.evaluationStatus !== 'complete')
+      return this.evaluate(id, userId, row.revision);
+    return this.get(id, userId);
+  }
+  async finalizeExam(examId: string, userId: string) {
+    const rows: { id: string }[] = await this.db.query(
+      'SELECT id FROM vibe_attempts WHERE enterprise_attempt_id=$1 AND user_id=$2',
+      [examId, userId],
+    );
+    // A busy or unavailable task stays pending; its saved snapshot remains available to the reviewer.
+    await Promise.allSettled(rows.map((row) => this.finalize(row.id, userId)));
   }
   async get(id: string, userId: string) {
     return this.view(await this.owned(id, userId));
@@ -105,12 +238,12 @@ export class VibeService {
         [userId],
       );
       const [active]: VibeAttemptRow[] = await manager.query(
-        'SELECT * FROM vibe_attempts WHERE user_id=$1 AND challenge_id=$2 AND submitted_at IS NULL AND deadline_at>now() ORDER BY started_at DESC LIMIT 1',
+        'SELECT * FROM vibe_attempts WHERE user_id=$1 AND challenge_id=$2 AND enterprise_attempt_id IS NULL AND submitted_at IS NULL AND deadline_at>now() ORDER BY started_at DESC LIMIT 1',
         [userId, challengeId],
       );
       if (active) return this.view(active);
       const [{ count }]: { count: number }[] = await manager.query(
-        "SELECT count(*)::int AS count FROM vibe_attempts WHERE user_id=$1 AND started_at>now()-interval '1 day'",
+        "SELECT count(*)::int AS count FROM vibe_attempts WHERE user_id=$1 AND enterprise_attempt_id IS NULL AND started_at>now()-interval '1 day'",
         [userId],
       );
       if (count >= VIBE_LIMITS.dailyAttempts)
@@ -118,20 +251,12 @@ export class VibeService {
           '새 연습은 24시간에 5회까지 시작할 수 있습니다.',
           HttpStatus.TOO_MANY_REQUESTS,
         );
-      const state: VibeState = {
-        files: editableFiles(),
-        messages: [],
-        events: [],
-        runs: [],
-        undo: null,
-        report: null,
-        aiRequests: 0,
-        evaluations: 0,
-      };
+      const state = this.initialState();
       const [row]: VibeAttemptRow[] = await manager.query(
         'INSERT INTO vibe_attempts(user_id,challenge_id,state,model) VALUES($1,$2,$3,$4) RETURNING *',
         [userId, challengeId, JSON.stringify(state), this.ai.model],
       );
+      await this.snapshot(manager, row, 'initial');
       return this.view(row);
     });
   }
@@ -148,7 +273,10 @@ export class VibeService {
       );
     if (!submitted && row.submitted_at)
       throw new ConflictException('제출을 마친 연습은 수정할 수 없습니다.');
-    if (!expired && row.deadline_at.getTime() <= Date.now())
+    if (
+      !expired &&
+      (row.enterprise_closed || row.deadline_at.getTime() <= Date.now())
+    )
       throw new ConflictException(
         '연습 시간이 끝났습니다. 마지막 저장본을 제출할 수 있습니다.',
       );
@@ -189,7 +317,7 @@ export class VibeService {
         row.busy_until,
       ],
     );
-    return saved;
+    return this.owned(saved.id, saved.user_id, manager);
   }
   async edit(
     id: string,
@@ -228,6 +356,7 @@ export class VibeService {
       row.state.files = next;
       row.revision++;
       this.event(row, action, { paths, ...(messageId ? { messageId } : {}) });
+      await this.snapshot(manager, row, action, paths, messageId);
       return this.view(await this.persist(manager, row));
     });
   }
@@ -283,7 +412,7 @@ export class VibeService {
       throw new ConflictException(
         '작업이 만료되었습니다. 최신 기록을 다시 열어 주세요.',
       );
-    return this.view(saved[0]);
+    return this.view(await this.owned(saved[0].id, saved[0].user_id));
   }
   private async release(row: VibeAttemptRow) {
     await this.db.query(
@@ -344,6 +473,7 @@ export class VibeService {
     );
     try {
       const checks = await this.runner.run(row.state.files, final);
+      if (row.enterprise_attempt_id && row.enterprise_closed) reflection = '';
       if (final) {
         const total = 11;
         const passed = checks.filter((c) => c.passed).length;

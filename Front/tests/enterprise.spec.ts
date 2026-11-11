@@ -49,6 +49,7 @@ async function signIn(page: Page) {
 }
 
 async function mockProblems(page: Page) {
+  await page.route("**/api/v1/vibe/challenges", (route) => route.fulfill({ json: { items: [], availability: { ai: false, runner: false } } }));
   await page.route("**/api/v1/problems/mine", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/problems?*", (route) =>
     route.fulfill({

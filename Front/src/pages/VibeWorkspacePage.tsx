@@ -73,7 +73,10 @@ export function VibeWorkspacePage() {
   const remoteBusy = attempt?.busyUntil
     ? Date.parse(attempt.busyUntil) > now
     : false;
-  const closed = Boolean(attempt?.submittedAt) || expired;
+  const closed =
+    Boolean(attempt?.submittedAt) ||
+    expired ||
+    Boolean(attempt?.enterprise?.finished);
   const dirty = Boolean(
     attempt &&
     !same(editedFiles(attempt, files), editedFiles(attempt, attempt.files)),
@@ -162,7 +165,11 @@ export function VibeWorkspacePage() {
     const snapshot = filesRef.current;
     if (same(editedFiles(row, snapshot), editedFiles(row, row.files)))
       return row;
-    if (row.submittedAt || Date.parse(row.deadlineAt) <= Date.now())
+    if (
+      row.submittedAt ||
+      row.enterprise?.finished ||
+      Date.parse(row.deadlineAt) <= Date.now()
+    )
       throw new Error(
         "시간이 끝나 저장하지 못한 변경이 있습니다. 코드를 복사해 보관한 뒤 마지막 서버 저장본을 제출해 주세요.",
       );
@@ -321,17 +328,26 @@ export function VibeWorkspacePage() {
     <div className="vibe-workspace page-width">
       <header className="vibe-workspace-header">
         <div>
-          <Link className="back-link" to="/vibe">
-            ← 바이브코딩
+          <Link
+            className="back-link"
+            to={
+              attempt?.enterprise
+                ? `/enterprise/attempts/${attempt.enterprise.attemptId}`
+                : "/vibe"
+            }
+          >
+            ← {attempt?.enterprise ? "기업 테스트 응시" : "바이브코딩"}
           </Link>
           <h1>{attempt.challenge.title}</h1>
           <p>
             <span>
               {attempt.submittedAt
                 ? "제출 완료"
-                : expired
-                  ? "시간 종료"
-                  : `남은 시간 ${Math.floor((Date.parse(attempt.deadlineAt) - now) / 60000)}분 ${Math.floor((Date.parse(attempt.deadlineAt) - now) / 1000) % 60}초`}
+                : attempt.enterprise?.finished
+                  ? "시험 종료"
+                  : expired
+                    ? "시간 종료"
+                    : `남은 시간 ${Math.floor((Date.parse(attempt.deadlineAt) - now) / 60000)}분 ${Math.floor((Date.parse(attempt.deadlineAt) - now) / 1000) % 60}초`}
             </span>
           </p>
         </div>
@@ -377,12 +393,25 @@ export function VibeWorkspacePage() {
               <ChevronRight size={16} aria-hidden="true" />
             </button>
           ) : (
-            <Link className="button button-outline" to="/vibe">
-              새 연습
+            <Link
+              className="button button-outline"
+              to={
+                attempt?.enterprise
+                  ? `/enterprise/attempts/${attempt.enterprise.attemptId}`
+                  : "/vibe"
+              }
+            >
+              {attempt.enterprise ? "기업 테스트로" : "새 연습"}
             </Link>
           )}
         </div>
       </header>
+      {attempt.enterprise ? (
+        <p className="notice-inline">
+          기업 테스트 과제입니다. 프롬프트·답변·저장한 코드와 실행 기록이
+          담당자에게 전달됩니다.
+        </p>
+      ) : null}
       {busy ? (
         <p className="notice-inline" role="status">
           {busy} 결과가 나올 때까지 잠시 기다려 주세요.
@@ -460,6 +489,12 @@ export function VibeWorkspacePage() {
               서버 저장본으로 돌아가기
             </button>
           ) : null}
+        </p>
+      ) : null}
+      {attempt.submittedAt && attempt.enterprise && !attempt.report ? (
+        <p className="notice-inline" role="status">
+          과제를 제출했습니다. 점수는 담당자의 공개 설정에 따라 응시 종료 후
+          표시됩니다.
         </p>
       ) : null}
       {attempt.report ? (
@@ -859,7 +894,11 @@ export function VibeWorkspacePage() {
             maxLength={3000}
             value={reflection}
             onChange={(event) => setReflection(event.target.value)}
-            disabled={Boolean(busy) || remoteBusy}
+            disabled={
+              Boolean(busy) ||
+              remoteBusy ||
+              Boolean(attempt.enterprise?.finished)
+            }
             placeholder="제안받은 내용 중 검토한 점과 직접 확인한 테스트를 적어 보세요."
           />
         </section>
