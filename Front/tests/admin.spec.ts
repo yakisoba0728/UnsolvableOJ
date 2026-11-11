@@ -168,7 +168,8 @@ test("audit log filters by action and actor and pages through results", async ({
 
   await page.locator(".admin-table tbody").getByRole("button", { name: "solver" }).click();
   await expect(page.getByRole("button", { name: "수행자 조건 지우기" })).toBeVisible();
-  expect(audits().at(-1)!.url.searchParams.get("actorId")).toBe("solver");
+  // 칩은 URL 상태로 먼저 그려지므로 요청이 기록될 때까지 기다린다.
+  await expect.poll(() => audits().at(-1)!.url.searchParams.get("actorId")).toBe("solver");
 
   await page.getByRole("button", { name: "2페이지" }).click();
   await expect(page).toHaveURL(/page=2/);

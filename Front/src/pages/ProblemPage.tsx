@@ -3,7 +3,7 @@ import { verdictLabel } from "../verdict";
 import { savedTime, useDocumentTitle } from "../hooks";
 import { Select } from "../components/Select";
 import { ProblemMarkdown } from "../components/ProblemMarkdown";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { api, ApiError } from "../api";
 import { useAuth } from "../auth";
@@ -43,6 +43,8 @@ type Tab = "statement" | "history" | "editorial";
 const fontKey = "unsolvable-oj-editor-font-v1";
 const FONT_MIN = 11;
 const FONT_MAX = 20;
+/** 서버가 받는 소스 코드 길이 상한(제출 DTO의 sourceCode). 넘으면 보내기 전에 알린다. */
+const SOURCE_MAX = 200_000;
 
 /** Tab으로 넣은 들여쓰기 한 단계의 위치 목록(초안 옆에 저장해, 새로고침 뒤에도 Backspace가 한 단계씩 지운다). */
 function unitsKey(ownerId: string | null, problemId: string, language: Language) {
@@ -70,6 +72,16 @@ export function ProblemPage() {
 
 function OwnedProblemPage() {
   const { slug } = useParams();
+  // 제출 결과의 "코드 수정하기"가 넘긴, 그 제출의 언어와 코드
+  const location = useLocation();
+  const navigate = useNavigate();
+  const restoreRef = useRef(
+    (
+      location.state as {
+        restore?: { language: Language; sourceCode: string };
+      } | null
+    )?.restore ?? null,
+  );
   const [problem, setProblem] = useState<Problem | null>(null);
   useDocumentTitle(problem?.title);
   const [loading, setLoading] = useState(true);
@@ -163,6 +175,33 @@ function OwnedProblemPage() {
   // 문제가 바뀌거나 불러와지면 저장된 초안을 복원한다.
   useEffect(() => {
     if (!problem) return;
+    const fromSubmission = restoreRef.current;
+    if (fromSubmission) {
+      // 제출 코드로 시작한다. 언어가 다르면 언어만 바꾸고, 바뀐 언어로 다시 이 효과가 돌 때 코드를 넣는다.
+      if (fromSubmission.language !== language) {
+        setLanguage(fromSubmission.language);
+        return;
+      }
+      restoreRef.current = null;
+      // 새로고침하면 편집한 내용이 제출 코드로 되돌아가지 않도록 state를 비운다.
+      navigate(`${location.pathname}${location.search}`, {
+        replace: true,
+        state: null,
+      });
+      const written = writeSourceDraft(
+        ownerId,
+        problem.id,
+        language,
+        fromSubmission.sourceCode,
+      );
+      setSource(fromSubmission.sourceCode);
+      setSavedAt(written.savedAt);
+      setDraftLoaded(false);
+      setSaveFailed(written.failed);
+      unitsRef.current = [];
+      unitsBaseRef.current = fromSubmission.sourceCode;
+      return;
+    }
     const draft = readSourceDraft(ownerId, problem.id, language);
     const restored = draft.value ?? starter(language);
     setSource(restored);
@@ -286,6 +325,12 @@ function OwnedProblemPage() {
     event.preventDefault();
     // Ctrl/⌘+Enter로도 제출되므로 버튼 비활성화만으로는 중복·빈 코드 제출을 막을 수 없다.
     if (!problem || !session || submittingRef.current || !source.trim()) return;
+    if (source.length > SOURCE_MAX) {
+      setSubmitError(
+        `코드는 ${SOURCE_MAX.toLocaleString()}자 이하여야 제출할 수 있어요. 지금은 ${source.length.toLocaleString()}자입니다.`,
+      );
+      return;
+    }
     submittingRef.current = true;
     const requestedFor = problem.id;
     setSubmitting(true);
@@ -774,7 +819,12 @@ function OwnedProblemPage() {
               {session ? (
                 <>
                   <span className="editor-note">
-                    {source.trim() ? (
+                    {source.length > SOURCE_MAX ? (
+                      <>
+                        코드가 너무 길어요 · {source.length.toLocaleString()} /{" "}
+                        {SOURCE_MAX.toLocaleString()}자
+                      </>
+                    ) : source.trim() ? (
                       <>
                         제출하면 전체 테스트 케이스로 채점합니다 ·{" "}
                         <kbd>Ctrl/⌘ + Enter</kbd>
@@ -785,7 +835,9 @@ function OwnedProblemPage() {
                   </span>
                   <button
                     className="button"
-                    disabled={submitting || !source.trim()}
+                    disabled={
+                      submitting || !source.trim() || source.length > SOURCE_MAX
+                    }
                   >
                     {submitting ? "제출 중…" : "제출하고 채점하기 →"}
                   </button>

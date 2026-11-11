@@ -72,6 +72,21 @@ describe('Public problem routes and HTTP limits', () => {
       .expect({ slug: 'old-problem' });
   });
 
+  it('answers a malformed JSON body with a fixed message instead of the parser internals', async () => {
+    for (const body of ['not json', '{"a":', "{'a':1}", '\u0000']) {
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/problems')
+        .set('Content-Type', 'application/json')
+        .send(body)
+        .expect(400);
+      expect(response.body).toEqual({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: '요청 본문이 올바른 JSON 형식이 아닙니다.',
+      });
+    }
+  });
+
   it('retains an aggregate request size limit', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/problems')

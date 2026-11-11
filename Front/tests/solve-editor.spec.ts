@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { authenticate, mockProblemApi, problem } from "./fixtures";
 
+// 크기·글꼴을 바꾼 직후에 재는 테스트가 많다. 움직임 줄이기의 0.01ms 전환은 값을 한 프레임 늦게 바꾸므로 기본 움직임으로 둔다.
+test.use({ contextOptions: { reducedMotion: "no-preference" } });
 test.beforeEach(({ page }) => mockProblemApi(page));
 
 for (const [language, label, source] of [

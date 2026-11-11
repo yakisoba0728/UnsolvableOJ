@@ -43,5 +43,8 @@ updates:
       # Node·nginx·Ubuntu의 major 변경은 런타임 호환성 검토와 함께 직접 올립니다.
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      # Ubuntu는 LTS(24.04 등)만 쓴다. 24.10 같은 중간 릴리스는 지원이 끝나 apt가 404를 낸다.
+      - dependency-name: ubuntu
+        update-types: ["version-update:semver-minor"]
       # Judge/runtime/Dockerfile의 라이선스 ADD URL·checksum이 v1.13.3에 고정되어 있어 함께 직접 올립니다.
       - dependency-name: criyle/go-judge

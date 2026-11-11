@@ -234,8 +234,17 @@ export function SubmissionsPage() {
                   ? "—"
                   : `${(item.memoryKb / 1024).toFixed(1)}MB`}
               </span>
-              <time className="history-time" dateTime={item.createdAt}>
+              <time
+                className="history-time"
+                dateTime={item.createdAt}
+                title={new Date(item.createdAt).toLocaleString("ko-KR")}
+              >
                 {new Date(item.createdAt).toLocaleString("ko-KR", {
+                  // 올해가 아닌 기록은 연도를 붙여 날짜가 모호하지 않게 한다.
+                  ...(new Date(item.createdAt).getFullYear() !==
+                  new Date().getFullYear()
+                    ? { year: "numeric" as const }
+                    : {}),
                   month: "numeric",
                   day: "numeric",
                   hour: "2-digit",
