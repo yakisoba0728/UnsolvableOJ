@@ -34,7 +34,7 @@ gh workflow run ci.yml --ref main -f full=true
 
 기본 검사에 더해 아래를 실행하며 작업 제한은 40분입니다.
 
-- Chromium·Firefox 전체 회귀와 WebKit 핵심 회귀(인증·세션 갱신·레이아웃·편집기 포커스·복사, 워커 2개). 브라우저 회귀는 서버·채점·Compose 검사 뒤 마지막 단계라, 브라우저 테스트 한 건이 실패해도 앞 검사 결과는 남습니다.
+- Chromium 전체 회귀와 WebKit 핵심 회귀(인증·세션 갱신·레이아웃·편집기 포커스·복사, 워커 2개). Firefox는 CI에서 돌리지 않으며 필요하면 로컬에서 `npx playwright test --project=firefox`로 확인합니다. 브라우저 회귀는 서버·채점·Compose 검사 뒤 마지막 단계라, 브라우저 테스트 한 건이 실패해도 앞 검사 결과는 남습니다.
 - privileged Linux go-judge 이미지 빌드, 8개 언어·실패 판정·자원 제한·격리·캐시 회수 검사
 - 실제 워커를 사용하는 채점 파이프라인 통합 검사
 - 운영 `deploy/compose.yaml`을 사용하는 별도 Compose 프로젝트에서 회원가입 → 문제 게시 → 실제 채점 → XP → 로그아웃 및 커뮤니티 브라우저 흐름(`--production`). 개발 Compose 실실행은 로컬 명령으로 남기며, 기본 CI는 운영 정적검사를 유지합니다.

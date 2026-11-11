@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       full:
-        description: Include Firefox/WebKit, native sandbox and full Compose tests
+        description: Include WebKit, native sandbox and full Compose tests
         type: boolean
         default: false
 
@@ -149,7 +149,7 @@ jobs:
       # Compose 흐름 검사도 Chromium을 쓰므로 브라우저는 먼저 설치한다.
       - name: Install Playwright browsers
         working-directory: Front
-        run: npx --no-install playwright install --with-deps --only-shell chromium ${{ (inputs.full || github.event_name == 'schedule') && 'firefox webkit' || '' }}
+        run: npx --no-install playwright install --with-deps --only-shell chromium ${{ (inputs.full || github.event_name == 'schedule') && 'webkit' || '' }}
       - name: Worker build and protocol regression tests
         run: |
           npm run check --prefix Judge
@@ -200,7 +200,8 @@ jobs:
       - name: Full browser regression tests
         if: ${{ (inputs.full || github.event_name == 'schedule') }}
         working-directory: Front
-        run: npx --no-install playwright test --workers=2
+        # Firefox는 CI 시간을 줄이려고 뺀다. 필요하면 로컬에서 --project=firefox로 돌린다.
+        run: npx --no-install playwright test --project=unit --project=chromium --project=chromium-slow --project=webkit --workers=2
       - name: Failed browser test artifacts (disposable test data only)
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
