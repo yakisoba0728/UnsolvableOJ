@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth";
 import { ProblemStatus, solveState } from "../components/ProblemStatus";
+import { DifficultyBadge } from "../components/DifficultyBadge";
 import { PageHeader } from "../components/PageHeader";
 import { CardSlider } from "../components/CardSlider";
 import { BrandArt } from "../components/BrandArt";
@@ -18,7 +19,6 @@ import {
 } from "../hooks";
 import { LANGUAGES } from "../types";
 import { problemPath, userPath } from "../paths";
-import { difficultyLabel } from "../difficulty";
 
 export function HomePage() {
   const { session } = useAuth();
@@ -296,11 +296,7 @@ export function HomePage() {
               to={problemPath(problem.slug)}
               key={problem.id}
             >
-              <span
-                className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
-              >
-                {difficultyLabel(problem.difficulty)}
-              </span>
+              <DifficultyBadge difficulty={problem.difficulty} />
               <strong>{problem.title}</strong>
               <small>
                 {problem.timeLimitMs}ms · {problem.memoryLimitMb}MB

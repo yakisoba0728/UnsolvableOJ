@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
+import { useConfirm } from "../components/ConfirmDialog";
 import { PageHeader } from "../components/PageHeader";
 import { CopyButton } from "../components/CopyButton";
 import { EnterpriseSchedule } from "../components/EnterpriseSchedule";
@@ -40,6 +41,7 @@ export function EnterpriseDetailPage() {
   const { session } = useAuth();
   const navigate = useNavigate();
   const [saveError, setSaveError] = useState("");
+  const [confirm, confirmDialog] = useConfirm();
   const now = useNow(10_000);
   const {
     data: test,
@@ -121,9 +123,12 @@ export function EnterpriseDetailPage() {
 
   async function remove() {
     if (
-      !window.confirm(
-        `‘${test!.title}’ 테스트를 삭제할까요? 삭제하면 되돌릴 수 없어요.`,
-      )
+      !(await confirm({
+        title: `‘${test!.title}’ 테스트를 삭제할까요?`,
+        message: "삭제하면 되돌릴 수 없어요.",
+        confirmLabel: "삭제",
+        danger: true,
+      }))
     )
       return;
     try {
@@ -142,6 +147,7 @@ export function EnterpriseDetailPage() {
 
   return (
     <div className="page-width enterprise-page">
+      {confirmDialog}
       {saveError ? (
         <p className="error-message" role="alert">
           {saveError}
