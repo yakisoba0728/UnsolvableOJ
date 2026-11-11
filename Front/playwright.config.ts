@@ -19,6 +19,15 @@ const slowSpecs = [
   "ui-harmony.spec.ts",
 ];
 
+// WebKit은 전체를 돌리면 CI가 10분 넘게 늘어나므로, 브라우저마다 동작이 갈렸던 영역(인증·세션 갱신·레이아웃·편집기 포커스·복사)만 돌린다.
+const webkitSpecs = [
+  "auth.spec.ts",
+  "editor-focus.spec.ts",
+  "layout.spec.ts",
+  "session-refresh.spec.ts",
+  "ui-harmony.spec.ts",
+];
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
@@ -42,7 +51,7 @@ export default defineConfig({
     // html의 smooth 스크롤이 Playwright의 클릭 전 스크롤과 겹치면 Firefox·WebKit에서 클릭이 빗나가므로 움직임을 줄인다.
     // 크기를 바로 재는 테스트는 0.01ms 전환이 한 프레임 늦게 반영되므로 emulateMedia로 no-preference를 쓴다.
     { name: "firefox", testIgnore: unitSpecs, use: { ...devices["Desktop Firefox"], contextOptions: { reducedMotion: "reduce" } } },
-    { name: "webkit", testIgnore: unitSpecs, use: { ...devices["Desktop Safari"], contextOptions: { reducedMotion: "reduce" } } },
+    { name: "webkit", testMatch: webkitSpecs, use: { ...devices["Desktop Safari"], contextOptions: { reducedMotion: "reduce" } } },
   ],
   webServer: {
     command: "npm run dev -- --port 4173 --strictPort",

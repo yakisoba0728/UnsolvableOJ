@@ -146,18 +146,10 @@ jobs:
         run: npm run check --prefix Front
       - name: Production Compose configuration
         run: node scripts/check-production-compose.mjs
-      - name: Chromium regression tests
-        if: ${{ !(inputs.full || github.event_name == 'schedule') }}
+      # Compose 흐름 검사도 Chromium을 쓰므로 브라우저는 먼저 설치한다.
+      - name: Install Playwright browsers
         working-directory: Front
-        run: |
-          npx --no-install playwright install --with-deps --only-shell chromium
-          npx --no-install playwright test --project=unit --project=chromium --project=chromium-slow --workers=2
-      - name: Full browser regression tests
-        if: ${{ (inputs.full || github.event_name == 'schedule') }}
-        working-directory: Front
-        run: |
-          npx --no-install playwright install --with-deps --only-shell chromium firefox webkit
-          npx --no-install playwright test --workers=2
+        run: npx --no-install playwright install --with-deps --only-shell chromium ${{ (inputs.full || github.event_name == 'schedule') && 'firefox webkit' || '' }}
       - name: Worker build and protocol regression tests
         run: |
           npm run check --prefix Judge
@@ -200,6 +192,15 @@ jobs:
       - name: Full Compose browser flow
         if: ${{ (inputs.full || github.event_name == 'schedule') }}
         run: node scripts/check-compose.mjs --production
+      # 브라우저 회귀는 가장 오래 걸리고 가끔 흔들리므로, 한 건 실패로 서버·채점·Compose 검사가 건너뛰어지지 않게 마지막에 둔다.
+      - name: Chromium regression tests
+        if: ${{ !(inputs.full || github.event_name == 'schedule') }}
+        working-directory: Front
+        run: npx --no-install playwright test --project=unit --project=chromium --project=chromium-slow --workers=2
+      - name: Full browser regression tests
+        if: ${{ (inputs.full || github.event_name == 'schedule') }}
+        working-directory: Front
+        run: npx --no-install playwright test --workers=2
       - name: Failed browser test artifacts (disposable test data only)
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
