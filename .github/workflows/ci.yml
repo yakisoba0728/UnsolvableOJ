@@ -306,6 +306,11 @@ jobs:
           npm ci --prefix Back
           npm ci --prefix Front
           npm ci --prefix Judge
+      # 채점 파이프라인 검사는 빌드된 API(Back/dist)와 워커(Judge/dist)를 실행한다.
+      - name: Build API and worker
+        run: |
+          npm run build --prefix Back
+          npm run build --prefix Judge
       # Compose 흐름 검사가 쓰는 Chromium만 받는다. 러너에 이미 있는 Chrome 의존 패키지를 쓰므로 apt 설치(--with-deps)는 하지 않는다.
       - name: Install Chromium for the Compose flow
         working-directory: Front
