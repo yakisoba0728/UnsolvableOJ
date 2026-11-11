@@ -5,31 +5,18 @@
   letter-spacing: 0.04em;
 }
 .vibe-intro {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  padding: 36px;
+  padding: 18px 24px;
   margin-bottom: 24px;
   border: 1px solid var(--color-feature-border);
   border-radius: var(--radius-feature);
   background: var(--color-feature);
 }
-.vibe-intro h2 {
-  font-size: clamp(28px, 3vw, 40px);
-  line-height: 1.3;
-  margin: 12px 0;
-}
-.vibe-intro p {
-  color: var(--color-ink-600);
-  font-size: 15px;
-  margin-bottom: 20px;
-}
 .vibe-steps {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px 24px;
   margin: 0;
-  padding: 12px 0;
+  padding: 0;
   list-style: none;
 }
 .vibe-steps li {
@@ -68,7 +55,7 @@
   padding: 28px;
 }
 .vibe-challenge h2 {
-  margin: 16px 0 10px;
+  margin: 0;
   font-size: 23px;
 }
 .vibe-challenge p {
@@ -81,12 +68,10 @@
   font-size: 13px;
   line-height: 1.8;
 }
-.vibe-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  color: var(--color-ink-600);
-  font-size: 12px;
+.vibe-meta {
+  margin: 14px 0 16px;
+  padding: 12px 0;
+  font-size: 14px;
 }
 .vibe-challenge-start {
   display: flex;
@@ -647,12 +632,12 @@
     padding: 28px;
   }
 }
-@media (max-width: 800px) {
-  .vibe-intro {
-    grid-template-columns: 1fr;
-    gap: 24px;
-    padding: 24px;
+@media (max-width: 900px) {
+  .vibe-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+@media (max-width: 800px) {
   .vibe-challenge {
     grid-template-columns: 1fr;
   }
@@ -702,8 +687,11 @@
   .vibe-workspace {
     width: calc(100% - 24px);
   }
+  .vibe-intro {
+    padding: 16px;
+  }
   .vibe-steps {
-    gap: 20px 12px;
+    gap: 16px 12px;
   }
   .vibe-steps li {
     gap: 8px;
