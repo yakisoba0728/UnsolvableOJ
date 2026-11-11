@@ -129,14 +129,25 @@ export class AuthService {
         tokenVersion: number;
         remember: boolean;
         revoked: boolean;
+        justRevoked: boolean;
         expired: boolean;
       }[] = await manager.query(
         `SELECT id, user_id AS "userId", family_id AS "familyId", family_created_at AS "familyCreatedAt", token_version AS "tokenVersion", remember,
-                revoked_at IS NOT NULL AS revoked, expires_at <= now() AS expired
+                revoked_at IS NOT NULL AS revoked, revoked_at > now() - interval '10 seconds' AS "justRevoked", expires_at <= now() AS expired
          FROM refresh_tokens WHERE token_hash = $1 FOR UPDATE`,
         [hashRefreshToken(token)],
       );
       if (!row || row.expired) return null;
+      // 여러 탭이 거의 동시에 갱신하면 앞 탭이 저장한 새 토큰이 늦게 보여(Firefox의 localStorage) 방금 회전한 토큰이 다시 온다.
+      // 짧은 유예 안이고 계열에 다음 토큰이 살아 있으면 계열을 끊지 않고 새 토큰도 주지 않는다(409).
+      // 따로 묻는 이유: 위 SELECT가 행 잠금을 기다렸다면 그 스냅샷에는 앞 요청이 만든 다음 토큰이 보이지 않는다.
+      if (row.justRevoked) {
+        const [live] = await manager.query(
+          'SELECT 1 FROM refresh_tokens WHERE family_id = $1 AND revoked_at IS NULL AND expires_at > now() LIMIT 1',
+          [row.familyId],
+        );
+        if (live) return 'rotated' as const;
+      }
       const user = await manager.findOneBy(User, { id: row.userId });
       // 이미 쓴(폐기된) 토큰이 다시 오면 탈취로 보고 그 계열을 모두 끊는다.
       // 역할 변경·정지·비밀번호 변경(token_version 증가)과 정지 중인 계정도 계열을 끝낸다.
@@ -165,6 +176,8 @@ export class AuthService {
       );
     });
     // 계열 폐기가 커밋된 뒤에 거절한다(트랜잭션 안에서 던지면 폐기도 되돌려진다).
+    if (issued === 'rotated')
+      throw new ConflictException('다른 탭에서 방금 로그인을 갱신했습니다.');
     if (!issued) throw new UnauthorizedException('다시 로그인해야 합니다.');
     return issued;
   }
