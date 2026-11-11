@@ -92,7 +92,8 @@ test.describe("problem list: changing a filter", () => {
         [...group.querySelectorAll("button")]
           .find((button) => button.textContent?.startsWith(label))!
           .click();
-      for (const label of ["입문", "어려움", "입문", "어려움"]) {
+      // 매번 다른 칩을 누른다. 같은 칩을 다시 누르면 앞 클릭이 아직 그려지지 않은 느린 CI에서 '단독 선택 해제'로 읽혀 조건이 비워진다.
+      for (const label of ["입문", "쉬움", "보통", "어려움"]) {
         click(label);
         await new Promise((resolve) => setTimeout(resolve, 20));
       }
