@@ -118,6 +118,18 @@ export function SiteHeader({
             </NavLink>
           ) : null}
           {role === "ADMIN" ? <NavLink to="/admin">관리</NavLink> : null}
+          {session ? (
+            <button
+              type="button"
+              className="text-button mobile-signout"
+              onClick={() => {
+                setMenuOpen(false);
+                onSignOut();
+              }}
+            >
+              로그아웃
+            </button>
+          ) : null}
           <span
             className={`nav-indicator ${indicatorReady ? "ready" : ""}`}
             aria-hidden="true"
@@ -143,7 +155,7 @@ export function SiteHeader({
                   {session.user.username.slice(0, 1).toUpperCase()}
                 </span>
               </Link>
-              <button className="text-button" onClick={onSignOut}>
+              <button className="text-button header-signout" onClick={onSignOut}>
                 로그아웃
               </button>
             </>

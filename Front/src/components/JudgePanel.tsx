@@ -37,7 +37,12 @@ export function JudgePanel({
 }: {
   result: Submission | null;
   error: string;
-  refresh: { retry: () => void; retrying: boolean; lastUpdated: number | null };
+  refresh: {
+    retry: () => void;
+    retrying: boolean;
+    lastUpdated: number | null;
+    invalidId?: boolean;
+  };
   open: boolean;
   height: number;
   onHeightChange: (height: number) => void;

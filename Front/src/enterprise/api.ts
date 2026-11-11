@@ -2,6 +2,7 @@ import { api } from "../api";
 import { useRequest } from "../hooks";
 import type { Session } from "../types";
 import type { EnterpriseTest, TestInput, TestResults } from "./model";
+import { invalidResourceIdMessage, isInvalidResourceId } from "../resourceErrors";
 
 /** 내가 만든 기업 테스트(서버 저장). */
 export function useEnterpriseTests(session: Session | null) {
@@ -17,7 +18,16 @@ export function useEnterpriseTests(session: Session | null) {
 export function useEnterpriseTest(session: Session | null, id: string | undefined) {
   const token = session?.accessToken;
   return useRequest<EnterpriseTest | null>(
-    token && id ? (signal) => api(`/enterprise/tests/${id}`, { signal }, token) : null,
+    token && id
+      ? (signal) =>
+          api<EnterpriseTest>(`/enterprise/tests/${id}`, { signal }, token).catch(
+            (cause: unknown) => {
+              if (isInvalidResourceId(cause))
+                throw new Error(invalidResourceIdMessage);
+              throw cause;
+            },
+          )
+      : null,
     null,
     "테스트를 불러오지 못했어요.",
     [token, id],

@@ -2486,6 +2486,23 @@ input,
 }
 .menu-button {
   display: none;
+  flex-shrink: 0;
+}
+.mobile-signout {
+  display: none;
+}
+@media (max-width: 480px) {
+  .header-signout {
+    display: none;
+  }
+  .main-nav .mobile-signout {
+    display: block;
+    min-height: 48px;
+    padding: 0 12px;
+    text-align: left;
+    color: var(--color-ink-600);
+    font-size: 16px;
+  }
 }
 
 /* A1. 헤더: 메뉴가 들어갈 폭이 없으면(1100px 미만) 접는다. 계정 영역은 항상 보인다 */

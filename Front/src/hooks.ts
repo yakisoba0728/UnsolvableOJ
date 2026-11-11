@@ -314,7 +314,23 @@ export function useUrlFilters(hold?: (text: string) => boolean) {
     paramsRef.current = params;
   }
   const urlQuery = params.get("q") ?? "";
-  const page = Math.max(1, Math.floor(Number(params.get("page"))) || 1);
+  // 서버 ListQuery 상한에 맞춰 Infinity나 지나치게 큰 값을 API로 보내지 않는다.
+  const rawPage = params.get("page");
+  const requestedPage = Math.floor(Number(rawPage));
+  const page =
+    Number.isSafeInteger(requestedPage) &&
+    requestedPage >= 1 &&
+    requestedPage <= 1_000_000
+      ? requestedPage
+      : 1;
+  useEffect(() => {
+    if (rawPage === null || rawPage === String(page)) return;
+    const next = new URLSearchParams(paramsRef.current);
+    if (page === 1) next.delete("page");
+    else next.set("page", String(page));
+    paramsRef.current = next;
+    setParams(next, { replace: true });
+  }, [params, rawPage, page, setParams]);
 
   /**
    * 빈 값은 지우고, 배열은 같은 키를 반복해 쓴다. 조건이 바뀌면 첫 쪽으로 돌아간다.
