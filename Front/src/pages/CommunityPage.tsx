@@ -6,7 +6,8 @@ import guideArt from "../assets/community-guide.png";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import { Select } from "../components/Select";
-import { Skeleton, SkeletonRows } from "../components/Skeleton";
+import { RangeCount } from "../components/RangeCount";
+import { SkeletonRows } from "../components/Skeleton";
 import { SlideToggle } from "../components/SlideToggle";
 import { listPosts, type Page } from "../community/api";
 import { relativeTime } from "../community/store";
@@ -27,7 +28,6 @@ import {
   useUrlFilters,
 } from "../hooks";
 import { isImeEnter } from "../keyboard";
-import { pageRange, pageRangeTitle } from "../pageRange";
 
 const PAGE_SIZE = 10;
 /** 서버가 받는 쪽 번호의 상한 */
@@ -286,6 +286,7 @@ export function CommunityPage() {
               first={first}
               count={visible.length}
               total={total}
+              withTitle
             />
           </div>
           {problemId ? (
@@ -451,35 +452,6 @@ function TagSearch({
         />
       </div>
     </div>
-  );
-}
-
-/** "1–10 / 32" 같은 쪽 범위. 화면 낭독기에는 풀어 쓴 문장을 읽어 준다. */
-function RangeCount({
-  loading,
-  first,
-  count,
-  total,
-}: {
-  loading: boolean;
-  first: number;
-  count: number;
-  total: number;
-}) {
-  if (loading)
-    return (
-      <span className="total-count">
-        <Skeleton width={80} height={14} />
-      </span>
-    );
-  const title = pageRangeTitle(first, count, total);
-  return (
-    <>
-      <span className="total-count" aria-hidden="true" title={title}>
-        {pageRange(first, count, total)}
-      </span>
-      <span className="sr-only">{title}</span>
-    </>
   );
 }
 

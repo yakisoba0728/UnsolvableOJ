@@ -2,24 +2,30 @@ import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { canAuthor, useAuth } from "../auth";
 import { BrandArt } from "../components/BrandArt";
+import { DifficultyBadge } from "../components/DifficultyBadge";
 import { PageHeader } from "../components/PageHeader";
-import { Select } from "../components/Select";
-import { SlideToggle } from "../components/SlideToggle";
 import { Pagination } from "../components/Pagination";
-import { pageRange, pageRangeTitle } from "../pageRange";
-import { Skeleton, SkeletonRegion, SkeletonRows } from "../components/Skeleton";
-import { ReverseIcon } from "../components/ReverseIcon";
-import { ShuffleIcon } from "../components/ShuffleIcon";
 import {
   ProblemStatus,
   solveState,
   type SolveState,
 } from "../components/ProblemStatus";
+import { RangeCount } from "../components/RangeCount";
+import { ReverseIcon } from "../components/ReverseIcon";
+import { Select } from "../components/Select";
+import { ShuffleIcon } from "../components/ShuffleIcon";
+import { Skeleton, SkeletonRegion, SkeletonRows } from "../components/Skeleton";
+import { SlideToggle } from "../components/SlideToggle";
 import {
-  useAllProblems,
-  useDocumentTitle,
+  DIFFICULTIES as order,
+  difficultyLabel,
+  difficultyOptions,
+} from "../difficulty";
+import {
   pickNextProblem,
   pickResume,
+  useAllProblems,
+  useDocumentTitle,
   useMyStanding,
   useSlashFocus,
   useStickyTop,
@@ -28,13 +34,7 @@ import {
 } from "../hooks";
 import { problemPath } from "../paths";
 import { newSeed, seededShuffle } from "../shuffle";
-import type { Difficulty, ProblemSummary } from "../types";
-import {
-  DIFFICULTIES as order,
-  difficultyLabel,
-  difficultyOptions,
-} from "../difficulty";
-import { DifficultyBadge } from "../components/DifficultyBadge";
+import type { Difficulty, ProblemSummary, Submission } from "../types";
 
 const PAGE_SIZE = 20;
 
@@ -61,6 +61,84 @@ const statusChips: { value: "" | SolveState; label: string }[] = [
   { value: "attempted", label: "풀이 중" },
   { value: "solved", label: "해결" },
 ];
+const solveStates: SolveState[] = ["solved", "attempted", "none"];
+
+/** URL에 저장된 목록 조건. 풀이 상태 필터는 로그인했을 때만 읽는다. */
+function readFilters(params: URLSearchParams, signedIn: boolean) {
+  const rawSort = params.get("sort") ?? "latest";
+  const legacy = legacySorts[rawSort];
+  return {
+    difficulties: (params.get("d") ?? "")
+      .split(",")
+      .filter((value): value is Difficulty =>
+        order.includes(value as Difficulty),
+      ),
+    statuses: (signedIn ? (params.get("s") ?? "") : "")
+      .split(",")
+      .filter((value): value is SolveState =>
+        solveStates.includes(value as SolveState),
+      ),
+    sort: legacy?.sort ?? rawSort,
+    // 기본 순서(최신순=최신 먼저, 난이도순=쉬운 것 먼저, 푼 사람순=많은 순, 정답률순=높은 순)를 뒤집은 상태
+    reversed: (params.get("rev") === "1") !== Boolean(legacy?.reversed),
+    seed: Number(params.get("seed")) || 1,
+  };
+}
+
+/** 정렬한 새 배열. 무작위는 전체를 한 번 섞으므로 필터를 바꿔도 상대 순서가 유지된다. */
+function sortProblems(
+  problems: ProblemSummary[],
+  sort: string,
+  reversed: boolean,
+  seed: number,
+) {
+  if (sort === "random") return seededShuffle(problems, seed);
+  const dir = reversed ? -1 : 1;
+  const base = [...problems];
+  if (sort === "difficulty")
+    return base.sort(
+      (a, b) =>
+        (order.indexOf(a.difficulty) - order.indexOf(b.difficulty)) * dir,
+    );
+  if (sort === "title")
+    return base.sort((a, b) => a.title.localeCompare(b.title, "ko") * dir);
+  if (sort === "solvers")
+    return base.sort(
+      (a, b) => ((b.solverCount ?? 0) - (a.solverCount ?? 0)) * dir,
+    );
+  if (sort === "rate")
+    // 정답률이 없는(제출 없는) 문제는 뒤집어도 맨 뒤에 둔다.
+    return base.sort((a, b) => {
+      if (a.acceptanceRate == null || b.acceptanceRate == null)
+        return (
+          Number(a.acceptanceRate == null) - Number(b.acceptanceRate == null)
+        );
+      return (b.acceptanceRate - a.acceptanceRate) * dir;
+    });
+  return base.sort((a, b) => b.createdAt.localeCompare(a.createdAt) * dir);
+}
+
+interface ContinueTarget {
+  slug: string;
+  title: string;
+  label: string;
+  difficulty: Difficulty;
+}
+
+/** 이어 풀 문제(시도했지만 못 푼 가장 최근 문제). 없으면 가장 쉬운 안 푼 문제. */
+function continueTargetOf(
+  submissions: Submission[],
+  solved: Set<string>,
+  problems: ProblemSummary[],
+): ContinueTarget | null {
+  const resume = pickResume(submissions, solved, problems);
+  if (resume) {
+    const problem = problems.find((item) => item.id === resume.problem.id);
+    return problem ? { ...problem, label: "이어서 풀기" } : null;
+  }
+  const next = pickNextProblem(problems, solved);
+  return next ? { ...next, label: "다음 문제 풀기" } : null;
+}
 
 /**
  * 목록 조건(검색어·난이도·상태·정렬·순서 뒤집기·페이지)은 모두 URL에 저장한다.
@@ -71,8 +149,7 @@ export function ProblemsPage() {
   useDocumentTitle("문제 목록");
   const { problems, loading, error, retry } = useAllProblems();
   const history = useSubmissionHistory(session);
-  const { profile, rank, profileLoading, rankLoading, profileError, rankError } =
-    useMyStanding(session);
+  const standing = useMyStanding(session);
   const { params, update, urlQuery, queryText, setQueryText, page } =
     useUrlFilters();
   const searchRef = useRef<HTMLInputElement>(null);
@@ -80,32 +157,12 @@ export function ProblemsPage() {
   const sideRef = useRef<HTMLElement>(null);
   useStickyTop(sideRef);
   const [announce, setAnnounce] = useState("");
-  // 다시 섞기 아이콘을 누를 때마다 화살표가 오른쪽으로 빠져나갔다 왼쪽에서 다시 들어오게 한다(키가 바뀌면 애니메이션이 처음부터 다시 실행된다).
-  const [spinKey, setSpinKey] = useState(0);
-  // 순서 뒤집기 아이콘: 누를 때마다 위·아래 화살표가 각자 방향으로 움직였다가 돌아온다.
-  const [reverseKey, setReverseKey] = useState(0);
 
-  const selectedDifficulties = (params.get("d") ?? "")
-    .split(",")
-    .filter((value): value is Difficulty =>
-      order.includes(value as Difficulty),
-    );
-  const statuses = (session ? (params.get("s") ?? "") : "")
-    .split(",")
-    .filter((value): value is SolveState =>
-      ["solved", "attempted", "none"].includes(value),
-    );
-  const rawSort = params.get("sort") ?? "latest";
-  const legacySort = legacySorts[rawSort];
-  const sort = legacySort?.sort ?? rawSort;
-  // 기본 순서(최신순=최신 먼저, 난이도순=쉬운 것 먼저, 푼 사람순=많은 순, 정답률순=높은 순)를 뒤집은 상태
-  const reversed =
-    (params.get("rev") === "1") !== Boolean(legacySort?.reversed);
-  const seed = Number(params.get("seed")) || 1;
-
+  const { difficulties, statuses, sort, reversed, seed } = readFilters(
+    params,
+    Boolean(session),
+  );
   const keyword = urlQuery.trim().toLowerCase();
-  const isSingle = (value: string) =>
-    selectedDifficulties.length === 1 && selectedDifficulties[0] === value;
   const stateOf = (problem: ProblemSummary) =>
     solveState(problem.id, history.solved, history.attempted);
 
@@ -116,8 +173,8 @@ export function ProblemsPage() {
   ) => {
     if (
       skip !== "difficulty" &&
-      selectedDifficulties.length &&
-      !selectedDifficulties.includes(problem.difficulty)
+      difficulties.length &&
+      !difficulties.includes(problem.difficulty)
     )
       return false;
     if (
@@ -133,41 +190,14 @@ export function ProblemsPage() {
     );
   };
 
-  const filtered = useMemo(() => {
-    // 무작위: 전체를 한 번 섞은 뒤 필터를 적용한다. 필터를 바꿔도 상대 순서가 유지된다.
-    const base =
-      sort === "random" ? seededShuffle(problems, seed) : [...problems];
-    const dir = reversed ? -1 : 1;
-    if (sort === "difficulty")
-      base.sort(
-        (a, b) =>
-          (order.indexOf(a.difficulty) - order.indexOf(b.difficulty)) * dir,
-      );
-    else if (sort === "title")
-      base.sort((a, b) => a.title.localeCompare(b.title, "ko") * dir);
-    else if (sort === "solvers")
-      base.sort((a, b) => ((b.solverCount ?? 0) - (a.solverCount ?? 0)) * dir);
-    else if (sort === "rate")
-      // 정답률이 없는(제출 없는) 문제는 뒤집어도 맨 뒤에 둔다.
-      base.sort((a, b) => {
-        if (a.acceptanceRate == null || b.acceptanceRate == null)
-          return (
-            Number(a.acceptanceRate == null) - Number(b.acceptanceRate == null)
-          );
-        return (b.acceptanceRate - a.acceptanceRate) * dir;
-      });
-    else if (sort !== "random")
-      base.sort((a, b) => b.createdAt.localeCompare(a.createdAt) * dir);
-    return base.filter((problem) => matches(problem, null));
-  }, [
-    problems,
-    sort,
-    reversed,
-    seed,
-    params,
-    history.solved,
-    history.attempted,
-  ]);
+  const sorted = useMemo(
+    () => sortProblems(problems, sort, reversed, seed),
+    [problems, sort, reversed, seed],
+  );
+  const filtered = useMemo(
+    () => sorted.filter((problem) => matches(problem, null)),
+    [sorted, params, history.solved, history.attempted],
+  );
 
   const statusCount = (value: "" | SolveState) =>
     problems.filter(
@@ -180,47 +210,21 @@ export function ProblemsPage() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
-  const visible = filtered.slice(
-    (current - 1) * PAGE_SIZE,
-    current * PAGE_SIZE,
-  );
-  const hasFilter = Boolean(
-    selectedDifficulties.length || statuses.length || keyword,
-  );
+  const first = (current - 1) * PAGE_SIZE;
+  const visible = filtered.slice(first, first + PAGE_SIZE);
+  const hasFilter = Boolean(difficulties.length || statuses.length || keyword);
 
-  // 이어 풀 문제(시도했지만 못 푼 가장 최근 문제). 없으면 가장 쉬운 안 푼 문제.
   const recommendationsReady =
     !loading && !error && !history.loading && !history.error;
-  const resume = recommendationsReady
-    ? pickResume(history.submissions, history.solved, problems)
+  const continueTarget = recommendationsReady
+    ? continueTargetOf(history.submissions, history.solved, problems)
     : null;
-  const resumeProblem = resume
-    ? problems.find((problem) => problem.id === resume.problem.id)
-    : undefined;
-  const next =
-    recommendationsReady && !resume
-      ? pickNextProblem(problems, history.solved)
-      : null;
-  const continueTarget = resumeProblem
-    ? {
-        slug: resumeProblem.slug,
-        title: resumeProblem.title,
-        label: "이어서 풀기",
-      }
-    : next
-      ? { slug: next.slug, title: next.title, label: "다음 문제 풀기" }
-      : null;
-
-  const continueDifficulty = continueTarget
-    ? problems.find((problem) => problem.slug === continueTarget.slug)
-        ?.difficulty
-    : undefined;
 
   // 목록을 무작위 순서로 섞는다(이동하지 않는다). 선택한 조건 안에서 섞인다.
   function shuffle() {
     update({ sort: "random", seed: String(newSeed()) });
-    const scope = selectedDifficulties.length
-      ? `${selectedDifficulties.map(difficultyLabel).join("·")} 난이도 `
+    const scope = difficulties.length
+      ? `${difficulties.map(difficultyLabel).join("·")} 난이도 `
       : "";
     setAnnounce(`${scope}문제 목록을 무작위로 섞었어요.`);
   }
@@ -269,10 +273,7 @@ export function ProblemsPage() {
           <Select
             ariaLabel="정렬"
             value={sort}
-            options={sorts.map((item) => ({
-              value: item.value,
-              label: item.label,
-            }))}
+            options={sorts}
             onChange={changeSort}
           />
         </div>
@@ -287,8 +288,7 @@ export function ProblemsPage() {
                 countsLoading={loading || history.loading}
                 values={statuses}
                 options={statusChips.map((item) => ({
-                  value: item.value,
-                  label: item.label,
+                  ...item,
                   count: statusCount(item.value),
                 }))}
                 defaultValue=""
@@ -309,12 +309,11 @@ export function ProblemsPage() {
               multiple
               ariaLabel="난이도 필터"
               countsLoading={loading}
-              values={selectedDifficulties}
+              values={difficulties}
               options={[
                 { value: "", label: "전체", count: difficultyCount("") },
                 ...difficultyOptions.map((item) => ({
-                  value: item.value,
-                  label: item.label,
+                  ...item,
                   count: difficultyCount(item.value),
                 })),
               ]}
@@ -322,36 +321,13 @@ export function ProblemsPage() {
               onChangeValues={(next) => update({ d: next.join(",") || null })}
             />
           </div>
-          {sort === "random" ? (
-            <button
-              type="button"
-              className="shuffle-icon-button"
-              aria-label="무작위로 다시 섞기"
-              title="무작위로 다시 섞기"
-              onClick={() => {
-                setSpinKey((key) => key + 1);
-                shuffle();
-              }}
-              disabled={filtered.length < 2}
-            >
-              <ShuffleIcon playKey={spinKey} />
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="shuffle-icon-button reverse-icon-button"
-              aria-label="목록 순서 뒤집기"
-              aria-pressed={reversed}
-              title="목록 순서 뒤집기"
-              onClick={() => {
-                setReverseKey((key) => key + 1);
-                reverseOrder();
-              }}
-              disabled={filtered.length < 2}
-            >
-              <ReverseIcon playKey={reverseKey} />
-            </button>
-          )}
+          <OrderButton
+            random={sort === "random"}
+            reversed={reversed}
+            disabled={filtered.length < 2}
+            onShuffle={shuffle}
+            onReverse={reverseOrder}
+          />
         </div>
       </div>
 
@@ -382,29 +358,12 @@ export function ProblemsPage() {
                 </>
               ) : null}
             </div>
-            <span
-              className="total-count"
-              aria-hidden={loading ? undefined : true}
-            >
-              {loading ? (
-                <Skeleton width={80} height={14} />
-              ) : (
-                pageRange(
-                  (current - 1) * PAGE_SIZE,
-                  visible.length,
-                  filtered.length,
-                )
-              )}
-            </span>
-            {loading ? null : (
-              <span className="sr-only">
-                {pageRangeTitle(
-                  (current - 1) * PAGE_SIZE,
-                  visible.length,
-                  filtered.length,
-                )}
-              </span>
-            )}
+            <RangeCount
+              loading={loading}
+              first={first}
+              count={visible.length}
+              total={filtered.length}
+            />
           </div>
           {loading ? (
             <SkeletonRows count={8} />
@@ -417,36 +376,12 @@ export function ProblemsPage() {
                 <span>정답률</span>
               </div>
               {visible.map((problem) => (
-                <div className="problem-row-wrap" key={problem.id}>
-                  {/* 프로그래머스처럼 문제는 새 탭에서 열어, 목록의 검색·필터·쪽 위치를 그대로 둔다. */}
-                  <Link
-                    className="problem-row"
-                    to={problemPath(problem.slug)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span className="problem-title">
-                      <span className="post-title-line">
-                        <strong title={problem.title}>{problem.title}</strong>
-                        <span className="sr-only">(새 탭에서 열려요)</span>
-                        {session && history.loading ? (
-                          <Skeleton width={48} height={16} />
-                        ) : stateOf(problem) === "none" ? null : (
-                          <ProblemStatus state={stateOf(problem)} />
-                        )}
-                      </span>
-                    </span>
-                    <DifficultyBadge difficulty={problem.difficulty} />
-                    <span className="problem-limit" data-label="푼 사람">
-                      {problem.solverCount ?? 0}명
-                    </span>
-                    <span className="problem-limit" data-label="정답률">
-                      {problem.acceptanceRate == null
-                        ? "—"
-                        : `${problem.acceptanceRate}%`}
-                    </span>
-                  </Link>
-                </div>
+                <ProblemRow
+                  key={problem.id}
+                  problem={problem}
+                  // 로그인했는데 기록을 아직 못 받았으면 상태 자리에 뼈대를 둔다.
+                  state={session && history.loading ? null : stateOf(problem)}
+                />
               ))}
             </div>
           ) : error ? (
@@ -486,80 +421,25 @@ export function ProblemsPage() {
         </section>
 
         <aside className="side-stack" ref={sideRef}>
-          {session && profileLoading ? (
-            <SkeletonRegion
-              className="standing-card"
-              label="내 요약을 불러오는 중입니다"
-            >
-              <Skeleton width={90} height={18} />
-              <div className="skeleton-stats">
-                <Skeleton height={36} />
-                <Skeleton height={36} />
-                <Skeleton height={36} />
-              </div>
-              <Skeleton height={40} radius={10} />
-            </SkeletonRegion>
-          ) : null}
-          {session && profileError ? (
+          {session && standing.profileLoading ? <StandingSkeleton /> : null}
+          {session && standing.profileError ? (
             <p className="error-message" role="alert">
-              {profileError}
+              {standing.profileError}
             </p>
           ) : null}
-          {session && rankError ? (
+          {session && standing.rankError ? (
             <p className="error-message" role="alert">
-              {rankError}
+              {standing.rankError}
             </p>
           ) : null}
-          {profile ? (
-            <div className="standing-card">
-              <Link to="/profile" className="standing-link">
-                <h2>
-                  내 요약
-                  <span className="card-more" aria-hidden="true">
-                    프로필 ›
-                  </span>
-                </h2>
-              </Link>
-              <dl>
-                <div>
-                  <dt>순위</dt>
-                  <dd>
-                    {rankLoading ? (
-                      <Skeleton width={36} height={20} />
-                    ) : rank >= 0 ? (
-                      `${rank + 1}위`
-                    ) : (
-                      "—"
-                    )}
-                  </dd>
-                </div>
-                <div>
-                  <dt>XP</dt>
-                  <dd>{profile.xp.toLocaleString()}</dd>
-                </div>
-                <div>
-                  <dt>해결한 문제</dt>
-                  <dd>{profile.solvedCount}개</dd>
-                </div>
-              </dl>
-              {continueTarget ? (
-                <div className="standing-continue">
-                  <div className="standing-continue-title">
-                    <strong>{continueTarget.title}</strong>
-                    {continueDifficulty ? (
-                      <DifficultyBadge difficulty={continueDifficulty} />
-                    ) : null}
-                  </div>
-                  <Link
-                    className="button"
-                    to={problemPath(continueTarget.slug)}
-                    title={`${continueTarget.title} · ${continueTarget.label}`}
-                  >
-                    {continueTarget.label} <span aria-hidden="true">→</span>
-                  </Link>
-                </div>
-              ) : null}
-            </div>
+          {standing.profile ? (
+            <StandingCard
+              xp={standing.profile.xp}
+              solvedCount={standing.profile.solvedCount}
+              rank={standing.rank}
+              rankLoading={standing.rankLoading}
+              continueTarget={continueTarget}
+            />
           ) : null}
           {!session ? (
             <div className="brand-card">
@@ -571,78 +451,273 @@ export function ProblemsPage() {
               </p>
             </div>
           ) : null}
-          <div className="guide-card">
-            <h2>나에게 맞는 문제 찾기</h2>
-            <ol>
-              <li>
-                <button
-                  aria-pressed={isSingle("BEGINNER")}
-                  onClick={() => update({ d: "BEGINNER" })}
-                >
-                  <strong>쉬운 난이도로 시작하기</strong>
-                  <span>부담 없는 문제부터 차근차근</span>
-                  <i className="row-chevron" aria-hidden="true">
-                    ›
-                  </i>
-                </button>
-              </li>
-              <li>
-                <button
-                  aria-pressed={isSingle("MEDIUM")}
-                  onClick={() => update({ d: "MEDIUM" })}
-                >
-                  <strong>보통 난이도에 도전하기</strong>
-                  <span>익숙해졌다면 한 단계 위로</span>
-                  <i className="row-chevron" aria-hidden="true">
-                    ›
-                  </i>
-                </button>
-              </li>
-              {session ? (
-                <li>
-                  <button
-                    aria-pressed={
-                      statuses.length === 1 &&
-                      statuses[0] === "none" &&
-                      !selectedDifficulties.length
-                    }
-                    onClick={() => update({ s: "none", d: null })}
-                  >
-                    <strong>아직 안 푼 문제만 보기</strong>
-                    <span>새로운 문제에 집중해요</span>
-                    <i className="row-chevron" aria-hidden="true">
-                      ›
-                    </i>
-                  </button>
-                </li>
-              ) : null}
-            </ol>
-          </div>
-          {canAuthor(session) ? (
-            <div className="guide-card create-cta">
-              <h2>직접 문제를 만들어 보세요</h2>
-              <p>
-                떠오른 아이디어를 문제로 만들어 다른 사람과 나눠 보세요. 설명과
-                예제, 채점용 테스트케이스까지 한 화면에서 만들 수 있어요.
-              </p>
-              <ol className="create-cta-steps">
-                <li>
-                  <span>1</span>문제 설명 쓰기
-                </li>
-                <li>
-                  <span>2</span>예제와 숨김 테스트케이스 추가
-                </li>
-                <li>
-                  <span>3</span>검수를 거쳐 공개
-                </li>
-              </ol>
-              <Link className="button button-full" to="/problems/new">
-                문제 만들기 <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-          ) : null}
+          <FinderGuide
+            signedIn={Boolean(session)}
+            difficulties={difficulties}
+            statuses={statuses}
+            onPick={update}
+          />
+          {canAuthor(session) ? <CreateCta /> : null}
         </aside>
       </div>
+    </div>
+  );
+}
+
+/** 무작위일 때는 다시 섞기, 아니면 순서 뒤집기. 누를 때마다 아이콘 애니메이션을 처음부터 다시 튼다. */
+function OrderButton({
+  random,
+  reversed,
+  disabled,
+  onShuffle,
+  onReverse,
+}: {
+  random: boolean;
+  reversed: boolean;
+  disabled: boolean;
+  onShuffle: () => void;
+  onReverse: () => void;
+}) {
+  // 키가 바뀌면 애니메이션이 처음부터 다시 실행된다.
+  const [spinKey, setSpinKey] = useState(0);
+  const [reverseKey, setReverseKey] = useState(0);
+  return random ? (
+    <button
+      type="button"
+      className="shuffle-icon-button"
+      aria-label="무작위로 다시 섞기"
+      title="무작위로 다시 섞기"
+      onClick={() => {
+        setSpinKey((key) => key + 1);
+        onShuffle();
+      }}
+      disabled={disabled}
+    >
+      <ShuffleIcon playKey={spinKey} />
+    </button>
+  ) : (
+    <button
+      type="button"
+      className="shuffle-icon-button reverse-icon-button"
+      aria-label="목록 순서 뒤집기"
+      aria-pressed={reversed}
+      title="목록 순서 뒤집기"
+      onClick={() => {
+        setReverseKey((key) => key + 1);
+        onReverse();
+      }}
+      disabled={disabled}
+    >
+      <ReverseIcon playKey={reverseKey} />
+    </button>
+  );
+}
+
+/** state가 null이면 풀이 상태를 아직 모른다(뼈대 표시). */
+function ProblemRow({
+  problem,
+  state,
+}: {
+  problem: ProblemSummary;
+  state: SolveState | null;
+}) {
+  return (
+    <div className="problem-row-wrap">
+      {/* 프로그래머스처럼 문제는 새 탭에서 열어, 목록의 검색·필터·쪽 위치를 그대로 둔다. */}
+      <Link
+        className="problem-row"
+        to={problemPath(problem.slug)}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span className="problem-title">
+          <span className="post-title-line">
+            <strong title={problem.title}>{problem.title}</strong>
+            <span className="sr-only">(새 탭에서 열려요)</span>
+            {state === null ? (
+              <Skeleton width={48} height={16} />
+            ) : state === "none" ? null : (
+              <ProblemStatus state={state} />
+            )}
+          </span>
+        </span>
+        <DifficultyBadge difficulty={problem.difficulty} />
+        <span className="problem-limit" data-label="푼 사람">
+          {problem.solverCount ?? 0}명
+        </span>
+        <span className="problem-limit" data-label="정답률">
+          {problem.acceptanceRate == null ? "—" : `${problem.acceptanceRate}%`}
+        </span>
+      </Link>
+    </div>
+  );
+}
+
+function StandingSkeleton() {
+  return (
+    <SkeletonRegion className="standing-card" label="내 요약을 불러오는 중입니다">
+      <Skeleton width={90} height={18} />
+      <div className="skeleton-stats">
+        <Skeleton height={36} />
+        <Skeleton height={36} />
+        <Skeleton height={36} />
+      </div>
+      <Skeleton height={40} radius={10} />
+    </SkeletonRegion>
+  );
+}
+
+function StandingCard({
+  xp,
+  solvedCount,
+  rank,
+  rankLoading,
+  continueTarget,
+}: {
+  xp: number;
+  solvedCount: number;
+  /** 0부터 센 순위. 순위표에 없으면 음수 */
+  rank: number;
+  rankLoading: boolean;
+  continueTarget: ContinueTarget | null;
+}) {
+  return (
+    <div className="standing-card">
+      <Link to="/profile" className="standing-link">
+        <h2>
+          내 요약
+          <span className="card-more" aria-hidden="true">
+            프로필 ›
+          </span>
+        </h2>
+      </Link>
+      <dl>
+        <div>
+          <dt>순위</dt>
+          <dd>
+            {rankLoading ? (
+              <Skeleton width={36} height={20} />
+            ) : rank >= 0 ? (
+              `${rank + 1}위`
+            ) : (
+              "—"
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt>XP</dt>
+          <dd>{xp.toLocaleString()}</dd>
+        </div>
+        <div>
+          <dt>해결한 문제</dt>
+          <dd>{solvedCount}개</dd>
+        </div>
+      </dl>
+      {continueTarget ? (
+        <div className="standing-continue">
+          <div className="standing-continue-title">
+            <strong>{continueTarget.title}</strong>
+            <DifficultyBadge difficulty={continueTarget.difficulty} />
+          </div>
+          <Link
+            className="button"
+            to={problemPath(continueTarget.slug)}
+            title={`${continueTarget.title} · ${continueTarget.label}`}
+          >
+            {continueTarget.label} <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+type FilterUpdate = Record<string, string | null>;
+
+/** 자주 쓰는 조건을 한 번에 거는 바로가기. 이미 그 조건이면 눌린 상태로 보인다. */
+function FinderGuide({
+  signedIn,
+  difficulties,
+  statuses,
+  onPick,
+}: {
+  signedIn: boolean;
+  difficulties: Difficulty[];
+  statuses: SolveState[];
+  onPick: (change: FilterUpdate) => void;
+}) {
+  const only = <T,>(values: T[], value: T) =>
+    values.length === 1 && values[0] === value;
+  const shortcuts: {
+    title: string;
+    hint: string;
+    pressed: boolean;
+    change: FilterUpdate;
+  }[] = [
+    {
+      title: "쉬운 난이도로 시작하기",
+      hint: "부담 없는 문제부터 차근차근",
+      pressed: only(difficulties, "BEGINNER"),
+      change: { d: "BEGINNER" },
+    },
+    {
+      title: "보통 난이도에 도전하기",
+      hint: "익숙해졌다면 한 단계 위로",
+      pressed: only(difficulties, "MEDIUM"),
+      change: { d: "MEDIUM" },
+    },
+    ...(signedIn
+      ? [
+          {
+            title: "아직 안 푼 문제만 보기",
+            hint: "새로운 문제에 집중해요",
+            pressed: only(statuses, "none") && !difficulties.length,
+            change: { s: "none", d: null },
+          },
+        ]
+      : []),
+  ];
+  return (
+    <div className="guide-card">
+      <h2>나에게 맞는 문제 찾기</h2>
+      <ol>
+        {shortcuts.map((item) => (
+          <li key={item.title}>
+            <button aria-pressed={item.pressed} onClick={() => onPick(item.change)}>
+              <strong>{item.title}</strong>
+              <span>{item.hint}</span>
+              <i className="row-chevron" aria-hidden="true">
+                ›
+              </i>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+const createSteps = ["문제 설명 쓰기", "예제와 숨김 테스트케이스 추가", "검수를 거쳐 공개"];
+
+function CreateCta() {
+  return (
+    <div className="guide-card create-cta">
+      <h2>직접 문제를 만들어 보세요</h2>
+      <p>
+        떠오른 아이디어를 문제로 만들어 다른 사람과 나눠 보세요. 설명과 예제,
+        채점용 테스트케이스까지 한 화면에서 만들 수 있어요.
+      </p>
+      <ol className="create-cta-steps">
+        {createSteps.map((step, index) => (
+          <li key={step}>
+            <span>{index + 1}</span>
+            {step}
+          </li>
+        ))}
+      </ol>
+      <Link className="button button-full" to="/problems/new">
+        문제 만들기 <span aria-hidden="true">→</span>
+      </Link>
     </div>
   );
 }
