@@ -37,6 +37,8 @@ import {
   type ProblemForm,
 } from "../problems/editor";
 import type { Difficulty, Problem } from "../types";
+
+type Review = ReturnType<typeof reviewForm>;
 import { difficultyOptions } from "../difficulty";
 
 interface ManagedProblem extends Problem {
@@ -96,6 +98,71 @@ function jumpTo(target: string) {
   );
 }
 
+/** 서버에 보낼 문제 내용(주소·공개 상태 제외) */
+function toContent(form: ProblemForm) {
+  return {
+    title: form.title.trim(),
+    statementMarkdown: composeStatement(form),
+    inputDescriptionMarkdown: form.inputDescription,
+    outputDescriptionMarkdown: form.outputDescription,
+    difficulty: form.difficulty,
+    timeLimitMs: form.timeLimitMs,
+    memoryLimitMb: form.memoryLimitMb,
+    testCases: form.cases.map(({ input, expectedOutput, isSample, score }) => ({
+      input,
+      expectedOutput,
+      isSample,
+      score,
+    })),
+  };
+}
+
+/**
+ * 새 문제의 주소가 이미 공개된 문제에 쓰이는지 잠시 뒤에 확인한다(초안 주소는 저장할 때 서버가 알려 준다).
+ * 주소가 바뀌면 서버가 알려 준 주소 오류도 지운다.
+ */
+function useSlugAvailability(slug: string, editing: boolean) {
+  const [slugTaken, setSlugTaken] = useState(false);
+  const [serverSlugError, setServerSlugError] = useState("");
+  useEffect(() => {
+    setServerSlugError("");
+    setSlugTaken(false);
+    if (editing || slug.length < 3 || !SLUG_PATTERN.test(slug)) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      api<Problem>(`/problems/by-slug/${slug}`)
+        .then(() => !cancelled && setSlugTaken(true))
+        .catch(() => undefined);
+    }, 500);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [slug, editing]);
+  return { slugTaken, serverSlugError, setServerSlugError };
+}
+
+/** 화면 위 단계 막대: 지금 보고 있는 구역의 id. 구역이 다시 그려지면(deps) 다시 지켜본다. */
+function useActiveSection(deps: unknown[]) {
+  const [active, setActive] = useState(sections[0].id);
+  useEffect(() => {
+    const targets = sections
+      .map((item) => document.getElementById(item.id))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (!targets.length || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.find((entry) => entry.isIntersecting);
+        if (visible) setActive(visible.target.id);
+      },
+      { rootMargin: "-25% 0px -65% 0px" },
+    );
+    targets.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, deps);
+  return active;
+}
+
 export function CreateProblemPage() {
   const { id } = useParams();
   const editing = Boolean(id);
@@ -113,8 +180,6 @@ export function CreateProblemPage() {
   );
   const [showRestored, setShowRestored] = useState(Boolean(restored));
   const [showErrors, setShowErrors] = useState(false);
-  const [slugTaken, setSlugTaken] = useState(false);
-  const [serverSlugError, setServerSlugError] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const [loading, setLoading] = useState(editing);
@@ -125,7 +190,6 @@ export function CreateProblemPage() {
     restored?.savedAt ?? null,
   );
   const [saveFailed, setSaveFailed] = useState(recovery.failed);
-  const [activeSection, setActiveSection] = useState(sections[0].id);
   const initialRef = useRef(snapshot(form));
   const initialFormRef = useRef(form);
   const doneRef = useRef(false);
@@ -220,40 +284,9 @@ export function CreateProblemPage() {
     saveDraft();
   }, [draft, dirty, loading, loadError]);
 
-  // 이미 공개된 주소인지 잠시 뒤에 확인한다(초안 주소는 저장할 때 서버가 알려 준다).
-  useEffect(() => {
-    setServerSlugError("");
-    setSlugTaken(false);
-    if (editing || form.slug.length < 3 || !SLUG_PATTERN.test(form.slug))
-      return;
-    let cancelled = false;
-    const timer = window.setTimeout(() => {
-      api<Problem>(`/problems/by-slug/${form.slug}`)
-        .then(() => !cancelled && setSlugTaken(true))
-        .catch(() => undefined);
-    }, 500);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [form.slug, editing]);
-
-  // 화면 위 단계 막대: 지금 보고 있는 구역을 강조한다.
-  useEffect(() => {
-    const targets = sections
-      .map((item) => document.getElementById(item.id))
-      .filter((el): el is HTMLElement => Boolean(el));
-    if (!targets.length || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.find((entry) => entry.isIntersecting);
-        if (visible) setActiveSection(visible.target.id);
-      },
-      { rootMargin: "-25% 0px -65% 0px" },
-    );
-    targets.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [loading, createdDraft]);
+  const { slugTaken, serverSlugError, setServerSlugError } =
+    useSlugAvailability(form.slug, editing);
+  const activeSection = useActiveSection([loading, createdDraft]);
 
   function changeCases(action: CaseAction) {
     doneRef.current = false;
@@ -292,23 +325,7 @@ export function CreateProblemPage() {
     setPending(true);
     saveDraft();
     const submittedDraft = draft;
-    const content = {
-      title: form.title.trim(),
-      statementMarkdown: composeStatement(form),
-      inputDescriptionMarkdown: form.inputDescription,
-      outputDescriptionMarkdown: form.outputDescription,
-      difficulty: form.difficulty,
-      timeLimitMs: form.timeLimitMs,
-      memoryLimitMb: form.memoryLimitMb,
-      testCases: form.cases.map(
-        ({ input, expectedOutput, isSample, score }) => ({
-          input,
-          expectedOutput,
-          isSample,
-          score,
-        }),
-      ),
-    };
+    const content = toContent(form);
     try {
       if (editing) {
         await api<Problem>(
@@ -364,6 +381,17 @@ export function CreateProblemPage() {
       pendingRef.current = false;
       if (mountedRef.current) setPending(false);
     }
+  }
+
+  /** 복구한 초안을 버리고 원본(새 문제는 빈 폼)으로 돌아간다. */
+  function discardRecovery() {
+    doneRef.current = true;
+    const previous = readProblemDraft(draftScope).draft;
+    if (previous) setSaveFailed(!clearProblemDraft(draftScope, previous));
+    setForm(editing ? initialFormRef.current : blankForm());
+    setSlugTouched(false);
+    setSavedAt(null);
+    setShowRestored(false);
   }
 
   function cancel() {
@@ -458,351 +486,38 @@ export function CreateProblemPage() {
             type="button"
             className="inline-button"
             disabled={pending}
-            onClick={() => {
-              doneRef.current = true;
-              const previous = readProblemDraft(draftScope).draft;
-              if (previous) setSaveFailed(!clearProblemDraft(draftScope, previous));
-              setForm(editing ? initialFormRef.current : blankForm());
-              setSlugTouched(false);
-              setSavedAt(null);
-              setShowRestored(false);
-            }}
+            onClick={discardRecovery}
           >
             {editing ? "복구 내용 버리기" : "지우고 새로 시작"}
           </button>
         </p>
       ) : null}
 
-      <nav className="step-nav" aria-label="작성 단계">
-        {sections.map((item, index) => (
-          <button
-            type="button"
-            key={item.id}
-            className={`${activeSection === item.id ? "active" : ""} ${stepDone[item.id] ? "done" : ""}`}
-            aria-current={activeSection === item.id ? "step" : undefined}
-            onClick={() => jumpTo(item.id)}
-          >
-            <span className="step-dot" aria-hidden="true">
-              {stepDone[item.id] ? "✓" : index + 1}
-            </span>
-            {item.label}
-          </button>
-        ))}
-      </nav>
+      <StepNav active={activeSection} done={stepDone} />
 
       <form onSubmit={submit} className="create-form" noValidate>
         <fieldset disabled={pending} style={{ display: "contents" }}>
-        <section className="form-card" id="sec-basic">
-          <h2>
-            <span className="step-num" aria-hidden="true">
-              1
-            </span>
-            기본 정보
-          </h2>
-          <div className="form-grid">
-            <div className="field-group span-2" id="f-title">
-              <div className="label-row">
-                <label htmlFor="problem-title" className="field-label">
-                  제목
-                </label>
-                <span className="required-mark" aria-hidden="true">
-                  필수
-                </span>
-              </div>
-              <input
-                id="problem-title"
-                value={form.title}
-                maxLength={150}
-                placeholder="예: 두 수의 합"
-                aria-required="true"
-                aria-invalid={Boolean(shown.title)}
-                onChange={(event) => {
-                  const title = event.target.value;
-                  patch({
-                    title,
-                    ...(!editing && !slugTouched
-                      ? { slug: slugify(title) }
-                      : {}),
-                  });
-                }}
-              />
-              {shown.title ? (
-                <span className="field-error" role="alert">
-                  {shown.title}
-                </span>
-              ) : null}
-            </div>
-            <div className="field-group span-2" id="f-slug">
-              <div className="label-row">
-                <label htmlFor="problem-slug" className="field-label">
-                  주소용 slug
-                </label>
-                <span className="required-mark" aria-hidden="true">
-                  필수
-                </span>
-              </div>
-              <input
-                id="problem-slug"
-                value={form.slug}
-                readOnly={editing}
-                maxLength={80}
-                placeholder="a-plus-b"
-                aria-required="true"
-                aria-invalid={Boolean(slugError)}
-                onChange={(event) => {
-                  setSlugTouched(true);
-                  patch({ slug: event.target.value.toLowerCase() });
-                }}
-              />
-              {slugError ? (
-                <span className="field-error" role="alert">
-                  {slugError}
-                </span>
-              ) : (
-                <span className="field-help">
-                  {editing
-                    ? "주소는 만든 뒤에 바꿀 수 없어요."
-                    : form.slug
-                      ? `문제 주소: /problems/${form.slug}`
-                      : "제목이 영문이면 자동으로 채워져요. 한글 제목은 직접 입력해 주세요."}
-                </span>
-              )}
-            </div>
-            <div className="field-group">
-              <span className="field-label">난이도</span>
-              <Select
-                ariaLabel="난이도"
-                value={form.difficulty}
-                options={difficultyOptions}
-                onChange={(next) => patch({ difficulty: next as Difficulty })}
-              />
-            </div>
-            <div className="field-group" id="f-limits">
-              <div className="limit-row">
-                <div className="field-group">
-                  <label htmlFor="problem-time" className="field-label">
-                    시간 제한 (ms)
-                  </label>
-                  <input
-                    id="problem-time"
-                    type="number"
-                    min={100}
-                    max={60000}
-                    value={
-                      Number.isNaN(form.timeLimitMs) ? "" : form.timeLimitMs
-                    }
-                    aria-invalid={Boolean(shown.timeLimitMs)}
-                    onChange={(event) =>
-                      patch({ timeLimitMs: Number(event.target.value) })
-                    }
-                  />
-                </div>
-                <div className="field-group">
-                  <label htmlFor="problem-memory" className="field-label">
-                    메모리 제한 (MB)
-                  </label>
-                  <input
-                    id="problem-memory"
-                    type="number"
-                    min={16}
-                    max={4096}
-                    value={
-                      Number.isNaN(form.memoryLimitMb) ? "" : form.memoryLimitMb
-                    }
-                    aria-invalid={Boolean(shown.memoryLimitMb)}
-                    onChange={(event) =>
-                      patch({ memoryLimitMb: Number(event.target.value) })
-                    }
-                  />
-                </div>
-              </div>
-              {shown.timeLimitMs || shown.memoryLimitMb ? (
-                <span className="field-error" role="alert">
-                  {shown.timeLimitMs ?? shown.memoryLimitMb}
-                </span>
-              ) : null}
-            </div>
-          </div>
-        </section>
+        <BasicInfoSection
+          form={form}
+          errors={shown}
+          slugError={slugError}
+          editing={editing}
+          slugTouched={slugTouched}
+          onSlugTouched={() => setSlugTouched(true)}
+          patch={patch}
+        />
 
-        <section className="form-card" id="sec-statement">
-          <h2>
-            <span className="step-num" aria-hidden="true">
-              2
-            </span>
-            문제 설명
-          </h2>
-          <div className="form-stack">
-            <MarkdownField
-              id="statement"
-              label="문제 본문 (Markdown)"
-              required
-              rows={8}
-              value={form.statement}
-              onChange={(statement) => patch({ statement })}
-              error={shown.statement}
-              placeholder="두 정수 A와 B가 주어질 때, A+B를 출력하는 프로그램을 작성하세요."
-              help="`코드`, **굵게**, 목록, 표를 쓸 수 있어요. 미리보기에서 풀이 화면과 같은 모양을 확인하세요."
-            />
-            <MarkdownField
-              id="input-desc"
-              label="입력 설명"
-              required
-              rows={4}
-              value={form.inputDescription}
-              onChange={(inputDescription) => patch({ inputDescription })}
-              error={shown.inputDescription}
-              placeholder="첫째 줄에 A와 B가 공백으로 구분되어 주어진다."
-            />
-            <MarkdownField
-              id="output-desc"
-              label="출력 설명"
-              required
-              rows={4}
-              value={form.outputDescription}
-              onChange={(outputDescription) => patch({ outputDescription })}
-              error={shown.outputDescription}
-              placeholder="첫째 줄에 A+B를 출력한다."
-            />
-            <details
-              className="optional-box"
-              open={Boolean(form.hint || form.source)}
-            >
-              <summary>힌트·출처 (선택)</summary>
-              <div className="form-stack">
-                <MarkdownField
-                  id="hint"
-                  label="힌트"
-                  rows={3}
-                  value={form.hint}
-                  onChange={(hint) => patch({ hint })}
-                  help="문제 본문 아래 ‘힌트’ 구역으로 보여요."
-                />
-                <div className="field-group">
-                  <label htmlFor="problem-source" className="field-label">
-                    출처
-                  </label>
-                  <input
-                    id="problem-source"
-                    value={form.source}
-                    maxLength={200}
-                    placeholder="예: 직접 출제, 2026 교내 대회"
-                    onChange={(event) => patch({ source: event.target.value })}
-                  />
-                </div>
-              </div>
-            </details>
-          </div>
-        </section>
+        <StatementSection form={form} errors={shown} patch={patch} />
 
-        <section className="form-card" id="sec-cases">
-          <div className="section-heading">
-            <div>
-              <h2>
-                <span className="step-num" aria-hidden="true">
-                  3
-                </span>
-                테스트케이스
-              </h2>
-              <p className="case-summary" id="f-cases" aria-live="polite">
-                <span className="case-pill sample">예제 {sampleCount}개</span>
-                <span className="case-pill hidden">숨김 {hiddenCount}개</span>
-                <span className="muted">
-                  예제는 문제 화면에 보이고, 숨김은 채점에만 사용돼요.
-                </span>
-              </p>
-            </div>
-            <div className="case-tools">
-              <button
-                type="button"
-                className="text-button"
-                onClick={() =>
-                  changeCases({
-                    type: "collapseAll",
-                    collapsed: !form.cases.every((item) => item.collapsed),
-                  })
-                }
-              >
-                {form.cases.every((item) => item.collapsed)
-                  ? "모두 펼치기"
-                  : "모두 접기"}
-              </button>
-            </div>
-          </div>
-          {shown.testCases ? (
-            <p className="field-error" role="alert">
-              {shown.testCases}
-            </p>
-          ) : null}
-          {form.cases.map((testCase, index) => (
-            <CaseEditor
-              key={testCase.key}
-              testCase={testCase}
-              index={index}
-              total={form.cases.length}
-              error={shown.cases[testCase.key]}
-              onEdit={changeCases}
-            />
-          ))}
-          <div className="case-add">
-            <button
-              type="button"
-              className="button button-outline"
-              onClick={() => changeCases({ type: "add", isSample: true })}
-            >
-              + 예제 추가
-            </button>
-            <button
-              type="button"
-              className="button button-outline"
-              onClick={() => changeCases({ type: "add", isSample: false })}
-            >
-              + 숨김 케이스 추가
-            </button>
-          </div>
-        </section>
+        <CasesSection
+          cases={form.cases}
+          errors={shown}
+          sampleCount={sampleCount}
+          hiddenCount={hiddenCount}
+          onEdit={changeCases}
+        />
 
-        <section className="form-card" id="sec-review">
-          <h2>
-            <span className="step-num" aria-hidden="true">
-              4
-            </span>
-            확인·저장
-          </h2>
-          <ul className="checklist" aria-label="저장 전 확인 목록">
-            {checklist.map((item) => (
-              <li key={item.label} className={item.ok ? "ok" : "todo"}>
-                <span className="check-mark" aria-hidden="true">
-                  {item.ok ? "✓" : "!"}
-                </span>
-                <span>{item.label}</span>
-                {item.ok ? (
-                  <span className="check-state">완료</span>
-                ) : (
-                  <button
-                    type="button"
-                    className="inline-button"
-                    onClick={() => jumpTo(item.target)}
-                  >
-                    입력하러 가기
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-          {warnings.length ? (
-            <ul className="check-warnings" aria-label="권장 사항">
-              {warnings.map((text) => (
-                <li key={text}>{text}</li>
-              ))}
-            </ul>
-          ) : null}
-          {error ? (
-            <p className="error-message" role="alert">
-              {error}
-            </p>
-          ) : null}
-        </section>
+        <ReviewSection checklist={checklist} warnings={warnings} error={error} />
 
         <div className="editor-bar">
           <p className="editor-status" role="status">
@@ -837,5 +552,406 @@ export function CreateProblemPage() {
         </fieldset>
       </form>
     </div>
+  );
+}
+
+function BasicInfoSection({
+  form,
+  errors: shown,
+  slugError,
+  editing,
+  slugTouched,
+  onSlugTouched,
+  patch,
+}: {
+  form: ProblemForm;
+  errors: FormErrors;
+  slugError: string;
+  editing: boolean;
+  slugTouched: boolean;
+  onSlugTouched: () => void;
+  patch: (next: Partial<ProblemForm>) => void;
+}) {
+  return (
+    <section className="form-card" id="sec-basic">
+      <h2>
+        <span className="step-num" aria-hidden="true">
+          1
+        </span>
+        기본 정보
+      </h2>
+      <div className="form-grid">
+        <div className="field-group span-2" id="f-title">
+          <div className="label-row">
+            <label htmlFor="problem-title" className="field-label">
+              제목
+            </label>
+            <span className="required-mark" aria-hidden="true">
+              필수
+            </span>
+          </div>
+          <input
+            id="problem-title"
+            value={form.title}
+            maxLength={150}
+            placeholder="예: 두 수의 합"
+            aria-required="true"
+            aria-invalid={Boolean(shown.title)}
+            onChange={(event) => {
+              const title = event.target.value;
+              patch({
+                title,
+                ...(!editing && !slugTouched
+                  ? { slug: slugify(title) }
+                  : {}),
+              });
+            }}
+          />
+          {shown.title ? (
+            <span className="field-error" role="alert">
+              {shown.title}
+            </span>
+          ) : null}
+        </div>
+        <div className="field-group span-2" id="f-slug">
+          <div className="label-row">
+            <label htmlFor="problem-slug" className="field-label">
+              주소용 slug
+            </label>
+            <span className="required-mark" aria-hidden="true">
+              필수
+            </span>
+          </div>
+          <input
+            id="problem-slug"
+            value={form.slug}
+            readOnly={editing}
+            maxLength={80}
+            placeholder="a-plus-b"
+            aria-required="true"
+            aria-invalid={Boolean(slugError)}
+            onChange={(event) => {
+              onSlugTouched();
+              patch({ slug: event.target.value.toLowerCase() });
+            }}
+          />
+          {slugError ? (
+            <span className="field-error" role="alert">
+              {slugError}
+            </span>
+          ) : (
+            <span className="field-help">
+              {editing
+                ? "주소는 만든 뒤에 바꿀 수 없어요."
+                : form.slug
+                  ? `문제 주소: /problems/${form.slug}`
+                  : "제목이 영문이면 자동으로 채워져요. 한글 제목은 직접 입력해 주세요."}
+            </span>
+          )}
+        </div>
+        <div className="field-group">
+          <span className="field-label">난이도</span>
+          <Select
+            ariaLabel="난이도"
+            value={form.difficulty}
+            options={difficultyOptions}
+            onChange={(next) => patch({ difficulty: next as Difficulty })}
+          />
+        </div>
+        <div className="field-group" id="f-limits">
+          <div className="limit-row">
+            <div className="field-group">
+              <label htmlFor="problem-time" className="field-label">
+                시간 제한 (ms)
+              </label>
+              <input
+                id="problem-time"
+                type="number"
+                min={100}
+                max={60000}
+                value={
+                  Number.isNaN(form.timeLimitMs) ? "" : form.timeLimitMs
+                }
+                aria-invalid={Boolean(shown.timeLimitMs)}
+                onChange={(event) =>
+                  patch({ timeLimitMs: Number(event.target.value) })
+                }
+              />
+            </div>
+            <div className="field-group">
+              <label htmlFor="problem-memory" className="field-label">
+                메모리 제한 (MB)
+              </label>
+              <input
+                id="problem-memory"
+                type="number"
+                min={16}
+                max={4096}
+                value={
+                  Number.isNaN(form.memoryLimitMb) ? "" : form.memoryLimitMb
+                }
+                aria-invalid={Boolean(shown.memoryLimitMb)}
+                onChange={(event) =>
+                  patch({ memoryLimitMb: Number(event.target.value) })
+                }
+              />
+            </div>
+          </div>
+          {shown.timeLimitMs || shown.memoryLimitMb ? (
+            <span className="field-error" role="alert">
+              {shown.timeLimitMs ?? shown.memoryLimitMb}
+            </span>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StatementSection({
+  form,
+  errors: shown,
+  patch,
+}: {
+  form: ProblemForm;
+  errors: FormErrors;
+  patch: (next: Partial<ProblemForm>) => void;
+}) {
+  return (
+    <section className="form-card" id="sec-statement">
+      <h2>
+        <span className="step-num" aria-hidden="true">
+          2
+        </span>
+        문제 설명
+      </h2>
+      <div className="form-stack">
+        <MarkdownField
+          id="statement"
+          label="문제 본문 (Markdown)"
+          required
+          rows={8}
+          value={form.statement}
+          onChange={(statement) => patch({ statement })}
+          error={shown.statement}
+          placeholder="두 정수 A와 B가 주어질 때, A+B를 출력하는 프로그램을 작성하세요."
+          help="`코드`, **굵게**, 목록, 표를 쓸 수 있어요. 미리보기에서 풀이 화면과 같은 모양을 확인하세요."
+        />
+        <MarkdownField
+          id="input-desc"
+          label="입력 설명"
+          required
+          rows={4}
+          value={form.inputDescription}
+          onChange={(inputDescription) => patch({ inputDescription })}
+          error={shown.inputDescription}
+          placeholder="첫째 줄에 A와 B가 공백으로 구분되어 주어진다."
+        />
+        <MarkdownField
+          id="output-desc"
+          label="출력 설명"
+          required
+          rows={4}
+          value={form.outputDescription}
+          onChange={(outputDescription) => patch({ outputDescription })}
+          error={shown.outputDescription}
+          placeholder="첫째 줄에 A+B를 출력한다."
+        />
+        <details
+          className="optional-box"
+          open={Boolean(form.hint || form.source)}
+        >
+          <summary>힌트·출처 (선택)</summary>
+          <div className="form-stack">
+            <MarkdownField
+              id="hint"
+              label="힌트"
+              rows={3}
+              value={form.hint}
+              onChange={(hint) => patch({ hint })}
+              help="문제 본문 아래 ‘힌트’ 구역으로 보여요."
+            />
+            <div className="field-group">
+              <label htmlFor="problem-source" className="field-label">
+                출처
+              </label>
+              <input
+                id="problem-source"
+                value={form.source}
+                maxLength={200}
+                placeholder="예: 직접 출제, 2026 교내 대회"
+                onChange={(event) => patch({ source: event.target.value })}
+              />
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+  );
+}
+
+function CasesSection({
+  cases,
+  errors: shown,
+  sampleCount,
+  hiddenCount,
+  onEdit,
+}: {
+  cases: ProblemForm["cases"];
+  errors: FormErrors;
+  sampleCount: number;
+  hiddenCount: number;
+  onEdit: (action: CaseAction) => void;
+}) {
+  const allCollapsed = cases.every((item) => item.collapsed);
+  return (
+    <section className="form-card" id="sec-cases">
+      <div className="section-heading">
+        <div>
+          <h2>
+            <span className="step-num" aria-hidden="true">
+              3
+            </span>
+            테스트케이스
+          </h2>
+          <p className="case-summary" id="f-cases" aria-live="polite">
+            <span className="case-pill sample">예제 {sampleCount}개</span>
+            <span className="case-pill hidden">숨김 {hiddenCount}개</span>
+            <span className="muted">
+              예제는 문제 화면에 보이고, 숨김은 채점에만 사용돼요.
+            </span>
+          </p>
+        </div>
+        <div className="case-tools">
+          <button
+            type="button"
+            className="text-button"
+            onClick={() =>
+              onEdit({
+                type: "collapseAll",
+                collapsed: !cases.every((item) => item.collapsed),
+              })
+            }
+          >
+            {cases.every((item) => item.collapsed)
+              ? "모두 펼치기"
+              : "모두 접기"}
+          </button>
+        </div>
+      </div>
+      {shown.testCases ? (
+        <p className="field-error" role="alert">
+          {shown.testCases}
+        </p>
+      ) : null}
+      {cases.map((testCase, index) => (
+        <CaseEditor
+          key={testCase.key}
+          testCase={testCase}
+          index={index}
+          total={cases.length}
+          error={shown.cases[testCase.key]}
+          onEdit={onEdit}
+        />
+      ))}
+      <div className="case-add">
+        <button
+          type="button"
+          className="button button-outline"
+          onClick={() => onEdit({ type: "add", isSample: true })}
+        >
+          + 예제 추가
+        </button>
+        <button
+          type="button"
+          className="button button-outline"
+          onClick={() => onEdit({ type: "add", isSample: false })}
+        >
+          + 숨김 케이스 추가
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function ReviewSection({
+  checklist,
+  warnings,
+  error,
+}: {
+  checklist: Review["checklist"];
+  warnings: string[];
+  error: string;
+}) {
+  return (
+    <section className="form-card" id="sec-review">
+      <h2>
+        <span className="step-num" aria-hidden="true">
+          4
+        </span>
+        확인·저장
+      </h2>
+      <ul className="checklist" aria-label="저장 전 확인 목록">
+        {checklist.map((item) => (
+          <li key={item.label} className={item.ok ? "ok" : "todo"}>
+            <span className="check-mark" aria-hidden="true">
+              {item.ok ? "✓" : "!"}
+            </span>
+            <span>{item.label}</span>
+            {item.ok ? (
+              <span className="check-state">완료</span>
+            ) : (
+              <button
+                type="button"
+                className="inline-button"
+                onClick={() => jumpTo(item.target)}
+              >
+                입력하러 가기
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+      {warnings.length ? (
+        <ul className="check-warnings" aria-label="권장 사항">
+          {warnings.map((text) => (
+            <li key={text}>{text}</li>
+          ))}
+        </ul>
+      ) : null}
+      {error ? (
+        <p className="error-message" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+/** 화면 위 단계 막대. 누르면 그 구역으로 옮겨 첫 입력 칸에 포커스한다. */
+function StepNav({
+  active: activeSection,
+  done: stepDone,
+}: {
+  active: string;
+  done: Review["stepDone"];
+}) {
+  return (
+    <nav className="step-nav" aria-label="작성 단계">
+      {sections.map((item, index) => (
+        <button
+          type="button"
+          key={item.id}
+          className={`${activeSection === item.id ? "active" : ""} ${stepDone[item.id] ? "done" : ""}`}
+          aria-current={activeSection === item.id ? "step" : undefined}
+          onClick={() => jumpTo(item.id)}
+        >
+          <span className="step-dot" aria-hidden="true">
+            {stepDone[item.id] ? "✓" : index + 1}
+          </span>
+          {item.label}
+        </button>
+      ))}
+    </nav>
   );
 }
