@@ -316,6 +316,15 @@ p {
   border-radius: var(--radius-panel);
   overflow: hidden;
 }
+/* 조건을 바꿔 새 목록을 받는 동안 앞선 목록을 지우지 않고 흐리게만 한다. */
+.problem-list.is-refreshing {
+  opacity: 0.55;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .problem-list {
+    transition: opacity 0.15s;
+  }
+}
 .problem-row {
   display: flex;
   align-items: center;

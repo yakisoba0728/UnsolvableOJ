@@ -138,7 +138,7 @@ export function ProblemsPage() {
   else if (reversed) request.set("reverse", "true");
   const requestKey = request.toString();
   const {
-    data: list,
+    data: loaded,
     loading,
     error,
     retry,
@@ -152,8 +152,15 @@ export function ProblemsPage() {
     EMPTY_PAGE,
     "문제를 불러오지 못했습니다.",
     [requestKey, session],
+    // 조건을 바꿔도 새 결과가 올 때까지 앞선 목록을 보여 주고(깜빡임 없음), 연달아 바꾸면 마지막 조건으로 한 번만 요청한다.
+    { keepPrevious: true, debounceMs: 150 },
   );
+  // 실패한 요청의 조건에는 앞선 목록을 보이지 않는다.
+  const list = error ? EMPTY_PAGE : loaded;
   const problems = list.items;
+  // 이미 보이는 목록이 있으면 새로 받는 동안 그대로 두고 흐리게만 한다. 보일 목록이 없을 때만 스켈레톤을 쓴다.
+  const refreshing = loading && problems.length > 0;
+  const showSkeleton = loading && !refreshing;
   // 태그 목록은 다시 받는 동안에도 앞서 받은 것을 보여 준다(고르는 칸이 사라졌다 생기지 않게).
   const lastTags = useRef<{ tag: string; count: number }[]>([]);
   if (!loading && list.facets?.tags) lastTags.current = list.facets.tags;
@@ -289,8 +296,9 @@ export function ProblemsPage() {
               ref={searchRef}
               type="search"
               className="search-input"
-              placeholder="문제 제목 검색"
+              placeholder="문제 제목·주소 검색"
               aria-label="문제 검색"
+              name="q"
               aria-keyshortcuts="/"
               maxLength={SEARCH_MAX}
               value={queryText}
@@ -323,7 +331,7 @@ export function ProblemsPage() {
               <SlideToggle
                 multiple
                 ariaLabel="풀이 상태 필터"
-                countsLoading={loading}
+                countsLoading={showSkeleton}
                 values={statuses}
                 options={statusChips.map((item) => ({
                   value: item.value,
@@ -433,9 +441,9 @@ export function ProblemsPage() {
             </div>
             <span
               className="total-count"
-              aria-hidden={loading ? undefined : true}
+              aria-hidden={showSkeleton ? undefined : true}
             >
-              {loading ? (
+              {showSkeleton ? (
                 <Skeleton width={80} height={14} />
               ) : (
                 pageRange((current - 1) * PAGE_SIZE, problems.length, total)
@@ -447,10 +455,13 @@ export function ProblemsPage() {
               </span>
             )}
           </div>
-          {loading ? (
+          {showSkeleton ? (
             <SkeletonRows count={8} />
           ) : problems.length ? (
-            <div className="problem-list data-list list-problems">
+            <div
+              className={`problem-list data-list list-problems${refreshing ? " is-refreshing" : ""}`}
+              aria-busy={refreshing || undefined}
+            >
               <div className="problem-head" aria-hidden="true">
                 <span>문제</span>
                 <span>난이도</span>

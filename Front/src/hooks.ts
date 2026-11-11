@@ -23,12 +23,15 @@ import type {
 /**
  * load가 있으면 요청해 결과·로딩·오류를 돌려준다. deps가 바뀌거나 retry를 부르면 이전 요청을 취소하고 다시 받는다.
  * deps가 바뀌면 다른 데이터이므로 initial로 비우고, retry는 새 값이 올 때까지 지금 값을 그대로 보여 준다.
+ * options.keepPrevious: deps가 바뀌어도 새 값이 올 때까지 앞선 값을 그대로 둔다(검색·필터를 바꿀 때 목록이 비었다 다시 생기지 않게).
+ * options.debounceMs: deps가 바뀐 뒤 이 시간 동안 더 바뀌지 않을 때만 요청한다(필터를 연달아 눌러도 요청은 한 번).
  */
 export function useRequest<T>(
   load: ((signal: AbortSignal) => Promise<T>) | null,
   initial: T,
   failure: string,
   deps: DependencyList,
+  options?: { keepPrevious?: boolean; debounceMs?: number },
 ) {
   const [data, setData] = useState(initial);
   const [loading, setLoading] = useState(Boolean(load));
@@ -38,28 +41,35 @@ export function useRequest<T>(
   useEffect(() => {
     const previous = lastDeps.current;
     lastDeps.current = deps;
-    if (
-      previous &&
-      (previous.length !== deps.length ||
-        deps.some((value, index) => !Object.is(value, previous[index])))
-    )
-      setData(initial);
+    const changed =
+      Boolean(previous) &&
+      (previous!.length !== deps.length ||
+        deps.some((value, index) => !Object.is(value, previous![index])));
+    if (changed && !options?.keepPrevious) setData(initial);
     setError("");
     setLoading(Boolean(load));
     if (!load) return;
     const controller = new AbortController();
-    load(controller.signal)
-      .then((value) => {
-        if (!controller.signal.aborted) setData(value);
-      })
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setError(cause instanceof Error ? cause.message : failure);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
+    const run = () =>
+      load(controller.signal)
+        .then((value) => {
+          if (!controller.signal.aborted) setData(value);
+        })
+        .catch((cause) => {
+          if (!controller.signal.aborted)
+            setError(cause instanceof Error ? cause.message : failure);
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setLoading(false);
+        });
+    // 처음 받을 때와 다시 시도할 때는 기다리지 않는다.
+    const wait = changed ? (options?.debounceMs ?? 0) : 0;
+    const timer = wait > 0 ? setTimeout(run, wait) : undefined;
+    if (wait <= 0) void run();
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [...deps, attempt]);
   const retry = useCallback(() => setAttempt((count) => count + 1), []);
   return { data, loading, error, retry };

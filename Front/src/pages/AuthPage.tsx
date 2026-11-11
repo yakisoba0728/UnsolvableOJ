@@ -68,6 +68,7 @@ export function AuthPage({ getNavigationVersion }: { getNavigationVersion: () =>
   function fieldProps(field: Field) {
     const message = shown(field);
     return {
+      name: field,
       "aria-invalid": message ? true : undefined,
       "aria-describedby": message ? `auth-${field}-error` : undefined,
       onBlur: () => setTouched((previous) => ({ ...previous, [field]: true })),
