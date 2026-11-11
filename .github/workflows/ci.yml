@@ -196,12 +196,12 @@ jobs:
       - name: Chromium regression tests
         if: ${{ !(inputs.full || github.event_name == 'schedule') }}
         working-directory: Front
-        run: npx --no-install playwright test --project=unit --project=chromium --project=chromium-slow --workers=2
+        run: npx --no-install playwright test --project=unit --project=chromium --project=chromium-slow --workers=4
       - name: Full browser regression tests
         if: ${{ (inputs.full || github.event_name == 'schedule') }}
         working-directory: Front
         # Firefox는 CI 시간을 줄이려고 뺀다. 필요하면 로컬에서 --project=firefox로 돌린다.
-        run: npx --no-install playwright test --project=unit --project=chromium --project=chromium-slow --project=webkit --workers=2
+        run: npx --no-install playwright test --project=unit --project=chromium --project=chromium-slow --project=webkit --workers=4
       - name: Failed browser test artifacts (disposable test data only)
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
