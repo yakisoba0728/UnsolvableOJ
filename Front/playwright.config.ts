@@ -8,6 +8,7 @@ const unitSpecs = [
   "page-range.spec.ts",
   "problem-editor.spec.ts",
   "solve-split.spec.ts",
+  "vibe-layout.spec.ts",
 ];
 
 // 오래 걸리는 다중 탭·지연 로딩 회귀 시나리오. 로컬 기본 실행(npm run test:e2e)에서는 빼고

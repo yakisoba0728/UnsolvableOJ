@@ -49,8 +49,10 @@ export function VibePage() {
         session.accessToken,
       );
       const path = `/vibe/attempts/${attempt.id}`;
-      if (tab) tab.location.href = `${window.location.origin}${path}`;
-      else window.location.assign(path);
+      // 기다리는 사이 빈 탭을 닫았다면 연습은 만들어졌으니 오류 없이 목록에 남는다(최근 연습에서 이어 연다).
+      if (tab) {
+        if (!tab.closed) tab.location.href = `${window.location.origin}${path}`;
+      } else window.location.assign(path);
     } catch (cause) {
       tab?.close();
       setError(

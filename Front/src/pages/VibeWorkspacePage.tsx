@@ -3,8 +3,10 @@ import { Link, useParams } from "react-router-dom";
 import {
   Check,
   ChevronRight,
+  Clock,
   FileCode2,
   GitCompareArrows,
+  Lock,
   Play,
   Save,
   Send,
@@ -17,6 +19,22 @@ import { useUnsavedChanges } from "../useUnsavedChanges";
 import { CodeEditor, type CodeEditorHandle } from "../components/CodeEditor";
 import { addUnits, remapUnits } from "../editor/codeEditing";
 import { SkeletonRows } from "../components/Skeleton";
+import {
+  DEFAULT_COLUMNS,
+  DEFAULT_DOCK_STATE,
+  DOCK_COLLAPSED,
+  HANDLE,
+  columnsFromKey,
+  columnsFromLeftPointer,
+  columnsFromRightPointer,
+  dockFromKey,
+  dockFromPointer,
+  percentOf,
+  visibleWidths,
+  type ColumnState,
+  type DockState,
+  type Side,
+} from "../vibeLayout";
 import type {
   ProjectFiles,
   VibeAttempt,
@@ -54,6 +72,18 @@ export function VibeWorkspacePage() {
   const [proposal, setProposal] = useState<VibeMessage | null>(null);
   const [showChanges, setShowChanges] = useState(false);
   const [reload, setReload] = useState(0);
+  const [dockTab, setDockTab] = useState<"tests" | "reflection">("tests");
+  // 세 열과 하단 칸의 크기는 저장하지 않는다(풀이 화면과 같다): 화면을 열 때마다 기본값으로 시작한다.
+  const [columns, setColumns] = useState<ColumnState>(DEFAULT_COLUMNS);
+  const columnsRef = useRef(columns);
+  const [dock, setDock] = useState<DockState>(DEFAULT_DOCK_STATE);
+  const dockRef = useRef(dock);
+  const [gridWidth, setGridWidth] = useState(0);
+  const [bodyHeight, setBodyHeight] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const endDragRef = useRef<(() => void) | null>(null);
   const mounted = useRef(true);
   const rowRef = useRef(attempt);
   rowRef.current = attempt;
@@ -82,6 +112,23 @@ export function VibeWorkspacePage() {
     !same(editedFiles(attempt, files), editedFiles(attempt, attempt.files)),
   );
   useUnsavedChanges(dirty, bypass);
+  const ready = Boolean(attempt);
+  // 두 영역의 크기를 지켜봐서, 창이 줄어 가운데가 모자라면 양옆을 접는다.
+  useEffect(() => {
+    const grid = gridRef.current;
+    const body = bodyRef.current;
+    if (!grid || !body) return;
+    const update = () => {
+      setGridWidth(grid.getBoundingClientRect().width);
+      setBodyHeight(body.getBoundingClientRect().height);
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(grid);
+    observer.observe(body);
+    return () => observer.disconnect();
+  }, [ready]);
+  useEffect(() => () => endDragRef.current?.(), []);
 
   function accept(next: VibeAttempt, replaceFiles = true) {
     rowRef.current = next;
@@ -285,6 +332,84 @@ export function VibeWorkspacePage() {
     }
   }
 
+  function applyColumns(next: ColumnState) {
+    columnsRef.current = next;
+    setColumns(next);
+  }
+  function applyDock(next: DockState) {
+    dockRef.current = next;
+    setDock(next);
+  }
+  function startDrag(
+    event: React.PointerEvent<HTMLDivElement>,
+    area: HTMLElement | null,
+    update: (event: PointerEvent, rect: DOMRect) => void,
+  ) {
+    // 보조 버튼과 두 번째 손가락의 입력은 무시한다
+    if (!area || event.button !== 0 || !event.isPrimary) return;
+    event.preventDefault();
+    endDragRef.current?.();
+    const handle = event.currentTarget;
+    const pointerId = event.pointerId;
+    handle.setPointerCapture(pointerId);
+    handle.focus({ preventScroll: true });
+    setDragging(true);
+    const move = (moveEvent: PointerEvent) => {
+      if (moveEvent.pointerId === pointerId)
+        update(moveEvent, area.getBoundingClientRect());
+    };
+    const end = () => {
+      handle.removeEventListener("pointermove", move);
+      handle.removeEventListener("pointerup", end);
+      handle.removeEventListener("pointercancel", end);
+      handle.removeEventListener("lostpointercapture", end);
+      endDragRef.current = null;
+      setDragging(false);
+    };
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener("pointerup", end);
+    handle.addEventListener("pointercancel", end);
+    handle.addEventListener("lostpointercapture", end);
+    endDragRef.current = end;
+  }
+  function onColumnKey(side: Side, event: React.KeyboardEvent) {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    const next = columnsFromKey(
+      side,
+      event.key,
+      gridWidth || 1,
+      columnsRef.current,
+    );
+    if (!next) return;
+    event.preventDefault();
+    applyColumns(next);
+  }
+  function onDockKey(event: React.KeyboardEvent) {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    const next = dockFromKey(event.key, bodyHeight || 1, dockRef.current);
+    if (!next) return;
+    event.preventDefault();
+    applyDock(next);
+  }
+  function onFileTabKey(event: React.KeyboardEvent, names: string[]) {
+    const index = names.indexOf(path);
+    const target =
+      event.key === "ArrowRight"
+        ? names[(index + 1) % names.length]
+        : event.key === "ArrowLeft"
+          ? names[(index - 1 + names.length) % names.length]
+          : event.key === "Home"
+            ? names[0]
+            : event.key === "End"
+              ? names[names.length - 1]
+              : null;
+    if (!target) return;
+    event.preventDefault();
+    setPath(target);
+    setShowChanges(false);
+    document.getElementById(`vibe-file-tab-${names.indexOf(target)}`)?.focus();
+  }
+
   if (!attempt)
     return (
       <div className="page-width page-body">
@@ -324,6 +449,45 @@ export function VibeWorkspacePage() {
             "user"
           ? "작성한 프롬프트"
           : "파트너 답변";
+  const names = Object.keys(files);
+  const remaining = Date.parse(attempt.deadlineAt) - now;
+  const timerState = attempt.submittedAt
+    ? "제출 완료"
+    : attempt.enterprise?.finished
+      ? "시험 종료"
+      : expired
+        ? "시간 종료"
+        : null;
+  const seconds = Math.max(0, Math.floor(remaining / 1000));
+  const timerText = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+  const timerLevel =
+    remaining < 5 * 60_000
+      ? " is-danger"
+      : remaining < 10 * 60_000
+        ? " is-warn"
+        : "";
+  // 매초 읽지 않도록 타이머는 조용히 두고, 10·5·1분을 지날 때만 한 번 알린다.
+  const timerNotice = timerState
+    ? ""
+    : remaining <= 60_000
+      ? "남은 시간이 1분 이하입니다."
+      : remaining <= 5 * 60_000
+        ? "남은 시간이 5분 이하입니다."
+        : remaining <= 10 * 60_000
+          ? "남은 시간이 10분 이하입니다."
+          : "";
+  const widths = visibleWidths(
+    columns,
+    gridWidth || Number.POSITIVE_INFINITY,
+  );
+  const leftWidth = gridWidth ? widths.left : columns.leftHidden ? 0 : columns.left;
+  const rightWidth = gridWidth
+    ? widths.right
+    : columns.rightHidden
+      ? 0
+      : columns.right;
+  const activeDock = attempt.submittedAt ? "tests" : dockTab;
+  const dockHeight = dock.collapsed ? DOCK_COLLAPSED : dock.height;
   return (
     <div className="vibe-workspace page-width">
       <header className="vibe-workspace-header">
@@ -339,19 +503,24 @@ export function VibeWorkspacePage() {
             ← {attempt?.enterprise ? "기업 테스트 응시" : "바이브코딩"}
           </Link>
           <h1>{attempt.challenge.title}</h1>
-          <p>
-            <span>
-              {attempt.submittedAt
-                ? "제출 완료"
-                : attempt.enterprise?.finished
-                  ? "시험 종료"
-                  : expired
-                    ? "시간 종료"
-                    : `남은 시간 ${Math.floor((Date.parse(attempt.deadlineAt) - now) / 60000)}분 ${Math.floor((Date.parse(attempt.deadlineAt) - now) / 1000) % 60}초`}
-            </span>
-          </p>
         </div>
         <div className="vibe-workspace-actions">
+          <p
+            className={`ent-timer vibe-timer${timerState ? " is-closed" : timerLevel}`}
+            role="timer"
+            aria-live="off"
+          >
+            <Clock size={16} aria-hidden="true" />
+            {timerState ?? (
+              <>
+                <span>남은 시간</span>
+                <strong>{timerText}</strong>
+              </>
+            )}
+          </p>
+          <span className="sr-only" role="status">
+            {timerNotice}
+          </span>
           <span
             className={saveError ? "vibe-save-error" : "muted"}
             role="status"
@@ -561,35 +730,26 @@ export function VibeWorkspacePage() {
           ) : null}
         </section>
       ) : null}
-      <div className="vibe-workspace-grid">
-        <aside className="vibe-task-panel">
-          <h2>해야 할 일</h2>
+      <div
+        ref={gridRef}
+        className={`vibe-workspace-grid${dragging ? " is-dragging" : ""}`}
+        style={
+          {
+            "--vibe-columns": `${leftWidth}px ${HANDLE}px minmax(0, 1fr) ${HANDLE}px ${rightWidth}px`,
+          } as React.CSSProperties
+        }
+      >
+        <aside
+          id="vibe-task-panel"
+          className={`vibe-task-panel${leftWidth === 0 ? " is-hidden" : ""}`}
+          aria-labelledby="vibe-task-title"
+        >
+          <h2 id="vibe-task-title">해야 할 일</h2>
           <ol>
             {attempt.challenge.requirements.map((requirement) => (
               <li key={requirement}>{requirement}</li>
             ))}
           </ol>
-          <h2>프로젝트 파일</h2>
-          <nav className="vibe-files" aria-label="프로젝트 파일">
-            {Object.keys(files).map((name) => (
-              <button
-                type="button"
-                key={name}
-                aria-current={path === name ? "page" : undefined}
-                className={path === name ? "active" : ""}
-                onClick={() => {
-                  setPath(name);
-                  setShowChanges(false);
-                }}
-              >
-                <FileCode2 size={15} aria-hidden="true" />
-                <span>{name}</span>
-                {!attempt.editablePaths.includes(name) ? (
-                  <small>읽기</small>
-                ) : null}
-              </button>
-            ))}
-          </nav>
           <div className="vibe-task-note">
             공개 테스트로 기능을 확인하고, 최종 제출에서 숨김 테스트도
             검사합니다. 작성한 테스트는 결과물 점수에 직접 더하지 않습니다.
@@ -610,12 +770,92 @@ export function VibeWorkspacePage() {
             ))}
           </details>
         </aside>
-        <section className="vibe-code-panel" aria-label="코드 작업">
-          <div className="vibe-panel-toolbar">
-            <strong>{path}</strong>
-            <div>
+        <div
+          className="solve-resizer"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="해야 할 일과 코드 작성 크기 조절"
+          aria-controls="vibe-task-panel"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={percentOf(leftWidth, gridWidth)}
+          tabIndex={0}
+          title="좌우로 끌어 크기를 조절해요. 너무 줄이면 접히고, 끌어서 다시 열 수 있어요. (←→ 키, 더블클릭으로 원래대로)"
+          onPointerDown={(event) =>
+            startDrag(event, gridRef.current, (move, rect) =>
+              applyColumns(
+                columnsFromLeftPointer(
+                  move.clientX - rect.left,
+                  rect.width,
+                  columnsRef.current,
+                ),
+              ),
+            )
+          }
+          onKeyDown={(event) => onColumnKey("left", event)}
+          onDoubleClick={() =>
+            applyColumns({
+              ...columnsRef.current,
+              left: DEFAULT_COLUMNS.left,
+              leftHidden: false,
+            })
+          }
+        >
+          <span className="solve-resizer-grip" aria-hidden="true" />
+        </div>
+        <section
+          id="vibe-code-panel"
+          className="vibe-code-panel"
+          aria-label="코드 작업"
+        >
+          <div className="vibe-file-bar">
+            <div
+              className="vibe-file-tabs"
+              role="tablist"
+              aria-label="프로젝트 파일"
+            >
+              {names.map((name, index) => {
+                const editable = attempt.editablePaths.includes(name);
+                const changed = files[name] !== attempt.files[name];
+                return (
+                  <button
+                    type="button"
+                    role="tab"
+                    key={name}
+                    id={`vibe-file-tab-${index}`}
+                    aria-selected={path === name}
+                    aria-controls="vibe-editor-panel"
+                    tabIndex={path === name ? 0 : -1}
+                    className={`vibe-file-tab${path === name ? " active" : ""}`}
+                    onClick={() => {
+                      setPath(name);
+                      setShowChanges(false);
+                    }}
+                    onKeyDown={(event) => onFileTabKey(event, names)}
+                  >
+                    <FileCode2 size={14} aria-hidden="true" />
+                    <span>{name}</span>
+                    {!editable ? (
+                      <>
+                        <Lock size={12} aria-hidden="true" />
+                        <span className="sr-only">읽기 전용</span>
+                      </>
+                    ) : changed ? (
+                      <i
+                        className="vibe-file-dot"
+                        role="img"
+                        aria-label="저장 전 변경"
+                      />
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="vibe-file-actions">
               <button
-                className="text-button"
+                className="vibe-icon-button"
+                title="되돌리기"
+                aria-label="되돌리기"
                 disabled={
                   Boolean(busy) ||
                   remoteBusy ||
@@ -625,130 +865,293 @@ export function VibeWorkspacePage() {
                 }
                 onClick={() => void action("변경을 되돌리는 중…", "undo")}
               >
-                <Undo2 size={15} aria-hidden="true" />
-                되돌리기
+                <Undo2 size={16} aria-hidden="true" />
               </button>
               <button
-                className="text-button"
+                className="vibe-icon-button"
+                title="변경 비교"
+                aria-label="변경 비교"
                 disabled={!proposal}
                 aria-pressed={showChanges}
                 onClick={() => setShowChanges((v) => !v)}
               >
-                <GitCompareArrows size={15} aria-hidden="true" />
-                변경 비교
+                <GitCompareArrows size={16} aria-hidden="true" />
               </button>
             </div>
           </div>
-          {showChanges && proposal ? (
-            <div className="vibe-diff">
-              {Object.entries(selectedProposal).map(([name, content]) => (
-                <section key={name}>
-                  <h3>{name}</h3>
-                  <div className="vibe-diff-columns">
-                    <div>
-                      <h4>현재 코드</h4>
-                      <pre>{files[name]}</pre>
-                    </div>
-                    <div>
-                      <h4>제안한 변경안</h4>
-                      <pre>{content}</pre>
-                    </div>
-                  </div>
-                </section>
-              ))}
-            </div>
-          ) : readOnly ? (
-            <pre
-              className="vibe-readonly"
-              tabIndex={0}
-              aria-label={`${path} 코드`}
+          <div className="vibe-code-body" ref={bodyRef}>
+            <div
+              id="vibe-editor-panel"
+              role="tabpanel"
+              aria-labelledby={`vibe-file-tab-${Math.max(0, names.indexOf(path))}`}
+              className="vibe-editor-area"
             >
-              {files[path]}
-            </pre>
-          ) : (
-            <fieldset
-              disabled={Boolean(busy) || remoteBusy}
-              className="vibe-editor-fieldset"
-            >
-              <legend className="sr-only">{path} 편집</legend>
-              <CodeEditor
-                key={path}
-                ref={editorRef}
-                language="TYPESCRIPT"
-                value={files[path] ?? ""}
-                fontSize={14}
-                onChange={change}
-                onCursorChange={() => {}}
-                syncUnits={(value, added = []) => {
-                  const next = addUnits(
-                    remapUnits(
-                      units.current.positions,
-                      units.current.source,
+            {showChanges && proposal ? (
+              <div className="vibe-diff">
+                {Object.entries(selectedProposal).map(([name, content]) => (
+                  <section key={name}>
+                    <h3>{name}</h3>
+                    <div className="vibe-diff-columns">
+                      <div>
+                        <h4>현재 코드</h4>
+                        <pre>{files[name]}</pre>
+                      </div>
+                      <div>
+                        <h4>제안한 변경안</h4>
+                        <pre>{content}</pre>
+                      </div>
+                    </div>
+                  </section>
+                ))}
+              </div>
+            ) : readOnly ? (
+              <pre
+                className="vibe-readonly"
+                tabIndex={0}
+                aria-label={`${path} 코드`}
+              >
+                {files[path]}
+              </pre>
+            ) : (
+              <fieldset
+                disabled={Boolean(busy) || remoteBusy}
+                className="vibe-editor-fieldset"
+              >
+                <legend className="sr-only">{path} 편집</legend>
+                <CodeEditor
+                  key={path}
+                  ref={editorRef}
+                  language="TYPESCRIPT"
+                  value={files[path] ?? ""}
+                  fontSize={14}
+                  onChange={change}
+                  onCursorChange={() => {}}
+                  syncUnits={(value, added = []) => {
+                    const next = addUnits(
+                      remapUnits(
+                        units.current.positions,
+                        units.current.source,
+                        value,
+                      ),
+                      added,
                       value,
+                    );
+                    units.current = { source: value, positions: next };
+                    return next;
+                  }}
+                />
+              </fieldset>
+            )}
+            </div>
+            <div
+              className="solve-resizer is-horizontal"
+              role="separator"
+              aria-orientation="horizontal"
+              aria-label="코드 편집기와 실행·회고 크기 조절"
+              aria-controls="vibe-dock"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={dock.collapsed ? 0 : percentOf(dockHeight, bodyHeight)}
+              tabIndex={0}
+              title="위아래로 끌어 크기를 조절해요. 너무 줄이면 이름줄만 남고, 끌어서 다시 열 수 있어요. (↑↓ 키, 더블클릭으로 원래대로)"
+              onPointerDown={(event) =>
+                startDrag(event, bodyRef.current, (move, rect) =>
+                  applyDock(
+                    dockFromPointer(
+                      move.clientY - rect.top,
+                      rect.height,
+                      dockRef.current,
                     ),
-                    added,
-                    value,
-                  );
-                  units.current = { source: value, positions: next };
-                  return next;
-                }}
-              />
-            </fieldset>
-          )}
-          <section className="vibe-test-panel" aria-labelledby="vibe-tests">
-            <div className="vibe-panel-toolbar">
-              <h2 id="vibe-tests">실행과 테스트</h2>
-              <button
-                className="button button-small button-outline"
+                  ),
+                )
+              }
+              onKeyDown={onDockKey}
+              onDoubleClick={() => applyDock(DEFAULT_DOCK_STATE)}
+            >
+              <span className="solve-resizer-grip" aria-hidden="true" />
+            </div>
+            <section
+              id="vibe-dock"
+              className={`vibe-dock${dock.collapsed ? " is-collapsed" : ""}`}
+              style={{ flexBasis: dockHeight }}
+              aria-label="실행과 회고"
+            >
+              <div className="vibe-panel-toolbar vibe-dock-bar">
+                <div
+                  role="tablist"
+                  aria-label="실행과 회고"
+                  className="vibe-dock-tabs"
+                  onKeyDown={(event) => {
+                    if (
+                      attempt.submittedAt ||
+                      (event.key !== "ArrowLeft" && event.key !== "ArrowRight")
+                    )
+                      return;
+                    event.preventDefault();
+                    const next = activeDock === "tests" ? "reflection" : "tests";
+                    setDockTab(next);
+                    document.getElementById(`vibe-dock-tab-${next}`)?.focus();
+                  }}
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    id="vibe-dock-tab-tests"
+                    aria-selected={activeDock === "tests"}
+                    tabIndex={activeDock === "tests" ? 0 : -1}
+                    aria-controls="vibe-dock-panel"
+                    className={`tab-button${activeDock === "tests" ? " active" : ""}`}
+                    onClick={() => {
+                      setDockTab("tests");
+                      applyDock({ ...dockRef.current, collapsed: false });
+                    }}
+                  >
+                    실행과 테스트
+                  </button>
+                  {!attempt.submittedAt ? (
+                    <button
+                      type="button"
+                      role="tab"
+                      id="vibe-dock-tab-reflection"
+                      aria-selected={activeDock === "reflection"}
+                      tabIndex={activeDock === "reflection" ? 0 : -1}
+                      aria-controls="vibe-dock-panel"
+                      className={`tab-button${activeDock === "reflection" ? " active" : ""}`}
+                      onClick={() => {
+                        setDockTab("reflection");
+                        applyDock({ ...dockRef.current, collapsed: false });
+                      }}
+                    >
+                      회고 <small>{reflection.trim() ? "작성 중" : "선택"}</small>
+                    </button>
+                  ) : null}
+                </div>
+                {activeDock === "tests" ? (
+                  <button
+                    className="button button-small button-outline"
+                    disabled={
+                      Boolean(busy) ||
+                      remoteBusy ||
+                      closed ||
+                      !attempt.availability.runner ||
+                      attempt.remainingRuns <= 0
+                    }
+                    onClick={() => void action("공개 테스트 실행 중…", "runs")}
+                  >
+                    <Play size={14} aria-hidden="true" />
+                    테스트 실행
+                  </button>
+                ) : null}
+              </div>
+              <div
+                id="vibe-dock-panel"
+                role="tabpanel"
+                aria-labelledby={`vibe-dock-tab-${activeDock}`}
+                className="vibe-dock-body"
+                hidden={dock.collapsed}
+              >
+                {activeDock === "tests" ? (
+                  <>
+                {!attempt.availability.runner ? (
+                  <p className="vibe-panel-note">
+                    실행기가 아직 준비되지 않았습니다. 작성한 코드는 저장할 수
+                    있습니다.
+                  </p>
+                ) : latestRun ? (
+                  <div id={`vibe-${latestRun.id}`}>
+                    <p className="vibe-panel-note">
+                      r{latestRun.revision}의 실행 결과
+                      {latestRun.revision !== attempt.revision || dirty
+                        ? " · 현재 코드는 실행 뒤 변경되었습니다."
+                        : ""}
+                    </p>
+                    <Checks checks={latestRun.checks} />
+                  </div>
+                ) : (
+                  <p className="vibe-panel-note">
+                    코드를 수정한 뒤 테스트를 실행해 보세요. {attempt.remainingRuns}
+                    회 남았습니다.
+                  </p>
+                )}
+                <details className="vibe-run-history">
+                  <summary>이전 실행 기록</summary>
+                  {attempt.runs.slice(0, -1).map((run) => (
+                    <div id={`vibe-${run.id}`} key={run.id}>
+                      <strong>
+                        r{run.revision} ·{" "}
+                        {new Date(run.createdAt).toLocaleTimeString("ko-KR")}
+                      </strong>
+                      <Checks checks={run.checks} />
+                    </div>
+                  ))}
+                </details>
+                  </>
+                ) : (
+                  <div className="vibe-reflection">
+              <label htmlFor="vibe-reflection">
+                제출 전 짧은 회고 <span>선택</span>
+              </label>
+              <p>
+                무엇을 고쳤고, 어떤 근거로 동작을 확인했나요? 실제 기록과 함께
+                피드백에 활용됩니다.
+              </p>
+              <textarea
+                id="vibe-reflection"
+                rows={3}
+                maxLength={3000}
+                value={reflection}
+                onChange={(event) => setReflection(event.target.value)}
                 disabled={
                   Boolean(busy) ||
                   remoteBusy ||
-                  closed ||
-                  !attempt.availability.runner ||
-                  attempt.remainingRuns <= 0
+                  Boolean(attempt.enterprise?.finished)
                 }
-                onClick={() => void action("공개 테스트 실행 중…", "runs")}
-              >
-                <Play size={14} aria-hidden="true" />
-                테스트 실행
-              </button>
-            </div>
-            {!attempt.availability.runner ? (
-              <p className="vibe-panel-note">
-                실행기가 아직 준비되지 않았습니다. 작성한 코드는 저장할 수
-                있습니다.
-              </p>
-            ) : latestRun ? (
-              <div id={`vibe-${latestRun.id}`}>
-                <p className="vibe-panel-note">
-                  r{latestRun.revision}의 실행 결과
-                  {latestRun.revision !== attempt.revision || dirty
-                    ? " · 현재 코드는 실행 뒤 변경되었습니다."
-                    : ""}
-                </p>
-                <Checks checks={latestRun.checks} />
+                placeholder="제안받은 내용 중 검토한 점과 직접 확인한 테스트를 적어 보세요."
+              />
+                  </div>
+                )}
               </div>
-            ) : (
-              <p className="vibe-panel-note">
-                코드를 수정한 뒤 테스트를 실행해 보세요. {attempt.remainingRuns}
-                회 남았습니다.
-              </p>
-            )}
-            <details className="vibe-run-history">
-              <summary>이전 실행 기록</summary>
-              {attempt.runs.slice(0, -1).map((run) => (
-                <div id={`vibe-${run.id}`} key={run.id}>
-                  <strong>
-                    r{run.revision} ·{" "}
-                    {new Date(run.createdAt).toLocaleTimeString("ko-KR")}
-                  </strong>
-                  <Checks checks={run.checks} />
-                </div>
-              ))}
-            </details>
-          </section>
+            </section>
+          </div>
         </section>
-        <aside className="vibe-chat-panel" aria-labelledby="vibe-chat-title">
+        <div
+          className="solve-resizer"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="코드 작성과 코딩 파트너 크기 조절"
+          aria-controls="vibe-chat-panel"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={percentOf(rightWidth, gridWidth)}
+          tabIndex={0}
+          title="좌우로 끌어 크기를 조절해요. 너무 줄이면 접히고, 끌어서 다시 열 수 있어요. (←→ 키, 더블클릭으로 원래대로)"
+          onPointerDown={(event) =>
+            startDrag(event, gridRef.current, (move, rect) =>
+              applyColumns(
+                columnsFromRightPointer(
+                  move.clientX - rect.left,
+                  rect.width,
+                  columnsRef.current,
+                ),
+              ),
+            )
+          }
+          onKeyDown={(event) => onColumnKey("right", event)}
+          onDoubleClick={() =>
+            applyColumns({
+              ...columnsRef.current,
+              right: DEFAULT_COLUMNS.right,
+              rightHidden: false,
+            })
+          }
+        >
+          <span className="solve-resizer-grip" aria-hidden="true" />
+        </div>
+        <aside
+          id="vibe-chat-panel"
+          className={`vibe-chat-panel${rightWidth === 0 ? " is-hidden" : ""}`}
+          aria-labelledby="vibe-chat-title"
+        >
           <div className="vibe-panel-toolbar">
             <h2 id="vibe-chat-title">코딩 파트너</h2>
             <span>{attempt.remainingAiRequests}회 남음</span>
@@ -879,30 +1282,6 @@ export function VibeWorkspacePage() {
           ) : null}
         </aside>
       </div>
-      {!attempt.submittedAt ? (
-        <section className="vibe-reflection">
-          <label htmlFor="vibe-reflection">
-            제출 전 짧은 회고 <span>선택</span>
-          </label>
-          <p>
-            무엇을 고쳤고, 어떤 근거로 동작을 확인했나요? 실제 기록과 함께
-            피드백에 활용됩니다.
-          </p>
-          <textarea
-            id="vibe-reflection"
-            rows={3}
-            maxLength={3000}
-            value={reflection}
-            onChange={(event) => setReflection(event.target.value)}
-            disabled={
-              Boolean(busy) ||
-              remoteBusy ||
-              Boolean(attempt.enterprise?.finished)
-            }
-            placeholder="제안받은 내용 중 검토한 점과 직접 확인한 테스트를 적어 보세요."
-          />
-        </section>
-      ) : null}
     </div>
   );
 }
