@@ -1,8 +1,8 @@
 import { useAllProblems } from "../hooks";
 import { problemPath } from "../paths";
-import { difficultyLabel } from "../difficulty";
 import { seededShuffle } from "../shuffle";
 import { MissionBody, type MissionCardData } from "./MissionBody";
+import { DifficultyBadge } from "./DifficultyBadge";
 
 const seedOf = (text: string) =>
   [...text].reduce((hash, char) => (Math.imul(hash, 31) + char.charCodeAt(0)) | 0, 0);
@@ -34,11 +34,7 @@ export function XpBoostCard({
         description: (
           <>
             {problem.title} ·{" "}
-            <span
-              className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
-            >
-              {difficultyLabel(problem.difficulty)}
-            </span>
+            <DifficultyBadge difficulty={problem.difficulty} />
           </>
         ),
         target: 1,

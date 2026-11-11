@@ -34,6 +34,7 @@ import {
   difficultyLabel,
   difficultyOptions,
 } from "../difficulty";
+import { DifficultyBadge } from "../components/DifficultyBadge";
 
 const PAGE_SIZE = 20;
 
@@ -435,11 +436,7 @@ export function ProblemsPage() {
                         )}
                       </span>
                     </span>
-                    <span
-                      className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
-                    >
-                      {difficultyLabel(problem.difficulty)}
-                    </span>
+                    <DifficultyBadge difficulty={problem.difficulty} />
                     <span className="problem-limit" data-label="푼 사람">
                       {problem.solverCount ?? 0}명
                     </span>
@@ -550,11 +547,7 @@ export function ProblemsPage() {
                   <div className="standing-continue-title">
                     <strong>{continueTarget.title}</strong>
                     {continueDifficulty ? (
-                      <span
-                        className={`difficulty difficulty-${continueDifficulty.toLowerCase()}`}
-                      >
-                        {difficultyLabel(continueDifficulty)}
-                      </span>
+                      <DifficultyBadge difficulty={continueDifficulty} />
                     ) : null}
                   </div>
                   <Link

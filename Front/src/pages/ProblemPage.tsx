@@ -35,7 +35,7 @@ import {
   type SplitMode,
   type SplitState,
 } from "../solveSplit";
-import { difficultyLabel } from "../difficulty";
+import { DifficultyBadge } from "../components/DifficultyBadge";
 
 type Tab = "statement" | "history";
 
@@ -442,11 +442,7 @@ function OwnedProblemPage() {
             질문 작성
           </Link>
         </nav>
-        <span
-          className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
-        >
-          {difficultyLabel(problem.difficulty)}
-        </span>
+        <DifficultyBadge difficulty={problem.difficulty} />
       </div>
       <div
         ref={gridRef}

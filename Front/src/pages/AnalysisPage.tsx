@@ -29,6 +29,7 @@ import { analysisPath } from "../paths";
 import { newSeed, seededShuffle } from "../shuffle";
 import type { Difficulty } from "../types";
 import { difficultyLabel } from "../difficulty";
+import { DifficultyBadge } from "../components/DifficultyBadge";
 
 const difficultyOptions: Difficulty[] = [
   "BEGINNER",
@@ -379,11 +380,7 @@ export function AnalysisPage() {
                         )}
                       </span>
                     </span>
-                    <span
-                      className={`difficulty difficulty-${item.difficulty.toLowerCase()}`}
-                    >
-                      {difficultyLabel(item.difficulty)}
-                    </span>
+                    <DifficultyBadge difficulty={item.difficulty} />
                     <span className="problem-limit" data-label="분류">
                       {item.topic}
                     </span>
@@ -448,11 +445,7 @@ export function AnalysisPage() {
               <div className="standing-continue">
                 <div className="standing-continue-title">
                   <strong>{next.title}</strong>
-                  <span
-                    className={`difficulty difficulty-${next.difficulty.toLowerCase()}`}
-                  >
-                    {difficultyLabel(next.difficulty)}
-                  </span>
+                  <DifficultyBadge difficulty={next.difficulty} />
                 </div>
                 <Link
                   className="button"

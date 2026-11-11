@@ -18,7 +18,7 @@ import {
 } from "../hooks";
 import { LANGUAGES } from "../types";
 import { problemPath } from "../paths";
-import { difficultyLabel } from "../difficulty";
+import { DifficultyBadge } from "../components/DifficultyBadge";
 
 export function HomePage() {
   const { session } = useAuth();
@@ -270,11 +270,7 @@ export function HomePage() {
               to={problemPath(problem.slug)}
               key={problem.id}
             >
-              <span
-                className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
-              >
-                {difficultyLabel(problem.difficulty)}
-              </span>
+              <DifficultyBadge difficulty={problem.difficulty} />
               <strong>{problem.title}</strong>
               <small>
                 {problem.timeLimitMs}ms · {problem.memoryLimitMb}MB

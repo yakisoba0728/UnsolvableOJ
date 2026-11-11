@@ -10,8 +10,8 @@ import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
 import { useDocumentTitle } from "../hooks";
 import { analysisPath } from "../paths";
-import { difficultyLabel } from "../difficulty";
 import { api } from "../api";
+import { DifficultyBadge } from "../components/DifficultyBadge";
 
 const LETTERS = ["A", "B", "C", "D"];
 // 문제 풀이 화면의 에디터와 같은 값을 써서 글꼴 크기가 두 화면에서 이어진다.
@@ -206,11 +206,7 @@ function AnalysisQuestion({
       <PageHeader
         title={question.title}
         badge={
-          <span
-            className={`difficulty difficulty-${question.difficulty.toLowerCase()}`}
-          >
-            {difficultyLabel(question.difficulty)}
-          </span>
+          <DifficultyBadge difficulty={question.difficulty} />
         }
         description={`${question.kind} · ${question.language} · ${question.topic}`}
       />
