@@ -126,7 +126,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSession(next);
           return next.accessToken;
         } catch (cause) {
-          // 잠금을 못 쓰는 브라우저에서 다른 탭이 먼저 회전했다면 그 탭이 저장한 세션을 쓴다.
+          // 잠금을 못 쓰거나 다른 탭의 저장이 늦게 보이는 브라우저(Firefox)에서 다른 탭이 먼저 회전했다면 그 탭이 저장한 세션을 쓴다.
+          // 아직 안 보이면 서버는 409를 주고, 세션을 지우지 않은 채 던져 storage 이벤트로 새 세션을 받는다.
           const after = readSaved();
           if (
             after &&

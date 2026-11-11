@@ -96,7 +96,11 @@ describe('Refresh tokens and temporary passwords (e2e)', () => {
     expect(second).toMatchObject({ remember: true, user: { id: solver.id } });
     await http().get(`${base}/users/me`).set(bearer(second.accessToken)).expect(200);
 
-    // 이미 쓴 first를 다시 내면 탈취로 보고, 정상 사용자가 가진 second까지 끊는다.
+    // 유예(10초)가 지난 뒤 이미 쓴 first를 다시 내면 탈취로 보고, 정상 사용자가 가진 second까지 끊는다.
+    await db.query(
+      "UPDATE refresh_tokens SET revoked_at = revoked_at - interval '1 minute' WHERE user_id = $1 AND revoked_at IS NOT NULL",
+      [solver.id],
+    );
     await refresh(first.refreshToken).expect(401);
     await refresh(second.refreshToken).expect(401);
     // 다른 로그인(계열)은 영향을 받지 않는다.
@@ -104,6 +108,17 @@ describe('Refresh tokens and temporary passwords (e2e)', () => {
       remembered = body;
     });
     await refresh('not-a-real-token').expect(401);
+  });
+
+  it('answers a token rotated moments ago with 409 and keeps the login when tabs race to refresh', async () => {
+    // 로그인은 분당 10회라 새로 로그인하지 않고 remembered 로그인을 쓴다.
+    const used = remembered.refreshToken;
+    // 잠금 없이 동시에, 또는 앞 탭의 저장이 늦게 보여 잠금 뒤에 같은 토큰을 다시 보내는 경우.
+    const racing = await Promise.all([refresh(used), refresh(used)]);
+    expect(racing.map((response) => response.status)).toEqual(expect.arrayContaining([200, 409]));
+    await refresh(used).expect(409);
+    const next = racing.find((response) => response.status === 200)!.body as Session;
+    remembered = (await refresh(next.refreshToken).expect(200)).body;
   });
 
   it('lists login devices without token values and logs out one or all other devices at once', async () => {
