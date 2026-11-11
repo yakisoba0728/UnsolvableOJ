@@ -43,6 +43,8 @@ type Tab = "statement" | "history" | "editorial";
 const fontKey = "unsolvable-oj-editor-font-v1";
 const FONT_MIN = 11;
 const FONT_MAX = 20;
+/** 서버가 받는 소스 코드 길이 상한(제출 DTO의 sourceCode). 넘으면 보내기 전에 알린다. */
+const SOURCE_MAX = 200_000;
 
 /** Tab으로 넣은 들여쓰기 한 단계의 위치 목록(초안 옆에 저장해, 새로고침 뒤에도 Backspace가 한 단계씩 지운다). */
 function unitsKey(ownerId: string | null, problemId: string, language: Language) {
@@ -286,6 +288,12 @@ function OwnedProblemPage() {
     event.preventDefault();
     // Ctrl/⌘+Enter로도 제출되므로 버튼 비활성화만으로는 중복·빈 코드 제출을 막을 수 없다.
     if (!problem || !session || submittingRef.current || !source.trim()) return;
+    if (source.length > SOURCE_MAX) {
+      setSubmitError(
+        `코드는 ${SOURCE_MAX.toLocaleString()}자 이하여야 제출할 수 있어요. 지금은 ${source.length.toLocaleString()}자입니다.`,
+      );
+      return;
+    }
     submittingRef.current = true;
     const requestedFor = problem.id;
     setSubmitting(true);
@@ -774,7 +782,12 @@ function OwnedProblemPage() {
               {session ? (
                 <>
                   <span className="editor-note">
-                    {source.trim() ? (
+                    {source.length > SOURCE_MAX ? (
+                      <>
+                        코드가 너무 길어요 · {source.length.toLocaleString()} /{" "}
+                        {SOURCE_MAX.toLocaleString()}자
+                      </>
+                    ) : source.trim() ? (
                       <>
                         제출하면 전체 테스트 케이스로 채점합니다 ·{" "}
                         <kbd>Ctrl/⌘ + Enter</kbd>
@@ -785,7 +798,9 @@ function OwnedProblemPage() {
                   </span>
                   <button
                     className="button"
-                    disabled={submitting || !source.trim()}
+                    disabled={
+                      submitting || !source.trim() || source.length > SOURCE_MAX
+                    }
                   >
                     {submitting ? "제출 중…" : "제출하고 채점하기 →"}
                   </button>

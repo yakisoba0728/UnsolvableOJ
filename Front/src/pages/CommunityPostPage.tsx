@@ -705,7 +705,7 @@ export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersi
                         </form>
                       ) : (
                         <div className="markdown answer-body">
-                          <ProblemMarkdown>{answer.body}</ProblemMarkdown>
+                          <ProblemMarkdown headingOffset={2}>{answer.body}</ProblemMarkdown>
                         </div>
                       )}
                       <small className="muted">
@@ -775,7 +775,7 @@ function PostContent({
   return (
     <>
       <div className="markdown post-body">
-        <ProblemMarkdown>{body}</ProblemMarkdown>
+        <ProblemMarkdown headingOffset={1}>{body}</ProblemMarkdown>
       </div>
       {code ? (
         <div className="markdown post-body post-code">
