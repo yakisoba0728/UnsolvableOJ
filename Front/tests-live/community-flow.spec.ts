@@ -80,9 +80,10 @@ test("two real accounts write, answer, vote, follow, accept, edit and delete a c
     await writer.page.getByLabel(/^제목/).fill(`${title} 수정`);
     await writer.page.getByRole("button", { name: "수정 저장", exact: true }).click();
     await expect(writer.page.getByRole("heading", { name: `${title} 수정`, exact: true })).toBeVisible();
-    writer.page.once("dialog", (dialog) => dialog.accept());
     await writer.page.getByRole("button", { name: "글 관리" }).click();
     await writer.page.getByRole("menuitem", { name: "삭제" }).click();
+    // 삭제 확인은 화면 안 확인 창이다.
+    await writer.page.getByRole("dialog").getByRole("button", { name: "삭제", exact: true }).click();
     await expect(writer.page).toHaveURL(/\/community$/);
     expect((await request.get(`/api/v1/community/posts/${id}`)).status()).toBe(404);
     id = "";
