@@ -114,6 +114,8 @@ test("the my-submissions title column stays readable between 881 and 1100px", as
 test("the grading result panel can be resized by dragging or with arrow keys, and remembers its height", async ({
   page,
 }) => {
+  // 움직임 줄이기의 0.01ms 전환은 높이를 한 프레임 늦게 바꿔, 끌기 직후에 재는 이 테스트와 맞지 않는다.
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await authenticate(page);
   const submitted = {
     id: "submission-id",

@@ -53,14 +53,16 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
   await page.getByLabel("소스 코드").fill("print(sum(map(int,input().split())))");
   await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
   const panel = page.getByRole("region", { name: "채점 결과", exact: true });
-  await expect(panel.getByRole("status")).toHaveText("성공", { timeout: 30_000 });
+  // 복사 버튼도 role=status 안내를 두므로 전체 판정 알약만 본다.
+  await expect(panel.locator(".verdict").first()).toHaveText("성공", { timeout: 30_000 });
   await expect(page.getByText("2 / 2", { exact: true })).toBeVisible();
   await expect(page.locator(".case-result")).toHaveCount(1);
   await expect(page.locator(".case-result")).not.toContainText("5 7");
   await panel.getByRole("link", { name: "자세히 보기" }).click();
   await expect(page).toHaveURL(/\/submissions\/[a-f0-9-]+$/);
   await page.reload();
-  await expect(page.getByText("성공", { exact: true })).toBeVisible();
+  // 테스트별 결과 표에도 판정이 있으므로 맨 위의 전체 판정만 본다.
+  await expect(page.getByText("성공", { exact: true }).first()).toBeVisible();
 
   await page.goto("/profile");
   await expect(page.getByText("10 / 100 XP", { exact: false })).toBeVisible();
@@ -73,7 +75,7 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
   await page.getByRole("button", { name: "제출하고 채점하기 →" }).click();
   expect((await wrongRequest).postDataJSON()).toEqual({ language: "PYTHON", sourceCode: "print(0)" });
   try {
-    await expect(panel.getByRole("status")).toHaveText("틀림", { timeout: 30_000 });
+    await expect(panel.locator(".verdict").first()).toHaveText("틀림", { timeout: 30_000 });
   } catch (error) {
     // Only this disposable test's public outputs; never dump sessions or request headers.
     console.error("Actual judging details:", await panel.innerText());

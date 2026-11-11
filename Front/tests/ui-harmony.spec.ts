@@ -326,16 +326,25 @@ test("post cards with one post do not reserve a second slide or show dead naviga
 
 test("result memory uses the list unit and copy preserves trailing newlines", async ({
   page,
-  context,
 }) => {
-  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  // Firefox·WebKit에는 clipboard 권한을 줄 수 없어, 읽어 보는 대신 writeText에 넘긴 값을 본다.
+  await page.addInitScript(() =>
+    Object.defineProperty(navigator.clipboard, "writeText", {
+      value: (text: string) => {
+        (window as unknown as { copied: string }).copied = text;
+        return Promise.resolve();
+      },
+    }),
+  );
   await page.goto("/submissions/h1");
   await expect(page.locator(".result-stats")).toContainText("C++");
   await expect(page.locator(".result-stats")).toContainText("14.0MB");
   await page.getByRole("button", { name: "입력 복사", exact: true }).click();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
-    "1 2\n",
-  );
+  await expect
+    .poll(() =>
+      page.evaluate(() => (window as unknown as { copied?: string }).copied),
+    )
+    .toBe("1 2\n");
 });
 
 test("clipboard rejection keeps the input and gives a usable fallback", async ({
@@ -482,6 +491,8 @@ test("analysis storage descriptions distinguish accounts from guest browser reco
 test("harmonized pages fit narrow and intermediate widths and keep editor focus visible", async ({
   page,
 }) => {
+  // 5개 너비 × 6개 화면을 차례로 여므로 Firefox에서는 기본 30초를 넘긴다.
+  test.slow();
   await mockMissions(page);
   for (const width of [320, 390, 768, 1101, 1440]) {
     await page.setViewportSize({ width, height: 900 });
