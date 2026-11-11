@@ -32,8 +32,11 @@ export function CardSlider({ title, description, label, count, children }: CardS
     const el = track.current;
     if (!el) return;
     update();
+    // 트랙 크기가 그대로여도 카드 크기가 바뀌면(늦게 적용된 스타일·글꼴 등) 넘칠 폭이 달라진다.
+    // 트랙과 함께 카드도 지켜본다. 카드가 바뀌면 count가 바뀌어 이 효과가 다시 돈다.
     const observer = new ResizeObserver(update);
     observer.observe(el);
+    Array.from(el.children).forEach((child) => observer.observe(child));
     el.addEventListener("scroll", update, { passive: true });
 
     // 세로 휠을 가로 이동으로 바꾼다. 더 갈 곳이 없으면(양 끝) 페이지 스크롤에 맡긴다.

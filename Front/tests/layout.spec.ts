@@ -99,6 +99,55 @@ test("the home problem slider stays inside the page container and fades only on 
   await expect(area).not.toHaveClass(/can-forward/);
 });
 
+test("the slider re-measures its fades when the cards change size without the track resizing", async ({
+  page,
+}) => {
+  await authenticate(page);
+  await page.setViewportSize({ width: 1440, height: 1400 });
+  await page.route(/\/api\/v1\/problems(\?.*)?$/, (route) =>
+    route.fulfill({
+      json: {
+        items: Array.from({ length: 12 }, (_, index) => ({
+          ...problem,
+          id: `p-${index}`,
+          slug: `p-${index}`,
+          title: `문제 ${index + 1}`,
+        })),
+        page: 1,
+        limit: 100,
+        total: 12,
+        totalPages: 1,
+      },
+    }),
+  );
+  await page.goto("/");
+  const area = page.locator(".slider-area");
+  await expect(page.locator(".slider-track .problem-card").first()).toBeVisible();
+  // 카드 높이를 먼저 고정해, 아래에서 폭만 바뀌고 트랙 크기는 그대로이게 한다.
+  await page.addStyleTag({
+    content: ".slider-track > .problem-card { height: 180px !important; overflow: hidden; }",
+  });
+  const track = page.locator(".slider-track");
+  const before = (await track.boundingBox())!;
+  await expect(area).toHaveClass(/can-forward/);
+
+  // 트랙 크기는 그대로 두고 카드만 줄여 모두 한 화면에 들어오게 한다(늦게 적용된 스타일·글꼴과 같은 상황).
+  await page.addStyleTag({
+    content: ".slider-track > .problem-card { flex-basis: 40px !important; min-width: 0 !important; }",
+  });
+  const after = (await track.boundingBox())!;
+  expect(after.width).toBe(before.width);
+  expect(after.height).toBe(before.height);
+  await expect(area).not.toHaveClass(/can-forward/);
+  await expect(page.locator(".slider-fade.right")).toHaveClass(/hidden/);
+
+  // 다시 커지면 더 볼 카드가 있다고 알린다.
+  await page.addStyleTag({
+    content: ".slider-track > .problem-card { flex-basis: 340px !important; }",
+  });
+  await expect(area).toHaveClass(/can-forward/);
+});
+
 test("the collapsed menu opens as a full-width panel right under the header on narrow screens", async ({
   page,
 }) => {
