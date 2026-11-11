@@ -78,31 +78,39 @@ test.describe("problem list: changing a filter", () => {
     ).toBeGreaterThan(0);
   });
 
-  test("rapid filter clicks send one request for the last condition", async ({
+  test("rapid filter clicks send one request for the last condition, only after the debounce", async ({
     page,
   }) => {
+    // 실제 시간에 기대지 않도록 시계를 직접 움직인다(느린 CI에서도 같은 결과).
+    // install만으로는 가짜 시계가 실제 속도로 계속 흐르므로, 목록을 받은 뒤 멈춘다.
+    await page.clock.install({ time: new Date("2026-11-11T00:00:00") });
     const requests = await mockProblemList(page, items);
     await page.goto("/problems");
     await expect(rows(page)).toHaveCount(20);
+    await page.clock.pauseAt(new Date("2026-11-11T01:00:00"));
     requests.length = 0;
+    const filtered = () => requests.filter((params) => params.has("difficulty"));
 
-    await page.evaluate(async () => {
+    // 서로 다른 칩만 연달아 누른다: 같은 칩을 다시 누르면 선택 해제(토글)라 렌더가 늦을 때 결과가 달라진다.
+    await page.evaluate(() => {
       const group = document.querySelector('[aria-label="난이도 필터"]')!;
-      const click = (label: string) =>
+      for (const label of ["입문", "쉬움", "보통", "어려움"]) {
         [...group.querySelectorAll("button")]
           .find((button) => button.textContent?.startsWith(label))!
           .click();
-      // 매번 다른 칩을 누른다. 같은 칩을 다시 누르면 앞 클릭이 아직 그려지지 않은 느린 CI에서 '단독 선택 해제'로 읽혀 조건이 비워진다.
-      for (const label of ["입문", "쉬움", "보통", "어려움"]) {
-        click(label);
-        await new Promise((resolve) => setTimeout(resolve, 20));
       }
     });
     await expect(page).toHaveURL(/[?&]d=HARD(&|$)/);
+
+    // 디바운스(150ms) 안에는 아무 요청도 나가지 않는다.
+    await page.clock.runFor(100);
+    expect(filtered()).toHaveLength(0);
+    // 지나면 마지막 조건 하나만 나간다.
+    await page.clock.runFor(100);
+    await expect
+      .poll(() => filtered().map((params) => params.get("difficulty")))
+      .toEqual(["HARD"]);
     await expect(page.locator(".total-count")).toHaveText("1 - 15/15");
-    await page.waitForTimeout(400);
-    const filtered = requests.filter((params) => params.has("difficulty"));
-    expect(filtered.map((params) => params.get("difficulty"))).toEqual(["HARD"]);
   });
 
   test("a failed request never leaves the previous list standing under the error", async ({
