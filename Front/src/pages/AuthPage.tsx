@@ -146,11 +146,6 @@ export function AuthPage({ getNavigationVersion }: { getNavigationVersion: () =>
           문제를 고르고, 코드를 제출하고, 판정을 확인하세요. 한 문제씩 쌓아가는
           기록이 시작됩니다.
         </p>
-        <div className="intro-decoration" aria-hidden="true">
-          <span>01</span>
-          <span>02</span>
-          <span>03</span>
-        </div>
       </section>
       <section className="auth-card">
         <div className="card-kicker">계정</div>

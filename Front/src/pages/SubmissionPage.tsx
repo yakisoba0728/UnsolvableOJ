@@ -166,6 +166,16 @@ export function SubmissionPage() {
                 <Link
                   className="button"
                   to={problemPath(submission.problem.slug)}
+                  state={
+                    submission.sourceCode
+                      ? {
+                          restore: {
+                            language: submission.language,
+                            sourceCode: submission.sourceCode,
+                          },
+                        }
+                      : undefined
+                  }
                 >
                   코드 수정하기
                 </Link>
