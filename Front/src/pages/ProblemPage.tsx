@@ -3,7 +3,7 @@ import { verdictLabel } from "../verdict";
 import { savedTime, useDocumentTitle } from "../hooks";
 import { Select } from "../components/Select";
 import { ProblemMarkdown } from "../components/ProblemMarkdown";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { api, ApiError } from "../api";
 import { useAuth } from "../auth";
@@ -70,6 +70,16 @@ export function ProblemPage() {
 
 function OwnedProblemPage() {
   const { slug } = useParams();
+  // 제출 결과의 "코드 수정하기"가 넘긴, 그 제출의 언어와 코드
+  const location = useLocation();
+  const navigate = useNavigate();
+  const restoreRef = useRef(
+    (
+      location.state as {
+        restore?: { language: Language; sourceCode: string };
+      } | null
+    )?.restore ?? null,
+  );
   const [problem, setProblem] = useState<Problem | null>(null);
   useDocumentTitle(problem?.title);
   const [loading, setLoading] = useState(true);
@@ -163,6 +173,33 @@ function OwnedProblemPage() {
   // 문제가 바뀌거나 불러와지면 저장된 초안을 복원한다.
   useEffect(() => {
     if (!problem) return;
+    const fromSubmission = restoreRef.current;
+    if (fromSubmission) {
+      // 제출 코드로 시작한다. 언어가 다르면 언어만 바꾸고, 바뀐 언어로 다시 이 효과가 돌 때 코드를 넣는다.
+      if (fromSubmission.language !== language) {
+        setLanguage(fromSubmission.language);
+        return;
+      }
+      restoreRef.current = null;
+      // 새로고침하면 편집한 내용이 제출 코드로 되돌아가지 않도록 state를 비운다.
+      navigate(`${location.pathname}${location.search}`, {
+        replace: true,
+        state: null,
+      });
+      const written = writeSourceDraft(
+        ownerId,
+        problem.id,
+        language,
+        fromSubmission.sourceCode,
+      );
+      setSource(fromSubmission.sourceCode);
+      setSavedAt(written.savedAt);
+      setDraftLoaded(false);
+      setSaveFailed(written.failed);
+      unitsRef.current = [];
+      unitsBaseRef.current = fromSubmission.sourceCode;
+      return;
+    }
     const draft = readSourceDraft(ownerId, problem.id, language);
     const restored = draft.value ?? starter(language);
     setSource(restored);
