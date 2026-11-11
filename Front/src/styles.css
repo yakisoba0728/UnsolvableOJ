@@ -2486,6 +2486,23 @@ input,
 }
 .menu-button {
   display: none;
+  flex-shrink: 0;
+}
+.mobile-signout {
+  display: none;
+}
+@media (max-width: 480px) {
+  .header-signout {
+    display: none;
+  }
+  .main-nav .mobile-signout {
+    display: block;
+    min-height: 48px;
+    padding: 0 12px;
+    text-align: left;
+    color: var(--color-ink-600);
+    font-size: 16px;
+  }
 }
 
 /* A1. 헤더: 메뉴가 들어갈 폭이 없으면(1100px 미만) 접는다. 계정 영역은 항상 보인다 */
@@ -5008,38 +5025,30 @@ h3 {
   }
 }
 
-/* 문제 목록: 문제 만들기 안내 카드 (작성자·관리자) */
-.create-cta p {
-  color: var(--color-ink-600);
-  /* 문제 만들기 카드도 같은 규격 */
-  margin: 0 0 12px;
-  font-size: 13px;
-  line-height: 1.6;
-}
-.create-cta .create-cta-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--color-ink-700);
-  margin-bottom: 16px;
-}
-.create-cta .create-cta-steps li {
+.problem-authoring {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
 }
-.create-cta .create-cta-steps span {
-  display: inline-grid;
-  place-items: center;
-  flex: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  font-size: 12px;
-  font-weight: var(--weight-title);
+.problem-authoring strong {
+  font-size: 15px;
+}
+.problem-authoring p {
+  margin: 6px 0 0;
+  color: var(--color-ink-600);
+  font-size: 13px;
+}
+.problem-authoring-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 /* ===== 문제 목록 오른쪽 카드: 하나의 규격(안쪽 여백 20 · 제목 16/700 · 카드 간격 16) ===== */

@@ -629,7 +629,7 @@ test("an odd page number in the address never shifts the list off a page boundar
     "-3": "1 - 10/16",
     abc: "1 - 10/16",
     "99": "11 - 16/16",
-    "1e9": "11 - 16/16",
+    "1e9": "1 - 10/16",
   };
   for (const [value, text] of Object.entries(expected)) {
     await page.goto(`/community?q=ZZ&page=${encodeURIComponent(value)}`);

@@ -24,6 +24,7 @@ const webkitSpecs = [
   "auth.spec.ts",
   "editor-focus.spec.ts",
   "layout.spec.ts",
+  "live-qa-followups.spec.ts",
   "session-refresh.spec.ts",
   "ui-harmony.spec.ts",
 ];
@@ -33,7 +34,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: process.env.CI ? 4 : undefined,
   reporter: [
     ["list"],
     ["html", { open: "never" }],

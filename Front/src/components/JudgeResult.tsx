@@ -3,6 +3,10 @@ import { CopyButton } from "./CopyButton";
 import { verdictLabel } from "../verdict";
 import { api, ApiError } from "../api";
 import { LANGUAGE_LABELS, type Session, type Submission } from "../types";
+import {
+  invalidResourceIdMessage,
+  isInvalidResourceId,
+} from "../resourceErrors";
 
 /** 채점기의 bytes.rstrip()과 맞춘다: 끝에 붙은 ASCII 공백만 무시한다. */
 const normalizeOutput = (text: string) => text.replace(/[\t\n\v\f\r ]+$/, "");
@@ -38,6 +42,7 @@ export function useSubmissionResult(
   const [retryIndex, setRetryIndex] = useState(0);
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [retrying, setRetrying] = useState(false);
+  const [invalidId, setInvalidId] = useState(false);
   const identity = `${session?.accessToken ?? ""}:${id ?? ""}`;
   const identityRef = useRef(identity);
   const retry = useCallback(() => setRetryIndex((value) => value + 1), []);
@@ -50,6 +55,7 @@ export function useSubmissionResult(
     }
     setError("");
     setRetrying(false);
+    setInvalidId(false);
     if (!session || !id) return;
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -93,10 +99,14 @@ export function useSubmissionResult(
               (cause.status >= 500 && cause.status <= 599)));
         const retry = transient && failures < 5;
         setRetrying(retry);
+        const malformed = isInvalidResourceId(cause);
+        setInvalidId(malformed);
         setError(
-          (cause instanceof Error
-            ? cause.message
-            : "결과를 불러오지 못했습니다.") +
+          (malformed
+            ? invalidResourceIdMessage
+            : cause instanceof Error
+              ? cause.message
+              : "결과를 불러오지 못했습니다.") +
             (retry ? " 잠시 후 다시 확인합니다." : ""),
         );
         if (retry) {
@@ -123,6 +133,7 @@ export function useSubmissionResult(
     error: current ? error : "",
     retry,
     retrying,
+    invalidId: Boolean(current && invalidId),
     lastUpdated: current ? lastUpdated : null,
   };
 }
@@ -132,11 +143,13 @@ export function JudgeRefreshNotice({
   retry,
   retrying,
   lastUpdated,
+  invalidId = false,
 }: {
   error: string;
   retry: () => void;
   retrying: boolean;
   lastUpdated: number | null;
+  invalidId?: boolean;
 }) {
   return (
     <>
@@ -146,7 +159,7 @@ export function JudgeRefreshNotice({
           {lastUpdated ? (
             <p>표시된 결과는 마지막 확인 당시 상태입니다.</p>
           ) : null}
-          {!retrying ? (
+          {!retrying && !invalidId ? (
             <button
               type="button"
               className="button button-outline"

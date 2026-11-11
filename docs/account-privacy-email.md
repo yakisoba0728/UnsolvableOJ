@@ -69,7 +69,7 @@ EMAIL_TOKEN_SECRET=JWT와_다른_32자_이상_전용난수비밀키
 
 ## 로컬 검증 기록 — 2026-11-11
 
-최종 통합 기준 커밋은 `9015a10`이며 작업 브랜치는 `feat/withdrawal-community-email`입니다. 최신 Vibe·기업 AI 시험 변경을 포함하여 검증했습니다. PR의 검토·병합과 운영 서버 반영은 별도 단계입니다.
+아래 로컬 전체 검사는 `9015a10`과 통합한 기능 커밋 `04fb7d9`에서 수행했습니다. 이후 팀의 main `9e5336f`(프론트 개선·CI 작업 분리)를 추가 통합했습니다. Back 제품 코드와 테스트는 그대로이며, 추가 통합 후 검사 결과는 PR #49의 최신 커밋 검사에서 확인할 수 있습니다. 작업 브랜치는 `feat/withdrawal-community-email`이며 PR의 검토·병합과 운영 서버 반영은 별도 단계입니다.
 
 | 검증 | 결과 |
 |---|---|
@@ -77,7 +77,8 @@ EMAIL_TOKEN_SECRET=JWT와_다른_32자_이상_전용난수비밀키
 | 실제 PostgreSQL 통합 검사 | 이메일·탈퇴·기업 Vibe 탈퇴 호환·미션·제출 XP 관련 5개 파일, 80개 통과 |
 | 마이그레이션 검사 | 기존 DB 업그레이드, 신규 설치, 안전한 되돌리기·재적용, 데이터가 있는 경우 롤백 거절 확인 |
 | Front `npm run check` | 빌드·정답 데이터 번들 검사·텔레메트리 검사 3개·E2E 타입 검사 통과 |
-| 최종 Front 전체 범위 | `unit`, `chromium`, `chromium-slow` 484개가 한 실행에서 전부 통과 (workers 2, 9.2분, 실패·재시도·건너뜀 없음) |
+| `9015a10` 통합 당시 Front 전체 범위 | `unit`, `chromium`, `chromium-slow` 484개가 한 실행에서 전부 통과 (workers 2, 9.2분, 실패·재시도·건너뜀 없음) |
+| `9e5336f` 추가 통합 후 Front 검사 | `npm run check` 및 로그인·세션 갱신·탈퇴·이메일 핵심 4개 spec 50개 전부 통과 (workers 2, 실패·재시도·건너뜀 없음) |
 | 운영 Compose 구성 검사 | 통과 |
 | 의존성 검사 | Front Vite 7.3.8 패치 후 전체 audit 0건. Back 운영 의존성의 기존 moderate 3건은 남아 있으며 high/critical 기준 통과. Judge 운영 의존성 audit 0건 |
 

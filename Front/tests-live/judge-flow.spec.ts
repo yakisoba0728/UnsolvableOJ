@@ -30,7 +30,8 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
   await page.getByLabel("이메일").fill(email);
   await page.getByLabel("비밀번호").fill(password);
   await page.getByRole("button", { name: "로그인", exact: true }).click();
-  await expect(page.getByRole("link", { name: "문제 만들기", exact: true })).toBeVisible();
+  // '문제 만들기'는 헤더가 아니라 문제 목록 아래에 있으므로 로그인 완료는 로그아웃 버튼으로 확인한다.
+  await expect(page.getByRole("button", { name: "로그아웃" })).toBeVisible();
   await page.goto("/problems/new");
   await page.getByLabel("제목", { exact: true }).fill(title);
   const available = page.waitForResponse((response) => response.url().endsWith(`/problems/by-slug/${slug}`));

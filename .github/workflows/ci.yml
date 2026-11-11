@@ -96,10 +96,180 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
 
-  check:
-    name: CI required
+  changes:
+    # PR은 바뀐 경로에 해당하는 검사만 돌린다. main push·야간·수동 실행은 항상 전부 돌린다.
+    name: Detect changes
     runs-on: ubuntu-24.04
-    timeout-minutes: ${{ (inputs.full || github.event_name == 'schedule') && 40 || 15 }}
+    timeout-minutes: 5
+    outputs:
+      back: ${{ steps.diff.outputs.back }}
+      front: ${{ steps.diff.outputs.front }}
+      judge: ${{ steps.diff.outputs.judge }}
+      full: ${{ steps.diff.outputs.full }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          FULL: ${{ inputs.full || github.event_name == 'schedule' }}
+        run: |
+          echo "full=$FULL" >> "$GITHUB_OUTPUT"
+          all() { for name in back front judge; do echo "$name=true" >> "$GITHUB_OUTPUT"; done; }
+          # PR이 아니거나 base를 가져올 수 없으면 전부 검사한다.
+          if [ "$EVENT" != pull_request ] || [ -z "$BASE" ] || ! git fetch --no-tags --depth=1 origin "$BASE"; then
+            all; exit 0
+          fi
+          files=$(git diff --name-only FETCH_HEAD HEAD)
+          printf '%s\n' "$files"
+          # 워크플로 자체가 바뀌면 전부 검사한다.
+          if grep -qx '.github/workflows/ci.yml' <<<"$files"; then all; exit 0; fi
+          has() { grep -qE "$1" <<<"$files" && echo true || echo false; }
+          # 프론트 테스트는 API를 모의 응답으로 대신하므로 Back 변경만으로는 돌리지 않는다.
+          echo "back=$(has '^(Back/|deploy/|scripts/|compose\.yaml$)')" >> "$GITHUB_OUTPUT"
+          echo "front=$(has '^Front/')" >> "$GITHUB_OUTPUT"
+          echo "judge=$(has '^(Judge/|compose\.yaml$)')" >> "$GITHUB_OUTPUT"
+
+  back:
+    name: Backend and API
+    needs: changes
+    if: ${{ needs.changes.outputs.back == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: unsolvable
+          POSTGRES_PASSWORD: ci_disposable_password
+          POSTGRES_DB: unsolvable_ci
+        ports:
+          - '127.0.0.1::5432'
+        options: >-
+          --memory 512m --cpus 1
+          --tmpfs /var/lib/postgresql/data:rw,nosuid,size=256m
+          --health-cmd "pg_isready -U unsolvable -d unsolvable_ci"
+          --health-interval 3s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:8.10.3
+        ports:
+          - '127.0.0.1::6379'
+        options: >-
+          --memory 128m --cpus 1 --tmpfs /data:rw,nosuid,size=64m
+          --health-cmd "redis-cli ping"
+          --health-interval 3s --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: Back/package-lock.json
+      - name: Install dependencies
+        run: npm ci --prefix Back
+      - name: Backend lint, types, unit tests and build
+        run: |
+          npm run check --prefix Back
+          npm run test:boj-import --prefix Back
+          npm run test:operations --prefix Back
+          node --test Back/scripts/starter-problems.test.mjs Back/scripts/seed-starter.test.mjs
+      - name: Production Compose configuration
+        run: node scripts/check-production-compose.mjs
+      - name: Database migrations and API tests
+        working-directory: Back
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://unsolvable:ci_disposable_password@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/unsolvable_ci
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+          REDIS_DB: '1'
+          JWT_ACCESS_SECRET: test-jwt-secret-with-at-least-32-characters
+          JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
+          GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
+        run: |
+          node scripts/check-migrations.mjs
+          node scripts/run-integration.mjs e2e
+
+  judge:
+    name: Judge worker
+    needs: changes
+    if: ${{ needs.changes.outputs.judge == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: Judge/package-lock.json
+      - name: Install dependencies
+        run: npm ci --prefix Judge
+      - name: Worker build and protocol regression tests
+        run: |
+          npm run check --prefix Judge
+          python3 -m unittest discover -s Judge/runtime -p 'test_*.py'
+
+  front:
+    # 브라우저와 의존 패키지가 들어 있는 Playwright 이미지에서 돌려 apt 설치·브라우저 다운로드를 하지 않는다.
+    # 이미지 버전은 Front/package.json의 @playwright/test 버전과 같아야 한다.
+    name: Browser tests (${{ matrix.shard }}/2)
+    needs: changes
+    if: ${{ needs.changes.outputs.front == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: Front/package-lock.json
+      - name: Install dependencies
+        run: npm ci --prefix Front
+      - name: Frontend build and test types
+        if: ${{ matrix.shard == 1 }}
+        run: npm run check --prefix Front
+      - name: Browser regression tests
+        working-directory: Front
+        env:
+          # 컨테이너는 root로 돈다. HOME이 /github/home이면 일부 브라우저가 프로필을 만들지 못한다.
+          HOME: /root
+          PROJECTS: --project=unit --project=chromium --project=chromium-slow ${{ needs.changes.outputs.full == 'true' && '--project=webkit' || '' }}
+        run: npx --no-install playwright test $PROJECTS --workers=4 --shard=${{ matrix.shard }}/2
+      - name: Failed browser test artifacts (disposable test data only)
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: browser-failure-${{ matrix.shard }}-${{ github.run_attempt }}
+          path: |
+            Front/test-results/
+            Front/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  full:
+    # 야간·수동 전체 실행에서만 privileged go-judge, 실제 채점 파이프라인, 운영 Compose 브라우저 흐름을 검사한다.
+    name: Sandbox, pipeline and Compose
+    needs: changes
+    if: ${{ needs.changes.outputs.full == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:17.11
@@ -136,44 +306,32 @@ jobs:
           npm ci --prefix Back
           npm ci --prefix Front
           npm ci --prefix Judge
-      - name: Backend lint, types, unit tests and build
+      # 채점 파이프라인 검사는 빌드된 API(Back/dist)와 워커(Judge/dist)를 실행한다.
+      - name: Build API and worker
         run: |
-          npm run check --prefix Back
-          npm run test:boj-import --prefix Back
-          npm run test:operations --prefix Back
-          node --test Back/scripts/starter-problems.test.mjs Back/scripts/seed-starter.test.mjs
-      - name: Frontend build and test types
-        run: npm run check --prefix Front
-      - name: Production Compose configuration
-        run: node scripts/check-production-compose.mjs
-      - name: Worker build and protocol regression tests
-        run: |
-          npm run check --prefix Judge
-          python3 -m unittest discover -s Judge/runtime -p 'test_*.py'
+          npm run build --prefix Back
+          npm run build --prefix Judge
+      # Compose 흐름 검사가 쓰는 Chromium만 받는다. 러너에 이미 있는 Chrome 의존 패키지를 쓰므로 apt 설치(--with-deps)는 하지 않는다.
+      - name: Install Chromium for the Compose flow
+        working-directory: Front
+        run: npx --no-install playwright install --only-shell chromium
+      # 실행 이미지는 Docker image (runtime) 작업과 같은 GHA 캐시에서 받아, 바뀌지 않았으면 apt 설치를 다시 하지 않는다.
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+      - name: Build go-judge image from cache
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: Judge/runtime
+          load: true
+          tags: unsolvable-go-judge:local
+          cache-from: type=gha,scope=runtime
       - name: go-judge language and isolation regression tests
-        if: ${{ (inputs.full || github.event_name == 'schedule') }}
         env:
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: |
           sudo swapoff -a
-          docker compose up -d --build --wait --wait-timeout 180 go-judge
+          docker compose up -d --no-build --wait --wait-timeout 180 go-judge
           npm run test:runtime --prefix Judge
-      - name: Database migrations and API tests
-        working-directory: Back
-        env:
-          NODE_ENV: test
-          DATABASE_URL: postgresql://unsolvable:ci_disposable_password@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/unsolvable_ci
-          REDIS_HOST: 127.0.0.1
-          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-          REDIS_DB: '1'
-          JWT_ACCESS_SECRET: test-jwt-secret-with-at-least-32-characters
-          JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
-          GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
-        run: |
-          node scripts/check-migrations.mjs
-          node scripts/run-integration.mjs e2e
       - name: Native judging pipeline
-        if: ${{ (inputs.full || github.event_name == 'schedule') }}
         working-directory: Back
         env:
           NODE_ENV: test
@@ -185,40 +343,38 @@ jobs:
           JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: node scripts/run-integration.mjs pipeline
-      # 브라우저 설치의 외부 패키지/DNS 장애가 독립적인 Worker·DB/API 검사를 건너뛰지 않도록 뒤에 둔다.
-      # Compose 흐름 검사도 Chromium을 쓰므로 브라우저를 사용하는 단계보다는 먼저 설치한다.
-      - name: Install Playwright browsers
-        working-directory: Front
-        run: npx --no-install playwright install --with-deps --only-shell chromium ${{ (inputs.full || github.event_name == 'schedule') && 'webkit' || '' }}
       - name: Full Compose browser flow
-        if: ${{ (inputs.full || github.event_name == 'schedule') }}
         run: node scripts/check-compose.mjs --production
-      # 브라우저 회귀는 가장 오래 걸리고 가끔 흔들리므로, 한 건 실패로 서버·채점·Compose 검사가 건너뛰어지지 않게 마지막에 둔다.
-      - name: Chromium regression tests
-        if: ${{ !(inputs.full || github.event_name == 'schedule') }}
-        working-directory: Front
-        run: npx --no-install playwright test --project=unit --project=chromium --project=chromium-slow --workers=2
-      - name: Full browser regression tests
-        if: ${{ (inputs.full || github.event_name == 'schedule') }}
-        working-directory: Front
-        # Firefox는 CI 시간을 줄이려고 뺀다. 필요하면 로컬에서 --project=firefox로 돌린다.
-        run: npx --no-install playwright test --project=unit --project=chromium --project=chromium-slow --project=webkit --workers=2
-      - name: Failed browser test artifacts (disposable test data only)
+      - name: Failed Compose browser artifacts (disposable test data only)
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: browser-failure-${{ github.run_attempt }}
+          name: compose-failure-${{ github.run_attempt }}
           path: |
-            Front/test-results/
-            Front/playwright-report/
             Front/reports/live-browser/
             Front/reports/live-browser-report/
             Front/reports/live-browser.xml
           if-no-files-found: ignore
           retention-days: 7
       - name: Sandbox failure logs
-        if: ${{ failure() && (inputs.full || github.event_name == 'schedule') }}
+        if: ${{ failure() }}
         run: docker compose logs --no-color go-judge
       - name: Stop sandbox
-        if: ${{ always() && (inputs.full || github.event_name == 'schedule') }}
+        if: ${{ always() }}
         run: docker compose stop go-judge
+
+  required:
+    # 필수 검사 이름은 그대로 'CI required'다. 건너뛴 작업(바뀌지 않은 경로)은 통과로 본다.
+    name: CI required
+    needs: [changes, back, judge, front, full]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "$RESULTS"
+          for result in $RESULTS; do
+            case "$result" in success|skipped) ;; *) exit 1 ;; esac
+          done

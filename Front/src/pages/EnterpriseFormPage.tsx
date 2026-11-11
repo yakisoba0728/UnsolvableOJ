@@ -5,6 +5,7 @@ import type { VibeCatalog } from "../vibe/types";
 import { useAuth } from "../auth";
 import { DateTimePicker } from "../components/DateTimePicker";
 import { PageHeader } from "../components/PageHeader";
+import { invalidResourceIdMessage } from "../resourceErrors";
 import { deviceTimeZone } from "../components/EnterpriseSchedule";
 import {
   LIMITS,
@@ -130,6 +131,15 @@ function EnterpriseForm({ token, id }: { token: string; id?: string }) {
     return (
       <Notice title="테스트 편집">
         <p role="status">테스트를 불러오는 중…</p>
+      </Notice>
+    );
+  if (id && !existing && error === invalidResourceIdMessage)
+    return (
+      <Notice title="테스트 편집">
+        <strong role="alert">{error}</strong>
+        <Link className="button" to="/enterprise">
+          기업 테스트로
+        </Link>
       </Notice>
     );
   if (id && error && !existing && !/찾을 수 없/.test(error))
