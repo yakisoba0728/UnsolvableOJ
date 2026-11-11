@@ -61,7 +61,8 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
   await panel.getByRole("link", { name: "자세히 보기" }).click();
   await expect(page).toHaveURL(/\/submissions\/[a-f0-9-]+$/);
   await page.reload();
-  await expect(page.getByText("성공", { exact: true })).toBeVisible();
+  // 테스트별 결과 표에도 판정이 있으므로 맨 위의 전체 판정만 본다.
+  await expect(page.getByText("성공", { exact: true }).first()).toBeVisible();
 
   await page.goto("/profile");
   await expect(page.getByText("10 / 100 XP", { exact: false })).toBeVisible();

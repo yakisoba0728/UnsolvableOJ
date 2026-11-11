@@ -71,7 +71,8 @@ test("two real accounts write, answer, vote, follow, accept, edit and delete a c
 
     // 작성자: 답변을 채택하고, 글을 고친 뒤 지운다.
     await writer.page.reload();
-    await writer.page.getByRole("button", { name: /^답변 1/ }).click();
+    // 답변 목록은 펼친 채로 열린다. 눌러서 접으면 채택 전 답변이 숨는다.
+    await expect(writer.page.getByRole("button", { name: /^답변 1/ })).toHaveAttribute("aria-expanded", "true");
     await writer.page.getByRole("button", { name: "채택하기", exact: true }).click();
     await expect(writer.page.getByText("채택된 답변", { exact: true })).toBeVisible();
     await writer.page.getByRole("button", { name: "글 관리" }).click();
