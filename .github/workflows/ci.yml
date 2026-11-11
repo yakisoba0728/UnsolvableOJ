@@ -310,12 +310,21 @@ jobs:
       - name: Install Chromium for the Compose flow
         working-directory: Front
         run: npx --no-install playwright install --only-shell chromium
+      # 실행 이미지는 Docker image (runtime) 작업과 같은 GHA 캐시에서 받아, 바뀌지 않았으면 apt 설치를 다시 하지 않는다.
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+      - name: Build go-judge image from cache
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: Judge/runtime
+          load: true
+          tags: unsolvable-go-judge:local
+          cache-from: type=gha,scope=runtime
       - name: go-judge language and isolation regression tests
         env:
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: |
           sudo swapoff -a
-          docker compose up -d --build --wait --wait-timeout 180 go-judge
+          docker compose up -d --no-build --wait --wait-timeout 180 go-judge
           npm run test:runtime --prefix Judge
       - name: Native judging pipeline
         working-directory: Back
