@@ -24,6 +24,7 @@ const webkitSpecs = [
   "auth.spec.ts",
   "editor-focus.spec.ts",
   "layout.spec.ts",
+  "live-qa-followups.spec.ts",
   "session-refresh.spec.ts",
   "ui-harmony.spec.ts",
 ];
