@@ -419,8 +419,6 @@ test.describe("community post: delete own post and answer layout", () => {
   test("the answer list precedes the separate editor and a shortcut focuses writing", async ({
     page,
   }) => {
-    // '답변 작성으로 이동'의 smooth 스크롤이 이어지면 WebKit에서 다음 '글 관리' 클릭이 빗나간다.
-    await page.emulateMedia({ reducedMotion: "reduce" });
     await authenticate(page);
     await seed(page);
     await page.goto("/community/other-1");
