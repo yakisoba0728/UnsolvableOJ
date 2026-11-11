@@ -125,6 +125,15 @@ export function remainingText(ms: number) {
   return `${minutes}분`;
 }
 
+/** 상태에 맞는 남은 시간 글자: 시작까지·마감까지·마감된 때 */
+export function statusTimeText(test: Period, status: TestStatus, now = Date.now()) {
+  if (status === "scheduled")
+    return `시작까지 ${remainingText(Date.parse(test.startsAt) - now)}`;
+  if (status === "running")
+    return `마감까지 ${remainingText(Date.parse(test.endsAt) - now)}`;
+  return `${formatEnd(test)}에 마감됐어요`;
+}
+
 export const metaLine = (test: Pick<EnterpriseTest, "problemIds" | "durationMin">) =>
   `${test.problemIds.length}문항 · ${test.durationMin}분`;
 

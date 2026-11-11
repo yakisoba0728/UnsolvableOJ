@@ -12,6 +12,10 @@ export const categories: { key: CategoryKey; label: string }[] = [
 export const categoryLabel = (key: CategoryKey) =>
   categories.find((item) => item.key === key)?.label ?? key;
 
+/** 입력한 글에서 앞의 '#'과 앞뒤 공백을 뗀 태그. 쉼표와 공백은 태그의 일부다. */
+export const normalizeTag = (value: string) =>
+  value.trim().replace(/^#+/, "").trim();
+
 /** 상세 화면 머리말·돌아가기 링크에 쓰는 이름 (Figma: "질문과 답변") */
 export const categoryLongLabel = (key: CategoryKey) =>
   key === "question" ? "질문과 답변" : categoryLabel(key);

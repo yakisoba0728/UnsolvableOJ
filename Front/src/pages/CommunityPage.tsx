@@ -1,6 +1,5 @@
-import { Eye, ThumbsUp } from "lucide-react";
-import { X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Eye, ThumbsUp, X } from "lucide-react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth";
 import guideArt from "../assets/community-guide.png";
@@ -14,6 +13,7 @@ import { relativeTime } from "../community/store";
 import {
   categories,
   categoryLabel,
+  normalizeTag,
   type CategoryKey,
   type CommunityPost,
 } from "../community/types";
@@ -26,9 +26,13 @@ import {
   useStickyTop,
   useUrlFilters,
 } from "../hooks";
+import { isImeEnter } from "../keyboard";
 import { pageRange, pageRangeTitle } from "../pageRange";
 
 const PAGE_SIZE = 10;
+/** 서버가 받는 쪽 번호의 상한 */
+const MAX_PAGE = 100_000;
+const NOTICE_MS = 4000;
 
 const sortOptions = [
   { value: "latest", label: "최신순" },
@@ -37,48 +41,81 @@ const sortOptions = [
   { value: "answers", label: "답변순" },
 ];
 
+type AcceptStatus = "unaccepted" | "accepted";
+
 const statusOptions = [
   { value: "", label: "전체" },
   { value: "unaccepted", label: "채택 전" },
   { value: "accepted", label: "채택 완료" },
 ];
 
-const isCategory = (value: string | null): value is CategoryKey =>
+const emptyPage: Page<CommunityPost> = {
+  items: [],
+  total: 0,
+  page: 1,
+  totalPages: 0,
+};
+
+const isCategory = (value: string): value is CategoryKey =>
   categories.some((item) => item.key === value);
+
+const isAcceptStatus = (value: string): value is AcceptStatus =>
+  value === "unaccepted" || value === "accepted";
+
+/** 쉼표로 이은 URL 값 */
+const listParam = (params: URLSearchParams, key: string) =>
+  (params.get(key) ?? "").split(",");
 
 // tag를 반복해 쉼표·공백이 든 태그도 보존한다. 기존 t=a,b 주소도 계속 읽는다.
 const tagsOf = (params: URLSearchParams) => [
-  ...new Set(
-    [...params.getAll("tag"), ...(params.get("t") ?? "").split(",")].filter(Boolean),
-  ),
+  ...new Set([...params.getAll("tag"), ...listParam(params, "t")].filter(Boolean)),
 ];
+
+/** URL에 저장된 목록 조건. 알 수 없는 값은 버린다. */
+function readFilters(params: URLSearchParams) {
+  const sort = params.get("sort") ?? "";
+  return {
+    categories: listParam(params, "c").filter(isCategory),
+    statuses: listParam(params, "s").filter(isAcceptStatus),
+    sort: sortOptions.some((item) => item.value === sort) ? sort : "latest",
+    problemId: params.get("problemId"),
+    tags: tagsOf(params),
+  };
+}
+
+type Filters = ReturnType<typeof readFilters>;
+
+/** 서버에 보낼 목록 조건 */
+function listQuery(filters: Filters, keyword: string, page: number) {
+  // 고정 공지는 분류·상태 필터와 상관없이 항상 목록 맨 위에 보인다(검색어·태그는 그대로 적용).
+  const query = new URLSearchParams({
+    page: String(page),
+    limit: String(PAGE_SIZE),
+    sort: filters.sort,
+    includePinned: "true",
+  });
+  if (filters.categories.length)
+    query.set("categories", filters.categories.join(",").toUpperCase());
+  if (filters.statuses.length) query.set("status", filters.statuses.join(","));
+  if (keyword) query.set("q", keyword);
+  filters.tags.forEach((tag) => query.append("tag", tag));
+  if (filters.problemId) query.set("problemId", filters.problemId);
+  return query;
+}
+
+/** 1쪽은 주소에 남기지 않는다. */
+const pageParam = (page: number) => (page === 1 ? null : String(page));
 
 export function CommunityPage() {
   useDocumentTitle("커뮤니티");
   const { session } = useAuth();
   const navigate = useNavigate();
-  const [notice, setNotice] = useFlashNotice();
-  useEffect(() => {
-    if (!notice) return;
-    const timer = window.setTimeout(() => setNotice(""), 4000);
-    return () => window.clearTimeout(timer);
-  }, [notice]);
+  const [notice] = useFlashNotice(NOTICE_MS);
   // '#단어'는 Enter를 눌러 태그가 되기 전까지 검색어로 쓰지 않는다(입력 중에 목록이 비는 것을 막는다).
   const { params, update, urlQuery, queryText, setQueryText, page } =
     useUrlFilters((text) => text.trim().startsWith("#"));
-
-  const selectedCategories = (params.get("c") ?? "")
-    .split(",")
-    .filter((value): value is CategoryKey => isCategory(value));
-  const statuses = (params.get("s") ?? "")
-    .split(",")
-    .filter((value) => value === "unaccepted" || value === "accepted");
-  const sort = sortOptions.some((item) => item.value === params.get("sort"))
-    ? params.get("sort")!
-    : "latest";
-  const problemId = params.get("problemId");
-  const selectedTags = tagsOf(params);
-  const size = PAGE_SIZE;
+  const filters = readFilters(params);
+  const { problemId, tags: selectedTags } = filters;
 
   function setTags(next: string[]) {
     update({ t: null, tag: next });
@@ -87,15 +124,15 @@ export function CommunityPage() {
   /** 작성 화면처럼 Enter로 태그를 확정한다. 쉼표와 공백은 태그의 일부다. */
   function commitTag(raw: string) {
     if (!raw.trim().startsWith("#")) return false;
-    const tag = raw.trim().replace(/^#+/, "").trim();
+    const tag = normalizeTag(raw);
     if (!tag) return false;
     // 빠르게 이어서 확정해도 앞 태그를 잃지 않도록 최신 조건에서 계산한다.
     update((latest) => {
       const current = tagsOf(latest);
-      const next = current.some((item) => item.toLowerCase() === tag.toLowerCase())
-        ? current
-        : [...current, tag];
-      return { t: null, tag: next, q: null };
+      const exists = current.some(
+        (item) => item.toLowerCase() === tag.toLowerCase(),
+      );
+      return { t: null, tag: exists ? current : [...current, tag], q: null };
     });
     setQueryText("");
     return true;
@@ -109,37 +146,22 @@ export function CommunityPage() {
   const [retry, setRetry] = useState(0);
   const keyword = urlQuery.trim();
   // 서버의 쪽 번호 상한을 넘는 주소는 상한까지만 보내고, 아래에서 마지막 쪽으로 옮긴다.
-  const requestedPage = Math.min(page, 100_000);
-  // 고정 공지는 분류·상태 필터와 상관없이 항상 목록 맨 위에 보인다(검색어·태그는 그대로 적용).
-  const query = new URLSearchParams({
-    page: String(requestedPage),
-    limit: String(PAGE_SIZE),
-    sort,
-    includePinned: "true",
-  });
-  if (selectedCategories.length)
-    query.set("categories", selectedCategories.join(",").toUpperCase());
-  if (statuses.length) query.set("status", statuses.join(","));
-  if (keyword) query.set("q", keyword);
-  selectedTags.forEach((tag) => query.append("tag", tag));
-  if (problemId) query.set("problemId", problemId);
+  const requestedPage = Math.min(page, MAX_PAGE);
+  const query = listQuery(filters, keyword, requestedPage);
   const {
     data: remote,
     loading,
     error: loadError,
   } = useRequest<Page<CommunityPost>>(
     (signal) => listPosts(query, signal),
-    { items: [], total: 0, page: 1, totalPages: 0 },
+    emptyPage,
     "글 목록을 불러오지 못했어요.",
     [query.toString(), retry],
   );
   // 없는 쪽을 열면 마지막 쪽으로 옮긴다.
   useEffect(() => {
     if (remote.totalPages > 0 && requestedPage > remote.totalPages)
-      update(
-        { page: remote.totalPages === 1 ? null : String(remote.totalPages) },
-        { resetPage: false },
-      );
+      update({ page: pageParam(remote.totalPages) }, { resetPage: false });
   }, [remote]);
 
   const followed = new Set(useMyCommunityPosts(session).data.following);
@@ -151,16 +173,18 @@ export function CommunityPage() {
 
   const totalPages = Math.max(1, remote.totalPages);
   const current = Math.min(requestedPage, totalPages);
-  const first = (current - 1) * size;
-  const visible = loading || loadError ? [] : remote.items;
-  const total = loading || loadError ? 0 : remote.total;
+  const first = (current - 1) * PAGE_SIZE;
+  const ready = !loading && !loadError;
+  const visible = ready ? remote.items : [];
+  const total = ready ? remote.total : 0;
   const hasFilter = Boolean(
-    selectedCategories.length ||
-    statuses.length ||
-    selectedTags.length ||
-    keyword ||
-    problemId,
+    filters.categories.length ||
+      filters.statuses.length ||
+      selectedTags.length ||
+      keyword ||
+      problemId,
   );
+  const listSearch = params.toString() ? `?${params.toString()}` : "";
 
   function write(initialCategory?: CategoryKey) {
     // 문제 화면에서 들어왔으면 새 글에도 그 문제를 이어 붙인다.
@@ -186,67 +210,17 @@ export function CommunityPage() {
 
       <div className="filter-card">
         <div className="filter-row">
-          <div className="search-field">
-            <div
-              className="search-box"
-              onClick={() => searchRef.current?.focus()}
-            >
-              {selectedTags.map((tag) => (
-                <span className="search-tag" key={tag}>
-                  <span aria-hidden="true">#</span>
-                  {tag}
-                  <button
-                    type="button"
-                    className="search-tag-remove"
-                    aria-label={`태그 #${tag} 지우기`}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setTags(selectedTags.filter((item) => item !== tag));
-                      searchRef.current?.focus();
-                    }}
-                  >
-                    <X size={12} aria-hidden="true" />
-                  </button>
-                </span>
-              ))}
-              <input
-                ref={searchRef}
-                type="search"
-                className="search-input"
-                placeholder={
-                  selectedTags.length
-                    ? "더 검색하거나 #태그 추가"
-                    : "질문·풀이 검색 (#태그 + Enter)"
-                }
-                aria-label="게시글 검색"
-                aria-keyshortcuts="/"
-                maxLength={100}
-                value={queryText}
-                onChange={(event) => setQueryText(event.target.value)}
-                onKeyDown={(event) => {
-                  // Safari는 한글 조합 확정 Enter를 isComposing=false, keyCode 229로 보낸다(Enter일 때만 막는다).
-                  if (
-                    event.nativeEvent.isComposing ||
-                    (event.key === "Enter" && event.keyCode === 229)
-                  )
-                    return;
-                  if (event.key === "Enter" && commitTag(queryText)) {
-                    event.preventDefault();
-                  } else if (
-                    event.key === "Backspace" &&
-                    !queryText &&
-                    selectedTags.length
-                  ) {
-                    // 입력칸이 비어 있을 때 Backspace로 마지막 태그를 지운다.
-                    setTags(selectedTags.slice(0, -1));
-                  }
-                }}
-              />
-            </div>
-          </div>
+          <TagSearch
+            inputRef={searchRef}
+            tags={selectedTags}
+            text={queryText}
+            onTextChange={setQueryText}
+            onCommit={commitTag}
+            onTagsChange={setTags}
+          />
           <Select
             ariaLabel="정렬"
-            value={sort}
+            value={filters.sort}
             options={sortOptions}
             onChange={(next) =>
               update({ sort: next === "latest" ? null : next })
@@ -259,7 +233,7 @@ export function CommunityPage() {
             <SlideToggle
               multiple
               ariaLabel="분류 필터"
-              values={selectedCategories}
+              values={filters.categories}
               options={[
                 { value: "", label: "전체", count: categoryCount("") },
                 ...categories.map((item) => ({
@@ -277,7 +251,7 @@ export function CommunityPage() {
             <SlideToggle
               multiple
               ariaLabel="채택 상태 필터"
-              values={statuses}
+              values={filters.statuses}
               options={statusOptions.map((item) => ({
                 ...item,
                 count: statusCount(item.value),
@@ -294,7 +268,7 @@ export function CommunityPage() {
           <div className="section-heading compact">
             <div className="title-line">
               <h2>{hasFilter ? "검색 결과" : "전체 글"}</h2>
-              {urlQuery.trim() ? (
+              {keyword ? (
                 <button
                   type="button"
                   className="inline-button"
@@ -303,28 +277,16 @@ export function CommunityPage() {
                     update({ q: null });
                   }}
                 >
-                  “{urlQuery.trim()}” 지우기
+                  “{keyword}” 지우기
                 </button>
               ) : null}
             </div>
-            <span
-              className="total-count"
-              aria-hidden={loading ? undefined : true}
-              title={
-                loading ? undefined : pageRangeTitle(first, visible.length, total)
-              }
-            >
-              {loading ? (
-                <Skeleton width={80} height={14} />
-              ) : (
-                pageRange(first, visible.length, total)
-              )}
-            </span>
-            {loading ? null : (
-              <span className="sr-only">
-                {pageRangeTitle(first, visible.length, total)}
-              </span>
-            )}
+            <RangeCount
+              loading={loading}
+              first={first}
+              count={visible.length}
+              total={total}
+            />
           </div>
           {problemId ? (
             <p className="muted">
@@ -360,77 +322,14 @@ export function CommunityPage() {
                 <span>추천</span>
                 <span>조회 수</span>
               </li>
-              {visible.map((post) => {
-                const count = post.commentCount ?? 0;
-                const accepted = Boolean(post.acceptedCommentId);
-                return (
-                  <li key={post.id}>
-                    <Link
-                      className={`post-row ${post.pinned ? "pinned" : ""}`}
-                      to={`/community/${post.id}`}
-                      state={{
-                        listSearch: params.toString()
-                          ? `?${params.toString()}`
-                          : "",
-                      }}
-                    >
-                      <span className="post-category">
-                        {categoryLabel(post.category)}
-                      </span>
-                      <span className="post-main">
-                        <span className="post-title-line">
-                          <strong className="post-title" title={post.title}>
-                            {post.title}
-                          </strong>
-                          <span
-                            className="post-answer-badge"
-                            title="달린 답변의 수"
-                          >
-                            답변 {count}
-                          </span>
-                          {accepted ? (
-                            <span
-                              className="post-accepted-badge"
-                              title="질문자가 답변을 채택했어요"
-                            >
-                              <span aria-hidden="true">✓</span> 채택 완료
-                            </span>
-                          ) : null}
-                        </span>
-                        <span className="post-meta">
-                          <span className="post-author">
-                            {post.author.name}
-                            {post.authorId && followed.has(post.authorId) ? (
-                              <span
-                                className="post-follow-badge"
-                                title="내가 팔로우한 사람이 쓴 글이에요"
-                              >
-                                팔로잉
-                              </span>
-                            ) : null}
-                          </span>{" "}
-                          · {relativeTime(post.createdAt)}
-                          {post.pinned ? " · 고정" : ""}
-                        </span>
-                      </span>
-                      <span
-                        className="post-num post-num-up"
-                        aria-label={`추천 ${post.upvotes}`}
-                      >
-                        <ThumbsUp size={14} aria-hidden="true" />
-                        {post.upvotes}
-                      </span>
-                      <span
-                        className="post-num post-num-view"
-                        aria-label={`조회 ${post.views.toLocaleString()}`}
-                      >
-                        <Eye size={14} aria-hidden="true" />
-                        {post.views.toLocaleString()}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
+              {visible.map((post) => (
+                <PostRow
+                  key={post.id}
+                  post={post}
+                  listSearch={listSearch}
+                  followed={Boolean(post.authorId && followed.has(post.authorId))}
+                />
+              ))}
             </ul>
           ) : (
             <div className="empty-state">
@@ -474,10 +373,7 @@ export function CommunityPage() {
                 page={current}
                 totalPages={totalPages}
                 onChange={(next) =>
-                  update(
-                    { page: next === 1 ? null : String(next) },
-                    { resetPage: false },
-                  )
+                  update({ page: pageParam(next) }, { resetPage: false })
                 }
               />
             </div>
@@ -485,45 +381,231 @@ export function CommunityPage() {
         </section>
 
         <aside className="side-stack" ref={sideRef}>
-          <div className="community-guide">
-            <div className="community-guide-head">
-              <h2>질문하고 풀이를 나누면 막힌 곳이 풀려요.</h2>
-              <img src={guideArt} alt="" width="232" height="186" />
-            </div>
-            <div className="community-guide-cols">
-              <div className="guide-col">
-                <h3>질문을 올리기 전 확인해 보세요.</h3>
-                <ul>
-                  <li>어떤 문제에서 막혔나요?</li>
-                  <li>시도한 코드와 입력은 무엇인가요?</li>
-                  <li>기대한 결과와 실제 결과가 다른가요?</li>
-                </ul>
-                <button
-                  type="button"
-                  className="button"
-                  onClick={() => write()}
-                >
-                  질문 작성하기
-                </button>
-              </div>
-              <div className="guide-col">
-                <h3>풀이를 나누는 공간</h3>
-                <ul>
-                  <li>정답뿐 아니라 생각한 과정도 남겨요.</li>
-                  <li>시간·메모리 복잡도를 함께 적어요.</li>
-                  <li>다른 관점이 더 좋은 풀이로 이어져요.</li>
-                </ul>
-                <button
-                  type="button"
-                  className="button"
-                  onClick={() => write("solution")}
-                >
-                  풀이 공유하기
-                </button>
-              </div>
-            </div>
-          </div>
+          <CommunityGuide onWrite={write} />
         </aside>
+      </div>
+    </div>
+  );
+}
+
+/** 검색칸: 확정한 태그 칩과 검색어 입력. '#단어' + Enter로 태그를 더한다. */
+function TagSearch({
+  inputRef,
+  tags,
+  text,
+  onTextChange,
+  onCommit,
+  onTagsChange,
+}: {
+  inputRef: RefObject<HTMLInputElement | null>;
+  tags: string[];
+  text: string;
+  onTextChange: (value: string) => void;
+  onCommit: (raw: string) => boolean;
+  onTagsChange: (next: string[]) => void;
+}) {
+  return (
+    <div className="search-field">
+      <div className="search-box" onClick={() => inputRef.current?.focus()}>
+        {tags.map((tag) => (
+          <span className="search-tag" key={tag}>
+            <span aria-hidden="true">#</span>
+            {tag}
+            <button
+              type="button"
+              className="search-tag-remove"
+              aria-label={`태그 #${tag} 지우기`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onTagsChange(tags.filter((item) => item !== tag));
+                inputRef.current?.focus();
+              }}
+            >
+              <X size={12} aria-hidden="true" />
+            </button>
+          </span>
+        ))}
+        <input
+          ref={inputRef}
+          type="search"
+          className="search-input"
+          placeholder={
+            tags.length
+              ? "더 검색하거나 #태그 추가"
+              : "질문·풀이 검색 (#태그 + Enter)"
+          }
+          aria-label="게시글 검색"
+          aria-keyshortcuts="/"
+          maxLength={100}
+          value={text}
+          onChange={(event) => onTextChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (isImeEnter(event)) return;
+            if (event.key === "Enter" && onCommit(text)) {
+              event.preventDefault();
+            } else if (event.key === "Backspace" && !text && tags.length) {
+              // 입력칸이 비어 있을 때 Backspace로 마지막 태그를 지운다.
+              onTagsChange(tags.slice(0, -1));
+            }
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** "1–10 / 32" 같은 쪽 범위. 화면 낭독기에는 풀어 쓴 문장을 읽어 준다. */
+function RangeCount({
+  loading,
+  first,
+  count,
+  total,
+}: {
+  loading: boolean;
+  first: number;
+  count: number;
+  total: number;
+}) {
+  if (loading)
+    return (
+      <span className="total-count">
+        <Skeleton width={80} height={14} />
+      </span>
+    );
+  const title = pageRangeTitle(first, count, total);
+  return (
+    <>
+      <span className="total-count" aria-hidden="true" title={title}>
+        {pageRange(first, count, total)}
+      </span>
+      <span className="sr-only">{title}</span>
+    </>
+  );
+}
+
+function PostRow({
+  post,
+  listSearch,
+  followed,
+}: {
+  post: CommunityPost;
+  listSearch: string;
+  followed: boolean;
+}) {
+  const views = post.views.toLocaleString();
+  return (
+    <li>
+      <Link
+        className={`post-row ${post.pinned ? "pinned" : ""}`}
+        to={`/community/${post.id}`}
+        state={{ listSearch }}
+      >
+        <span className="post-category">{categoryLabel(post.category)}</span>
+        <span className="post-main">
+          <span className="post-title-line">
+            <strong className="post-title" title={post.title}>
+              {post.title}
+            </strong>
+            <span className="post-answer-badge" title="달린 답변의 수">
+              답변 {post.commentCount ?? 0}
+            </span>
+            {post.acceptedCommentId ? (
+              <span
+                className="post-accepted-badge"
+                title="질문자가 답변을 채택했어요"
+              >
+                <span aria-hidden="true">✓</span> 채택 완료
+              </span>
+            ) : null}
+          </span>
+          <span className="post-meta">
+            <span className="post-author">
+              {post.author.name}
+              {followed ? (
+                <span
+                  className="post-follow-badge"
+                  title="내가 팔로우한 사람이 쓴 글이에요"
+                >
+                  팔로잉
+                </span>
+              ) : null}
+            </span>{" "}
+            · {relativeTime(post.createdAt)}
+            {post.pinned ? " · 고정" : ""}
+          </span>
+        </span>
+        <span
+          className="post-num post-num-up"
+          aria-label={`추천 ${post.upvotes}`}
+        >
+          <ThumbsUp size={14} aria-hidden="true" />
+          {post.upvotes}
+        </span>
+        <span className="post-num post-num-view" aria-label={`조회 ${views}`}>
+          <Eye size={14} aria-hidden="true" />
+          {views}
+        </span>
+      </Link>
+    </li>
+  );
+}
+
+const guideColumns: {
+  title: string;
+  points: string[];
+  action: string;
+  category?: CategoryKey;
+}[] = [
+  {
+    title: "질문을 올리기 전 확인해 보세요.",
+    points: [
+      "어떤 문제에서 막혔나요?",
+      "시도한 코드와 입력은 무엇인가요?",
+      "기대한 결과와 실제 결과가 다른가요?",
+    ],
+    action: "질문 작성하기",
+  },
+  {
+    title: "풀이를 나누는 공간",
+    points: [
+      "정답뿐 아니라 생각한 과정도 남겨요.",
+      "시간·메모리 복잡도를 함께 적어요.",
+      "다른 관점이 더 좋은 풀이로 이어져요.",
+    ],
+    action: "풀이 공유하기",
+    category: "solution",
+  },
+];
+
+function CommunityGuide({
+  onWrite,
+}: {
+  onWrite: (category?: CategoryKey) => void;
+}) {
+  return (
+    <div className="community-guide">
+      <div className="community-guide-head">
+        <h2>질문하고 풀이를 나누면 막힌 곳이 풀려요.</h2>
+        <img src={guideArt} alt="" width="232" height="186" />
+      </div>
+      <div className="community-guide-cols">
+        {guideColumns.map((column) => (
+          <div className="guide-col" key={column.action}>
+            <h3>{column.title}</h3>
+            <ul>
+              {column.points.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              className="button"
+              onClick={() => onWrite(column.category)}
+            >
+              {column.action}
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

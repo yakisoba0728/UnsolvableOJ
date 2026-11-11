@@ -8,6 +8,10 @@ import { testStatus, type EnterpriseTest, type TestInput } from "./model";
 type Data = Record<string, EnterpriseTest[]>;
 
 const storageKey = "unsolvable-oj-enterprise-v1";
+
+/** 저장소에 쓰지 못했을 때의 안내. 폼은 입력을 그대로 둔다. */
+export const SAVE_FAILED =
+  "이 브라우저에 저장하지 못했어요. 입력한 내용은 유지했으니 저장 공간·권한을 확인하고 다시 시도해 주세요.";
 const EMPTY: EnterpriseTest[] = [];
 
 const isTest = (value: unknown): value is EnterpriseTest => {
@@ -96,7 +100,7 @@ export const enterpriseActions = {
   },
   /** 성공은 null, 실패는 입력을 유지한 채 표시할 오류 메시지다. */
   update(userId: string, original: EnterpriseTest, input: TestInput): string | null {
-    let error = "이 브라우저에 저장하지 못했어요. 입력한 내용은 유지했으니 저장 공간·권한을 확인하고 다시 시도해 주세요.";
+    let error = SAVE_FAILED;
     // shortcut: localStorage read/compare/write is not atomic across tabs; use server transactions when simultaneous writes must be serialized.
     const saved = commit((current) => {
       const latest = current[userId]?.find((test) => test.id === original.id);

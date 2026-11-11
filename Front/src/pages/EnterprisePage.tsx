@@ -15,52 +15,55 @@ import {
 import { useEnterpriseTests } from "../enterprise/store";
 import { useDocumentTitle, useNow } from "../hooks";
 
-function periodCell(test: EnterpriseTest, status: TestStatus, now: number) {
-  if (status === "scheduled")
-    return <span>{formatStart(test, now)} 시작 예정</span>;
-  return <span>{formatPeriod(test)}</span>;
+/** 응시 기능이 생기기 전까지 값을 비워 두는 지표 */
+const pendingMetrics = ["총 응시자", "평균 점수", "합격률"];
+
+const INTRO =
+  "공개된 문제 중에서 문제를 고르고, 응시 기간과 제한 시간을 정해";
+
+/** 예정된 테스트는 편집, 시작된 테스트는 상세 보기로 관리한다. */
+function manageLink(test: EnterpriseTest, status: TestStatus) {
+  return status === "scheduled"
+    ? { to: `/enterprise/${test.id}/edit`, label: "편집" }
+    : { to: `/enterprise/${test.id}`, label: "상세 보기" };
 }
 
 export function EnterprisePage() {
   useDocumentTitle("기업 테스트");
   const { session } = useAuth();
   const now = useNow();
-  const tests = sortTests(useEnterpriseTests(session?.user.id), now);
-  const running = tests.filter((test) => testStatus(test, now) === "running").length;
-  const scheduled = tests.filter((test) => testStatus(test, now) === "scheduled").length;
-
-  const create = session ? (
-    <Link className="button" to="/enterprise/new">
-      + 새 테스트 만들기
-    </Link>
-  ) : null;
+  const rows = sortTests(useEnterpriseTests(session?.user.id), now).map(
+    (test) => ({ test, status: testStatus(test, now) }),
+  );
+  const countOf = (status: TestStatus) =>
+    rows.filter((row) => row.status === status).length;
 
   return (
     <div className="page-width enterprise-page">
       <PageHeader
         title="기업 코드 테스트"
         description="테스트 일정과 응시 현황을 확인하고 결과를 검토합니다."
-        aside={create}
+        aside={
+          session ? (
+            <Link className="button" to="/enterprise/new">
+              + 새 테스트 만들기
+            </Link>
+          ) : null
+        }
       />
 
       {!session ? (
         <div className="empty-state ent-empty">
           <strong>로그인하고 코드 테스트를 만들어 보세요</strong>
-          <p>
-            공개된 문제 중에서 문제를 고르고, 응시 기간과 제한 시간을 정해
-            테스트를 운영할 수 있어요.
-          </p>
+          <p>{INTRO} 테스트를 운영할 수 있어요.</p>
           <Link className="button" to="/auth" state={{ from: "/enterprise" }}>
             로그인하기 <span aria-hidden="true">→</span>
           </Link>
         </div>
-      ) : tests.length === 0 ? (
+      ) : rows.length === 0 ? (
         <div className="empty-state ent-empty">
           <strong>아직 만든 테스트가 없어요</strong>
-          <p>
-            공개된 문제 중에서 문제를 고르고, 응시 기간과 제한 시간을 정해
-            첫 테스트를 만들어 보세요.
-          </p>
+          <p>{INTRO} 첫 테스트를 만들어 보세요.</p>
           <Link className="button" to="/enterprise/new">
             첫 테스트 만들기 <span aria-hidden="true">→</span>
           </Link>
@@ -70,31 +73,23 @@ export function EnterprisePage() {
           <div className="stat-tiles ent-metrics" aria-label="테스트 지표">
             <div className="stat-tile">
               <small>진행 중 테스트</small>
-              <strong>{running}</strong>
-              <span>예정 {scheduled}건</span>
+              <strong>{countOf("running")}</strong>
+              <span>예정 {countOf("scheduled")}건</span>
             </div>
-            <div className="stat-tile">
-              <small>총 응시자</small>
-              <strong>—</strong>
-              <span>응시 기능 연동 후</span>
-            </div>
-            <div className="stat-tile">
-              <small>평균 점수</small>
-              <strong>—</strong>
-              <span>응시 기능 연동 후</span>
-            </div>
-            <div className="stat-tile">
-              <small>합격률</small>
-              <strong>—</strong>
-              <span>응시 기능 연동 후</span>
-            </div>
+            {pendingMetrics.map((label) => (
+              <div className="stat-tile" key={label}>
+                <small>{label}</small>
+                <strong>—</strong>
+                <span>응시 기능 연동 후</span>
+              </div>
+            ))}
           </div>
 
           <section aria-labelledby="ent-recent">
             <div className="section-heading compact">
               <h2 id="ent-recent">최근 테스트</h2>
               <span className="muted">
-                {tests.length}건 · 지표는 전체 테스트 집계 기준
+                {rows.length}건 · 지표는 전체 테스트 집계 기준
               </span>
             </div>
             <table className="ent-table">
@@ -107,8 +102,8 @@ export function EnterprisePage() {
                 </tr>
               </thead>
               <tbody>
-                {tests.map((test) => {
-                  const status = testStatus(test, now);
+                {rows.map(({ test, status }) => {
+                  const manage = manageLink(test, status);
                   return (
                     <tr key={test.id}>
                       <td>
@@ -117,7 +112,13 @@ export function EnterprisePage() {
                         </Link>
                         <small>{metaLine(test)}</small>
                       </td>
-                      <td className="ent-period">{periodCell(test, status, now)}</td>
+                      <td className="ent-period">
+                        <span>
+                          {status === "scheduled"
+                            ? `${formatStart(test, now)} 시작 예정`
+                            : formatPeriod(test)}
+                        </span>
+                      </td>
                       <td>
                         <span className={statusPillClass[status]}>
                           {statusLabel[status]}
@@ -126,14 +127,10 @@ export function EnterprisePage() {
                       <td>
                         <Link
                           className="button button-outline button-small"
-                          to={
-                            status === "scheduled"
-                              ? `/enterprise/${test.id}/edit`
-                              : `/enterprise/${test.id}`
-                          }
-                          aria-label={`${test.title} ${status === "scheduled" ? "편집" : "상세 보기"}`}
+                          to={manage.to}
+                          aria-label={`${test.title} ${manage.label}`}
                         >
-                          {status === "scheduled" ? "편집" : "상세 보기"}
+                          {manage.label}
                         </Link>
                       </td>
                     </tr>

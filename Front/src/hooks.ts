@@ -191,7 +191,7 @@ export function useMyStanding(session: Session | null) {
  * 다른 화면이 navigate state로 넘긴 안내(notice)를 한 번 읽고 기록에서는 지운다.
  * 남겨 두면 새로고침·뒤로 가기마다 다시 뜬다. listSearch 같은 나머지 state는 그대로 둔다.
  */
-export function useFlashNotice() {
+export function useFlashNotice(autoDismissMs?: number) {
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state as { notice?: string } | null;
@@ -205,7 +205,25 @@ export function useFlashNotice() {
       state: rest,
     });
   }, [state, location.pathname, location.search, location.hash, navigate]);
+  // autoDismissMs를 주면 안내가 바뀔 때마다 그 시간 뒤에 지운다.
+  useEffect(() => {
+    if (!notice || !autoDismissMs) return;
+    const timer = window.setTimeout(() => setNotice(""), autoDismissMs);
+    return () => window.clearTimeout(timer);
+  }, [notice, autoDismissMs]);
   return [notice, setNotice] as const;
+}
+
+/** 비동기 응답이 돌아왔을 때 화면이 아직 남아 있는지 확인하는 ref */
+export function useMountedRef() {
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  return mounted;
 }
 
 /**
