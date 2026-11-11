@@ -146,10 +146,6 @@ jobs:
         run: npm run check --prefix Front
       - name: Production Compose configuration
         run: node scripts/check-production-compose.mjs
-      # Compose 흐름 검사도 Chromium을 쓰므로 브라우저는 먼저 설치한다.
-      - name: Install Playwright browsers
-        working-directory: Front
-        run: npx --no-install playwright install --with-deps --only-shell chromium ${{ (inputs.full || github.event_name == 'schedule') && 'webkit' || '' }}
       - name: Worker build and protocol regression tests
         run: |
           npm run check --prefix Judge
@@ -189,6 +185,11 @@ jobs:
           JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: node scripts/run-integration.mjs pipeline
+      # 브라우저 설치의 외부 패키지/DNS 장애가 독립적인 Worker·DB/API 검사를 건너뛰지 않도록 뒤에 둔다.
+      # Compose 흐름 검사도 Chromium을 쓰므로 브라우저를 사용하는 단계보다는 먼저 설치한다.
+      - name: Install Playwright browsers
+        working-directory: Front
+        run: npx --no-install playwright install --with-deps --only-shell chromium ${{ (inputs.full || github.event_name == 'schedule') && 'webkit' || '' }}
       - name: Full Compose browser flow
         if: ${{ (inputs.full || github.event_name == 'schedule') }}
         run: node scripts/check-compose.mjs --production
