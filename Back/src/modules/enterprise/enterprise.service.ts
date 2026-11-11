@@ -1,4 +1,8 @@
 import { randomBytes } from 'node:crypto';
+import { VibeService } from '../vibe/vibe.service.js';
+import { challenge } from '../vibe/vibe.catalog.js';
+import type { VibeReport } from '../vibe/vibe.types.js';
+import { canJoinEnterprise as canJoin } from './enterprise-access.js';
 import {
   BadRequestException,
   ConflictException,
@@ -24,6 +28,7 @@ interface TestRow {
   ends_at: Date;
   duration_min: number;
   problem_ids: string[];
+  vibe_challenge_ids: string[];
   invite_code: string;
   invite_only: boolean;
   invite_user_ids: string[];
@@ -48,11 +53,6 @@ const NOT_FOUND = '테스트를 찾을 수 없습니다.';
 const TEST_COLUMNS = `t.*, (SELECT count(*)::int FROM enterprise_attempts a WHERE a.test_id = t.id) AS attempt_count,
   ARRAY(SELECT u.username FROM users u WHERE u.id = ANY(t.invite_user_ids) ORDER BY lower(u.username)) AS invite_usernames`;
 
-/** 초대 전용이면 만든 사람과 초대한 사람(계정 또는 계정 이메일)만 통과한다. user는 사용자 id 매개변수 자리. */
-const canJoin = (user: string) =>
-  `(NOT t.invite_only OR t.owner_id = ${user} OR ${user} = ANY(t.invite_user_ids)
-    OR EXISTS (SELECT 1 FROM users iu WHERE iu.id = ${user} AND iu.email = ANY(t.invite_emails)))`;
-
 const toTest = (row: TestRow) => ({
   id: row.id,
   title: row.title,
@@ -61,6 +61,7 @@ const toTest = (row: TestRow) => ({
   endsAt: row.ends_at,
   durationMin: row.duration_min,
   problemIds: row.problem_ids,
+  vibeChallengeIds: row.vibe_challenge_ids,
   inviteCode: row.invite_code,
   inviteOnly: row.invite_only,
   invitees: [...(row.invite_usernames ?? []), ...row.invite_emails],
@@ -84,12 +85,15 @@ const toPublicTest = (row: TestRow) => ({
   startsAt: row.starts_at,
   endsAt: row.ends_at,
   durationMin: row.duration_min,
-  problemCount: row.problem_ids.length,
+  problemCount: row.problem_ids.length + row.vibe_challenge_ids.length,
 });
 
 @Injectable()
 export class EnterpriseService {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private readonly dataSource: DataSource,
+    private readonly vibe: VibeService,
+  ) {}
 
   async list(user: AuthenticatedUser) {
     const rows: TestRow[] = await this.dataSource.query(
@@ -102,12 +106,17 @@ export class EnterpriseService {
   async create(dto: CreateEnterpriseTestDto, user: AuthenticatedUser) {
     this.assertSchedule(dto.startsAt, dto.endsAt, dto.durationMin, true);
     return this.dataSource.transaction(async (manager) => {
+      this.assertTasks(dto.problemIds, dto.vibeChallengeIds ?? []);
       await this.assertProblems(manager, dto.problemIds, user);
-      const invite = await this.resolveInvitees(manager, dto.inviteOnly ?? false, dto.invitees ?? []);
+      const invite = await this.resolveInvitees(
+        manager,
+        dto.inviteOnly ?? false,
+        dto.invitees ?? [],
+      );
       const [row]: TestRow[] = await manager.query(
         `INSERT INTO enterprise_tests (owner_id, title, description, starts_at, ends_at, duration_min, problem_ids, invite_code,
-           invite_only, invite_user_ids, invite_emails, show_score_to_candidates)
-         VALUES ($1, $2, $3, $4, $5, $6, $7::uuid[], $8, $9, $10::uuid[], $11::text[], $12) RETURNING id`,
+           invite_only, invite_user_ids, invite_emails, show_score_to_candidates, vibe_challenge_ids)
+         VALUES ($1, $2, $3, $4, $5, $6, $7::uuid[], $8, $9, $10::uuid[], $11::text[], $12, $13::text[]) RETURNING id`,
         [
           user.id,
           dto.title.trim(),
@@ -121,6 +130,7 @@ export class EnterpriseService {
           invite.userIds,
           invite.emails,
           dto.showScoreToCandidates ?? false,
+          dto.vibeChallengeIds ?? [],
         ],
       );
       return toTest(await this.owned(manager, row.id, user));
@@ -131,8 +141,13 @@ export class EnterpriseService {
     return toTest(await this.owned(this.dataSource.manager, id, user));
   }
 
-  async update(id: string, dto: UpdateEnterpriseTestDto, user: AuthenticatedUser) {
-    if (!Object.keys(dto).length) throw new BadRequestException('변경할 필드가 없습니다.');
+  async update(
+    id: string,
+    dto: UpdateEnterpriseTestDto,
+    user: AuthenticatedUser,
+  ) {
+    if (!Object.keys(dto).length)
+      throw new BadRequestException('변경할 필드가 없습니다.');
     return this.dataSource.transaction(async (manager) => {
       const current = await this.owned(manager, id, user, true);
       if (current.starts_at.getTime() <= Date.now())
@@ -144,18 +159,25 @@ export class EnterpriseService {
         endsAt: dto.endsAt ?? current.ends_at.toISOString(),
         durationMin: dto.durationMin ?? current.duration_min,
         problemIds: dto.problemIds ?? current.problem_ids,
+        vibeChallengeIds: dto.vibeChallengeIds ?? current.vibe_challenge_ids,
       };
       this.assertSchedule(next.startsAt, next.endsAt, next.durationMin, true);
-      if (dto.problemIds) await this.assertProblems(manager, dto.problemIds, user);
+      this.assertTasks(next.problemIds, next.vibeChallengeIds);
+      if (dto.problemIds)
+        await this.assertProblems(manager, dto.problemIds, user);
       const inviteOnly = dto.inviteOnly ?? current.invite_only;
       const invite =
         dto.invitees || dto.inviteOnly !== undefined
-          ? await this.resolveInvitees(manager, inviteOnly, dto.invitees ?? toTest(current).invitees)
+          ? await this.resolveInvitees(
+              manager,
+              inviteOnly,
+              dto.invitees ?? toTest(current).invitees,
+            )
           : { userIds: current.invite_user_ids, emails: current.invite_emails };
       await manager.query(
         `UPDATE enterprise_tests SET title = $2, description = $3, starts_at = $4, ends_at = $5,
            duration_min = $6, problem_ids = $7::uuid[], invite_only = $8, invite_user_ids = $9::uuid[],
-           invite_emails = $10::text[], show_score_to_candidates = $11, updated_at = now()
+           invite_emails = $10::text[], show_score_to_candidates = $11, vibe_challenge_ids=$12::text[], updated_at = now()
          WHERE id = $1`,
         [
           id,
@@ -169,6 +191,7 @@ export class EnterpriseService {
           invite.userIds,
           invite.emails,
           dto.showScoreToCandidates ?? current.show_score_to_candidates,
+          next.vibeChallengeIds,
         ],
       );
       return toTest(await this.owned(manager, id, user));
@@ -185,18 +208,25 @@ export class EnterpriseService {
         [id],
       );
       if (count)
-        throw new ConflictException('응시 기록이 있는 테스트는 삭제할 수 없어요.');
+        throw new ConflictException(
+          '응시 기록이 있는 테스트는 삭제할 수 없어요.',
+        );
       await manager.query('DELETE FROM enterprise_tests WHERE id = $1', [id]);
     });
     return { id };
   }
 
-  /** 응시자별 문제 정답 여부와 점수. 점수는 맞힌 문제 비율(0~100)이다. */
+  /** 일반 문제와 바이브코딩 과제를 동일 비중으로 합산한다. */
   async results(id: string, user: AuthenticatedUser) {
     const test = await this.owned(this.dataSource.manager, id, user);
     const rows: (AttemptRow & {
       username: string;
-      problems: { problemId: string; solved: boolean; submissions: number; submissionId: string }[];
+      problems: {
+        problemId: string;
+        solved: boolean;
+        submissions: number;
+        submissionId: string;
+      }[];
     })[] = await this.dataSource.query(
       `SELECT a.*, u.username,
               coalesce(json_agg(json_build_object(
@@ -215,7 +245,10 @@ export class EnterpriseService {
         ORDER BY a.started_at`,
       [id],
     );
-    const total = test.problem_ids.length;
+    const scores = await this.vibeScores(
+      test,
+      rows.map((row) => row.id),
+    );
     const candidates = rows.map((row) => {
       const solved = row.problems.filter((problem) => problem.solved).length;
       return {
@@ -223,18 +256,28 @@ export class EnterpriseService {
         user: { id: row.user_id, username: row.username },
         problems: row.problems,
         solved,
-        score: Math.round((solved / total) * 100),
+        vibeTasks: scores.get(row.id) ?? [],
+        score: assessmentScore(
+          solved,
+          test.problem_ids.length,
+          (scores.get(row.id) ?? []).map((task) => task.score),
+        ),
       };
     });
+    const complete = candidates.filter((item) => item.score !== null);
     return {
       test: toTest(test),
       summary: {
         candidates: candidates.length,
-        averageScore: candidates.length
-          ? Math.round(candidates.reduce((sum, item) => sum + item.score, 0) / candidates.length)
+        pending: candidates.length - complete.length,
+        averageScore: complete.length
+          ? Math.round(
+              complete.reduce((sum, item) => sum + item.score!, 0) /
+                complete.length,
+            )
           : null,
         // 모든 문제를 맞힌 응시자 수.
-        perfect: candidates.filter((item) => item.solved === total).length,
+        perfect: candidates.filter((item) => item.score === 100).length,
       },
       candidates,
     };
@@ -263,7 +306,9 @@ export class EnterpriseService {
       );
       if (existing) return toAttempt(existing);
       if (test.owner_id === user.id)
-        throw new ForbiddenException('테스트를 만든 계정으로는 응시할 수 없어요.');
+        throw new ForbiddenException(
+          '테스트를 만든 계정으로는 응시할 수 없어요.',
+        );
       const [inserted]: AttemptRow[] = await manager.query(
         `INSERT INTO enterprise_attempts (test_id, user_id, deadline_at)
          SELECT t.id, $2, LEAST(now() + make_interval(mins => t.duration_min), t.ends_at)
@@ -280,7 +325,9 @@ export class EnterpriseService {
       );
       if (raced) return toAttempt(raced);
       throw new ConflictException(
-        test.starts_at.getTime() > Date.now() ? '아직 응시 기간이 아니에요.' : '응시 기간이 끝났어요.',
+        test.starts_at.getTime() > Date.now()
+          ? '아직 응시 기간이 아니에요.'
+          : '응시 기간이 끝났어요.',
       );
     });
   }
@@ -326,16 +373,32 @@ export class EnterpriseService {
          FROM submissions WHERE attempt_id = $1 GROUP BY problem_id`,
       [id],
     );
-    const byProblem = new Map(statuses.map((status) => [status.problemId, status]));
-    const total = test.problem_ids.length;
+    const byProblem = new Map(
+      statuses.map((status) => [status.problemId, status]),
+    );
+    const vibeTasks = (await this.vibeScores(test, [id])).get(id) ?? [];
+    const total = test.problem_ids.length + test.vibe_challenge_ids.length;
     const solved = statuses.filter((status) => status.solved).length;
     return {
       ...toAttempt(attempt),
       test: toPublicTest(test),
+      vibeTasks: vibeTasks.map((task) => ({
+        ...task,
+        score:
+          attempt.closed && test.show_score_to_candidates ? task.score : null,
+      })),
       // 담당자가 공개를 켠 테스트만, 응시가 끝난 뒤에 점수를 준다. 점수 계산은 results()와 같다.
       result:
         attempt.closed && test.show_score_to_candidates
-          ? { solved, total, score: Math.round((solved / total) * 100) }
+          ? {
+              solved,
+              total,
+              score: assessmentScore(
+                solved,
+                test.problem_ids.length,
+                vibeTasks.map((task) => task.score),
+              ),
+            }
           : null,
       problems: problems.map((problem) => ({
         ...problem,
@@ -346,27 +409,153 @@ export class EnterpriseService {
     };
   }
 
+  async startVibe(id: string, challengeId: string, user: AuthenticatedUser) {
+    return this.vibe.startEnterprise(id, challengeId, user.id);
+  }
   async finish(id: string, user: AuthenticatedUser) {
-    await this.ownAttempt(id, user);
-    const [[row]]: [AttemptRow[], number] = await this.dataSource.query(
-      'UPDATE enterprise_attempts SET finished_at = coalesce(finished_at, now()) WHERE id = $1 RETURNING *',
-      [id],
-    );
+    const row = await this.dataSource.transaction(async (manager) => {
+      await this.ownAttempt(id, user, manager, true);
+      const [[saved]]: [AttemptRow[], number] = await manager.query(
+        'UPDATE enterprise_attempts SET finished_at=coalesce(finished_at,now()) WHERE id=$1 RETURNING *',
+        [id],
+      );
+      return saved;
+    });
+    await this.vibe.finalizeExam(id, user.id);
     return toAttempt(row);
   }
-
-  private async ownAttempt(id: string, user: AuthenticatedUser) {
-    const [attempt]: (AttemptRow & { closed: boolean })[] = await this.dataSource.query(
-      `SELECT a.*, (a.finished_at IS NOT NULL OR a.deadline_at <= now()) AS closed
-         FROM enterprise_attempts a JOIN enterprise_tests t ON t.id = a.test_id
-        WHERE a.id = $1 AND a.user_id = $2 AND ${canJoin('$2')}`,
+  private async ownAttempt(
+    id: string,
+    user: AuthenticatedUser,
+    manager = this.dataSource.manager,
+    lock = false,
+  ) {
+    const [attempt]: (AttemptRow & { closed: boolean })[] = await manager.query(
+      `SELECT a.*, LEAST(a.deadline_at,t.ends_at) AS deadline_at, (a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now()) AS closed
+       FROM enterprise_attempts a JOIN enterprise_tests t ON t.id=a.test_id WHERE a.id=$1 AND a.user_id=$2 AND ${canJoin('$2')}${lock ? ' FOR UPDATE OF a' : ''}`,
       [id, user.id],
     );
     if (!attempt) throw new NotFoundException('응시 기록을 찾을 수 없습니다.');
     return attempt;
   }
+  private async reviewContext(
+    testId: string,
+    attemptId: string,
+    vibeId: string,
+    user: AuthenticatedUser,
+  ) {
+    await this.owned(this.dataSource.manager, testId, user);
+    const [row]: { user_id: string; username: string; closed: boolean }[] =
+      await this.dataSource.query(
+        `SELECT a.user_id,u.username,(a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now()) AS closed
+       FROM enterprise_attempts a JOIN enterprise_tests t ON t.id=a.test_id JOIN users u ON u.id=a.user_id
+       JOIN vibe_attempts v ON v.enterprise_attempt_id=a.id WHERE a.id=$1 AND a.test_id=$2 AND v.id=$3`,
+        [attemptId, testId, vibeId],
+      );
+    if (!row) throw new NotFoundException('응시 과제를 찾을 수 없습니다.');
+    return row;
+  }
+  async reviewVibe(
+    testId: string,
+    attemptId: string,
+    vibeId: string,
+    user: AuthenticatedUser,
+  ) {
+    const row = await this.reviewContext(testId, attemptId, vibeId, user);
+    return {
+      ...(await this.vibe.review(vibeId, row.user_id)),
+      candidate: { id: row.user_id, username: row.username },
+      canGrade: row.closed,
+    };
+  }
+  async reviewRevision(
+    testId: string,
+    attemptId: string,
+    vibeId: string,
+    revision: number,
+    user: AuthenticatedUser,
+  ) {
+    const row = await this.reviewContext(testId, attemptId, vibeId, user);
+    return this.vibe.revision(vibeId, row.user_id, revision);
+  }
+  async gradeVibe(
+    testId: string,
+    attemptId: string,
+    vibeId: string,
+    user: AuthenticatedUser,
+  ) {
+    const row = await this.reviewContext(testId, attemptId, vibeId, user);
+    if (!row.closed)
+      throw new ConflictException(
+        '응시가 끝난 뒤 저장본을 채점할 수 있습니다.',
+      );
+    await this.vibe.finalize(vibeId, row.user_id);
+    return this.reviewVibe(testId, attemptId, vibeId, user);
+  }
+  private assertTasks(problems: string[], vibeIds: string[]) {
+    if (
+      problems.length + vibeIds.length < 1 ||
+      problems.length + vibeIds.length > 20 ||
+      vibeIds.some((id) => id !== challenge.id)
+    )
+      throw new BadRequestException(
+        '일반 문제와 바이브코딩 과제를 합해 1~20개 선택해 주세요.',
+      );
+  }
+  private async vibeScores(test: TestRow, attemptIds: string[]) {
+    const rows: {
+      id: string;
+      enterprise_attempt_id: string;
+      challenge_id: string;
+      submitted_at: Date | null;
+      report: VibeReport | null;
+    }[] =
+      attemptIds.length && test.vibe_challenge_ids.length
+        ? await this.dataSource.query(
+            "SELECT id,enterprise_attempt_id,challenge_id,submitted_at,state->'report' AS report FROM vibe_attempts WHERE enterprise_attempt_id=ANY($1::uuid[])",
+            [attemptIds],
+          )
+        : [];
+    return new Map(
+      attemptIds.map((id) => [
+        id,
+        test.vibe_challenge_ids.map((challengeId) => {
+          const row = rows.find(
+            (row) =>
+              row.enterprise_attempt_id === id &&
+              row.challenge_id === challengeId,
+          );
+          const report = row?.report;
+          const score = !row
+            ? 0
+            : report?.evaluationStatus === 'complete'
+              ? report.outcome + report.prompt!.score + report.process!.score
+              : null;
+          return {
+            challengeId,
+            title: challenge.title,
+            id: row?.id ?? null,
+            submittedAt: row?.submitted_at ?? null,
+            score,
+            status: !row
+              ? 'not_started'
+              : !row.submitted_at
+                ? 'working'
+                : score === null
+                  ? 'pending'
+                  : 'complete',
+          };
+        }),
+      ]),
+    );
+  }
 
-  private async owned(manager: EntityManager, id: string, user: AuthenticatedUser, lock = false) {
+  private async owned(
+    manager: EntityManager,
+    id: string,
+    user: AuthenticatedUser,
+    lock = false,
+  ) {
     const [row]: TestRow[] = await manager.query(
       `SELECT ${TEST_COLUMNS} FROM enterprise_tests t WHERE t.id = $1 ${lock ? 'FOR UPDATE' : ''}`,
       [id],
@@ -377,18 +566,29 @@ export class EnterpriseService {
     return row;
   }
 
-  private async byCode(manager: EntityManager, code: string, user: AuthenticatedUser) {
+  private async byCode(
+    manager: EntityManager,
+    code: string,
+    user: AuthenticatedUser,
+  ) {
     const [row]: (TestRow & { allowed: boolean })[] = await manager.query(
       `SELECT t.*, ${canJoin('$2')} AS allowed FROM enterprise_tests t WHERE t.invite_code = $1`,
       [code.slice(0, 32), user.id],
     );
     // 초대받지 않은 사람에게는 테스트가 있다는 것도 알리지 않는다.
-    if (!row?.allowed) throw new NotFoundException('응시 링크가 올바르지 않거나 삭제된 테스트예요.');
+    if (!row?.allowed)
+      throw new NotFoundException(
+        '응시 링크가 올바르지 않거나 삭제된 테스트예요.',
+      );
     return row;
   }
 
   /** 초대 목록을 저장 형태로: 사용자 이름은 id로 바꾸고(없는 이름은 400), 이메일은 소문자로 둔다. */
-  private async resolveInvitees(manager: EntityManager, inviteOnly: boolean, invitees: string[]) {
+  private async resolveInvitees(
+    manager: EntityManager,
+    inviteOnly: boolean,
+    invitees: string[],
+  ) {
     if (!inviteOnly) return { userIds: [] as string[], emails: [] as string[] };
     const names = new Map<string, string>();
     const emails = new Set<string>();
@@ -406,7 +606,9 @@ export class EnterpriseService {
         )
       : [];
     const found = new Set(users.map((item) => item.name));
-    const missing = [...names].filter(([key]) => !found.has(key)).map(([, value]) => value);
+    const missing = [...names]
+      .filter(([key]) => !found.has(key))
+      .map(([, value]) => value);
     if (missing.length)
       throw new BadRequestException(
         `없는 사용자 이름이 있어요: ${missing.slice(0, 10).join(', ')}${missing.length > 10 ? ` 외 ${missing.length - 10}명` : ''}`,
@@ -414,10 +616,16 @@ export class EnterpriseService {
     return { userIds: users.map((item) => item.id), emails: [...emails] };
   }
 
-  private assertSchedule(startsAt: string, endsAt: string, durationMin: number, future: boolean) {
+  private assertSchedule(
+    startsAt: string,
+    endsAt: string,
+    durationMin: number,
+    future: boolean,
+  ) {
     const start = Date.parse(startsAt);
     const end = Date.parse(endsAt);
-    if (!(end > start)) throw new BadRequestException('종료 일시는 시작 일시보다 늦어야 해요.');
+    if (!(end > start))
+      throw new BadRequestException('종료 일시는 시작 일시보다 늦어야 해요.');
     if (future && end <= Date.now())
       throw new BadRequestException('종료 일시는 지금보다 이후여야 해요.');
     if (durationMin * 60_000 > end - start)
@@ -425,13 +633,32 @@ export class EnterpriseService {
   }
 
   /** 출제 화면에서 고를 수 있는 문제만 허용: 공개 문제, 내가 만든 문제(기업 전용 포함), 관리자는 전부. */
-  private async assertProblems(manager: EntityManager, ids: string[], user: AuthenticatedUser) {
+  private async assertProblems(
+    manager: EntityManager,
+    ids: string[],
+    user: AuthenticatedUser,
+  ) {
     const [{ count }]: { count: number }[] = await manager.query(
       `SELECT count(*)::int AS count FROM problems
         WHERE id = ANY($1::uuid[]) AND (status = 'PUBLISHED' OR author_id = $2 OR $3)`,
       [ids, user.id, user.role === UserRole.ADMIN],
     );
     if (count !== ids.length)
-      throw new BadRequestException('출제할 수 없는 문제가 포함되어 있어요. 문제 목록을 다시 확인해 주세요.');
+      throw new BadRequestException(
+        '출제할 수 없는 문제가 포함되어 있어요. 문제 목록을 다시 확인해 주세요.',
+      );
   }
+}
+
+export function assessmentScore(
+  solved: number,
+  problemCount: number,
+  vibeScores: (number | null)[],
+) {
+  if (vibeScores.some((score) => score === null)) return null;
+  return Math.round(
+    (solved * 100 +
+      vibeScores.reduce<number>((sum, score) => sum + score!, 0)) /
+      (problemCount + vibeScores.length),
+  );
 }

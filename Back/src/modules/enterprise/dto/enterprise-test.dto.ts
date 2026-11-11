@@ -45,11 +45,19 @@ export class CreateEnterpriseTestDto {
   durationMin: number;
 
   @IsArray()
-  @ArrayMinSize(1)
+  @ArrayMinSize(0)
   @ArrayMaxSize(20)
   @ArrayUnique()
   @IsUUID('all', { each: true })
   problemIds: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @ArrayUnique()
+  @IsString({ each: true })
+  @Length(1, 100, { each: true })
+  vibeChallengeIds?: string[];
 
   /** true면 invitees에 적은 사람만 응시 링크를 열 수 있다. */
   @IsOptional()
@@ -71,4 +79,6 @@ export class CreateEnterpriseTestDto {
   showScoreToCandidates?: boolean;
 }
 
-export class UpdateEnterpriseTestDto extends PartialType(CreateEnterpriseTestDto) {}
+export class UpdateEnterpriseTestDto extends PartialType(
+  CreateEnterpriseTestDto,
+) {}

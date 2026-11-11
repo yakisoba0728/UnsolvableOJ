@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { VibeModule } from './modules/vibe/vibe.module.js';
 import { MissionsModule } from './modules/missions/missions.module.js';
 import { CommunityModule } from './modules/community/community.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
@@ -62,6 +63,7 @@ import { EnterpriseModule } from './modules/enterprise/enterprise.module.js';
     CommunityModule,
     MissionsModule,
     NotificationsModule,
+    VibeModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

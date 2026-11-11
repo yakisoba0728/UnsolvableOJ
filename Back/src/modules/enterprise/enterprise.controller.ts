@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  ParseIntPipe,
   Patch,
   Post,
   UseGuards,
@@ -35,12 +36,18 @@ export class EnterpriseController {
   }
 
   @Post('tests')
-  create(@Body() dto: CreateEnterpriseTestDto, @CurrentUser() user: AuthenticatedUser) {
+  create(
+    @Body() dto: CreateEnterpriseTestDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.enterprise.create(dto, user);
   }
 
   @Get('tests/:id')
-  findOne(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthenticatedUser) {
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.enterprise.findOwned(id, user);
   }
 
@@ -56,13 +63,64 @@ export class EnterpriseController {
   // 웹 api()는 빈 응답을 오류로 보므로 204 대신 지운 id를 돌려준다.
   @Delete('tests/:id')
   @HttpCode(HttpStatus.OK)
-  remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthenticatedUser) {
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.enterprise.remove(id, user);
   }
 
   @Get('tests/:id/results')
-  results(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthenticatedUser) {
+  results(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.enterprise.results(id, user);
+  }
+
+  @Post('attempts/:id/vibe/:challengeId')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  startVibe(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('challengeId') challengeId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.enterprise.startVibe(id, challengeId, user);
+  }
+  @Get('tests/:testId/attempts/:attemptId/vibe/:vibeId')
+  reviewVibe(
+    @Param('testId', ParseUUIDPipe) testId: string,
+    @Param('attemptId', ParseUUIDPipe) attemptId: string,
+    @Param('vibeId', ParseUUIDPipe) vibeId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.enterprise.reviewVibe(testId, attemptId, vibeId, user);
+  }
+  @Get('tests/:testId/attempts/:attemptId/vibe/:vibeId/revisions/:revision')
+  revision(
+    @Param('testId', ParseUUIDPipe) testId: string,
+    @Param('attemptId', ParseUUIDPipe) attemptId: string,
+    @Param('vibeId', ParseUUIDPipe) vibeId: string,
+    @Param('revision', ParseIntPipe) revision: number,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.enterprise.reviewRevision(
+      testId,
+      attemptId,
+      vibeId,
+      revision,
+      user,
+    );
+  }
+  @Post('tests/:testId/attempts/:attemptId/vibe/:vibeId/evaluation')
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  grade(
+    @Param('testId', ParseUUIDPipe) testId: string,
+    @Param('attemptId', ParseUUIDPipe) attemptId: string,
+    @Param('vibeId', ParseUUIDPipe) vibeId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.enterprise.gradeVibe(testId, attemptId, vibeId, user);
   }
 
   // 응시 링크 코드는 추측해 볼 수 있으므로 조회·시작을 제한한다.
@@ -79,13 +137,19 @@ export class EnterpriseController {
   }
 
   @Get('attempts/:id')
-  attempt(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthenticatedUser) {
+  attempt(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.enterprise.attempt(id, user);
   }
 
   @Post('attempts/:id/finish')
   @HttpCode(HttpStatus.OK)
-  finish(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthenticatedUser) {
+  finish(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.enterprise.finish(id, user);
   }
 }

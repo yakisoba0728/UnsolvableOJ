@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { CodeEditor, type CodeEditorHandle } from "../components/CodeEditor";
@@ -38,11 +38,14 @@ function writeDraft(key: string, value: string) {
 export function EnterpriseAttemptPage() {
   const { id = "" } = useParams();
   const { session } = useAuth();
+  const navigate = useNavigate();
   const token = session?.accessToken;
   // 본문·편집기를 매초 다시 그리지 않도록 초 단위 표시는 AttemptTimer가 맡는다.
   const now = useNow(5_000);
   const { data, loading, error, retry } = useRequest<AttemptView | null>(
-    token ? (signal) => api(`/enterprise/attempts/${id}`, { signal }, token) : null,
+    token
+      ? (signal) => api(`/enterprise/attempts/${id}`, { signal }, token)
+      : null,
     null,
     "응시 정보를 불러오지 못했어요.",
     [token, id],
@@ -61,8 +64,12 @@ export function EnterpriseAttemptPage() {
 
   const problem = data?.problems[index];
   const key = problem ? draftKey(id, problem.id, language) : "";
-  const source = problem ? (sources[key] ?? readDraft(key) ?? starter(language)) : "";
-  const submissionId = problem ? (submitted[problem.id] ?? problem.lastSubmissionId) : null;
+  const source = problem
+    ? (sources[key] ?? readDraft(key) ?? starter(language))
+    : "";
+  const submissionId = problem
+    ? (submitted[problem.id] ?? problem.lastSubmissionId)
+    : null;
   const result = useSubmissionResult(submissionId, session);
   const judging = result.submission ? isJudging(result.submission) : false;
 
@@ -89,7 +96,11 @@ export function EnterpriseAttemptPage() {
         <PageHeader title="코드 테스트" />
         <div className="empty-state ent-empty">
           <strong>로그인해야 응시 화면을 볼 수 있어요</strong>
-          <Link className="button" to="/auth" state={{ from: `/enterprise/attempts/${id}` }}>
+          <Link
+            className="button"
+            to="/auth"
+            state={{ from: `/enterprise/attempts/${id}` }}
+          >
             로그인하기 <span aria-hidden="true">→</span>
           </Link>
         </div>
@@ -104,7 +115,9 @@ export function EnterpriseAttemptPage() {
             <p role="status">응시 화면을 불러오는 중…</p>
           ) : (
             <>
-              <strong role="alert">{error || "응시 정보를 불러오지 못했어요."}</strong>
+              <strong role="alert">
+                {error || "응시 정보를 불러오지 못했어요."}
+              </strong>
               <button className="button" onClick={retry}>
                 다시 시도
               </button>
@@ -116,10 +129,15 @@ export function EnterpriseAttemptPage() {
 
   const remaining = Date.parse(data.deadlineAt) - now;
   const closed = Boolean(data.finishedAt) || remaining <= 0;
+  const taskCount = data.problems.length + (data.vibeTasks?.length ?? 0);
   const solved = data.problems.filter((item) => item.solved).length;
 
   function syncUnits(value: string, added: readonly number[] = []) {
-    unitsRef.current = addUnits(remapUnits(unitsRef.current, unitsBaseRef.current, value), added, value);
+    unitsRef.current = addUnits(
+      remapUnits(unitsRef.current, unitsBaseRef.current, value),
+      added,
+      value,
+    );
     unitsBaseRef.current = value;
     return unitsRef.current;
   }
@@ -137,7 +155,10 @@ export function EnterpriseAttemptPage() {
     try {
       const created = await api<Submission>(
         `/enterprise/attempts/${id}/problems/${problem.id}/submissions`,
-        { method: "POST", body: JSON.stringify({ language, sourceCode: source }) },
+        {
+          method: "POST",
+          body: JSON.stringify({ language, sourceCode: source }),
+        },
         token,
       );
       setSubmitted((current) => ({ ...current, [problem.id]: created.id }));
@@ -151,13 +172,19 @@ export function EnterpriseAttemptPage() {
   }
 
   async function finish() {
-    if (finishing || !window.confirm("시험을 종료할까요? 종료하면 더 제출할 수 없어요.")) return;
+    if (
+      finishing ||
+      !window.confirm("시험을 종료할까요? 종료하면 더 제출할 수 없어요.")
+    )
+      return;
     setFinishing(true);
     try {
       await api(`/enterprise/attempts/${id}/finish`, { method: "POST" }, token);
       retry();
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : "시험을 종료하지 못했어요.");
+      setMessage(
+        cause instanceof Error ? cause.message : "시험을 종료하지 못했어요.",
+      );
     } finally {
       setFinishing(false);
     }
@@ -167,12 +194,19 @@ export function EnterpriseAttemptPage() {
     <div className="page-width enterprise-page ent-attempt">
       <PageHeader
         title={data.test.title}
-        description={`${data.problems.length}문항 · 맞힌 문제 ${solved}개`}
+        description={`${taskCount}문항 · 맞힌 문제 ${solved}개`}
         aside={
           <div className="ent-actions">
-            <AttemptTimer deadlineAt={data.deadlineAt} finished={Boolean(data.finishedAt)} />
+            <AttemptTimer
+              deadlineAt={data.deadlineAt}
+              finished={Boolean(data.finishedAt)}
+            />
             {closed ? null : (
-              <button className="button button-outline" onClick={() => void finish()} disabled={finishing}>
+              <button
+                className="button button-outline"
+                onClick={() => void finish()}
+                disabled={finishing}
+              >
                 시험 종료
               </button>
             )}
@@ -180,12 +214,21 @@ export function EnterpriseAttemptPage() {
         }
       />
       {data.result ? (
-        <section className="form-card ent-card ent-result-card" aria-labelledby="ent-my-result">
+        <section
+          className="form-card ent-card ent-result-card"
+          aria-labelledby="ent-my-result"
+        >
           <h2 id="ent-my-result">내 결과</h2>
           <p>
-            <strong>{data.result.score}점</strong>{" "}
+            <strong>
+              {data.result.score === null
+                ? "평가 대기"
+                : `${data.result.score}점`}
+            </strong>{" "}
             <span className="muted">
-              ({data.result.total}문제 중 {data.result.solved}문제 정답)
+              {data.vibeTasks?.length
+                ? `${data.result.total}문항 중 일반 문제 ${data.result.solved}개 정답`
+                : `${data.result.total}문제 중 ${data.result.solved}문제 정답`}
             </span>
           </p>
           <ul>
@@ -193,7 +236,11 @@ export function EnterpriseAttemptPage() {
               <li key={item.id}>
                 {position + 1}. {item.title} —{" "}
                 <span className={item.solved ? "verdict-good" : "verdict-bad"}>
-                  {item.solved ? "정답" : item.lastSubmissionId ? "미해결" : "미제출"}
+                  {item.solved
+                    ? "정답"
+                    : item.lastSubmissionId
+                      ? "미해결"
+                      : "미제출"}
                 </span>
               </li>
             ))}
@@ -201,7 +248,8 @@ export function EnterpriseAttemptPage() {
         </section>
       ) : closed ? (
         <p className="local-storage-notice" role="status">
-          응시가 끝났어요. 제출한 코드와 결과는 아래에서 볼 수 있고, 점수는 테스트를 만든 담당자에게 전달돼요.
+          응시가 끝났어요. 제출한 코드와 결과는 아래에서 볼 수 있고, 점수는
+          테스트를 만든 담당자에게 전달돼요.
         </p>
       ) : null}
       {message ? (
@@ -210,6 +258,62 @@ export function EnterpriseAttemptPage() {
         </p>
       ) : null}
 
+      {data.vibeTasks?.length ? (
+        <section
+          className="form-card ent-card ent-vibe-tasks"
+          aria-labelledby="ent-vibe-tasks"
+        >
+          <h2 id="ent-vibe-tasks">바이브코딩 과제</h2>
+          <p className="muted">
+            이 시험의 남은 시간을 공유합니다. 시험 종료 시 마지막 저장본이
+            제출됩니다.
+          </p>
+          {data.vibeTasks.map((task) => (
+            <div key={task.challengeId}>
+              <div>
+                <strong>{task.title}</strong>
+                <p>
+                  {task.submittedAt
+                    ? "제출 완료"
+                    : task.id
+                      ? "작성 중"
+                      : "미응시"}
+                  {data.result && task.score !== null
+                    ? ` · ${task.score}점`
+                    : ""}
+                </p>
+              </div>
+              <button
+                className="button button-outline"
+                disabled={!task.id && closed}
+                onClick={async () => {
+                  if (task.id) {
+                    navigate(`/vibe/attempts/${task.id}`);
+                    return;
+                  }
+                  setMessage("");
+                  try {
+                    const created = await api<{ id: string }>(
+                      `/enterprise/attempts/${id}/vibe/${task.challengeId}`,
+                      { method: "POST" },
+                      token,
+                    );
+                    navigate(`/vibe/attempts/${created.id}`);
+                  } catch (cause) {
+                    setMessage(
+                      cause instanceof Error
+                        ? cause.message
+                        : "과제를 열지 못했습니다.",
+                    );
+                  }
+                }}
+              >
+                {task.id ? "작업 공간 보기" : "과제 시작"}
+              </button>
+            </div>
+          ))}
+        </section>
+      ) : null}
       <nav className="tab-list ent-attempt-tabs" aria-label="문제 목록">
         {data.problems.map((item, position) => (
           <button
@@ -220,20 +324,28 @@ export function EnterpriseAttemptPage() {
             onClick={() => setIndex(position)}
           >
             {position + 1}. {item.title}
-            {item.solved ? <span className="ent-solved"> ✓<span className="sr-only"> 정답</span></span> : null}
+            {item.solved ? (
+              <span className="ent-solved">
+                {" "}
+                ✓<span className="sr-only"> 정답</span>
+              </span>
+            ) : null}
           </button>
         ))}
       </nav>
 
       {problem ? (
         <div className="ent-attempt-grid">
-          <article className="problem-content form-card" aria-label={`${index + 1}번 문제`}>
+          <article
+            className="problem-content form-card"
+            aria-label={`${index + 1}번 문제`}
+          >
             <h2>
               {index + 1}. {problem.title}
             </h2>
             <p className="muted">
-              {difficultyLabel(problem.difficulty)} · 시간 제한 {problem.timeLimitMs}ms · 메모리 제한{" "}
-              {problem.memoryLimitMb}MB
+              {difficultyLabel(problem.difficulty)} · 시간 제한{" "}
+              {problem.timeLimitMs}ms · 메모리 제한 {problem.memoryLimitMb}MB
             </p>
             <section>
               <h3>문제</h3>
@@ -245,7 +357,9 @@ export function EnterpriseAttemptPage() {
               <section>
                 <h3>입력</h3>
                 <div className="markdown">
-                  <ProblemMarkdown>{problem.inputDescriptionMarkdown}</ProblemMarkdown>
+                  <ProblemMarkdown>
+                    {problem.inputDescriptionMarkdown}
+                  </ProblemMarkdown>
                 </div>
               </section>
             ) : null}
@@ -253,7 +367,9 @@ export function EnterpriseAttemptPage() {
               <section>
                 <h3>출력</h3>
                 <div className="markdown">
-                  <ProblemMarkdown>{problem.outputDescriptionMarkdown}</ProblemMarkdown>
+                  <ProblemMarkdown>
+                    {problem.outputDescriptionMarkdown}
+                  </ProblemMarkdown>
                 </div>
               </section>
             ) : null}
@@ -280,10 +396,17 @@ export function EnterpriseAttemptPage() {
                 className="language-select"
                 ariaLabel="언어"
                 value={language}
-                options={languages.map((item) => ({ value: item.value, label: item.label }))}
+                options={languages.map((item) => ({
+                  value: item.value,
+                  label: item.label,
+                }))}
                 onChange={(next) => setLanguage(next as Language)}
               />
-              <button className="button" type="submit" disabled={closed || submitting || !source.trim()}>
+              <button
+                className="button"
+                type="submit"
+                disabled={closed || submitting || !source.trim()}
+              >
                 {submitting ? "제출하는 중…" : "제출"}
               </button>
             </div>
@@ -316,12 +439,22 @@ export function EnterpriseAttemptPage() {
   );
 }
 
-function AttemptTimer({ deadlineAt, finished }: { deadlineAt: string; finished: boolean }) {
+function AttemptTimer({
+  deadlineAt,
+  finished,
+}: {
+  deadlineAt: string;
+  finished: boolean;
+}) {
   const now = useNow(1_000);
   const remaining = Date.parse(deadlineAt) - now;
   const closed = finished || remaining <= 0;
   return (
-    <p className={`ent-timer${!closed && remaining < 5 * 60_000 ? " ent-timer-low" : ""}`} role="timer" aria-live="off">
+    <p
+      className={`ent-timer${!closed && remaining < 5 * 60_000 ? " ent-timer-low" : ""}`}
+      role="timer"
+      aria-live="off"
+    >
       {closed ? "응시 종료" : `남은 시간 ${remainingText(remaining)}`}
     </p>
   );
