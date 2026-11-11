@@ -8482,7 +8482,7 @@ label.check-row input[type="radio"] {
   max-width: none;
   padding: 32px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-feature);
+  border-radius: 24px;
   background: var(--color-surface);
   color: var(--color-ink-900);
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
