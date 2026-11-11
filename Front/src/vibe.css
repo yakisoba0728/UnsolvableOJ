@@ -137,9 +137,9 @@
 .vibe-workspace-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   gap: 20px;
-  padding: 24px 0;
+  padding: 24px 0 12px;
 }
 .vibe-workspace-header .back-link {
   display: inline-block;
@@ -209,7 +209,7 @@
     260px 16px minmax(0, 1fr) 16px 360px
   );
   align-items: stretch;
-  height: calc(100vh - 210px);
+  height: calc(100vh - 198px);
   min-height: 620px;
 }
 .vibe-workspace-grid.is-dragging {
