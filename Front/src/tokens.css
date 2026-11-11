@@ -39,6 +39,7 @@
   --color-success-soft: #e3f7ec;
   --color-success-border: #c4e8d5;
   --color-danger: #c9262b;
+  --color-on-danger: #fbfcfe; /* 위험(빨강) 바탕 위 글자 */
   --color-danger-soft: #fdebec;
   --color-danger-border: #f5c6c8;
   --color-warning: #8f5a0c;
@@ -123,6 +124,7 @@
   --color-success-soft: #12301f;
   --color-success-border: #1f5238;
   --color-danger: #ff8086;
+  --color-on-danger: #0e131a; /* 다크의 빨강은 밝아서 어두운 글자를 쓴다 */
   --color-danger-soft: #3a1a1d;
   --color-danger-border: #5f2b30;
   --color-warning: #f0b660;

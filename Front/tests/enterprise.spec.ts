@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { Session } from "../src/types";
+import { answerConfirm } from "./fixtures";
 
 const sessionKey = "unsolvable-oj-session-v1";
 const testsKey = "unsolvable-oj-enterprise-v1";
@@ -140,8 +141,8 @@ test("deleting the same test in another tab rejects saving and preserves the ope
   try {
     await mockProblems(other);
     await other.goto("/enterprise/t-edit");
-    other.once("dialog", (dialog) => dialog.accept());
     await other.getByRole("button", { name: "삭제", exact: true }).click();
+    await answerConfirm(other, true);
     await expect(other).toHaveURL(/\/enterprise$/);
     const afterDelete = await other.evaluate((key) => localStorage.getItem(key), testsKey);
     expect(JSON.parse(afterDelete!).solver).toEqual([]);
@@ -274,8 +275,8 @@ test("enterprise update/remove storage failures leave the persisted record and d
   await expect(page.getByLabel(/테스트 이름/)).toHaveValue("실패한 수정");
   await page.getByRole("link", { name: /테스트 상세/ }).click();
   await expect(page.getByRole("heading", { name: "기존 테스트" })).toBeVisible();
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "삭제", exact: true }).click();
+  await answerConfirm(page, true);
   await expect(page.getByRole("alert")).toContainText("삭제하지 못했어요");
   await expect(page).toHaveURL(url);
   await page.evaluate(() => (window as unknown as { restoreStorage: () => void }).restoreStorage());
@@ -409,11 +410,11 @@ test("create, edit and delete a test", async ({ page }) => {
 
   // 삭제는 확인을 거친다.
   await page.locator(".ent-name").click();
-  page.once("dialog", (dialog) => dialog.dismiss());
   await page.getByRole("button", { name: "삭제" }).click();
+  await answerConfirm(page, false);
   await expect(page.getByRole("heading", { name: "백엔드 신입 공채 2차" })).toBeVisible();
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "삭제" }).click();
+  await answerConfirm(page, true);
   await expect(page).toHaveURL(/\/enterprise$/);
   await expect(page.getByText("아직 만든 테스트가 없어요")).toBeVisible();
 });
@@ -605,4 +606,33 @@ test("logging in from an edit link returns to that edit page", async ({ page }) 
   expect(await page.evaluate(() => (history.state?.usr as { from?: string } | undefined)?.from)).toBe(
     "/enterprise/t-1/edit",
   );
+});
+
+test("deleting asks in an in-page dialog that starts on cancel, closes with Escape and returns focus", async ({ page }) => {
+  await signIn(page);
+  await mockProblems(page);
+  await page.goto("/enterprise/new");
+  await page.getByLabel(/테스트 이름/).fill("확인 창 테스트");
+  await page.getByRole("checkbox", { name: /두 수의 합/ }).check();
+  await page.getByRole("button", { name: "테스트 만들기", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "확인 창 테스트" })).toBeVisible();
+
+  const trigger = page.getByRole("button", { name: "삭제", exact: true });
+  // 키보드로 연다(Safari는 버튼을 눌러도 포커스를 주지 않아 돌아갈 곳이 없다).
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "‘확인 창 테스트’ 테스트를 삭제할까요?" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText("삭제하면 되돌릴 수 없어요.");
+  // 되돌릴 수 없는 동작이므로 처음 포커스는 취소에 있다.
+  await expect(dialog.getByRole("button", { name: "취소" })).toBeFocused();
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+  await expect(page.getByRole("heading", { name: "확인 창 테스트" })).toBeVisible();
+
+  await trigger.click();
+  await answerConfirm(page, true);
+  await expect(page).toHaveURL(/\/enterprise$/);
 });

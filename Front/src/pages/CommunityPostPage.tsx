@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { ApiError, api } from "../api";
 import { ActionMenu } from "../components/ActionMenu";
+import { useConfirm } from "../components/ConfirmDialog";
 import { Pagination } from "../components/Pagination";
 import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { useAuth } from "../auth";
@@ -118,6 +119,7 @@ export function CommunityPostPage({
   const location = useLocation();
   const beginRequest = useRequestOwner(getNavigationVersion);
   const pendingRef = useRef(false);
+  const [confirm, confirmDialog] = useConfirm();
   const [answerPage, setAnswerPage] = useState(1);
   const [revision, setRevision] = useState(0);
   const reload = () => setRevision((count) => count + 1);
@@ -248,11 +250,16 @@ export function CommunityPostPage({
   async function deletePost() {
     if (!canDelete || !session || pendingRef.current) return;
     if (
-      !window.confirm(
-        "이 글을 삭제할까요? 달린 답변도 함께 삭제되고 되돌릴 수 없어요.",
-      )
+      !(await confirm({
+        title: "이 글을 삭제할까요?",
+        message: "달린 답변도 함께 삭제되고 되돌릴 수 없어요.",
+        confirmLabel: "삭제",
+        danger: true,
+      }))
     )
       return;
+    // 확인을 기다리는 사이 다른 동작이 시작됐으면 겹쳐 보내지 않는다.
+    if (pendingRef.current) return;
     setActionError("");
     const ownsRequest = beginRequest();
     const submittedAnswer = readAnswerDraft(ownerId, id);
@@ -296,7 +303,15 @@ export function CommunityPostPage({
   }
 
   async function deleteAnswer(answerId: string) {
-    if (!window.confirm("이 답변을 삭제할까요? 되돌릴 수 없어요.")) return;
+    if (
+      !(await confirm({
+        title: "이 답변을 삭제할까요?",
+        message: "삭제한 답변은 되돌릴 수 없어요.",
+        confirmLabel: "삭제",
+        danger: true,
+      }))
+    )
+      return;
     if (!(await act(`/comments/${answerId}`, "DELETE"))) return;
     if (editing?.id === answerId) setEditing(null);
     setNotice("답변을 삭제했어요.");
@@ -357,6 +372,7 @@ export function CommunityPostPage({
 
   return (
     <div className="post-page">
+      {confirmDialog}
       <Link className="back-link" to={`/community${listSearch}`}>
         ← 커뮤니티
       </Link>

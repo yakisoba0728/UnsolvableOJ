@@ -4,6 +4,7 @@ import {
   mockCommunityApi,
   mockProblemApi,
   session,
+  answerConfirm,
 } from "./fixtures";
 
 test.beforeEach(({ page }) => mockProblemApi(page));
@@ -425,16 +426,16 @@ test.describe("community post: delete own post and answer layout", () => {
     await authenticate(page);
     await seed(page);
     await page.goto("/community/mine-1");
-    page.once("dialog", (dialog) => dialog.dismiss());
     await page.getByRole("button", { name: "글 관리" }).click();
     await page.getByRole("menuitem", { name: "삭제" }).click();
+    await answerConfirm(page, false);
     await expect(
       page.getByRole("heading", { name: "내가 쓴 글" }),
     ).toBeVisible();
 
-    page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "글 관리" }).click();
     await page.getByRole("menuitem", { name: "삭제" }).click();
+    await answerConfirm(page, true);
     await expect(page).toHaveURL(/\/community$/);
     await expect(page.getByText("글을 삭제했어요.")).toBeVisible();
     // 샘플 글이 있는 환경에서는 목록이 여러 쪽이라, 검색으로 두 글의 상태를 확인한다.
@@ -819,8 +820,8 @@ test.describe("community API", () => {
     await page.goto("/community/x-1");
     await page.getByRole("button", { name: "글 관리" }).click();
     await expect(page.getByRole("menuitem", { name: "수정" })).toHaveCount(0);
-    page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("menuitem", { name: "삭제" }).click();
+    await answerConfirm(page, true);
     await expect(page).toHaveURL(/\/community$/);
     expect(api.posts).toHaveLength(0);
   });
@@ -894,9 +895,9 @@ test.describe("community API", () => {
     await expect(editor).toHaveCount(0);
     await expect(mine.locator(".answer-body")).toHaveText("고친 답변입니다.");
 
-    page.once("dialog", (dialog) => dialog.accept());
     await mine.getByRole("button", { name: "답변 관리" }).click();
     await page.getByRole("menuitem", { name: "삭제" }).click();
+    await answerConfirm(page, true);
     await expect(page.getByText("답변을 삭제했어요.")).toBeVisible();
     await expect(page.locator(".answer")).toHaveCount(1);
     expect(api.answers.map((answer) => answer.id)).toEqual(["their-a"]);
@@ -922,8 +923,8 @@ test.describe("community API", () => {
     await expect(page.getByText("채택 완료", { exact: true })).toBeVisible();
     await page.locator("#their-a").getByRole("button", { name: "답변 관리" }).click();
     await expect(page.getByRole("menuitem", { name: "수정" })).toHaveCount(0);
-    page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("menuitem", { name: "삭제" }).click();
+    await answerConfirm(page, true);
     await expect(page.locator(".answer")).toHaveCount(0);
     await expect(page.getByText("채택 완료", { exact: true })).toHaveCount(0);
     expect(api.answers).toHaveLength(0);

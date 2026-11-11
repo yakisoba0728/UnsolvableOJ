@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
+import { useConfirm } from "../components/ConfirmDialog";
 import { DifficultyBadge } from "../components/DifficultyBadge";
 import { PageHeader } from "../components/PageHeader";
 import {
@@ -29,6 +30,7 @@ export function EnterpriseDetailPage() {
   const { session } = useAuth();
   const navigate = useNavigate();
   const [saveError, setSaveError] = useState("");
+  const [confirm, confirmDialog] = useConfirm();
   const now = useNow(10_000);
   const tests = useEnterpriseTests(session?.user.id);
   const { problems, loading } = useAllProblems();
@@ -50,11 +52,14 @@ export function EnterpriseDetailPage() {
   const current: EnterpriseTest = test;
   const status = testStatus(current, now);
 
-  function remove() {
+  async function remove() {
     if (
-      !window.confirm(
-        `‘${current.title}’ 테스트를 삭제할까요? 삭제하면 되돌릴 수 없어요.`,
-      )
+      !(await confirm({
+        title: `‘${current.title}’ 테스트를 삭제할까요?`,
+        message: "삭제하면 되돌릴 수 없어요.",
+        confirmLabel: "삭제",
+        danger: true,
+      }))
     )
       return;
     if (!enterpriseActions.remove(userId, current.id)) {
@@ -68,6 +73,7 @@ export function EnterpriseDetailPage() {
 
   return (
     <div className="page-width enterprise-page">
+      {confirmDialog}
       {saveError ? (
         <p className="error-message" role="alert">
           {saveError}
@@ -90,7 +96,10 @@ export function EnterpriseDetailPage() {
                 편집
               </Link>
             ) : null}
-            <button className="button button-outline ent-danger" onClick={remove}>
+            <button
+              className="button button-outline ent-danger"
+              onClick={() => void remove()}
+            >
               삭제
             </button>
           </div>
