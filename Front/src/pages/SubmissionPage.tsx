@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
+import { confirmOf, useConfirm } from "../components/ConfirmDialog";
 import { useAuth } from "../auth";
 import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { PageHeader } from "../components/PageHeader";
@@ -25,6 +26,7 @@ import {
 export function SubmissionPage() {
   const { id } = useParams();
   const { session } = useAuth();
+  const [confirm, confirmDialog] = useConfirm();
   const resultState = useSubmissionResult(id ?? null, session);
   const { submission, error } = resultState;
   useDocumentTitle(
@@ -57,9 +59,13 @@ export function SubmissionPage() {
       !session ||
       !submission ||
       rejudging ||
-      !window.confirm(
-        "이 제출을 다시 채점할까요? 지금 판정은 지워지고 새 제출 뒤에 채점됩니다.",
-      )
+      !(await confirm(
+        confirmOf(
+          "이 제출을 다시 채점할까요? 지금 판정은 지워지고 새 제출 뒤에 채점됩니다.",
+          "다시 채점",
+          true,
+        ),
+      ))
     )
       return;
     setRejudging(true);
@@ -102,6 +108,7 @@ export function SubmissionPage() {
     );
   return (
     <div className="page-width result-page">
+      {confirmDialog}
       <PageHeader
         back={{ to: "/submissions", label: "내 제출" }}
         title={submission.problem.title ?? "제출 결과"}

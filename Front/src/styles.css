@@ -8478,9 +8478,9 @@ label.check-row input[type="radio"] {
 
 /* 화면 안 확인 창 (components/ConfirmDialog) */
 .confirm-dialog {
-  width: min(420px, calc(100vw - 32px));
+  width: min(560px, calc(100vw - 32px));
   max-width: none;
-  padding: 24px;
+  padding: 32px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-feature);
   background: var(--color-surface);
@@ -8492,22 +8492,27 @@ label.check-row input[type="radio"] {
   background: rgba(12, 17, 26, 0.45);
 }
 .confirm-dialog h2 {
-  margin: 0 0 8px;
-  font-size: 18px;
+  margin: 0 0 12px;
+  font-size: 22px;
   font-weight: var(--weight-title);
   line-height: 1.4;
 }
 .confirm-dialog p {
   margin: 0;
   color: var(--color-ink-600);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.7;
 }
 .confirm-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 24px;
+  gap: 12px;
+  margin-top: 32px;
+}
+.confirm-actions .button {
+  min-height: 48px;
+  padding-inline: 24px;
+  font-size: 16px;
 }
 .button.button-danger {
   background: var(--color-danger);

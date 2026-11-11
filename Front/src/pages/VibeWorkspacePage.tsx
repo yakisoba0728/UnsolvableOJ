@@ -113,7 +113,7 @@ export function VibeWorkspacePage() {
     attempt &&
     !same(editedFiles(attempt, files), editedFiles(attempt, attempt.files)),
   );
-  useUnsavedChanges(dirty, bypass);
+  const unsavedDialog = useUnsavedChanges(dirty, bypass);
   const ready = Boolean(attempt);
   // 두 영역의 크기를 지켜봐서, 창이 줄어 가운데가 모자라면 양옆을 접는다.
   useEffect(() => {
@@ -1296,6 +1296,7 @@ export function VibeWorkspacePage() {
         </aside>
       </div>
       {confirmDialog}
+      {unsavedDialog}
     </div>
   );
 }

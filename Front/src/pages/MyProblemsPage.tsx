@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { confirmOf, useConfirm } from "../components/ConfirmDialog";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { SkeletonRows } from "../components/Skeleton";
@@ -38,6 +39,7 @@ export function MyProblemsPage() {
   const [problems, setProblems] = useState<MyProblem[] | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [confirm, confirmDialog] = useConfirm();
   const busyRef = useRef(false);
   const alive = useRef(false);
   const [notice, setNotice] = useFlashNotice();
@@ -94,7 +96,14 @@ export function MyProblemsPage() {
         : problem.status === "ARCHIVED"
           ? `‘${problem.title}’의 보관을 해제할까요? 초안으로 돌아오며, 다시 공개하려면 관리자 검수가 필요해요.`
           : "";
-    if (question && !window.confirm(question)) return;
+    if (
+      question &&
+      !(await confirm(
+        confirmOf(question, status === "ARCHIVED" ? "보관" : "보관 해제"),
+      ))
+    )
+      return;
+    if (!current() || busyRef.current) return;
     busyRef.current = true;
     setBusy(true);
     setError("");
@@ -135,11 +144,16 @@ export function MyProblemsPage() {
     if (!session || !current() || busyRef.current) return;
     if (
       !after &&
-      !window.confirm(
-        `‘${problem.title}’의 모든 제출을 다시 채점할까요? 오래된 제출부터 200건씩 처리하며, 지금 판정과 XP가 바뀔 수 있어요. 대기·채점 중인 제출과 기업 테스트 응시 제출은 건너뜁니다.`,
-      )
+      !(await confirm(
+        confirmOf(
+          `‘${problem.title}’의 모든 제출을 다시 채점할까요? 오래된 제출부터 200건씩 처리하며, 지금 판정과 XP가 바뀔 수 있어요. 대기·채점 중인 제출과 기업 테스트 응시 제출은 건너뜁니다.`,
+          "모두 다시 채점",
+          true,
+        ),
+      ))
     )
       return;
+    if (!current() || busyRef.current) return;
     busyRef.current = true;
     setBusy(true);
     setError("");
@@ -175,6 +189,7 @@ export function MyProblemsPage() {
 
   return (
     <div className="page-width my-problems-page">
+      {confirmDialog}
       <PageHeader
         back={{ to: "/problems", label: "문제 목록" }}
         title="내 문제"

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useConfirm } from "../components/ConfirmDialog";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
@@ -26,6 +27,7 @@ export function EnterpriseJoinPage() {
   const { session } = useAuth();
   const navigate = useNavigate();
   const now = useNow(10_000);
+  const [confirm, confirmDialog] = useConfirm();
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState("");
   const token = session?.accessToken;
@@ -39,6 +41,7 @@ export function EnterpriseJoinPage() {
 
   const frame = (children: React.ReactNode) => (
     <div className="page-width enterprise-page">
+      {confirmDialog}
       <PageHeader title={data?.test.title ?? "코드 테스트 응시"} />
       <div className="empty-state ent-empty ent-join">{children}</div>
     </div>
@@ -73,9 +76,11 @@ export function EnterpriseJoinPage() {
   async function start() {
     if (starting) return;
     if (
-      !window.confirm(
-        `응시를 시작하면 ${test.durationMin}분 타이머가 바로 시작되고 멈출 수 없어요. 시작할까요?`,
-      )
+      !(await confirm({
+        title: "응시를 시작할까요?",
+        message: `시작하면 ${test.durationMin}분 타이머가 바로 시작되고 멈출 수 없어요.`,
+        confirmLabel: "응시 시작",
+      }))
     )
       return;
     setStarting(true);
