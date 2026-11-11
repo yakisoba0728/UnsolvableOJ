@@ -1,5 +1,5 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
-import { authenticate, mockProblemApi } from "./fixtures";
+import { answerConfirm, authenticate, mockProblemApi } from "./fixtures";
 import type { VibeAttempt, VibeCatalog } from "../src/vibe/types";
 
 const id = "70000000-0000-4000-8000-000000000001";
@@ -221,8 +221,14 @@ test("practice saves files, reviews and applies AI proposals, runs tests and sho
   await page
     .getByLabel("제출 전 짧은 회고")
     .fill("태그 필터를 수정하고 테스트의 실패 원인을 확인했습니다.");
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "최종 제출", exact: true }).click();
+  // 브라우저 기본 창이 아니라 화면 안 확인 창이 뜬다. 취소하면 제출하지 않는다.
+  const dialog = page.getByRole("dialog", { name: "최종 제출할까요?" });
+  await expect(dialog).toBeVisible();
+  await answerConfirm(page, false);
+  expect(mock.state.submittedAt).toBeNull();
+  await page.getByRole("button", { name: "최종 제출", exact: true }).click();
+  await answerConfirm(page, true, "최종 제출");
   await expect(
     page.getByRole("heading", { name: "81점, 다음 시도를 위한 기록" }),
   ).toBeVisible();

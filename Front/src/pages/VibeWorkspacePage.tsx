@@ -18,6 +18,7 @@ import { useDocumentTitle, useNow } from "../hooks";
 import { useUnsavedChanges } from "../useUnsavedChanges";
 import { CodeEditor, type CodeEditorHandle } from "../components/CodeEditor";
 import { addUnits, remapUnits } from "../editor/codeEditing";
+import { useConfirm } from "../components/ConfirmDialog";
 import { SkeletonRows } from "../components/Skeleton";
 import {
   DEFAULT_COLUMNS,
@@ -72,6 +73,7 @@ export function VibeWorkspacePage() {
   const [proposal, setProposal] = useState<VibeMessage | null>(null);
   const [showChanges, setShowChanges] = useState(false);
   const [reload, setReload] = useState(0);
+  const [confirm, confirmDialog] = useConfirm();
   const [dockTab, setDockTab] = useState<"tests" | "reflection">("tests");
   // 세 열과 하단 칸의 크기는 저장하지 않는다(풀이 화면과 같다): 화면을 열 때마다 기본값으로 시작한다.
   const [columns, setColumns] = useState<ColumnState>(DEFAULT_COLUMNS);
@@ -547,11 +549,14 @@ export function VibeWorkspacePage() {
               disabled={
                 Boolean(busy) || remoteBusy || !attempt.availability.runner
               }
-              onClick={() => {
+              onClick={async () => {
                 if (
-                  window.confirm(
-                    "현재 저장본을 제출할까요? 제출 후에는 수정할 수 없습니다.",
-                  )
+                  await confirm({
+                    title: "최종 제출할까요?",
+                    message:
+                      "현재 저장본을 제출합니다. 제출 후에는 파일과 대화를 수정할 수 없어요.",
+                    confirmLabel: "최종 제출",
+                  })
                 )
                   void action("최종 채점과 과정 평가 중…", "submit", {
                     reflection,
@@ -604,12 +609,16 @@ export function VibeWorkspacePage() {
           <button
             className="inline-button"
             disabled={saving || Boolean(busy)}
-            onClick={() => {
+            onClick={async () => {
               if (
                 !dirty ||
-                window.confirm(
-                  "저장하지 않은 코드는 복사해 보관했나요? 서버 저장본을 다시 엽니다.",
-                )
+                (await confirm({
+                  title: "서버 저장본을 다시 열까요?",
+                  message:
+                    "저장하지 않은 코드는 사라져요. 복사해 보관했는지 확인해 주세요.",
+                  confirmLabel: "다시 열기",
+                  danger: true,
+                }))
               )
                 setReload((v) => v + 1);
             }}
@@ -644,11 +653,15 @@ export function VibeWorkspacePage() {
           {dirty ? (
             <button
               className="inline-button"
-              onClick={() => {
+              onClick={async () => {
                 if (
-                  window.confirm(
-                    "현재 수정 내용을 복사해 보관했나요? 서버 저장본으로 돌아갑니다.",
-                  )
+                  await confirm({
+                    title: "서버 저장본으로 돌아갈까요?",
+                    message:
+                      "현재 수정 내용은 사라져요. 복사해 보관했는지 확인해 주세요.",
+                    confirmLabel: "돌아가기",
+                    danger: true,
+                  })
                 ) {
                   filesRef.current = attempt.files;
                   setFiles(attempt.files);
@@ -1282,6 +1295,7 @@ export function VibeWorkspacePage() {
           ) : null}
         </aside>
       </div>
+      {confirmDialog}
     </div>
   );
 }
