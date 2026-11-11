@@ -1,6 +1,6 @@
 # CI 운영
 
-`main` 대상 PR과 `main` push는 빠른 기본 검사를 실행합니다. GitHub 제공 `ubuntu-24.04` 러너 한 개, Node 24와 npm 캐시를 사용하며 결과 이름은 `CI required`를 유지합니다. 같은 PR·수동 실행의 이전 실행은 취소하지만, `main` push는 커밋마다 결과가 남도록 취소하지 않습니다. 수동·야간 전체 검사는 PR 검사와 서로 취소하지 않습니다.
+`main` 대상 PR과 `main` push는 빠른 기본 검사를 실행합니다. 검사는 여러 작업으로 나뉘어 GitHub 제공 `ubuntu-24.04` 러너에서 동시에 돌고(Node 24와 npm 캐시 사용), 마지막 `CI required` 작업이 결과를 모읍니다. 필요한 작업이 하나라도 실패·취소되면 `CI required`가 실패하고, 건너뛴 작업은 통과로 봅니다. 같은 PR·수동 실행의 이전 실행은 취소하지만, `main` push는 커밋마다 결과가 남도록 취소하지 않습니다. 수동·야간 전체 검사는 PR 검사와 서로 취소하지 않습니다.
 
 모든 실행에는 별도 작업 `Dependency audit`도 함께 돌아갑니다. Back·Front·Judge 각각 `npm audit --omit=dev --audit-level=high`로 운영 의존성의 high/critical 취약점만 실패로 처리하고 low/moderate는 로그로만 남깁니다. lockfile만 읽으므로 의존성을 설치하지 않습니다. 새 권고가 공개되면 코드 변경 없이도 실패할 수 있으며 `CI required`와는 별개입니다. 보호 규칙에 넣을지는 별도로 결정하세요.
 
@@ -9,6 +9,18 @@
 ## 의존성 업데이트
 
 `.github/dependabot.yml`이 매주 월요일 09:00 KST에 npm(Back·Front·Judge), GitHub Actions, Dockerfile 기본 이미지의 버전 업데이트를 엽니다. npm은 디렉터리마다 minor/patch 묶음과 major 묶음, Actions와 Docker는 각각 한 묶음으로 PR 수를 줄입니다. Docker 기본 이미지의 major 변경과 `criyle/go-judge`(라이선스 ADD URL·checksum이 버전에 고정됨)는 제외하므로 직접 올립니다. 보안 업데이트는 이 일정과 별개로 열립니다. 실행 이미지(`Judge/runtime`) 변경 PR은 병합 전에 전체 검사를 실행하세요.
+
+## 작업 구성
+
+| 작업 | 내용 | 실행 조건(PR) |
+|---|---|---|
+| `Detect changes` | base와 비교해 바뀐 경로를 판단 | 항상 |
+| `Backend and API` | 백엔드 lint·단위·빌드, 운영 Compose 정적 검사, DB 마이그레이션·API 통합 | `Back/`·`deploy/`·`scripts/`·`compose.yaml` 변경 |
+| `Judge worker` | 워커 빌드·계약 검사, Python 실행기 검사 | `Judge/`·`compose.yaml` 변경 |
+| `Browser tests (1/2, 2/2)` | Playwright 공식 이미지에서 브라우저 회귀를 둘로 나눠 동시에 실행. 1번은 프론트 빌드·타입 검사도 함 | `Front/` 변경 |
+| `Sandbox, pipeline and Compose` | go-judge·실제 채점 파이프라인·운영 Compose 브라우저 흐름 | 야간·수동 전체 검사만 |
+
+`.github/workflows/ci.yml`이 바뀐 PR과 `main` push·야간·수동 실행은 경로와 상관없이 모든 작업을 돌립니다. 프론트 테스트는 API를 모의 응답으로 대신하므로 Back만 바뀐 PR에서는 브라우저 테스트를 돌리지 않습니다. 브라우저 작업은 `mcr.microsoft.com/playwright:v<버전>-noble` 컨테이너에서 돌아 apt 설치나 브라우저 다운로드가 없습니다. **`Front/package.json`의 `@playwright/test` 버전을 바꾸면 `ci.yml`의 이미지 태그도 같은 버전으로 바꾸세요.**
 
 ## 기본 검사
 
@@ -20,7 +32,7 @@
 - 임시 PostgreSQL/Redis에서 DB 마이그레이션 왕복과 API 통합 검사
 - 운영 Compose 검사는 go-judge를 뺀 서비스의 `no-new-privileges`·`cap_drop: [ALL]`·pids/CPU 상한과 Redis 비밀번호가 명령 인자에 없는지도 확인
 
-Chromium headless shell만 설치하며 Playwright 워커는 2개입니다. 기본 작업 제한은 15분이며 재시도 횟수를 늘리지 않습니다. 개별 테스트 제한은 CLI 프로세스를 여러 번 띄우는 `Back/test/boj-seed.e2e-spec.ts`만 60초로 둡니다. 백엔드는 한 번 빌드한 결과를 DB 검사에서도 재사용합니다.
+브라우저 작업마다 Playwright 워커는 4개입니다. 작업 제한은 백엔드 15분, 브라우저 20분이며 재시도 횟수를 늘리지 않습니다. 개별 테스트 제한은 CLI 프로세스를 여러 번 띄우는 `Back/test/boj-seed.e2e-spec.ts`만 60초로 둡니다. 백엔드는 한 번 빌드한 결과를 DB 검사에서도 재사용합니다.
 
 기존 main의 성공 실행은 총 약 29분 중 브라우저 777개 검사가 24.3분을 사용했습니다. 기본 검사는 같은 UI를 세 브라우저에서 직렬로 반복하던 부분을 줄였습니다. 실제 시간은 Actions 결과에서 확인합니다.
 
@@ -32,9 +44,9 @@ Chromium headless shell만 설치하며 Playwright 워커는 2개입니다. 기�
 gh workflow run ci.yml --ref main -f full=true
 ```
 
-기본 검사에 더해 아래를 실행하며 작업 제한은 40분입니다.
+기본 검사에 더해 아래를 실행하며 `Sandbox, pipeline and Compose` 작업 제한은 30분입니다.
 
-- Chromium 전체 회귀와 WebKit 핵심 회귀(인증·세션 갱신·레이아웃·편집기 포커스·복사, 워커 4개). Firefox는 CI에서 돌리지 않으며 필요하면 로컬에서 `npx playwright test --project=firefox`로 확인합니다. 브라우저 회귀는 서버·채점·Compose 검사 뒤 마지막 단계라, 브라우저 테스트 한 건이 실패해도 앞 검사 결과는 남습니다.
+- Chromium 전체 회귀와 WebKit 핵심 회귀(인증·세션 갱신·레이아웃·편집기 포커스·복사, 워커 4개). Firefox는 CI에서 돌리지 않으며 필요하면 로컬에서 `npx playwright test --project=firefox`로 확인합니다. 브라우저 회귀와 서버·채점·Compose 검사는 서로 다른 작업이라, 한쪽이 실패해도 다른 쪽 결과는 남습니다.
 - privileged Linux go-judge 이미지 빌드, 8개 언어·실패 판정·자원 제한·격리·캐시 회수 검사
 - 실제 워커를 사용하는 채점 파이프라인 통합 검사
 - 운영 `deploy/compose.yaml`을 사용하는 별도 Compose 프로젝트에서 회원가입 → 문제 게시 → 실제 채점 → XP → 로그아웃 및 커뮤니티 브라우저 흐름(`--production`). 개발 Compose 실실행은 로컬 명령으로 남기며, 기본 CI는 운영 정적검사를 유지합니다.
@@ -43,7 +55,7 @@ gh workflow run ci.yml --ref main -f full=true
 
 운영 Compose 테스트도 일회용 localhost ingress를 사용하므로 실제 Traefik·Cloudflare·DNS·HTTPS 경로 검증은 아닙니다. 기본 예산은 sandbox 10 GiB, 전체 13.375 GiB 상한이며 일반 CI 흐름은 최대 메모리 동시 부하를 검증하지 않습니다.
 
-실패 시 `browser-failure-<attempt>` artifact에 `Front/test-results/`, `Front/playwright-report/`, live-browser trace/screenshots/HTML/JUnit만 7일 보관합니다. 빈 경로는 실패시키지 않습니다. 테스트용 일회용/fixture 계정만 사용하고 실제 계정·개인 브라우저 프로필·운영 credentials를 이 검사에 넣지 마세요. trace에는 요청/응답과 화면이 포함될 수 있습니다.
+실패 시 `browser-failure-<shard>-<attempt>` artifact에 `Front/test-results/`, `Front/playwright-report/`를, `compose-failure-<attempt>` artifact에 live-browser trace/screenshots/HTML/JUnit을 7일 보관합니다. 빈 경로는 실패시키지 않습니다. 테스트용 일회용/fixture 계정만 사용하고 실제 계정·개인 브라우저 프로필·운영 credentials를 이 검사에 넣지 마세요. trace에는 요청/응답과 화면이 포함될 수 있습니다.
 
 ## 데이터와 실행 환경
 
