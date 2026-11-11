@@ -182,6 +182,8 @@ test("the solve page has no back-to-list breadcrumb and the list opens problems 
 test("problem links open in a new tab for unusual slugs: encoded, never dropped or reinterpreted", async ({
   page,
 }) => {
+  // 슬러그마다 새 탭에서 앱을 처음부터 불러오므로, 워커가 많으면 기본 30초를 넘는다.
+  test.slow();
   await authenticate(page);
   // 실제 슬러그 규칙에는 없을 값까지: 한글·공백·구분자(/ ? # %)·이모지·HTML·javascript:·아주 긴 값.
   const slugs = [

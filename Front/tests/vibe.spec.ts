@@ -244,10 +244,13 @@ test("a failed save retains work and stops AI from receiving unsaved stale code"
   await expect(editor).toHaveValue('const unsaved = "keep this work";\n');
   expect(mock.requests.some((path) => path.endsWith("/messages"))).toBe(false);
   mock.failSave(false);
-  await page.getByRole("button", { name: "저장", exact: true }).click();
-  await expect(
-    page.getByRole("status").filter({ hasText: "서버에 저장됨" }),
-  ).toBeVisible();
+  // 저장 오류 뒤 1초 자동 저장이 먼저 성공하면 '저장' 버튼이 꺼진다. 아직 켜져 있을 때만 직접 누른다.
+  const save = page.getByRole("button", { name: "저장", exact: true });
+  const saved = page.getByRole("status").filter({ hasText: "서버에 저장됨" });
+  await expect(async () => {
+    if (await save.isEnabled()) await save.click({ timeout: 1_000 });
+    await expect(saved).toBeVisible({ timeout: 1_000 });
+  }).toPass();
   await page.reload();
   await expect(editor).toHaveValue('const unsaved = "keep this work";\n');
 });
