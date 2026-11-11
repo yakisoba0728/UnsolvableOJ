@@ -1,3 +1,4 @@
+import { WithdrawalCompletePage } from "./pages/WithdrawalCompletePage";
 import {
   lazy,
   Suspense,
@@ -36,6 +37,7 @@ const CommunityPostPage = lazyPage(() => import("./pages/CommunityPostPage"), "C
 const CommunityWritePage = lazyPage(() => import("./pages/CommunityWritePage"), "CommunityWritePage");
 const CreateProblemPage = lazyPage(() => import("./pages/CreateProblemPage"), "CreateProblemPage");
 const EnterpriseVibeReviewPage = lazyPage(() => import("./pages/EnterpriseVibeReviewPage"), "EnterpriseVibeReviewPage");
+const EmailActionPage = lazyPage(() => import("./pages/EmailActionPage"), "EmailActionPage");
 const EnterpriseDetailPage = lazyPage(() => import("./pages/EnterpriseDetailPage"), "EnterpriseDetailPage");
 const EnterpriseJoinPage = lazyPage(() => import("./pages/EnterpriseJoinPage"), "EnterpriseJoinPage");
 const EnterpriseAttemptPage = lazyPage(() => import("./pages/EnterpriseAttemptPage"), "EnterpriseAttemptPage");
@@ -64,7 +66,7 @@ const menu = [
 
 export function App({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { session, setSession } = useAuth();
-  const { pathname, search, hash } = useLocation();
+  const { pathname, search, hash, key: locationKey } = useLocation();
   const navigationType = useNavigationType();
   // 다른 화면으로 이동하면 스크롤을 맨 위로 올린다(뒤로 가기는 브라우저 동작에 맡기고,
   // 같은 화면에서 필터·검색 주소만 바뀔 때는 위치를 유지한다).
@@ -121,7 +123,7 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
             }
           >
             {/* 임시 비밀번호로 로그인했다면 비밀번호를 바꿀 때까지 계정 설정에 머문다(서버도 다른 API를 403으로 막는다). */}
-            {session?.user.mustChangePassword && pathname !== "/settings" ? (
+            {session?.user.mustChangePassword && pathname !== "/settings" && pathname !== "/email/unsubscribe" ? (
               <Navigate to="/settings" replace />
             ) : (
             <Routes>
@@ -157,6 +159,9 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
                 path="/settings"
                 element={session ? <SettingsPage key={session.user.id} /> : loginRedirect}
               />
+              <Route path="/account/withdrawn" element={<WithdrawalCompletePage />} />
+              <Route path="/email/verify" element={<EmailActionPage key={`verify:${locationKey}:${hash}`} action="verify" />} />
+              <Route path="/email/unsubscribe" element={<EmailActionPage key={`unsubscribe:${locationKey}:${hash}`} action="unsubscribe" />} />
               <Route path="/rankings" element={<RankingsPage />} />
               <Route path="/users/:username" element={<UserPage />} />
               <Route path="/community" element={<CommunityPage />} />

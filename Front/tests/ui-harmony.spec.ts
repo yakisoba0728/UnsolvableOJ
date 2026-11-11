@@ -326,16 +326,25 @@ test("post cards with one post do not reserve a second slide or show dead naviga
 
 test("result memory uses the list unit and copy preserves trailing newlines", async ({
   page,
+  context,
+  browserName,
 }) => {
-  // Firefox·WebKit에는 clipboard 권한을 줄 수 없어, 읽어 보는 대신 writeText에 넘긴 값을 본다.
-  await page.addInitScript(() =>
+  const nativeClipboard = browserName === "chromium";
+  if (nativeClipboard)
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  // Firefox·WebKit에는 clipboard 권한을 줄 수 없어 writeText 인자를 검사한다.
+  // Chromium은 실제 쓰기까지 수행하고 Windows의 OS 줄바꿈 변환도 따로 확인한다.
+  await page.addInitScript((nativeClipboard) => {
+    const write = nativeClipboard
+      ? navigator.clipboard.writeText.bind(navigator.clipboard)
+      : () => Promise.resolve();
     Object.defineProperty(navigator.clipboard, "writeText", {
       value: (text: string) => {
         (window as unknown as { copied: string }).copied = text;
-        return Promise.resolve();
+        return write(text);
       },
-    }),
-  );
+    });
+  }, nativeClipboard);
   await page.goto("/submissions/h1");
   await expect(page.locator(".result-stats")).toContainText("C++");
   await expect(page.locator(".result-stats")).toContainText("14.0MB");
@@ -345,6 +354,17 @@ test("result memory uses the list unit and copy preserves trailing newlines", as
       page.evaluate(() => (window as unknown as { copied?: string }).copied),
     )
     .toBe("1 2\n");
+  await expect(page.getByText("복사했어요.", { exact: true })).toBeVisible();
+  if (nativeClipboard)
+    await expect
+      .poll(async () =>
+        // Normalize only the native read; the write argument above stays exact.
+        (await page.evaluate(() => navigator.clipboard.readText())).replace(
+          /\r\n/g,
+          "\n",
+        ),
+      )
+      .toBe("1 2\n");
 });
 
 test("clipboard rejection keeps the input and gives a usable fallback", async ({
@@ -488,13 +508,13 @@ test("analysis storage descriptions distinguish accounts from guest browser reco
   );
 });
 
-test("harmonized pages fit narrow and intermediate widths and keep editor focus visible", async ({
-  page,
-}) => {
-  // 5개 너비 × 6개 화면을 차례로 여므로 Firefox에서는 기본 30초를 넘긴다.
-  test.slow();
-  await mockMissions(page);
-  for (const width of [320, 390, 768, 1101, 1440]) {
+for (const width of [320, 390, 768, 1101, 1440])
+  test(`harmonized pages fit ${width}px and keep editor focus visible`, async ({
+    page,
+  }) => {
+    await mockMissions(page);
+    // Each width checks all pages independently. Thirty navigations in one test
+    // exhausted the test budget before the final width on slower CI/Windows runs.
     await page.setViewportSize({ width, height: 900 });
     for (const path of [
       "/problems",
@@ -513,12 +533,11 @@ test("harmonized pages fit narrow and intermediate widths and keep editor focus 
         `${path}:${width}`,
       ).toBeLessThanOrEqual(1);
     }
-  }
-  await page.goto("/problems/view/sum");
-  await page.locator("textarea.code-editor").focus();
-  expect(
-    await page
-      .locator(".editor-frame")
-      .evaluate((el) => getComputedStyle(el).boxShadow),
-  ).not.toBe("none");
-});
+    await page.goto("/problems/view/sum");
+    await page.locator("textarea.code-editor").focus();
+    expect(
+      await page
+        .locator(".editor-frame")
+        .evaluate((el) => getComputedStyle(el).boxShadow),
+    ).not.toBe("none");
+  });

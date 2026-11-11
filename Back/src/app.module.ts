@@ -1,3 +1,4 @@
+import { EmailModule } from './modules/email/email.module.js';
 import { Module } from '@nestjs/common';
 import { VibeModule } from './modules/vibe/vibe.module.js';
 import { MissionsModule } from './modules/missions/missions.module.js';
@@ -64,6 +65,7 @@ import { EnterpriseModule } from './modules/enterprise/enterprise.module.js';
     MissionsModule,
     NotificationsModule,
     VibeModule,
+    EmailModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

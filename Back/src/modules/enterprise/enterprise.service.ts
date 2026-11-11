@@ -445,13 +445,17 @@ export class EnterpriseService {
     user: AuthenticatedUser,
   ) {
     await this.owned(this.dataSource.manager, testId, user);
-    const [row]: { user_id: string; username: string; closed: boolean }[] =
-      await this.dataSource.query(
-        `SELECT a.user_id,u.username,(a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now()) AS closed
+    const [row]: {
+      user_id: string;
+      username: string;
+      closed: boolean;
+      deletedAt: Date | null;
+    }[] = await this.dataSource.query(
+      `SELECT a.user_id,u.username,u.deleted_at AS "deletedAt",(a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now()) AS closed
        FROM enterprise_attempts a JOIN enterprise_tests t ON t.id=a.test_id JOIN users u ON u.id=a.user_id
        JOIN vibe_attempts v ON v.enterprise_attempt_id=a.id WHERE a.id=$1 AND a.test_id=$2 AND v.id=$3`,
-        [attemptId, testId, vibeId],
-      );
+      [attemptId, testId, vibeId],
+    );
     if (!row) throw new NotFoundException('응시 과제를 찾을 수 없습니다.');
     return row;
   }
@@ -463,9 +467,9 @@ export class EnterpriseService {
   ) {
     const row = await this.reviewContext(testId, attemptId, vibeId, user);
     return {
-      ...(await this.vibe.review(vibeId, row.user_id)),
+      ...(await this.vibe.reviewForStaff(vibeId, row.user_id, user)),
       candidate: { id: row.user_id, username: row.username },
-      canGrade: row.closed,
+      canGrade: row.closed && !row.deletedAt,
     };
   }
   async reviewRevision(
@@ -476,7 +480,7 @@ export class EnterpriseService {
     user: AuthenticatedUser,
   ) {
     const row = await this.reviewContext(testId, attemptId, vibeId, user);
-    return this.vibe.revision(vibeId, row.user_id, revision);
+    return this.vibe.revisionForStaff(vibeId, row.user_id, revision, user);
   }
   async gradeVibe(
     testId: string,
@@ -485,6 +489,10 @@ export class EnterpriseService {
     user: AuthenticatedUser,
   ) {
     const row = await this.reviewContext(testId, attemptId, vibeId, user);
+    if (row.deletedAt)
+      throw new ConflictException(
+        '탈퇴한 응시자의 답안은 조회만 가능하며 새 평가를 요청할 수 없습니다.',
+      );
     if (!row.closed)
       throw new ConflictException(
         '응시가 끝난 뒤 저장본을 채점할 수 있습니다.',

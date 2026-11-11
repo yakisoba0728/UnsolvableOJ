@@ -307,7 +307,7 @@ try {
   const jwt = new JwtService({ secret });
   const oldToken = await jwt.signAsync({ sub: owner.id, tokenVersion: 0 }, { expiresIn: '5m' });
   // 현재 User 엔터티는 나중 마이그레이션의 정지 열도 읽으므로, 이 검사 동안만 그 열을 잠시 둔다.
-  await db.query('ALTER TABLE users ADD COLUMN suspended_at timestamptz, ADD COLUMN must_change_password boolean NOT NULL DEFAULT false');
+  await db.query('ALTER TABLE users ADD COLUMN suspended_at timestamptz, ADD COLUMN must_change_password boolean NOT NULL DEFAULT false, ADD COLUMN deleted_at timestamptz, ADD COLUMN email_verified_at timestamptz');
   const strategy = new JwtStrategy(new ConfigService({ JWT_ACCESS_SECRET: secret }), db.getRepository(User));
   await db.query("UPDATE users SET token_version=1,role='ADMIN' WHERE id=$1", [owner.id]);
   const payload = await jwt.verifyAsync(oldToken);
@@ -316,7 +316,7 @@ try {
   assert.deepEqual(await db.query('SELECT * FROM migrations ORDER BY id'), migrationBefore);
   assert.deepEqual((await db.query('SELECT token_version,role FROM users WHERE id=$1', [owner.id]))[0], { token_version: 1, role: 'ADMIN' });
   await assert.rejects(strategy.validate(await jwt.verifyAsync(oldToken)), /다시 로그인/);
-  await db.query('ALTER TABLE users DROP COLUMN suspended_at, DROP COLUMN must_change_password');
+  await db.query('ALTER TABLE users DROP COLUMN suspended_at, DROP COLUMN must_change_password, DROP COLUMN deleted_at, DROP COLUMN email_verified_at');
   await db.query('DELETE FROM users');
   await db.undoLastMigration();
   await db.runMigrations();
@@ -397,6 +397,19 @@ try {
   );
   assert.equal(await db.showMigrations(), false);
   // Preserve the current files of pre-enterprise practices; refuse a rollback that would unlink company assessments.
+  // Target that migration explicitly even when newer features append migrations.
+  // This is still the empty database used for the full rollback/reapply above.
+  const enterpriseVibe = configured.options.migrations.findIndex(
+    (migration) => migration.name === 'EnterpriseVibe1795500000000',
+  );
+  assert.notEqual(enterpriseVibe, -1);
+  for (let i = configured.options.migrations.length - 1; i > enterpriseVibe; i--)
+    await db.undoLastMigration();
+  await db.destroy();
+  db = await new DataSource({
+    ...options,
+    migrations: configured.options.migrations.slice(0, enterpriseVibe + 1),
+  }).initialize();
   await db.undoLastMigration();
   const [vibeUser] = await db.query("INSERT INTO users(email,username,password_hash) VALUES('vibe-migration@example.com','vibe_migration','unused') RETURNING id");
   const files = { 'src/search.ts': 'export const searchPosts = () => [];' };

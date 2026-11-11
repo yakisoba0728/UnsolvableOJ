@@ -1,3 +1,4 @@
+import { AccountPrivacyPanels } from "../components/AccountPrivacyPanels";
 import { useState, type FormEvent } from "react";
 import { api } from "../api";
 import { useAuth } from "../auth";
@@ -190,6 +191,7 @@ export function SettingsPage() {
           </button>
         </form>
       </section>
+      <AccountPrivacyPanels />
       <section className="panel settings-panel" aria-labelledby="settings-devices">
         <h2 id="settings-devices">로그인 기기</h2>
         {devices.loading && !devices.data.length ? (

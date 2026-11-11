@@ -1,6 +1,7 @@
 import type { UserRole } from '../users/user-role.enum.js';
 
 export interface AuthenticatedUser {
+  tokenVersion?: number;
   id: string;
   role: UserRole;
   /** 임시 비밀번호를 받은 뒤 아직 바꾸지 않았다. */

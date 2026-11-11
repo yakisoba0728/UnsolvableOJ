@@ -79,3 +79,5 @@ node scripts/check-compose.mjs
 GitHub Actions의 GitHub 제공 `ubuntu-24.04` 러너에서 Node 24 기반 lint·타입 검사·빌드,
 백엔드/채점기 단위 테스트와 DB/API 통합 테스트를 실행합니다.
 검사 범위와 러너 운영·로컬 재현 방법은 [CI 운영 문서](.github/CI.md)를 참고하세요.
+
+회원 탈퇴·이메일 인증·선택형 커뮤니티 이메일 알림(기본 비활성)의 API·보관 정책·운영 설정은 [개인정보와 이메일 문서](./docs/account-privacy-email.md)를 참고하세요. 이메일을 통한 비밀번호 재설정은 이 변경의 범위에 포함되지 않습니다.

@@ -48,6 +48,13 @@ export class User {
   @Column({ name: 'token_version', type: 'integer', default: 0 })
   tokenVersion: number;
 
+  @Column({ name: 'email_verified_at', type: 'timestamptz', nullable: true })
+  emailVerifiedAt: Date | null;
+
+  /** 탈퇴 시 식별 정보를 익명화하며 복원할 수 없다. */
+  @Column({ name: 'deleted_at', type: 'timestamptz', nullable: true })
+  deletedAt: Date | null;
+
   /** 값이 있으면 정지된 계정이다(로그인·토큰 사용 불가). */
   @Column({ name: 'suspended_at', type: 'timestamptz', nullable: true })
   suspendedAt: Date | null;

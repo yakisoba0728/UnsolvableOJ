@@ -41,32 +41,38 @@ describe('AdminService.changeRole', () => {
     [id.toUpperCase(), id],
     [id, id.toUpperCase()],
     [id, id],
-  ])('rejects self-demotion for target %s and actor %s', async (target, self) => {
-    const { service, db } = setup();
-    for (const role of [UserRole.USER, UserRole.AUTHOR]) {
-      await expect(
-        service.changeRole(target, role, { ...actor, id: self }),
-      ).rejects.toBeInstanceOf(ConflictException);
-    }
-    expect(db.transaction).not.toHaveBeenCalled();
-  });
+  ])(
+    'rejects self-demotion for target %s and actor %s',
+    async (target, self) => {
+      const { service, db } = setup();
+      for (const role of [UserRole.USER, UserRole.AUTHOR]) {
+        await expect(
+          service.changeRole(target, role, { ...actor, id: self }),
+        ).rejects.toBeInstanceOf(ConflictException);
+      }
+      expect(db.transaction).not.toHaveBeenCalled();
+    },
+  );
 
   it('allows retaining the admin role without changing the account', async () => {
     const { service, manager } = setup();
-    manager.query.mockResolvedValue([{ role: UserRole.ADMIN }]);
+    manager.query.mockResolvedValue([{ id, role: UserRole.ADMIN }]);
     await expect(
       service.changeRole(id.toUpperCase(), UserRole.ADMIN, actor),
     ).resolves.toEqual({ id: id.toUpperCase(), role: UserRole.ADMIN });
     expect(manager.query).toHaveBeenCalledExactlyOnceWith(
-      'SELECT role FROM users WHERE id = $1 FOR UPDATE',
-      [id.toUpperCase()],
+      expect.stringContaining('ORDER BY id FOR UPDATE'),
+      [[id.toUpperCase(), actor.id]],
     );
   });
 
   it('still updates another user, invalidates tokens, and writes an audit event', async () => {
     const { service, manager } = setup();
     const otherId = '23456789-abcd-4abc-8abc-123456789abc';
-    manager.query.mockResolvedValueOnce([{ role: UserRole.ADMIN }]);
+    manager.query.mockResolvedValueOnce([
+      { id: otherId, role: UserRole.ADMIN },
+      { id: actor.id, role: UserRole.ADMIN },
+    ]);
     await expect(
       service.changeRole(otherId, UserRole.AUTHOR, actor),
     ).resolves.toEqual({ id: otherId, role: UserRole.AUTHOR });

@@ -47,4 +47,35 @@ describe('environment validation', () => {
   it('defaults the expiry to 15m', () => {
     expect(validate({}).value.JWT_ACCESS_EXPIRES_IN).toBe('15m');
   });
+
+  it('defaults email to disabled and fails closed when enabled without delivery configuration', () => {
+    expect(validate({}).value.EMAIL_ENABLED).toBe(false);
+    expect(validate({ EMAIL_ENABLED: 'true' }).error?.message).toContain(
+      'EMAIL_API_KEY',
+    );
+    const mail = {
+      EMAIL_ENABLED: 'true',
+      EMAIL_API_KEY: 'test-provider-key',
+      EMAIL_FROM: 'test@example.com',
+      EMAIL_APP_ORIGIN: 'https://judge.example.com',
+      EMAIL_TOKEN_SECRET: 'test-dedicated-mail-key-at-least-32-characters',
+    };
+    expect(validate(mail).error).toBeUndefined();
+    for (const origin of [
+      'http://judge.example.com',
+      'https://evil.example/path',
+      'https://user@judge.example.com',
+      'https://judge.example.com?x=1',
+    ])
+      expect(
+        validate({ ...mail, EMAIL_APP_ORIGIN: origin }).error?.message,
+      ).toContain('EMAIL_APP_ORIGIN');
+    expect(
+      validate({
+        ...mail,
+        NODE_ENV: 'production',
+        EMAIL_TOKEN_SECRET: 'replace-this-with-at-least-32-random-characters',
+      }).error?.message,
+    ).toContain('EMAIL_TOKEN_SECRET');
+  });
 });
