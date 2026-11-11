@@ -4,6 +4,7 @@ import {
   session,
   storageKey as sessionKey,
   type SeedPost,
+  answerConfirm,
 } from "./fixtures";
 
 const postDraftKey = "unsolvable-oj-community-draft-v2:solver:new";
@@ -385,9 +386,9 @@ test("K13: failed deletion stays on the post and does not clear answer or edit d
     category: "question", title: "수정 초안", body: "초안 본문", tags: [], savedAt: Date.now(),
   })), editDraftKey);
   failWrites(api);
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "글 관리" }).click();
   await page.getByRole("menuitem", { name: "삭제", exact: true }).click();
+  await answerConfirm(page, true);
   await expect(page).toHaveURL(/\/community\/my-question$/);
   await expect(page.getByRole("alert")).toContainText("글을 삭제하지 못했어요.");
   expect(api.posts).toHaveLength(2);
@@ -395,9 +396,9 @@ test("K13: failed deletion stays on the post and does not clear answer or edit d
   expect(JSON.parse((await readStored(page, editDraftKey))!).title).toBe("수정 초안");
 
   failWrites(api, false);
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "글 관리" }).click();
   await page.getByRole("menuitem", { name: "삭제", exact: true }).click();
+  await answerConfirm(page, true);
   await expect(page).toHaveURL(/\/community$/);
   expect(api.posts.map((post) => post.id)).not.toContain("my-question");
   expect(await readStored(page, answerDraftKey)).toBeNull();
@@ -407,9 +408,9 @@ test("K13: failed deletion stays on the post and does not clear answer or edit d
 test("a notice passed on navigation shows once and does not return on reload or Back/Forward", async ({ page }) => {
   await seed(page);
   await page.goto("/community/my-question");
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "글 관리" }).click();
   await page.getByRole("menuitem", { name: "삭제", exact: true }).click();
+  await answerConfirm(page, true);
   await expect(page).toHaveURL(/\/community$/);
   const notice = page.getByRole("status").filter({ hasText: "글을 삭제했어요." });
   await expect(notice).toBeVisible();

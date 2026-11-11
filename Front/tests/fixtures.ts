@@ -607,3 +607,12 @@ export async function mockCommunityApi(
   );
   return state;
 }
+
+/** 화면 안 확인 창(ConfirmDialog)에 답한다. accept가 거짓이면 취소를 누른다. */
+export async function answerConfirm(page: Page, accept = true, confirmLabel = "삭제") {
+  const dialog = page.getByRole("dialog");
+  await dialog
+    .getByRole("button", { name: accept ? confirmLabel : "취소", exact: true })
+    .click();
+  await dialog.waitFor({ state: "detached" });
+}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { verdictLabel } from "../verdict";
+import { DifficultyBadge } from "../components/DifficultyBadge";
 import { savedTime, useDocumentTitle } from "../hooks";
 import { Select } from "../components/Select";
 import { ProblemMarkdown } from "../components/ProblemMarkdown";
@@ -35,7 +36,6 @@ import {
   type SplitMode,
   type SplitState,
 } from "../solveSplit";
-import { difficultyLabel } from "../difficulty";
 import { fetchAll } from "../pagination";
 
 type Tab = "statement" | "history" | "editorial";
@@ -476,11 +476,7 @@ function OwnedProblemPage() {
             질문 작성
           </Link>
         </nav>
-        <span
-          className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
-        >
-          {difficultyLabel(problem.difficulty)}
-        </span>
+        <DifficultyBadge difficulty={problem.difficulty} />
       </div>
       <div
         ref={gridRef}

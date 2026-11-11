@@ -1,6 +1,7 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import type { Session } from "../src/types";
 import type { EnterpriseTest, TestResults } from "../src/enterprise/model";
+import { answerConfirm } from "./fixtures";
 
 const sessionKey = "unsolvable-oj-session-v1";
 const session: Session = {
@@ -263,12 +264,12 @@ test("create, edit and delete a test through the server", async ({ page }) => {
 
   // 삭제는 확인을 거친다.
   await page.locator(".ent-name").click();
-  page.once("dialog", (dialog) => dialog.dismiss());
   await page.getByRole("button", { name: "삭제" }).click();
+  await answerConfirm(page, false);
   await expect(page.getByRole("heading", { name: "백엔드 신입 공채 2차" })).toBeVisible();
   expect(requests.some((item) => item.method === "DELETE")).toBe(false);
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "삭제" }).click();
+  await answerConfirm(page, true);
   await expect(page).toHaveURL(/\/enterprise$/);
   expect(requests.find((item) => item.method === "DELETE")?.path).toBe("/enterprise/tests/t-new-1");
   await expect(page.getByText("아직 만든 테스트가 없어요")).toBeVisible();
@@ -318,8 +319,8 @@ test("server rejections are shown while the inputs and the saved test stay put",
   // 삭제 실패: 상세에 남아 이유를 보여 준다.
   await page.getByRole("link", { name: /테스트 상세/ }).click();
   await expect(page.getByRole("heading", { name: "기존 테스트" })).toBeVisible();
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "삭제", exact: true }).click();
+  await answerConfirm(page, true);
   await expect(page.getByRole("alert")).toContainText("응시 기록이 있는 테스트는 삭제할 수 없어요.");
   await expect(page).toHaveURL(/\/enterprise\/t-edit$/);
 });
