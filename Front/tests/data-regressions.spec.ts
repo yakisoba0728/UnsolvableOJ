@@ -676,7 +676,7 @@ test("form identity: changing owners on the same author route remounts the form"
   await expect(page).toHaveURL(/\/problems\/new$/);
 });
 
-test("form identity: navigating from an unchanged edit form to new does not reuse edit state", async ({ page }) => {
+test("form identity: opening a new problem through the list does not reuse edit state", async ({ page }) => {
   await authenticate(page, { ...session, user: { ...session.user, role: "AUTHOR" } });
   await page.route(`**/api/v1/problems/${problem.id}/manage`, (route) => route.fulfill({ json: {
     ...problem,
@@ -684,7 +684,8 @@ test("form identity: navigating from an unchanged edit form to new does not reus
   } }));
   await page.goto(`/my-problems/${problem.id}/edit`);
   await expect(page.getByLabel("제목", { exact: true })).toHaveValue(problem.title);
-  await page.locator(".main-nav").getByRole("link", { name: "문제 만들기", exact: true }).click();
+  await page.locator(".main-nav").getByRole("link", { name: "문제", exact: true }).click();
+  await page.locator(".problem-authoring").getByRole("link", { name: "문제 만들기", exact: true }).click();
   await expect(page).toHaveURL(/\/problems\/new$/);
   await expect(page.getByLabel("제목", { exact: true })).toHaveValue("");
 });

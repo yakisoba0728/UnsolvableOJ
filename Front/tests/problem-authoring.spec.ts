@@ -155,7 +155,7 @@ test("any signed-in user can open the author form; signed-out visitors are sent 
   await expect(page).toHaveURL(/\/auth$/);
   await authenticate(page);
   await page.goto("/problems");
-  await page.locator("header").getByRole("link", { name: "문제 만들기", exact: true }).click();
+  await page.locator(".problem-authoring").getByRole("link", { name: "문제 만들기", exact: true }).click();
   await expect(page).toHaveURL(/\/problems\/new$/);
   await expect(page.getByLabel("제목", { exact: true })).toBeVisible();
 });

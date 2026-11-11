@@ -528,6 +528,22 @@ export function ProblemsPage() {
               )
             }
           />
+          <div className="problem-authoring">
+            <div>
+              <strong>나만의 문제를 만들어 보세요</strong>
+              <p>문제 설명과 테스트케이스를 작성하고 다른 사람과 나눠 보세요.</p>
+            </div>
+            <div className="problem-authoring-actions">
+              {canAuthor(session) ? (
+                <Link className="button button-outline" to="/my-problems">
+                  내 문제
+                </Link>
+              ) : null}
+              <Link className="button" to="/problems/new">
+                문제 만들기
+              </Link>
+            </div>
+          </div>
         </section>
 
         <aside className="side-stack" ref={sideRef}>
@@ -669,29 +685,6 @@ export function ProblemsPage() {
               ) : null}
             </ol>
           </div>
-          {canAuthor(session) ? (
-            <div className="guide-card create-cta">
-              <h2>직접 문제를 만들어 보세요</h2>
-              <p>
-                떠오른 아이디어를 문제로 만들어 다른 사람과 나눠 보세요. 설명과
-                예제, 채점용 테스트케이스까지 한 화면에서 만들 수 있어요.
-              </p>
-              <ol className="create-cta-steps">
-                <li>
-                  <span>1</span>문제 설명 쓰기
-                </li>
-                <li>
-                  <span>2</span>예제와 숨김 테스트케이스 추가
-                </li>
-                <li>
-                  <span>3</span>검수를 거쳐 공개
-                </li>
-              </ol>
-              <Link className="button button-full" to="/problems/new">
-                문제 만들기 <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-          ) : null}
         </aside>
       </div>
     </div>

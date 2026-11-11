@@ -10,6 +10,46 @@ import {
 
 test.beforeEach(({ page }) => mockProblemApi(page));
 
+for (const width of [320, 375, 1440]) {
+  test(`authoring is below the problem list at ${width}px and belongs to the problem menu`, async ({ page }) => {
+    await authenticate(page);
+    await mockProblemList(page, [problem]);
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/problems");
+    await expect(page.locator("a.problem-row")).toHaveCount(1);
+    const actions = page.locator(".problem-authoring");
+    const create = actions.getByRole("link", { name: "문제 만들기", exact: true });
+    await expect(create).toBeVisible();
+    await expect(actions.getByRole("link", { name: "내 문제", exact: true })).toBeVisible();
+    await expect(page.locator(".main-nav").getByRole("link", { name: "문제 만들기" })).toHaveCount(0);
+    expect(await page.locator("section[aria-label='문제 목록']").evaluate((section) => {
+      const list = section.querySelector(".problem-list")!.getBoundingClientRect();
+      const actions = section.querySelector(".problem-authoring")!.getBoundingClientRect();
+      const controls = [...section.querySelectorAll(".problem-authoring a")];
+      return actions.top >= list.bottom && controls.every((control) => control.getBoundingClientRect().right <= innerWidth);
+    })).toBe(true);
+    await actions.getByRole("link", { name: "내 문제", exact: true }).click();
+    await expect(page).toHaveURL(/\/my-problems$/);
+    await expect(page.locator(".main-nav a[href='/problems']")).toHaveClass("active");
+    await page.goto("/problems");
+    await create.click();
+    await expect(page).toHaveURL(/\/problems\/new$/);
+    await expect(page.getByLabel("제목", { exact: true })).toBeVisible();
+    await expect(page.locator(".main-nav a[href='/problems']")).toHaveClass("active");
+  });
+}
+
+test("visitors can start authoring below an empty list and are asked to sign in", async ({ page }) => {
+  await mockProblemList(page, []);
+  await page.goto("/problems");
+  const actions = page.locator(".problem-authoring");
+  await expect(page.getByText("공개된 문제가 아직 없습니다.")).toBeVisible();
+  await expect(actions.getByRole("link", { name: "내 문제", exact: true })).toHaveCount(0);
+  await actions.getByRole("link", { name: "문제 만들기", exact: true }).click();
+  await expect(page).toHaveURL(/\/auth$/);
+});
+
+
 for (const slug of ["new", "mine"]) {
   test(`public slug ${slug} opens from the problem list`, async ({ page }) => {
     await page.route(/\/api\/v1\/problems(\?.*)?$/, (route) =>
