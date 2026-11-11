@@ -115,7 +115,7 @@ describe('Refresh tokens and temporary passwords (e2e)', () => {
     const used = remembered.refreshToken;
     // 잠금 없이 동시에, 또는 앞 탭의 저장이 늦게 보여 잠금 뒤에 같은 토큰을 다시 보내는 경우.
     const racing = await Promise.all([refresh(used), refresh(used)]);
-    expect(racing.map((response) => response.status).sort()).toEqual([200, 409]);
+    expect(racing.map((response) => response.status)).toEqual(expect.arrayContaining([200, 409]));
     await refresh(used).expect(409);
     const next = racing.find((response) => response.status === 200)!.body as Session;
     remembered = (await refresh(next.refreshToken).expect(200)).body;
