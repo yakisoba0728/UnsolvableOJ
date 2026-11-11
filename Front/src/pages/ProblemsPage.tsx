@@ -3,6 +3,11 @@ import { Link } from "react-router-dom";
 import { canAuthor, useAuth } from "../auth";
 import { BrandArt } from "../components/BrandArt";
 import { DifficultyBadge } from "../components/DifficultyBadge";
+import {
+  FinderGuide,
+  OrderButton,
+  RandomOrderNotice,
+} from "../components/ListControls";
 import { PageHeader } from "../components/PageHeader";
 import { Pagination } from "../components/Pagination";
 import {
@@ -11,9 +16,7 @@ import {
   type SolveState,
 } from "../components/ProblemStatus";
 import { RangeCount } from "../components/RangeCount";
-import { ReverseIcon } from "../components/ReverseIcon";
 import { Select } from "../components/Select";
-import { ShuffleIcon } from "../components/ShuffleIcon";
 import { Skeleton, SkeletonRegion, SkeletonRows } from "../components/Skeleton";
 import { SlideToggle } from "../components/SlideToggle";
 import {
@@ -346,16 +349,7 @@ export function ProblemsPage() {
             <div className="title-line">
               <h2>{hasFilter ? "검색 결과" : "전체 문제"}</h2>
               {sort === "random" ? (
-                <>
-                  <span className="pill pill-primary">무작위 순서</span>
-                  <button
-                    type="button"
-                    className="inline-button"
-                    onClick={() => changeSort("latest")}
-                  >
-                    기본 순서로
-                  </button>
-                </>
+                <RandomOrderNotice onReset={() => changeSort("latest")} />
               ) : null}
             </div>
             <RangeCount
@@ -452,7 +446,7 @@ export function ProblemsPage() {
             </div>
           ) : null}
           <FinderGuide
-            signedIn={Boolean(session)}
+            showUnsolved={Boolean(session)}
             difficulties={difficulties}
             statuses={statuses}
             onPick={update}
@@ -461,55 +455,6 @@ export function ProblemsPage() {
         </aside>
       </div>
     </div>
-  );
-}
-
-/** 무작위일 때는 다시 섞기, 아니면 순서 뒤집기. 누를 때마다 아이콘 애니메이션을 처음부터 다시 튼다. */
-function OrderButton({
-  random,
-  reversed,
-  disabled,
-  onShuffle,
-  onReverse,
-}: {
-  random: boolean;
-  reversed: boolean;
-  disabled: boolean;
-  onShuffle: () => void;
-  onReverse: () => void;
-}) {
-  // 키가 바뀌면 애니메이션이 처음부터 다시 실행된다.
-  const [spinKey, setSpinKey] = useState(0);
-  const [reverseKey, setReverseKey] = useState(0);
-  return random ? (
-    <button
-      type="button"
-      className="shuffle-icon-button"
-      aria-label="무작위로 다시 섞기"
-      title="무작위로 다시 섞기"
-      onClick={() => {
-        setSpinKey((key) => key + 1);
-        onShuffle();
-      }}
-      disabled={disabled}
-    >
-      <ShuffleIcon playKey={spinKey} />
-    </button>
-  ) : (
-    <button
-      type="button"
-      className="shuffle-icon-button reverse-icon-button"
-      aria-label="목록 순서 뒤집기"
-      aria-pressed={reversed}
-      title="목록 순서 뒤집기"
-      onClick={() => {
-        setReverseKey((key) => key + 1);
-        onReverse();
-      }}
-      disabled={disabled}
-    >
-      <ReverseIcon playKey={reverseKey} />
-    </button>
   );
 }
 
@@ -628,71 +573,6 @@ function StandingCard({
           </Link>
         </div>
       ) : null}
-    </div>
-  );
-}
-
-type FilterUpdate = Record<string, string | null>;
-
-/** 자주 쓰는 조건을 한 번에 거는 바로가기. 이미 그 조건이면 눌린 상태로 보인다. */
-function FinderGuide({
-  signedIn,
-  difficulties,
-  statuses,
-  onPick,
-}: {
-  signedIn: boolean;
-  difficulties: Difficulty[];
-  statuses: SolveState[];
-  onPick: (change: FilterUpdate) => void;
-}) {
-  const only = <T,>(values: T[], value: T) =>
-    values.length === 1 && values[0] === value;
-  const shortcuts: {
-    title: string;
-    hint: string;
-    pressed: boolean;
-    change: FilterUpdate;
-  }[] = [
-    {
-      title: "쉬운 난이도로 시작하기",
-      hint: "부담 없는 문제부터 차근차근",
-      pressed: only(difficulties, "BEGINNER"),
-      change: { d: "BEGINNER" },
-    },
-    {
-      title: "보통 난이도에 도전하기",
-      hint: "익숙해졌다면 한 단계 위로",
-      pressed: only(difficulties, "MEDIUM"),
-      change: { d: "MEDIUM" },
-    },
-    ...(signedIn
-      ? [
-          {
-            title: "아직 안 푼 문제만 보기",
-            hint: "새로운 문제에 집중해요",
-            pressed: only(statuses, "none") && !difficulties.length,
-            change: { s: "none", d: null },
-          },
-        ]
-      : []),
-  ];
-  return (
-    <div className="guide-card">
-      <h2>나에게 맞는 문제 찾기</h2>
-      <ol>
-        {shortcuts.map((item) => (
-          <li key={item.title}>
-            <button aria-pressed={item.pressed} onClick={() => onPick(item.change)}>
-              <strong>{item.title}</strong>
-              <span>{item.hint}</span>
-              <i className="row-chevron" aria-hidden="true">
-                ›
-              </i>
-            </button>
-          </li>
-        ))}
-      </ol>
     </div>
   );
 }
