@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { canAuthor, useAuth } from "../auth";
+import { useAuth } from "../auth";
 import { NotificationBell } from "./NotificationBell";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -90,11 +90,10 @@ export function SiteHeader({
           <NavLink to="/" end>
             홈
           </NavLink>
-          {/* /problems/new 는 "문제 만들기"만 활성화한다 */}
           <NavLink
             to="/problems"
             className={({ isActive }) =>
-              isActive && pathname !== "/problems/new" ? "active" : ""
+              isActive || pathname.startsWith("/my-problems") ? "active" : ""
             }
           >
             문제
@@ -105,19 +104,19 @@ export function SiteHeader({
             </NavLink>
           ))}
           {session ? <NavLink to="/submissions">내 제출</NavLink> : null}
-          {canAuthor(session) ? (
-            <NavLink
-              to="/problems/new"
-              className={({ isActive }) =>
-                isActive || pathname.startsWith("/my-problems")
-                  ? "active"
-                  : ""
-              }
-            >
-              문제 만들기
-            </NavLink>
-          ) : null}
           {role === "ADMIN" ? <NavLink to="/admin">관리</NavLink> : null}
+          {session ? (
+            <button
+              type="button"
+              className="text-button mobile-signout"
+              onClick={() => {
+                setMenuOpen(false);
+                onSignOut();
+              }}
+            >
+              로그아웃
+            </button>
+          ) : null}
           <span
             className={`nav-indicator ${indicatorReady ? "ready" : ""}`}
             aria-hidden="true"
@@ -143,7 +142,7 @@ export function SiteHeader({
                   {session.user.username.slice(0, 1).toUpperCase()}
                 </span>
               </Link>
-              <button className="text-button" onClick={onSignOut}>
+              <button className="text-button header-signout" onClick={onSignOut}>
                 로그아웃
               </button>
             </>

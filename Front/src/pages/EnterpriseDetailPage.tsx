@@ -23,6 +23,7 @@ import {
 import { useEnterpriseProblems, useDocumentTitle, useNow } from "../hooks";
 import { problemPath } from "../paths";
 import { difficultyLabel } from "../difficulty";
+import { invalidResourceIdMessage } from "../resourceErrors";
 
 function Missing({ children }: { children: React.ReactNode }) {
   return (
@@ -90,6 +91,15 @@ export function EnterpriseDetailPage() {
     return (
       <Missing>
         <p role="status">테스트를 불러오는 중…</p>
+      </Missing>
+    );
+  if (!test && testError === invalidResourceIdMessage)
+    return (
+      <Missing>
+        <strong role="alert">{testError}</strong>
+        <Link className="button" to="/enterprise">
+          기업 테스트로
+        </Link>
       </Missing>
     );
   if (!test && testError && !/찾을 수 없/.test(testError))
