@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Link, Navigate, NavLink, Route, Routes } from "react-router-dom";
+import { confirmOf, useConfirm } from "../components/ConfirmDialog";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { CopyButton } from "../components/CopyButton";
@@ -83,6 +84,7 @@ export function AdminPage() {
 
 function AdminUsers() {
   useDocumentTitle("사용자 관리");
+  const [confirm, confirmDialog] = useConfirm();
   const { session } = useAuth();
   const { params, update, urlQuery, queryText, setQueryText, page } =
     useUrlFilters();
@@ -114,9 +116,13 @@ function AdminUsers() {
   async function issuePassword(user: AdminUser) {
     if (
       busy ||
-      !window.confirm(
-        `${user.username}에게 임시 비밀번호를 발급할까요? 기존 비밀번호는 쓸 수 없게 되고 그 사용자의 모든 로그인이 끊깁니다.`,
-      )
+      !(await confirm(
+        confirmOf(
+          `${user.username}에게 임시 비밀번호를 발급할까요? 기존 비밀번호는 쓸 수 없게 되고 그 사용자의 모든 로그인이 끊깁니다.`,
+          "발급",
+          true,
+        ),
+      ))
     )
       return;
     setBusy(user.id);
@@ -143,8 +149,11 @@ function AdminUsers() {
     action: string,
     body: object,
     question: string,
+    confirmLabel: string,
+    danger = false,
   ) {
-    if (busy || !window.confirm(question)) return;
+    if (busy || !(await confirm(confirmOf(question, confirmLabel, danger))))
+      return;
     setBusy(user.id);
     setActionError("");
     try {
@@ -172,6 +181,7 @@ function AdminUsers() {
   }));
   return (
     <section aria-label="사용자">
+      {confirmDialog}
       <div className="filter-card">
         <div className="filter-row">
           <div className="search-field">
@@ -266,6 +276,9 @@ function AdminUsers() {
                           "role",
                           { role: next },
                           `${user.username}의 역할을 ${roleLabels[next as Role]}(으)로 바꿀까요? 그 사용자는 다시 로그인해야 합니다.`,
+                          "역할 바꾸기",
+                          // 관리자 권한을 주거나 거두는 변경은 위험 동작으로 보인다.
+                          next === "ADMIN" || user.role === "ADMIN",
                         )
                       }
                     />
@@ -295,6 +308,8 @@ function AdminUsers() {
                               user.suspendedAt
                                 ? `${user.username}의 정지를 해제할까요?`
                                 : `${user.username} 계정을 정지할까요? 바로 로그아웃되고 해제할 때까지 로그인할 수 없습니다.`,
+                              user.suspendedAt ? "정지 해제" : "정지",
+                              !user.suspendedAt,
                             )
                           }
                         >
@@ -356,6 +371,7 @@ const reportStatusLabels = { open: "처리 전", resolved: "처리됨", all: "�
 
 function AdminReports() {
   useDocumentTitle("커뮤니티 신고");
+  const [confirm, confirmDialog] = useConfirm();
   const { session } = useAuth();
   const { params, update, page } = useUrlFilters();
   const status = params.get("status") ?? "open";
@@ -375,8 +391,16 @@ function AdminReports() {
   const [actionError, setActionError] = useState("");
 
   // 숨김·해제는 같은 대상의 다른 신고도 처리됨으로 바꾸므로 고친 행만 덮지 않고 목록을 다시 받는다.
-  async function act(report: CommunityReport, path: string, method: string, question: string) {
-    if (busy || !window.confirm(question)) return;
+  async function act(
+    report: CommunityReport,
+    path: string,
+    method: string,
+    question: string,
+    confirmLabel: string,
+    danger = false,
+  ) {
+    if (busy || !(await confirm(confirmOf(question, confirmLabel, danger))))
+      return;
     setBusy(report.id);
     setActionError("");
     try {
@@ -391,6 +415,7 @@ function AdminReports() {
 
   return (
     <section aria-label="커뮤니티 신고">
+      {confirmDialog}
       <div className="filter-card">
         <div className="filter-row">
           <Select
@@ -474,6 +499,7 @@ function AdminReports() {
                               `reports/${report.id}/resolved`,
                               "PUT",
                               `이 신고를 숨기지 않고 처리됨으로 닫을까요?`,
+                              "처리 완료",
                             )
                           }
                         >
@@ -492,6 +518,8 @@ function AdminReports() {
                             target.hidden
                               ? `이 ${target.name}의 숨김을 해제할까요? 다시 모두에게 보입니다.`
                               : `이 ${target.name}을(를) 숨길까요? 작성자와 관리자에게만 보이고, 이 대상의 처리 전 신고는 모두 처리됨이 됩니다.`,
+                            target.hidden ? "숨김 해제" : "숨기기",
+                            !target.hidden,
                           )
                         }
                       >

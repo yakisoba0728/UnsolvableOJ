@@ -147,8 +147,8 @@ test("a response arriving during suspended navigation cannot revive old unmount 
     await page.getByLabel(/^본문/).fill("이전 제출 본문");
     await page.getByRole("button", { name: "글 등록", exact: true }).click();
     await gate.ready;
-    page.on("dialog", (dialog) => dialog.accept());
     await page.locator("header").getByRole("link", { name: "커뮤니티", exact: true }).click();
+    await answerConfirm(page, true, "나가기");
     await destination.ready;
     const second = await context.newPage();
     await second.goto("/");
@@ -183,8 +183,9 @@ for (const kind of ["answer", "post"] as const) {
         const key = kind === "answer" ? answerDraftKey : postDraftKey;
         const stored = await readStored(page, key);
         if (move === "page") {
-          page.on("dialog", (dialog) => dialog.accept());
           await page.locator("header").getByRole("link", { name: "커뮤니티", exact: true }).click();
+          // 글 작성 화면만 나갈 때 확인 창이 뜬다(답변 입력은 묻지 않는다).
+          if (kind === "post") await answerConfirm(page, true, "나가기");
           await expect(page).toHaveURL(/\/community$/);
         } else {
           const second = await context.newPage();
@@ -312,8 +313,8 @@ test("K15: explicit discard cannot autosave or submit while its lazy destination
     await page.getByLabel(/^제목/).fill("버린 초안");
     await page.getByLabel(/^본문/).fill("버린 초안 본문입니다.");
     await page.getByRole("button", { name: "임시 저장", exact: true }).click();
-    page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "취소", exact: true }).click();
+    await answerConfirm(page, true, "나가기");
     await destination.ready;
     await expect(page.locator(".write-form")).toBeVisible();
     expect(await readStored(page, postDraftKey)).toBeNull();
@@ -518,24 +519,20 @@ test("K15: SPA navigation can be rejected, accepted navigation recovers edits, e
   await page.getByLabel(/^제목/).fill("가장 최근 수정 제목");
   await page.getByLabel(/^본문/).fill("가장 최근 수정 본문");
   await page.locator("#tag-input").fill("아직 확정하지 않은 태그");
-  await Promise.all([
-    page.waitForEvent("dialog").then((dialog) => dialog.dismiss()),
-    page.locator(".write-page .back-link").click(),
-  ]);
+  await page.locator(".write-page .back-link").click();
+  await answerConfirm(page, false);
   await expect(page).toHaveURL(/\/community\/my-question\/edit$/);
   await expect(page.getByLabel(/^제목/)).toHaveValue("가장 최근 수정 제목");
 
-  await Promise.all([
-    page.waitForEvent("dialog").then((dialog) => dialog.accept()),
-    page.locator(".write-page .back-link").click(),
-  ]);
+  await page.locator(".write-page .back-link").click();
+  await answerConfirm(page, true, "나가기");
   await expect(page).toHaveURL(/\/community\/my-question$/);
   await openEditor(page);
   await expect(page.getByLabel(/^제목/)).toHaveValue("가장 최근 수정 제목");
   await expect(page.getByLabel(/^본문/)).toHaveValue("가장 최근 수정 본문");
   await expect(page.locator(".tag-chip")).toContainText("아직 확정하지 않은 태그");
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "취소", exact: true }).click();
+  await answerConfirm(page, true, "나가기");
   await expect(page).toHaveURL(/\/community\/my-question$/);
   expect(await readStored(page, editDraftKey)).toBeNull();
   await openEditor(page);

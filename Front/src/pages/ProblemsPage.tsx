@@ -162,6 +162,8 @@ export function ProblemsPage() {
   // 이미 보이는 목록이 있으면 새로 받는 동안 그대로 두고 흐리게만 한다. 보일 목록이 없을 때만 스켈레톤을 쓴다.
   const refreshing = loading && problems.length > 0;
   const showSkeleton = loading && !refreshing;
+  // 필터 칩의 개수는 한 번이라도 받았다면 다시 받는 동안 앞선 숫자를 그대로 둔다. 스켈레톤(16px)으로 바꾸면 숫자(약 7px)보다 넓어 칩이 커졌다 작아진다.
+  const countsPending = loading && !list.facets;
   // 태그 목록은 다시 받는 동안에도 앞서 받은 것을 보여 준다(고르는 칸이 사라졌다 생기지 않게).
   const lastTags = useRef<{ tag: string; count: number }[]>([]);
   if (!loading && list.facets?.tags) lastTags.current = list.facets.tags;
@@ -332,7 +334,7 @@ export function ProblemsPage() {
               <SlideToggle
                 multiple
                 ariaLabel="풀이 상태 필터"
-                countsLoading={showSkeleton}
+                countsLoading={countsPending}
                 values={statuses}
                 options={statusChips.map((item) => ({
                   value: item.value,
@@ -356,7 +358,7 @@ export function ProblemsPage() {
             <SlideToggle
               multiple
               ariaLabel="난이도 필터"
-              countsLoading={loading}
+              countsLoading={countsPending}
               values={selectedDifficulties}
               options={[
                 { value: "", label: "전체", count: difficultyCount("") },

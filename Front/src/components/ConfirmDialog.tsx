@@ -2,7 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 export interface ConfirmOptions {
   title: string;
-  /** 무엇이 사라지는지·되돌릴 수 있는지 */
+  /** 무엇이 사라지는지·되돌릴 수 있는지(비우면 제목만 보인다) */
   message: string;
   /** 확인 버튼 글자 (예: "삭제") */
   confirmLabel: string;
@@ -23,11 +23,14 @@ function ConfirmDialog({
   onClose,
 }: ConfirmOptions & { onClose: (confirmed: boolean) => void }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
   const messageId = useId();
   useEffect(() => {
     const dialog = ref.current;
     if (dialog && !dialog.open) dialog.showModal();
+    // 앞에 포커스 받을 요소가 생겨도 처음 포커스는 늘 '취소'에 둔다.
+    cancelRef.current?.focus();
   }, []);
   // 모달이 열려 있는 동안 바깥은 비활성이라 포커스를 옮길 수 없다: 먼저 닫고 알린다.
   const finish = (confirmed: boolean) => {
@@ -39,7 +42,7 @@ function ConfirmDialog({
       ref={ref}
       className="confirm-dialog"
       aria-labelledby={titleId}
-      aria-describedby={messageId}
+      aria-describedby={message ? messageId : undefined}
       // Esc로 닫으면 취소다.
       onCancel={(event) => {
         event.preventDefault();
@@ -50,27 +53,48 @@ function ConfirmDialog({
         if (event.target === event.currentTarget) finish(false);
       }}
     >
-      <h2 id={titleId}>{title}</h2>
-      <p id={messageId}>{message}</p>
-      <div className="confirm-actions">
-        <button
-          type="button"
-          className="button button-outline"
-          autoFocus
-          onClick={() => finish(false)}
-        >
-          취소
-        </button>
-        <button
-          type="button"
-          className={`button ${danger ? "button-danger" : ""}`}
-          onClick={() => finish(true)}
-        >
-          {confirmLabel}
-        </button>
+      {/* 여백은 안쪽 상자가 가진다: dialog 자신이 눌린 경우만 '배경 클릭'이 되게 한다. */}
+      <div className="confirm-body">
+        <h2 id={titleId}>{title}</h2>
+        {message ? <p id={messageId}>{message}</p> : null}
+        <div className="confirm-actions">
+          <button
+            ref={cancelRef}
+            type="button"
+            className="button button-outline"
+            onClick={() => finish(false)}
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            className={`button ${danger ? "button-danger" : ""}`}
+            onClick={() => finish(true)}
+          >
+            {confirmLabel}
+          </button>
+        </div>
       </div>
     </dialog>
   );
+}
+
+/**
+ * "~할까요? 설명…" 형태의 한 줄 질문을 제목(첫 문장)과 설명(나머지)으로 나눈다.
+ * 예전 브라우저 confirm 문구를 그대로 쓰는 화면이 확인 창으로 옮겨 올 때 쓴다.
+ */
+export function confirmOf(
+  question: string,
+  confirmLabel: string,
+  danger = false,
+): ConfirmOptions {
+  const match = question.match(/^(.+?까요\?)\s*([\s\S]*)$/);
+  return {
+    title: match ? match[1] : question,
+    message: match ? match[2] : "",
+    confirmLabel,
+    danger,
+  };
 }
 
 /**
@@ -85,18 +109,20 @@ export function useConfirm() {
     returnFocus: Element | null;
   } | null>(null);
 
+  // 아직 답을 기다리는 질문의 resolve: 새 질문이 오거나 화면을 벗어나면 취소로 알린다.
+  const waiting = useRef<((confirmed: boolean) => void) | null>(null);
   const confirm = useCallback(
     (options: ConfirmOptions) =>
-      new Promise<boolean>((resolve) =>
-        setRequest({ options, resolve, returnFocus: document.activeElement }),
-      ),
+      new Promise<boolean>((resolve) => {
+        // 앞선 질문이 아직 열려 있으면 그 호출이 영원히 기다리지 않게 취소로 닫는다.
+        waiting.current?.(false);
+        waiting.current = resolve;
+        setRequest({ options, resolve, returnFocus: document.activeElement });
+      }),
     [],
   );
 
-  // 화면을 벗어나면 기다리던 쪽에 취소로 알린다.
-  const pending = useRef(request);
-  pending.current = request;
-  useEffect(() => () => pending.current?.resolve(false), []);
+  useEffect(() => () => waiting.current?.(false), []);
 
   const element = request ? (
     <ConfirmDialog
@@ -105,6 +131,7 @@ export function useConfirm() {
         setRequest(null);
         const target = request.returnFocus;
         if (target instanceof HTMLElement && target.isConnected) target.focus();
+        if (waiting.current === request.resolve) waiting.current = null;
         request.resolve(confirmed);
       }}
     />

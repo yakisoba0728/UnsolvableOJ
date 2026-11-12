@@ -536,3 +536,40 @@ test("a failed list request shows the error with a retry that keeps the conditio
   expect(last.get("q")).toBe("합");
   expect(last.get("difficulty")).toBe("BEGINNER");
 });
+
+test("difficulty filter chips keep their size while the list reloads", async ({ page }) => {
+  await authenticate(page);
+  await mockProblemList(page, [problem]);
+  // 목록을 다시 받는 시간을 늘려, 개수 자리가 스켈레톤으로 바뀌는지 놓치지 않게 한다.
+  await page.route(
+    (url) => url.pathname === "/api/v1/problems",
+    async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      await route.fallback();
+    },
+  );
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/problems");
+  await expect(page.locator("a.problem-row")).toHaveCount(1);
+  const toggle = page.locator('[aria-label="난이도 필터"]');
+  await expect(toggle).toBeVisible();
+  await page.evaluate(() => {
+    const widths: number[] = [];
+    (window as unknown as { __widths: number[] }).__widths = widths;
+    const el = document.querySelector('[aria-label="난이도 필터"]')!;
+    const tick = () => {
+      widths.push(el.getBoundingClientRect().width);
+      requestAnimationFrame(tick);
+    };
+    tick();
+  });
+  for (const label of ["쉬움", "보통", "쉬움", "보통"]) {
+    const reload = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/v1/problems");
+    await toggle.getByRole("button", { name: new RegExp(`^${label}`) }).click();
+    await reload;
+    await page.waitForTimeout(150);
+  }
+  const widths = await page.evaluate(() => (window as unknown as { __widths: number[] }).__widths);
+  expect(widths.length).toBeGreaterThan(30);
+  expect(Math.max(...widths) - Math.min(...widths)).toBeLessThan(1);
+});

@@ -1,5 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-import { authenticate, mockProblemApi } from "./fixtures";
+import { expect, test, type Page, type Route } from "@playwright/test";
+import { answerConfirm, authenticate, mockProblemApi } from "./fixtures";
 import type { VibeAttempt, VibeCatalog } from "../src/vibe/types";
 
 const id = "70000000-0000-4000-8000-000000000001";
@@ -61,7 +61,7 @@ async function mockVibe(page: Page) {
   let undo = state.files;
   const requests: string[] = [];
   let failSave = false;
-  await page.route("**/api/v1/vibe/**", async (route) => {
+  const handleVibe = async (route: Route) => {
     const path = new URL(route.request().url()).pathname;
     const method = route.request().method();
     const body = route.request().postDataJSON() ?? {};
@@ -146,7 +146,10 @@ async function mockVibe(page: Page) {
       };
     }
     return route.fulfill({ json: structuredClone(state) });
-  });
+  };
+  // 연습은 새 탭에서 열리므로 팝업에서도 같은 응답을 받도록 브라우저 문맥에도 건다.
+  await page.route("**/api/v1/vibe/**", handleVibe);
+  await page.context().route("**/api/v1/vibe/**", handleVibe);
   return {
     requests,
     get state() {
@@ -175,13 +178,20 @@ test("a visitor discovers vibe practice and is sent to login before opening a wo
 });
 
 test("practice saves files, reviews and applies AI proposals, runs tests and shows all three scores", async ({
-  page,
+  page: listPage,
 }) => {
-  const mock = await mockVibe(page);
-  await authenticate(page);
-  await page.goto("/vibe");
-  await page.getByRole("button", { name: "연습 시작 / 이어하기" }).click();
-  await expect(page).toHaveURL(new RegExp(`/vibe/attempts/${id}$`));
+  let page = listPage;
+  const mock = await mockVibe(listPage);
+  await authenticate(listPage);
+  await listPage.goto("/vibe");
+  // 문제 목록처럼 연습은 새 탭에서 열리고, 목록 탭은 그대로 남는다.
+  const [workspace] = await Promise.all([
+    page.waitForEvent("popup"),
+    page.getByRole("button", { name: "연습 시작 / 이어하기" }).click(),
+  ]);
+  await expect(workspace).toHaveURL(new RegExp(`/vibe/attempts/${id}$`));
+  await expect(page).toHaveURL(/\/vibe$/);
+  page = workspace;
   const editor = page.getByRole("textbox", { name: "TypeScript 소스 코드" });
   await editor.fill("export const searchPosts = () => [1];\n");
   await expect(
@@ -202,19 +212,23 @@ test("practice saves files, reviews and applies AI proposals, runs tests and sho
   await expect(page.locator(".vibe-diff")).toContainText("tags.includes(tag)");
   expect(mock.state.files["src/tags.ts"]).not.toContain("tags.includes");
   await page.getByRole("button", { name: "적용", exact: true }).click();
-  await page
-    .getByRole("navigation", { name: "프로젝트 파일" })
-    .getByRole("button", { name: "src/tags.ts" })
-    .click();
+  await page.getByRole("tab", { name: "src/tags.ts" }).click();
   await expect(editor).toHaveValue(/tags.includes/);
   await page.getByRole("button", { name: "테스트 실행", exact: true }).click();
   await expect(page.getByText("r2의 실행 결과")).toBeVisible();
-  await expect(page.locator(".vibe-test-panel")).toContainText("태그 필터");
+  await expect(page.locator("#vibe-dock-panel")).toContainText("태그 필터");
+  await page.getByRole("tab", { name: /회고/ }).click();
   await page
     .getByLabel("제출 전 짧은 회고")
     .fill("태그 필터를 수정하고 테스트의 실패 원인을 확인했습니다.");
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "최종 제출", exact: true }).click();
+  // 브라우저 기본 창이 아니라 화면 안 확인 창이 뜬다. 취소하면 제출하지 않는다.
+  const dialog = page.getByRole("dialog", { name: "최종 제출할까요?" });
+  await expect(dialog).toBeVisible();
+  await answerConfirm(page, false);
+  expect(mock.state.submittedAt).toBeNull();
+  await page.getByRole("button", { name: "최종 제출", exact: true }).click();
+  await answerConfirm(page, true, "최종 제출");
   await expect(
     page.getByRole("heading", { name: "81점, 다음 시도를 위한 기록" }),
   ).toBeVisible();
@@ -334,10 +348,7 @@ for (const width of [375, 1440])
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
-    await page
-      .getByRole("navigation", { name: "프로젝트 파일" })
-      .getByRole("button", { name: "README.md" })
-      .click();
+    await page.getByRole("tab", { name: /README\.md/ }).click();
     await expect(page.getByLabel("README.md 코드")).toContainText(
       "요구사항을 읽어 주세요.",
     );
@@ -345,3 +356,191 @@ for (const width of [375, 1440])
       page.getByRole("textbox", { name: "TypeScript 소스 코드" }),
     ).toHaveCount(0);
   });
+
+test("file tabs move with arrow keys and mark the read-only file", async ({
+  page,
+}) => {
+  await mockVibe(page);
+  await authenticate(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`/vibe/attempts/${id}`);
+  const tabs = page.getByRole("tablist", { name: "프로젝트 파일" });
+  await expect(tabs.getByRole("tab")).toHaveCount(4);
+  await expect(tabs.getByRole("tab", { name: /README\.md/ })).toContainText(
+    "읽기 전용",
+  );
+  const search = tabs.getByRole("tab", { name: "src/search.ts" });
+  await expect(search).toHaveAttribute("aria-selected", "true");
+  await search.focus();
+  await page.keyboard.press("ArrowRight");
+  const tags = tabs.getByRole("tab", { name: "src/tags.ts" });
+  await expect(tags).toBeFocused();
+  await expect(tags).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("textbox", { name: "TypeScript 소스 코드" })).toHaveValue(
+    /matchesTag/,
+  );
+  await page.keyboard.press("End");
+  await expect(tabs.getByRole("tab", { name: "tests/search.test.ts" })).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(tabs.getByRole("tab", { name: /README\.md/ })).toBeFocused();
+  await expect(page.getByLabel("README.md 코드")).toBeVisible();
+  // 해야 할 일 패널에는 파일 목록이 없다
+  await expect(
+    page.locator("#vibe-task-panel").getByRole("tab"),
+  ).toHaveCount(0);
+});
+
+test("the remaining time sits in the header and warns before the deadline", async ({
+  page,
+}) => {
+  const mock = await mockVibe(page);
+  await authenticate(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  mock.state = {
+    ...mock.state,
+    deadlineAt: new Date(Date.now() + 9 * 60_000).toISOString(),
+  };
+  await page.goto(`/vibe/attempts/${id}`);
+  const timer = page.getByRole("timer");
+  await expect(timer).toContainText("남은 시간");
+  await expect(timer).toContainText(/0[89]:\d\d/);
+  await expect(timer).toHaveClass(/is-warn/);
+  await expect(page.getByRole("status").filter({ hasText: "10분 이하" })).toHaveCount(1);
+  expect(
+    await timer.evaluate((node) => parseFloat(getComputedStyle(node.querySelector("strong")!).fontSize)),
+  ).toBeGreaterThanOrEqual(20);
+  mock.state = {
+    ...mock.state,
+    deadlineAt: new Date(Date.now() + 3 * 60_000).toISOString(),
+  };
+  await page.reload();
+  await expect(page.getByRole("timer")).toHaveClass(/is-danger/);
+  await expect(page.getByRole("status").filter({ hasText: "5분 이하" })).toHaveCount(1);
+  mock.state = {
+    ...mock.state,
+    deadlineAt: new Date(Date.now() - 1000).toISOString(),
+  };
+  await page.reload();
+  await expect(page.getByRole("timer")).toContainText("시간 종료");
+});
+
+test("panels resize by drag and keys, fold when squeezed and reset on double click", async ({
+  page,
+}) => {
+  await mockVibe(page);
+  await authenticate(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`/vibe/attempts/${id}`);
+  const tasks = page.locator("#vibe-task-panel");
+  const chat = page.locator("#vibe-chat-panel");
+  const width = async (locator: typeof tasks) =>
+    Math.round((await locator.boundingBox())!.width);
+  expect(await width(tasks)).toBe(260);
+  expect(await width(chat)).toBe(360);
+
+  const left = page.getByRole("separator", { name: "해야 할 일과 코드 작성 크기 조절" });
+  await left.focus();
+  await page.keyboard.press("ArrowRight");
+  expect(await width(tasks)).toBe(284);
+  // 끌어서 넓힌다
+  const box = (await left.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 + 100, box.y + box.height / 2, { steps: 5 });
+  await page.mouse.up();
+  expect(await width(tasks)).toBeGreaterThan(340);
+  // 끝까지 좁히면 접히고, 다시 끌면 열린다
+  await page.keyboard.press("Home");
+  await expect(tasks).toBeHidden();
+  // 왼쪽이 접혀도 코드 작성 칸은 넓은 가운데 열을 그대로 쓴다
+  expect(await width(page.locator("#vibe-code-panel"))).toBeGreaterThan(600);
+  await page.keyboard.press("ArrowRight");
+  await expect(tasks).toBeVisible();
+  await left.dblclick();
+  expect(await width(tasks)).toBe(260);
+
+  const right = page.getByRole("separator", { name: "코드 작성과 코딩 파트너 크기 조절" });
+  await right.focus();
+  await page.keyboard.press("ArrowLeft");
+  expect(await width(chat)).toBe(384);
+  await page.keyboard.press("Home");
+  await expect(chat).toBeHidden();
+  await page.keyboard.press("Enter");
+  expect(await width(chat)).toBe(360);
+
+  const dock = page.getByRole("separator", { name: "코드 편집기와 실행·회고 크기 조절" });
+  const body = page.locator("#vibe-dock");
+  const height = async () => Math.round((await body.boundingBox())!.height);
+  expect(await height()).toBe(240);
+  await dock.focus();
+  await page.keyboard.press("ArrowUp");
+  expect(await height()).toBe(264);
+  await page.keyboard.press("Home");
+  await expect(page.locator("#vibe-dock-panel")).toBeHidden();
+  expect(await height()).toBe(48);
+  // 접힌 상태에서 탭을 누르면 펴진다
+  await page.getByRole("tab", { name: /회고/ }).click();
+  await expect(page.getByLabel("제출 전 짧은 회고")).toBeVisible();
+  await dock.dblclick();
+  expect(await height()).toBe(240);
+  // 회고에 적은 글은 탭을 오가도 남는다
+  await page.getByLabel("제출 전 짧은 회고").fill("메모");
+  await page.getByRole("tab", { name: "실행과 테스트" }).click();
+  await page.getByRole("tab", { name: /회고/ }).click();
+  await expect(page.getByLabel("제출 전 짧은 회고")).toHaveValue("메모");
+  await expect(page.getByRole("tab", { name: /회고/ })).toContainText("작성 중");
+});
+
+test("confirm dialog starts on cancel, ignores clicks on its own body, and Esc or the backdrop cancels and returns focus", async ({
+  page,
+}) => {
+  await mockVibe(page);
+  await authenticate(page);
+  await page.goto(`/vibe/attempts/${id}`);
+  const submit = page.getByRole("button", { name: "최종 제출", exact: true });
+  const dialog = page.locator("dialog.confirm-dialog");
+  await submit.click();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "취소" })).toBeFocused();
+  // 창 안쪽 여백을 눌러도 배경 클릭으로 보지 않는다.
+  await dialog.locator(".confirm-body").click({ position: { x: 100, y: 4 } });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(submit).toBeFocused();
+  // 창 바깥(배경)을 누르면 취소다.
+  await submit.click();
+  await expect(dialog).toBeVisible();
+  await page.mouse.click(4, 4);
+  await expect(dialog).toBeHidden();
+});
+
+test("the code editor explains how to leave it with the keyboard", async ({
+  page,
+}) => {
+  await mockVibe(page);
+  await authenticate(page);
+  await page.goto(`/vibe/attempts/${id}`);
+  const editor = page.getByRole("textbox", { name: "TypeScript 소스 코드" });
+  await expect(editor).toHaveAccessibleDescription(/Esc 다음 Tab/);
+});
+
+test("the file tab strip hints at hidden tabs and keeps the selected tab in view", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const mock = await mockVibe(page);
+  const extra = Object.fromEntries(
+    Array.from({ length: 6 }, (_, i) => [`src/module-${i}/very-long-file-name.ts`, "export {};\n"]),
+  );
+  mock.state.files = { ...mock.state.files, ...extra };
+  await authenticate(page);
+  await page.goto(`/vibe/attempts/${id}`);
+  const strip = page.locator(".vibe-file-tabs");
+  await expect(strip).toHaveClass(/has-more/);
+  // 끝 탭을 키보드로 고르면 줄이 끝까지 밀리고 단서는 사라진다
+  await page.getByRole("tab", { name: "src/search.ts" }).focus();
+  await page.keyboard.press("End");
+  await expect(page.getByRole("tab", { name: /module-5/, selected: true })).toBeInViewport();
+  await expect(strip).not.toHaveClass(/has-more/);
+});
