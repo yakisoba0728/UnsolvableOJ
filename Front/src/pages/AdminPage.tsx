@@ -277,6 +277,8 @@ function AdminUsers() {
                           { role: next },
                           `${user.username}의 역할을 ${roleLabels[next as Role]}(으)로 바꿀까요? 그 사용자는 다시 로그인해야 합니다.`,
                           "역할 바꾸기",
+                          // 관리자 권한을 주거나 거두는 변경은 위험 동작으로 보인다.
+                          next === "ADMIN" || user.role === "ADMIN",
                         )
                       }
                     />

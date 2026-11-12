@@ -171,6 +171,15 @@ export function dockFromPointer(
   return { height: clamp(height, MIN_DOCK, max), collapsed: false };
 }
 
+/**
+ * 창이 줄어 코드 작성 영역이 모자라면 저장해 둔 하단 칸 높이를 그려 줄 때만 줄인다(저장값은 그대로).
+ * 편집기가 최소 높이를 지키고 하단 칸이 영역 밖으로 잘리지 않게 한다. `total`이 아직 0이면 그대로 둔다.
+ */
+export function fitDockHeight(height: number, total: number): number {
+  if (!(total > 0)) return height;
+  return Math.min(height, Math.max(MIN_DOCK, total - HANDLE - MIN_EDITOR));
+}
+
 export function dockFromKey(
   key: string,
   total: number,

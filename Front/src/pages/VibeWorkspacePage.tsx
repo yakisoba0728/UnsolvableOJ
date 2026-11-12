@@ -30,6 +30,7 @@ import {
   columnsFromRightPointer,
   dockFromKey,
   dockFromPointer,
+  fitDockHeight,
   percentOf,
   visibleWidths,
   type ColumnState,
@@ -131,6 +132,51 @@ export function VibeWorkspacePage() {
     return () => observer.disconnect();
   }, [ready]);
   useEffect(() => () => endDragRef.current?.(), []);
+  // 작업 중에는 입력과 버튼이 잠겨 포커스가 문서 처음으로 떨어진다: 끝나면 누르던 자리로 돌려놓는다.
+  const restoreFocus = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const target = restoreFocus.current;
+    if (busy || !target) return;
+    restoreFocus.current = null;
+    if (target.isConnected && document.activeElement === document.body)
+      target.focus();
+  }, [busy]);
+  // 파일 탭이 줄을 넘치면 가려진 탭이 있다는 단서(가장자리 흐림)를 보이고, 선택한 탭이 가려지면 보이게 민다.
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [tabsMore, setTabsMore] = useState(false);
+  const fileCount = Object.keys(files).length;
+  useEffect(() => {
+    const strip = tabsRef.current;
+    if (!strip) return;
+    const update = () =>
+      setTabsMore(strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 1);
+    update();
+    strip.addEventListener("scroll", update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(strip);
+    return () => {
+      strip.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
+  }, [ready, fileCount]);
+  useEffect(() => {
+    // 페이지가 세로로 밀리지 않도록 scrollIntoView 대신 탭 줄만 가로로 움직인다.
+    const strip = tabsRef.current;
+    const tab = strip?.querySelector<HTMLElement>(".vibe-file-tab.active");
+    if (!strip || !tab) return;
+    const tabBox = tab.getBoundingClientRect();
+    const stripBox = strip.getBoundingClientRect();
+    if (tabBox.left < stripBox.left) strip.scrollLeft -= stripBox.left - tabBox.left;
+    else if (tabBox.right > stripBox.right)
+      strip.scrollLeft += tabBox.right - stripBox.right;
+  }, [path, ready]);
+  // 새 메시지가 오면 대화 목록을 맨 아래로 내려 방금 오간 내용과 변경안 버튼이 보이게 한다.
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const messageCount = attempt?.messages.length ?? 0;
+  useEffect(() => {
+    const list = messagesRef.current;
+    if (list) list.scrollTop = list.scrollHeight;
+  }, [messageCount]);
 
   function accept(next: VibeAttempt, replaceFiles = true) {
     rowRef.current = next;
@@ -209,7 +255,15 @@ export function VibeWorkspacePage() {
   }, [id, session?.user.id, reload]);
 
   async function save(): Promise<VibeAttempt> {
-    if (savingRef.current) await savingRef.current;
+    // 저장이 겹치면 끝날 때까지 기다린다. 기다리는 동안 또 다른 저장이 시작될 수 있어 반복해서 확인하고,
+    // 앞선 저장의 오류는 그 호출이 알리므로 여기서는 다시 저장을 시도한다.
+    while (savingRef.current) {
+      try {
+        await savingRef.current;
+      } catch {
+        /* 앞선 저장이 실패해도 이 호출은 최신 상태로 다시 저장한다. */
+      }
+    }
     const row = rowRef.current!;
     const snapshot = filesRef.current;
     if (same(editedFiles(row, snapshot), editedFiles(row, row.files)))
@@ -291,6 +345,13 @@ export function VibeWorkspacePage() {
       );
     }
   }
+  function discardBackup() {
+    try {
+      sessionStorage.removeItem(backupKey);
+    } catch {
+      /* 복구 사본을 지우지 못해도 서버 저장본은 그대로다. */
+    }
+  }
   async function action(
     name: string,
     endpoint: string,
@@ -298,6 +359,12 @@ export function VibeWorkspacePage() {
   ) {
     if (operationRef.current) return;
     operationRef.current = true;
+    restoreFocus.current =
+      endpoint === "messages"
+        ? document.getElementById("vibe-prompt")
+        : document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
     setBusy(name);
     setError("");
     try {
@@ -489,7 +556,9 @@ export function VibeWorkspacePage() {
       ? 0
       : columns.right;
   const activeDock = attempt.submittedAt ? "tests" : dockTab;
-  const dockHeight = dock.collapsed ? DOCK_COLLAPSED : dock.height;
+  const dockHeight = dock.collapsed
+    ? DOCK_COLLAPSED
+    : fitDockHeight(dock.height, bodyHeight);
   return (
     <div className="vibe-workspace page-width">
       <header className="vibe-workspace-header">
@@ -605,7 +674,9 @@ export function VibeWorkspacePage() {
       {error || saveError ? (
         <div className="error-message" role="alert">
           {error || saveError}
-          <p>저장되지 않은 코드는 편집기에서 복사할 수 있습니다.</p>
+          {dirty || saveError ? (
+            <p>저장되지 않은 코드는 편집기에서 복사할 수 있습니다.</p>
+          ) : null}
           <button
             className="inline-button"
             disabled={saving || Boolean(busy)}
@@ -619,8 +690,11 @@ export function VibeWorkspacePage() {
                   confirmLabel: "다시 열기",
                   danger: true,
                 }))
-              )
+              ) {
+                // 이 탭의 복구 사본을 남기면 다시 열 때 그대로 되살아나므로 함께 지운다.
+                discardBackup();
                 setReload((v) => v + 1);
+              }
             }}
           >
             서버 저장본 다시 열기
@@ -663,6 +737,7 @@ export function VibeWorkspacePage() {
                     danger: true,
                   })
                 ) {
+                  discardBackup();
                   filesRef.current = attempt.files;
                   setFiles(attempt.files);
                 }
@@ -823,7 +898,8 @@ export function VibeWorkspacePage() {
         >
           <div className="vibe-file-bar">
             <div
-              className="vibe-file-tabs"
+              ref={tabsRef}
+              className={`vibe-file-tabs${tabsMore ? " has-more" : ""}`}
               role="tablist"
               aria-label="프로젝트 파일"
             >
@@ -840,6 +916,7 @@ export function VibeWorkspacePage() {
                     aria-controls="vibe-editor-panel"
                     tabIndex={path === name ? 0 : -1}
                     className={`vibe-file-tab${path === name ? " active" : ""}`}
+                    title={name}
                     onClick={() => {
                       setPath(name);
                       setShowChanges(false);
@@ -847,7 +924,7 @@ export function VibeWorkspacePage() {
                     onKeyDown={(event) => onFileTabKey(event, names)}
                   >
                     <FileCode2 size={14} aria-hidden="true" />
-                    <span>{name}</span>
+                    <span className="vibe-file-name">{name}</span>
                     {!editable ? (
                       <>
                         <Lock size={12} aria-hidden="true" />
@@ -926,6 +1003,7 @@ export function VibeWorkspacePage() {
                 {files[path]}
               </pre>
             ) : (
+              <>
               <fieldset
                 disabled={Boolean(busy) || remoteBusy}
                 className="vibe-editor-fieldset"
@@ -954,6 +1032,11 @@ export function VibeWorkspacePage() {
                   }}
                 />
               </fieldset>
+              <p className="vibe-editor-hint" id="editor-shortcuts">
+                Tab 들여쓰기 · Shift+Tab 내어쓰기 · Esc 다음 Tab 또는
+                Shift+Tab으로 편집기 밖 이동
+              </p>
+              </>
             )}
             </div>
             <div
@@ -1049,7 +1132,11 @@ export function VibeWorkspacePage() {
                       !attempt.availability.runner ||
                       attempt.remainingRuns <= 0
                     }
-                    onClick={() => void action("공개 테스트 실행 중…", "runs")}
+                    onClick={() => {
+                      // 칸이 접혀 있으면 결과가 보이지 않으므로 먼저 펼친다.
+                      applyDock({ ...dockRef.current, collapsed: false });
+                      void action("공개 테스트 실행 중…", "runs");
+                    }}
                   >
                     <Play size={14} aria-hidden="true" />
                     테스트 실행
@@ -1173,7 +1260,7 @@ export function VibeWorkspacePage() {
             현재 프로젝트와 공개 실행 결과를 함께 읽습니다. 변경안은 확인 후
             적용하세요.
           </p>
-          <div className="vibe-messages" aria-live="polite">
+          <div className="vibe-messages" aria-live="polite" ref={messagesRef}>
             {!attempt.messages.length ? (
               <div className="vibe-chat-empty">
                 <MessageHint />

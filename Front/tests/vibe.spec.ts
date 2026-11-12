@@ -490,3 +490,57 @@ test("panels resize by drag and keys, fold when squeezed and reset on double cli
   await expect(page.getByLabel("제출 전 짧은 회고")).toHaveValue("메모");
   await expect(page.getByRole("tab", { name: /회고/ })).toContainText("작성 중");
 });
+
+test("confirm dialog starts on cancel, ignores clicks on its own body, and Esc or the backdrop cancels and returns focus", async ({
+  page,
+}) => {
+  await mockVibe(page);
+  await authenticate(page);
+  await page.goto(`/vibe/attempts/${id}`);
+  const submit = page.getByRole("button", { name: "최종 제출", exact: true });
+  const dialog = page.locator("dialog.confirm-dialog");
+  await submit.click();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "취소" })).toBeFocused();
+  // 창 안쪽 여백을 눌러도 배경 클릭으로 보지 않는다.
+  await dialog.locator(".confirm-body").click({ position: { x: 100, y: 4 } });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(submit).toBeFocused();
+  // 창 바깥(배경)을 누르면 취소다.
+  await submit.click();
+  await expect(dialog).toBeVisible();
+  await page.mouse.click(4, 4);
+  await expect(dialog).toBeHidden();
+});
+
+test("the code editor explains how to leave it with the keyboard", async ({
+  page,
+}) => {
+  await mockVibe(page);
+  await authenticate(page);
+  await page.goto(`/vibe/attempts/${id}`);
+  const editor = page.getByRole("textbox", { name: "TypeScript 소스 코드" });
+  await expect(editor).toHaveAccessibleDescription(/Esc 다음 Tab/);
+});
+
+test("the file tab strip hints at hidden tabs and keeps the selected tab in view", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const mock = await mockVibe(page);
+  const extra = Object.fromEntries(
+    Array.from({ length: 6 }, (_, i) => [`src/module-${i}/very-long-file-name.ts`, "export {};\n"]),
+  );
+  mock.state.files = { ...mock.state.files, ...extra };
+  await authenticate(page);
+  await page.goto(`/vibe/attempts/${id}`);
+  const strip = page.locator(".vibe-file-tabs");
+  await expect(strip).toHaveClass(/has-more/);
+  // 끝 탭을 키보드로 고르면 줄이 끝까지 밀리고 단서는 사라진다
+  await page.getByRole("tab", { name: "src/search.ts" }).focus();
+  await page.keyboard.press("End");
+  await expect(page.getByRole("tab", { name: /module-5/, selected: true })).toBeInViewport();
+  await expect(strip).not.toHaveClass(/has-more/);
+});

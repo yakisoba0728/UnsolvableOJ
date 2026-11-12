@@ -993,3 +993,57 @@
     flex-direction: column;
   }
 }
+
+/* 탭이 줄을 넘쳐 오른쪽에 가려진 탭이 있으면 가장자리를 흐려 더 있음을 알린다(끝까지 밀면 사라진다). */
+.vibe-file-tabs.has-more {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+}
+/* 긴 파일 이름은 탭 안에서 말줄임으로 줄이고(전체 이름은 title로 보인다), 한 탭이 줄을 다 차지하지 않게 한다. */
+.vibe-file-name {
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 편집기 아래의 키보드 이동 안내(Tab이 들여쓰기로 쓰여 빠져나오는 방법을 알려 준다) */
+.vibe-editor-hint {
+  flex: none;
+  margin: 0;
+  padding: 8px 16px;
+  background: var(--color-code);
+  color: var(--color-strong-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+/* 터치 화면: 뒤로가기 링크·펼침 줄·텍스트 버튼·아이콘 버튼을 손가락으로 누를 만큼 키운다. */
+.vibe-workspace .back-link {
+  padding: 14px 0;
+  margin: 18px 0 14px;
+}
+@media (max-width: 800px), (pointer: coarse) {
+  .vibe-icon-button {
+    width: 44px;
+    height: 44px;
+  }
+  .vibe-proposal .text-button {
+    min-height: 44px;
+  }
+  .vibe-checks summary,
+  .vibe-events summary,
+  .vibe-run-history summary,
+  .vibe-recovery summary {
+    padding: 12px 0;
+    margin-bottom: 0;
+  }
+}
+/* 좁은 화면에서는 4단계 안내를 2줄 2칸으로 쌓고, 한국어는 단어 중간에서 끊지 않는다. */
+@media (max-width: 560px) {
+  .vibe-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .vibe-steps strong,
+  .vibe-steps span {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+}

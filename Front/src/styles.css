@@ -8480,7 +8480,8 @@ label.check-row input[type="radio"] {
 .confirm-dialog {
   width: min(560px, calc(100vw - 32px));
   max-width: none;
-  padding: 32px;
+  /* 여백은 안쪽 .confirm-body가 가진다: dialog 자신을 누른 것만 배경 클릭으로 본다. */
+  padding: 0;
   border: 1px solid var(--color-border);
   border-radius: 24px;
   background: var(--color-surface);
@@ -8490,6 +8491,9 @@ label.check-row input[type="radio"] {
 }
 .confirm-dialog::backdrop {
   background: rgba(12, 17, 26, 0.45);
+}
+.confirm-body {
+  padding: 32px;
 }
 .confirm-dialog h2 {
   margin: 0 0 12px;

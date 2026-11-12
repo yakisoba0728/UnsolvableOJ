@@ -15,6 +15,7 @@ import {
   columnsFromRightPointer,
   dockFromKey,
   dockFromPointer,
+  fitDockHeight,
   visibleWidths,
 } from "../src/vibeLayout";
 
@@ -97,4 +98,13 @@ test("the bottom dock follows the pointer, folds to its bar and returns with key
   expect(dockFromKey("ArrowDown", total, folded)).toBeNull();
   expect(dockFromKey("ArrowUp", total, folded)!.collapsed).toBe(false);
   expect(dockFromKey("Enter", total, folded)).toEqual(DEFAULT_DOCK_STATE);
+});
+
+test("a saved dock height is trimmed on screen so the editor keeps its minimum when the area shrinks", () => {
+  // 영역이 충분하면 그대로, 모자라면 편집기 최소 높이를 남기고 줄인다
+  expect(fitDockHeight(240, 800)).toBe(240);
+  expect(fitDockHeight(479, 573)).toBe(573 - HANDLE - MIN_EDITOR);
+  // 아직 영역 높이를 모르면(0) 건드리지 않고, 아무리 좁아도 하단 칸 최소 높이는 지킨다
+  expect(fitDockHeight(479, 0)).toBe(479);
+  expect(fitDockHeight(479, 200)).toBe(MIN_DOCK);
 });
