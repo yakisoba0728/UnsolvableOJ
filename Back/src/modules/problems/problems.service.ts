@@ -199,6 +199,8 @@ export class ProblemsService {
     const cursor = readListCursor(query.cursor);
     if (query.solve?.length && !viewer)
       throw new UnauthorizedException('풀이 상태로 거르려면 로그인이 필요합니다.');
+    if (query.bookmarked === 'true' && !viewer)
+      throw new UnauthorizedException('저장한 문제를 보려면 로그인이 필요합니다.');
 
     // 기업 전용 문제는 공개로 바꿀 수 없지만 목록에서도 한 번 더 막는다.
     const visible = "p.status = 'PUBLISHED' AND NOT p.is_private";
@@ -208,13 +210,20 @@ export class ProblemsService {
       ? "CASE WHEN mine.solved THEN 'solved' WHEN mine.problem_id IS NOT NULL THEN 'attempted' ELSE 'none' END"
       : "'none'";
     // PostgreSQL은 SQL에 쓰이지 않은 매개변수를 거절하므로, 조건을 쓸 때만 값을 더한다(쿼리마다 새로).
-    const scope = () => {
+    const scope = (includeBookmarks = false) => {
       const params: unknown[] = [];
       const add = (value: unknown) => `$${params.push(value)}`;
+      const owner = viewer ? add(viewer.id) : null;
       const mine = viewer
         ? `LEFT JOIN (SELECT problem_id, bool_or(status = 'ACCEPTED') AS solved
-             FROM submissions WHERE user_id = ${add(viewer.id)} AND NOT is_test
+             FROM submissions WHERE user_id = ${owner} AND NOT is_test
              GROUP BY problem_id) mine ON mine.problem_id = p.id`
+        : '';
+      // One user-first indexed join for the page, never one query per problem.
+      // An inner join scopes every facet and total to this user's saved problems.
+      const bookmarks = viewer && (includeBookmarks || query.bookmarked === 'true')
+        ? `${query.bookmarked === 'true' ? 'INNER' : 'LEFT'} JOIN problem_bookmarks bookmarks
+           ON bookmarks.user_id=${owner} AND bookmarks.problem_id=p.id`
         : '';
       const search = () => {
         if (!keyword) return 'TRUE';
@@ -224,7 +233,7 @@ export class ProblemsService {
       return {
         params,
         add,
-        from: `FROM problems p ${mine}`,
+        from: `FROM problems p ${mine} ${bookmarks}`,
         search,
         tag: () => (query.tag ? `${add(query.tag)} = ANY(p.tags)` : 'TRUE'),
         difficulty: () =>
@@ -295,7 +304,7 @@ export class ProblemsService {
       groups.filter((g) => difficultyOk(g.difficulty) && solveOk(g.state)),
     );
 
-    const items = scope();
+    const items = scope(true);
     const conditions = [
       visible,
       items.search(),
@@ -339,11 +348,13 @@ export class ProblemsService {
         memoryLimitMb: number;
         currentVersion: number;
         createdAt: Date;
+        bookmarked: boolean;
       }[]
     >(
       `SELECT p.id, p.slug, p.title, p.difficulty, p.tags,
          p.time_limit_ms AS "timeLimitMs", p.memory_limit_mb AS "memoryLimitMb",
-         p.current_version AS "currentVersion", p.created_at AS "createdAt"
+         p.current_version AS "currentVersion", p.created_at AS "createdAt",
+         ${viewer ? 'bookmarks.problem_id IS NOT NULL' : 'false'} AS bookmarked
        ${items.from} ${stats}
        WHERE ${conditions.join(' AND ')}
        ORDER BY ${order}

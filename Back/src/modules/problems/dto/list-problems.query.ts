@@ -61,6 +61,11 @@ export class ListProblemsQuery extends ListQuery {
   @ArrayUnique()
   solve?: (typeof SOLVE_STATES)[number][];
 
+  /** 내 비공개 저장 목록 안에서 검색·필터링한다(로그인 필요). */
+  @IsOptional()
+  @IsIn(['true', 'false'])
+  bookmarked?: string;
+
   @IsOptional()
   @IsIn(PROBLEM_SORTS)
   sort?: (typeof PROBLEM_SORTS)[number];

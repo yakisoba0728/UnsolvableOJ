@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { verdictLabel } from "../verdict";
 import { DifficultyBadge } from "../components/DifficultyBadge";
+import { ProblemBookmark } from "../components/ProblemBookmark";
 import { savedTime, useDocumentTitle } from "../hooks";
 import { Select } from "../components/Select";
 import { ProblemMarkdown } from "../components/ProblemMarkdown";
@@ -466,6 +467,7 @@ function OwnedProblemPage() {
     <div className="solve-page">
       <div className="solve-heading">
         <h1>{problem.title}</h1>
+        <ProblemBookmark problemId={problem.id} />
         <nav className="community-problem-links" aria-label="문제 커뮤니티">
           <Link to={`/community?c=question&problemId=${problem.id}`}>질문 보기</Link>
           <Link to={`/community?c=solution&problemId=${problem.id}`}>풀이 공유</Link>
