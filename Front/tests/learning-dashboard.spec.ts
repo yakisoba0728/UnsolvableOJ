@@ -36,6 +36,7 @@ async function setup(page: Page) {
     key: storageKey, value: { session: signedIn, expiresAt: Date.now() + 900_000 },
   });
   await mockProblemApi(page);
+  await page.route("**/api/v1/users/me/learning-goal", route => route.fulfill({ json: { goal: null, timeZone: "Asia/Seoul", generatedAt: "2026-11-16T03:00:00.000Z" } }));
   await page.route("**/api/v1/notifications/unread-count", route => route.fulfill({ json: { unread: 0 } }));
   await page.route(endpoint, route => route.fulfill({ json: fixture(Number(new URL(route.request().url()).searchParams.get("days")) as LearningDays) }));
 }
