@@ -1,0 +1,61 @@
+{
+  "baseline": {
+    "label": "baseline",
+    "revision": "410da6b067142c78c8479c11b8cda2a3e95e79bb",
+    "frontendSourceTree": "e5f28a68bd115fced30bd2881288253a827cfc8b",
+    "node": "v24.22.1",
+    "config": "Identical build environment; VITE_SENTRY_DSN empty or synthetic https://benchmark@example.invalid/1; no network calls performed by built app",
+    "results": [
+      {
+        "mode": "disabled",
+        "entry": "/assets/index-Dkq7zVpv.js",
+        "bytes": 377840,
+        "gzipBytes": 121072,
+        "deferredChunks": []
+      },
+      {
+        "mode": "enabled",
+        "entry": "/assets/index-CAaBDdbQ.js",
+        "bytes": 472421,
+        "gzipBytes": 154558,
+        "deferredChunks": []
+      }
+    ]
+  },
+  "integrated": {
+    "label": "integrated",
+    "revision": "d268de5fabf7838bf4b7dfaea436b9255428003a",
+    "frontendSourceTree": "05948aee32bf0d620f75d5ff45fc3a73b39a96e2",
+    "node": "v24.22.1",
+    "config": "Identical build environment; VITE_SENTRY_DSN empty or synthetic https://benchmark@example.invalid/1; no network calls performed by built app",
+    "results": [
+      {
+        "mode": "disabled",
+        "entry": "/assets/index-Cg2ogADe.js",
+        "bytes": 381313,
+        "gzipBytes": 122285,
+        "deferredChunks": [
+          {
+            "name": "monitoringSdk-DKZKjjjQ.js",
+            "bytes": 92991,
+            "gzipBytes": 32142
+          }
+        ]
+      },
+      {
+        "mode": "enabled",
+        "entry": "/assets/index-CWVYNQUa.js",
+        "bytes": 381348,
+        "gzipBytes": 122310,
+        "deferredChunks": [
+          {
+            "name": "monitoringSdk-C4Q6bh0C.js",
+            "bytes": 92991,
+            "gzipBytes": 32143
+          }
+        ]
+      }
+    ]
+  },
+  "method": "Python gzip.compress default level9, mtime0, measures entry and optional adapter separately. No startup/browser speed inference."
+}

@@ -31,8 +31,8 @@ The existing pipeline test timeout remains 90 seconds. There are no increased re
 | First native CI attempt | [Run 43784164298, job 133027976114](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43784164298/job/133027976114) failed in the new setup hook: `expect.poll() must be called inside a test`. Existing 16 pipeline cases passed; the new recovery case was skipped because setup failed. |
 | Recovery-test correction | Move the first worker start from `beforeAll` into the test body so both readiness polls run inside the test. Preserve the readiness assertion, 15-second bound and existing 90-second test timeout. |
 | Focused local Vitest check | 2/2 scratch tests passed on the installed Vitest 4.1.11: polling in `beforeAll` raises the observed error, while both readiness polls succeed inside a test body. This verifies the test-framework correction, not native worker recovery. |
-| Native recovery rerun | Pending GitHub native CI after correction; not run locally because Docker/go-judge are absent. |
-| Independent review | Pending coordinator/QA review. |
+| Native recovery rerun | [Run43784688710, job133029687437](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43784688710/job/133029687437) passed: recovery case35.228s;2pipeline files/17tests in54.00s; native26/26 and Compose2/2 also passed. Exact head8801454dc297d0d1af0e195408767dcc002fe584; all12jobs successful. No local native run is claimed. |
+| Independent review | QA approved the initial scenario and independently verified the final27ad6a3 correction and actual logs. Remote test blob0380de50db4ef62b6b79f86e46ff42c4f481f26f matches reviewed source. Coordinator separately checked the correction, full CI and published tree. PR62 merged into integration57cd03a after these gates. |
 
 Full command: `npm run test:pipeline --prefix Back`, with the existing disposable PostgreSQL/Redis runner settings and an authorized test-only go-judge instance. The existing `vitest.config.pipeline.ts` pattern automatically includes the new file. Worker diagnostics are saved to `Back/reports/pipeline-recovery-worker.log` without real user credentials.
 
