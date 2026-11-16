@@ -1,5 +1,36 @@
 # Phase III Runtime advisory revalidation
 
+## Separate review decision — exact policy, CI still required
+
+The independent reviewer and coordinator separately approved policy content
+`99ec18c22bc108759734494755fe4241a36c447949309881f15c01bec5d632db` at immutable remote
+proposal`08901f36ea19b7ffd4f459357e7b5763822a6bad`. Its complete tree
+`9f35973a99fa8eedb51b51879d0d7bd42567cef8` matches local authored proposal
+`efa2bab6726be4225a08c6ec4ec02b9c08b9f7a8`. Only the active policy's review metadata
+changes after that proposal; its content hash, bound evidence and November30
+expiry remain unchanged. The archived proposal and original policy retain their
+historical states and bytes.
+
+The independent reviewer ran all92 script tests(51.768s), checked the actual remote
+commit/tree, all23 bound files,182 source records,55 raw metadata changes,990-file
+proof and preservation of the existing test assertions. The coordinator separately
+checked the bindings and primary pages and replayed old-success, old-policy drift
+failure and new-proposal approval denial using real retained artifacts.
+
+[Independent decision](evidence/phase3-runtime-independent-policy-review.json) ·
+[Coordinator decision](evidence/phase3-runtime-coordinator-review.json) ·
+[Independent92-test log](evidence/runtime-efa2bab-python-tests.log)
+
+These are separate AI engineering reviews, not fabricated human GitHub approvals.
+They approve this exact component evidence only. Fresh full CI on the final source
+and later integration remains required before merge readiness. Raw177HIGH/5CRITICAL
+and unverified host security are not changed by this approval.
+
+After recording both decisions, a current-time replay of the unchanged retained
+artifact returned `PASS_WITH_REVIEWED_COMPONENT_FINDINGS`,182 exact component
+decisions and the same raw counts. The [retained-artifact evaluation](measurements/phase3-runtime-advisory-revalidation/reviewed-retained-evaluation.json)
+is a policy-contract check, not a new image build, scan or CI acceptance.
+
 ## Author proposal checkpoint — 2026-11-16
 
 This checkpoint is an **unapproved, exact-component revalidation proposal** based
@@ -14,7 +45,7 @@ The proposal content SHA256 is
 The expiration remains **2026-11-30 00:00:00 UTC**. Neither a new baseline nor an
 eventual approval extends that deadline.
 
-No evaluator, scanner, payload verifier, image gate, runtime image, package,
+No evaluator, scanner, payload verifier, image gate, Runtime build definition, package,
 dependency, workflow, or production configuration is changed by this proposal.
 The implementation change is limited to preserving a historical negative test
 fixture and adding evidence/replay regressions. The active policy receives new
@@ -122,9 +153,11 @@ review. Dedicated regression checks verify this additional provenance. The
 runtime evaluator continues consuming its existing five evidence files; its
 behavior and required checks are unchanged.
 
-The 39 changed LOW/MEDIUM records receive no new exception. New IDs, additional
-advisory drift, any package/source/payload mismatch, malformed evidence, missing
-independent approval, or expiration continue to block under the existing rules.
+The 39 changed LOW/MEDIUM records receive no new exception. New HIGH/CRITICAL
+findings, any added/missing/changed member of the reviewed cohort, any
+package/source/payload mismatch, malformed evidence, missing independent approval,
+or expiration continue to block under the existing rules. This does not introduce
+automatic blocking of all new LOW/MEDIUM/UNKNOWN IDs.
 
 ## Verification and approval boundary
 

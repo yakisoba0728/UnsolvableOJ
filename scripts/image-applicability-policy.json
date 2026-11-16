@@ -1350,10 +1350,21 @@
     }
   ],
   "review": {
-    "state": "PROPOSED",
-    "reviewedAt": null,
-    "contentSha256": null,
-    "reviews": []
+    "state": "REVIEWED",
+    "reviewedAt": "2026-11-16T07:55:01.997611+00:00",
+    "contentSha256": "99ec18c22bc108759734494755fe4241a36c447949309881f15c01bec5d632db",
+    "reviews": [
+      {
+        "role": "independent-reviewer",
+        "reviewer": "independent_recovery",
+        "reviewedCommit": "08901f36ea19b7ffd4f459357e7b5763822a6bad"
+      },
+      {
+        "role": "coordinator",
+        "reviewer": "root",
+        "reviewedCommit": "08901f36ea19b7ffd4f459357e7b5763822a6bad"
+      }
+    ]
   },
   "revalidationOf": {
     "policyId": "ubuntu-noble-linux-libc-dev-6.8.0-149.149-amd64-2026-11-16",
