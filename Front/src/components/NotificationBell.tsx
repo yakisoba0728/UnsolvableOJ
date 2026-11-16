@@ -58,49 +58,97 @@ export function NotificationBell({ token }: { token: string }) {
   const [open, setOpen] = useState(false);
   const [list, setList] = useState<NotificationPage | null>(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [failedPage, setFailedPage] = useState(1);
+  const [markingAll, setMarkingAll] = useState(false);
+  const listRequest = useRef<AbortController | null>(null);
+  const readRequests = useRef(new Set<AbortController>());
+  const markingAllRef = useRef(false);
+  // A count requested before a list refresh or read must not restore an old badge.
+  const countVersion = useRef(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
 
   useEffect(() => {
     let timer: number | undefined;
+    let pending: AbortController | undefined;
     const poll = () => {
       window.clearTimeout(timer);
+      pending?.abort();
       if (document.hidden) return;
-      request<{ unread: number }>(token, "/unread-count")
-        .then((result) => setUnread(result.unread))
-        .catch(() => {});
       timer = window.setTimeout(poll, POLL_MS);
+      if (readRequests.current.size) return;
+      const controller = new AbortController();
+      pending = controller;
+      const version = countVersion.current;
+      request<{ unread: number }>(token, "/unread-count", { signal: controller.signal })
+        .then((result) => {
+          if (!controller.signal.aborted && version === countVersion.current)
+            setUnread(result.unread);
+        })
+        .catch(() => {});
     };
     poll();
     document.addEventListener("visibilitychange", poll);
     return () => {
       window.clearTimeout(timer);
+      pending?.abort();
       document.removeEventListener("visibilitychange", poll);
     };
   }, [token]);
 
+  useEffect(() => () => {
+    listRequest.current?.abort();
+    readRequests.current.forEach((controller) => controller.abort());
+  }, []);
+
   async function load(page: number) {
+    // A repeated click before React paints the disabled button is also ignored.
+    if (page > 1 && listRequest.current) return;
+    listRequest.current?.abort();
+    const controller = new AbortController();
+    listRequest.current = controller;
     setError("");
+    setLoading(true);
     try {
       const next = await request<NotificationPage>(
         token,
         `?page=${page}&limit=${PAGE_SIZE}`,
+        { signal: controller.signal },
       );
+      if (controller.signal.aborted) return;
+      countVersion.current += 1;
       setUnread(next.unread);
       setList((current) =>
         page > 1 && current
-          ? { ...next, items: [...current.items, ...next.items] }
+          ? {
+              ...next,
+              // New notifications can shift offset pages while the panel is open.
+              items: [...new Map([...current.items, ...next.items].map((item) => [item.id, item])).values()],
+            }
           : next,
       );
     } catch {
-      setError("알림을 불러오지 못했어요.");
+      if (!controller.signal.aborted) {
+        setFailedPage(page);
+        setError("알림을 불러오지 못했어요.");
+      }
+    } finally {
+      if (listRequest.current === controller) {
+        listRequest.current = null;
+        setLoading(false);
+      }
     }
   }
 
   useEffect(() => {
     if (open) void load(1);
-  }, [open]);
+    return () => {
+      listRequest.current?.abort();
+      listRequest.current = null;
+    };
+  }, [open, token]);
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
@@ -119,24 +167,43 @@ export function NotificationBell({ token }: { token: string }) {
     };
   }, [open]);
 
-  function markRead(item: AppNotification) {
+  async function markRead(item: AppNotification) {
     if (item.readAt) return;
-    const readAt = new Date().toISOString();
-    setList((current) =>
-      current && {
+    const controller = new AbortController();
+    readRequests.current.add(controller);
+    const version = ++countVersion.current;
+    try {
+      const result = await request<{ unread: number }>(token, `/${item.id}/read`, {
+        method: "PUT", signal: controller.signal,
+      });
+      if (controller.signal.aborted) return;
+      const readAt = new Date().toISOString();
+      setList((current) => current && {
         ...current,
-        items: current.items.map((other) =>
-          other.id === item.id ? { ...other, readAt } : other,
-        ),
-      },
-    );
-    setUnread((count) => Math.max(0, count - 1));
-    request(token, `/${item.id}/read`, { method: "PUT" }).catch(() => {});
+        items: current.items.map((other) => other.id === item.id ? { ...other, readAt } : other),
+      });
+      if (version === countVersion.current) {
+        countVersion.current += 1;
+        setUnread(result.unread);
+      }
+    } catch {
+      if (!controller.signal.aborted) setError("읽음으로 바꾸지 못했어요.");
+    } finally {
+      readRequests.current.delete(controller);
+    }
   }
 
   async function markAllRead() {
+    if (markingAllRef.current || listRequest.current) return;
+    markingAllRef.current = true;
+    setMarkingAll(true);
+    const controller = new AbortController();
+    readRequests.current.add(controller);
+    const version = ++countVersion.current;
     try {
-      await request(token, "/read-all", { method: "PUT" });
+      await request(token, "/read-all", { method: "PUT", signal: controller.signal });
+      if (controller.signal.aborted || version !== countVersion.current) return;
+      countVersion.current += 1;
       const readAt = new Date().toISOString();
       setUnread(0);
       setList(
@@ -150,7 +217,11 @@ export function NotificationBell({ token }: { token: string }) {
           },
       );
     } catch {
-      setError("읽음으로 바꾸지 못했어요.");
+      if (!controller.signal.aborted) setError("읽음으로 바꾸지 못했어요.");
+    } finally {
+      readRequests.current.delete(controller);
+      markingAllRef.current = false;
+      if (!controller.signal.aborted) setMarkingAll(false);
     }
   }
 
@@ -184,7 +255,7 @@ export function NotificationBell({ token }: { token: string }) {
             <button
               type="button"
               className="inline-button"
-              disabled={!unread}
+              disabled={!unread || loading || markingAll}
               onClick={() => void markAllRead()}
             >
               모두 읽음
@@ -192,7 +263,10 @@ export function NotificationBell({ token }: { token: string }) {
           </div>
           {error ? (
             <p className="error-message" role="alert">
-              {error}
+              {error}{" "}
+              <button type="button" className="inline-button" disabled={loading} onClick={() => void load(failedPage)}>
+                다시 시도
+              </button>
             </p>
           ) : null}
           {!list ? (
@@ -210,7 +284,7 @@ export function NotificationBell({ token }: { token: string }) {
                     <Link
                       to={to}
                       onClick={() => {
-                        markRead(item);
+                        void markRead(item);
                         // 지연 로딩 화면은 주소 변경이 늦게 반영되므로 누르는 즉시 닫는다.
                         setOpen(false);
                       }}
@@ -232,9 +306,10 @@ export function NotificationBell({ token }: { token: string }) {
             <button
               type="button"
               className="button button-outline button-small"
+              disabled={loading}
               onClick={() => void load(list.page + 1)}
             >
-              더 보기
+              {loading ? "불러오는 중…" : "더 보기"}
             </button>
           ) : null}
         </div>
