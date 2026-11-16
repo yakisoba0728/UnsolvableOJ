@@ -1,0 +1,95 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @unsolvable-oj/back@0.0.1 test
+> vitest run vibe.spec -t executes the selected harness
+
+
+ RUN  v4.1.12 /workspace/scratch/86de5f814139/oj-vibe/Back
+
+ ❯ src/modules/vibe/vibe.spec.ts (6 tests | 1 failed | 5 skipped) 21ms
+     × executes the selected harness and test cohort instead of the live catalog 20ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/modules/vibe/vibe.spec.ts > vibe project trust boundaries > executes the selected harness and test cohort instead of the live catalog
+AssertionError: expected [ { …(3) }, …(10) ] to deeply equal [ { …(2) }, { …(2) } ]
+
+- Expected
++ Received
+
+  [
+    {
+-     "name": "Selected public check",
+-     "passed": true,
++     "detail": "기대 결과: [1,3]
++ 실제 출력: [42]",
++     "name": "제목의 대소문자를 무시하고 검색",
++     "passed": false,
++   },
++   {
++     "detail": "기대 결과: [1,3]
++ 실제 출력: [100]",
++     "name": "검색어 앞뒤 공백 제거",
++     "passed": false,
+    },
+    {
+-     "name": "Private selected check",
++     "detail": "기대 결과: [2]
++ 실제 출력: [100]",
++     "name": "slug로 검색",
++     "passed": false,
++   },
++   {
++     "detail": "기대 결과: [1,3]
++ 실제 출력: [100]",
++     "name": "태그가 정확히 일치하는 게시글",
++     "passed": false,
++   },
++   {
++     "detail": "기대 결과: [1]
++ 실제 출력: [100]",
++     "name": "검색과 태그를 함께 적용",
++     "passed": false,
++   },
++   {
++     "name": "숨김 테스트 1",
++     "passed": false,
++   },
++   {
++     "name": "숨김 테스트 2",
++     "passed": false,
++   },
++   {
++     "name": "숨김 테스트 3",
++     "passed": false,
++   },
++   {
++     "name": "숨김 테스트 4",
++     "passed": false,
++   },
++   {
++     "name": "숨김 테스트 5",
++     "passed": false,
++   },
++   {
++     "name": "숨김 테스트 6",
+      "passed": false,
+    },
+  ]
+
+ ❯ src/modules/vibe/vibe.spec.ts:77:20
+     75|     );
+     76|     const checks = await runner.run(editableFiles(), true, content);
+     77|     expect(checks).toEqual([
+       |                    ^
+     78|       { name: 'Selected public check', passed: true },
+     79|       { name: 'Private selected check', passed: false },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 skipped (6)
+   Start at  15:15:47
+   Duration  461ms (transform 99ms, setup 0ms, import 272ms, tests 21ms, environment 0ms)
+

@@ -262,6 +262,7 @@ test('native execution and contract changes require full validation before integ
     'Back/src/modules/submissions/judge.service.ts', 'Back/src/modules/submissions/dto/judge-result.dto.ts',
     'Back/src/modules/vibe/vibe.runner.ts', 'Back/src/modules/vibe/vibe.service.ts',
     'Back/src/modules/vibe/vibe.catalog.ts', 'Back/src/modules/vibe/vibe.types.ts',
+    'Back/src/modules/vibe/vibe.snapshot.ts', 'Back/src/modules/vibe/vibe.prompts.ts', 'Back/src/modules/vibe/vibe.ai.ts',
     'Back/src/common/queue.constants.ts', 'Back/src/config/redis.config.ts', 'Back/src/config/env.validation.ts',
     'Back/package.json', 'Back/package-lock.json',
   ]) {

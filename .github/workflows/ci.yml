@@ -192,7 +192,7 @@ jobs:
           # 문서/벤치마크와 일반 UI 변경은 이 목록에 포함하지 않는다.
           if grep -qE \
             -e '^Judge/(src/|runtime/|deploy/|Dockerfile$|\.dockerignore$|package(-lock)?\.json$|tsconfig\.json$)' \
-            -e '^Back/src/(modules/submissions/|modules/vibe/vibe\.(runner|service|catalog|types)\.ts$|common/queue\.constants\.ts$|config/(redis\.config|env\.validation)\.ts$)' \
+            -e '^Back/src/(modules/submissions/|modules/vibe/vibe\.(runner|service|catalog|types|snapshot|prompts|ai)\.ts$|common/queue\.constants\.ts$|config/(redis\.config|env\.validation)\.ts$)' \
             -e '^Back/(Dockerfile$|\.dockerignore$|docker-entrypoint\.sh$|package(-lock)?\.json$|scripts/run-integration\.mjs$|vitest\.config\.pipeline\.ts$|test/.*\.pipeline-(spec|helpers)\.ts$)' \
             -e '^Front/(Dockerfile$|\.dockerignore$|nginx\.conf$|trusted-proxy\.conf\.template$|playwright\.live\.config\.ts$|tests-live/)' \
             -e '^(compose\.yaml$|deploy/(compose\.yaml$|\.env\.example$)|scripts/check-(compose|production-compose|sandbox-budget)\.mjs$)' <<<"$native_files"; then
@@ -342,7 +342,7 @@ jobs:
           node -e 'const fs = require("node:fs"); const { firefox } = require("@playwright/test"); fs.accessSync(firefox.executablePath(), fs.constants.X_OK); console.log("Firefox executable:", firefox.executablePath());'
           npx --no-install playwright test \
             enterprise-results.spec.ts \
-            auth.spec.ts editor-focus.spec.ts enterprise-ownership.spec.ts enterprise-pinned-summary.spec.ts enterprise-refresh.spec.ts layout.spec.ts \
+            auth.spec.ts editor-focus.spec.ts enterprise-ownership.spec.ts enterprise-pinned-summary.spec.ts enterprise-refresh.spec.ts enterprise-vibe-versioning.spec.ts layout.spec.ts \
             live-qa-followups.spec.ts problem-bookmarks.spec.ts session-refresh.spec.ts ui-harmony.spec.ts \
             --project=firefox --workers=4 --shard=${{ matrix.shard }}/2 \
             --output=test-results/firefox

@@ -1,0 +1,14 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @unsolvable-oj/back@0.0.1 test
+> vitest run vibe.spec -t executes the selected harness
+
+
+ RUN  v4.1.12 /workspace/scratch/86de5f814139/oj-vibe/Back
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 5 skipped (6)
+   Start at  15:15:48
+   Duration  492ms (transform 126ms, setup 0ms, import 307ms, tests 12ms, environment 0ms)
+

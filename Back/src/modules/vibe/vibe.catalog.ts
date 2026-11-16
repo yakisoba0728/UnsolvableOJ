@@ -135,16 +135,20 @@ export const hiddenChecks = [
 
 export const harness = `import { readFileSync } from 'node:fs';\nimport { searchPosts } from './src/search';\nconst { posts, query = '', tag = '' } = JSON.parse(readFileSync(0, 'utf8'));\nconst before = JSON.stringify(posts);\nconst result = searchPosts(posts, query, tag);\nif (JSON.stringify(posts) !== before) throw new Error('입력 데이터를 수정했습니다.');\nprocess.stdout.write(JSON.stringify(result.map(post => post.id)));\n`;
 
-export function validateFiles(value: unknown, partial = false): ProjectFiles {
+export function validateFiles(
+  value: unknown,
+  partial = false,
+  paths: readonly string[] = editablePaths,
+): ProjectFiles {
   if (!value || typeof value !== 'object' || Array.isArray(value))
     throw new BadRequestException('프로젝트 파일 형식이 올바르지 않습니다.');
   const entries = Object.entries(value);
   if (
-    (!partial && entries.length !== editablePaths.length) ||
-    entries.length > editablePaths.length ||
+    (!partial && entries.length !== paths.length) ||
+    entries.length > paths.length ||
     entries.some(
       ([path, content]) =>
-        !editablePaths.includes(path) ||
+        !paths.includes(path) ||
         typeof content !== 'string' ||
         !/^[^\0\p{Cs}]*$/u.test(content) ||
         Buffer.byteLength(content) > VIBE_LIMITS.fileBytes,
