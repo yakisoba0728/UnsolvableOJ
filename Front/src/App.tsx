@@ -76,6 +76,9 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
   // A login identity and navigation entry own private exam data and editor state.
   // Access-token refresh does not change this identity or reset in-progress code.
   const enterpriseOwner = `${session?.user.id ?? "guest"}:${getSessionIdentityVersion()}:${pathname}:${locationKey}`;
+  // Community writes can trigger a token refresh themselves. Keep that login's
+  // form and pending write together; a new login still replaces the component.
+  const communityOwner = `${session?.user.id ?? "guest"}:${getSessionIdentityVersion()}:${pathname}`;
   const navigationType = useNavigationType();
   // 다른 화면으로 이동하면 스크롤을 맨 위로 올린다(뒤로 가기는 브라우저 동작에 맡기고,
   // 같은 화면에서 필터·검색 주소만 바뀔 때는 위치를 유지한다).
@@ -183,7 +186,7 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
                 path="/community/new"
                 element={
                   session ? (
-                    <CommunityWritePage key={`${session.user.id}:${session.accessToken}:${pathname}`} getNavigationVersion={getNavigationVersion} />
+                    <CommunityWritePage key={communityOwner} getNavigationVersion={getNavigationVersion} />
                   ) : (
                     loginRedirect
                   )
@@ -193,13 +196,13 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
                 path="/community/:id/edit"
                 element={
                   session ? (
-                    <CommunityWritePage key={`${session.user.id}:${session.accessToken}:${pathname}`} getNavigationVersion={getNavigationVersion} />
+                    <CommunityWritePage key={communityOwner} getNavigationVersion={getNavigationVersion} />
                   ) : (
                     loginRedirect
                   )
                 }
               />
-              <Route path="/community/:id" element={<CommunityPostPage key={`${session?.user.id}:${session?.accessToken}:${pathname}`} getNavigationVersion={getNavigationVersion} />} />
+              <Route path="/community/:id" element={<CommunityPostPage key={communityOwner} getNavigationVersion={getNavigationVersion} />} />
               <Route path="/analysis" element={<AnalysisPage />} />
               <Route path="/vibe" element={<VibePage key={session?.user.id ?? 'guest'} />} />
               <Route path="/vibe/attempts/:id" element={session ? <VibeWorkspacePage key={`${session.user.id}:${pathname}`} /> : loginRedirect} />

@@ -32,6 +32,7 @@ import {
   writeAnswerDraft,
 } from "../community/store";
 import { ReportDialog } from "../community/ReportDialog";
+import { useRequestOwner } from "../community/useRequestOwner";
 import { categoryLabel } from "../community/types";
 import { useDocumentTitle, useFlashNotice } from "../hooks";
 import { problemPath, userPath } from "../paths";
@@ -41,23 +42,14 @@ const ANSWER_PAGE_SIZE = 20;
 
 export function CommunityPostPage({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { id = "" } = useParams();
-  const { session, getSessionVersion } = useAuth();
+  const { session } = useAuth();
   const ownerId = session?.user.id ?? "";
   const token = session?.accessToken;
   const navigate = useNavigate();
   const location = useLocation();
-  const mounted = useRef(false);
   const pendingRef = useRef(false);
   const [confirm, confirmDialog] = useConfirm();
-  useEffect(() => {
-    mounted.current = true;
-    return () => { mounted.current = false; };
-  }, []);
-  function requestOwner() {
-    const navigationVersion = getNavigationVersion();
-    const sessionVersion = getSessionVersion();
-    return () => mounted.current && getNavigationVersion() === navigationVersion && getSessionVersion() === sessionVersion;
-  }
+  const requestOwner = useRequestOwner(getNavigationVersion, true);
   const [answerPage, setAnswerPage] = useState(1);
   const [revision, setRevision] = useState(0);
   const [data, setData] = useState<Awaited<
