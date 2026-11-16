@@ -41,15 +41,15 @@ export function useEnterpriseTest(
   );
 }
 
-export function useTestResults(session: Session | null, id: string | undefined, enabled: boolean) {
+export function useTestResults(session: Session | null, id: string | undefined, enabled: boolean, page = 1) {
   const token = session?.accessToken;
   return useRequest<TestResults | null>(
     token && id && enabled
-      ? (signal) => api(`/enterprise/tests/${id}/results`, { signal }, token)
+      ? (signal) => api(`/enterprise/tests/${id}/results${page === 1 ? "" : `?page=${page}`}`, { signal }, token)
       : null,
     null,
     "응시 결과를 불러오지 못했어요.",
-    [token, id, enabled],
+    [token, id, enabled, page],
   );
 }
 

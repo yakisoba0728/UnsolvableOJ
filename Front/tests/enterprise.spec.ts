@@ -105,6 +105,7 @@ async function mockEnterprise(page: Page, initial: EnterpriseTest[] = [], result
       return route.fulfill({
         json: results[id] ?? {
           test: tests[index],
+          pagination: { page: 1, limit: 50, total: tests[index].attemptCount, totalPages: Math.ceil(tests[index].attemptCount / 50) },
           summary: { candidates: tests[index].attemptCount, averageScore: null, perfect: 0 },
           candidates: [],
         },
@@ -415,6 +416,7 @@ test("a test with candidates hides delete and lists scores with per-problem resu
     finishedAt: finished ? iso(-2 * DAY + HOUR / 2) : null,
   });
   const results: TestResults = {
+    pagination: { page: 1, limit: 50, total: 2, totalPages: 1 },
     test: test1,
     summary: { candidates: 2, averageScore: 67, perfect: 1 },
     candidates: [
@@ -679,6 +681,7 @@ test("a running test's results refresh every 30 seconds while the tab is visible
   await page.route("**/api/v1/enterprise/tests/t-live/results", (route) =>
     route.fulfill({
       json: {
+        pagination: { page: 1, limit: 50, total: candidates.length, totalPages: candidates.length ? 1 : 0 },
         test: running,
         summary: { candidates: candidates.length, averageScore: candidates.length ? 100 : null, perfect: candidates.length },
         candidates,

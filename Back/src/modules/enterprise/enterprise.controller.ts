@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -22,6 +23,7 @@ import {
   UpdateEnterpriseTestDto,
 } from './dto/enterprise-test.dto.js';
 import { EnterpriseService } from './enterprise.service.js';
+import { EnterpriseResultsQuery } from './dto/enterprise-results.query.js';
 
 @ApiTags('enterprise')
 @ApiBearerAuth()
@@ -73,9 +75,10 @@ export class EnterpriseController {
   @Get('tests/:id/results')
   results(
     @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: EnterpriseResultsQuery,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.enterprise.results(id, user);
+    return this.enterprise.results(id, user, query);
   }
 
   @Post('attempts/:id/vibe/:challengeId')

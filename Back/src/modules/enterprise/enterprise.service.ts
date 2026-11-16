@@ -3,6 +3,8 @@ import { VibeService } from '../vibe/vibe.service.js';
 import { challenge } from '../vibe/vibe.catalog.js';
 import { canJoinEnterprise as canJoin } from './enterprise-access.js';
 import { buildEnterpriseVibeScores, type EnterpriseVibeRow } from './enterprise-vibe-scores.js';
+import { enterpriseResultPageSql, enterpriseResultSummarySql } from './enterprise-result-queries.js';
+import { EnterpriseResultsQuery } from './dto/enterprise-results.query.js';
 import {
   BadRequestException,
   ConflictException,
@@ -226,70 +228,49 @@ export class EnterpriseService {
   }
 
   /** 일반 문제와 바이브코딩 과제를 동일 비중으로 합산한다. */
-  async results(id: string, user: AuthenticatedUser) {
-    const test = await this.owned(this.dataSource.manager, id, user);
-    const rows: (AttemptRow & {
-      username: string;
-      problems: {
-        problemId: string;
-        solved: boolean;
-        submissions: number;
-        submissionId: string;
-      }[];
-    })[] = await this.dataSource.query(
-      `SELECT a.*, u.username,
-              coalesce(json_agg(json_build_object(
-                'problemId', s.problem_id, 'solved', s.solved,
-                'submissions', s.count, 'submissionId', s.submission_id
-              )) FILTER (WHERE s.problem_id IS NOT NULL), '[]') AS problems
-         FROM enterprise_attempts a
-         JOIN users u ON u.id = a.user_id
-         LEFT JOIN LATERAL (
-           SELECT problem_id, bool_or(status = 'ACCEPTED') AS solved, count(*)::int AS count,
-                  (array_agg(id ORDER BY (status = 'ACCEPTED') DESC, created_at DESC))[1] AS submission_id
-             FROM submissions WHERE attempt_id = a.id GROUP BY problem_id
-         ) s ON true
-        WHERE a.test_id = $1
-        GROUP BY a.id, u.username
-        ORDER BY a.started_at`,
-      [id],
-    );
-    const scores = await this.vibeScores(
-      test,
-      rows.map((row) => row.id),
-    );
-    const candidates = rows.map((row) => {
-      const solved = row.problems.filter((problem) => problem.solved).length;
-      return {
-        ...toAttempt(row),
-        user: { id: row.user_id, username: row.username },
-        problems: row.problems,
-        solved,
-        vibeTasks: scores.get(row.id) ?? [],
-        score: assessmentScore(
+  async results(id: string, user: AuthenticatedUser, query = new EnterpriseResultsQuery()) {
+    // Counts, scores and details describe one committed snapshot even while
+    // candidates join and judging finishes. No row locks or mutable cache.
+    return this.dataSource.transaction('REPEATABLE READ', async (manager) => {
+      const test = await this.owned(manager, id, user);
+      const [summary]: {
+        candidates: number; pending: number; averageScore: number | null; perfect: number;
+      }[] = await manager.query(enterpriseResultSummarySql, [
+        id, test.vibe_challenge_ids, test.problem_ids.length + test.vibe_challenge_ids.length,
+      ]);
+      const rows: (AttemptRow & {
+        username: string;
+        problems: {
+          problemId: string;
+          solved: boolean;
+          submissions: number;
+          submissionId: string;
+        }[];
+      })[] = await manager.query(enterpriseResultPageSql, [id, query.limit, (query.page - 1) * query.limit]);
+      const scores = await this.vibeScores(test, rows.map((row) => row.id), manager);
+      const candidates = rows.map((row) => {
+        const solved = row.problems.filter((problem) => problem.solved).length;
+        return {
+          ...toAttempt(row),
+          user: { id: row.user_id, username: row.username },
+          problems: row.problems,
           solved,
-          test.problem_ids.length,
-          (scores.get(row.id) ?? []).map((task) => task.score),
-        ),
+          vibeTasks: scores.get(row.id) ?? [],
+          score: assessmentScore(
+            solved,
+            test.problem_ids.length,
+            (scores.get(row.id) ?? []).map((task) => task.score),
+          ),
+        };
+      });
+      return {
+        test: toTest(test), summary, candidates,
+        pagination: {
+          page: query.page, limit: query.limit, total: summary.candidates,
+          totalPages: Math.ceil(summary.candidates / query.limit),
+        },
       };
     });
-    const complete = candidates.filter((item) => item.score !== null);
-    return {
-      test: toTest(test),
-      summary: {
-        candidates: candidates.length,
-        pending: candidates.length - complete.length,
-        averageScore: complete.length
-          ? Math.round(
-              complete.reduce((sum, item) => sum + item.score!, 0) /
-                complete.length,
-            )
-          : null,
-        // 모든 문제를 맞힌 응시자 수.
-        perfect: candidates.filter((item) => item.score === 100).length,
-      },
-      candidates,
-    };
   }
 
   async joinInfo(code: string, user: AuthenticatedUser) {
@@ -538,10 +519,10 @@ export class EnterpriseService {
         '일반 문제와 바이브코딩 과제를 합해 1~20개 선택해 주세요.',
       );
   }
-  private async vibeScores(test: TestRow, attemptIds: string[]) {
+  private async vibeScores(test: TestRow, attemptIds: string[], manager = this.dataSource.manager) {
     const rows: EnterpriseVibeRow[] =
       attemptIds.length && test.vibe_challenge_ids.length
-        ? await this.dataSource.query(
+        ? await manager.query(
             "SELECT id,enterprise_attempt_id,challenge_id,submitted_at,state->'report' AS report FROM vibe_attempts WHERE enterprise_attempt_id=ANY($1::uuid[])",
             [attemptIds],
           )

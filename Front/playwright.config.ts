@@ -25,6 +25,7 @@ const webkitSpecs = [
   "enterprise-refresh.spec.ts",
   "enterprise-ownership.spec.ts",
   "problem-bookmarks.spec.ts",
+  "enterprise-results.spec.ts",
   "auth.spec.ts",
   "editor-focus.spec.ts",
   "layout.spec.ts",
