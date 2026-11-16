@@ -26,7 +26,7 @@ async function sandbox(t: TestContext, steps: Step[] = []) {
   const deleted: string[] = [];
   const brokenFiles = new Set<string>();
   const state = {
-    os: "linux", denyDelete: false,
+    os: "linux", denyDelete: false, requireAuthentication: true,
     onPartialBody: undefined as (() => void) | undefined,
     runner: { cgroupType: 2, seccomp: true, workDir: "/w", cgroupControllers: ["cpu", "memory", "pids"] },
   };
@@ -45,7 +45,7 @@ async function sandbox(t: TestContext, steps: Step[] = []) {
       };
       if (request.url === "/version") return json({ os: state.os });
       if (request.url === "/config") return json({ runnerConfig: state.runner });
-      if (request.headers.authorization !== "Bearer unit-token") return json("Unauthorized", 401);
+      if (state.requireAuthentication && request.headers.authorization !== "Bearer unit-token") return json("Unauthorized", 401);
       if (request.url === "/file") return json(Object.fromEntries(files));
       if (request.url?.startsWith("/file/")) {
         const id = decodeURIComponent(request.url.slice(6));
@@ -151,6 +151,12 @@ test("startup requires authenticated Linux, seccomp and all resource controllers
   s.state.runner.seccomp = true;
   s.state.runner.cgroupType = 0;
   await assert.rejects(checkSandbox(s.config), /cgroups/);
+});
+
+test("startup refuses a sandbox that accepts unauthenticated file access", async (t) => {
+  const s = await sandbox(t);
+  s.state.requireAuthentication = false;
+  await assert.rejects(checkSandbox(s.config), /authentication/i);
 });
 
 test("normal exit is compared with the expected output and preserves units and limits", async (t) => {

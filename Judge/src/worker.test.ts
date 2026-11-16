@@ -88,6 +88,7 @@ function harness(
         cgroupType: 2, seccomp: true, workDir: "/w", cgroupControllers: ["cpu", "memory", "pids"],
       } });
       assert.equal(url.pathname, "/file");
+      if (!new Headers(options?.headers).has("Authorization")) return new Response(null, { status: 401 });
       return Response.json({});
     }
     const request = {
