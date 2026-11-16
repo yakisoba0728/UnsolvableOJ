@@ -191,11 +191,11 @@ jobs:
           # 실제 실행·큐 계약·Compose와 그 검사기는 통합 전에 native 검증이 필요하다.
           # 문서/벤치마크와 일반 UI 변경은 이 목록에 포함하지 않는다.
           if grep -qE \
-            -e '^Judge/(src/|runtime/|deploy/|Dockerfile$|\.dockerignore$|package(-lock)?\.json$|tsconfig\.json$)' \
+            -e '^Judge/(src/|runtime/|deploy/|scripts/check-redis-tls\.mjs$|Dockerfile$|\.dockerignore$|package(-lock)?\.json$|tsconfig\.json$)' \
             -e '^Back/src/(modules/submissions/|modules/vibe/vibe\.(runner|service|catalog|types|snapshot|prompts|ai)\.ts$|common/queue\.constants\.ts$|config/(redis\.config|env\.validation)\.ts$)' \
             -e '^Back/(Dockerfile$|\.dockerignore$|docker-entrypoint\.sh$|package(-lock)?\.json$|scripts/run-integration\.mjs$|vitest\.config\.pipeline\.ts$|test/.*\.pipeline-(spec|helpers)\.ts$)' \
             -e '^Front/(Dockerfile$|\.dockerignore$|nginx\.conf$|trusted-proxy\.conf\.template$|playwright\.live\.config\.ts$|tests-live/)' \
-            -e '^(compose\.yaml$|deploy/(compose\.yaml$|\.env\.example$)|scripts/check-(compose|production-compose|sandbox-budget)\.mjs$)' <<<"$native_files"; then
+            -e '^(compose\.yaml$|deploy/(compose\.yaml$|\.env\.example$)|scripts/check-(compose|production-compose|sandbox-budget|executor-compose(\.test)?)\.mjs$)' <<<"$native_files"; then
             echo "full=true" >> "$GITHUB_OUTPUT"
             all; exit 0
           fi
@@ -249,7 +249,7 @@ jobs:
         run: npm ci --prefix Back
       - name: Backend lint, types, unit tests and build
         run: |
-          node --test scripts/ci-policy.test.mjs
+          node --test scripts/ci-policy.test.mjs scripts/check-executor-compose.test.mjs
           npm run check --prefix Back
           npm run test:boj-import --prefix Back
           npm run test:operations --prefix Back
@@ -405,6 +405,8 @@ jobs:
         run: |
           npm run build --prefix Back
           npm run build --prefix Judge
+      - name: Verified Redis TLS and BullMQ transport
+        run: node Judge/scripts/check-redis-tls.mjs --docker
       # Compose 흐름 검사가 쓰는 Chromium만 받는다. 러너에 이미 있는 Chrome 의존 패키지를 쓰므로 apt 설치(--with-deps)는 하지 않는다.
       - name: Install Chromium for the Compose flow
         working-directory: Front

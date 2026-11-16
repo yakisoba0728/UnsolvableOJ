@@ -4,6 +4,7 @@ import timers from "node:timers/promises";
 import { pathToFileURL } from "node:url";
 import { Worker, type RedisClient } from "bullmq";
 import { Redis } from "ioredis";
+import { loadWorkerConfig } from "./config.js";
 import { checkSandbox, judge, SandboxUnavailableError, type Claim, type JudgeResult, type SandboxConfig } from "./judge.js";
 
 interface JudgeJob {
@@ -246,35 +247,25 @@ export async function startWorker(
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   await import("dotenv/config");
-  const redis = new Redis({
-    host: process.env.REDIS_HOST ?? "localhost",
-    port: Number(process.env.REDIS_PORT ?? 6379),
-    username: process.env.REDIS_USERNAME || undefined,
-    password: process.env.REDIS_PASSWORD || undefined,
-    db: Number(process.env.REDIS_DB ?? 0),
-    maxRetriesPerRequest: null,
-  });
+  const config = loadWorkerConfig(process.env);
+  const redis = new Redis(config.redis);
   redis.on("error", (error) => console.error("Judge Redis connection error:", error.message));
   // Do not advertise even the initial API presence for a disconnected queue.
   await redis.ping();
   let consumerConstructed = false;
   let blockingClient: RedisClient | undefined;
   const running = await startWorker({
-    url: process.env.API_BASE_URL ?? "http://localhost:3000/api/v1",
-    token: process.env.JUDGE_SERVICE_TOKEN ?? "",
+    ...config.api,
     heartbeatFile: process.env.JUDGE_HEARTBEAT_FILE || undefined,
     isQueueReady: () => redis.status === "ready" &&
       (!consumerConstructed || blockingClient?.status === "ready"),
     observe: process.env.JUDGE_METRICS === "json"
       ? (measurement) => console.log(JSON.stringify(measurement)) : undefined,
-  }, {
-    url: process.env.GO_JUDGE_URL ?? "http://127.0.0.1:5050",
-    token: process.env.GO_JUDGE_TOKEN ?? "",
-  }, (processor) => {
+  }, config.sandbox, (processor) => {
     consumerConstructed = true;
     const worker = new Worker("judge-submissions", processor, {
       connection: redis,
-      concurrency: Number(process.env.JUDGE_CONCURRENCY ?? 2),
+      concurrency: config.concurrency,
     });
     // BullMQ owns a second Redis connection for its blocking queue read. A
     // main-client ping alone cannot prove that this consumer can receive work.
