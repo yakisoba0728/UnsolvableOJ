@@ -1,6 +1,6 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import type { Session } from "../src/types";
-import type { EnterpriseTest, TestResults } from "../src/enterprise/model";
+import type { EnterpriseTest, EnterpriseTestDetail, TestResults } from "../src/enterprise/model";
 import { answerConfirm } from "./fixtures";
 
 const sessionKey = "unsolvable-oj-session-v1";
@@ -59,7 +59,7 @@ async function mockProblems(page: Page) {
   );
 }
 
-const enterpriseTest = (patch: Partial<EnterpriseTest> & Pick<EnterpriseTest, "id" | "title">): EnterpriseTest => ({
+const enterpriseTest = (patch: Partial<EnterpriseTestDetail> & Pick<EnterpriseTest, "id" | "title">): EnterpriseTestDetail => ({
   description: "",
   startsAt: iso(DAY),
   endsAt: iso(3 * DAY),
@@ -72,6 +72,13 @@ const enterpriseTest = (patch: Partial<EnterpriseTest> & Pick<EnterpriseTest, "i
   attemptCount: 0,
   createdAt: iso(-DAY),
   updatedAt: iso(-DAY),
+  selectedProblems: (patch.problemIds ?? ["p1"]).flatMap((id) => {
+    const problem = problems.find((item) => item.id === id);
+    return problem ? [{
+      id, version: 1, title: problem.title, difficulty: problem.difficulty,
+      timeLimitMs: problem.timeLimitMs, memoryLimitMb: problem.memoryLimitMb,
+    }] : [];
+  }),
   ...patch,
 });
 
@@ -82,7 +89,7 @@ const fail = (route: Route, status: number, message: string | string[]) =>
  * 서버의 /enterprise/tests API를 메모리 목록으로 흉내 낸다. 받은 요청은 `requests`에 남는다.
  * 특정 요청을 실패시키려면 이 뒤에 page.route를 더 걸고 나머지는 route.fallback()으로 넘긴다.
  */
-async function mockEnterprise(page: Page, initial: EnterpriseTest[] = [], results: Record<string, TestResults> = {}) {
+async function mockEnterprise(page: Page, initial: EnterpriseTestDetail[] = [], results: Record<string, TestResults> = {}) {
   const tests = [...initial];
   const requests: { method: string; path: string; body: unknown }[] = [];
   await page.route(/\/api\/v1\/enterprise\/tests(\/|\?|$)/, (route) => {
@@ -124,7 +131,7 @@ async function mockEnterprise(page: Page, initial: EnterpriseTest[] = [], result
   return { tests, requests };
 }
 
-async function setup(page: Page, initial: EnterpriseTest[] = [], results: Record<string, TestResults> = {}) {
+async function setup(page: Page, initial: EnterpriseTestDetail[] = [], results: Record<string, TestResults> = {}) {
   await signIn(page);
   await mockProblems(page);
   return mockEnterprise(page, initial, results);
@@ -264,7 +271,7 @@ test("create, edit and delete a test through the server", async ({ page }) => {
   await expect(order.nth(0)).toHaveText("수 정렬하기");
   await expect(order.nth(1)).toHaveText("두 수의 합");
   await expect(page.getByText("노트북 반입 금지")).toBeVisible();
-  await expect(page.getByRole("link", { name: "두 수의 합 문제 보기" })).toHaveAttribute("href", "/problems/view/two-sum");
+  await expect(page.getByRole("link", { name: "두 수의 합 현재 원본 보기" })).toHaveAttribute("href", "/problems/view/two-sum");
 
   // 예정 상태에서는 편집할 수 있고, 변경은 PATCH로 보낸다.
   await page.getByRole("link", { name: "편집" }).click();
@@ -375,7 +382,10 @@ test("the detail shows the invite link with a copy button and allows deleting be
     });
   });
   const { requests } = await setup(page, [
-    enterpriseTest({ id: "t-1", title: "링크 테스트", inviteCode: "AbC_123", problemIds: ["company-only", "p1"] }),
+    enterpriseTest({ id: "t-1", title: "링크 테스트", inviteCode: "AbC_123", problemIds: ["company-only", "p1"], selectedProblems: [
+      { id: "company-only", version: 1, title: "사내 전용 문제", difficulty: "MEDIUM", timeLimitMs: 2000, memoryLimitMb: 256 },
+      { id: "p1", version: 1, title: "두 수의 합", difficulty: "BEGINNER", timeLimitMs: 1000, memoryLimitMb: 256 },
+    ] }),
   ]);
   await page.route("**/api/v1/problems/mine", (route) =>
     route.fulfill({
@@ -397,7 +407,7 @@ test("the detail shows the invite link with a copy button and allows deleting be
   // 기업 전용 문제는 공개 화면이 없어 출제 화면으로 연다.
   const item = page.locator(".ent-problem-list li", { hasText: "사내 전용 문제" });
   await expect(item).toContainText("기업 전용");
-  await expect(item.getByRole("link", { name: "사내 전용 문제 문제 보기" })).toHaveAttribute("href", "/my-problems/company-only/edit");
+  await expect(item.getByRole("link", { name: "사내 전용 문제 현재 원본 보기" })).toHaveAttribute("href", "/my-problems/company-only/edit");
 
   await expect(page.getByText("아직 응시한 사람이 없어요")).toBeVisible();
   await expect(page.locator(".ent-summary")).toContainText("0명");

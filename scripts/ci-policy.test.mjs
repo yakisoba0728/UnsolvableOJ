@@ -14,6 +14,36 @@ function runBlock(section) {
   return block[1].split('\n').map((line) => line.slice(10)).join('\n');
 }
 
+test('dependency audit covers runtime and complete graphs and preserves each failure', () => {
+  const script = runBlock(workflow.slice(workflow.indexOf('\n  audit:'), workflow.indexOf('\n  images:')));
+  const directory = mkdtempSync(join(tmpdir(), 'oj-ci-audit-'));
+  const calls = join(directory, 'calls');
+  const combinations = ['Back', 'Front', 'Judge'].flatMap((name) => [`${name}/production`, `${name}/all`]);
+  try {
+    writeFileSync(join(directory, 'npm'), `#!/usr/bin/env node
+const fs = require('node:fs');
+const args = process.argv.slice(2);
+if (args[0] !== 'audit' || !args.includes('--audit-level=moderate')) process.exit(99);
+const name = args[args.indexOf('--prefix') + 1];
+const scope = args.includes('--omit=dev') ? 'production' : 'all';
+const key = name + '/' + scope;
+fs.appendFileSync(process.env.AUDIT_CALLS, key + '\\n');
+process.exit(process.env.AUDIT_FAIL === key ? 1 : 0);
+`, { mode: 0o700 });
+    for (const failure of ['', ...combinations]) {
+      writeFileSync(calls, '');
+      const run = spawnSync('bash', ['-e', '-o', 'pipefail', '-c', script], {
+        env: { ...process.env, PATH: `${directory}:${process.env.PATH}`, AUDIT_CALLS: calls, AUDIT_FAIL: failure },
+        encoding: 'utf8',
+      });
+      assert.equal(run.status, failure ? 1 : 0, `Audit result for ${failure || 'clean graphs'}: ${run.stderr}`);
+      assert.deepEqual(readFileSync(calls, 'utf8').trim().split('\n'), combinations);
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test('required gate depends on every validation job, including audit and images', () => {
   const jobs = [...workflow.matchAll(/^  ([a-z]+):\n/gm)]
     .map((match) => match[1]).filter((name) => !['push', 'pull_request', 'schedule', 'workflow_dispatch', 'run', 'required'].includes(name));
@@ -174,6 +204,8 @@ test('Compose and live-test harness changes cannot skip their own execution', ()
     'scripts/check-compose.mjs', 'scripts/check-production-compose.mjs', 'scripts/check-sandbox-budget.mjs',
     'Back/scripts/run-integration.mjs', 'Back/test/judge.pipeline-spec.ts',
     'Back/test/judge-recovery.pipeline-spec.ts', 'Back/vitest.config.pipeline.ts',
+    'Back/test/judge-redis-restart.pipeline-spec.ts', 'Back/test/judge-rejudge-recovery.pipeline-spec.ts',
+    'Back/test/owned-redis.pipeline-helpers.ts', 'Back/test/process.pipeline-helpers.ts',
     'Front/playwright.live.config.ts', 'Front/tests-live/judge-flow.spec.ts',
   ]) {
     const run = selectJobs([path]);

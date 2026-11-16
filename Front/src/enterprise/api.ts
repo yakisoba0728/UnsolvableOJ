@@ -1,7 +1,7 @@
 import { api } from "../api";
 import { useRequest } from "../hooks";
 import type { Session } from "../types";
-import type { EnterpriseTest, TestInput, TestResults } from "./model";
+import type { EnterpriseTest, EnterpriseTestDetail, TestInput, TestResults } from "./model";
 import { invalidResourceIdMessage, isInvalidResourceId } from "../resourceErrors";
 
 /** 내가 만든 기업 테스트(서버 저장). */
@@ -21,10 +21,10 @@ export function useEnterpriseTest(
   options?: { retainWhileRefreshing?: boolean },
 ) {
   const token = session?.accessToken;
-  return useRequest<EnterpriseTest | null>(
+  return useRequest<EnterpriseTestDetail | null>(
     token && id
       ? (signal) =>
-          api<EnterpriseTest>(`/enterprise/tests/${id}`, { signal }, token).catch(
+          api<EnterpriseTestDetail>(`/enterprise/tests/${id}`, { signal }, token).catch(
             (cause: unknown) => {
               if (isInvalidResourceId(cause))
                 throw new Error(invalidResourceIdMessage);

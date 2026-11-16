@@ -83,7 +83,10 @@ learning, and one shared solve/10 XP. The Judge process remains alive. Raw resta
 timing and evidence are in `Back/reports/phase2-api-restart.json`.
 
 Actual Redis daemon restart/persistence recovery, rejudge interruption and
-sustained mixed-load failures remain distinct follow-ups.
+sustained mixed-load failures are distinct from these scenarios. The separate
+followup in `PHASE2-RECOVERY.md` adds a clean owned Redis/AOF restart under a small
+mixed-language burst and natural-lease recovery during rejudge. Its execution
+status must be checked separately; prolonged mixed-load failures remain unverified.
 
 ## Measurement methodology and limits
 
