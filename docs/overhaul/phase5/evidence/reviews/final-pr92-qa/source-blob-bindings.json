@@ -1,0 +1,411 @@
+{
+  "combinedCommit": "6ebb8e78e10c2a5e1107321e405ce49327314c1a",
+  "combinedTree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+  "streams": {
+    "database": {
+      "commit": "9978a3ec33d551c899c9bb50415dd4cb2d030bdf",
+      "base": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "files": [
+        {
+          "path": "Back/scripts/phase5-db-qualification.mjs",
+          "authorBlob": "5a33e65574a24b0bcd77fef4fbebc80d2c5c1ce4",
+          "acceptedPR91Blob": "5a33e65574a24b0bcd77fef4fbebc80d2c5c1ce4",
+          "finalBlob": "5a33e65574a24b0bcd77fef4fbebc80d2c5c1ce4",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "Back/scripts/phase5-db-qualification.test.mjs",
+          "authorBlob": "8ad80a6514c9ce8ba614ddcbb67447bde8953952",
+          "acceptedPR91Blob": "8ad80a6514c9ce8ba614ddcbb67447bde8953952",
+          "finalBlob": "8ad80a6514c9ce8ba614ddcbb67447bde8953952",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "Back/test/enterprise-export-revocation.e2e-spec.ts",
+          "authorBlob": "db2eb812a7c33f0d9e53042ceabb55b935132796",
+          "acceptedPR91Blob": "db2eb812a7c33f0d9e53042ceabb55b935132796",
+          "finalBlob": "db2eb812a7c33f0d9e53042ceabb55b935132796",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "Back/test/enterprise-export.e2e-spec.ts",
+          "authorBlob": "58bfebb92b824afd1cc764ce4495237564d6564a",
+          "acceptedPR91Blob": "58bfebb92b824afd1cc764ce4495237564d6564a",
+          "finalBlob": "58bfebb92b824afd1cc764ce4495237564d6564a",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/DATABASE.md",
+          "authorBlob": "ca0bcad2eaedf7ea4a097858812a339d796ddd0a",
+          "acceptedPR91Blob": "ca0bcad2eaedf7ea4a097858812a339d796ddd0a",
+          "finalBlob": "96d5ae32d9c1afb2dda17109365657f2b1e0f463",
+          "equalToAcceptedPR91": false
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/database-auth-test-admission-failure.txt",
+          "authorBlob": "f0ab12acf4caf168b5ba6bacd360b24ad0e33109",
+          "acceptedPR91Blob": "f0ab12acf4caf168b5ba6bacd360b24ad0e33109",
+          "finalBlob": "f0ab12acf4caf168b5ba6bacd360b24ad0e33109",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/database-local-f037d5c.json",
+          "authorBlob": "718a0b8d48f756724260e7cb12d8d2582b14e492",
+          "acceptedPR91Blob": "718a0b8d48f756724260e7cb12d8d2582b14e492",
+          "finalBlob": "718a0b8d48f756724260e7cb12d8d2582b14e492",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/database-targeted-api.txt",
+          "authorBlob": "20cbe47761619ff88a1e0b963dcd743991d8d9fb",
+          "acceptedPR91Blob": "20cbe47761619ff88a1e0b963dcd743991d8d9fb",
+          "finalBlob": "20cbe47761619ff88a1e0b963dcd743991d8d9fb",
+          "equalToAcceptedPR91": true
+        }
+      ]
+    },
+    "reliability": {
+      "commit": "e9bc90d8c7347960fe70f8503267f695805c93e0",
+      "base": "ce26659b816c1dc1450cdc48f0c58d6e41ecea1e",
+      "files": [
+        {
+          "path": "Back/scripts/phase4-restore-rehearsal.mjs",
+          "authorBlob": "9794e87857a2bc7ad221bcbb6ceac5c6bd1bc485",
+          "acceptedPR91Blob": "9794e87857a2bc7ad221bcbb6ceac5c6bd1bc485",
+          "finalBlob": "9794e87857a2bc7ad221bcbb6ceac5c6bd1bc485",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "Back/src/database/migrations/1796200000000-learning-goals.ts",
+          "authorBlob": "f030525864a46690bf62da34a7a7774c47b91356",
+          "acceptedPR91Blob": "f030525864a46690bf62da34a7a7774c47b91356",
+          "finalBlob": "f030525864a46690bf62da34a7a7774c47b91356",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "Back/test/learning-goal-migration.e2e-spec.ts",
+          "authorBlob": "ee86b61fc620d81fadad4e71fca182e53ab74348",
+          "acceptedPR91Blob": "ee86b61fc620d81fadad4e71fca182e53ab74348",
+          "finalBlob": "ee86b61fc620d81fadad4e71fca182e53ab74348",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/RELEASE-RUNBOOK.md",
+          "authorBlob": "ab98566564e0d8bf1534109a55d14d0b815d0164",
+          "acceptedPR91Blob": "ab98566564e0d8bf1534109a55d14d0b815d0164",
+          "finalBlob": "ab98566564e0d8bf1534109a55d14d0b815d0164",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/RELIABILITY.md",
+          "authorBlob": "9c1eb5187396f4d7dd8633a328f1dbdfeff79ce2",
+          "acceptedPR91Blob": "9c1eb5187396f4d7dd8633a328f1dbdfeff79ce2",
+          "finalBlob": "046de55cb0d71b0247d080a45d57f168f3a8c330",
+          "equalToAcceptedPR91": false
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/FRONTEND-INDEPENDENT-REVIEW.md",
+          "authorBlob": "93f31488e6f47fb98442bcc3db205d3962342dc4",
+          "acceptedPR91Blob": "93f31488e6f47fb98442bcc3db205d3962342dc4",
+          "finalBlob": "93f31488e6f47fb98442bcc3db205d3962342dc4",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/fixture-proof.json",
+          "authorBlob": "063acf101be1617c178b330b0dd9bd0915b57068",
+          "acceptedPR91Blob": "063acf101be1617c178b330b0dd9bd0915b57068",
+          "finalBlob": "063acf101be1617c178b330b0dd9bd0915b57068",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/fixture-proof.log",
+          "authorBlob": "d13e45ab411d6cd1625929320c6dbb39fa4bc35a",
+          "acceptedPR91Blob": "d13e45ab411d6cd1625929320c6dbb39fa4bc35a",
+          "finalBlob": "d13e45ab411d6cd1625929320c6dbb39fa4bc35a",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/fixture-proof.mjs",
+          "authorBlob": "c06f18f0cdf1c60e605e88e07ab7d1d0255d53b9",
+          "acceptedPR91Blob": "c06f18f0cdf1c60e605e88e07ab7d1d0255d53b9",
+          "finalBlob": "c06f18f0cdf1c60e605e88e07ab7d1d0255d53b9",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/frontend-independent.json",
+          "authorBlob": "f11217ba4a79358d6a8b35ec281c7d64ac0d499f",
+          "acceptedPR91Blob": "f11217ba4a79358d6a8b35ec281c7d64ac0d499f",
+          "finalBlob": "f11217ba4a79358d6a8b35ec281c7d64ac0d499f",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/goal-isolation-independent-baseline.json",
+          "authorBlob": "47ff81bccf3630cc02458cd175b1e711c49e4ca3",
+          "acceptedPR91Blob": "47ff81bccf3630cc02458cd175b1e711c49e4ca3",
+          "finalBlob": "47ff81bccf3630cc02458cd175b1e711c49e4ca3",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/goal-isolation-independent-baseline.mjs",
+          "authorBlob": "579ac4634be6a73125abf0ec93b68cb4b5c4b64c",
+          "acceptedPR91Blob": "579ac4634be6a73125abf0ec93b68cb4b5c4b64c",
+          "finalBlob": "579ac4634be6a73125abf0ec93b68cb4b5c4b64c",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/goal-isolation-tests.json",
+          "authorBlob": "0eb8f1dc9a184516856a63357eb168d9c00c6484",
+          "acceptedPR91Blob": "0eb8f1dc9a184516856a63357eb168d9c00c6484",
+          "finalBlob": "0eb8f1dc9a184516856a63357eb168d9c00c6484",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/goal-rollback-baseline.log",
+          "authorBlob": "7d1e68b8df259b776e009b5198f35d5c0532f387",
+          "acceptedPR91Blob": "7d1e68b8df259b776e009b5198f35d5c0532f387",
+          "finalBlob": "7d1e68b8df259b776e009b5198f35d5c0532f387",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/goal-rollback-candidate.log",
+          "authorBlob": "da228b3774f8897d1e625d8ab40e6eb91aec3b0f",
+          "acceptedPR91Blob": "da228b3774f8897d1e625d8ab40e6eb91aec3b0f",
+          "finalBlob": "da228b3774f8897d1e625d8ab40e6eb91aec3b0f",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/goal-rollback-captures.json",
+          "authorBlob": "06590384feb329a8320991334d95b65706e0c323",
+          "acceptedPR91Blob": "06590384feb329a8320991334d95b65706e0c323",
+          "finalBlob": "06590384feb329a8320991334d95b65706e0c323",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/migration-regression.log",
+          "authorBlob": "6801b4e1c4c6fd32c39df588499fdfe756745627",
+          "acceptedPR91Blob": "6801b4e1c4c6fd32c39df588499fdfe756745627",
+          "finalBlob": "6801b4e1c4c6fd32c39df588499fdfe756745627",
+          "equalToAcceptedPR91": true
+        }
+      ]
+    },
+    "multiapi": {
+      "commit": "7c1731dbcef91b8e8828acdd428d7274d667007c",
+      "base": "e9f056bccf99e75938beadf02b652003f0c4ee23",
+      "files": [
+        {
+          "path": "Back/test/phase5-multi-api-deadline.spec.ts",
+          "authorBlob": "c81e5896146c3565d0d8e2625253495548aef4d6",
+          "acceptedPR91Blob": "c81e5896146c3565d0d8e2625253495548aef4d6",
+          "finalBlob": "c81e5896146c3565d0d8e2625253495548aef4d6",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "Back/test/phase5-multi-api.pipeline-helpers.ts",
+          "authorBlob": "685c71d5a30c22255a3afc9f54a027c60498b984",
+          "acceptedPR91Blob": "685c71d5a30c22255a3afc9f54a027c60498b984",
+          "finalBlob": "685c71d5a30c22255a3afc9f54a027c60498b984",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "Back/test/phase5-multi-api.pipeline-spec.ts",
+          "authorBlob": "5d806fed75941d17b07b8f67bb1ec37ca9c81fe2",
+          "acceptedPR91Blob": "5d806fed75941d17b07b8f67bb1ec37ca9c81fe2",
+          "finalBlob": "5d806fed75941d17b07b8f67bb1ec37ca9c81fe2",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "Back/test/vibe-dedicated.pipeline-spec.ts",
+          "authorBlob": "b5904419c99875eaffd8edd57ac6e9821a8971c0",
+          "acceptedPR91Blob": "b5904419c99875eaffd8edd57ac6e9821a8971c0",
+          "finalBlob": "b5904419c99875eaffd8edd57ac6e9821a8971c0",
+          "equalToAcceptedPR91": true
+        },
+        {
+          "path": "docs/overhaul/phase5/MULTI-API.md",
+          "authorBlob": "90b2677bb5e4b0a92282a4432c7fce29c7d44303",
+          "acceptedPR91Blob": "90b2677bb5e4b0a92282a4432c7fce29c7d44303",
+          "finalBlob": "2d2dda5c21f9713d0396d8ec5a8bf20c257c7ffb",
+          "equalToAcceptedPR91": false
+        }
+      ]
+    }
+  },
+  "remoteSource": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+  "acceptedPreviousLocalCommit": "38824a09566fd75811704a44d65f7577d5cba9c3",
+  "allExecutableSourceEqualToAcceptedPR91": true,
+  "nonPhase5DocsPathsCompared": 876,
+  "changedPaths": [
+    "docs/overhaul/phase5/DATABASE.md",
+    "docs/overhaul/phase5/FINAL-REPORT.md",
+    "docs/overhaul/phase5/FRONTEND.md",
+    "docs/overhaul/phase5/JUDGE.md",
+    "docs/overhaul/phase5/MULTI-API.md",
+    "docs/overhaul/phase5/PERFORMANCE.md",
+    "docs/overhaul/phase5/PROGRESS.md",
+    "docs/overhaul/phase5/RELIABILITY.md",
+    "docs/overhaul/phase5/REMAINING-EXTERNAL-GATES.md",
+    "docs/overhaul/phase5/RISKS.md",
+    "docs/overhaul/phase5/ROADMAP.md",
+    "docs/overhaul/phase5/SECURITY.md",
+    "docs/overhaul/phase5/VIBE-BROWSER.md",
+    "docs/overhaul/phase5/evidence/README.md",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/backend-independent-checks.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/browser-log-checks.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/browser-performance.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/compose-independent-checks.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/composition-independent-checks.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/database-qualification.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/downloaded-artifacts.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/downloaded-logs.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/final-metadata.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/frontend-1.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/frontend-2.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/frontend-independent-checks.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/image-back.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/image-front.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/image-independent-checks.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/image-judge.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/image-runtime.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/immutable-commit-objects.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/judge-evidence.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/multi-api.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/native-verdict.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/npm-sbom.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/phase3-browser-performance.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/phase4-restore.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/phase5-database.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/phase5-multi-api.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/phase5-verdict-matrix.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/phase5-vibe-browser.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/phase5-vibe-compose.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/phase5-vibe-dedicated.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/restore.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/source-blob-bindings.json",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/vibe-browser.zip",
+    "docs/overhaul/phase5/evidence/backend-run-43905864054/vibe-pipeline.zip",
+    "docs/overhaul/phase5/evidence/foundation-run-43890166522/runtime.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/browser-log-checks.json",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/browser-performance.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/chromium-1440-dark-ready.png",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/chromium-1440-dark-refreshing.png",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/chromium-320-light-ready.png",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/chromium-320-light-refreshing.png",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/decoded-log-bindings.json",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/downloaded-artifacts.json",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/final-metadata.json",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/frontend-independent-checks.json",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/image-back.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/image-front.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/image-judge.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/image-runtime.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/native-matrix.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/npm-sbom.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/phase2-pipeline.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/phase5-frontend-shard1.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/phase5-frontend-shard2.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/phase5-vibe-browser.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/phase5-vibe-pipeline.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/restore.zip",
+    "docs/overhaul/phase5/evidence/frontend-run-43901468081/runtime-independent-replay.json",
+    "docs/overhaul/phase5/evidence/frontend/ci-wiring-validation.json",
+    "docs/overhaul/phase5/evidence/frontend/failed-43898203434-checkpoint.json",
+    "docs/overhaul/phase5/evidence/frontend/failed-43898203434-final.json",
+    "docs/overhaul/phase5/evidence/frontend/provenance-local.json",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/back.zip",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/browser.zip",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/front.zip",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/github-metadata.json",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/job-log-excerpts.json",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/judge.zip",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/native.zip",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/phase5-verdict-matrix.json",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/phase5-vibe-browser.json",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/phase5-vibe-browser.png",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/phase5-vibe-compose.json",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/phase5-vibe-dedicated.json",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/runtime.zip",
+    "docs/overhaul/phase5/evidence/judge-run-43893025800/vibe.zip",
+    "docs/overhaul/phase5/evidence/performance/README.md",
+    "docs/overhaul/phase5/evidence/performance/foundation-browser-43890166522.zip",
+    "docs/overhaul/phase5/evidence/performance/foundation-judge-43890166522.zip",
+    "docs/overhaul/phase5/evidence/performance/foundation-provenance.json",
+    "docs/overhaul/phase5/evidence/performance/historical-browser-artifacts.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43898203434/browser.zip",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43898203434/github-metadata.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43898203434/learning-performance-49a3674e76f79b0d1626b12f02862825c189bdff.ts",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43898203434/learning-performance-500329305615070e4e9edbde0ca9215539ed1cc4.ts",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43898203434/phase3-browser-performance.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43901468081/browser.zip",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43901468081/editor-shard2.zip",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43901468081/editor-source-proof.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43901468081/github-metadata.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43901468081/layout-source-proof.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43901468081/learning-performance.ts",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43901468081/phase3-browser-performance.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43901468081/phase5-editor-observation.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43901468081/phase5-editor-observation.spec.ts",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/browser.zip",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/database.zip",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/editor-shard2.zip",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/editor-source-proof.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/github-metadata-initial.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/github-metadata.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/layout-source-proof.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/learning-performance.ts",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/multi-api.zip",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/native-fixture-source-proof.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/phase3-browser-performance.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/phase4-restore.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/phase5-database.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/phase5-editor-observation.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/phase5-editor-observation.spec.ts",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/phase5-multi-api.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/restore.zip",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/smoke-sources.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/source-proof.json",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/source-snapshots/ci.yml",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/source-snapshots/phase4-restore-rehearsal.mjs",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/source-snapshots/phase5-db-qualification.mjs",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/source-snapshots/phase5-multi-api.pipeline-helpers.ts",
+    "docs/overhaul/phase5/evidence/performance/observed-candidates/43905864054/source-snapshots/phase5-multi-api.pipeline-spec.ts",
+    "docs/overhaul/phase5/evidence/performance/performance-source-data-foundation.json",
+    "docs/overhaul/phase5/evidence/performance/performance-source-data.json",
+    "docs/overhaul/phase5/evidence/performance/phase4-browser-baseline.zip",
+    "docs/overhaul/phase5/evidence/performance/phase4-browser-foundation-43841589126.zip",
+    "docs/overhaul/phase5/evidence/performance/portable-verification-corrected-43901468081.json",
+    "docs/overhaul/phase5/evidence/performance/portable-verification-pr91-43905864054.json",
+    "docs/overhaul/phase5/evidence/performance/portable-verification.json",
+    "docs/overhaul/phase5/evidence/performance/source-proof.json",
+    "docs/overhaul/phase5/evidence/performance/source-snapshots/foundation-judge-capacity.pipeline-spec.ts",
+    "docs/overhaul/phase5/evidence/performance/source-snapshots/foundation-learning-performance.ts",
+    "docs/overhaul/phase5/evidence/performance/verify-performance.py",
+    "docs/overhaul/phase5/evidence/performance/verify-pr91.py",
+    "docs/overhaul/phase5/evidence/retained-files.json",
+    "docs/overhaul/phase5/evidence/reviews/backend-pr91-independent-review.json",
+    "docs/overhaul/phase5/evidence/reviews/ci-context-0b2c975-independent-review.json",
+    "docs/overhaul/phase5/evidence/reviews/ci-wiring-fa809280-independent-review.json",
+    "docs/overhaul/phase5/evidence/reviews/database-review-9978a3e.json",
+    "docs/overhaul/phase5/evidence/reviews/foundation-reviewed-artifact-check.json",
+    "docs/overhaul/phase5/evidence/reviews/frontend-43901468081-independent-review.json",
+    "docs/overhaul/phase5/evidence/reviews/frontend-independent-dom.json",
+    "docs/overhaul/phase5/evidence/reviews/judge-43893025800-independent-acceptance.json",
+    "docs/overhaul/phase5/evidence/reviews/multi-api-7c1731db-independent-deadline-tests.log",
+    "docs/overhaul/phase5/evidence/reviews/multi-api-7c1731db-independent-review.json",
+    "docs/overhaul/phase5/evidence/reviews/multi-api-da8deeba-independent-review.json",
+    "docs/overhaul/phase5/evidence/reviews/multi-api-lifecycle-implementer-tests.log",
+    "docs/overhaul/phase5/evidence/reviews/multi-api-lifecycle-implementer.json",
+    "docs/overhaul/phase5/evidence/reviews/multi-api-pr91-actual-acceptance.json",
+    "docs/overhaul/phase5/evidence/reviews/provenance-f872de5-independent-review.json",
+    "docs/overhaul/phase5/evidence/reviews/provenance-f872de5-repro.json",
+    "docs/overhaul/phase5/evidence/reviews/provenance-f872de5-repro.py",
+    "docs/overhaul/phase5/evidence/reviews/reliability-independent-accept-e9bc90d.json",
+    "docs/overhaul/phase5/evidence/reviews/reliability-independent-block-f6f11ed.json",
+    "docs/overhaul/phase5/evidence/reviews/vibe-browser-independent-review.json",
+    "docs/overhaul/phase5/evidence/validation-ledger.json"
+  ],
+  "documentationReview": {
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-docs-review/docs-independent-acceptance-6ebb8e7.json",
+    "sha256": "ad50b1a3947b949824b3db02efa877f12e35af29a55d291efdb6affb82a00494"
+  }
+}

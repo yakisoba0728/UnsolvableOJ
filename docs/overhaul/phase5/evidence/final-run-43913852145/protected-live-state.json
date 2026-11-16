@@ -1,0 +1,98 @@
+{
+  "phase4": {
+    "ref": "refs/heads/overhaul4/integration",
+    "node_id": "REF_kwDOUjpo4NoAIHJlZnMvaGVhZHMvb3ZlcmhhdWw0L2ludGVncmF0aW9u",
+    "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/refs/heads/overhaul4/integration",
+    "object": {
+      "sha": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "type": "commit",
+      "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/commits/d0159b1f844bf0608415dded9e84af566c8e2041"
+    }
+  },
+  "phase5": {
+    "ref": "refs/heads/overhaul5/integration",
+    "node_id": "REF_kwDOUjpo4NoAIHJlZnMvaGVhZHMvb3ZlcmhhdWw1L2ludGVncmF0aW9u",
+    "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/refs/heads/overhaul5/integration",
+    "object": {
+      "sha": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+      "type": "commit",
+      "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/commits/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5"
+    }
+  },
+  "main": {
+    "ref": "refs/heads/main",
+    "node_id": "REF_kwDOUjpo4K9yZWZzL2hlYWRzL21haW4",
+    "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/refs/heads/main",
+    "object": {
+      "sha": "6176015b63a1615cc2269172f246725ef08abab3",
+      "type": "commit",
+      "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/commits/6176015b63a1615cc2269172f246725ef08abab3"
+    }
+  },
+  "pr63": {
+    "number": 63,
+    "html_url": "https://github.com/yakisoba0728/UnsolvableOJ/pull/63",
+    "state": "open",
+    "merged": false,
+    "merged_at": null,
+    "draft": false,
+    "auto_merge": null,
+    "head": {
+      "ref": "overhaul/integration",
+      "sha": "3bcba380f92bd2da8973e6c88c00cd14b03be08e"
+    },
+    "base": {
+      "ref": "main",
+      "sha": "6176015b63a1615cc2269172f246725ef08abab3"
+    },
+    "merge_commit_sha": "7bb0b27e6f7a57bf2ba743dc8a765ac2ac312ecc",
+    "mergeable": true,
+    "mergeable_state": "clean",
+    "updated_at": "2026-11-16T09:08:49Z"
+  },
+  "pr86": {
+    "number": 86,
+    "html_url": "https://github.com/yakisoba0728/UnsolvableOJ/pull/86",
+    "state": "open",
+    "merged": false,
+    "merged_at": null,
+    "draft": false,
+    "auto_merge": null,
+    "head": {
+      "ref": "overhaul4/integration",
+      "sha": "d0159b1f844bf0608415dded9e84af566c8e2041"
+    },
+    "base": {
+      "ref": "overhaul/integration",
+      "sha": "3bcba380f92bd2da8973e6c88c00cd14b03be08e"
+    },
+    "merge_commit_sha": "906819c36a56f1f8326e6d8743b02a102762138a",
+    "mergeable": true,
+    "mergeable_state": "clean",
+    "updated_at": "2026-11-16T11:16:10Z"
+  },
+  "pr92": {
+    "number": 92,
+    "html_url": "https://github.com/yakisoba0728/UnsolvableOJ/pull/92",
+    "state": "open",
+    "merged": false,
+    "merged_at": null,
+    "draft": false,
+    "auto_merge": null,
+    "head": {
+      "ref": "overhaul5/integration",
+      "sha": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5"
+    },
+    "base": {
+      "ref": "overhaul4/integration",
+      "sha": "d0159b1f844bf0608415dded9e84af566c8e2041"
+    },
+    "merge_commit_sha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "mergeable": true,
+    "mergeable_state": "clean",
+    "updated_at": "2026-11-16T17:26:59Z"
+  },
+  "retrievedAt": "2026-11-16 17:27:25 UTC",
+  "method": "Connected GitHub REST reads after final CI and independent acceptance, after marking PR92 ready; no protected refs or prior PR metadata modified."
+}
+

@@ -1,6 +1,46 @@
 # UnsolvableOJ Phase V final engineering handoff
 
-This source report closes the four accepted feature increments and preserves their immutable evidence. Final code acceptance requires the **post-run receipt on the final stacked PR**: the exact final source/base/checkout/tree, all twelve completed jobs and independent review. The completed receipt and a finalized copy of this report are retained on the evidence-only `overhaul5/final-receipts` branch without changing the tested release source. Until that receipt exists, this document does not grant merge or deployment approval.
+**Final code decision: READY_FOR_MANUAL_MERGE.** [PR #92](https://github.com/yakisoba0728/UnsolvableOJ/pull/92) is OPEN, ready for review and UNMERGED. All twelve required jobs in [final run 43913852145](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145), attempt1, actually completed successfully at the exact source/base/tree below. Independent whole-run and security reviewers accepted that execution with no blocking findings in the tested scope.
+
+**Operational deployment: BLOCKED_EXTERNAL_ENVIRONMENT.** This code decision does not authorize deployment or certify a production host, network, certificate operation, backup or RTO/RPO. The fixed Runtime review expiry and remaining operator gates still apply.
+
+This is the completed post-run report copy on the evidence-only archive branch. The tested release source remains `e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5`; the archive is not an additional release-code change or a PR to merge. The original pre-run source report and all failed/historical receipts remain preserved in Git.
+
+## Final exact-source acceptance
+
+| Binding | Verified value |
+|---|---|
+| Final source / branch | `e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5` / `overhaul5/integration` |
+| Current base / branch | `d0159b1f844bf0608415dded9e84af566c8e2041` / `overhaul4/integration` |
+| Actual Actions checkout | `70307b3d3c7c9591ee3822e4b5ab903d3527f1b1` |
+| Equal source and checkout tree | `a2a2409dfd3e73b82ba7b39c2e41808eba7b5813` |
+| Checkout parents | `d0159b1f844bf0608415dded9e84af566c8e2041`, then `e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5` |
+| Final CI | [43913852145](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145), attempt1;12 completed successful jobs |
+| Whole-run independent receipt | [JSON](evidence/reviews/final-pr92-independent-review.json), SHA256 `70f6f4489b0f355691c64158043f254aaa7ddb8f955b02fd32e7e09ff6d5144b` |
+| Separate security/native receipt | [JSON](evidence/reviews/final-pr92-security-acceptance.json), SHA256 `631c04e5e5954ed9a12a8d2a3c94deb0726e7cf2bbdf7197757e4643f0c0dc2a` |
+| Final source-document review | [JSON](evidence/reviews/final-docs-independent-acceptance.json), SHA256 `ad50b1a3947b949824b3db02efa877f12e35af29a55d291efdb6affb82a00494` |
+| Protected live-state read | `2026-11-16 17:27:25 UTC`; main/#63/#86 unchanged, #63/#86/#92 OPEN/UNMERGED |
+
+| Required job | Exact job ID | Actual conclusion |
+|---|---|---|
+| Detect changes | [133462613274](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/job/133462613274) | SUCCESS |
+| Docker image (judge) | [133462613610](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/job/133462613610) | SUCCESS |
+| Docker image (runtime) | [133462613878](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/job/133462613878) | SUCCESS |
+| Dependency audit | [133462613893](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/job/133462613893) | SUCCESS |
+| Docker image (front) | [133462613974](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/job/133462613974) | SUCCESS |
+| Docker image (back) | [133462614697](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/job/133462614697) | SUCCESS |
+| Sandbox, pipeline and Compose | [133462777184](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/job/133462777184) | SUCCESS |
+| Backend and API | [133462777250](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/job/133462777250) | SUCCESS |
+| Browser tests (1/2) | [133462777344](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/job/133462777344) | SUCCESS |
+| Judge worker | [133462777373](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/job/133462777373) | SUCCESS |
+| Browser tests (2/2) | [133462778158](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/job/133462778158) | SUCCESS |
+| CI required | [133474126427](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/job/133474126427) | SUCCESS |
+
+The [final acceptance JSON](evidence/final-acceptance.json), [complete final metadata](evidence/final-run-43913852145/final-metadata.json), [original artifact map](evidence/final-run-43913852145/downloaded-artifacts.json) and [decoded-log bindings](evidence/final-run-43913852145/decoded-log-bindings.json) retain the raw provenance. All15 selected original ZIPs match GitHub artifact digests and sizes. Twelve decoded logs are retained in a separate ZIP after explicit credential-retention review; the bindings describe their exact encoding scope.
+
+Actual final execution passed **392 Backend unit tests**, **261 real PostgreSQL API tests**, **137 Judge worker tests**, **5 Python runtime checks** (one health/four Go-package-graph), **90 native tests** including their parent, **36 pipeline cases**, **979 ordinary Playwright entries** (894 real-browser cases and85 browser-free units), and **4 real Compose browser flows**. The72 recorded native matrix rows are not an additional72 tests. The final DB qualification passed7 workloads; schema2 restore passed31 migrations/37 table fingerprints, writer refusal, saved-goal rollback refusal, restored writes and owned cleanup.
+
+There were no failed, cancelled or skipped required jobs in this final run. Browser retries remain0; conditional failure-only artifact steps and the duplicate Front build omission on shard2 are not skipped application suites. Earlier failed source runs and local baseline exclusions remain separately recorded below. The final run's raw measurement values remain source-bound; the detailed selected performance observations later in this report still refer to their explicitly named feature runs.
 
 ## Decisions and scope
 
@@ -14,7 +54,7 @@ The phase created six distinct workers (Frontend, Judge, Database, Security, Rel
 
 ## Final scope matrix
 
-Percentages are the coordinator's **subjective estimates of the stated Phase V goals**, not objective product completion, coverage, pass rates or security scores. There is no weighted aggregate. The estimates include the explicitly unverified scope below; final code acceptance still requires the final stacked PR receipt.
+Percentages are the coordinator's **subjective estimates of the stated Phase V goals**, not objective product completion, coverage, pass rates or security scores. There is no weighted aggregate. The estimates include the explicitly unverified scope below; final code acceptance is supplied by the exact-source receipt above.
 
 | Area | Final status / subjective estimate | Completed evidence | Limit or remaining requirement |
 |---|---|---|---|
@@ -27,7 +67,7 @@ Percentages are the coordinator's **subjective estimates of the stated Phase V g
 | Resilience | CI_VERIFIED / 90% | Actual finite API/Redis/worker/rejudge recovery and generation/duplicate invariants | Clean Redis AOF restart is not a power-loss test; no long chaos campaign or independent fault domain |
 | Migration / backup / recovery | CI_VERIFIED, INTEGRATED / 95% | READ COMMITTED-only empty rollback/reapply; populated-goal and stale-snapshot refusals. Actual schema-2 dump/restore, writer barrier, restored 37-table equality and post-restore write passed | Operational data size, retention, access and RTO/RPO remain external |
 | Performance / scale | TESTED, limited qualification / 80% | Recomputed raw finite load, queue/admission timings, query plans/WAL, browser geometry/heap/EventTiming and bundle bytes | No unsupported speedup, population p99, long-session leak or maximum-capacity claim |
-| CI / independent QA | Features CI_VERIFIED; final receipt required / 95% | Required current-source/current-base full jobs and independent source/artifact review | Acceptance is bound to one source/base/tree; later changes invalidate automatic reuse |
+| CI / independent QA | CI_VERIFIED, INDEPENDENTLY_REVIEWED / 95% | Required current-source/current-base full jobs and independent source/artifact review | Acceptance is bound to one source/base/tree; later changes invalidate automatic reuse |
 | Deployment readiness | BLOCKED_EXTERNAL_ENVIRONMENT / 35% | Concrete release runbook and stop/go evidence requirements | Dedicated host/kernel, networks/egress, operational credentials/certificates, production migration/backup and monitoring receipts needed |
 
 ## Source and integration ledger
@@ -43,11 +83,11 @@ The machine-readable [validation ledger](evidence/validation-ledger.json) is the
 
 The final stacked PR's immutable acceptance comment records the final source, base, merge checkout, equal tree, run/attempt and all twelve job IDs after execution. A document cannot contain its own future commit SHA; that post-run receipt is the authoritative final binding. Historical feature measurements remain tied to their own named source rather than relabeled as the final execution.
 
-Protected starting heads were `main=6176015b63a1615cc2269172f246725ef08abab3`, PR63 `3bcba380f92bd2da8973e6c88c00cd14b03be08e`, and PR86 `d0159b1f844bf0608415dded9e84af566c8e2041`. The final acceptance must repeat the live read of these heads and OPEN/UNMERGED states.
+Protected starting heads were `main=6176015b63a1615cc2269172f246725ef08abab3`, PR63 `3bcba380f92bd2da8973e6c88c00cd14b03be08e`, and PR86 `d0159b1f844bf0608415dded9e84af566c8e2041`. The final acceptance above repeats the live read of these heads and OPEN/UNMERGED states.
 
 ## Actual tests and interpretation
 
-The completed combined Backend/Recovery feature run43905864054 contains these actual results. The final stacked PR must re-execute the same required suites at its own exact source/base/tree; its post-run receipt records the final job IDs rather than reusing these feature counts as final execution.
+The completed combined Backend/Recovery feature run43905864054 contains these actual results. The final stacked PR independently re-executed those required suites at its own exact source/base/tree; its receipt above records the final job IDs. This table preserves the separately accepted feature execution.
 
 | Executed scope | Actual result in combined feature CI |
 |---|---|
@@ -94,6 +134,10 @@ Failed and superseded runs remain in the ledger. Retry, cancellation, test-selec
 
 ## Performance and security conclusions
 
+The final run retained less favorable timings under different CI job hosts. Its two-API batch measured11,176.100703ms active (0.715813jobs/s) and13,488.428723ms through cleanup before report writing (0.593101jobs/s), compared with PR91's8,912.916859ms through-cleanup observation:4,575.511864ms /51.34% longer. The final pipeline host was AMD EPYC7763/Azure; PR91 used Intel6975P-C/AWS. Eight-job arrival-to-finish p50/max were485/10,129ms. This is a finite same-code observation across different hosts, not a causal regression or capacity claim.
+
+The final Compose LCP candidates were[424,396,396]ms, median396ms versus PR91's368ms; the15-switch maximum was53.7ms versus49.2ms. CLS remained[0.048731330235799154,0.048731330235799154,0.05432499885559082]. The editor retained200 events and discarded176, with duration p95/p99=96/104ms; fieldINP stayed null and heap snapshots remained coarse. Final DB qualification took1,986.283389ms and the separate tiny restore1,026.560620ms. The [final numerical addendum](FINAL-RUN-PERFORMANCE.md) preserves exact raw hashes, vectors, per-job environments, limits and adverse observations. The earlier feature observations below remain tied to their named runs.
+
 [PERFORMANCE.md](PERFORMANCE.md) contains protocol-specific raw hashes, conditions, raw vectors, recomputation and limits. The earlier 32-job/four-trial and 24-job/three-wave campaigns both used one API with multiple workers; they are separate protocols and must not be pooled or relabeled as two-API evidence. Tiny nearest-rank p95/p99 values are observed order statistics. Admission time is retained separately from active throughput.
 
 The accepted two-API run43905864054 used eight jobs across eight languages, three admission lanes and two workers. APIs admitted4+4 jobs; workers completed6+2. Active-window throughput was1.086716jobs/s and through-cleanup throughput0.897574jobs/s. Arrival-to-BullMQ-finish p50/p95 were317/6707ms; with eight observations p95 and p99 are the observed maximum. Queue-timestamp wait3/456ms and worker-reported queue age6/457ms have different boundaries. The normal shared quota, claim409, duplicate200, generation1, one10-XP solve and owned cleanup invariants passed. Final report-write time is excluded from the latter denominator. API lifetime CPU and end-RSS include startup and exclude the native executor/DB/Redis/host; this is correctness and bounded resource evidence, not capacity. See [MULTI-API.md](MULTI-API.md).
@@ -110,6 +154,8 @@ The comparable old browser probe runs retain adverse observations: the older Pha
 
 ## Manual handoff
 
-The final receipt must contain exactly one code disposition, `READY_FOR_MANUAL_MERGE`, `PARTIAL_READY_WITH_EXPLICIT_BLOCKERS`, or `BLOCKED`, after actual validation. This source checkpoint does not preselect that future result.
+At this receipt, PR63 targets `main`, PR86 targets `overhaul/integration`, and PR92 targets `overhaul4/integration`. After each owner merge, inspect the next PR's actual base and retarget it to the intended current `main` when necessary, then repeat all required CI against that new base before merging. This receipt approves the recorded PhaseIV base; it does not pre-approve a future retarget or changed merge tree. The evidence-only archive branch is not part of the release merge sequence.
+
+**READY_FOR_MANUAL_MERGE** is the sole final code disposition after actual validation. Production deployment remains blocked on the separately listed operator evidence.
 
 Read the final PR acceptance receipt, [RELEASE-RUNBOOK.md](RELEASE-RUNBOOK.md), and [REMAINING-EXTERNAL-GATES.md](REMAINING-EXTERNAL-GATES.md). Confirm the live stack and required checks; merge #63, then #86, then the final Phase V PR manually, refreshing CI if the base changes. A merge is not a deployment authorization. Operational stop/go requires the dedicated host, network, credentials/certificates, backup/restore, migration and monitoring evidence listed in the runbook.

@@ -6,6 +6,8 @@ The acceptance unit is an immutable **source + current base + actual Actions che
 
 | Directory or file | Purpose |
 |---|---|
+| `final-run-43913852145/` | Final accepted15 original ZIPs, exact raw numerical/transport reports,12 reviewed decoded job logs, current protected-state receipt and derived final observations |
+| `final-acceptance.json` | Sole final code disposition, exact final source/base/checkout/tree/run/jobs and independent review hashes; production remains separately blocked |
 | `security/` | Original failed Runtime scan, unchanged inherited policy, proposed exact policy, primary advisory/CNA evidence, independent review and activation replay |
 | `foundation-run-43890166522/` | Fresh accepted foundation Runtime archive |
 | `judge-run-43893025800/` | Accepted actual72-cell native matrix, real dedicated Vibe pipeline/browser/Compose and fresh image ZIPs |
@@ -39,3 +41,5 @@ This offline PASS concerns historical evidence integrity and arithmetic. It is n
 Ordinary Playwright totals include85 browser-free unit cases; real browser counts are reported separately. Live Compose cases are a separate suite. Native Node totals include their parent, and the72-row language/scenario matrix is not an additional72 tests to add to that total. Reviewer arithmetic checks are evidence checks, not application tests. Failed baselines, unselected baseline controls, blocked local browsers, superseded source runs and final-source results retain their original classification.
 
 The 32-job/four-trial and24-job/three-wave campaigns each used one API with multiple workers. The new eight-job protocol uses two actual API processes and two actual workers on one disposable host. Those protocols have different boundaries and sample sizes; their counts and latency vectors are never pooled into a capacity claim.
+
+The completed post-run report is on this evidence-only archive. The tested release source remains e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5. Original source-document checkpoints and numerical datasets retain their historical meaning. Final raw data and the new numerical appendix are separate from the original10,875-condition portable-verifier dataset.

@@ -1,5 +1,9 @@
 # Phase V progress
 
+## Post-run final archive update
+
+Final PR92 source `e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5`, tree `a2a2409dfd3e73b82ba7b39c2e41808eba7b5813`, passed all12 actual jobs in run43913852145, attempt1, and independent final source/artifact acceptance. Code disposition is **READY_FOR_MANUAL_MERGE**; PR92 remains OPEN/UNMERGED. Production readiness remains BLOCKED_EXTERNAL_ENVIRONMENT. [The completed report](FINAL-REPORT.md) and [immutable acceptance data](evidence/final-acceptance.json) supersede the final-CI-pending checkpoints preserved below. This archive does not change the tested integration head.
+
 ## Current source checkpoint — all feature increments integrated
 
 Four feature PRs are MERGED into Phase V only: #88 (foundation/security), #90 (Judge/Vibe), #89 (Frontend), and #91 (DB/API, multi-API and recovery). Each passed independent review and its own current-source/current-base full twelve-job CI before merge. The latest merge is `a6588f7bedc87228c11852d8664fe20ec6b3ece3`, tree `0f191c89a17b984cae8706cb02137ab0e4e2c3a4`; PR91 run [43905864054](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43905864054) tested checkout `9aa843fad33b30270ab346bc62c4865c17697ff3` with the expected M3/source parents and identical tree.

@@ -1,0 +1,3555 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only numerical addendum from final-run original artifacts; no new experiment/test, no mutation of accepted performance dataset.",
+  "stage": "FINAL_PR92_ACTUAL_NUMERICAL_OBSERVATIONS",
+  "runId": 43913852145,
+  "runUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145",
+  "source": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+  "checkout": {
+    "sha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+    "parents": [
+      "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5"
+    ]
+  },
+  "metadataFile": "final-metadata.json",
+  "metadataSha256": "83825ffe064f1dd03d324e63e27fafefa8379cd3a1331a84fcbad661534e290f",
+  "metadataRunStatus": "completed",
+  "metadataRunConclusion": "success",
+  "metadataJobConclusions": {
+    "success": 12
+  },
+  "sourceBindingReceiptSha256": "3b70703e691f9fab7346692bd1b0d7449f464e49692151949e85e41dfb8cdabe",
+  "all876NonPhase5DocPathsEqualToPr91": true,
+  "artifactIndexSha256": "470d3265a3bc864ca3beec4ffefef0408e56b1073b156ef57d5e2673c0e4c616",
+  "artifacts": {
+    "database": {
+      "artifactId": 14247944044,
+      "artifactUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/artifacts/14247944044",
+      "zipFile": "database-qualification.zip",
+      "zipBytes": 18074,
+      "zipSha256": "41b9c26f8a6e68c9a3f551a06f280f4232db099248ccc4a73c19ac7abe576d5d",
+      "jsonMember": "phase5-database.json",
+      "jsonBytes": 243592,
+      "jsonSha256": "337cbcc2132f1fd9c27d024f034a249ca55b055cfe7be74f88467c6d493e76f0",
+      "matchesOriginalZipMember": true,
+      "matchesQaDownloadedReceipt": true,
+      "matchesFinalGithubMetadata": true
+    },
+    "restore": {
+      "artifactId": 14248613692,
+      "artifactUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/artifacts/14248613692",
+      "zipFile": "restore.zip",
+      "zipBytes": 2265,
+      "zipSha256": "15e74add3c7d4f22624ff1a9869a472f2aa7582aafab2743b171a2fa1f0f3af8",
+      "jsonMember": "phase4-restore.json",
+      "jsonBytes": 7516,
+      "jsonSha256": "ee077e87ef3b3f700a6a53fa0fc068125a69991fd3e575ff1d1e458d2dcf8c7c",
+      "matchesOriginalZipMember": true,
+      "matchesQaDownloadedReceipt": true,
+      "matchesFinalGithubMetadata": true
+    },
+    "multiApi": {
+      "artifactId": 14249198949,
+      "artifactUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/artifacts/14249198949",
+      "zipFile": "multi-api.zip",
+      "zipBytes": 5315,
+      "zipSha256": "bf5ea3ba7956f67295f255c132365e677b3a2a4b45e22815f50bc94f9cd59d45",
+      "jsonMember": "phase5-multi-api.json",
+      "jsonBytes": 25520,
+      "jsonSha256": "644afcd93bf7902815f6eb3a9b0c094e9419bf3cceb9a9f6a35d44790e626f2a",
+      "matchesOriginalZipMember": true,
+      "matchesQaDownloadedReceipt": true,
+      "matchesFinalGithubMetadata": true
+    },
+    "editor": {
+      "artifactId": 14249607210,
+      "artifactUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/artifacts/14249607210",
+      "zipFile": "frontend-2.zip",
+      "zipBytes": 2085350,
+      "zipSha256": "c8b1759609705d77297c938d7a0ea2606058b5673847e95841796c317e5b638d",
+      "jsonMember": "phase5-editor-observation.json",
+      "jsonBytes": 65795,
+      "jsonSha256": "fbfff690fdc12cda92ff0575a9db7173fec6da400ba47ab2ab2f9c6c0de1ae7e",
+      "matchesOriginalZipMember": true,
+      "matchesQaDownloadedReceipt": true,
+      "matchesFinalGithubMetadata": true
+    },
+    "browser": {
+      "artifactId": 14250011866,
+      "artifactUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145/artifacts/14250011866",
+      "zipFile": "browser-performance.zip",
+      "zipBytes": 6100,
+      "zipSha256": "1bbb4f8d8214e2953dbc6b2a03807f2c1ef66cfae7d34e0721f301643a640b66",
+      "jsonMember": "phase3-browser-performance.json",
+      "jsonBytes": 89099,
+      "jsonSha256": "7832745ab70125a085db97afb1c2393720af5cf72218d34badf25e310574478b",
+      "matchesOriginalZipMember": true,
+      "matchesQaDownloadedReceipt": true,
+      "matchesFinalGithubMetadata": true
+    }
+  },
+  "database": {
+    "schemaVersion": 1,
+    "status": "PASS",
+    "source": {
+      "head": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+      "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+      "dirtyPaths": "",
+      "hashes": {
+        "scripts/phase5-db-qualification.mjs": "7ee117df19f12c9946a8ba9e308508593d18352efa32f051e27861dbb325d357",
+        "src/modules/enterprise/enterprise-result-queries.ts": "a0e6441a25e69f4a464e646217ed1944c04844021fbd1497d1f52a60f9849962",
+        "src/modules/enterprise/enterprise-result-export.ts": "2033214890d0bfbb8bd3ce5ea45747c15421c9741d89e20ed1998c51f75e2845",
+        "src/modules/users/learning.service.ts": "69d7a47ee6ee853d54179f2c6955bcff9eb24bed9a40f7924c4980862eb810dc",
+        "src/database/migrations/1796100000000-incremental-problem-stats.ts": "de6b2cdab05abefe6ed37f3c1e33f251a206517800f39e4d47ec1f6f7dc50e82"
+      }
+    },
+    "environment": {
+      "node": "v24.22.2",
+      "os": "7.0.0-1014-aws",
+      "cpu": "Intel(R) Xeon(R) 6975P-C",
+      "logicalCpus": 4,
+      "postgres": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+      "settings": [
+        {
+          "name": "fsync",
+          "setting": "on",
+          "unit": null
+        },
+        {
+          "name": "full_page_writes",
+          "setting": "on",
+          "unit": null
+        },
+        {
+          "name": "lock_timeout",
+          "setting": "2000",
+          "unit": "ms"
+        },
+        {
+          "name": "max_connections",
+          "setting": "100",
+          "unit": null
+        },
+        {
+          "name": "shared_buffers",
+          "setting": "16384",
+          "unit": "8kB"
+        },
+        {
+          "name": "statement_timeout",
+          "setting": "15000",
+          "unit": "ms"
+        },
+        {
+          "name": "synchronous_commit",
+          "setting": "on",
+          "unit": null
+        },
+        {
+          "name": "temp_file_limit",
+          "setting": "32768",
+          "unit": "kB"
+        },
+        {
+          "name": "wal_compression",
+          "setting": "off",
+          "unit": null
+        },
+        {
+          "name": "work_mem",
+          "setting": "4096",
+          "unit": "kB"
+        }
+      ]
+    },
+    "fixture": {
+      "candidates": 5000,
+      "enterpriseSubmissions": 10000,
+      "learningSubmissions": 20000,
+      "visibleLearningSubmissions": 10000,
+      "distinctStatsSolvers": 5000,
+      "bulkRows": 256,
+      "bulkSourceBytesPerRow": 32768
+    },
+    "limits": {
+      "candidates": 5000,
+      "learningRows": 20000,
+      "largeSources": 256,
+      "sourceBytes": 32768,
+      "samples": 5,
+      "statementMs": 15000,
+      "lockMs": 2000,
+      "temporaryBytes": 33554432,
+      "databaseBytes": 167772160,
+      "durationMs": 180000
+    },
+    "migrations": 31,
+    "measuredWorkloads": 7,
+    "reads": [
+      {
+        "label": "enterprise page offset 0",
+        "rawMs": [
+          2.5785189999999147,
+          2.260813999999982,
+          2.0361279999999624,
+          1.9072439999999915,
+          1.9577919999999267
+        ],
+        "nearestRankMs": {
+          "n": 5,
+          "p50": 2.0361279999999624,
+          "p95": 2.5785189999999147,
+          "p99": 2.5785189999999147,
+          "min": 1.9072439999999915,
+          "max": 2.5785189999999147
+        },
+        "returnedRows": [
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "stableResultDigest": "3c1a611e5de517faec897233afec7f48277b9666f242439da2ad9091c38e6bb3",
+        "rawClientCpuMs": [
+          1.891,
+          1.045,
+          0.657,
+          0.548,
+          0.879
+        ],
+        "summedClientCpuMs": 5.02,
+        "clientRssBytesRange": [
+          112394240,
+          114098176
+        ],
+        "rawClientRssBeforeBytes": [
+          112394240,
+          112656384,
+          113049600,
+          113573888,
+          113836032
+        ],
+        "rawClientRssAfterBytes": [
+          112525312,
+          112918528,
+          113311744,
+          113704960,
+          114098176
+        ],
+        "explain": {
+          "executionMs": 1.64,
+          "planningMs": 0.16,
+          "canonicalJsonSha256": "b51fe9e7a0820f8649b1162749045637d2ac13b00b1a7fd886b1972e2e92240b",
+          "topNode": {
+            "Node Type": "Sort",
+            "Shared Hit Blocks": 359,
+            "Shared Read Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "WAL Bytes": 0
+          },
+          "scanAndSortNodes": [
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 50,
+              "Actual Rows": 50,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 44,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "Seq Scan",
+              "Relation Name": "users",
+              "Plan Rows": 5001,
+              "Actual Rows": 5001,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 5000,
+              "Actual Rows": 50,
+              "Actual Loops": 1,
+              "Sort Method": "top-N heapsort",
+              "Sort Space Used": 31,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "Seq Scan",
+              "Relation Name": "enterprise_attempts",
+              "Plan Rows": 5000,
+              "Actual Rows": 5000,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 0
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 2,
+              "Actual Rows": 2,
+              "Actual Loops": 50,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 25,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "Bitmap Heap Scan",
+              "Relation Name": "submissions",
+              "Plan Rows": 2,
+              "Actual Rows": 2,
+              "Actual Loops": 50
+            },
+            {
+              "Node Type": "Bitmap Index Scan",
+              "Index Name": "submissions_attempt_idx",
+              "Plan Rows": 2,
+              "Actual Rows": 2,
+              "Actual Loops": 50
+            }
+          ]
+        }
+      },
+      {
+        "label": "enterprise page offset 4950",
+        "rawMs": [
+          1.884418000000096,
+          1.894008999999869,
+          1.951045000000022,
+          1.8895219999999426,
+          1.838130000000092
+        ],
+        "nearestRankMs": {
+          "n": 5,
+          "p50": 1.8895219999999426,
+          "p95": 1.951045000000022,
+          "p99": 1.951045000000022,
+          "min": 1.838130000000092,
+          "max": 1.951045000000022
+        },
+        "returnedRows": [
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "stableResultDigest": "97c25b1cffc2b94cae5267b10828beff29547e6aa7a353b059769a024e95b986",
+        "rawClientCpuMs": [
+          0.603,
+          0.65,
+          0.622,
+          0.541,
+          0.51
+        ],
+        "summedClientCpuMs": 2.926,
+        "clientRssBytesRange": [
+          114622464,
+          116457472
+        ],
+        "rawClientRssBeforeBytes": [
+          114622464,
+          115015680,
+          115408896,
+          115802112,
+          116195328
+        ],
+        "rawClientRssAfterBytes": [
+          114884608,
+          115277824,
+          115671040,
+          116064256,
+          116457472
+        ],
+        "explain": {
+          "executionMs": 1.941,
+          "planningMs": 0.155,
+          "canonicalJsonSha256": "7dbd96f7bbaa8bf4705256bfc2a0258b02dd281cca5019b0d824278cf94df254",
+          "topNode": {
+            "Node Type": "Sort",
+            "Shared Hit Blocks": 359,
+            "Shared Read Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "WAL Bytes": 0
+          },
+          "scanAndSortNodes": [
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 50,
+              "Actual Rows": 50,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 44,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "Seq Scan",
+              "Relation Name": "users",
+              "Plan Rows": 5001,
+              "Actual Rows": 5001,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 5000,
+              "Actual Rows": 5000,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 857,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "Seq Scan",
+              "Relation Name": "enterprise_attempts",
+              "Plan Rows": 5000,
+              "Actual Rows": 5000,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 0
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 2,
+              "Actual Rows": 2,
+              "Actual Loops": 50,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 25,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "Bitmap Heap Scan",
+              "Relation Name": "submissions",
+              "Plan Rows": 2,
+              "Actual Rows": 2,
+              "Actual Loops": 50
+            },
+            {
+              "Node Type": "Bitmap Index Scan",
+              "Index Name": "submissions_attempt_idx",
+              "Plan Rows": 2,
+              "Actual Rows": 2,
+              "Actual Loops": 50
+            }
+          ]
+        }
+      },
+      {
+        "label": "whole-assessment summary 5000 candidates",
+        "rawMs": [
+          18.663161000000173,
+          18.460630000000037,
+          18.386527000000115,
+          18.40741899999989,
+          18.749866999999995
+        ],
+        "nearestRankMs": {
+          "n": 5,
+          "p50": 18.460630000000037,
+          "p95": 18.749866999999995,
+          "p99": 18.749866999999995,
+          "min": 18.386527000000115,
+          "max": 18.749866999999995
+        },
+        "returnedRows": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "stableResultDigest": "d81ff13c0724ec80e4fdd454c73d3243f827fadad539b61e055e4c05f685fb31",
+        "rawClientCpuMs": [
+          0.575,
+          0.632,
+          0.493,
+          0.65,
+          0.846
+        ],
+        "summedClientCpuMs": 3.1959999999999997,
+        "clientRssBytesRange": [
+          116719616,
+          116850688
+        ],
+        "rawClientRssBeforeBytes": [
+          116719616,
+          116719616,
+          116850688,
+          116850688,
+          116850688
+        ],
+        "rawClientRssAfterBytes": [
+          116719616,
+          116850688,
+          116850688,
+          116850688,
+          116850688
+        ],
+        "explain": {
+          "executionMs": 20.972,
+          "planningMs": 0.462,
+          "canonicalJsonSha256": "aa71781693efd2e660f15afdda42f5bc8bce9db8d99fe14f7e57053d4b3af4f4",
+          "topNode": {
+            "Node Type": "Aggregate",
+            "Shared Hit Blocks": 10138,
+            "Shared Read Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "WAL Bytes": 0
+          },
+          "scanAndSortNodes": [
+            {
+              "Node Type": "Seq Scan",
+              "Relation Name": "enterprise_attempts",
+              "Plan Rows": 5000,
+              "Actual Rows": 5000,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 0
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 5000,
+              "Actual Rows": 5000,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Subquery Scan",
+              "Plan Rows": 4974,
+              "Actual Rows": 5000,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Index Scan",
+              "Relation Name": "submissions",
+              "Index Name": "submissions_attempt_idx",
+              "Plan Rows": 17500,
+              "Actual Rows": 7500,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 2500
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 5000,
+              "Actual Rows": 7499,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 193,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 5000,
+              "Actual Rows": 5000,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Subquery Scan",
+              "Plan Rows": 1,
+              "Actual Rows": 0,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 1,
+              "Actual Rows": 0,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 25,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 5000,
+              "Actual Rows": 1,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Index Scan",
+              "Relation Name": "vibe_attempts",
+              "Index Name": "vibe_enterprise_challenge_idx",
+              "Plan Rows": 1,
+              "Actual Rows": 0,
+              "Actual Loops": 1
+            }
+          ]
+        }
+      },
+      {
+        "label": "scalar export SQL 5000 candidates",
+        "rawMs": [
+          30.574047000000064,
+          22.65214900000001,
+          22.643636000000015,
+          22.60638599999993,
+          24.90311399999996
+        ],
+        "nearestRankMs": {
+          "n": 5,
+          "p50": 22.65214900000001,
+          "p95": 30.574047000000064,
+          "p99": 30.574047000000064,
+          "min": 22.60638599999993,
+          "max": 30.574047000000064
+        },
+        "returnedRows": [
+          5000,
+          5000,
+          5000,
+          5000,
+          5000
+        ],
+        "stableResultDigest": "018b9118fe7f58fca1464d33add94524972e280014504dd7cd5d584e6fa52edc",
+        "rawClientCpuMs": [
+          57.118,
+          15.097,
+          12.488,
+          20.221,
+          16.974
+        ],
+        "summedClientCpuMs": 121.898,
+        "clientRssBytesRange": [
+          135241728,
+          172699648
+        ],
+        "rawClientRssBeforeBytes": [
+          137035776,
+          139206656,
+          143933440,
+          158875648,
+          163131392
+        ],
+        "rawClientRssAfterBytes": [
+          135241728,
+          139206656,
+          146030592,
+          155660288,
+          172699648
+        ],
+        "explain": {
+          "executionMs": 15.124,
+          "planningMs": 0.458,
+          "canonicalJsonSha256": "aee70bc4a19c0ea5a166845fad5769c3b0fe84d1fe3f01eaf689b01c84452394",
+          "topNode": {
+            "Node Type": "Limit",
+            "Shared Hit Blocks": 10235,
+            "Shared Read Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "WAL Bytes": 0
+          },
+          "scanAndSortNodes": [
+            {
+              "Node Type": "Seq Scan",
+              "Relation Name": "enterprise_attempts",
+              "Plan Rows": 5000,
+              "Actual Rows": 5000,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 0
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 5000,
+              "Actual Rows": 5000,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 857,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 5000,
+              "Actual Rows": 5000,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Subquery Scan",
+              "Plan Rows": 4974,
+              "Actual Rows": 5000,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Index Scan",
+              "Relation Name": "submissions",
+              "Index Name": "submissions_attempt_idx",
+              "Plan Rows": 17500,
+              "Actual Rows": 7500,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 2500
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 5000,
+              "Actual Rows": 7499,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 193,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 5000,
+              "Actual Rows": 5000,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Subquery Scan",
+              "Plan Rows": 1,
+              "Actual Rows": 0,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 1,
+              "Actual Rows": 0,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 25,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 5000,
+              "Actual Rows": 1,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Index Scan",
+              "Relation Name": "vibe_attempts",
+              "Index Name": "vibe_enterprise_challenge_idx",
+              "Plan Rows": 1,
+              "Actual Rows": 0,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Seq Scan",
+              "Relation Name": "users",
+              "Plan Rows": 5001,
+              "Actual Rows": 5001,
+              "Actual Loops": 1
+            }
+          ]
+        }
+      },
+      {
+        "label": "learning 90 days over 20000-row history",
+        "rawMs": [
+          11.700451000000157,
+          11.587267999999995,
+          11.571871999999985,
+          11.55388599999992,
+          11.823032000000012
+        ],
+        "nearestRankMs": {
+          "n": 5,
+          "p50": 11.587267999999995,
+          "p95": 11.823032000000012,
+          "p99": 11.823032000000012,
+          "min": 11.55388599999992,
+          "max": 11.823032000000012
+        },
+        "returnedRows": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "stableResultDigest": "9b94f789463335351227593c9396e387b85ac7890e84eff60d4ccaa0eba5d5e2",
+        "rawClientCpuMs": [
+          0.406,
+          0.373,
+          0.406,
+          0.432,
+          0.43
+        ],
+        "summedClientCpuMs": 2.047,
+        "clientRssBytesRange": [
+          178941952,
+          178941952
+        ],
+        "rawClientRssBeforeBytes": [
+          178941952,
+          178941952,
+          178941952,
+          178941952,
+          178941952
+        ],
+        "rawClientRssAfterBytes": [
+          178941952,
+          178941952,
+          178941952,
+          178941952,
+          178941952
+        ],
+        "explain": {
+          "executionMs": 14.949,
+          "planningMs": 0.623,
+          "canonicalJsonSha256": "d439f4dabf1b984b210d9695dc0718fc167b06781544440770318be0c47ee4ba",
+          "topNode": {
+            "Node Type": "Nested Loop",
+            "Shared Hit Blocks": 252,
+            "Shared Read Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "WAL Bytes": 0
+          },
+          "scanAndSortNodes": [
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 1,
+              "Actual Rows": 1,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Bitmap Heap Scan",
+              "Relation Name": "submissions",
+              "Plan Rows": 988,
+              "Actual Rows": 10000,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 0
+            },
+            {
+              "Node Type": "Bitmap Index Scan",
+              "Index Name": "idx_submissions_user_created",
+              "Plan Rows": 2222,
+              "Actual Rows": 10000,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Seq Scan",
+              "Relation Name": "problems",
+              "Plan Rows": 22,
+              "Actual Rows": 22,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 0
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 988,
+              "Actual Rows": 10000,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 988,
+              "Actual Rows": 10000,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 20,
+              "Actual Rows": 18,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Seq Scan",
+              "Relation Name": "problems",
+              "Plan Rows": 22,
+              "Actual Rows": 22,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 10,
+              "Actual Rows": 9,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 25,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "Bitmap Heap Scan",
+              "Relation Name": "user_problem_solves",
+              "Plan Rows": 5,
+              "Actual Rows": 0,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Bitmap Index Scan",
+              "Index Name": "user_problem_solves_pkey",
+              "Plan Rows": 5,
+              "Actual Rows": 0,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 10,
+              "Actual Rows": 9,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 9
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 988,
+              "Actual Rows": 10000,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 576,
+              "Actual Rows": 5000,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 5000
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 10,
+              "Actual Rows": 9,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 9
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 20,
+              "Actual Rows": 18,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 3,
+              "Actual Rows": 1,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 5,
+              "Actual Rows": 5,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 25,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "Function Scan",
+              "Plan Rows": 5,
+              "Actual Rows": 5,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Subquery Scan",
+              "Plan Rows": 1,
+              "Actual Rows": 1,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 20,
+              "Actual Rows": 18,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Seq Scan",
+              "Relation Name": "problems",
+              "Plan Rows": 22,
+              "Actual Rows": 22,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 10,
+              "Actual Rows": 19,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 26,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 10,
+              "Actual Rows": 19,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 10,
+              "Actual Rows": 19,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 9,
+              "Actual Rows": 9,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 25,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 10,
+              "Actual Rows": 9,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 25,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "Seq Scan",
+              "Relation Name": "problems",
+              "Plan Rows": 22,
+              "Actual Rows": 22,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 10,
+              "Actual Rows": 9,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 494,
+              "Actual Rows": 4446,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 505,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 988,
+              "Actual Rows": 10000,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 10,
+              "Actual Rows": 9,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Index Only Scan",
+              "Relation Name": "problem_bookmarks",
+              "Index Name": "problem_bookmarks_pkey",
+              "Plan Rows": 1,
+              "Actual Rows": 0,
+              "Actual Loops": 9
+            },
+            {
+              "Node Type": "Index Scan",
+              "Relation Name": "users",
+              "Index Name": "users_pkey",
+              "Plan Rows": 1,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 0
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 1,
+              "Actual Rows": 1,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "Sort",
+              "Plan Rows": 90,
+              "Actual Rows": 90,
+              "Actual Loops": 1,
+              "Sort Method": "quicksort",
+              "Sort Space Used": 27,
+              "Sort Space Type": "Memory"
+            },
+            {
+              "Node Type": "Function Scan",
+              "Plan Rows": 90,
+              "Actual Rows": 90,
+              "Actual Loops": 1
+            },
+            {
+              "Node Type": "CTE Scan",
+              "Plan Rows": 3,
+              "Actual Rows": 1,
+              "Actual Loops": 1
+            }
+          ]
+        }
+      }
+    ],
+    "distinctSolvers": {
+      "label": "5000 distinct solver multiplicities",
+      "insertMs": 134.7535899999998,
+      "oracle": {
+        "solver_count": 5000,
+        "accepted_count": 5000,
+        "finished_count": 5000
+      },
+      "entireCounterRelationBytes": 638976
+    },
+    "bulk": {
+      "label": "large source bulk transition and rollback",
+      "committedMs": 6.03522699999985,
+      "clusterWalBytes": 191752,
+      "plan": {
+        "Plan": {
+          "Node Type": "ModifyTable",
+          "Operation": "Update",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Relation Name": "submissions",
+          "Alias": "submissions",
+          "Startup Cost": 0.29,
+          "Total Cost": 7.14,
+          "Plan Rows": 0,
+          "Plan Width": 0,
+          "Actual Startup Time": 2.261,
+          "Actual Total Time": 2.261,
+          "Actual Rows": 0,
+          "Actual Loops": 1,
+          "Shared Hit Blocks": 3582,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 11,
+          "Shared Written Blocks": 11,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 8,
+          "WAL Records": 1548,
+          "WAL FPI": 0,
+          "WAL Bytes": 175394,
+          "Plans": [
+            {
+              "Node Type": "Index Scan",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "idx_submissions_problem_status_user",
+              "Relation Name": "submissions",
+              "Alias": "submissions",
+              "Startup Cost": 0.29,
+              "Total Cost": 7.14,
+              "Plan Rows": 1,
+              "Plan Width": 10,
+              "Actual Startup Time": 0.004,
+              "Actual Total Time": 0.082,
+              "Actual Rows": 256,
+              "Actual Loops": 1,
+              "Index Cond": "(problem_id = '00000000-0000-4000-8000-000000000103'::uuid)",
+              "Rows Removed by Index Recheck": 0,
+              "Shared Hit Blocks": 223,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "WAL Records": 0,
+              "WAL FPI": 0,
+              "WAL Bytes": 0
+            }
+          ]
+        },
+        "Planning": {
+          "Shared Hit Blocks": 2,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0
+        },
+        "Planning Time": 0.038,
+        "Triggers": [
+          {
+            "Trigger Name": "trg_submissions_stats_update",
+            "Relation": "submissions",
+            "Time": 3.054,
+            "Calls": 1
+          }
+        ],
+        "Execution Time": 5.376
+      },
+      "initial": {
+        "solver_count": 256,
+        "accepted_count": 256,
+        "finished_count": 256
+      },
+      "afterRollback": {
+        "solver_count": 0,
+        "accepted_count": 0,
+        "finished_count": 256
+      },
+      "caution": "Single committed sample; cluster WAL includes concurrent/checkpoint effects if any. EXPLAIN temp blocks do not expose all trigger-internal temporary IO."
+    },
+    "stages": [
+      {
+        "label": "fresh migrations",
+        "elapsedMs": 86.34205399999996,
+        "databaseBytes": 9508531
+      },
+      {
+        "label": "seed bounded enterprise and learning histories",
+        "elapsedMs": 686.45957,
+        "databaseBytes": 21722803
+      },
+      {
+        "label": "enterprise page offset 0",
+        "elapsedMs": 21.248882000000094,
+        "databaseBytes": 21722803
+      },
+      {
+        "label": "enterprise page offset 4950",
+        "elapsedMs": 17.570674000000054,
+        "databaseBytes": 21722803
+      },
+      {
+        "label": "whole-assessment summary 5000 candidates",
+        "elapsedMs": 138.027736,
+        "databaseBytes": 21722803
+      },
+      {
+        "label": "scalar export SQL 5000 candidates",
+        "elapsedMs": 288.00380600000017,
+        "databaseBytes": 21722803
+      },
+      {
+        "label": "learning 90 days over 20000-row history",
+        "elapsedMs": 91.539403,
+        "databaseBytes": 21722803
+      },
+      {
+        "label": "5000 distinct solver multiplicities",
+        "elapsedMs": 143.9149769999999,
+        "databaseBytes": 23991987
+      },
+      {
+        "label": "large source bulk transition and rollback",
+        "elapsedMs": 349.01672799999983,
+        "databaseBytes": 33052339
+      }
+    ],
+    "elapsedMs": 1986.283389,
+    "stageIntervalSumMs": 1822.12383,
+    "maximumDatabaseBytes": 33052339,
+    "cleanup": {
+      "created": true,
+      "dropped": true
+    },
+    "sameMeasuredHashesAndFixturesAsPr91": true,
+    "maximumClientRssEndpointBytes": 178941952
+  },
+  "restore": {
+    "schemaVersion": 2,
+    "source": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "workflowRunId": "43913852145",
+    "result": "PASS",
+    "migrations": 31,
+    "fixture": {
+      "users": 128,
+      "problems": 24,
+      "submissions": 2056,
+      "ordinaryFixtureSubmissions": 2048,
+      "largeSourceBytes": 16384,
+      "workMem": "64kB",
+      "products": {
+        "goals": 12,
+        "problemVersions": 24,
+        "solves": 128,
+        "xpMatchesLedger": true,
+        "solveEvidenceMatches": true,
+        "assessments": 1,
+        "candidates": 8,
+        "algorithmPins": 1,
+        "vibePins": 1,
+        "assessmentSubmissions": 8,
+        "assessmentSubmissionOwnershipVersionsMatch": true,
+        "workspaces": 8,
+        "revisions": 16,
+        "workspaceOwnershipVersionsMatch": true
+      }
+    },
+    "writerBarrier": {
+      "mode": "SHARE",
+      "tables": 37,
+      "concurrentWriteRefused": true,
+      "heldThroughDump": true
+    },
+    "databaseBytes": {
+      "source": 11278003,
+      "restored": 11589299,
+      "capEach": 67108864
+    },
+    "archive": {
+      "bytes": 270181,
+      "sha256": "37fc6d0d24128e69e535f27fa9453e12a8e37359f625190311be8f4ad8fa7a1f"
+    },
+    "schemaComparison": "Exact columns/indexes/triggers/non-CHECK definitions and flags; stable PostgreSQL-parser-normalized CHECK definitions",
+    "stages": [
+      {
+        "name": "fresh migrations",
+        "elapsedMs": 75.075785
+      },
+      {
+        "name": "empty final migration rollback and reapply",
+        "elapsedMs": 8.610329999999976
+      },
+      {
+        "name": "bounded fixture with product history and transition pressure",
+        "elapsedMs": 81.68539799999996
+      },
+      {
+        "name": "stop-writer barrier rejects concurrent writes",
+        "elapsedMs": 102.706166
+      },
+      {
+        "name": "pg_dump custom archive",
+        "elapsedMs": 116.49926499999992
+      },
+      {
+        "name": "pg_restore into second generated database",
+        "elapsedMs": 138.56147199999998
+      },
+      {
+        "name": "all restored table fingerprints",
+        "elapsedMs": 57.36923200000001
+      },
+      {
+        "name": "restored schema equality",
+        "elapsedMs": 88.01564200000007
+      },
+      {
+        "name": "restored migration ledger",
+        "elapsedMs": 1.853121000000101
+      },
+      {
+        "name": "populated goal rollback refusal and product history preservation",
+        "elapsedMs": 127.3530229999999
+      },
+      {
+        "name": "restored write and statistics integrity",
+        "elapsedMs": 7.3928719999998975
+      },
+      {
+        "name": "owned database cleanup",
+        "elapsedMs": 15.673900000000003
+      }
+    ],
+    "elapsedMs": 1026.56062,
+    "cleanup": "both generated databases removed",
+    "tableCount": 37,
+    "nonemptyTableCount": 18,
+    "sumReportedTableRows": 2976,
+    "tableFingerprints": [
+      {
+        "table": "analysis_attempts",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "audit_events",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "community_comment_votes",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "community_comments",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "community_follows",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "community_post_views",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "community_posts",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "community_reports",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "community_saved",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "community_votes",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "email_delivery_clock",
+        "rows": 1,
+        "digest": "7f07a0af5270acec2ef23add3dffc141"
+      },
+      {
+        "table": "email_outbox",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "email_preferences",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "email_request_limits",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "email_tokens",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "enterprise_attempts",
+        "rows": 8,
+        "digest": "c66b370f5e5917019ed3c9afc605a260"
+      },
+      {
+        "table": "enterprise_problem_versions",
+        "rows": 1,
+        "digest": "c7812dd88de9d893bedd7559e6906029"
+      },
+      {
+        "table": "enterprise_tests",
+        "rows": 1,
+        "digest": "701440770dca58e6671fac55af4eed47"
+      },
+      {
+        "table": "enterprise_vibe_versions",
+        "rows": 1,
+        "digest": "8d9bf95436fc3af91029a0c96a4bc499"
+      },
+      {
+        "table": "learning_goals",
+        "rows": 12,
+        "digest": "5e85a8a8937fc500b020b6bbc4fdad32"
+      },
+      {
+        "table": "migrations",
+        "rows": 31,
+        "digest": "3634de1ba27c7ccd81d9b1a04641feb6"
+      },
+      {
+        "table": "mission_states",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "notifications",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "problem_bookmarks",
+        "rows": 128,
+        "digest": "2d5706b77646957b43bbe5bc29ae4fdd"
+      },
+      {
+        "table": "problem_solver_counts",
+        "rows": 384,
+        "digest": "f6cf432f3f574aa88b9decf32cc7dfc7"
+      },
+      {
+        "table": "problem_stats",
+        "rows": 24,
+        "digest": "de6abe22263afad71aa608106eb37f0c"
+      },
+      {
+        "table": "problem_versions",
+        "rows": 24,
+        "digest": "3ff24878394434c17238b19bc00621ef"
+      },
+      {
+        "table": "problems",
+        "rows": 24,
+        "digest": "bddf9c29f5e9f8307ae07498c39e0cce"
+      },
+      {
+        "table": "refresh_tokens",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "submissions",
+        "rows": 2056,
+        "digest": "f7a3db834a8957f678bafeb12c2d2d96"
+      },
+      {
+        "table": "test_cases",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "user_badges",
+        "rows": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      {
+        "table": "user_problem_solves",
+        "rows": 128,
+        "digest": "52c3278f927c33694e2e049e161c5f4d"
+      },
+      {
+        "table": "users",
+        "rows": 128,
+        "digest": "376970c447b61a98e1f56b68343818f4"
+      },
+      {
+        "table": "vibe_attempts",
+        "rows": 8,
+        "digest": "925968c81928ae679b82e4ebcfdfc6ce"
+      },
+      {
+        "table": "vibe_challenge_versions",
+        "rows": 1,
+        "digest": "7d00bcd4bdd50a4649961d5b6f761ddd"
+      },
+      {
+        "table": "vibe_revisions",
+        "rows": 16,
+        "digest": "7d5f06252fb2c0b542763bf301cdab32"
+      }
+    ],
+    "stageIntervalSumMs": 820.7962059999998,
+    "dumpArchiveRetained": false
+  },
+  "multiApi": {
+    "schemaVersion": 1,
+    "status": "PASS",
+    "provenance": {
+      "checkoutSha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+      "treeSha": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+      "sourceHeadSha": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+      "baseSha": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "runId": "43913852145",
+      "runAttempt": "1",
+      "trackedTreeClean": true
+    },
+    "environment": {
+      "node": "v24.22.2",
+      "platform": "linux",
+      "release": "7.0.0-1017-azure",
+      "cpuModel": "AMD EPYC 7763 64-Core Processor",
+      "logicalCpus": 4,
+      "clockTicksPerSecond": 100
+    },
+    "limits": {
+      "submissions": 8,
+      "languages": 8,
+      "solverAccounts": 1,
+      "admissionLanes": 3,
+      "apiProcesses": 2,
+      "workerProcesses": 2,
+      "concurrencyPerWorker": 1,
+      "childV8HeapMb": 256,
+      "submissionRateLimit": 20,
+      "submissionWindowMs": 60000,
+      "scenarioMs": 45000,
+      "existingTestTimeoutMs": 90000,
+      "cleanupProcessPhaseMs": 15000,
+      "cleanupIoBudgetMs": 6000,
+      "reportBudgetMs": 3000,
+      "totalBudgetMs": 84000,
+      "observerDatabaseConnectionsPerPhase": 1,
+      "observerQueryTimeoutMs": 2000,
+      "observerRedisCommandTimeoutMs": 2000,
+      "compileTimeMs": 30000,
+      "compileMemoryMb": 1024,
+      "executionTimeMs": 2000,
+      "executionMemoryMb": 256,
+      "providerCalls": 0,
+      "processLogCharactersPerChild": 100000
+    },
+    "admission": {
+      "requests": 8,
+      "maximumActiveLanes": 3,
+      "activeBatchMs": 11176.100703,
+      "counterResetsDuringProtocol": 0,
+      "submissionRetries": 0,
+      "solverRole": "USER"
+    },
+    "preSetupThrottleResets": 1,
+    "workerBound": {
+      "configuredTotal": 2,
+      "maximumObservedQueueOverlap": 2,
+      "perWorkerMaximumObservedQueueOverlap": [
+        1,
+        1
+      ]
+    },
+    "activeClaimConflict": {
+      "submissionId": "b20bd9db-4dae-46a6-baaf-d3dbabb9eaba",
+      "language": "GO",
+      "originalAttempt": "598781d3-84dc-451a-aeb7-d42b729dd52e",
+      "competingAttempt": "368e2573-a32c-424d-bd24-b62a3b077557",
+      "beforeAtEpochMs": 1794848839206,
+      "afterAtEpochMs": 1794848839217,
+      "beforeStatus": "JUDGING",
+      "afterStatus": "JUDGING",
+      "afterAttempt": "598781d3-84dc-451a-aeb7-d42b729dd52e",
+      "conflicts": [
+        {
+          "apiIndex": 0,
+          "httpStatus": 409
+        },
+        {
+          "apiIndex": 1,
+          "httpStatus": 409
+        }
+      ]
+    },
+    "persistence": {
+      "submissions": 8,
+      "learned": 8,
+      "notifications": 8,
+      "solves": [
+        {
+          "awarded_xp": 10,
+          "accepted_submission_id": "dc870e41-062e-405e-9455-81808061717c"
+        }
+      ],
+      "xp": 10,
+      "resultReplays": 8
+    },
+    "scenarioElapsedMs": 13397.353062,
+    "cleanup": {
+      "failures": [],
+      "removedJobIds": [
+        "dc870e41-062e-405e-9455-81808061717c-1",
+        "06fbb35f-87e2-4afb-bec6-65a9657358ec-1",
+        "160aaece-98ce-473e-a493-2948c62b8aea-1",
+        "0e6f2abf-6893-4974-b59d-f49ea2053efe-1",
+        "03109c58-4ee7-47fb-b79d-523eb1818722-1",
+        "b5e0c8dc-e94e-4344-93b1-068e77f52732-1",
+        "53bbee93-693a-4a33-a154-77b05a1ecc33-1",
+        "b20bd9db-4dae-46a6-baaf-d3dbabb9eaba-1"
+      ],
+      "elapsedMs": 83.35824200000025,
+      "processes": [
+        {
+          "pid": 24452,
+          "exitCode": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 24453,
+          "exitCode": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 24517,
+          "exitCode": 0,
+          "signal": null
+        },
+        {
+          "pid": 24518,
+          "exitCode": 0,
+          "signal": null
+        }
+      ],
+      "observers": [
+        {
+          "postgresSocketDestroyed": true,
+          "redisStatus": "end",
+          "queueCloseFailed": false,
+          "pendingOperations": 0,
+          "forceCloseFailures": []
+        },
+        {
+          "postgresSocketDestroyed": true,
+          "redisStatus": "end",
+          "queueCloseFailed": false,
+          "pendingOperations": 0,
+          "forceCloseFailures": []
+        }
+      ]
+    },
+    "nativeArtifacts": {
+      "before": [],
+      "after": []
+    },
+    "firstArrivalEpochMs": 1794848838125,
+    "timeline": [
+      {
+        "index": 0,
+        "language": "C",
+        "apiIndex": 0,
+        "workerIndex": 0,
+        "arrivalEpochMs": 1794848838125,
+        "queueEpochMs": 1794848838154,
+        "startEpochMs": 1794848838159,
+        "finishEpochMs": 1794848838315,
+        "arrivalOffsetMs": 0,
+        "queueOffsetMs": 29,
+        "startOffsetMs": 34,
+        "finishOffsetMs": 190,
+        "apiMs": 37.22527500000024,
+        "arrivalToQueueMs": 29,
+        "queueWaitMs": 5,
+        "bullmqActiveMs": 156,
+        "arrivalToFinishMs": 190,
+        "workerQueueAgeMs": 15,
+        "workerTotalMs": 143.99822799999998,
+        "claimMs": 22.15844400000003,
+        "judgeMs": 95.612888,
+        "reportMs": 26.16798700000004,
+        "dbCreatedEpochMs": 1794848838142,
+        "dbUpdatedEpochMs": 1794848838292
+      },
+      {
+        "index": 1,
+        "language": "CPP",
+        "apiIndex": 1,
+        "workerIndex": 0,
+        "arrivalEpochMs": 1794848838126,
+        "queueEpochMs": 1794848838201,
+        "startEpochMs": 1794848838315,
+        "finishEpochMs": 1794848838861,
+        "arrivalOffsetMs": 1,
+        "queueOffsetMs": 76,
+        "startOffsetMs": 190,
+        "finishOffsetMs": 736,
+        "apiMs": 81.24745699999994,
+        "arrivalToQueueMs": 75,
+        "queueWaitMs": 114,
+        "bullmqActiveMs": 546,
+        "arrivalToFinishMs": 735,
+        "workerQueueAgeMs": 118,
+        "workerTotalMs": 541.0238770000001,
+        "claimMs": 13.546205999999984,
+        "judgeMs": 510.697762,
+        "reportMs": 16.746376000000055,
+        "dbCreatedEpochMs": 1794848838170,
+        "dbUpdatedEpochMs": 1794848838847
+      },
+      {
+        "index": 2,
+        "language": "JAVA",
+        "apiIndex": 0,
+        "workerIndex": 1,
+        "arrivalEpochMs": 1794848838126,
+        "queueEpochMs": 1794848838178,
+        "startEpochMs": 1794848838179,
+        "finishEpochMs": 1794848839824,
+        "arrivalOffsetMs": 1,
+        "queueOffsetMs": 53,
+        "startOffsetMs": 54,
+        "finishOffsetMs": 1699,
+        "apiMs": 59.507164999999986,
+        "arrivalToQueueMs": 52,
+        "queueWaitMs": 1,
+        "bullmqActiveMs": 1645,
+        "arrivalToFinishMs": 1698,
+        "workerQueueAgeMs": 4,
+        "workerTotalMs": 1640.8191829999998,
+        "claimMs": 47.16211599999997,
+        "judgeMs": 1579.121456,
+        "reportMs": 14.480818999999883,
+        "dbCreatedEpochMs": 1794848838162,
+        "dbUpdatedEpochMs": 1794848839814
+      },
+      {
+        "index": 3,
+        "language": "PYTHON",
+        "apiIndex": 1,
+        "workerIndex": 0,
+        "arrivalEpochMs": 1794848838412,
+        "queueEpochMs": 1794848838455,
+        "startEpochMs": 1794848838861,
+        "finishEpochMs": 1794848838897,
+        "arrivalOffsetMs": 287,
+        "queueOffsetMs": 330,
+        "startOffsetMs": 736,
+        "finishOffsetMs": 772,
+        "apiMs": 52.53951499999994,
+        "arrivalToQueueMs": 43,
+        "queueWaitMs": 406,
+        "bullmqActiveMs": 36,
+        "arrivalToFinishMs": 485,
+        "workerQueueAgeMs": 407,
+        "workerTotalMs": 34.847181999999975,
+        "claimMs": 5.979706999999962,
+        "judgeMs": 19.911323999999922,
+        "reportMs": 8.930131999999958,
+        "dbCreatedEpochMs": 1794848838445,
+        "dbUpdatedEpochMs": 1794848838890
+      },
+      {
+        "index": 4,
+        "language": "JAVASCRIPT",
+        "apiIndex": 0,
+        "workerIndex": 0,
+        "arrivalEpochMs": 1794848838965,
+        "queueEpochMs": 1794848838973,
+        "startEpochMs": 1794848838974,
+        "finishEpochMs": 1794848839056,
+        "arrivalOffsetMs": 840,
+        "queueOffsetMs": 848,
+        "startOffsetMs": 849,
+        "finishOffsetMs": 931,
+        "apiMs": 9.233358000000408,
+        "arrivalToQueueMs": 8,
+        "queueWaitMs": 1,
+        "bullmqActiveMs": 82,
+        "arrivalToFinishMs": 91,
+        "workerQueueAgeMs": 2,
+        "workerTotalMs": 80.77727999999979,
+        "claimMs": 6.71130200000016,
+        "judgeMs": 56.68645000000015,
+        "reportMs": 17.34374099999991,
+        "dbCreatedEpochMs": 1794848838970,
+        "dbUpdatedEpochMs": 1794848839044
+      },
+      {
+        "index": 5,
+        "language": "TYPESCRIPT",
+        "apiIndex": 1,
+        "workerIndex": 0,
+        "arrivalEpochMs": 1794848838993,
+        "queueEpochMs": 1794848839006,
+        "startEpochMs": 1794848839056,
+        "finishEpochMs": 1794848839139,
+        "arrivalOffsetMs": 868,
+        "queueOffsetMs": 881,
+        "startOffsetMs": 931,
+        "finishOffsetMs": 1014,
+        "apiMs": 14.751154000000042,
+        "arrivalToQueueMs": 13,
+        "queueWaitMs": 50,
+        "bullmqActiveMs": 83,
+        "arrivalToFinishMs": 146,
+        "workerQueueAgeMs": 51,
+        "workerTotalMs": 81.29909900000007,
+        "claimMs": 6.816676000000143,
+        "judgeMs": 60.87169700000004,
+        "reportMs": 13.580519000000095,
+        "dbCreatedEpochMs": 1794848839001,
+        "dbUpdatedEpochMs": 1794848839128
+      },
+      {
+        "index": 6,
+        "language": "GO",
+        "apiIndex": 0,
+        "workerIndex": 0,
+        "arrivalEpochMs": 1794848839090,
+        "queueEpochMs": 1794848839098,
+        "startEpochMs": 1794848839139,
+        "finishEpochMs": 1794848849219,
+        "arrivalOffsetMs": 965,
+        "queueOffsetMs": 973,
+        "startOffsetMs": 1014,
+        "finishOffsetMs": 11094,
+        "apiMs": 9.368078999999852,
+        "arrivalToQueueMs": 8,
+        "queueWaitMs": 41,
+        "bullmqActiveMs": 10080,
+        "arrivalToFinishMs": 10129,
+        "workerQueueAgeMs": 42,
+        "workerTotalMs": 10078.540265,
+        "claimMs": 11.123965999999882,
+        "judgeMs": 10059.281971999999,
+        "reportMs": 8.095793999998932,
+        "dbCreatedEpochMs": 1794848839095,
+        "dbUpdatedEpochMs": 1794848849213
+      },
+      {
+        "index": 7,
+        "language": "RUST",
+        "apiIndex": 1,
+        "workerIndex": 1,
+        "arrivalEpochMs": 1794848839231,
+        "queueEpochMs": 1794848839245,
+        "startEpochMs": 1794848839824,
+        "finishEpochMs": 1794848840322,
+        "arrivalOffsetMs": 1106,
+        "queueOffsetMs": 1120,
+        "startOffsetMs": 1699,
+        "finishOffsetMs": 2197,
+        "apiMs": 15.811803000000054,
+        "arrivalToQueueMs": 14,
+        "queueWaitMs": 579,
+        "bullmqActiveMs": 498,
+        "arrivalToFinishMs": 1091,
+        "workerQueueAgeMs": 581,
+        "workerTotalMs": 495.76831600000014,
+        "claimMs": 5.598875999999791,
+        "judgeMs": 479.96567000000005,
+        "reportMs": 10.178711999999905,
+        "dbCreatedEpochMs": 1794848839237,
+        "dbUpdatedEpochMs": 1794848840314
+      }
+    ],
+    "nearestRankMs": {
+      "apiMs": {
+        "n": 8,
+        "p50": 15.811803000000054,
+        "p95": 81.24745699999994,
+        "p99": 81.24745699999994,
+        "min": 9.233358000000408,
+        "max": 81.24745699999994
+      },
+      "arrivalToQueueMs": {
+        "n": 8,
+        "p50": 14,
+        "p95": 75,
+        "p99": 75,
+        "min": 8,
+        "max": 75
+      },
+      "queueWaitMs": {
+        "n": 8,
+        "p50": 41,
+        "p95": 579,
+        "p99": 579,
+        "min": 1,
+        "max": 579
+      },
+      "bullmqActiveMs": {
+        "n": 8,
+        "p50": 156,
+        "p95": 10080,
+        "p99": 10080,
+        "min": 36,
+        "max": 10080
+      },
+      "arrivalToFinishMs": {
+        "n": 8,
+        "p50": 485,
+        "p95": 10129,
+        "p99": 10129,
+        "min": 91,
+        "max": 10129
+      },
+      "workerQueueAgeMs": {
+        "n": 8,
+        "p50": 42,
+        "p95": 581,
+        "p99": 581,
+        "min": 2,
+        "max": 581
+      },
+      "workerTotalMs": {
+        "n": 8,
+        "p50": 143.99822799999998,
+        "p95": 10078.540265,
+        "p99": 10078.540265,
+        "min": 34.847181999999975,
+        "max": 10078.540265
+      },
+      "claimMs": {
+        "n": 8,
+        "p50": 6.816676000000143,
+        "p95": 47.16211599999997,
+        "p99": 47.16211599999997,
+        "min": 5.598875999999791,
+        "max": 47.16211599999997
+      },
+      "judgeMs": {
+        "n": 8,
+        "p50": 95.612888,
+        "p95": 10059.281971999999,
+        "p99": 10059.281971999999,
+        "min": 19.911323999999922,
+        "max": 10059.281971999999
+      },
+      "reportMs": {
+        "n": 8,
+        "p50": 13.580519000000095,
+        "p95": 26.16798700000004,
+        "p99": 26.16798700000004,
+        "min": 8.095793999998932,
+        "max": 26.16798700000004
+      }
+    },
+    "apiCounts": {
+      "0": 4,
+      "1": 4
+    },
+    "workerCounts": {
+      "0": 6,
+      "1": 2
+    },
+    "quotaRemainingSorted": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "queueOverlapRecomputed": 2,
+    "perWorkerOverlapRecomputed": [
+      1,
+      1
+    ],
+    "dbRowTimestampOverlapRecomputed": 3,
+    "processEndpoints": [
+      {
+        "pid": 24452,
+        "sampledAtEpochMs": 1794848849366,
+        "rssKiB": 248676,
+        "peakRssKiB": 248676,
+        "userCpuTicks": 197,
+        "systemCpuTicks": 23,
+        "role": "api",
+        "index": 0,
+        "cumulativeCpuMs": 2200.0,
+        "rssMiB": 242.84765625,
+        "lifetimePeakRssMiB": 242.84765625
+      },
+      {
+        "pid": 24453,
+        "sampledAtEpochMs": 1794848849366,
+        "rssKiB": 196688,
+        "peakRssKiB": 196688,
+        "userCpuTicks": 180,
+        "systemCpuTicks": 19,
+        "role": "api",
+        "index": 1,
+        "cumulativeCpuMs": 1990.0,
+        "rssMiB": 192.078125,
+        "lifetimePeakRssMiB": 192.078125
+      },
+      {
+        "pid": 24517,
+        "sampledAtEpochMs": 1794848849366,
+        "rssKiB": 103548,
+        "peakRssKiB": 110844,
+        "userCpuTicks": 42,
+        "systemCpuTicks": 6,
+        "role": "worker",
+        "index": 0,
+        "cumulativeCpuMs": 480.0,
+        "rssMiB": 101.12109375,
+        "lifetimePeakRssMiB": 108.24609375
+      },
+      {
+        "pid": 24518,
+        "sampledAtEpochMs": 1794848849366,
+        "rssKiB": 101112,
+        "peakRssKiB": 110568,
+        "userCpuTicks": 37,
+        "systemCpuTicks": 6,
+        "role": "worker",
+        "index": 1,
+        "cumulativeCpuMs": 430.0,
+        "rssMiB": 98.7421875,
+        "lifetimePeakRssMiB": 107.9765625
+      }
+    ],
+    "elapsedMsBeforeReportWrite": 13488.428723,
+    "jobsPerActiveSecond": 0.7158131635170897,
+    "jobsPerRecordedThroughCleanupSecond": 0.5931009581834152,
+    "arrivalToLastBullmqFinishMs": 11094,
+    "pr91Comparison": {
+      "pr91RunId": 43905864054,
+      "pr91ActiveBatchMs": 7361.630467999999,
+      "pr91ElapsedMsBeforeReportWrite": 8912.916858999999,
+      "elapsedDifferenceMs": 4575.511864000002,
+      "elapsedRatio": 1.5133574043585727,
+      "scope": "Same code, different CI host and sample; no causal improvement/regression or sustained-capacity inference."
+    }
+  },
+  "editor": {
+    "schemaVersion": 1,
+    "status": "PASS",
+    "source": {
+      "checkout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+      "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+      "sourceHead": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+      "base": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "workflowRunId": "43913852145",
+      "workflowAttempt": "1",
+      "trackedTreeClean": true
+    },
+    "environment": {
+      "project": "chromium",
+      "browser": "chromium",
+      "browserVersion": "153.0.8010.12",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      }
+    },
+    "protocol": {
+      "trials": 1,
+      "scope": "Real frontend editor with deterministic browser-routed mock API and synthetic authentication; no real backend, native executor or provider.",
+      "plannedObservationMs": 40000,
+      "maximumObservationMs": 45000,
+      "testTimeoutMs": 90000,
+      "budgetScope": "Actions, autosave and heap sampling; observer disposal/reporting use the remaining 90-second test ceiling.",
+      "initialIdleMs": 5000,
+      "cycles": 10,
+      "scheduledCycleMs": 3000,
+      "finalIdleMs": 5000,
+      "editorWrites": 10,
+      "fileToggles": 10,
+      "charactersPerWrite": 8,
+      "plannedHeapSamples": 13,
+      "eventDurationThresholdMs": 16,
+      "maximumEventEntries": 200,
+      "initialLinesPerFile": 81,
+      "fixtureDeclarationsPerFile": 80,
+      "gcForced": false,
+      "actionWallTiming": "Includes automation, assertions and the mock autosave debounce; not a processing/paint latency.",
+      "clocks": "Actions use Node monotonic time; heap/EventTiming use browser monotonic time from probe installation. These nearby origins are not identical."
+    },
+    "actual": {
+      "heapSamples": 13,
+      "actions": 20,
+      "autosaveWrites": 10,
+      "unexpectedRequests": 0,
+      "pageErrors": 0
+    },
+    "protocolElapsedMs": 40020.498419,
+    "observerCleanupMs": 65.25304000000324,
+    "actualObservationMs": 40085.762096000006,
+    "fieldINP": {
+      "value": null,
+      "reason": "A finite automated laboratory interaction sample is not field INP."
+    },
+    "heapRaw": [
+      {
+        "label": "ready",
+        "elapsedMs": 2.6000000000058208,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      },
+      {
+        "label": "baseline-after-idle",
+        "elapsedMs": 5006.899999999994,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      },
+      {
+        "label": "cycle-1",
+        "elapsedMs": 8002.5,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      },
+      {
+        "label": "cycle-2",
+        "elapsedMs": 11003.5,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      },
+      {
+        "label": "cycle-3",
+        "elapsedMs": 14002.300000000003,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      },
+      {
+        "label": "cycle-4",
+        "elapsedMs": 17007,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      },
+      {
+        "label": "cycle-5",
+        "elapsedMs": 20002.800000000003,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      },
+      {
+        "label": "cycle-6",
+        "elapsedMs": 23006.399999999994,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      },
+      {
+        "label": "cycle-7",
+        "elapsedMs": 26006.399999999994,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      },
+      {
+        "label": "cycle-8",
+        "elapsedMs": 29020.800000000003,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      },
+      {
+        "label": "cycle-9",
+        "elapsedMs": 32004.100000000006,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      },
+      {
+        "label": "cycle-10",
+        "elapsedMs": 35005.399999999994,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      },
+      {
+        "label": "final-after-idle",
+        "elapsedMs": 40014,
+        "visibilityState": "visible",
+        "heap": {
+          "value": {
+            "usedJSHeapSize": 19300000,
+            "totalJSHeapSize": 26000000,
+            "jsHeapSizeLimit": 3760000000
+          },
+          "reason": null
+        }
+      }
+    ],
+    "heapNearestRankBytes": {
+      "usedJSHeapSize": {
+        "n": 13,
+        "p50": 19300000,
+        "p95": 19300000,
+        "p99": 19300000,
+        "min": 19300000,
+        "max": 19300000
+      },
+      "totalJSHeapSize": {
+        "n": 13,
+        "p50": 26000000,
+        "p95": 26000000,
+        "p99": 26000000,
+        "min": 26000000,
+        "max": 26000000
+      },
+      "jsHeapSizeLimit": {
+        "n": 13,
+        "p50": 3760000000,
+        "p95": 3760000000,
+        "p99": 3760000000,
+        "min": 3760000000,
+        "max": 3760000000
+      }
+    },
+    "usedHeapAdjacentDeltasBytes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "rawActions": [
+      {
+        "cycle": 1,
+        "kind": "edit-autosave",
+        "elapsedMs": 6509.125494,
+        "wallDurationMs": 1458.0404010000002,
+        "revision": 1,
+        "valueMatched": true,
+        "focusRetained": true
+      },
+      {
+        "cycle": 1,
+        "kind": "file-toggle",
+        "elapsedMs": 6787.268695999999,
+        "wallDurationMs": 278.1271680000009,
+        "valueMatched": true,
+        "tabFocused": true,
+        "editorFocusRestored": true
+      },
+      {
+        "cycle": 2,
+        "kind": "edit-autosave",
+        "elapsedMs": 9859.045173999999,
+        "wallDurationMs": 1816.3366029999997,
+        "revision": 2,
+        "valueMatched": true,
+        "focusRetained": true
+      },
+      {
+        "cycle": 2,
+        "kind": "file-toggle",
+        "elapsedMs": 10099.221617,
+        "wallDurationMs": 240.1740090000003,
+        "valueMatched": true,
+        "tabFocused": true,
+        "editorFocusRestored": true
+      },
+      {
+        "cycle": 3,
+        "kind": "edit-autosave",
+        "elapsedMs": 12474.317900999999,
+        "wallDurationMs": 1447.6117710000017,
+        "revision": 3,
+        "valueMatched": true,
+        "focusRetained": true
+      },
+      {
+        "cycle": 3,
+        "kind": "file-toggle",
+        "elapsedMs": 12600.986595999999,
+        "wallDurationMs": 126.66638100000273,
+        "valueMatched": true,
+        "tabFocused": true,
+        "editorFocusRestored": true
+      },
+      {
+        "cycle": 4,
+        "kind": "edit-autosave",
+        "elapsedMs": 15376.570575999998,
+        "wallDurationMs": 1335.2018650000027,
+        "revision": 4,
+        "valueMatched": true,
+        "focusRetained": true
+      },
+      {
+        "cycle": 4,
+        "kind": "file-toggle",
+        "elapsedMs": 15605.636717999998,
+        "wallDurationMs": 229.06328900000153,
+        "valueMatched": true,
+        "tabFocused": true,
+        "editorFocusRestored": true
+      },
+      {
+        "cycle": 5,
+        "kind": "edit-autosave",
+        "elapsedMs": 18706.775121,
+        "wallDurationMs": 1650.5083510000004,
+        "revision": 5,
+        "valueMatched": true,
+        "focusRetained": true
+      },
+      {
+        "cycle": 5,
+        "kind": "file-toggle",
+        "elapsedMs": 18975.294409,
+        "wallDurationMs": 268.516555000002,
+        "valueMatched": true,
+        "tabFocused": true,
+        "editorFocusRestored": true
+      },
+      {
+        "cycle": 6,
+        "kind": "edit-autosave",
+        "elapsedMs": 21429.216494,
+        "wallDurationMs": 1410.8611560000027,
+        "revision": 6,
+        "valueMatched": true,
+        "focusRetained": true
+      },
+      {
+        "cycle": 6,
+        "kind": "file-toggle",
+        "elapsedMs": 21642.874115,
+        "wallDurationMs": 213.65507799999978,
+        "valueMatched": true,
+        "tabFocused": true,
+        "editorFocusRestored": true
+      },
+      {
+        "cycle": 7,
+        "kind": "edit-autosave",
+        "elapsedMs": 24656.317012,
+        "wallDurationMs": 1612.6317629999976,
+        "revision": 7,
+        "valueMatched": true,
+        "focusRetained": true
+      },
+      {
+        "cycle": 7,
+        "kind": "file-toggle",
+        "elapsedMs": 24872.025208,
+        "wallDurationMs": 215.70571199999904,
+        "valueMatched": true,
+        "tabFocused": true,
+        "editorFocusRestored": true
+      },
+      {
+        "cycle": 8,
+        "kind": "edit-autosave",
+        "elapsedMs": 27555.052893,
+        "wallDurationMs": 1422.2106209999984,
+        "revision": 8,
+        "valueMatched": true,
+        "focusRetained": true
+      },
+      {
+        "cycle": 8,
+        "kind": "file-toggle",
+        "elapsedMs": 27840.918125,
+        "wallDurationMs": 285.8624170000003,
+        "valueMatched": true,
+        "tabFocused": true,
+        "editorFocusRestored": true
+      },
+      {
+        "cycle": 9,
+        "kind": "edit-autosave",
+        "elapsedMs": 30596.433174,
+        "wallDurationMs": 1537.7491969999974,
+        "revision": 9,
+        "valueMatched": true,
+        "focusRetained": true
+      },
+      {
+        "cycle": 9,
+        "kind": "file-toggle",
+        "elapsedMs": 30876.808116999997,
+        "wallDurationMs": 280.37286999999924,
+        "valueMatched": true,
+        "tabFocused": true,
+        "editorFocusRestored": true
+      },
+      {
+        "cycle": 10,
+        "kind": "edit-autosave",
+        "elapsedMs": 33644.333398,
+        "wallDurationMs": 1576.5164149999982,
+        "revision": 10,
+        "valueMatched": true,
+        "focusRetained": true
+      },
+      {
+        "cycle": 10,
+        "kind": "file-toggle",
+        "elapsedMs": 33859.339938000005,
+        "wallDurationMs": 215.00425600000017,
+        "valueMatched": true,
+        "tabFocused": true,
+        "editorFocusRestored": true
+      }
+    ],
+    "actionsByKind": {
+      "edit-autosave": {
+        "rawMs": [
+          1458.0404010000002,
+          1816.3366029999997,
+          1447.6117710000017,
+          1335.2018650000027,
+          1650.5083510000004,
+          1410.8611560000027,
+          1612.6317629999976,
+          1422.2106209999984,
+          1537.7491969999974,
+          1576.5164149999982
+        ],
+        "nearestRankMs": {
+          "n": 10,
+          "p50": 1458.0404010000002,
+          "p95": 1816.3366029999997,
+          "p99": 1816.3366029999997,
+          "min": 1335.2018650000027,
+          "max": 1816.3366029999997
+        },
+        "arithmeticMedianMs": 1497.8947989999988
+      },
+      "file-toggle": {
+        "rawMs": [
+          278.1271680000009,
+          240.1740090000003,
+          126.66638100000273,
+          229.06328900000153,
+          268.516555000002,
+          213.65507799999978,
+          215.70571199999904,
+          285.8624170000003,
+          280.37286999999924,
+          215.00425600000017
+        ],
+        "nearestRankMs": {
+          "n": 10,
+          "p50": 229.06328900000153,
+          "p95": 285.8624170000003,
+          "p99": 285.8624170000003,
+          "min": 126.66638100000273,
+          "max": 285.8624170000003
+        },
+        "arithmeticMedianMs": 234.61864900000091
+      }
+    },
+    "eventTiming": {
+      "retained": 200,
+      "discarded": 176,
+      "truncated": true,
+      "observedDurationMs": 40022.3,
+      "firstRetainedStartMs": 5039.100000000006,
+      "lastRetainedStartMs": 20107.300000000003,
+      "rawVectors": {
+        "durationMs": [
+          16,
+          48,
+          48,
+          48,
+          48,
+          16,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          16,
+          16,
+          16,
+          16,
+          24,
+          24,
+          24,
+          24,
+          40,
+          40,
+          40,
+          40,
+          72,
+          72,
+          72,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          64,
+          96,
+          96,
+          96,
+          96,
+          72,
+          72,
+          48,
+          48,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          40,
+          32,
+          96,
+          96,
+          96,
+          96,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          96,
+          96,
+          88,
+          88,
+          80,
+          80,
+          80,
+          80,
+          80,
+          24,
+          24,
+          24,
+          24,
+          40,
+          40,
+          40,
+          32,
+          72,
+          72,
+          72,
+          72,
+          72,
+          72,
+          72,
+          64,
+          48,
+          48,
+          48,
+          40,
+          32,
+          32,
+          32,
+          32,
+          48,
+          48,
+          48,
+          48,
+          24,
+          24,
+          24,
+          24,
+          64,
+          64,
+          64,
+          64,
+          64,
+          48,
+          48,
+          48,
+          48,
+          16,
+          40,
+          40,
+          40,
+          40,
+          24,
+          24,
+          24,
+          24,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          80,
+          80,
+          80,
+          80,
+          80,
+          88,
+          88,
+          88,
+          88,
+          120,
+          120,
+          104,
+          104,
+          64,
+          64,
+          56,
+          56,
+          56,
+          56,
+          56,
+          56,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          64,
+          64,
+          56,
+          56,
+          40,
+          40,
+          40,
+          40,
+          88,
+          88,
+          80,
+          80,
+          80,
+          32,
+          32,
+          32,
+          32,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24
+        ],
+        "processingMs": [
+          0.6000000000058208,
+          0.29999999998835847,
+          35.60000000000582,
+          0.0,
+          33.59999999999127,
+          0.20000000001164153,
+          0.19999999999708962,
+          17.80000000000291,
+          0.0,
+          16.80000000000291,
+          0.19999999999708962,
+          19.5,
+          0.0,
+          18.39999999999418,
+          0.19999999999708962,
+          13.19999999999709,
+          0.0,
+          12.5,
+          0.19999999999708962,
+          18.10000000000582,
+          0.0,
+          16.80000000000291,
+          0.19999999999708962,
+          32.80000000000291,
+          0.0,
+          32,
+          0.19999999999708962,
+          61.89999999999418,
+          0.0,
+          52.30000000000291,
+          0.29999999998835847,
+          55.70000000001164,
+          0,
+          52.0,
+          0.5,
+          0.0,
+          0.0,
+          0.09999999999126885,
+          42.10000000000582,
+          0.09999999999126885,
+          79.5,
+          0.10000000000582077,
+          77.30000000000291,
+          0.10000000000582077,
+          45.39999999999418,
+          0.0,
+          42.19999999999709,
+          0.19999999999708962,
+          33.5,
+          0.0,
+          32.60000000000582,
+          0.19999999999708962,
+          26.19999999999709,
+          0.0,
+          24.80000000000291,
+          0.20000000001164153,
+          81.79999999998836,
+          0.0,
+          80.80000000000291,
+          0.3000000000029104,
+          27.5,
+          0.0,
+          25.60000000000582,
+          0.3000000000029104,
+          27.19999999999709,
+          0.0,
+          26.39999999999418,
+          0.3000000000029104,
+          70.39999999999418,
+          0.0,
+          65.5,
+          0.3000000000029104,
+          0.0,
+          0.09999999999126885,
+          0.0,
+          60.80000000000291,
+          0.10000000000582077,
+          20.29999999998836,
+          0.0,
+          16.60000000000582,
+          0.10000000000582077,
+          28.0,
+          0.0,
+          26.79999999998836,
+          0.10000000000582077,
+          55.30000000000291,
+          0.0,
+          50.19999999999709,
+          0.19999999999708962,
+          56.89999999999418,
+          0.0,
+          55.90000000000873,
+          0.19999999999708962,
+          41.40000000000873,
+          0.0,
+          37.70000000001164,
+          0.09999999999126885,
+          24.30000000000291,
+          0.0,
+          23.10000000000582,
+          0.19999999999708962,
+          38.40000000000873,
+          0.0,
+          36.69999999999709,
+          0.19999999999708962,
+          19.80000000000291,
+          0.0,
+          18.5,
+          0.19999999999708962,
+          0.10000000000582077,
+          0.0,
+          0.0,
+          47.59999999999127,
+          0.10000000000582077,
+          37.29999999998836,
+          0.0,
+          30.19999999999709,
+          0.10000000000582077,
+          0.19999999999708962,
+          35.30000000000291,
+          0.0,
+          30.70000000001164,
+          0.19999999999708962,
+          19.19999999999709,
+          0.0,
+          17.0,
+          0.10000000000582077,
+          14.099999999991269,
+          0.0,
+          13.10000000000582,
+          0.09999999999126885,
+          12.80000000000291,
+          0.0,
+          11.900000000008731,
+          0.10000000000582077,
+          15.599999999991269,
+          0.0,
+          14.89999999999418,
+          0.10000000000582077,
+          15.19999999999709,
+          0.0,
+          14.19999999999709,
+          0.0,
+          12.69999999999709,
+          0.0,
+          11.89999999999418,
+          0.19999999999708962,
+          0.0,
+          0.0,
+          0.0,
+          69.69999999999709,
+          0.10000000000582077,
+          68.59999999999127,
+          0.0,
+          62.19999999999709,
+          0.20000000001164153,
+          97.19999999999709,
+          0.0,
+          90.79999999998836,
+          0.3000000000029104,
+          52.0,
+          0.0,
+          48.30000000000291,
+          0.10000000000582077,
+          48.09999999999127,
+          0.0,
+          47.10000000000582,
+          0.09999999999126885,
+          23.70000000001164,
+          0,
+          22.60000000000582,
+          0.19999999999708962,
+          18.40000000000873,
+          0.0,
+          17.39999999999418,
+          0.19999999999708962,
+          52.40000000000873,
+          0.0,
+          44.39999999999418,
+          0.10000000000582077,
+          33.79999999998836,
+          0.0,
+          32.80000000000291,
+          0.3000000000029104,
+          0.09999999999126885,
+          0.0,
+          0.10000000000582077,
+          63.10000000000582,
+          0.10000000000582077,
+          24.19999999999709,
+          0.0,
+          20.10000000000582,
+          0.20000000001164153,
+          22.29999999998836,
+          0.0,
+          21.10000000000582,
+          0.3000000000029104,
+          20.0,
+          0.0,
+          19.0
+        ],
+        "inputDelayMs": [
+          0.09999999999126885,
+          0.3000000000029104,
+          0.6999999999970896,
+          0.0,
+          0.10000000000582077,
+          11.5,
+          3.3000000000029104,
+          3.5,
+          0.0,
+          0.09999999999126885,
+          0.20000000001164153,
+          0.40000000000873115,
+          0.0,
+          0.19999999999708962,
+          0.10000000000582077,
+          0.3000000000029104,
+          0.0,
+          0.10000000000582077,
+          0.5,
+          0.6999999999970896,
+          0.0,
+          0.19999999999708962,
+          0.20000000001164153,
+          0.40000000000873115,
+          0.0,
+          0.10000000000582077,
+          0.8000000000029104,
+          1.0,
+          0.0,
+          2.0,
+          0.40000000000873115,
+          0.6999999999970896,
+          0,
+          0.10000000000582077,
+          3.0,
+          3.5,
+          12.5,
+          12.5,
+          12.599999999991269,
+          0.5,
+          0.5999999999912689,
+          0.0,
+          0.19999999999708962,
+          19.69999999999709,
+          19.80000000000291,
+          0.0,
+          0.19999999999708962,
+          0.39999999999417923,
+          0.5999999999912689,
+          0.0,
+          0.0,
+          0.39999999999417923,
+          0.5999999999912689,
+          0.0,
+          0.5,
+          0.29999999998835847,
+          0.5,
+          0.0,
+          0.19999999999708962,
+          0.19999999999708962,
+          0.5,
+          0.0,
+          1.1999999999970896,
+          0.8999999999941792,
+          1.1999999999970896,
+          0.0,
+          0.10000000000582077,
+          6,
+          6.30000000000291,
+          0.0,
+          1.8000000000029104,
+          4.19999999999709,
+          4.599999999991269,
+          3.1000000000058208,
+          3.1999999999970896,
+          3.1999999999970896,
+          0.10000000000582077,
+          0.20000000001164153,
+          0.0,
+          0.6999999999970896,
+          0.5,
+          0.6000000000058208,
+          0.0,
+          0.40000000000873115,
+          0.19999999999708962,
+          0.3000000000029104,
+          0.0,
+          0.09999999999126885,
+          0.10000000000582077,
+          0.3000000000029104,
+          0.0,
+          0.19999999999708962,
+          1,
+          1.1999999999970896,
+          0.0,
+          2.1999999999970896,
+          2.0,
+          2.099999999991269,
+          0.0,
+          0.19999999999708962,
+          0.8999999999941792,
+          1.0999999999912689,
+          0.0,
+          0.10000000000582077,
+          0.3000000000029104,
+          0.5,
+          0.0,
+          0.6000000000058208,
+          2.1000000000058208,
+          2.3000000000029104,
+          2.900000000008731,
+          2.900000000008731,
+          2.900000000008731,
+          0.3000000000029104,
+          0.40000000000873115,
+          0.0,
+          0.0,
+          13.10000000000582,
+          0.8000000000029104,
+          1.0999999999912689,
+          0.0,
+          1.2999999999883585,
+          0.3000000000029104,
+          0.5,
+          0.0,
+          0.8999999999941792,
+          0.09999999999126885,
+          0.19999999999708962,
+          0.0,
+          0.09999999999126885,
+          0.10000000000582077,
+          0.19999999999708962,
+          0.0,
+          0.09999999999126885,
+          0.10000000000582077,
+          0.20000000001164153,
+          0.0,
+          0.10000000000582077,
+          0.10000000000582077,
+          0.20000000001164153,
+          0.0,
+          0.10000000000582077,
+          0.10000000000582077,
+          0.10000000000582077,
+          0.0,
+          0.19999999999708962,
+          1.3999999999941792,
+          1.5999999999912689,
+          1.8000000000029104,
+          1.8000000000029104,
+          1.8000000000029104,
+          0.39999999999417923,
+          0.5,
+          0.0,
+          0.10000000000582077,
+          10.5,
+          10.700000000011642,
+          0.0,
+          2.3000000000029104,
+          5.900000000008731,
+          6.30000000000291,
+          0.0,
+          2.6999999999970896,
+          0.19999999999708962,
+          0.3000000000029104,
+          0.0,
+          0.19999999999708962,
+          0.8000000000029104,
+          0.8999999999941792,
+          0,
+          0.09999999999126885,
+          3.6999999999970896,
+          3.8999999999941792,
+          0.0,
+          0.40000000000873115,
+          1.6999999999970896,
+          1.8999999999941792,
+          0.0,
+          0.5,
+          0.8999999999941792,
+          1.0,
+          0.0,
+          0.10000000000582077,
+          4.0,
+          4.30000000000291,
+          4.099999999991269,
+          4.099999999991269,
+          4.19999999999709,
+          0.3000000000029104,
+          0.40000000000873115,
+          0.0,
+          0.19999999999708962,
+          0.19999999999708962,
+          0.40000000000873115,
+          0.0,
+          0.5,
+          0.09999999999126885,
+          0.39999999999417923,
+          0.0,
+          0.09999999999126885
+        ]
+      },
+      "nearestRankMs": {
+        "durationMs": {
+          "n": 200,
+          "p50": 40,
+          "p95": 96,
+          "p99": 104,
+          "min": 16,
+          "max": 120
+        },
+        "processingMs": {
+          "n": 200,
+          "p50": 0.29999999998835847,
+          "p95": 63.10000000000582,
+          "p99": 81.79999999998836,
+          "min": 0.0,
+          "max": 97.19999999999709
+        },
+        "inputDelayMs": {
+          "n": 200,
+          "p50": 0.3000000000029104,
+          "p95": 6.30000000000291,
+          "p99": 13.10000000000582,
+          "min": 0.0,
+          "max": 19.80000000000291
+        }
+      },
+      "regionCounts": {
+        "editor": 175,
+        "file-tab": 25
+      },
+      "distinctNonzeroInteractionIds": 49
+    }
+  },
+  "browser": {
+    "schemaVersion": 2,
+    "status": "complete",
+    "checkout": {
+      "sha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+      "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+      "workflowRunId": "43913852145",
+      "workflowAttempt": "1"
+    },
+    "environment": {
+      "browser": "chromium",
+      "browserVersion": "153.0.8010.12",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "node": "v24.22.2",
+      "platform": "linux",
+      "architecture": "x64",
+      "composeMode": "production",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36"
+    },
+    "protocol": {
+      "navigations": 3,
+      "periodsPerNavigation": [
+        7,
+        90,
+        30,
+        7,
+        90
+      ],
+      "initialObservationAfterUiReadyMs": 500,
+      "finalEventDeliveryWaitMs": 100,
+      "maximumRenderFrameWaitMs": 250,
+      "cache": "warm context reused after existing learning visits; no cache clearing",
+      "networkOrCpuThrottling": "none",
+      "maximumEntriesPerTypePerDocument": 1000,
+      "forcedGarbageCollection": false
+    },
+    "lcpMs": {
+      "raw": [
+        424,
+        396,
+        396
+      ],
+      "median": 396,
+      "max": 424
+    },
+    "cls": {
+      "raw": [
+        0.048731330235799154,
+        0.048731330235799154,
+        0.05432499885559082
+      ],
+      "median": 0.048731330235799154,
+      "max": 0.05432499885559082
+    },
+    "switchMs": {
+      "raw": [
+        51.79999999993015,
+        53.699999999953434,
+        45.70000000006985,
+        48.70000000006985,
+        48.09999999997672,
+        47,
+        46.5,
+        44.89999999990687,
+        46,
+        48.5,
+        47.79999999993015,
+        49.29999999993015,
+        44.5,
+        45.800000000046566,
+        46.60000000009313
+      ],
+      "median": 47,
+      "max": 53.699999999953434
+    },
+    "heapDeltasBytes": [
+      -3509020,
+      -5407188,
+      -5303292
+    ],
+    "shifts": [
+      [
+        {
+          "startTime": 371.89999999990687,
+          "value": 0.04548344612121582,
+          "hadRecentInput": false,
+          "sources": [
+            {
+              "region": ".site-footer",
+              "tag": "footer",
+              "previous": {
+                "x": 30,
+                "y": 644,
+                "width": 1220,
+                "height": 76
+              },
+              "current": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              }
+            }
+          ],
+          "sourcesTruncated": false
+        },
+        {
+          "startTime": 403.19999999995343,
+          "value": 0.003247884114583333,
+          "hadRecentInput": false,
+          "sources": [
+            {
+              "region": ".learning-toolbar",
+              "tag": "div",
+              "previous": {
+                "x": 50,
+                "y": 412.671875,
+                "width": 1180,
+                "height": 50
+              },
+              "current": {
+                "x": 50,
+                "y": 436.671875,
+                "width": 1180,
+                "height": 50
+              }
+            },
+            {
+              "region": ".learning-goal",
+              "tag": "div",
+              "previous": {
+                "x": 75,
+                "y": 327.671875,
+                "width": 1130,
+                "height": 40
+              },
+              "current": {
+                "x": 75,
+                "y": 351.671875,
+                "width": 1130,
+                "height": 40
+              }
+            }
+          ],
+          "sourcesTruncated": false
+        }
+      ],
+      [
+        {
+          "startTime": 359.5,
+          "value": 0.04548344612121582,
+          "hadRecentInput": false,
+          "sources": [
+            {
+              "region": ".site-footer",
+              "tag": "footer",
+              "previous": {
+                "x": 30,
+                "y": 644,
+                "width": 1220,
+                "height": 76
+              },
+              "current": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              }
+            }
+          ],
+          "sourcesTruncated": false
+        },
+        {
+          "startTime": 374.19999999995343,
+          "value": 0.003247884114583333,
+          "hadRecentInput": false,
+          "sources": [
+            {
+              "region": ".learning-toolbar",
+              "tag": "div",
+              "previous": {
+                "x": 50,
+                "y": 412.671875,
+                "width": 1180,
+                "height": 50
+              },
+              "current": {
+                "x": 50,
+                "y": 436.671875,
+                "width": 1180,
+                "height": 50
+              }
+            },
+            {
+              "region": ".learning-goal",
+              "tag": "div",
+              "previous": {
+                "x": 75,
+                "y": 327.671875,
+                "width": 1130,
+                "height": 40
+              },
+              "current": {
+                "x": 75,
+                "y": 351.671875,
+                "width": 1130,
+                "height": 40
+              }
+            }
+          ],
+          "sourcesTruncated": false
+        }
+      ],
+      [
+        {
+          "startTime": 356.4000000000233,
+          "value": 0.04548344612121582,
+          "hadRecentInput": false,
+          "sources": [
+            {
+              "region": ".site-footer",
+              "tag": "footer",
+              "previous": {
+                "x": 30,
+                "y": 644,
+                "width": 1220,
+                "height": 76
+              },
+              "current": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              }
+            }
+          ],
+          "sourcesTruncated": false
+        },
+        {
+          "startTime": 364.69999999995343,
+          "value": 0.008841552734374999,
+          "hadRecentInput": false,
+          "sources": [
+            {
+              "region": null,
+              "tag": "div",
+              "previous": {
+                "x": 50,
+                "y": 482.671875,
+                "width": 1180,
+                "height": 237.328125
+              },
+              "current": {
+                "x": 50,
+                "y": 506.671875,
+                "width": 1180,
+                "height": 213.328125
+              }
+            },
+            {
+              "region": ".learning-toolbar",
+              "tag": "div",
+              "previous": {
+                "x": 50,
+                "y": 412.671875,
+                "width": 1180,
+                "height": 50
+              },
+              "current": {
+                "x": 50,
+                "y": 436.671875,
+                "width": 1180,
+                "height": 50
+              }
+            },
+            {
+              "region": ".learning-goal",
+              "tag": "div",
+              "previous": {
+                "x": 75,
+                "y": 327.671875,
+                "width": 1130,
+                "height": 40
+              },
+              "current": {
+                "x": 75,
+                "y": 351.671875,
+                "width": 1130,
+                "height": 40
+              }
+            }
+          ],
+          "sourcesTruncated": false
+        }
+      ]
+    ],
+    "fontStates": [
+      [
+        "loaded",
+        "loaded"
+      ],
+      [
+        "loaded",
+        "loaded"
+      ],
+      [
+        "loaded",
+        "loaded"
+      ]
+    ],
+    "initialFinalGeometryEqual": [
+      true,
+      true,
+      true
+    ],
+    "apiStatusesAll200": true,
+    "observerBuffersUntruncated": true,
+    "inp": {
+      "value": null,
+      "reason": "Three finite scripted page visits do not establish page-lifetime or field INP. Event Timing samples are retained separately."
+    }
+  },
+  "method": "Nearest rank uses sorted[ceil(n*p)-1]; n5/n8/n10 p95 and p99 equal sample maxima. Browser switch and LCP/CLS use arithmetic median. Raw vectors remain separate per run and protocol.",
+  "limitations": [
+    "Actual source/probe equality does not control host contention, hardware, warmup or sample variability; no causal performance comparison.",
+    "CPU endpoint counters are lifetime cumulative; RSS excludes native/compiler/Postgres/Redis and is not an aggregate simultaneous peak.",
+    "Plan WAL and cluster WAL use different boundaries; original LSN endpoints and restore dump bytes are not retained.",
+    "Event Timing is a thresholded truncated prefix, not full-session INP; coarse heap values do not establish leak absence.",
+    "Run/job status and QA/Security semantic acceptance are separate; no acceptance is inferred solely from numerical consistency."
+  ],
+  "archiveLayout": {
+    "derivedFilename": "derived-performance.json",
+    "rawJsonFilesAreFlat": true,
+    "originalZipBasenamesPreserved": true,
+    "performanceMarkdownRelativeDirectory": "evidence/final-run-43913852145/"
+  }
+}

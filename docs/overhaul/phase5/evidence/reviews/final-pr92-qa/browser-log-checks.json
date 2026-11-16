@@ -1,0 +1,111 @@
+{
+  "result": "PASS_CURRENT_SOURCE_BROWSER_LOGS",
+  "runId": 43913852145,
+  "source": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+  "checkout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+  "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+  "actualMainTests": 805,
+  "actualFirefoxTests": 174,
+  "total": 979,
+  "actualBrowserCases": 894,
+  "playwrightUnitCases": 85,
+  "projectCounts": {
+    "unit": 85,
+    "chromium": 435,
+    "firefox": 174,
+    "chromium-slow": 111,
+    "webkit": 174
+  },
+  "newUxTestsByEngine": {
+    "chromium": 14,
+    "webkit": 14,
+    "firefox": 14
+  },
+  "newEditorTests": 1,
+  "failedCases": 0,
+  "flakyCases": 0,
+  "skippedCases": 0,
+  "retries": 0,
+  "countScope": "979 is the actual Playwright entry total including85 unit entries;894 are real-browser entries. UX42 and editor1 are included in these totals.",
+  "jobs": [
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "logBytes": 185676,
+      "summaries": [
+        "2026-11-16T17:06:12.9100535Z   403 passed (3.6m)",
+        "2026-11-16T17:07:32.8053389Z   87 passed (1.3m)"
+      ],
+      "projectCounts": {
+        "unit": 85,
+        "chromium": 318,
+        "firefox": 87
+      },
+      "uxTestLines": [
+        "2026-11-16T17:05:26.3202093Z   \u2713  326 [chromium] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after hour-enter without submitting the form (1.8s)",
+        "2026-11-16T17:05:26.5553216Z   \u2713  327 [chromium] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after minute-enter without submitting the form (1.7s)",
+        "2026-11-16T17:05:27.5720487Z   \u2713  328 [chromium] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after done without submitting the form (1.9s)",
+        "2026-11-16T17:05:28.0567605Z   \u2713  329 [chromium] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after clear without submitting the form (2.0s)",
+        "2026-11-16T17:05:28.6298722Z   \u2713  330 [chromium] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after escape without submitting the form (2.3s)",
+        "2026-11-16T17:05:28.7310052Z   \u2713  331 [chromium] \u203a tests/phase5-ux.spec.ts:45:1 \u203a date picker closes without reclaiming focus when the user moves to another field (2.2s)",
+        "2026-11-16T17:05:30.0063540Z   \u2713  332 [chromium] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 320px in light (2.4s)",
+        "2026-11-16T17:05:30.2117870Z   \u2713  333 [chromium] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 320px in dark (2.1s)",
+        "2026-11-16T17:05:30.4990299Z   \u2713  334 [chromium] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 375px in light (1.9s)",
+        "2026-11-16T17:05:30.6701018Z   \u2713  335 [chromium] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 375px in dark (1.9s)",
+        "2026-11-16T17:05:32.1672296Z   \u2713  336 [chromium] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 768px in light (2.1s)",
+        "2026-11-16T17:05:32.3341887Z   \u2713  337 [chromium] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 768px in dark (2.1s)",
+        "2026-11-16T17:05:32.7066751Z   \u2713  338 [chromium] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 1440px in light (2.2s)",
+        "2026-11-16T17:05:32.8914643Z   \u2713  339 [chromium] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 1440px in dark (2.2s)"
+      ],
+      "editorTestLines": []
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "logBytes": 163970,
+      "summaries": [
+        "2026-11-16T17:09:51.8475486Z   402 passed (7.4m)",
+        "2026-11-16T17:11:40.3692697Z   87 passed (1.8m)"
+      ],
+      "projectCounts": {
+        "chromium": 117,
+        "chromium-slow": 111,
+        "webkit": 174,
+        "firefox": 87
+      },
+      "uxTestLines": [
+        "2026-11-16T17:08:42.4380811Z   \u2713  345 [webkit] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after hour-enter without submitting the form (3.4s)",
+        "2026-11-16T17:08:42.7150737Z   \u2713  346 [webkit] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after minute-enter without submitting the form (3.0s)",
+        "2026-11-16T17:08:44.2710766Z   \u2713  347 [webkit] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after done without submitting the form (3.3s)",
+        "2026-11-16T17:08:44.6011091Z   \u2713  348 [webkit] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after clear without submitting the form (3.5s)",
+        "2026-11-16T17:08:46.2392560Z   \u2713  349 [webkit] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after escape without submitting the form (3.8s)",
+        "2026-11-16T17:08:46.3485280Z   \u2713  350 [webkit] \u203a tests/phase5-ux.spec.ts:45:1 \u203a date picker closes without reclaiming focus when the user moves to another field (3.6s)",
+        "2026-11-16T17:08:47.8880638Z   \u2713  351 [webkit] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 320px in light (3.6s)",
+        "2026-11-16T17:08:48.1372450Z   \u2713  352 [webkit] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 320px in dark (3.5s)",
+        "2026-11-16T17:08:49.7917923Z   \u2713  353 [webkit] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 375px in light (3.5s)",
+        "2026-11-16T17:08:50.1617457Z   \u2713  354 [webkit] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 375px in dark (3.8s)",
+        "2026-11-16T17:08:52.0981890Z   \u2713  355 [webkit] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 768px in light (4.2s)",
+        "2026-11-16T17:08:52.2219341Z   \u2713  356 [webkit] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 768px in dark (4.0s)",
+        "2026-11-16T17:08:54.4659255Z   \u2713  357 [webkit] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 1440px in light (4.6s)",
+        "2026-11-16T17:08:55.1370832Z   \u2713  358 [webkit] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 1440px in dark (4.9s)",
+        "2026-11-16T17:10:28.0784538Z   \u2713  30 [firefox] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after hour-enter without submitting the form (2.4s)",
+        "2026-11-16T17:10:28.4231060Z   \u2713  32 [firefox] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after done without submitting the form (2.5s)",
+        "2026-11-16T17:10:30.3568164Z   \u2713  33 [firefox] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after clear without submitting the form (2.3s)",
+        "2026-11-16T17:10:30.8826439Z   \u2713  34 [firefox] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after escape without submitting the form (2.4s)",
+        "2026-11-16T17:10:31.8191961Z   \u2713  35 [firefox] \u203a tests/phase5-ux.spec.ts:45:1 \u203a date picker closes without reclaiming focus when the user moves to another field (2.8s)",
+        "2026-11-16T17:10:32.1572201Z   \u2713  31 [firefox] \u203a tests/phase5-ux.spec.ts:16:3 \u203a date picker returns focus after minute-enter without submitting the form (6.2s)",
+        "2026-11-16T17:10:33.4861796Z   \u2713  36 [firefox] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 320px in light (3.1s)",
+        "2026-11-16T17:10:33.7312230Z   \u2713  37 [firefox] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 320px in dark (2.8s)",
+        "2026-11-16T17:10:35.7607943Z   \u2713  38 [firefox] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 375px in light (3.9s)",
+        "2026-11-16T17:10:35.9759669Z   \u2713  39 [firefox] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 375px in dark (3.8s)",
+        "2026-11-16T17:10:36.6733748Z   \u2713  40 [firefox] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 768px in light (3.2s)",
+        "2026-11-16T17:10:36.9847493Z   \u2713  41 [firefox] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 768px in dark (3.2s)",
+        "2026-11-16T17:10:38.9236906Z   \u2713  42 [firefox] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 1440px in light (3.1s)",
+        "2026-11-16T17:10:40.1237247Z   \u2713  43 [firefox] \u203a tests/phase5-ux.spec.ts:76:5 \u203a goal refresh keeps known content and geometry at 1440px in dark (4.1s)"
+      ],
+      "editorTestLines": [
+        "2026-11-16T17:03:16.4709424Z   \u2713    3 [chromium] \u203a tests/phase5-editor-observation.spec.ts:79:1 \u203a bounded editor heap and interaction observation with mocked persistence (42.7s)"
+      ]
+    }
+  ]
+}

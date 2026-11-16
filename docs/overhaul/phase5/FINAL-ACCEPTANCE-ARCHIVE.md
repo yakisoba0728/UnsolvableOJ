@@ -1,0 +1,7 @@
+# Final Phase V acceptance archive
+
+This branch retains post-run evidence for tested release source `e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5` and tree `a2a2409dfd3e73b82ba7b39c2e41808eba7b5813`. It is **not** a release-code branch or an additional feature PR to merge. PR92 remains OPEN/UNMERGED; manual order is #63 → #86 → #92 after current-base revalidation.
+
+Read [FINAL-REPORT.md](FINAL-REPORT.md), [final-acceptance.json](evidence/final-acceptance.json), [the full validation ledger](evidence/validation-ledger.json), [raw artifact map](evidence/final-run-43913852145/downloaded-artifacts.json), [whole-run independent review](evidence/reviews/final-pr92-independent-review.json) and [security review](evidence/reviews/final-pr92-security-acceptance.json). Runtime raw177HIGH/5CRITICAL and its fixed2026-11-30T00:00:00Z applicability-review expiry remain unchanged. Later evidence drift/expiry still blocks acceptance.
+
+All original artifact ZIPs retain their GitHub digests. The decoded job-log ZIP preserves the exact UTF-8 strings received from the connector, with per-log hashes, and a separate explicit retention review. The restore dump bytes remain unretained; its hash/stage/table evidence proves only the recorded actual CI execution, not a new offline restore. Historical receipts preserve their original source/paths. The final evidence manifest excludes only itself and is rebuilt after all archive files are complete.

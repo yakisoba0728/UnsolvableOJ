@@ -1,0 +1,104 @@
+{
+  "result": "PASS_FINAL_RUN_METADATA_ORIGINALS_LOGS_AND_PROTECTED_STATE",
+  "runId": 43913852145,
+  "runAttempt": 1,
+  "source": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+  "checkout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+  "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+  "base": "d0159b1f844bf0608415dded9e84af566c8e2041",
+  "all12JobsActuallyExecuted": true,
+  "all12JobsConclusion": "success",
+  "requiredAggregateResults": [
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success"
+  ],
+  "expectedSkippedSteps": [
+    {
+      "job": "Sandbox, pipeline and Compose",
+      "step": "Failed Compose browser artifacts (disposable test data only)"
+    },
+    {
+      "job": "Sandbox, pipeline and Compose",
+      "step": "Sandbox failure logs"
+    },
+    {
+      "job": "Browser tests (1/2)",
+      "step": "Failed browser test artifacts (disposable test data only)"
+    },
+    {
+      "job": "Browser tests (2/2)",
+      "step": "Frontend build and test types"
+    },
+    {
+      "job": "Browser tests (2/2)",
+      "step": "Failed browser test artifacts (disposable test data only)"
+    }
+  ],
+  "originalZips": 15,
+  "decodedJobLogs": 12,
+  "metadataOnlyDockerBuildRecords": 5,
+  "native": {
+    "reportedNodeTests": 90,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "pipeline": {
+    "tests": 36,
+    "files": 9,
+    "multiApiTestFileMs": 13494,
+    "multiApiEnclosingTestMs": 13492
+  },
+  "compose": {
+    "cases": 4,
+    "failed": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "retries": 0
+  },
+  "protected": {
+    "retrievedAt": "2026-11-16 17:19:41 UTC",
+    "main": "6176015b63a1615cc2269172f246725ef08abab3",
+    "phase5Integration": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+    "phase4Integration": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "pr63": {
+      "number": 63,
+      "state": "open",
+      "draft": false,
+      "merged": false,
+      "head": "3bcba380f92bd2da8973e6c88c00cd14b03be08e",
+      "base": "6176015b63a1615cc2269172f246725ef08abab3",
+      "mergeCommitSha": "7bb0b27e6f7a57bf2ba743dc8a765ac2ac312ecc"
+    },
+    "pr86": {
+      "number": 86,
+      "state": "open",
+      "draft": false,
+      "merged": false,
+      "head": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "base": "3bcba380f92bd2da8973e6c88c00cd14b03be08e",
+      "mergeCommitSha": "906819c36a56f1f8326e6d8743b02a102762138a"
+    },
+    "pr92": {
+      "number": 92,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+      "base": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "mergeCommitSha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1"
+    }
+  },
+  "artifactAndLogHashesRecomputed": true,
+  "limits": [
+    "These are retained original hosted-CI bytes, not a local application rerun.",
+    "Only failure diagnostics and the duplicate frontend build were conditionally skipped; no required test job was skipped.",
+    "Manual readiness binds the current stacked PR source/base. Future base/head changes require revalidation; this is not deployment approval."
+  ]
+}

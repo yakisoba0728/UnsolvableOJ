@@ -1,0 +1,283 @@
+[
+  {
+    "artifactId": 14249785142,
+    "artifactName": "image-audit-judge-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge.zip",
+    "bytes": 14299,
+    "sha256": "6c54d2352e3f3f81564ac14ecf13da22cf45fc256e5681a9ce8beac7ae1eef31",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge",
+    "members": [
+      "database-download.log",
+      "manifest.json",
+      "gate.json",
+      "scan.log",
+      "scanner-download.log",
+      "scanner-version-after.json",
+      "scanner-version.json",
+      "trivy.json"
+    ]
+  },
+  {
+    "artifactId": 14249346705,
+    "artifactName": "image-audit-front-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/front.zip",
+    "bytes": 28893,
+    "sha256": "716fc53439810005237a9cedb95a04cb16d0bdefdd1c075f83a42d4a740f990e",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/front",
+    "members": [
+      "database-download.log",
+      "gate.json",
+      "manifest.json",
+      "scan.log",
+      "scanner-download.log",
+      "scanner-version-after.json",
+      "scanner-version.json",
+      "trivy.json"
+    ]
+  },
+  {
+    "artifactId": 14248558283,
+    "artifactName": "npm-sbom-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/npm-sbom.zip",
+    "bytes": 100682,
+    "sha256": "34db989e06f30ee5d97d203fb6d4c2c6134ab4def046ac6974c92b211b9ba5ac",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/npm-sbom",
+    "members": [
+      "Front.cdx.json",
+      "Judge.cdx.json",
+      "Back.cdx.json",
+      "manifest.json"
+    ]
+  },
+  {
+    "artifactId": 14247439904,
+    "artifactName": "image-audit-back-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/back.zip",
+    "bytes": 26965,
+    "sha256": "0cd1278efb96602e19d4e88c669b670715eb68298f530778a340f6340af4db92",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/back",
+    "members": [
+      "database-download.log",
+      "manifest.json",
+      "gate.json",
+      "scan.log",
+      "scanner-download.log",
+      "scanner-version-after.json",
+      "scanner-version.json",
+      "trivy.json"
+    ]
+  },
+  {
+    "artifactId": 14248613692,
+    "artifactName": "phase4-restore-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/restore.zip",
+    "bytes": 2265,
+    "sha256": "15e74add3c7d4f22624ff1a9869a472f2aa7582aafab2743b171a2fa1f0f3af8",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/restore",
+    "members": [
+      "phase4-restore.json"
+    ]
+  },
+  {
+    "artifactId": 14247944044,
+    "artifactName": "phase5-database-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/database-qualification.zip",
+    "bytes": 18074,
+    "sha256": "41b9c26f8a6e68c9a3f551a06f280f4232db099248ccc4a73c19ac7abe576d5d",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/database-qualification",
+    "members": [
+      "phase5-database.json"
+    ]
+  },
+  {
+    "artifactId": 14247629738,
+    "artifactName": "image-audit-runtime-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/runtime.zip",
+    "bytes": 1086327,
+    "sha256": "d68f31f5282e02d6fdd672e6738a0653fc56ed99fb183f7d8f26d910f3458357",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/runtime",
+    "members": [
+      "database-download.log",
+      "gate.json",
+      "applicability-evaluation.json",
+      "manifest.json",
+      "payload-verification.json",
+      "scan.log",
+      "scanner-download.log",
+      "scanner-version-after.json",
+      "scanner-version.json",
+      "trivy.json"
+    ]
+  },
+  {
+    "artifactId": 14249057796,
+    "artifactName": "phase5-verdict-matrix-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/native-verdict.zip",
+    "bytes": 5419,
+    "sha256": "5c86a8952e7268a9684b97489a448e6b62a6838193182ec7d869f7a2cd5c96dc",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/native-verdict",
+    "members": [
+      "phase5-verdict-matrix.json"
+    ]
+  },
+  {
+    "artifactId": 14248993030,
+    "artifactName": "phase5-frontend-1-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/frontend-1.zip",
+    "bytes": 543684,
+    "sha256": "a763d4fba4d19d56ee1ac02c83761c1d7bb38397520275b8b9949b986e578397",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/frontend-1",
+    "members": [
+      "phase5-ux/chromium-1440-dark-ready.png",
+      "phase5-ux/chromium-1440-dark-geometry.json",
+      "phase5-ux/chromium-1440-dark-refreshing.png",
+      "phase5-ux/chromium-1440-light-geometry.json",
+      "phase5-ux/chromium-1440-light-ready.png",
+      "phase5-ux/chromium-1440-light-refreshing.png",
+      "phase5-ux/chromium-320-dark-geometry.json",
+      "phase5-ux/chromium-320-dark-ready.png",
+      "phase5-ux/chromium-320-dark-refreshing.png",
+      "phase5-ux/chromium-320-light-geometry.json",
+      "phase5-ux/chromium-320-light-ready.png",
+      "phase5-ux/chromium-320-light-refreshing.png",
+      "phase5-ux/chromium-375-dark-geometry.json",
+      "phase5-ux/chromium-375-dark-ready.png",
+      "phase5-ux/chromium-375-dark-refreshing.png",
+      "phase5-ux/chromium-375-light-geometry.json",
+      "phase5-ux/chromium-375-light-ready.png",
+      "phase5-ux/chromium-375-light-refreshing.png",
+      "phase5-ux/chromium-768-dark-geometry.json",
+      "phase5-ux/chromium-768-dark-ready.png",
+      "phase5-ux/chromium-768-dark-refreshing.png",
+      "phase5-ux/chromium-768-light-geometry.json",
+      "phase5-ux/chromium-768-light-ready.png",
+      "phase5-ux/chromium-768-light-refreshing.png",
+      "phase5-browser-selection.json"
+    ]
+  },
+  {
+    "artifactId": 14249607210,
+    "artifactName": "phase5-frontend-2-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/frontend-2.zip",
+    "bytes": 2085350,
+    "sha256": "c8b1759609705d77297c938d7a0ea2606058b5673847e95841796c317e5b638d",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/frontend-2",
+    "members": [
+      "phase5-ux/firefox-1440-dark-geometry.json",
+      "phase5-ux/firefox-1440-dark-ready.png",
+      "phase5-ux/firefox-1440-light-geometry.json",
+      "phase5-ux/firefox-1440-dark-refreshing.png",
+      "phase5-ux/firefox-1440-light-ready.png",
+      "phase5-ux/firefox-1440-light-refreshing.png",
+      "phase5-ux/firefox-320-dark-geometry.json",
+      "phase5-ux/firefox-320-dark-ready.png",
+      "phase5-ux/firefox-320-dark-refreshing.png",
+      "phase5-ux/firefox-320-light-geometry.json",
+      "phase5-ux/firefox-320-light-ready.png",
+      "phase5-ux/firefox-320-light-refreshing.png",
+      "phase5-ux/firefox-375-dark-geometry.json",
+      "phase5-ux/firefox-375-dark-ready.png",
+      "phase5-ux/firefox-375-dark-refreshing.png",
+      "phase5-ux/firefox-375-light-geometry.json",
+      "phase5-ux/firefox-375-light-ready.png",
+      "phase5-ux/firefox-768-dark-geometry.json",
+      "phase5-ux/firefox-768-dark-ready.png",
+      "phase5-ux/firefox-768-dark-refreshing.png",
+      "phase5-ux/firefox-375-light-refreshing.png",
+      "phase5-ux/firefox-768-light-ready.png",
+      "phase5-ux/firefox-768-light-geometry.json",
+      "phase5-ux/webkit-1440-dark-geometry.json",
+      "phase5-ux/firefox-768-light-refreshing.png",
+      "phase5-ux/webkit-1440-dark-ready.png",
+      "phase5-ux/webkit-1440-dark-refreshing.png",
+      "phase5-ux/webkit-1440-light-geometry.json",
+      "phase5-ux/webkit-1440-light-ready.png",
+      "phase5-ux/webkit-1440-light-refreshing.png",
+      "phase5-ux/webkit-320-dark-geometry.json",
+      "phase5-ux/webkit-320-dark-ready.png",
+      "phase5-ux/webkit-320-light-geometry.json",
+      "phase5-ux/webkit-320-dark-refreshing.png",
+      "phase5-ux/webkit-320-light-ready.png",
+      "phase5-ux/webkit-320-light-refreshing.png",
+      "phase5-ux/webkit-375-dark-geometry.json",
+      "phase5-ux/webkit-375-dark-ready.png",
+      "phase5-ux/webkit-375-dark-refreshing.png",
+      "phase5-ux/webkit-375-light-geometry.json",
+      "phase5-ux/webkit-375-light-refreshing.png",
+      "phase5-ux/webkit-375-light-ready.png",
+      "phase5-ux/webkit-768-dark-geometry.json",
+      "phase5-ux/webkit-768-dark-refreshing.png",
+      "phase5-ux/webkit-768-dark-ready.png",
+      "phase5-ux/webkit-768-light-geometry.json",
+      "phase5-ux/webkit-768-light-ready.png",
+      "phase5-ux/webkit-768-light-refreshing.png",
+      "phase5-browser-selection.json",
+      "phase5-editor-observation.json"
+    ]
+  },
+  {
+    "artifactId": 14249209009,
+    "artifactName": "phase5-vibe-pipeline-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/vibe-pipeline.zip",
+    "bytes": 1422,
+    "sha256": "7f26785edfdea5785bbb4d20fecedaaf87c245577210ef9479fdc45740c347cd",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/vibe-pipeline",
+    "members": [
+      "phase5-vibe-dedicated.json"
+    ]
+  },
+  {
+    "artifactId": 14249198949,
+    "artifactName": "phase5-multi-api-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/multi-api.zip",
+    "bytes": 5315,
+    "sha256": "bf5ea3ba7956f67295f255c132365e677b3a2a4b45e22815f50bc94f9cd59d45",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/multi-api",
+    "members": [
+      "phase5-multi-api.json"
+    ]
+  },
+  {
+    "artifactId": 14248979338,
+    "artifactName": "phase2-judge-evidence-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge-evidence.zip",
+    "bytes": 29404,
+    "sha256": "baf3e779d420f869bd143ddcb7e68b03cd9abfbdf41f2af25228a3693b91f665",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge-evidence",
+    "members": [
+      "phase2-api-restart.json",
+      "phase2-api-restart.log",
+      "phase2-judge-capacity.json",
+      "phase2-judge-workers.log",
+      "phase2-redis-restart.json",
+      "phase2-redis-restart.log",
+      "phase2-rejudge-recovery.json",
+      "phase2-rejudge-recovery.log",
+      "phase4-mixed-capacity.json"
+    ]
+  },
+  {
+    "artifactId": 14250501396,
+    "artifactName": "phase5-vibe-browser-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/vibe-browser.zip",
+    "bytes": 56765,
+    "sha256": "70050cbbb0104c4a40f2577abb005ea724f8f806d5af7c66c949f5b314f04cc8",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/vibe-browser",
+    "members": [
+      "phase5-vibe-browser.json",
+      "phase5-vibe-browser.png",
+      "phase5-vibe-compose.json"
+    ]
+  },
+  {
+    "artifactId": 14250011866,
+    "artifactName": "phase3-browser-performance-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/browser-performance.zip",
+    "bytes": 6100,
+    "sha256": "1bbb4f8d8214e2953dbc6b2a03807f2c1ef66cfae7d34e0721f301643a640b66",
+    "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/browser-performance",
+    "members": [
+      "phase3-browser-performance.json"
+    ]
+  }
+]

@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 1,
+  "kind": "phase5-final-log-retention-review",
+  "reviewer": "/root/security",
+  "observedAt": "2026-11-16T17:21:20.962880+00:00",
+  "runId": "43913852145",
+  "source": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+  "checkout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+  "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+  "verdict": "ALLOW_EXACT_REVIEWED_DECODED_LOGS_AND_ORIGINAL_JUDGE_LOG_MEMBERS",
+  "allowFullDecodedLogs": true,
+  "allowOriginalJudgeEvidenceZip": true,
+  "logs": [
+    {
+      "jobId": 133462613274,
+      "name": "Detect changes",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613274.log",
+      "bytes": 20263,
+      "sha256": "e2fd580d1d98e594e3146d72d41e32a81ed86645e53be1a6d722ac6c2e3e250f",
+      "lineCount": 223,
+      "status": "REVIEWED_ALLOW_FULL_DECODED_LOG",
+      "candidatePatternCounts": {
+        "credential-assignment": 3,
+        "authorization": 1
+      },
+      "classificationCounts": {
+        "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 2,
+        "MASKED_VALUE_OR_UNEXPANDED_SHELL_EXPRESSION": 2
+      }
+    },
+    {
+      "jobId": 133462613610,
+      "name": "Docker image (judge)",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613610.log",
+      "bytes": 125969,
+      "sha256": "66f56402a38a51cec7b0646cd47c6f212212add41848cc989e902e7f544dcdc3",
+      "lineCount": 1523,
+      "status": "REVIEWED_ALLOW_FULL_DECODED_LOG",
+      "candidatePatternCounts": {
+        "credential-assignment": 7,
+        "authorization": 1
+      },
+      "classificationCounts": {
+        "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 3,
+        "MASKED_VALUE_OR_UNEXPANDED_SHELL_EXPRESSION": 3,
+        "DOCKER_REGISTRY_AUTH_STAGE_LABEL": 2
+      }
+    },
+    {
+      "jobId": 133462613893,
+      "name": "Dependency audit",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613893.log",
+      "bytes": 21681,
+      "sha256": "8edd8cb4e197b1bfca938ea2f894a4f129de5e07e20fb7e119dd2256ca9e5c29",
+      "lineCount": 254,
+      "status": "REVIEWED_ALLOW_FULL_DECODED_LOG",
+      "candidatePatternCounts": {
+        "credential-assignment": 4,
+        "authorization": 1
+      },
+      "classificationCounts": {
+        "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 2,
+        "MASKED_VALUE_OR_UNEXPANDED_SHELL_EXPRESSION": 3
+      }
+    },
+    {
+      "jobId": 133462613974,
+      "name": "Docker image (front)",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613974.log",
+      "bytes": 143944,
+      "sha256": "fbc3f4cff2494aacf660feae289ad6c216eb33b7b52d64de44ab8a64cc94fc48",
+      "lineCount": 1686,
+      "status": "REVIEWED_ALLOW_FULL_DECODED_LOG",
+      "candidatePatternCounts": {
+        "credential-assignment": 8,
+        "authorization": 1
+      },
+      "classificationCounts": {
+        "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 3,
+        "MASKED_VALUE_OR_UNEXPANDED_SHELL_EXPRESSION": 3,
+        "DOCKER_REGISTRY_AUTH_STAGE_LABEL": 3
+      }
+    },
+    {
+      "jobId": 133462777373,
+      "name": "Judge worker",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462777373.log",
+      "bytes": 35926,
+      "sha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a",
+      "lineCount": 378,
+      "status": "REVIEWED_ALLOW_FULL_DECODED_LOG",
+      "candidatePatternCounts": {
+        "credential-assignment": 15,
+        "authorization": 1
+      },
+      "classificationCounts": {
+        "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 2,
+        "MASKED_VALUE_OR_UNEXPANDED_SHELL_EXPRESSION": 3,
+        "REVIEWED_STATIC_TEST_TITLE_OR_DURATION": 11
+      }
+    },
+    {
+      "jobId": 133462614697,
+      "name": "Docker image (back)",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462614697.log",
+      "bytes": 130005,
+      "sha256": "b3e7a6a1331d090c08c678f67b2686345dc9d9b62dc56d814c6de37bbb1123bb",
+      "lineCount": 1566,
+      "status": "REVIEWED_ALLOW_FULL_DECODED_LOG",
+      "candidatePatternCounts": {
+        "credential-assignment": 7,
+        "authorization": 1
+      },
+      "classificationCounts": {
+        "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 3,
+        "MASKED_VALUE_OR_UNEXPANDED_SHELL_EXPRESSION": 3,
+        "DOCKER_REGISTRY_AUTH_STAGE_LABEL": 2
+      }
+    },
+    {
+      "jobId": 133462777250,
+      "name": "Backend and API",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462777250.log",
+      "bytes": 132215,
+      "sha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "lineCount": 1373,
+      "status": "REVIEWED_ALLOW_FULL_DECODED_LOG",
+      "candidatePatternCounts": {
+        "credential-assignment": 26,
+        "authorization": 3
+      },
+      "classificationCounts": {
+        "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 2,
+        "FIXED_SOURCE_DEFINED_DISPOSABLE_CI_FIXTURE": 4,
+        "MASKED_VALUE_OR_UNEXPANDED_SHELL_EXPRESSION": 3,
+        "REVIEWED_STATIC_TEST_TITLE_OR_DURATION": 12,
+        "STATIC_MIGRATION_SUCCESS_SUMMARY": 1,
+        "STATIC_MIGRATION_ERROR_TEXT": 7
+      }
+    },
+    {
+      "jobId": 133462613878,
+      "name": "Docker image (runtime)",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613878.log",
+      "bytes": 297972,
+      "sha256": "5e2fc350cc2ef704b839f3f6428222e124dd23dfc3b2fc2ba0989f801bca9504",
+      "lineCount": 2638,
+      "status": "REVIEWED_ALLOW_FULL_DECODED_LOG",
+      "candidatePatternCounts": {
+        "credential-assignment": 9,
+        "authorization": 1
+      },
+      "classificationCounts": {
+        "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 3,
+        "MASKED_VALUE_OR_UNEXPANDED_SHELL_EXPRESSION": 3,
+        "DOCKER_REGISTRY_AUTH_STAGE_LABEL": 4
+      }
+    },
+    {
+      "jobId": 133462777344,
+      "name": "Browser tests (1/2)",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462777344.log",
+      "bytes": 185676,
+      "sha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "lineCount": 1473,
+      "status": "REVIEWED_ALLOW_FULL_DECODED_LOG",
+      "candidatePatternCounts": {
+        "credential-assignment": 29,
+        "authorization": 1
+      },
+      "classificationCounts": {
+        "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 2,
+        "MASKED_VALUE_OR_UNEXPANDED_SHELL_EXPRESSION": 3,
+        "REVIEWED_STATIC_TEST_TITLE_OR_DURATION": 25
+      }
+    },
+    {
+      "jobId": 133462778158,
+      "name": "Browser tests (2/2)",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462778158.log",
+      "bytes": 163970,
+      "sha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "lineCount": 1283,
+      "status": "REVIEWED_ALLOW_FULL_DECODED_LOG",
+      "candidatePatternCounts": {
+        "credential-assignment": 26,
+        "authorization": 1
+      },
+      "classificationCounts": {
+        "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 2,
+        "MASKED_VALUE_OR_UNEXPANDED_SHELL_EXPRESSION": 3,
+        "REVIEWED_STATIC_TEST_TITLE_OR_DURATION": 22
+      }
+    },
+    {
+      "jobId": 133462777184,
+      "name": "Sandbox, pipeline and Compose",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462777184.log",
+      "bytes": 335036,
+      "sha256": "c4752e237e9eaf78582484d14fac8a81199e1850a9bc7b136c1eefa59e65324e",
+      "lineCount": 3722,
+      "status": "REVIEWED_ALLOW_FULL_DECODED_LOG",
+      "candidatePatternCounts": {
+        "credential-assignment": 16,
+        "authorization": 1
+      },
+      "classificationCounts": {
+        "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 3,
+        "FIXED_SOURCE_DEFINED_DISPOSABLE_CI_FIXTURE": 5,
+        "MASKED_VALUE_OR_UNEXPANDED_SHELL_EXPRESSION": 4,
+        "DOCKER_REGISTRY_AUTH_STAGE_LABEL": 4,
+        "STATIC_SANDBOX_TOKEN_REDACTION_CHECK_SUCCESS": 1
+      }
+    },
+    {
+      "jobId": 133474126427,
+      "name": "CI required",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133474126427.log",
+      "bytes": 2442,
+      "sha256": "8b68d76ddf549c2aa247c956bd7aa3704221a9f68ca480ad6f860d2e4cd0dc74",
+      "lineCount": 41,
+      "status": "REVIEWED_ALLOW_FULL_DECODED_LOG",
+      "candidatePatternCounts": {
+        "credential-assignment": 2
+      },
+      "classificationCounts": {
+        "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 2
+      }
+    }
+  ],
+  "embeddedArtifactLogs": [
+    {
+      "artifactZipPath": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge-evidence.zip",
+      "artifactZipSha256": "baf3e779d420f869bd143ddcb7e68b03cd9abfbdf41f2af25228a3693b91f665",
+      "artifactMember": "phase2-api-restart.log",
+      "bytes": 64883,
+      "sha256": "00193f1e9799b9b743fcf69a59893c5478578e6decc30623a5ed328265a0efc0",
+      "lineCount": 372,
+      "status": "REVIEWED_ALLOW_UNMODIFIED_ORIGINAL_MEMBER",
+      "credentialPatternMatches": 0
+    },
+    {
+      "artifactZipPath": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge-evidence.zip",
+      "artifactZipSha256": "baf3e779d420f869bd143ddcb7e68b03cd9abfbdf41f2af25228a3693b91f665",
+      "artifactMember": "phase2-judge-workers.log",
+      "bytes": 45496,
+      "sha256": "d857aa189dce0f8a58c1a20d66c834a9ecb7a6f0ce5cf60f27ae08878b0300a1",
+      "lineCount": 414,
+      "status": "REVIEWED_ALLOW_UNMODIFIED_ORIGINAL_MEMBER",
+      "credentialPatternMatches": 0
+    },
+    {
+      "artifactZipPath": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge-evidence.zip",
+      "artifactZipSha256": "baf3e779d420f869bd143ddcb7e68b03cd9abfbdf41f2af25228a3693b91f665",
+      "artifactMember": "phase2-redis-restart.log",
+      "bytes": 64956,
+      "sha256": "9116de8b2fbb236f97861e3abde6495b57beb076582456ee1ffbd0aae591a8cc",
+      "lineCount": 870,
+      "status": "REVIEWED_ALLOW_UNMODIFIED_ORIGINAL_MEMBER",
+      "credentialPatternMatches": 0
+    },
+    {
+      "artifactZipPath": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge-evidence.zip",
+      "artifactZipSha256": "baf3e779d420f869bd143ddcb7e68b03cd9abfbdf41f2af25228a3693b91f665",
+      "artifactMember": "phase2-rejudge-recovery.log",
+      "bytes": 1001,
+      "sha256": "94a4f8100a4bf9a1010eccad83a00fc5013f54146094e7cd7bb1ab372fc0499d",
+      "lineCount": 9,
+      "status": "REVIEWED_ALLOW_UNMODIFIED_ORIGINAL_MEMBER",
+      "credentialPatternMatches": 0
+    }
+  ],
+  "fixedDisposableFixtureValues": [
+    {
+      "valueSha256": "74e2fe939fbd6bde0ba4bf2e9802931fbb1c6524af9a053e60978a02532055f4",
+      "logOccurrences": 2,
+      "sourceBindings": [
+        {
+          "field": "POSTGRES_PASSWORD",
+          "sourcePath": ".github/workflows/ci.yml",
+          "sourceLine": 222,
+          "sourceBlobSha256": "7cb96ddfa94d001c60d777bb0c75ea9f56911ed594aefe3b299c2cf2c5999166",
+          "valueSha256": "74e2fe939fbd6bde0ba4bf2e9802931fbb1c6524af9a053e60978a02532055f4",
+          "valueBytes": 22,
+          "classification": "FIXED_SOURCE_DEFINED_DISPOSABLE_CI_FIXTURE",
+          "scope": "Owned disposable CI/Compose service; source-defined test constant, not a generated browser credential or production secret."
+        },
+        {
+          "field": "POSTGRES_PASSWORD",
+          "sourcePath": ".github/workflows/ci.yml",
+          "sourceLine": 459,
+          "sourceBlobSha256": "7cb96ddfa94d001c60d777bb0c75ea9f56911ed594aefe3b299c2cf2c5999166",
+          "valueSha256": "74e2fe939fbd6bde0ba4bf2e9802931fbb1c6524af9a053e60978a02532055f4",
+          "valueBytes": 22,
+          "classification": "FIXED_SOURCE_DEFINED_DISPOSABLE_CI_FIXTURE",
+          "scope": "Owned disposable CI/Compose service; source-defined test constant, not a generated browser credential or production secret."
+        }
+      ]
+    },
+    {
+      "valueSha256": "9f62c812b533d4ee6b753bd76fa1af698d91725eec331da40164773fca765993",
+      "logOccurrences": 3,
+      "sourceBindings": [
+        {
+          "field": "GO_JUDGE_TOKEN",
+          "sourcePath": ".github/workflows/ci.yml",
+          "sourceLine": 274,
+          "sourceBlobSha256": "7cb96ddfa94d001c60d777bb0c75ea9f56911ed594aefe3b299c2cf2c5999166",
+          "valueSha256": "9f62c812b533d4ee6b753bd76fa1af698d91725eec331da40164773fca765993",
+          "valueBytes": 39,
+          "classification": "FIXED_SOURCE_DEFINED_DISPOSABLE_CI_FIXTURE",
+          "scope": "Owned disposable CI/Compose service; source-defined test constant, not a generated browser credential or production secret."
+        },
+        {
+          "field": "GO_JUDGE_TOKEN",
+          "sourcePath": ".github/workflows/ci.yml",
+          "sourceLine": 513,
+          "sourceBlobSha256": "7cb96ddfa94d001c60d777bb0c75ea9f56911ed594aefe3b299c2cf2c5999166",
+          "valueSha256": "9f62c812b533d4ee6b753bd76fa1af698d91725eec331da40164773fca765993",
+          "valueBytes": 39,
+          "classification": "FIXED_SOURCE_DEFINED_DISPOSABLE_CI_FIXTURE",
+          "scope": "Owned disposable CI/Compose service; source-defined test constant, not a generated browser credential or production secret."
+        },
+        {
+          "field": "GO_JUDGE_TOKEN",
+          "sourcePath": ".github/workflows/ci.yml",
+          "sourceLine": 538,
+          "sourceBlobSha256": "7cb96ddfa94d001c60d777bb0c75ea9f56911ed594aefe3b299c2cf2c5999166",
+          "valueSha256": "9f62c812b533d4ee6b753bd76fa1af698d91725eec331da40164773fca765993",
+          "valueBytes": 39,
+          "classification": "FIXED_SOURCE_DEFINED_DISPOSABLE_CI_FIXTURE",
+          "scope": "Owned disposable CI/Compose service; source-defined test constant, not a generated browser credential or production secret."
+        }
+      ]
+    },
+    {
+      "valueSha256": "c978c2ec1ded2ba2e9e34151225e86034a75264edf0a1c13c36150435799a79a",
+      "logOccurrences": 2,
+      "sourceBindings": [
+        {
+          "field": "JWT_ACCESS_SECRET",
+          "sourcePath": ".github/workflows/ci.yml",
+          "sourceLine": 272,
+          "sourceBlobSha256": "7cb96ddfa94d001c60d777bb0c75ea9f56911ed594aefe3b299c2cf2c5999166",
+          "valueSha256": "c978c2ec1ded2ba2e9e34151225e86034a75264edf0a1c13c36150435799a79a",
+          "valueBytes": 43,
+          "classification": "FIXED_SOURCE_DEFINED_DISPOSABLE_CI_FIXTURE",
+          "scope": "Owned disposable CI/Compose service; source-defined test constant, not a generated browser credential or production secret."
+        },
+        {
+          "field": "JWT_ACCESS_SECRET",
+          "sourcePath": ".github/workflows/ci.yml",
+          "sourceLine": 536,
+          "sourceBlobSha256": "7cb96ddfa94d001c60d777bb0c75ea9f56911ed594aefe3b299c2cf2c5999166",
+          "valueSha256": "c978c2ec1ded2ba2e9e34151225e86034a75264edf0a1c13c36150435799a79a",
+          "valueBytes": 43,
+          "classification": "FIXED_SOURCE_DEFINED_DISPOSABLE_CI_FIXTURE",
+          "scope": "Owned disposable CI/Compose service; source-defined test constant, not a generated browser credential or production secret."
+        }
+      ]
+    },
+    {
+      "valueSha256": "dd3d1b0cf45c718ce7aa4cd857a1380d23a4ad5d76adf45693be3d76460b4645",
+      "logOccurrences": 2,
+      "sourceBindings": [
+        {
+          "field": "JUDGE_SERVICE_TOKEN",
+          "sourcePath": ".github/workflows/ci.yml",
+          "sourceLine": 273,
+          "sourceBlobSha256": "7cb96ddfa94d001c60d777bb0c75ea9f56911ed594aefe3b299c2cf2c5999166",
+          "valueSha256": "dd3d1b0cf45c718ce7aa4cd857a1380d23a4ad5d76adf45693be3d76460b4645",
+          "valueBytes": 44,
+          "classification": "FIXED_SOURCE_DEFINED_DISPOSABLE_CI_FIXTURE",
+          "scope": "Owned disposable CI/Compose service; source-defined test constant, not a generated browser credential or production secret."
+        },
+        {
+          "field": "JUDGE_SERVICE_TOKEN",
+          "sourcePath": ".github/workflows/ci.yml",
+          "sourceLine": 537,
+          "sourceBlobSha256": "7cb96ddfa94d001c60d777bb0c75ea9f56911ed594aefe3b299c2cf2c5999166",
+          "valueSha256": "dd3d1b0cf45c718ce7aa4cd857a1380d23a4ad5d76adf45693be3d76460b4645",
+          "valueBytes": 44,
+          "classification": "FIXED_SOURCE_DEFINED_DISPOSABLE_CI_FIXTURE",
+          "scope": "Owned disposable CI/Compose service; source-defined test constant, not a generated browser credential or production secret."
+        }
+      ]
+    }
+  ],
+  "classificationCounts": {
+    "CI_PERMISSION_OR_TOKEN_ACL_HEADING": 29,
+    "MASKED_VALUE_OR_UNEXPANDED_SHELL_EXPRESSION": 33,
+    "DOCKER_REGISTRY_AUTH_STAGE_LABEL": 15,
+    "REVIEWED_STATIC_TEST_TITLE_OR_DURATION": 70,
+    "FIXED_SOURCE_DEFINED_DISPOSABLE_CI_FIXTURE": 9,
+    "STATIC_MIGRATION_SUCCESS_SUMMARY": 1,
+    "STATIC_MIGRATION_ERROR_TEXT": 7,
+    "STATIC_SANDBOX_TOKEN_REDACTION_CHECK_SUCCESS": 1
+  },
+  "disallowedCredentialPatternsFound": 0,
+  "generatedBrowserCredentialPatternsFound": 0,
+  "unresolvedCandidates": [],
+  "withheldContent": [],
+  "manualReview": {
+    "testTitleAndDurationCandidates": 70,
+    "receiptPath": "manual-log-title-review.json",
+    "receiptSha256": "5434281f2e11ed7222c75b43ae57d4fd952d4468aaf1bd1fe769b3938db3eef8",
+    "staticSuccessMessageSource": {
+      "path": "Judge/runtime/check-logs.mjs",
+      "line": 35,
+      "sha256": "1272baf0f47a64e731978f4f70d1efc7a88bc16540f555bfe054f5e71c1d9b33"
+    },
+    "embeddedAuthContext": "Static Nest AuthModule/route-registration text and two static disposable Redis authentication warnings; no credential values."
+  },
+  "method": {
+    "scope": "Exact twelve completed decoded job logs and four original embedded Judge log members; no author files or original bytes changed.",
+    "patterns": [
+      "PEM private-key blocks",
+      "JWT-shaped strings",
+      "GitHub tokens",
+      "OpenAI API keys",
+      "AWS access-key identifiers",
+      "Bearer/Basic authorization values",
+      "password/token/secret/API-key assignments",
+      "credential-bearing URLs",
+      "signed query capabilities",
+      "exact generated Vibe browser password formats"
+    ],
+    "manualContextClassification": true,
+    "fixedFixtureSourceBinding": true,
+    "all12JobsCompletedSuccess": true,
+    "scannerScriptSha256": "d8616806da53ea4b4cbf8914a74429407447826ceaf13ead10393a43d611d85c",
+    "classificationScriptSha256": "943be17475140842ebd20ae329c5032e8d067f35c61ce1db2731a11a7159831a"
+  },
+  "archiveConditions": [
+    "Preserve only the exact listed UTF-8 bytes after independently verifying each SHA-256 and byte size.",
+    "Keep source-defined disposable CI fixtures labeled separately from generated credentials.",
+    "Any changed or additional log requires a new review; this approval does not transfer to other files or runs."
+  ],
+  "limitations": [
+    "Scoped pattern checks and source/context review do not constitute a universal guarantee of arbitrary secret detection.",
+    "Fixed disposable fixture credentials appear in the original logs; these are source-defined constants for owned CI resources, not production credentials.",
+    "Logs are the exact decoded tool response saved as UTF-8, not a claim to retain an original GitHub log ZIP."
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "ALL_FEATURES_INTEGRATED_FINAL_SOURCE_RECEIPT_REQUIRED",
+  "status": "READY_FOR_MANUAL_MERGE",
   "protected": {
     "main": "6176015b63a1615cc2269172f246725ef08abab3",
     "pr63": {
@@ -864,17 +864,246 @@
     }
   ],
   "finalAcceptance": {
-    "state": "REQUIRED_AFTER_THIS_REPORT_COMMIT",
-    "branch": "overhaul5/integration",
-    "baseBranch": "overhaul4/integration",
+    "schemaVersion": 1,
+    "decision": "READY_FOR_MANUAL_MERGE",
+    "productionReadiness": "BLOCKED_EXTERNAL_ENVIRONMENT",
+    "repository": "yakisoba0728/UnsolvableOJ",
+    "pullRequest": 92,
+    "pullRequestState": "OPEN_UNMERGED_NOT_DRAFT",
+    "source": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
     "base": "d0159b1f844bf0608415dded9e84af566c8e2041",
-    "receiptLocation": "Final stacked PR immutable acceptance comment and evidence-only overhaul5/final-receipts archive commit; neither changes the tested release source.",
-    "requirements": [
-      "12 actually executed successful jobs at final source/current base",
-      "merge-checkout expected parents and equal intended source tree",
-      "independent final source and artifacts acceptance",
-      "live protected main, PR63 and PR86 heads/states",
-      "final PR OPEN and UNMERGED"
+    "checkout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+    "checkoutParents": [
+      "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5"
+    ],
+    "run": {
+      "id": 43913852145,
+      "attempt": 1,
+      "conclusion": "success",
+      "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145"
+    },
+    "jobs": [
+      {
+        "id": 133462613274,
+        "name": "Detect changes",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462613610,
+        "name": "Docker image (judge)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462613878,
+        "name": "Docker image (runtime)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462613893,
+        "name": "Dependency audit",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462613974,
+        "name": "Docker image (front)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462614697,
+        "name": "Docker image (back)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462777184,
+        "name": "Sandbox, pipeline and Compose",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462777250,
+        "name": "Backend and API",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462777344,
+        "name": "Browser tests (1/2)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462777373,
+        "name": "Judge worker",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462778158,
+        "name": "Browser tests (2/2)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133474126427,
+        "name": "CI required",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "independentWholeRunReceipt": {
+      "path": "evidence/reviews/final-pr92-independent-review.json",
+      "sha256": "70f6f4489b0f355691c64158043f254aaa7ddb8f955b02fd32e7e09ff6d5144b"
+    },
+    "independentSecurityReceipt": {
+      "path": "evidence/reviews/final-pr92-security-acceptance.json",
+      "sha256": "631c04e5e5954ed9a12a8d2a3c94deb0726e7cf2bbdf7197757e4643f0c0dc2a"
+    },
+    "sourceDocumentationReceipt": {
+      "path": "evidence/reviews/final-docs-independent-acceptance.json",
+      "sha256": "ad50b1a3947b949824b3db02efa877f12e35af29a55d291efdb6affb82a00494"
+    },
+    "actualTestTruth": {
+      "dependencyAudit": "Six actual production/full npm audits each report zero vulnerabilities; three exact-source lockfile SBOMs retained.",
+      "backend": {
+        "unitTests": 392,
+        "unitFiles": 30,
+        "apiTests": 261,
+        "apiFiles": 44,
+        "migrationGuardFileTests": 5,
+        "enterpriseExportFileTests": 4,
+        "enterpriseExportRevocationFileTests": 1,
+        "fullMigrationRegression": "PASS"
+      },
+      "additionalNodeSuites": {
+        "sbom": 4,
+        "ciExecutorAndVibeFixture": 86,
+        "vibeTls": 16,
+        "boj": 7,
+        "operations": 6,
+        "enterpriseBenchmarkGuard": 4,
+        "restoreGuard": 2,
+        "databaseGuard": 2,
+        "starter": 2,
+        "note": "Counts are the actual Node test-runner reports, including parent/subtest semantics; not added again to the API or native totals."
+      },
+      "databaseQualification": {
+        "schemaVersion": 1,
+        "workloads": 7,
+        "status": "PASS",
+        "source": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+        "createdAndDropped": true
+      },
+      "restore": {
+        "schemaVersion": 2,
+        "status": "PASS",
+        "migrations": 31,
+        "tableFingerprints": 37,
+        "goals": 12,
+        "stopWriterBarrier": "37 tables SHARE, concurrent write refused, held through dump",
+        "populatedDown": "Refused and fingerprints/schema/products/ledger retained",
+        "restoredWrites": "Statistics integrity and saved-goal update passed",
+        "cleanup": "both generated databases removed"
+      },
+      "judge": {
+        "workerTests": 137,
+        "pythonRuntimeChecks": 5,
+        "pythonRuntimeScope": "One health route and four Go package-graph/runtime checks."
+      },
+      "browser": {
+        "mainShardCounts": [
+          403,
+          402
+        ],
+        "firefoxShardCounts": [
+          87,
+          87
+        ],
+        "total": 979,
+        "actualBrowserCases": 894,
+        "playwrightUnitCases": 85,
+        "projectCounts": {
+          "unit": 85,
+          "chromium": 435,
+          "firefox": 174,
+          "chromium-slow": 111,
+          "webkit": 174
+        },
+        "newUxCases": 42,
+        "newUxPerEngine": 14,
+        "newEditorCases": 1,
+        "countScope": "The42 UX cases and1 editor case are included in979. The979 total includes85 unit cases; it is not979 real-browser cases.",
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "retries": 0
+      },
+      "native": {
+        "tests": 90,
+        "matrixRows": 72,
+        "matrixRowsAreAdditionalTests": false,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "pipeline": {
+        "tests": 36,
+        "files": 9,
+        "newMultiApiCases": 1,
+        "multiApiTestFileMs": 13494,
+        "multiApiIndividualTestMs": 13492,
+        "multiApiReportElapsedBeforeWriteMs": 13488.428723
+      },
+      "compose": {
+        "realBrowserFlows": 4,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "retries": 0,
+        "actualRemovedContainers": 8,
+        "actualRemovedNetworks": 4,
+        "actualRemovedBackupVolumes": 1
+      }
+    },
+    "protectedLiveRead": {
+      "path": "evidence/final-run-43913852145/protected-live-state.json",
+      "sha256": "8a67b8a92831d53226d491fce7a63330f0fddfcf948c0c5a675a66dfd4d3b152",
+      "retrievedAt": "2026-11-16 17:27:25 UTC"
+    },
+    "manualMergeOrder": [
+      63,
+      86,
+      92
+    ],
+    "runtime": {
+      "rawHigh": 177,
+      "rawCritical": 5,
+      "scannerExit": 2,
+      "reviewedFindings": 182,
+      "payloadFileMatches": 990,
+      "policySha256": "81f0bf685f2ffc22cdb0933c2c55f6f5fff05f8f252765c0af8fe56189084603",
+      "expiresAt": "2026-11-30T00:00:00Z",
+      "gate": "PASS_WITH_REVIEWED_COMPONENT_FINDINGS",
+      "hostKernelReadiness": "UNVERIFIED"
+    },
+    "evidenceArchiveScope": "Post-run evidence only. It is not the tested release source and is not a feature to merge. It does not move the integration head, renew security evidence or authorize production deployment.",
+    "originalZipCount": 15,
+    "qualificationLimits": [
+      "All application execution was on disposable hosted CI fixtures; no production database, host/kernel, certificate operations, restore RTO/RPO or deployment approval is claimed.",
+      "Database seven-workload and multi-API eight-job observations are finite samples; no population tail, sustainable capacity, speedup or causal regression claim.",
+      "Mocked UX/editor invariants are distinct from actual Compose observations. Stable refresh geometry does not imply zero whole-page CLS. Field INP is null; EventTiming is truncated and heap snapshots are coarse.",
+      "Runtime raw177HIGH/5CRITICAL remains visible under exact previously independent-approved component applicability with unchanged expiry2026-11-30T00:00:00Z. Supported installed-library scanning does not establish full bundled JavaScript/arbitrary binary or license coverage.",
+      "Native72 matrix rows are observations within the90 reported tests, not72 additional tests. Java over-heap normalization remains RUNTIME_ERROR where actually observed.",
+      "The final source contains the reviewed report and historical evidence; its post-run finalized report/receipts belong on a separate evidence-only archive so the tested release tree remains unchanged.",
+      "This approval binds only the exact source,tree,merge checkout and current Phase IV base. Future live head/base changes require revalidation; final merge remains the owner's manual action."
     ]
   },
   "integrationBeforeReportCommit": {

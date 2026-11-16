@@ -1,0 +1,283 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/security",
+  "observedAt": "2026-11-16T17:19:39.924637+00:00",
+  "source": {
+    "checkoutSha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "treeSha": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+    "sourceHeadSha": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+    "baseSha": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "runId": "43913852145",
+    "runAttempt": "1",
+    "trackedTreeClean": true
+  },
+  "bindings": [
+    {
+      "zip": "native-verdict.zip",
+      "zipSha256": "5c86a8952e7268a9684b97489a448e6b62a6838193182ec7d869f7a2cd5c96dc",
+      "zipBytes": 5419,
+      "member": "phase5-verdict-matrix.json",
+      "reportSha256": "89db22d466552844fae4db2fe3114a4928a8971025942059a6fc9c9200d973a5"
+    },
+    {
+      "zip": "multi-api.zip",
+      "zipSha256": "bf5ea3ba7956f67295f255c132365e677b3a2a4b45e22815f50bc94f9cd59d45",
+      "zipBytes": 5315,
+      "member": "phase5-multi-api.json",
+      "reportSha256": "644afcd93bf7902815f6eb3a9b0c094e9419bf3cceb9a9f6a35d44790e626f2a"
+    },
+    {
+      "zip": "vibe-pipeline.zip",
+      "zipSha256": "7f26785edfdea5785bbb4d20fecedaaf87c245577210ef9479fdc45740c347cd",
+      "zipBytes": 1422,
+      "member": "phase5-vibe-dedicated.json",
+      "reportSha256": "b0b4c9a5c7d87ea14a63a5332fb56966680f73c28c4c9d43301ef20a3a93e11e"
+    },
+    {
+      "zip": "vibe-browser.zip",
+      "zipSha256": "70050cbbb0104c4a40f2577abb005ea724f8f806d5af7c66c949f5b314f04cc8",
+      "zipBytes": 56765,
+      "member": "phase5-vibe-browser.json",
+      "reportSha256": "0dd2b958a0e472d0308c9bbdce1ce6bc53a7d46ce1a72c0e22d0cf5b1adbb13f"
+    },
+    {
+      "zip": "vibe-browser.zip",
+      "zipSha256": "70050cbbb0104c4a40f2577abb005ea724f8f806d5af7c66c949f5b314f04cc8",
+      "zipBytes": 56765,
+      "member": "phase5-vibe-compose.json",
+      "reportSha256": "20202160bcff45ef32631d4878d30c8634cc82175a0dee223a0fe8efac38a9bd"
+    }
+  ],
+  "limitations": [
+    "One finite CI workload; no production capacity, saturation or tail-latency claim.",
+    "Native results are normalized JudgeResult measurements, not retained raw cgroup OOM counters.",
+    "API/worker RSS and CPU are process metrics; the V8 heap limit is not a process RSS limit.",
+    "Persisted row timestamp overlap is an observation, not a transaction-commit timestamp proof."
+  ],
+  "nativeMatrix": {
+    "status": "PASS",
+    "rows": 72,
+    "sourceHashesChecked": 72,
+    "elapsedMs": 108065.113889,
+    "statusCounts": {
+      "ACCEPTED": 24,
+      "WRONG_ANSWER": 8,
+      "RUNTIME_ERROR": 11,
+      "TIME_LIMIT_EXCEEDED": 8,
+      "OUTPUT_LIMIT_EXCEEDED": 8,
+      "COMPILE_ERROR": 6,
+      "MEMORY_LIMIT_EXCEEDED": 7
+    },
+    "javaOverHeapStatus": "RUNTIME_ERROR"
+  },
+  "multiApi": {
+    "status": "PASS",
+    "rows": 8,
+    "sourceHashesChecked": 8,
+    "apiRequests": [
+      4,
+      4
+    ],
+    "workerJobs": [
+      6,
+      2
+    ],
+    "apiPids": [
+      24452,
+      24453
+    ],
+    "workerPids": [
+      24517,
+      24518
+    ],
+    "quotaRemaining": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "maximumQueueOverlap": 2,
+    "quotaResetSecondsBySubmission": [
+      60,
+      60,
+      60,
+      60,
+      60,
+      60,
+      60,
+      59
+    ],
+    "perWorkerMaximumOverlap": [
+      1,
+      1
+    ],
+    "terminalClaimConflicts": 8,
+    "activeClaimConflicts": 2,
+    "idempotentReplays": 8,
+    "scenarioElapsedMs": 13397.353062,
+    "batchElapsedMs": 11176.100703,
+    "cleanupElapsedMs": 83.35824200000025,
+    "elapsedBeforeReportWriteMs": 13488.428723,
+    "cleanup": {
+      "failures": [],
+      "removedJobIds": [
+        "dc870e41-062e-405e-9455-81808061717c-1",
+        "06fbb35f-87e2-4afb-bec6-65a9657358ec-1",
+        "160aaece-98ce-473e-a493-2948c62b8aea-1",
+        "0e6f2abf-6893-4974-b59d-f49ea2053efe-1",
+        "03109c58-4ee7-47fb-b79d-523eb1818722-1",
+        "b5e0c8dc-e94e-4344-93b1-068e77f52732-1",
+        "53bbee93-693a-4a33-a154-77b05a1ecc33-1",
+        "b20bd9db-4dae-46a6-baaf-d3dbabb9eaba-1"
+      ],
+      "elapsedMs": 83.35824200000025,
+      "processes": [
+        {
+          "pid": 24452,
+          "exitCode": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 24453,
+          "exitCode": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 24517,
+          "exitCode": 0,
+          "signal": null
+        },
+        {
+          "pid": 24518,
+          "exitCode": 0,
+          "signal": null
+        }
+      ],
+      "observers": [
+        {
+          "postgresSocketDestroyed": true,
+          "redisStatus": "end",
+          "queueCloseFailed": false,
+          "pendingOperations": 0,
+          "forceCloseFailures": []
+        },
+        {
+          "postgresSocketDestroyed": true,
+          "redisStatus": "end",
+          "queueCloseFailed": false,
+          "pendingOperations": 0,
+          "forceCloseFailures": []
+        }
+      ]
+    },
+    "nativeCacheCounts": [
+      0,
+      0
+    ],
+    "persistence": {
+      "submissions": 8,
+      "learned": 8,
+      "notifications": 8,
+      "solves": [
+        {
+          "awarded_xp": 10,
+          "accepted_submission_id": "dc870e41-062e-405e-9455-81808061717c"
+        }
+      ],
+      "xp": 10,
+      "resultReplays": 8
+    }
+  },
+  "dedicatedVibe": {
+    "status": "PASS",
+    "requests": 32,
+    "deleteRequests": 4,
+    "assessment": {
+      "publicChecks": 6,
+      "finalPassed": 11,
+      "finalTotal": 11,
+      "evaluationStatus": "unavailable",
+      "persisted": true,
+      "ownershipDenied": true,
+      "artifactDelta": 0
+    },
+    "closed": true,
+    "upstreamFailures": 0,
+    "cleanupFailures": 0
+  },
+  "browserVibe": {
+    "status": "PASS",
+    "assessment": {
+      "publicChecks": 6,
+      "passed": 11,
+      "total": 11,
+      "outcome": 40,
+      "evaluationStatus": "unavailable",
+      "challengeVersion": "2e1df0949b196347b2820c72e2c72749011e8406ef658e45009d01f2c8324e18",
+      "persistedReloadEqual": true,
+      "outsiderDenied": true,
+      "sourceRestoredInReadOnlyEditor": true
+    },
+    "protocol": {
+      "admissionWaitMs": 61000.818843,
+      "mainTestTimeoutMs": 90000,
+      "publicRuns": 1,
+      "finalSubmissions": 1,
+      "registrations": 2,
+      "paidProviderCalls": 0,
+      "browserApiMocks": 0
+    },
+    "fixture": {
+      "mode": "dedicated",
+      "servername": "vibe-executor.internal",
+      "templateSha256": "83293d5f157fefc7f5cbf6a408f3cf89cf73fb1eb247083c76bec30d5b37026b",
+      "serverCertificateFingerprint": "43:19:EB:3C:45:1D:CF:94:9C:0A:3A:DB:33:07:73:C6:EE:AE:16:66:45:01:0A:95:6A:C2:97:5A:83:07:F9:80",
+      "clientCertificateFingerprint": "41:FC:40:85:28:AA:BB:75:8C:04:4A:7B:41:7D:16:C0:63:B3:D8:22:5C:B9:C0:EE:2A:E5:F9:02:AC:83:6F:B3",
+      "certificateLifetimeDays": 1,
+      "serverAndClientCertificateRequired": true,
+      "applicationSandboxNetwork": false,
+      "newPrivilegedExecutors": 0,
+      "providerConfigured": false,
+      "testOnlySharedNativeExecutor": true
+    },
+    "probes": {
+      "positive": {
+        "status": 200,
+        "elapsedMs": 34.303405
+      },
+      "noClient": {
+        "status": 400,
+        "elapsedMs": 7.017568999999995
+      },
+      "wrongBearer": {
+        "status": 401,
+        "elapsedMs": 2.2953820000000036
+      },
+      "anonymous": {
+        "status": 401,
+        "elapsedMs": 0.9506039999999985
+      },
+      "wrongHostname": {
+        "errorCode": "ERR_TLS_CERT_ALTNAME_INVALID",
+        "elapsedMs": 6.890045000000001
+      },
+      "disallowed": {
+        "status": 404,
+        "elapsedMs": 1.1171439999999961
+      },
+      "query": {
+        "status": 400,
+        "elapsedMs": 0.7154049999999899
+      },
+      "requests": 7,
+      "perRequestTimeoutMs": 4000
+    },
+    "composeCleanup": true,
+    "mainTestMs": 4683.100972
+  },
+  "status": "PASS"
+}

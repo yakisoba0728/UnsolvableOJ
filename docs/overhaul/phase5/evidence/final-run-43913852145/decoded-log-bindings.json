@@ -1,0 +1,66 @@
+{
+  "scope": "Exact UTF-8 bytes of the decoded log strings retained from the connected GitHub tool; not a claim about the original HTTP archive encoding.",
+  "archiveSha256": "584f017b50a8e26af8a503515f328c2bf45fea619b6a36868db58e627ba14cf6",
+  "logs": [
+    {
+      "file": "job-133462613274.log",
+      "bytes": 20263,
+      "sha256": "e2fd580d1d98e594e3146d72d41e32a81ed86645e53be1a6d722ac6c2e3e250f"
+    },
+    {
+      "file": "job-133462613610.log",
+      "bytes": 125969,
+      "sha256": "66f56402a38a51cec7b0646cd47c6f212212add41848cc989e902e7f544dcdc3"
+    },
+    {
+      "file": "job-133462613878.log",
+      "bytes": 297972,
+      "sha256": "5e2fc350cc2ef704b839f3f6428222e124dd23dfc3b2fc2ba0989f801bca9504"
+    },
+    {
+      "file": "job-133462613893.log",
+      "bytes": 21681,
+      "sha256": "8edd8cb4e197b1bfca938ea2f894a4f129de5e07e20fb7e119dd2256ca9e5c29"
+    },
+    {
+      "file": "job-133462613974.log",
+      "bytes": 143944,
+      "sha256": "fbc3f4cff2494aacf660feae289ad6c216eb33b7b52d64de44ab8a64cc94fc48"
+    },
+    {
+      "file": "job-133462614697.log",
+      "bytes": 130005,
+      "sha256": "b3e7a6a1331d090c08c678f67b2686345dc9d9b62dc56d814c6de37bbb1123bb"
+    },
+    {
+      "file": "job-133462777184.log",
+      "bytes": 335036,
+      "sha256": "c4752e237e9eaf78582484d14fac8a81199e1850a9bc7b136c1eefa59e65324e"
+    },
+    {
+      "file": "job-133462777250.log",
+      "bytes": 132215,
+      "sha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19"
+    },
+    {
+      "file": "job-133462777344.log",
+      "bytes": 185676,
+      "sha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d"
+    },
+    {
+      "file": "job-133462777373.log",
+      "bytes": 35926,
+      "sha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a"
+    },
+    {
+      "file": "job-133462778158.log",
+      "bytes": 163970,
+      "sha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68"
+    },
+    {
+      "file": "job-133474126427.log",
+      "bytes": 2442,
+      "sha256": "8b68d76ddf549c2aa247c956bd7aa3704221a9f68ca480ad6f860d2e4cd0dc74"
+    }
+  ]
+}

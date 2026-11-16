@@ -1,0 +1,1983 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "timestamp": "2026-11-16T17:07:13.451Z",
+  "provenance": {
+    "checkoutSha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "treeSha": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+    "sourceHeadSha": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+    "baseSha": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "runId": "43913852145",
+    "runAttempt": "1",
+    "trackedTreeClean": true
+  },
+  "environment": {
+    "node": "v24.22.2",
+    "platform": "linux",
+    "kernel": "7.0.0-1017-azure",
+    "logicalCpus": 4,
+    "cpu": "AMD EPYC 7763 64-Core Processor"
+  },
+  "limits": {
+    "suiteTimeoutMs": 600000,
+    "sequential": true,
+    "matrixCases": 72,
+    "memoryProbeLimitMiB": 128,
+    "memoryAllocationsMiB": [
+      8,
+      192
+    ],
+    "memoryProbeTimeLimitMs": 5000,
+    "compileLimitMiB": 1024,
+    "compileTimeLimitMs": 30000,
+    "stdoutAndStderrLimitBytes": 1000000
+  },
+  "elapsedMs": 108065.113889,
+  "missing": [],
+  "observations": [
+    {
+      "language": "C",
+      "scenario": "AC",
+      "sourceSha256": "282764e790f75414d63047040c8e662aae070f5ee61e8148b53a59382dfe5125",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 168.97037,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 11,
+        "memoryKb": 740,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 11,
+            "memoryKb": 740
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 2,
+            "memoryKb": 652
+          }
+        ]
+      }
+    },
+    {
+      "language": "CPP",
+      "scenario": "AC",
+      "sourceSha256": "8f7d241917e34019f992d03dc7ae0c661c8e40c882ff0599b8ce5b0fe39c98bc",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 504.85938999999996,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 39,
+        "memoryKb": 1364,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 39,
+            "memoryKb": 1364
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 2,
+            "memoryKb": 392
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVA",
+      "scenario": "AC",
+      "sourceSha256": "f92bf9e14978d3ff4e072fcbe76a647cfec568191cbbf27ddc15cb729ed83a59",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "-Xmx256m",
+      "timeLimitMs": 5000,
+      "elapsedMs": 1506.6451289999998,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 111,
+        "memoryKb": 20612,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 111,
+            "memoryKb": 20612
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 105,
+            "memoryKb": 20348
+          }
+        ]
+      }
+    },
+    {
+      "language": "PYTHON",
+      "scenario": "AC",
+      "sourceSha256": "2056d74aaba9a0c3f8bae7e4f3c21f00cf17408473a329e325c38221109e1cd0",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 36.87042700000029,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 12,
+        "memoryKb": 2952,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 12,
+            "memoryKb": 2952
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 12,
+            "memoryKb": 2948
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVASCRIPT",
+      "scenario": "AC",
+      "sourceSha256": "bcc758d57af556edb8668dafa0fa434b75166be273a082976d452b10f76cb8bd",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 5000,
+      "elapsedMs": 73.74573499999997,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 30,
+        "memoryKb": 9916,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 30,
+            "memoryKb": 9848
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 28,
+            "memoryKb": 9916
+          }
+        ]
+      }
+    },
+    {
+      "language": "TYPESCRIPT",
+      "scenario": "AC",
+      "sourceSha256": "4e0f8ae6335ed59fee88f7e1704d9368d394d13e963476430187ab73fe7be838",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 5000,
+      "elapsedMs": 85.7879969999999,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 31,
+        "memoryKb": 10100,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 31,
+            "memoryKb": 10100
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 29,
+            "memoryKb": 10100
+          }
+        ]
+      }
+    },
+    {
+      "language": "GO",
+      "scenario": "AC",
+      "sourceSha256": "eb2b6890a14126db60a49a63e8861635b11ecde9ad55f0c7f54bd71124f6362a",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 10287.882039,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 2,
+        "memoryKb": 1416,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 2,
+            "memoryKb": 1416
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 2,
+            "memoryKb": 1156
+          }
+        ]
+      }
+    },
+    {
+      "language": "RUST",
+      "scenario": "AC",
+      "sourceSha256": "4a89da213833aa5e05c831311b0c71049bf9de9cc31800bd4f387ef40192f486",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 435.361895,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 2,
+        "memoryKb": 464,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 2,
+            "memoryKb": 464
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 2,
+            "memoryKb": 392
+          }
+        ]
+      }
+    },
+    {
+      "language": "C",
+      "scenario": "WA",
+      "sourceSha256": "3134dd3abe2bab93de88d45aefac7d36f6ee4742ad857e7b0717238cafbe403e",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 60.272267000000284,
+      "verification": "PASS",
+      "result": {
+        "status": "WRONG_ANSWER",
+        "runtimeMs": 1,
+        "memoryKb": 392,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "WRONG_ANSWER",
+            "runtimeMs": 1,
+            "memoryKb": 392
+          }
+        ]
+      }
+    },
+    {
+      "language": "C",
+      "scenario": "RE",
+      "sourceSha256": "3134dd3abe2bab93de88d45aefac7d36f6ee4742ad857e7b0717238cafbe403e",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 59.7558769999996,
+      "verification": "PASS",
+      "result": {
+        "status": "RUNTIME_ERROR",
+        "runtimeMs": 1,
+        "memoryKb": 388,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "RUNTIME_ERROR",
+            "runtimeMs": 1,
+            "memoryKb": 388
+          }
+        ]
+      }
+    },
+    {
+      "language": "C",
+      "scenario": "TLE",
+      "sourceSha256": "3134dd3abe2bab93de88d45aefac7d36f6ee4742ad857e7b0717238cafbe403e",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 1000,
+      "elapsedMs": 1060.8308830000005,
+      "verification": "PASS",
+      "result": {
+        "status": "TIME_LIMIT_EXCEEDED",
+        "runtimeMs": 1001,
+        "memoryKb": 512,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "TIME_LIMIT_EXCEEDED",
+            "runtimeMs": 1001,
+            "memoryKb": 512
+          }
+        ]
+      }
+    },
+    {
+      "language": "C",
+      "scenario": "OLE",
+      "sourceSha256": "3134dd3abe2bab93de88d45aefac7d36f6ee4742ad857e7b0717238cafbe403e",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 165.5110229999991,
+      "verification": "PASS",
+      "result": {
+        "status": "OUTPUT_LIMIT_EXCEEDED",
+        "runtimeMs": 99,
+        "memoryKb": 1676,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "OUTPUT_LIMIT_EXCEEDED",
+            "runtimeMs": 99,
+            "memoryKb": 1676
+          }
+        ]
+      }
+    },
+    {
+      "language": "C",
+      "scenario": "syntax",
+      "sourceSha256": "f72c13c81a31e006b9c7c89338becfd62634efe34d343b88e76020bb2a5547bf",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 19.82199099999889,
+      "verification": "PASS",
+      "result": {
+        "status": "COMPILE_ERROR",
+        "runtimeMs": 0,
+        "memoryKb": 0,
+        "passedTestCases": 0,
+        "totalTestCases": 2,
+        "testResults": []
+      }
+    },
+    {
+      "language": "C",
+      "scenario": "UTF8",
+      "sourceSha256": "3134dd3abe2bab93de88d45aefac7d36f6ee4742ad857e7b0717238cafbe403e",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 89.78277600000001,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 4,
+        "memoryKb": 648,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 4,
+            "memoryKb": 644
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 4,
+            "memoryKb": 648
+          }
+        ]
+      }
+    },
+    {
+      "language": "CPP",
+      "scenario": "WA",
+      "sourceSha256": "6c6b567f9e1ff4cd5f2c3f84b8f98c8e24dfe5d33baf311c0f85e8a37a489217",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 449.3424590000013,
+      "verification": "PASS",
+      "result": {
+        "status": "WRONG_ANSWER",
+        "runtimeMs": 3,
+        "memoryKb": 412,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "WRONG_ANSWER",
+            "runtimeMs": 3,
+            "memoryKb": 412
+          }
+        ]
+      }
+    },
+    {
+      "language": "CPP",
+      "scenario": "RE",
+      "sourceSha256": "6c6b567f9e1ff4cd5f2c3f84b8f98c8e24dfe5d33baf311c0f85e8a37a489217",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 443.3278390000014,
+      "verification": "PASS",
+      "result": {
+        "status": "RUNTIME_ERROR",
+        "runtimeMs": 2,
+        "memoryKb": 392,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "RUNTIME_ERROR",
+            "runtimeMs": 2,
+            "memoryKb": 392
+          }
+        ]
+      }
+    },
+    {
+      "language": "CPP",
+      "scenario": "TLE",
+      "sourceSha256": "6c6b567f9e1ff4cd5f2c3f84b8f98c8e24dfe5d33baf311c0f85e8a37a489217",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 1000,
+      "elapsedMs": 1463.949501000001,
+      "verification": "PASS",
+      "result": {
+        "status": "TIME_LIMIT_EXCEEDED",
+        "runtimeMs": 1002,
+        "memoryKb": 512,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "TIME_LIMIT_EXCEEDED",
+            "runtimeMs": 1002,
+            "memoryKb": 512
+          }
+        ]
+      }
+    },
+    {
+      "language": "CPP",
+      "scenario": "OLE",
+      "sourceSha256": "6c6b567f9e1ff4cd5f2c3f84b8f98c8e24dfe5d33baf311c0f85e8a37a489217",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 564.9045640000004,
+      "verification": "PASS",
+      "result": {
+        "status": "OUTPUT_LIMIT_EXCEEDED",
+        "runtimeMs": 93,
+        "memoryKb": 2436,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "OUTPUT_LIMIT_EXCEEDED",
+            "runtimeMs": 93,
+            "memoryKb": 2436
+          }
+        ]
+      }
+    },
+    {
+      "language": "CPP",
+      "scenario": "syntax",
+      "sourceSha256": "f72c13c81a31e006b9c7c89338becfd62634efe34d343b88e76020bb2a5547bf",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 20.18954400000075,
+      "verification": "PASS",
+      "result": {
+        "status": "COMPILE_ERROR",
+        "runtimeMs": 0,
+        "memoryKb": 0,
+        "passedTestCases": 0,
+        "totalTestCases": 2,
+        "testResults": []
+      }
+    },
+    {
+      "language": "CPP",
+      "scenario": "UTF8",
+      "sourceSha256": "6c6b567f9e1ff4cd5f2c3f84b8f98c8e24dfe5d33baf311c0f85e8a37a489217",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 532.8364999999976,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 15,
+        "memoryKb": 648,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 7,
+            "memoryKb": 644
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 15,
+            "memoryKb": 648
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVA",
+      "scenario": "WA",
+      "sourceSha256": "05e25e41454b6d34e71e7a249e1b9754dd225b0e4ce3fb611eb499f530f794b3",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "-Xmx256m",
+      "timeLimitMs": 5000,
+      "elapsedMs": 1568.2389079999994,
+      "verification": "PASS",
+      "result": {
+        "status": "WRONG_ANSWER",
+        "runtimeMs": 51,
+        "memoryKb": 18572,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "WRONG_ANSWER",
+            "runtimeMs": 51,
+            "memoryKb": 18572
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVA",
+      "scenario": "RE",
+      "sourceSha256": "05e25e41454b6d34e71e7a249e1b9754dd225b0e4ce3fb611eb499f530f794b3",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "-Xmx256m",
+      "timeLimitMs": 5000,
+      "elapsedMs": 1411.3022700000001,
+      "verification": "PASS",
+      "result": {
+        "status": "RUNTIME_ERROR",
+        "runtimeMs": 53,
+        "memoryKb": 19080,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "RUNTIME_ERROR",
+            "runtimeMs": 53,
+            "memoryKb": 19080
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVA",
+      "scenario": "TLE",
+      "sourceSha256": "05e25e41454b6d34e71e7a249e1b9754dd225b0e4ce3fb611eb499f530f794b3",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "-Xmx256m",
+      "timeLimitMs": 1000,
+      "elapsedMs": 2290.9624879999974,
+      "verification": "PASS",
+      "result": {
+        "status": "TIME_LIMIT_EXCEEDED",
+        "runtimeMs": 1005,
+        "memoryKb": 18300,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "TIME_LIMIT_EXCEEDED",
+            "runtimeMs": 1005,
+            "memoryKb": 18300
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVA",
+      "scenario": "OLE",
+      "sourceSha256": "05e25e41454b6d34e71e7a249e1b9754dd225b0e4ce3fb611eb499f530f794b3",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "-Xmx256m",
+      "timeLimitMs": 5000,
+      "elapsedMs": 1303.0983420000011,
+      "verification": "PASS",
+      "result": {
+        "status": "OUTPUT_LIMIT_EXCEEDED",
+        "runtimeMs": 46,
+        "memoryKb": 21380,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "OUTPUT_LIMIT_EXCEEDED",
+            "runtimeMs": 46,
+            "memoryKb": 21380
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVA",
+      "scenario": "syntax",
+      "sourceSha256": "9ef650506f8d1aa7ff39e3968dcc2a63c91c312d32203f22630f5cd9565a6e78",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "-Xmx256m",
+      "timeLimitMs": 5000,
+      "elapsedMs": 669.1681810000009,
+      "verification": "PASS",
+      "result": {
+        "status": "COMPILE_ERROR",
+        "runtimeMs": 0,
+        "memoryKb": 0,
+        "passedTestCases": 0,
+        "totalTestCases": 2,
+        "testResults": []
+      }
+    },
+    {
+      "language": "JAVA",
+      "scenario": "UTF8",
+      "sourceSha256": "05e25e41454b6d34e71e7a249e1b9754dd225b0e4ce3fb611eb499f530f794b3",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "-Xmx256m",
+      "timeLimitMs": 5000,
+      "elapsedMs": 1320.3910560000004,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 42,
+        "memoryKb": 18828,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 42,
+            "memoryKb": 18828
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 40,
+            "memoryKb": 18560
+          }
+        ]
+      }
+    },
+    {
+      "language": "PYTHON",
+      "scenario": "WA",
+      "sourceSha256": "67d6d1662e1e6fd3d3688fa845cfad4d1b3bc11eeed5edfe5203b2d48548ad7f",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 19.520355999997264,
+      "verification": "PASS",
+      "result": {
+        "status": "WRONG_ANSWER",
+        "runtimeMs": 13,
+        "memoryKb": 3208,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "WRONG_ANSWER",
+            "runtimeMs": 13,
+            "memoryKb": 3208
+          }
+        ]
+      }
+    },
+    {
+      "language": "PYTHON",
+      "scenario": "RE",
+      "sourceSha256": "67d6d1662e1e6fd3d3688fa845cfad4d1b3bc11eeed5edfe5203b2d48548ad7f",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 18.643897000001743,
+      "verification": "PASS",
+      "result": {
+        "status": "RUNTIME_ERROR",
+        "runtimeMs": 12,
+        "memoryKb": 3208,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "RUNTIME_ERROR",
+            "runtimeMs": 12,
+            "memoryKb": 3208
+          }
+        ]
+      }
+    },
+    {
+      "language": "PYTHON",
+      "scenario": "TLE",
+      "sourceSha256": "67d6d1662e1e6fd3d3688fa845cfad4d1b3bc11eeed5edfe5203b2d48548ad7f",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 1000,
+      "elapsedMs": 1007.3748260000029,
+      "verification": "PASS",
+      "result": {
+        "status": "TIME_LIMIT_EXCEEDED",
+        "runtimeMs": 1002,
+        "memoryKb": 3212,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "TIME_LIMIT_EXCEEDED",
+            "runtimeMs": 1002,
+            "memoryKb": 3212
+          }
+        ]
+      }
+    },
+    {
+      "language": "PYTHON",
+      "scenario": "OLE",
+      "sourceSha256": "67d6d1662e1e6fd3d3688fa845cfad4d1b3bc11eeed5edfe5203b2d48548ad7f",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 21.583848999998736,
+      "verification": "PASS",
+      "result": {
+        "status": "OUTPUT_LIMIT_EXCEEDED",
+        "runtimeMs": 13,
+        "memoryKb": 4996,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "OUTPUT_LIMIT_EXCEEDED",
+            "runtimeMs": 13,
+            "memoryKb": 4996
+          }
+        ]
+      }
+    },
+    {
+      "language": "PYTHON",
+      "scenario": "syntax",
+      "sourceSha256": "d23f5586dbb8286f29dd79b47a6a6a284412b1c31ac03b2122e147315a263907",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 17.792568999997457,
+      "verification": "PASS",
+      "result": {
+        "status": "RUNTIME_ERROR",
+        "runtimeMs": 12,
+        "memoryKb": 2952,
+        "passedTestCases": 0,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "RUNTIME_ERROR",
+            "runtimeMs": 12,
+            "memoryKb": 2952
+          }
+        ]
+      }
+    },
+    {
+      "language": "PYTHON",
+      "scenario": "UTF8",
+      "sourceSha256": "67d6d1662e1e6fd3d3688fa845cfad4d1b3bc11eeed5edfe5203b2d48548ad7f",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 50.67398500000127,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 14,
+        "memoryKb": 3720,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 13,
+            "memoryKb": 3720
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 14,
+            "memoryKb": 3716
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVASCRIPT",
+      "scenario": "WA",
+      "sourceSha256": "57009ed3fce13713a9388815699a0fcfb01f73d2e6804eaeda6e8da60dcb105a",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 5000,
+      "elapsedMs": 34.73564599999736,
+      "verification": "PASS",
+      "result": {
+        "status": "WRONG_ANSWER",
+        "runtimeMs": 29,
+        "memoryKb": 9844,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "WRONG_ANSWER",
+            "runtimeMs": 29,
+            "memoryKb": 9844
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVASCRIPT",
+      "scenario": "RE",
+      "sourceSha256": "57009ed3fce13713a9388815699a0fcfb01f73d2e6804eaeda6e8da60dcb105a",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 5000,
+      "elapsedMs": 32.33937900000092,
+      "verification": "PASS",
+      "result": {
+        "status": "RUNTIME_ERROR",
+        "runtimeMs": 26,
+        "memoryKb": 9428,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "RUNTIME_ERROR",
+            "runtimeMs": 26,
+            "memoryKb": 9428
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVASCRIPT",
+      "scenario": "TLE",
+      "sourceSha256": "57009ed3fce13713a9388815699a0fcfb01f73d2e6804eaeda6e8da60dcb105a",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 1000,
+      "elapsedMs": 1008.7403510000004,
+      "verification": "PASS",
+      "result": {
+        "status": "TIME_LIMIT_EXCEEDED",
+        "runtimeMs": 1003,
+        "memoryKb": 9340,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "TIME_LIMIT_EXCEEDED",
+            "runtimeMs": 1003,
+            "memoryKb": 9340
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVASCRIPT",
+      "scenario": "OLE",
+      "sourceSha256": "57009ed3fce13713a9388815699a0fcfb01f73d2e6804eaeda6e8da60dcb105a",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 5000,
+      "elapsedMs": 39.694423000000825,
+      "verification": "PASS",
+      "result": {
+        "status": "OUTPUT_LIMIT_EXCEEDED",
+        "runtimeMs": 27,
+        "memoryKb": 11380,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "OUTPUT_LIMIT_EXCEEDED",
+            "runtimeMs": 27,
+            "memoryKb": 11380
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVASCRIPT",
+      "scenario": "syntax",
+      "sourceSha256": "48c3935b4cc5842583a782209efdb489996131405644c74e1c03763212e91cf4",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 5000,
+      "elapsedMs": 38.63962299999912,
+      "verification": "PASS",
+      "result": {
+        "status": "RUNTIME_ERROR",
+        "runtimeMs": 31,
+        "memoryKb": 9852,
+        "passedTestCases": 0,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "RUNTIME_ERROR",
+            "runtimeMs": 31,
+            "memoryKb": 9852
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVASCRIPT",
+      "scenario": "UTF8",
+      "sourceSha256": "57009ed3fce13713a9388815699a0fcfb01f73d2e6804eaeda6e8da60dcb105a",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 5000,
+      "elapsedMs": 81.18931200000225,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 29,
+        "memoryKb": 9848,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 29,
+            "memoryKb": 9592
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 28,
+            "memoryKb": 9848
+          }
+        ]
+      }
+    },
+    {
+      "language": "TYPESCRIPT",
+      "scenario": "WA",
+      "sourceSha256": "a90d098433c13a5d6388680ce38de169893aa851b7671bb8fad776b4c3f6d44e",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 5000,
+      "elapsedMs": 51.59750400000121,
+      "verification": "PASS",
+      "result": {
+        "status": "WRONG_ANSWER",
+        "runtimeMs": 31,
+        "memoryKb": 10056,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "WRONG_ANSWER",
+            "runtimeMs": 31,
+            "memoryKb": 10056
+          }
+        ]
+      }
+    },
+    {
+      "language": "TYPESCRIPT",
+      "scenario": "RE",
+      "sourceSha256": "a90d098433c13a5d6388680ce38de169893aa851b7671bb8fad776b4c3f6d44e",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 5000,
+      "elapsedMs": 47.77237099999911,
+      "verification": "PASS",
+      "result": {
+        "status": "RUNTIME_ERROR",
+        "runtimeMs": 26,
+        "memoryKb": 9592,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "RUNTIME_ERROR",
+            "runtimeMs": 26,
+            "memoryKb": 9592
+          }
+        ]
+      }
+    },
+    {
+      "language": "TYPESCRIPT",
+      "scenario": "TLE",
+      "sourceSha256": "a90d098433c13a5d6388680ce38de169893aa851b7671bb8fad776b4c3f6d44e",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 1000,
+      "elapsedMs": 1024.835543000001,
+      "verification": "PASS",
+      "result": {
+        "status": "TIME_LIMIT_EXCEEDED",
+        "runtimeMs": 1004,
+        "memoryKb": 9588,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "TIME_LIMIT_EXCEEDED",
+            "runtimeMs": 1004,
+            "memoryKb": 9588
+          }
+        ]
+      }
+    },
+    {
+      "language": "TYPESCRIPT",
+      "scenario": "OLE",
+      "sourceSha256": "a90d098433c13a5d6388680ce38de169893aa851b7671bb8fad776b4c3f6d44e",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 5000,
+      "elapsedMs": 49.62754599999971,
+      "verification": "PASS",
+      "result": {
+        "status": "OUTPUT_LIMIT_EXCEEDED",
+        "runtimeMs": 28,
+        "memoryKb": 11636,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "OUTPUT_LIMIT_EXCEEDED",
+            "runtimeMs": 28,
+            "memoryKb": 11636
+          }
+        ]
+      }
+    },
+    {
+      "language": "TYPESCRIPT",
+      "scenario": "syntax",
+      "sourceSha256": "48c3935b4cc5842583a782209efdb489996131405644c74e1c03763212e91cf4",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 5000,
+      "elapsedMs": 11.779732999999396,
+      "verification": "PASS",
+      "result": {
+        "status": "COMPILE_ERROR",
+        "runtimeMs": 0,
+        "memoryKb": 0,
+        "passedTestCases": 0,
+        "totalTestCases": 2,
+        "testResults": []
+      }
+    },
+    {
+      "language": "TYPESCRIPT",
+      "scenario": "UTF8",
+      "sourceSha256": "a90d098433c13a5d6388680ce38de169893aa851b7671bb8fad776b4c3f6d44e",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": "--max-old-space-size=256",
+      "timeLimitMs": 5000,
+      "elapsedMs": 90.91529699999955,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 29,
+        "memoryKb": 9868,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 29,
+            "memoryKb": 9848
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 28,
+            "memoryKb": 9868
+          }
+        ]
+      }
+    },
+    {
+      "language": "GO",
+      "scenario": "WA",
+      "sourceSha256": "3ef745c45960d250dc3e2e1716a783520c417d667411428fa61914ddff201976",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 7538.152628,
+      "verification": "PASS",
+      "result": {
+        "status": "WRONG_ANSWER",
+        "runtimeMs": 2,
+        "memoryKb": 900,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "WRONG_ANSWER",
+            "runtimeMs": 2,
+            "memoryKb": 900
+          }
+        ]
+      }
+    },
+    {
+      "language": "GO",
+      "scenario": "RE",
+      "sourceSha256": "3ef745c45960d250dc3e2e1716a783520c417d667411428fa61914ddff201976",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 7481.434625000002,
+      "verification": "PASS",
+      "result": {
+        "status": "RUNTIME_ERROR",
+        "runtimeMs": 2,
+        "memoryKb": 1160,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "RUNTIME_ERROR",
+            "runtimeMs": 2,
+            "memoryKb": 1160
+          }
+        ]
+      }
+    },
+    {
+      "language": "GO",
+      "scenario": "TLE",
+      "sourceSha256": "3ef745c45960d250dc3e2e1716a783520c417d667411428fa61914ddff201976",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 1000,
+      "elapsedMs": 8489.963523999999,
+      "verification": "PASS",
+      "result": {
+        "status": "TIME_LIMIT_EXCEEDED",
+        "runtimeMs": 1001,
+        "memoryKb": 1412,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "TIME_LIMIT_EXCEEDED",
+            "runtimeMs": 1001,
+            "memoryKb": 1412
+          }
+        ]
+      }
+    },
+    {
+      "language": "GO",
+      "scenario": "OLE",
+      "sourceSha256": "3ef745c45960d250dc3e2e1716a783520c417d667411428fa61914ddff201976",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 7583.368683000001,
+      "verification": "PASS",
+      "result": {
+        "status": "OUTPUT_LIMIT_EXCEEDED",
+        "runtimeMs": 3,
+        "memoryKb": 2184,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "OUTPUT_LIMIT_EXCEEDED",
+            "runtimeMs": 3,
+            "memoryKb": 2184
+          }
+        ]
+      }
+    },
+    {
+      "language": "GO",
+      "scenario": "syntax",
+      "sourceSha256": "c1d75daf2e5886fd99fe6c7d87091f5e93122fb34d4d5c496867dafcda43dd11",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 4684.822572000005,
+      "verification": "PASS",
+      "result": {
+        "status": "COMPILE_ERROR",
+        "runtimeMs": 0,
+        "memoryKb": 0,
+        "passedTestCases": 0,
+        "totalTestCases": 2,
+        "testResults": []
+      }
+    },
+    {
+      "language": "GO",
+      "scenario": "UTF8",
+      "sourceSha256": "3ef745c45960d250dc3e2e1716a783520c417d667411428fa61914ddff201976",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 7436.258191999994,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 4,
+        "memoryKb": 2696,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 3,
+            "memoryKb": 2696
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 4,
+            "memoryKb": 2696
+          }
+        ]
+      }
+    },
+    {
+      "language": "RUST",
+      "scenario": "WA",
+      "sourceSha256": "62e0920b639567d6355055c35c7cbfb554b52c01315b6c78e08d71b8c50ea531",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 270.67475799999374,
+      "verification": "PASS",
+      "result": {
+        "status": "WRONG_ANSWER",
+        "runtimeMs": 2,
+        "memoryKb": 512,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "WRONG_ANSWER",
+            "runtimeMs": 2,
+            "memoryKb": 512
+          }
+        ]
+      }
+    },
+    {
+      "language": "RUST",
+      "scenario": "RE",
+      "sourceSha256": "62e0920b639567d6355055c35c7cbfb554b52c01315b6c78e08d71b8c50ea531",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 277.56175399999483,
+      "verification": "PASS",
+      "result": {
+        "status": "RUNTIME_ERROR",
+        "runtimeMs": 2,
+        "memoryKb": 512,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "RUNTIME_ERROR",
+            "runtimeMs": 2,
+            "memoryKb": 512
+          }
+        ]
+      }
+    },
+    {
+      "language": "RUST",
+      "scenario": "TLE",
+      "sourceSha256": "62e0920b639567d6355055c35c7cbfb554b52c01315b6c78e08d71b8c50ea531",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 1000,
+      "elapsedMs": 1277.464856999999,
+      "verification": "PASS",
+      "result": {
+        "status": "TIME_LIMIT_EXCEEDED",
+        "runtimeMs": 1001,
+        "memoryKb": 396,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "TIME_LIMIT_EXCEEDED",
+            "runtimeMs": 1001,
+            "memoryKb": 396
+          }
+        ]
+      }
+    },
+    {
+      "language": "RUST",
+      "scenario": "OLE",
+      "sourceSha256": "62e0920b639567d6355055c35c7cbfb554b52c01315b6c78e08d71b8c50ea531",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 366.8813760000048,
+      "verification": "PASS",
+      "result": {
+        "status": "OUTPUT_LIMIT_EXCEEDED",
+        "runtimeMs": 88,
+        "memoryKb": 2700,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "OUTPUT_LIMIT_EXCEEDED",
+            "runtimeMs": 88,
+            "memoryKb": 2700
+          }
+        ]
+      }
+    },
+    {
+      "language": "RUST",
+      "scenario": "syntax",
+      "sourceSha256": "c860d3fd779e8acd75f387abf08d71a838a75f38775bdcf9804ab5fb44b5873a",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 29.141004000004614,
+      "verification": "PASS",
+      "result": {
+        "status": "COMPILE_ERROR",
+        "runtimeMs": 0,
+        "memoryKb": 0,
+        "passedTestCases": 0,
+        "totalTestCases": 2,
+        "testResults": []
+      }
+    },
+    {
+      "language": "RUST",
+      "scenario": "UTF8",
+      "sourceSha256": "62e0920b639567d6355055c35c7cbfb554b52c01315b6c78e08d71b8c50ea531",
+      "memoryLimitMiB": 256,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 333.43172700000287,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 2,
+        "memoryKb": 1168,
+        "passedTestCases": 2,
+        "totalTestCases": 2,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 2,
+            "memoryKb": 900
+          },
+          {
+            "testCase": 2,
+            "isSample": false,
+            "status": "ACCEPTED",
+            "runtimeMs": 2,
+            "memoryKb": 1168
+          }
+        ]
+      }
+    },
+    {
+      "language": "C",
+      "scenario": "memory-under",
+      "sourceSha256": "c0474b9d36e2226c4297773bbec681bd589ef8a934fb4b944ba44f9e71fc13cb",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 70.91213399999833,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 6,
+        "memoryKb": 8540,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 6,
+            "memoryKb": 8540
+          }
+        ]
+      }
+    },
+    {
+      "language": "C",
+      "scenario": "memory-over",
+      "sourceSha256": "c0474b9d36e2226c4297773bbec681bd589ef8a934fb4b944ba44f9e71fc13cb",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 138.95436499999778,
+      "verification": "PASS",
+      "result": {
+        "status": "MEMORY_LIMIT_EXCEEDED",
+        "runtimeMs": 73,
+        "memoryKb": 131088,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "MEMORY_LIMIT_EXCEEDED",
+            "runtimeMs": 73,
+            "memoryKb": 131088
+          }
+        ]
+      }
+    },
+    {
+      "language": "CPP",
+      "scenario": "memory-under",
+      "sourceSha256": "6868908a0e611f15807749c7abeddf174322b7afba88bb04bdfd3db1b94439b3",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 516.8277110000054,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 7,
+        "memoryKb": 8584,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 7,
+            "memoryKb": 8584
+          }
+        ]
+      }
+    },
+    {
+      "language": "CPP",
+      "scenario": "memory-over",
+      "sourceSha256": "6868908a0e611f15807749c7abeddf174322b7afba88bb04bdfd3db1b94439b3",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 640.1847189999971,
+      "verification": "PASS",
+      "result": {
+        "status": "MEMORY_LIMIT_EXCEEDED",
+        "runtimeMs": 88,
+        "memoryKb": 131088,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "MEMORY_LIMIT_EXCEEDED",
+            "runtimeMs": 88,
+            "memoryKb": 131088
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVA",
+      "scenario": "memory-under",
+      "sourceSha256": "79f50b58e0ae83c959d437323608687f77b3d585e41dda8d2e3b8519b7d3c97a",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": "-Xmx128m",
+      "timeLimitMs": 5000,
+      "elapsedMs": 1465.4564470000041,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 113,
+        "memoryKb": 29048,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 113,
+            "memoryKb": 29048
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVA",
+      "scenario": "memory-over",
+      "sourceSha256": "79f50b58e0ae83c959d437323608687f77b3d585e41dda8d2e3b8519b7d3c97a",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": "-Xmx128m",
+      "timeLimitMs": 5000,
+      "elapsedMs": 1323.0204149999918,
+      "verification": "PASS",
+      "result": {
+        "status": "RUNTIME_ERROR",
+        "runtimeMs": 93,
+        "memoryKb": 21656,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "RUNTIME_ERROR",
+            "runtimeMs": 93,
+            "memoryKb": 21656
+          }
+        ]
+      }
+    },
+    {
+      "language": "PYTHON",
+      "scenario": "memory-under",
+      "sourceSha256": "fa28e067c7fa1923beb01e5fa1dd199b9542097ecda3b5a5797e6cd141c4f9e0",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 26.877519999994547,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 20,
+        "memoryKb": 11664,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 20,
+            "memoryKb": 11664
+          }
+        ]
+      }
+    },
+    {
+      "language": "PYTHON",
+      "scenario": "memory-over",
+      "sourceSha256": "fa28e067c7fa1923beb01e5fa1dd199b9542097ecda3b5a5797e6cd141c4f9e0",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 105.94730100000743,
+      "verification": "PASS",
+      "result": {
+        "status": "MEMORY_LIMIT_EXCEEDED",
+        "runtimeMs": 99,
+        "memoryKb": 131088,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "MEMORY_LIMIT_EXCEEDED",
+            "runtimeMs": 99,
+            "memoryKb": 131088
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVASCRIPT",
+      "scenario": "memory-under",
+      "sourceSha256": "9bf9822b4488d9cc1632e3d4a3530d0941610578aa469680d14429590cd5d298",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": "--max-old-space-size=128",
+      "timeLimitMs": 5000,
+      "elapsedMs": 39.089721999989706,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 34,
+        "memoryKb": 18036,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 34,
+            "memoryKb": 18036
+          }
+        ]
+      }
+    },
+    {
+      "language": "JAVASCRIPT",
+      "scenario": "memory-over",
+      "sourceSha256": "9bf9822b4488d9cc1632e3d4a3530d0941610578aa469680d14429590cd5d298",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": "--max-old-space-size=128",
+      "timeLimitMs": 5000,
+      "elapsedMs": 101.67537199999788,
+      "verification": "PASS",
+      "result": {
+        "status": "MEMORY_LIMIT_EXCEEDED",
+        "runtimeMs": 96,
+        "memoryKb": 131088,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "MEMORY_LIMIT_EXCEEDED",
+            "runtimeMs": 96,
+            "memoryKb": 131088
+          }
+        ]
+      }
+    },
+    {
+      "language": "TYPESCRIPT",
+      "scenario": "memory-under",
+      "sourceSha256": "793ce9ed76510b49cedc958aeebeb472ca00e5f809392a02defaef7ee2de7eb6",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": "--max-old-space-size=128",
+      "timeLimitMs": 5000,
+      "elapsedMs": 52.99530299998878,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 33,
+        "memoryKb": 18288,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 33,
+            "memoryKb": 18288
+          }
+        ]
+      }
+    },
+    {
+      "language": "TYPESCRIPT",
+      "scenario": "memory-over",
+      "sourceSha256": "793ce9ed76510b49cedc958aeebeb472ca00e5f809392a02defaef7ee2de7eb6",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": "--max-old-space-size=128",
+      "timeLimitMs": 5000,
+      "elapsedMs": 112.60551900000428,
+      "verification": "PASS",
+      "result": {
+        "status": "MEMORY_LIMIT_EXCEEDED",
+        "runtimeMs": 96,
+        "memoryKb": 131088,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "MEMORY_LIMIT_EXCEEDED",
+            "runtimeMs": 96,
+            "memoryKb": 131088
+          }
+        ]
+      }
+    },
+    {
+      "language": "GO",
+      "scenario": "memory-under",
+      "sourceSha256": "608797b7c925f086826877fce98f587c52e979bfddf8e93a3305ef659397071a",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 9996.183262999999,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 7,
+        "memoryKb": 9604,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 7,
+            "memoryKb": 9604
+          }
+        ]
+      }
+    },
+    {
+      "language": "GO",
+      "scenario": "memory-over",
+      "sourceSha256": "608797b7c925f086826877fce98f587c52e979bfddf8e93a3305ef659397071a",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 9953.235708000007,
+      "verification": "PASS",
+      "result": {
+        "status": "MEMORY_LIMIT_EXCEEDED",
+        "runtimeMs": 76,
+        "memoryKb": 131088,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "MEMORY_LIMIT_EXCEEDED",
+            "runtimeMs": 76,
+            "memoryKb": 131088
+          }
+        ]
+      }
+    },
+    {
+      "language": "RUST",
+      "scenario": "memory-under",
+      "sourceSha256": "f0d079a3455defaaa13e58ce2d3270856b85aea50cb582cc27aa01129fd99733",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 356.19547999999486,
+      "verification": "PASS",
+      "result": {
+        "status": "ACCEPTED",
+        "runtimeMs": 6,
+        "memoryKb": 8584,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "ACCEPTED",
+            "runtimeMs": 6,
+            "memoryKb": 8584
+          }
+        ]
+      }
+    },
+    {
+      "language": "RUST",
+      "scenario": "memory-over",
+      "sourceSha256": "f0d079a3455defaaa13e58ce2d3270856b85aea50cb582cc27aa01129fd99733",
+      "memoryLimitMiB": 128,
+      "configuredHeapFlag": null,
+      "timeLimitMs": 5000,
+      "elapsedMs": 422.5916060000018,
+      "verification": "PASS",
+      "result": {
+        "status": "MEMORY_LIMIT_EXCEEDED",
+        "runtimeMs": 70,
+        "memoryKb": 131088,
+        "passedTestCases": 0,
+        "totalTestCases": 1,
+        "testResults": [
+          {
+            "testCase": 1,
+            "isSample": true,
+            "status": "MEMORY_LIMIT_EXCEEDED",
+            "runtimeMs": 70,
+            "memoryKb": 131088
+          }
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "One finite observation per language/scenario; not a threshold search, saturation test or population latency estimate.",
+    "These are actual normalized JudgeResult measurements, not raw go-judge status/signal/cgroup OOM events.",
+    "Python/JavaScript syntax errors are runtime errors; compiled languages reject syntax before execution.",
+    "Memory pressure is MLE only when the engine reports MLE. A proven Java heap allocation failure may remain RE; no RE/signal is relabeled MLE.",
+    "Reported memory is executor-reported peak for a case. Compiler, worker, API, Redis and PostgreSQL resources are separate.",
+    "Dedicated production host/kernel isolation and unobserved memory thresholds remain UNVERIFIED."
+  ]
+}

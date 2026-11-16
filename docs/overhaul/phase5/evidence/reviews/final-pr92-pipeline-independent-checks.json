@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/security",
+  "observedAt": "2026-11-16T17:16:02.319776+00:00",
+  "source": {
+    "checkoutSha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "treeSha": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+    "sourceHeadSha": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+    "baseSha": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "runId": "43913852145",
+    "runAttempt": "1",
+    "trackedTreeClean": true
+  },
+  "bindings": [
+    {
+      "zip": "native-verdict.zip",
+      "zipSha256": "5c86a8952e7268a9684b97489a448e6b62a6838193182ec7d869f7a2cd5c96dc",
+      "zipBytes": 5419,
+      "member": "phase5-verdict-matrix.json",
+      "reportSha256": "89db22d466552844fae4db2fe3114a4928a8971025942059a6fc9c9200d973a5"
+    },
+    {
+      "zip": "multi-api.zip",
+      "zipSha256": "bf5ea3ba7956f67295f255c132365e677b3a2a4b45e22815f50bc94f9cd59d45",
+      "zipBytes": 5315,
+      "member": "phase5-multi-api.json",
+      "reportSha256": "644afcd93bf7902815f6eb3a9b0c094e9419bf3cceb9a9f6a35d44790e626f2a"
+    },
+    {
+      "zip": "vibe-pipeline.zip",
+      "zipSha256": "7f26785edfdea5785bbb4d20fecedaaf87c245577210ef9479fdc45740c347cd",
+      "zipBytes": 1422,
+      "member": "phase5-vibe-dedicated.json",
+      "reportSha256": "b0b4c9a5c7d87ea14a63a5332fb56966680f73c28c4c9d43301ef20a3a93e11e"
+    }
+  ],
+  "limitations": [
+    "One finite CI workload; no production capacity, saturation or tail-latency claim.",
+    "Native results are normalized JudgeResult measurements, not retained raw cgroup OOM counters.",
+    "API/worker RSS and CPU are process metrics; the V8 heap limit is not a process RSS limit.",
+    "Persisted row timestamp overlap is an observation, not a transaction-commit timestamp proof."
+  ],
+  "nativeMatrix": {
+    "status": "PASS",
+    "rows": 72,
+    "sourceHashesChecked": 72,
+    "elapsedMs": 108065.113889,
+    "statusCounts": {
+      "ACCEPTED": 24,
+      "WRONG_ANSWER": 8,
+      "RUNTIME_ERROR": 11,
+      "TIME_LIMIT_EXCEEDED": 8,
+      "OUTPUT_LIMIT_EXCEEDED": 8,
+      "COMPILE_ERROR": 6,
+      "MEMORY_LIMIT_EXCEEDED": 7
+    },
+    "javaOverHeapStatus": "RUNTIME_ERROR"
+  },
+  "multiApi": {
+    "status": "PASS",
+    "rows": 8,
+    "sourceHashesChecked": 8,
+    "apiRequests": [
+      4,
+      4
+    ],
+    "workerJobs": [
+      6,
+      2
+    ],
+    "apiPids": [
+      24452,
+      24453
+    ],
+    "workerPids": [
+      24517,
+      24518
+    ],
+    "quotaRemaining": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "maximumQueueOverlap": 2,
+    "quotaResetSecondsBySubmission": [
+      60,
+      60,
+      60,
+      60,
+      60,
+      60,
+      60,
+      59
+    ],
+    "perWorkerMaximumOverlap": [
+      1,
+      1
+    ],
+    "terminalClaimConflicts": 8,
+    "activeClaimConflicts": 2,
+    "idempotentReplays": 8,
+    "scenarioElapsedMs": 13397.353062,
+    "batchElapsedMs": 11176.100703,
+    "cleanupElapsedMs": 83.35824200000025,
+    "elapsedBeforeReportWriteMs": 13488.428723,
+    "cleanup": {
+      "failures": [],
+      "removedJobIds": [
+        "dc870e41-062e-405e-9455-81808061717c-1",
+        "06fbb35f-87e2-4afb-bec6-65a9657358ec-1",
+        "160aaece-98ce-473e-a493-2948c62b8aea-1",
+        "0e6f2abf-6893-4974-b59d-f49ea2053efe-1",
+        "03109c58-4ee7-47fb-b79d-523eb1818722-1",
+        "b5e0c8dc-e94e-4344-93b1-068e77f52732-1",
+        "53bbee93-693a-4a33-a154-77b05a1ecc33-1",
+        "b20bd9db-4dae-46a6-baaf-d3dbabb9eaba-1"
+      ],
+      "elapsedMs": 83.35824200000025,
+      "processes": [
+        {
+          "pid": 24452,
+          "exitCode": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 24453,
+          "exitCode": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 24517,
+          "exitCode": 0,
+          "signal": null
+        },
+        {
+          "pid": 24518,
+          "exitCode": 0,
+          "signal": null
+        }
+      ],
+      "observers": [
+        {
+          "postgresSocketDestroyed": true,
+          "redisStatus": "end",
+          "queueCloseFailed": false,
+          "pendingOperations": 0,
+          "forceCloseFailures": []
+        },
+        {
+          "postgresSocketDestroyed": true,
+          "redisStatus": "end",
+          "queueCloseFailed": false,
+          "pendingOperations": 0,
+          "forceCloseFailures": []
+        }
+      ]
+    },
+    "nativeCacheCounts": [
+      0,
+      0
+    ],
+    "persistence": {
+      "submissions": 8,
+      "learned": 8,
+      "notifications": 8,
+      "solves": [
+        {
+          "awarded_xp": 10,
+          "accepted_submission_id": "dc870e41-062e-405e-9455-81808061717c"
+        }
+      ],
+      "xp": 10,
+      "resultReplays": 8
+    }
+  },
+  "dedicatedVibe": {
+    "status": "PASS",
+    "requests": 32,
+    "deleteRequests": 4,
+    "assessment": {
+      "publicChecks": 6,
+      "finalPassed": 11,
+      "finalTotal": 11,
+      "evaluationStatus": "unavailable",
+      "persisted": true,
+      "ownershipDenied": true,
+      "artifactDelta": 0
+    },
+    "closed": true,
+    "upstreamFailures": 0,
+    "cleanupFailures": 0
+  },
+  "status": "PASS_NATIVE_AND_PIPELINE_ONLY"
+}

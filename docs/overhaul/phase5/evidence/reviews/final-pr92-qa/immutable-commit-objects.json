@@ -1,0 +1,77 @@
+{
+  "source": {
+    "sha": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+    "node_id": "C_kwDOUjpo4NoAKGUxYmJhYjgxYmNjNDY2NmU5MmZmYWY0N2JjNjQwOGMyZDM3M2U2ZjU",
+    "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/commits/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+    "html_url": "https://github.com/yakisoba0728/UnsolvableOJ/commit/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+    "author": {
+      "name": "yakisoba0728",
+      "email": "yakihyuk0728@gmail.com",
+      "date": "2026-11-16T16:59:19Z"
+    },
+    "committer": {
+      "name": "yakisoba0728",
+      "email": "yakihyuk0728@gmail.com",
+      "date": "2026-11-16T16:59:19Z"
+    },
+    "tree": {
+      "sha": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+      "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/trees/a2a2409dfd3e73b82ba7b39c2e41808eba7b5813"
+    },
+    "message": "docs(phase5): finalize reviewed qualification evidence and manual handoff\n\nPreserve exact feature sources, actual CI artifacts, independent findings, bounded performance and external operational gates. Final stacked PR still requires its own complete CI and independent acceptance.",
+    "parents": [
+      {
+        "sha": "a6588f7bedc87228c11852d8664fe20ec6b3ece3",
+        "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/commits/a6588f7bedc87228c11852d8664fe20ec6b3ece3",
+        "html_url": "https://github.com/yakisoba0728/UnsolvableOJ/commit/a6588f7bedc87228c11852d8664fe20ec6b3ece3"
+      }
+    ],
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null,
+      "verified_at": null
+    }
+  },
+  "checkout": {
+    "sha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "node_id": "C_kwDOUjpo4NoAKDcwMzA3YjNkM2M3Yzk1OTFlZTM4MjJlNGI1YWI5MDNkMzUyN2YxYjE",
+    "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/commits/70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "html_url": "https://github.com/yakisoba0728/UnsolvableOJ/commit/70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "author": {
+      "name": "yakisoba0728",
+      "email": "yakihyuk0728@gmail.com",
+      "date": "2026-11-16T17:01:09Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-11-16T17:01:09Z"
+    },
+    "tree": {
+      "sha": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+      "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/trees/a2a2409dfd3e73b82ba7b39c2e41808eba7b5813"
+    },
+    "message": "Merge e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5 into d0159b1f844bf0608415dded9e84af566c8e2041",
+    "parents": [
+      {
+        "sha": "d0159b1f844bf0608415dded9e84af566c8e2041",
+        "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/commits/d0159b1f844bf0608415dded9e84af566c8e2041",
+        "html_url": "https://github.com/yakisoba0728/UnsolvableOJ/commit/d0159b1f844bf0608415dded9e84af566c8e2041"
+      },
+      {
+        "sha": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+        "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/commits/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+        "html_url": "https://github.com/yakisoba0728/UnsolvableOJ/commit/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5"
+      }
+    ],
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq+zbVCRC1aQ7uu5UhlAAA9/gQAHaI6hDuFNEbKXFZEErPj9N1\ndSf8+uKePS34zRThkch7Ruw4fxX7MNCvHgrfwDLbyREubQ/Yo99xufbJplUbkyPh\nnnML+9E4r2cR1IwXQP9BL7+oOY0TtDZrAqrazQeED1fYs+iAzFYI3I7JZ6cIA/z9\n6e+dEl56DAa2PYZ/zFBnVJe/k1KRdnyyprpt9K+JoCVRCheQaHWFKKvunHF51aHI\ncKWQrwD/teB98Q8U6X135nUk3WKAz3BRjbVgucuDLyf/twwYEJQA1PpSEy2MwF4H\n95ZOZZai/Mt4bvbAu9t2NhrOUuedY6u6HrCq1/otMoouLGwtlIzIpKS4PELPgsZT\nSehLMbfZbK+zcYwZu7w2/ftlkHR8Ta9bCsBLMEJ5UFCb4zrM+Zj0RJVyLGmYas9i\nijh8N0rfYVpG05Ua8Tmw4wotqvc2peFbj55UKvGnj+srmU0oE7RSuxeyG5fc9tyh\nswT7KajtkcAKxQql6ZSS3cF5rNtlxnUhdbn1G5j+rIZrWDpJ42dKGbD8n5gz3tTN\nylBxd+y4Fgmhg4D3FEDHduUAfEmzw9yJIZhsoRv6+TW2sJ7z5PQUo2tK0NBA6uNk\nioQPJ2zpxzKDr1EcZPeNlb9v4olXKpSZnNz445wL+hXy2ZLdE1GGAw8NjVVCz4jK\nq1IGVcVl+lD9gbYxyHnr\n=ZzX/\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree a2a2409dfd3e73b82ba7b39c2e41808eba7b5813\nparent d0159b1f844bf0608415dded9e84af566c8e2041\nparent e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5\nauthor yakisoba0728 <yakihyuk0728@gmail.com> 1794848469 +0900\ncommitter GitHub <noreply@github.com> 1794848469 +0900\n\nMerge e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5 into d0159b1f844bf0608415dded9e84af566c8e2041\n",
+      "verified_at": "2026-11-16T17:01:10Z"
+    }
+  }
+}

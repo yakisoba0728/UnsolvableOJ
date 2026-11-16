@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/security",
+  "observedAt": "2026-11-16T17:10:39.088683+00:00",
+  "source": {
+    "checkoutSha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "treeSha": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+    "sourceHeadSha": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+    "baseSha": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "runId": "43913852145",
+    "runAttempt": "1",
+    "trackedTreeClean": true
+  },
+  "bindings": [
+    {
+      "zip": "native-verdict.zip",
+      "zipSha256": "5c86a8952e7268a9684b97489a448e6b62a6838193182ec7d869f7a2cd5c96dc",
+      "zipBytes": 5419,
+      "member": "phase5-verdict-matrix.json",
+      "reportSha256": "89db22d466552844fae4db2fe3114a4928a8971025942059a6fc9c9200d973a5"
+    }
+  ],
+  "limitations": [
+    "One finite CI workload; no production capacity, saturation or tail-latency claim.",
+    "Native results are normalized JudgeResult measurements, not retained raw cgroup OOM counters.",
+    "API/worker RSS and CPU are process metrics; the V8 heap limit is not a process RSS limit.",
+    "Persisted row timestamp overlap is an observation, not a transaction-commit timestamp proof."
+  ],
+  "nativeMatrix": {
+    "status": "PASS",
+    "rows": 72,
+    "sourceHashesChecked": 72,
+    "elapsedMs": 108065.113889,
+    "statusCounts": {
+      "ACCEPTED": 24,
+      "WRONG_ANSWER": 8,
+      "RUNTIME_ERROR": 11,
+      "TIME_LIMIT_EXCEEDED": 8,
+      "OUTPUT_LIMIT_EXCEEDED": 8,
+      "COMPILE_ERROR": 6,
+      "MEMORY_LIMIT_EXCEEDED": 7
+    },
+    "javaOverHeapStatus": "RUNTIME_ERROR"
+  },
+  "status": "PASS_NATIVE_MATRIX_ONLY"
+}

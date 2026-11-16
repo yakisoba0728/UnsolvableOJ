@@ -1,0 +1,46 @@
+{
+  "reviewer": "/root/independent_qa",
+  "runId": 43913852145,
+  "scope": "Representative original responsive goal PNGs; full matrix separately verified from all24 geometry records and48 binary PNGs.",
+  "visuallyInspected": [
+    {
+      "path": "frontend-1/phase5-ux/chromium-320-dark-ready.png",
+      "sha256": "bac4f4ca41e236710f3eee10dddf3d26727f15dc7667c1e1bccf72d4d5570326"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-320-dark-refreshing.png",
+      "sha256": "56b13caa2770960f9391af5d3fd6885bccd3658913f4edd8f1d44d6946c802d1"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-1440-light-ready.png",
+      "sha256": "aac83f0c308ad14e82c777fed6f56509a2a20fe5ad01e5ba67c012e06f02272a"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-320-light-ready.png",
+      "sha256": "a4a6fa4cc6b521a26befb024069a59f862fbdc6e1d180868bb9fba99f6511274"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-320-light-refreshing.png",
+      "sha256": "ef82f5462193d0a40dd3a9f2dd36c6e82ab3d270c3ed9c80981e3b07ffa3e4fb"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-768-dark-ready.png",
+      "sha256": "58ad42160864e024f19761880a69128fd1e70a720136ee7953917243f7b564d3"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-1440-light-refreshing.png",
+      "sha256": "edba4b744d94301e3d3efbd141b79ff389230f3d8cf2607ae25c1b7b05c7f1d2"
+    }
+  ],
+  "observations": [
+    "Three browser engines, both themes and320/768/1440 viewport samples were personally inspected.",
+    "Narrow layouts wrap Korean text and controls inside the card without visible clipping; wide layouts preserve readable hierarchy.",
+    "Ready/refreshing pairs retain known900/1000 progress, date range and content position while controls become disabled; the refresh label changes deliberately.",
+    "WebKit screenshots use the reviewed DPR2 project; pixel size was normalized against exact CSS geometry before comparison.",
+    "Synthetic goal card captures contain no account credentials or solution source."
+  ],
+  "result": "PASS_REPRESENTATIVE_RESPONSIVE_VISUAL_REVIEW",
+  "source": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+  "checkout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+  "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813"
+}

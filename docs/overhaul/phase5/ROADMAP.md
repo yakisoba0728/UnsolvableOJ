@@ -1,5 +1,9 @@
 # Phase V finite acceptance backlog
 
+## Post-run final archive update
+
+Final PR92 source `e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5`, tree `a2a2409dfd3e73b82ba7b39c2e41808eba7b5813`, passed all12 actual jobs in run43913852145, attempt1, and independent final source/artifact acceptance. Code disposition is **READY_FOR_MANUAL_MERGE**; PR92 remains OPEN/UNMERGED. Production readiness remains BLOCKED_EXTERNAL_ENVIRONMENT. [The completed report](FINAL-REPORT.md) and [immutable acceptance data](evidence/final-acceptance.json) supersede the final-CI-pending checkpoints preserved below. This archive does not change the tested integration head.
+
 ## Completed feature scope and final gate
 
 All four feature PRs are independently reviewed, exact-source full-CI verified and merged only into `overhaul5/integration`: [#88](https://github.com/yakisoba0728/UnsolvableOJ/pull/88), [#90](https://github.com/yakisoba0728/UnsolvableOJ/pull/90), [#89](https://github.com/yakisoba0728/UnsolvableOJ/pull/89), [#91](https://github.com/yakisoba0728/UnsolvableOJ/pull/91). The feature integration head is `a6588f7bedc87228c11852d8664fe20ec6b3ece3`, tree `0f191c89a17b984cae8706cb02137ab0e4e2c3a4`. [FINAL-REPORT.md](FINAL-REPORT.md) records actual counts, findings and limits; the [validation ledger](evidence/validation-ledger.json) preserves each source, base, checkout, twelve jobs, artifacts and independent receipt.

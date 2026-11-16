@@ -1,0 +1,155 @@
+{
+  "result": "PASS_COMPLETED_AUDIT_BACKEND_AND_WORKER_LOG_COUNTS",
+  "scope": "Only completed final-run jobs; whole-run acceptance remains pending. No application tests rerun.",
+  "runId": 43913852145,
+  "source": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+  "checkout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+  "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+  "checks": [
+    "Six actual production/full npm audits report zero vulnerabilities; all three retained lockfile SBOMs bind exact clean checkout and source lock hashes/counts.",
+    "Actual Node suite counts and zero fail/cancelled/skipped/todo fields verified from complete logs; parent/subtest reporting remains unchanged.",
+    "Five Python runtime unittest checks actually passed: one health route and four Go package-graph/runtime source checks; not relabeled as five gateway checks."
+  ],
+  "npmAuditExecutions": 6,
+  "npmAuditNonzeroVulnerabilities": 0,
+  "sbom": {
+    "sourceCommit": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "workingTreeDirty": false,
+    "scope": "Complete npm lockfile graph, including runtime, build and optional packages; not an installed image or browser-bundle inventory.",
+    "packages": {
+      "Back": {
+        "components": 456,
+        "lockRecords": 471,
+        "lockSha256": "772ffac9066499421795a8af39117fab757c325ce55ac0be36eff09d92b5ff75"
+      },
+      "Front": {
+        "components": 263,
+        "lockRecords": 263,
+        "lockSha256": "728910bbbdfbc955cede2da1d604f9508e475cde4ce3222f5502d70ee238a644"
+      },
+      "Judge": {
+        "components": 29,
+        "lockRecords": 29,
+        "lockSha256": "861f351aa928fdad6c91e9ec32b57d4a28f0434b4a113bf69c81492c3164bd47"
+      }
+    }
+  },
+  "nodeTestGroups": {
+    "133462613893": {
+      "groups": [
+        {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 53.023756
+        }
+      ],
+      "logSha256": "8edd8cb4e197b1bfca938ea2f894a4f129de5e07e20fb7e119dd2256ca9e5c29"
+    },
+    "133462777250": {
+      "groups": [
+        {
+          "tests": 86,
+          "suites": 0,
+          "pass": 86,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 1865.111951
+        },
+        {
+          "tests": 16,
+          "suites": 0,
+          "pass": 16,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 6085.579471
+        },
+        {
+          "tests": 7,
+          "suites": 0,
+          "pass": 7,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 103.314904
+        },
+        {
+          "tests": 6,
+          "suites": 0,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 505.81963
+        },
+        {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 228.231838
+        },
+        {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 50.955545
+        },
+        {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 51.585553
+        },
+        {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 1673.258128
+        }
+      ],
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19"
+    },
+    "133462777373": {
+      "groups": [
+        {
+          "tests": 137,
+          "suites": 0,
+          "pass": 137,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 2951.091233
+        }
+      ],
+      "logSha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a"
+    }
+  },
+  "pythonRuntimeChecks": 5
+}

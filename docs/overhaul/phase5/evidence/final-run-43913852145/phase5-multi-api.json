@@ -1,0 +1,800 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "timestamp": "2026-11-16T17:07:15.969Z",
+  "sourceFixture": "Judge/runtime/smoke-sources.json",
+  "topology": "Two actual dist/main.js child processes and two actual Judge/dist/worker.js child processes on one disposable CI host; one shared PostgreSQL database, Redis database and native executor.",
+  "limits": {
+    "submissions": 8,
+    "languages": 8,
+    "solverAccounts": 1,
+    "admissionLanes": 3,
+    "apiProcesses": 2,
+    "workerProcesses": 2,
+    "concurrencyPerWorker": 1,
+    "childV8HeapMb": 256,
+    "submissionRateLimit": 20,
+    "submissionWindowMs": 60000,
+    "scenarioMs": 45000,
+    "existingTestTimeoutMs": 90000,
+    "cleanupProcessPhaseMs": 15000,
+    "cleanupIoBudgetMs": 6000,
+    "reportBudgetMs": 3000,
+    "totalBudgetMs": 84000,
+    "observerDatabaseConnectionsPerPhase": 1,
+    "observerQueryTimeoutMs": 2000,
+    "observerRedisCommandTimeoutMs": 2000,
+    "compileTimeMs": 30000,
+    "compileMemoryMb": 1024,
+    "executionTimeMs": 2000,
+    "executionMemoryMb": 256,
+    "providerCalls": 0,
+    "processLogCharactersPerChild": 100000
+  },
+  "observations": [
+    {
+      "index": 0,
+      "language": "C",
+      "sourceSha256": "282764e790f75414d63047040c8e662aae070f5ee61e8148b53a59382dfe5125",
+      "apiIndex": 0,
+      "submittedAtEpochMs": 1794848838125,
+      "acknowledgedAtEpochMs": 1794848838163,
+      "apiElapsedMs": 37.22527500000024,
+      "httpStatus": 202,
+      "rateLimit": {
+        "limit": 20,
+        "remaining": 19,
+        "resetSeconds": 60
+      },
+      "submissionId": "dc870e41-062e-405e-9455-81808061717c",
+      "jobId": "dc870e41-062e-405e-9455-81808061717c-1",
+      "lastStatus": "ACCEPTED",
+      "lastQueueState": "completed",
+      "queue": {
+        "timestampEpochMs": 1794848838154,
+        "processedOnEpochMs": 1794848838159,
+        "finishedOnEpochMs": 1794848838315,
+        "attemptsMade": 1,
+        "attemptsStarted": 1,
+        "generation": 1,
+        "state": "completed"
+      },
+      "persisted": {
+        "id": "dc870e41-062e-405e-9455-81808061717c",
+        "language": "C",
+        "status": "ACCEPTED",
+        "generation": 1,
+        "attempt": "92cb6bff-deee-4f58-8215-687da5137044",
+        "recoveries": 0,
+        "learned": true,
+        "isTest": false,
+        "runtimeMs": 2,
+        "memoryKb": 660,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "createdAt": "2026-11-16T17:07:18.142Z",
+        "updatedAt": "2026-11-16T17:07:18.292Z",
+        "notifications": 1,
+        "sourceSha256": "282764e790f75414d63047040c8e662aae070f5ee61e8148b53a59382dfe5125"
+      },
+      "readThroughApiIndex": 1,
+      "workerIndex": 0,
+      "replayThroughApiIndex": 1,
+      "finalClaimHttpStatus": 409,
+      "duplicateResultHttpStatus": 200
+    },
+    {
+      "index": 1,
+      "language": "CPP",
+      "sourceSha256": "8f7d241917e34019f992d03dc7ae0c661c8e40c882ff0599b8ce5b0fe39c98bc",
+      "apiIndex": 1,
+      "submittedAtEpochMs": 1794848838126,
+      "acknowledgedAtEpochMs": 1794848838207,
+      "apiElapsedMs": 81.24745699999994,
+      "httpStatus": 202,
+      "rateLimit": {
+        "limit": 20,
+        "remaining": 17,
+        "resetSeconds": 60
+      },
+      "submissionId": "06fbb35f-87e2-4afb-bec6-65a9657358ec",
+      "jobId": "06fbb35f-87e2-4afb-bec6-65a9657358ec-1",
+      "lastStatus": "ACCEPTED",
+      "lastQueueState": "completed",
+      "queue": {
+        "timestampEpochMs": 1794848838201,
+        "processedOnEpochMs": 1794848838315,
+        "finishedOnEpochMs": 1794848838861,
+        "attemptsMade": 1,
+        "attemptsStarted": 1,
+        "generation": 1,
+        "state": "completed"
+      },
+      "persisted": {
+        "id": "06fbb35f-87e2-4afb-bec6-65a9657358ec",
+        "language": "CPP",
+        "status": "ACCEPTED",
+        "generation": 1,
+        "attempt": "c974a8ba-1008-490d-b3be-a7e8f6d645c2",
+        "recoveries": 0,
+        "learned": true,
+        "isTest": false,
+        "runtimeMs": 3,
+        "memoryKb": 408,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "createdAt": "2026-11-16T17:07:18.170Z",
+        "updatedAt": "2026-11-16T17:07:18.847Z",
+        "notifications": 1,
+        "sourceSha256": "8f7d241917e34019f992d03dc7ae0c661c8e40c882ff0599b8ce5b0fe39c98bc"
+      },
+      "readThroughApiIndex": 0,
+      "workerIndex": 0,
+      "replayThroughApiIndex": 1,
+      "finalClaimHttpStatus": 409,
+      "duplicateResultHttpStatus": 200
+    },
+    {
+      "index": 2,
+      "language": "JAVA",
+      "sourceSha256": "f92bf9e14978d3ff4e072fcbe76a647cfec568191cbbf27ddc15cb729ed83a59",
+      "apiIndex": 0,
+      "submittedAtEpochMs": 1794848838126,
+      "acknowledgedAtEpochMs": 1794848838185,
+      "apiElapsedMs": 59.507164999999986,
+      "httpStatus": 202,
+      "rateLimit": {
+        "limit": 20,
+        "remaining": 18,
+        "resetSeconds": 60
+      },
+      "submissionId": "b5e0c8dc-e94e-4344-93b1-068e77f52732",
+      "jobId": "b5e0c8dc-e94e-4344-93b1-068e77f52732-1",
+      "lastStatus": "ACCEPTED",
+      "lastQueueState": "completed",
+      "queue": {
+        "timestampEpochMs": 1794848838178,
+        "processedOnEpochMs": 1794848838179,
+        "finishedOnEpochMs": 1794848839824,
+        "attemptsMade": 1,
+        "attemptsStarted": 1,
+        "generation": 1,
+        "state": "completed"
+      },
+      "persisted": {
+        "id": "b5e0c8dc-e94e-4344-93b1-068e77f52732",
+        "language": "JAVA",
+        "status": "ACCEPTED",
+        "generation": 1,
+        "attempt": "0ca66920-323f-4d9e-9566-45ccc7f38446",
+        "recoveries": 0,
+        "learned": true,
+        "isTest": false,
+        "runtimeMs": 136,
+        "memoryKb": 19756,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "createdAt": "2026-11-16T17:07:18.162Z",
+        "updatedAt": "2026-11-16T17:07:19.814Z",
+        "notifications": 1,
+        "sourceSha256": "f92bf9e14978d3ff4e072fcbe76a647cfec568191cbbf27ddc15cb729ed83a59"
+      },
+      "readThroughApiIndex": 1,
+      "workerIndex": 1,
+      "replayThroughApiIndex": 0,
+      "finalClaimHttpStatus": 409,
+      "duplicateResultHttpStatus": 200
+    },
+    {
+      "index": 3,
+      "language": "PYTHON",
+      "sourceSha256": "2056d74aaba9a0c3f8bae7e4f3c21f00cf17408473a329e325c38221109e1cd0",
+      "apiIndex": 1,
+      "submittedAtEpochMs": 1794848838412,
+      "acknowledgedAtEpochMs": 1794848838465,
+      "apiElapsedMs": 52.53951499999994,
+      "httpStatus": 202,
+      "rateLimit": {
+        "limit": 20,
+        "remaining": 16,
+        "resetSeconds": 60
+      },
+      "submissionId": "160aaece-98ce-473e-a493-2948c62b8aea",
+      "jobId": "160aaece-98ce-473e-a493-2948c62b8aea-1",
+      "lastStatus": "ACCEPTED",
+      "lastQueueState": "completed",
+      "queue": {
+        "timestampEpochMs": 1794848838455,
+        "processedOnEpochMs": 1794848838861,
+        "finishedOnEpochMs": 1794848838897,
+        "attemptsMade": 1,
+        "attemptsStarted": 1,
+        "generation": 1,
+        "state": "completed"
+      },
+      "persisted": {
+        "id": "160aaece-98ce-473e-a493-2948c62b8aea",
+        "language": "PYTHON",
+        "status": "ACCEPTED",
+        "generation": 1,
+        "attempt": "af08fbbe-402b-459c-b630-ef217fe3380d",
+        "recoveries": 0,
+        "learned": true,
+        "isTest": false,
+        "runtimeMs": 13,
+        "memoryKb": 2952,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "createdAt": "2026-11-16T17:07:18.445Z",
+        "updatedAt": "2026-11-16T17:07:18.890Z",
+        "notifications": 1,
+        "sourceSha256": "2056d74aaba9a0c3f8bae7e4f3c21f00cf17408473a329e325c38221109e1cd0"
+      },
+      "readThroughApiIndex": 0,
+      "workerIndex": 0,
+      "replayThroughApiIndex": 1,
+      "finalClaimHttpStatus": 409,
+      "duplicateResultHttpStatus": 200
+    },
+    {
+      "index": 4,
+      "language": "JAVASCRIPT",
+      "sourceSha256": "bcc758d57af556edb8668dafa0fa434b75166be273a082976d452b10f76cb8bd",
+      "apiIndex": 0,
+      "submittedAtEpochMs": 1794848838965,
+      "acknowledgedAtEpochMs": 1794848838975,
+      "apiElapsedMs": 9.233358000000408,
+      "httpStatus": 202,
+      "rateLimit": {
+        "limit": 20,
+        "remaining": 15,
+        "resetSeconds": 60
+      },
+      "submissionId": "0e6f2abf-6893-4974-b59d-f49ea2053efe",
+      "jobId": "0e6f2abf-6893-4974-b59d-f49ea2053efe-1",
+      "lastStatus": "ACCEPTED",
+      "lastQueueState": "completed",
+      "queue": {
+        "timestampEpochMs": 1794848838973,
+        "processedOnEpochMs": 1794848838974,
+        "finishedOnEpochMs": 1794848839056,
+        "attemptsMade": 1,
+        "attemptsStarted": 1,
+        "generation": 1,
+        "state": "completed"
+      },
+      "persisted": {
+        "id": "0e6f2abf-6893-4974-b59d-f49ea2053efe",
+        "language": "JAVASCRIPT",
+        "status": "ACCEPTED",
+        "generation": 1,
+        "attempt": "e2c88d45-c21f-4eee-83d7-12d782382c97",
+        "recoveries": 0,
+        "learned": true,
+        "isTest": false,
+        "runtimeMs": 43,
+        "memoryKb": 9588,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "createdAt": "2026-11-16T17:07:18.970Z",
+        "updatedAt": "2026-11-16T17:07:19.044Z",
+        "notifications": 1,
+        "sourceSha256": "bcc758d57af556edb8668dafa0fa434b75166be273a082976d452b10f76cb8bd"
+      },
+      "readThroughApiIndex": 1,
+      "workerIndex": 0,
+      "replayThroughApiIndex": 1,
+      "finalClaimHttpStatus": 409,
+      "duplicateResultHttpStatus": 200
+    },
+    {
+      "index": 5,
+      "language": "TYPESCRIPT",
+      "sourceSha256": "4e0f8ae6335ed59fee88f7e1704d9368d394d13e963476430187ab73fe7be838",
+      "apiIndex": 1,
+      "submittedAtEpochMs": 1794848838993,
+      "acknowledgedAtEpochMs": 1794848839007,
+      "apiElapsedMs": 14.751154000000042,
+      "httpStatus": 202,
+      "rateLimit": {
+        "limit": 20,
+        "remaining": 14,
+        "resetSeconds": 60
+      },
+      "submissionId": "03109c58-4ee7-47fb-b79d-523eb1818722",
+      "jobId": "03109c58-4ee7-47fb-b79d-523eb1818722-1",
+      "lastStatus": "ACCEPTED",
+      "lastQueueState": "completed",
+      "queue": {
+        "timestampEpochMs": 1794848839006,
+        "processedOnEpochMs": 1794848839056,
+        "finishedOnEpochMs": 1794848839139,
+        "attemptsMade": 1,
+        "attemptsStarted": 1,
+        "generation": 1,
+        "state": "completed"
+      },
+      "persisted": {
+        "id": "03109c58-4ee7-47fb-b79d-523eb1818722",
+        "language": "TYPESCRIPT",
+        "status": "ACCEPTED",
+        "generation": 1,
+        "attempt": "9aa22983-6ab7-4ced-8060-e0ec9809f95d",
+        "recoveries": 0,
+        "learned": true,
+        "isTest": false,
+        "runtimeMs": 34,
+        "memoryKb": 9616,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "createdAt": "2026-11-16T17:07:19.001Z",
+        "updatedAt": "2026-11-16T17:07:19.128Z",
+        "notifications": 1,
+        "sourceSha256": "4e0f8ae6335ed59fee88f7e1704d9368d394d13e963476430187ab73fe7be838"
+      },
+      "readThroughApiIndex": 0,
+      "workerIndex": 0,
+      "replayThroughApiIndex": 1,
+      "finalClaimHttpStatus": 409,
+      "duplicateResultHttpStatus": 200
+    },
+    {
+      "index": 6,
+      "language": "GO",
+      "sourceSha256": "eb2b6890a14126db60a49a63e8861635b11ecde9ad55f0c7f54bd71124f6362a",
+      "apiIndex": 0,
+      "submittedAtEpochMs": 1794848839090,
+      "acknowledgedAtEpochMs": 1794848839099,
+      "apiElapsedMs": 9.368078999999852,
+      "httpStatus": 202,
+      "rateLimit": {
+        "limit": 20,
+        "remaining": 13,
+        "resetSeconds": 60
+      },
+      "submissionId": "b20bd9db-4dae-46a6-baaf-d3dbabb9eaba",
+      "jobId": "b20bd9db-4dae-46a6-baaf-d3dbabb9eaba-1",
+      "lastStatus": "ACCEPTED",
+      "lastQueueState": "completed",
+      "queue": {
+        "timestampEpochMs": 1794848839098,
+        "processedOnEpochMs": 1794848839139,
+        "finishedOnEpochMs": 1794848849219,
+        "attemptsMade": 1,
+        "attemptsStarted": 1,
+        "generation": 1,
+        "state": "completed"
+      },
+      "persisted": {
+        "id": "b20bd9db-4dae-46a6-baaf-d3dbabb9eaba",
+        "language": "GO",
+        "status": "ACCEPTED",
+        "generation": 1,
+        "attempt": "598781d3-84dc-451a-aeb7-d42b729dd52e",
+        "recoveries": 0,
+        "learned": true,
+        "isTest": false,
+        "runtimeMs": 2,
+        "memoryKb": 1160,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "createdAt": "2026-11-16T17:07:19.095Z",
+        "updatedAt": "2026-11-16T17:07:29.213Z",
+        "notifications": 1,
+        "sourceSha256": "eb2b6890a14126db60a49a63e8861635b11ecde9ad55f0c7f54bd71124f6362a"
+      },
+      "readThroughApiIndex": 1,
+      "workerIndex": 0,
+      "replayThroughApiIndex": 1,
+      "finalClaimHttpStatus": 409,
+      "duplicateResultHttpStatus": 200
+    },
+    {
+      "index": 7,
+      "language": "RUST",
+      "sourceSha256": "4a89da213833aa5e05c831311b0c71049bf9de9cc31800bd4f387ef40192f486",
+      "apiIndex": 1,
+      "submittedAtEpochMs": 1794848839231,
+      "acknowledgedAtEpochMs": 1794848839247,
+      "apiElapsedMs": 15.811803000000054,
+      "httpStatus": 202,
+      "rateLimit": {
+        "limit": 20,
+        "remaining": 12,
+        "resetSeconds": 59
+      },
+      "submissionId": "53bbee93-693a-4a33-a154-77b05a1ecc33",
+      "jobId": "53bbee93-693a-4a33-a154-77b05a1ecc33-1",
+      "lastStatus": "ACCEPTED",
+      "lastQueueState": "completed",
+      "queue": {
+        "timestampEpochMs": 1794848839245,
+        "processedOnEpochMs": 1794848839824,
+        "finishedOnEpochMs": 1794848840322,
+        "attemptsMade": 1,
+        "attemptsStarted": 1,
+        "generation": 1,
+        "state": "completed"
+      },
+      "persisted": {
+        "id": "53bbee93-693a-4a33-a154-77b05a1ecc33",
+        "language": "RUST",
+        "status": "ACCEPTED",
+        "generation": 1,
+        "attempt": "92899502-f947-4793-b857-244454aed713",
+        "recoveries": 0,
+        "learned": true,
+        "isTest": false,
+        "runtimeMs": 2,
+        "memoryKb": 656,
+        "passedTestCases": 1,
+        "totalTestCases": 1,
+        "createdAt": "2026-11-16T17:07:19.237Z",
+        "updatedAt": "2026-11-16T17:07:20.314Z",
+        "notifications": 1,
+        "sourceSha256": "4a89da213833aa5e05c831311b0c71049bf9de9cc31800bd4f387ef40192f486"
+      },
+      "readThroughApiIndex": 0,
+      "workerIndex": 1,
+      "replayThroughApiIndex": 0,
+      "finalClaimHttpStatus": 409,
+      "duplicateResultHttpStatus": 200
+    }
+  ],
+  "limitations": [
+    "One finite eight-job protocol, not a saturation, capacity, p95/p99, long-term memory or production fault-domain measurement.",
+    "A bounded observer resets test Redis throttle counters once before owned API setup; no counter resets, extra solver accounts, bypass headers or retries occur during the protocol.",
+    "The API clients use loopback URLs; actual listeners are separately observed by PID and socket inode. This does not establish a firewall or production network policy.",
+    "Queue timestamps and API/DB dates are host wall clocks; worker phase durations use performance.now. Queue start/finish bracket BullMQ work, not native instruction execution.",
+    "One procfs resource sample per owned child and cumulative worker metrics describe Node processes, not native compilers, sandbox processes or total host resource use.",
+    "Claim checks cover one observed active Go lease and terminal claims; no API, Redis or native outage is injected."
+  ],
+  "provenance": {
+    "checkoutSha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "treeSha": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+    "sourceHeadSha": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+    "baseSha": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "runId": "43913852145",
+    "runAttempt": "1",
+    "trackedTreeClean": true
+  },
+  "environment": {
+    "node": "v24.22.2",
+    "platform": "linux",
+    "release": "7.0.0-1017-azure",
+    "cpuModel": "AMD EPYC 7763 64-Core Processor",
+    "logicalCpus": 4,
+    "clockTicksPerSecond": 100
+  },
+  "sharedState": {
+    "databaseName": "unsolvable_integration_c1f4956529cf4a1fae58e4f8055a8688",
+    "redisDb": 2
+  },
+  "preSetupThrottleResets": 1,
+  "apiListeners": [
+    {
+      "pid": 24452,
+      "requestedHost": "127.0.0.1",
+      "listeners": [
+        {
+          "protocol": "tcp",
+          "rawLocalAddress": "0100007F:9D9F",
+          "inode": "59948"
+        }
+      ],
+      "requestedPort": 0,
+      "observedPort": 40351,
+      "clientUrl": "http://127.0.0.1:40351"
+    },
+    {
+      "pid": 24453,
+      "requestedHost": "127.0.0.1",
+      "listeners": [
+        {
+          "protocol": "tcp",
+          "rawLocalAddress": "0100007F:8F89",
+          "inode": "62465"
+        }
+      ],
+      "requestedPort": 0,
+      "observedPort": 36745,
+      "clientUrl": "http://127.0.0.1:36745"
+    }
+  ],
+  "fixtureApiIndex": 0,
+  "inProcessNestContexts": 0,
+  "activeClaimConflict": {
+    "submissionId": "b20bd9db-4dae-46a6-baaf-d3dbabb9eaba",
+    "language": "GO",
+    "originalAttempt": "598781d3-84dc-451a-aeb7-d42b729dd52e",
+    "competingAttempt": "368e2573-a32c-424d-bd24-b62a3b077557",
+    "beforeAtEpochMs": 1794848839206,
+    "afterAtEpochMs": 1794848839217,
+    "beforeStatus": "JUDGING",
+    "afterStatus": "JUDGING",
+    "afterAttempt": "598781d3-84dc-451a-aeb7-d42b729dd52e",
+    "conflicts": [
+      {
+        "apiIndex": 0,
+        "httpStatus": 409
+      },
+      {
+        "apiIndex": 1,
+        "httpStatus": 409
+      }
+    ]
+  },
+  "admission": {
+    "requests": 8,
+    "maximumActiveLanes": 3,
+    "activeBatchMs": 11176.100703,
+    "counterResetsDuringProtocol": 0,
+    "submissionRetries": 0,
+    "solverRole": "USER"
+  },
+  "workerMeasurements": [
+    {
+      "workerIndex": 0,
+      "pid": 24517,
+      "apiIndex": 0,
+      "rows": [
+        {
+          "event": "judge_completed",
+          "workerId": "22976885-66f8-4799-a965-eb0bedd65a11",
+          "submissionId": "dc870e41-062e-405e-9455-81808061717c",
+          "generation": 1,
+          "language": "C",
+          "status": "ACCEPTED",
+          "queueWaitMs": 15,
+          "claimMs": 22.15844400000003,
+          "judgeMs": 95.612888,
+          "reportMs": 26.16798700000004,
+          "totalMs": 143.99822799999998,
+          "processCpuUserUs": 344647,
+          "processCpuSystemUs": 57107,
+          "processRssBytes": 102060032,
+          "processPeakRssKiB": 110844
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "22976885-66f8-4799-a965-eb0bedd65a11",
+          "submissionId": "06fbb35f-87e2-4afb-bec6-65a9657358ec",
+          "generation": 1,
+          "language": "CPP",
+          "status": "ACCEPTED",
+          "queueWaitMs": 118,
+          "claimMs": 13.546205999999984,
+          "judgeMs": 510.697762,
+          "reportMs": 16.746376000000055,
+          "totalMs": 541.0238770000001,
+          "processCpuUserUs": 363221,
+          "processCpuSystemUs": 57350,
+          "processRssBytes": 102191104,
+          "processPeakRssKiB": 110844
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "22976885-66f8-4799-a965-eb0bedd65a11",
+          "submissionId": "160aaece-98ce-473e-a493-2948c62b8aea",
+          "generation": 1,
+          "language": "PYTHON",
+          "status": "ACCEPTED",
+          "queueWaitMs": 407,
+          "claimMs": 5.979706999999962,
+          "judgeMs": 19.911323999999922,
+          "reportMs": 8.930131999999958,
+          "totalMs": 34.847181999999975,
+          "processCpuUserUs": 370483,
+          "processCpuSystemUs": 58550,
+          "processRssBytes": 102715392,
+          "processPeakRssKiB": 110844
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "22976885-66f8-4799-a965-eb0bedd65a11",
+          "submissionId": "0e6f2abf-6893-4974-b59d-f49ea2053efe",
+          "generation": 1,
+          "language": "JAVASCRIPT",
+          "status": "ACCEPTED",
+          "queueWaitMs": 2,
+          "claimMs": 6.71130200000016,
+          "judgeMs": 56.68645000000015,
+          "reportMs": 17.34374099999991,
+          "totalMs": 80.77727999999979,
+          "processCpuUserUs": 381863,
+          "processCpuSystemUs": 61623,
+          "processRssBytes": 103370752,
+          "processPeakRssKiB": 110844
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "22976885-66f8-4799-a965-eb0bedd65a11",
+          "submissionId": "03109c58-4ee7-47fb-b79d-523eb1818722",
+          "generation": 1,
+          "language": "TYPESCRIPT",
+          "status": "ACCEPTED",
+          "queueWaitMs": 51,
+          "claimMs": 6.816676000000143,
+          "judgeMs": 60.87169700000004,
+          "reportMs": 13.580519000000095,
+          "totalMs": 81.29909900000007,
+          "processCpuUserUs": 399094,
+          "processCpuSystemUs": 63653,
+          "processRssBytes": 104550400,
+          "processPeakRssKiB": 110844
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "22976885-66f8-4799-a965-eb0bedd65a11",
+          "submissionId": "b20bd9db-4dae-46a6-baaf-d3dbabb9eaba",
+          "generation": 1,
+          "language": "GO",
+          "status": "ACCEPTED",
+          "queueWaitMs": 42,
+          "claimMs": 11.123965999999882,
+          "judgeMs": 10059.281971999999,
+          "reportMs": 8.095793999998932,
+          "totalMs": 10078.540265,
+          "processCpuUserUs": 427968,
+          "processCpuSystemUs": 69455,
+          "processRssBytes": 105598976,
+          "processPeakRssKiB": 110844
+        }
+      ]
+    },
+    {
+      "workerIndex": 1,
+      "pid": 24518,
+      "apiIndex": 1,
+      "rows": [
+        {
+          "event": "judge_completed",
+          "workerId": "2b3cc2cb-1011-4a1c-b2a9-9df30028faaf",
+          "submissionId": "b5e0c8dc-e94e-4344-93b1-068e77f52732",
+          "generation": 1,
+          "language": "JAVA",
+          "status": "ACCEPTED",
+          "queueWaitMs": 4,
+          "claimMs": 47.16211599999997,
+          "judgeMs": 1579.121456,
+          "reportMs": 14.480818999999883,
+          "totalMs": 1640.8191829999998,
+          "processCpuUserUs": 352915,
+          "processCpuSystemUs": 59313,
+          "processRssBytes": 102277120,
+          "processPeakRssKiB": 110568
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "2b3cc2cb-1011-4a1c-b2a9-9df30028faaf",
+          "submissionId": "53bbee93-693a-4a33-a154-77b05a1ecc33",
+          "generation": 1,
+          "language": "RUST",
+          "status": "ACCEPTED",
+          "queueWaitMs": 581,
+          "claimMs": 5.598875999999791,
+          "judgeMs": 479.96567000000005,
+          "reportMs": 10.178711999999905,
+          "totalMs": 495.76831600000014,
+          "processCpuUserUs": 367179,
+          "processCpuSystemUs": 62519,
+          "processRssBytes": 102670336,
+          "processPeakRssKiB": 110568
+        }
+      ]
+    }
+  ],
+  "workerBound": {
+    "configuredTotal": 2,
+    "maximumObservedQueueOverlap": 2,
+    "perWorkerMaximumObservedQueueOverlap": [
+      1,
+      1
+    ]
+  },
+  "persistence": {
+    "submissions": 8,
+    "learned": 8,
+    "notifications": 8,
+    "solves": [
+      {
+        "awarded_xp": 10,
+        "accepted_submission_id": "dc870e41-062e-405e-9455-81808061717c"
+      }
+    ],
+    "xp": 10,
+    "resultReplays": 8
+  },
+  "processSamples": [
+    {
+      "pid": 24452,
+      "sampledAtEpochMs": 1794848849366,
+      "rssKiB": 248676,
+      "peakRssKiB": 248676,
+      "userCpuTicks": 197,
+      "systemCpuTicks": 23
+    },
+    {
+      "pid": 24453,
+      "sampledAtEpochMs": 1794848849366,
+      "rssKiB": 196688,
+      "peakRssKiB": 196688,
+      "userCpuTicks": 180,
+      "systemCpuTicks": 19
+    },
+    {
+      "pid": 24517,
+      "sampledAtEpochMs": 1794848849366,
+      "rssKiB": 103548,
+      "peakRssKiB": 110844,
+      "userCpuTicks": 42,
+      "systemCpuTicks": 6
+    },
+    {
+      "pid": 24518,
+      "sampledAtEpochMs": 1794848849366,
+      "rssKiB": 101112,
+      "peakRssKiB": 110568,
+      "userCpuTicks": 37,
+      "systemCpuTicks": 6
+    }
+  ],
+  "scenarioElapsedMs": 13397.353062,
+  "nativeArtifacts": {
+    "before": [],
+    "after": []
+  },
+  "cleanup": {
+    "failures": [],
+    "removedJobIds": [
+      "dc870e41-062e-405e-9455-81808061717c-1",
+      "06fbb35f-87e2-4afb-bec6-65a9657358ec-1",
+      "160aaece-98ce-473e-a493-2948c62b8aea-1",
+      "0e6f2abf-6893-4974-b59d-f49ea2053efe-1",
+      "03109c58-4ee7-47fb-b79d-523eb1818722-1",
+      "b5e0c8dc-e94e-4344-93b1-068e77f52732-1",
+      "53bbee93-693a-4a33-a154-77b05a1ecc33-1",
+      "b20bd9db-4dae-46a6-baaf-d3dbabb9eaba-1"
+    ],
+    "elapsedMs": 83.35824200000025,
+    "processes": [
+      {
+        "pid": 24452,
+        "exitCode": null,
+        "signal": "SIGTERM"
+      },
+      {
+        "pid": 24453,
+        "exitCode": null,
+        "signal": "SIGTERM"
+      },
+      {
+        "pid": 24517,
+        "exitCode": 0,
+        "signal": null
+      },
+      {
+        "pid": 24518,
+        "exitCode": 0,
+        "signal": null
+      }
+    ],
+    "observers": [
+      {
+        "postgresSocketDestroyed": true,
+        "redisStatus": "end",
+        "queueCloseFailed": false,
+        "pendingOperations": 0,
+        "forceCloseFailures": []
+      },
+      {
+        "postgresSocketDestroyed": true,
+        "redisStatus": "end",
+        "queueCloseFailed": false,
+        "pendingOperations": 0,
+        "forceCloseFailures": []
+      }
+    ]
+  },
+  "elapsedMs": 13488.428723
+}

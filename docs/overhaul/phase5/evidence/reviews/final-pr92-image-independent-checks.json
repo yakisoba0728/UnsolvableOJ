@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/security",
+  "observedAt": "2026-11-16T17:08:42.874835+00:00",
+  "runId": "43913852145",
+  "checkout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+  "images": [
+    {
+      "component": "front",
+      "zipPath": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/front.zip",
+      "zipSha256": "716fc53439810005237a9cedb95a04cb16d0bdefdd1c075f83a42d4a740f990e",
+      "zipBytes": 28893,
+      "memberSha256": {
+        "database-download.log": "301de7c58141fccf58a04c78d6243e36303aa4b648579d2752ac9100555f04d2",
+        "gate.json": "9eae4bce1a22595697ed7b311f805a913632c8a1ff457027642b0164843404fd",
+        "manifest.json": "2b6d81e677e2606d57b97aebdf18cf74d37df37a17dafb02b4c2cd813b0fa14c",
+        "scan.log": "66fb0f2baf800cad37a7cc69e1ccc7db7092669aca0d2e9d9050aa506b3566ba",
+        "scanner-download.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scanner-version-after.json": "20a22741e81ec85b7fd47ce68da280e2acef4910fce55ab8eb1a0a5d020271a9",
+        "scanner-version.json": "20a22741e81ec85b7fd47ce68da280e2acef4910fce55ab8eb1a0a5d020271a9",
+        "trivy.json": "99c42897a3a1c9cdf2c07adf4ccb6d52a3f1edae7d94b3a00f82a68daa71d1cd"
+      },
+      "gate": "PASS_RAW_SCAN",
+      "rawScannerExit": 0,
+      "rawCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "inventoryOsPackages": 72,
+      "inventoryLibraryPackages": 0,
+      "unknownLibraryVersions": 0,
+      "image": {
+        "manifestDigest": "sha256:005a45ae8649cedb7111b03c7a802641a32244458223ae98db92d05463f92f0f",
+        "configDigest": "sha256:26c3974ee2f8ce03d5fda907fc6ec3d73bbe5e4986956033afc1c14f5f38cf12",
+        "indexDigest": "sha256:f95939033a82a9edd0562401f877a29a4d780492615ff7afde0f43e4d7046d04",
+        "buildDigest": "sha256:87bea4fa5c1465ab36ad21d60def9d896598c1a8a5dd6c6d3858b6c14d58f6a7",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17",
+          "sha256:1abafee971b93c1ae05f03c35c6fb6e3376e75e6f16b590092a822b61ebf10b6",
+          "sha256:c7dfd64eeb02740cc41e9f32ad7f75781882d4c167b77427aa9615d1419c4515",
+          "sha256:e011f124249bf1c4be27b3311c3b40cb90dd7737381af1c62b508020790b7bd5",
+          "sha256:a746bd1dc828f61bf43b775dcfecb9ded8a3d3b41789915fe135fa6b9fa85965",
+          "sha256:b9c6ee6a30f8811636d7273be348906cf0e4e9725378dd54b7d4a3725538cad4",
+          "sha256:69d81d5522572d5b7abcc8f594ecbc4cf9bea72402675a419e8d7b516e4c3f14",
+          "sha256:da90db506dd5f2d604467c4dc38442534f74c9e76c1982df0c262e144bad7bc9",
+          "sha256:d8006f3c02c1ba023aa3690181d7223c6c2753cb33a39c094bdb25c72f719a66",
+          "sha256:0b88debb8b54c85f737dc3c23eea7de6a4a54f20d40fe631555f09c0967785e1",
+          "sha256:7616fc478a1f278b2a147a15140989a87069cf240016e5ccdc86d035204c449f",
+          "sha256:60b49731a29e21526a761cc81f3a53e078605fd18c5183bd353f59a7f68a9a5f"
+        ],
+        "compressedLayerBytes": 28210628
+      },
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-11-17T13:03:44.830426014Z",
+        "UpdatedAt": "2026-11-16T13:03:44.830426244Z",
+        "DownloadedAt": "2026-11-16T17:02:05.266942748Z"
+      },
+      "databaseSha256": "e7587cc3528c2d401dfae2bb327d6d7e2943cb04d714ae7d413c6dbe64a38db3",
+      "libraryCoverage": {
+        "requiredInstalledNpmPackage": null,
+        "goJudgeWithStdlibRequired": false,
+        "status": "VERIFIED"
+      }
+    },
+    {
+      "component": "back",
+      "zipPath": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/back.zip",
+      "zipSha256": "0cd1278efb96602e19d4e88c669b670715eb68298f530778a340f6340af4db92",
+      "zipBytes": 26965,
+      "memberSha256": {
+        "database-download.log": "76e33337e9b0bba952b82aab2029eb09d50df343f2afa560e2b1ca6b0e4f49ea",
+        "manifest.json": "82c19e8632474b1b1372d41a6504cd2d0ce0dbd7731a613c19b5df47016d7b0b",
+        "gate.json": "5527f969aa3b78b2c03c8f63948c7b1ed8de5485d40bc7724e327d098aa94074",
+        "scan.log": "85328faccbb48bf6e4aa28f6fbc02913ced05f7f9e9ecb6e0637b141dd0e5e80",
+        "scanner-download.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scanner-version-after.json": "8e3c87272e6730529f5b74fad90ba96f86b960e075848f9bd403cdc7a149a9b6",
+        "scanner-version.json": "8e3c87272e6730529f5b74fad90ba96f86b960e075848f9bd403cdc7a149a9b6",
+        "trivy.json": "637b909dc26b6ec56f45bf2d9228cdb51993d9c287092ee28cc990c63475ea24"
+      },
+      "gate": "PASS_RAW_SCAN",
+      "rawScannerExit": 0,
+      "rawCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "inventoryOsPackages": 19,
+      "inventoryLibraryPackages": 230,
+      "unknownLibraryVersions": 0,
+      "image": {
+        "manifestDigest": "sha256:b2827ffe85520a98f26141a1ba1831ae67ab5651e93020d74b13e3302a9542a6",
+        "configDigest": "sha256:66075d0ea8e91490d677a4b36b1d9d309a4d84db72ba59708fd3f4cd4c1718b9",
+        "indexDigest": "sha256:9bde7107de3cfa6cbeabbd51e1a609caa78489a5e64d31219f7ce8cf6d8e3b8a",
+        "buildDigest": "sha256:a884b64dcb367811a19d2c1d9f8f41ce52f8463fd379ee30f98bada3253ec3a2",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17",
+          "sha256:b72829bc75b7701104d057fde78fe0aef6dc0c3eaf2423e7249e8a14c37ead57",
+          "sha256:89a151fddb377af33d0dda6a24f40061bbde4b159f82c349fe01208baba8a84f",
+          "sha256:60ef5f57e09d3f24d91cfd5547a102a028a7bd629f03e79409f53a202cf9df54",
+          "sha256:97b64ceb74b7cc85b28a10c95e9e759a83a761e4cf25f4ede602b07328349f72",
+          "sha256:29e26d0602eb9c2d19f64f20b62f43b6ff99480b8b231ef1ffd59eb2397b9450",
+          "sha256:49ad3612f2eda085ab98c315e832fb6598c9370c109e7dc40242d552a703c201",
+          "sha256:150d3dcb8a1e0a6b32262a9f692bbae8ccfba2763c79193d5f05a8a950a0cdc0",
+          "sha256:3d585582ecef1ea7cc9a044da9e97ba602bd6d08138aabbb296ef8d95563ee3b",
+          "sha256:426d293df3e8c83bad1c238fbb8d1abea7144642296cbd6f7430e4c76c2824b5",
+          "sha256:d56e282261a136e5a5aa8e8667accb31626eecf1c59be81e74ad4db848749aea",
+          "sha256:ae1608041f45dd3da5d50c085a5c3a9d39901da8ba19f61f79982e13a9e3b940"
+        ],
+        "compressedLayerBytes": 119962982
+      },
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-11-17T13:03:44.830426014Z",
+        "UpdatedAt": "2026-11-16T13:03:44.830426244Z",
+        "DownloadedAt": "2026-11-16T17:03:24.245060369Z"
+      },
+      "databaseSha256": "e7587cc3528c2d401dfae2bb327d6d7e2943cb04d714ae7d413c6dbe64a38db3",
+      "libraryCoverage": {
+        "requiredInstalledNpmPackage": "@nestjs/core",
+        "goJudgeWithStdlibRequired": false,
+        "status": "VERIFIED"
+      }
+    },
+    {
+      "component": "judge",
+      "zipPath": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge.zip",
+      "zipSha256": "6c54d2352e3f3f81564ac14ecf13da22cf45fc256e5681a9ce8beac7ae1eef31",
+      "zipBytes": 14299,
+      "memberSha256": {
+        "database-download.log": "a380c5c5f53b73d2663fa7919a78037171b85496804030d6786fe260568c86f7",
+        "manifest.json": "24349ef371fdca547fe5825bb230ce84249c1b4eacb1bca26fadec01b5e2a9f9",
+        "gate.json": "3804239233f43a932106a7638aeb2e4341718e676bf45f7c55ae5587cd19504b",
+        "scan.log": "740c0cb5f4f5134bf97309f4d326754dc4d590d2509b3f86ddf16a6f29613be8",
+        "scanner-download.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scanner-version-after.json": "8f609b016749e358d70992bbf28d7937745a6b3c0e2977d0f61777df9a506dda",
+        "scanner-version.json": "8f609b016749e358d70992bbf28d7937745a6b3c0e2977d0f61777df9a506dda",
+        "trivy.json": "cbec4c0cdae5e54d3dc886e3f229d1c3ffc6ffd9b4ee2161b6dc646fb201c2a3"
+      },
+      "gate": "PASS_RAW_SCAN",
+      "rawScannerExit": 0,
+      "rawCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "inventoryOsPackages": 19,
+      "inventoryLibraryPackages": 24,
+      "unknownLibraryVersions": 0,
+      "image": {
+        "manifestDigest": "sha256:950928afeb7bb77f6ab237930af4e7ffd85ae2795782b6a037155fb471bcf602",
+        "configDigest": "sha256:ace8cc6f6a6b2ccb9f96d405b8107be374091a0a64ed432999fb1ebff61a99d2",
+        "indexDigest": "sha256:45478665e99a16db99c7e0a1f54cfdaaa1e36f632244252c0d096a59bd64ae0a",
+        "buildDigest": "sha256:7d7870128e87c85327fe7a669fe235cd99ecc6becd71fea5d607ad59875b15ec",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17",
+          "sha256:b72829bc75b7701104d057fde78fe0aef6dc0c3eaf2423e7249e8a14c37ead57",
+          "sha256:89a151fddb377af33d0dda6a24f40061bbde4b159f82c349fe01208baba8a84f",
+          "sha256:60ef5f57e09d3f24d91cfd5547a102a028a7bd629f03e79409f53a202cf9df54",
+          "sha256:aae7c25cc34ab5491c6c47d3d7467cb3a99208a2094f7be7e419e57a1cfd7496",
+          "sha256:dd9dfe08ccba18748a82134bd5ab2af2879214658e6d16e4f60b52d380c16f57",
+          "sha256:30629af34ddbe702b3df688a71acb948f2341c7235500fec3c70f662ca22dc75",
+          "sha256:6fad32bdb4eddb41a89a2c35afb434b0dff1a0ecf3c39f04f3fd75491b6f99cb"
+        ],
+        "compressedLayerBytes": 65796870
+      },
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-11-17T13:03:44.830426014Z",
+        "UpdatedAt": "2026-11-16T13:03:44.830426244Z",
+        "DownloadedAt": "2026-11-16T17:01:58.070965446Z"
+      },
+      "databaseSha256": "e7587cc3528c2d401dfae2bb327d6d7e2943cb04d714ae7d413c6dbe64a38db3",
+      "libraryCoverage": {
+        "requiredInstalledNpmPackage": "bullmq",
+        "goJudgeWithStdlibRequired": false,
+        "status": "VERIFIED"
+      }
+    },
+    {
+      "component": "runtime",
+      "zipPath": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/runtime.zip",
+      "zipSha256": "d68f31f5282e02d6fdd672e6738a0653fc56ed99fb183f7d8f26d910f3458357",
+      "zipBytes": 1086327,
+      "memberSha256": {
+        "database-download.log": "34386ed47323b633f9a78b134405b91264af79dc39b725ec2070a182c2d69dfa",
+        "gate.json": "ee8e82888f10773e384d2bdb2e12efa4187da2dcfb89de150fadcb0be5c979e2",
+        "applicability-evaluation.json": "2e8b0ed8bd46adce31a9a172dd7d6bbafda888dc4908a076be19562d13564f95",
+        "manifest.json": "330c3aa4a84275e8d92f6a86098091f8384b3d1c08470f4cf088a88828aea263",
+        "payload-verification.json": "6e3b7ddb4ee4129858e92acb6841668f86195d292a97edc056cca72c742f421f",
+        "scan.log": "cc1160f520efa383fee8a95ce3addab205babcd4f7ce43d66ecd9b8aef5b5451",
+        "scanner-download.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scanner-version-after.json": "c0eda6e67b38f497507eca87b73e8c28574b365c873e1557b762b6444ba8a39d",
+        "scanner-version.json": "2188c347c52e73b248fe6e1dd892cbe6674b80fc1ae9d89920ff926bb0f3fb20",
+        "trivy.json": "6235b3a07fe5be28dbab26e5b565b90b0367639136a062eb40553852d111c0be"
+      },
+      "gate": "PASS_WITH_REVIEWED_COMPONENT_FINDINGS",
+      "rawScannerExit": 2,
+      "rawCounts": {
+        "UNKNOWN": 1,
+        "LOW": 363,
+        "MEDIUM": 560,
+        "HIGH": 177,
+        "CRITICAL": 5
+      },
+      "inventoryOsPackages": 172,
+      "inventoryLibraryPackages": 53,
+      "unknownLibraryVersions": 1,
+      "image": {
+        "manifestDigest": "sha256:69bbc89eed8be224d184b2050d373e4fd05a62c2a280fe86306dd371bb89eff1",
+        "configDigest": "sha256:06f5267baf0431c99588473e69ef16f13898651125aa87d979c0dfc4ef14c37f",
+        "indexDigest": "sha256:c519e6dafdfbca1ce05d3935c71c91a2e6597c790408531e0b12b3e44300140a",
+        "buildDigest": "sha256:20bc102da020f954fc83e4e2e9802d72352070d3e5ae9bcad7641b2516bb02eb",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+          "sha256:63543ae0e917b1c0474861f765cd39e40dd05df4a744996f754e8ec78cd0b704",
+          "sha256:bd172a69e4995cbc1be0305103fd1ba57e4dae7c0187a2ef88d9ad001645bd38",
+          "sha256:e40025dfac5f83529f91c72efbcc12a55ee3d6372fc4fab1175ab11909e5337e",
+          "sha256:425122196df8fb244a9f04c540889b14740a51df08a514733f2365d0d26a2ab9",
+          "sha256:535fb50ae673dcef3c724d3b2aca4c69d28689cfe881b7cd8f6061d722c64fe6",
+          "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+          "sha256:8891bc23ba82ec227ccf3dc5f340d517cd81c5b094915f5ef3cf5f3a609addf3",
+          "sha256:c9450852bd5a5c710cf644e273a67a48a1e2187c323bf0e9ffd7ce6df49b0220",
+          "sha256:1dc3e9e599a828c254cc29d912e2160438569a18eb39fda04baff9348b5d7421",
+          "sha256:4d22e3c5dd127834d6c6f75bd6d49d98febd7eedb97e8ab7bc86f9613da6cd4e",
+          "sha256:98c103fdb96874a5cc2e63f2f884382bc41c796b29c80873d755ebec2a4e33b8",
+          "sha256:5866ac1c47b91985e5e0fee95a7f30a85647b5a7645a67b8c0f08a8b7aac892e",
+          "sha256:eb88c88fff6cd579e860b9e1503894e594142b256fff3eff7a1c8b22e2f8bb3f"
+        ],
+        "compressedLayerBytes": 574140735
+      },
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-11-17T13:03:44.830426014Z",
+        "UpdatedAt": "2026-11-16T13:03:44.830426244Z",
+        "DownloadedAt": "2026-11-16T17:06:13.238940445Z"
+      },
+      "databaseSha256": "e7587cc3528c2d401dfae2bb327d6d7e2943cb04d714ae7d413c6dbe64a38db3",
+      "libraryCoverage": {
+        "requiredInstalledNpmPackage": "esbuild",
+        "goJudgeWithStdlibRequired": true,
+        "status": "VERIFIED"
+      },
+      "runtime": {
+        "policySha256": "81f0bf685f2ffc22cdb0933c2c55f6f5fff05f8f252765c0af8fe56189084603",
+        "policyContentSha256": "d938665f24995ea53bf0984047459de0aa9ba366dc5ebbe37055f304c68903fb",
+        "expiresAt": "2026-11-30T00:00:00Z",
+        "independentlyRecomputedAdvisories": 182,
+        "independentlyRecheckedPayloadRecords": 990,
+        "reviewed": 182,
+        "remaining": 0,
+        "unresolved": 0,
+        "strictEvaluatorExit": 0,
+        "hostKernelReadiness": "UNVERIFIED"
+      }
+    }
+  ],
+  "limitations": [
+    "Retained scanner and payload-proof bytes are rechecked; OCI layers are not locally rebuilt or extracted.",
+    "Existing independent reviewer and coordinator approvals authorize the unchanged policy; this reviewer authored its proposal.",
+    "Raw Runtime HIGH/CRITICAL findings remain unpatched findings; exact-component applicability is not host readiness."
+  ],
+  "status": "PASS"
+}

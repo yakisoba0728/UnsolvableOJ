@@ -1,0 +1,33 @@
+{
+  "retrievedAt": "2026-11-16 17:19:41 UTC",
+  "main": "6176015b63a1615cc2269172f246725ef08abab3",
+  "phase5Integration": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+  "phase4Integration": "d0159b1f844bf0608415dded9e84af566c8e2041",
+  "pr63": {
+    "number": 63,
+    "state": "open",
+    "draft": false,
+    "merged": false,
+    "head": "3bcba380f92bd2da8973e6c88c00cd14b03be08e",
+    "base": "6176015b63a1615cc2269172f246725ef08abab3",
+    "mergeCommitSha": "7bb0b27e6f7a57bf2ba743dc8a765ac2ac312ecc"
+  },
+  "pr86": {
+    "number": 86,
+    "state": "open",
+    "draft": false,
+    "merged": false,
+    "head": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "base": "3bcba380f92bd2da8973e6c88c00cd14b03be08e",
+    "mergeCommitSha": "906819c36a56f1f8326e6d8743b02a102762138a"
+  },
+  "pr92": {
+    "number": 92,
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "head": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+    "base": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "mergeCommitSha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1"
+  }
+}

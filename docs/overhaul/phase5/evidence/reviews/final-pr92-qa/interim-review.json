@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/independent_qa",
+  "recordedAt": "2026-11-16T17:10:54.090827+00:00",
+  "decision": "PENDING_FINAL_FULL_CI_ARTIFACTS_AND_INDEPENDENT_REVIEW",
+  "wholeRunAccepted": false,
+  "runId": 43913852145,
+  "runAttempt": 1,
+  "source": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+  "checkout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+  "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+  "base": "d0159b1f844bf0608415dded9e84af566c8e2041",
+  "completedScopes": [
+    "Immutable GitHub source/checkout/parent/tree binding; exact approved docs tree;876 unchanged non-Phase5-doc paths;protected main/63/86 unchanged and PR92 open/draft/unmerged at initial read.",
+    "All four original image evidence bundles;626 offline consistency/advisory/payload conditions;Security separate strict replay underway.",
+    "392 unit tests/30files,261 real API tests/44files;7 workload schema1 DB qualification with bounded resources/oracles/cleanup;actual schema2 restore31migrations/37tablefingerprints/12goals/stopwriter/guardedrollback/restoredwrite/cleanup.",
+    "Six clean npm audit executions;three exact-source lockfile SBOMs;Node groups4,86/16/7/6/4/2/2/2,137 all with zero failures/cancellations/skips/todo;five Python runtime checks.",
+    "First browser shard403main+87Firefox passed;8 Chromium geometry JSON/16PNG verified;three representative originals visually inspected. Native verdict original retained for separate Security review."
+  ],
+  "blockingFindings": [],
+  "pendingRequired": [
+    "Second browser shard complete log and original ZIP;remaining WebKit/Firefox geometry and single editor report.",
+    "Native pipeline and Compose job complete log;multi-API,dedicated Vibe,PhaseII judge,browser performance,real Vibe browser/gateway originals.",
+    "Actual final twelve completed jobs and required aggregate gate;fresh source/base/protected-state snapshot.",
+    "Final separate Security native/multi-API/Vibe acceptance and all-twelve-decoded-log retention receipt.",
+    "All fifteen original ZIP metadata/hash bindings and final combined independent review."
+  ],
+  "retainedOriginalArtifacts": [
+    {
+      "artifactId": 14249785142,
+      "artifactName": "image-audit-judge-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge.zip",
+      "bytes": 14299,
+      "sha256": "6c54d2352e3f3f81564ac14ecf13da22cf45fc256e5681a9ce8beac7ae1eef31",
+      "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge",
+      "members": [
+        "database-download.log",
+        "manifest.json",
+        "gate.json",
+        "scan.log",
+        "scanner-download.log",
+        "scanner-version-after.json",
+        "scanner-version.json",
+        "trivy.json"
+      ]
+    },
+    {
+      "artifactId": 14249346705,
+      "artifactName": "image-audit-front-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/front.zip",
+      "bytes": 28893,
+      "sha256": "716fc53439810005237a9cedb95a04cb16d0bdefdd1c075f83a42d4a740f990e",
+      "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/front",
+      "members": [
+        "database-download.log",
+        "gate.json",
+        "manifest.json",
+        "scan.log",
+        "scanner-download.log",
+        "scanner-version-after.json",
+        "scanner-version.json",
+        "trivy.json"
+      ]
+    },
+    {
+      "artifactId": 14248558283,
+      "artifactName": "npm-sbom-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/npm-sbom.zip",
+      "bytes": 100682,
+      "sha256": "34db989e06f30ee5d97d203fb6d4c2c6134ab4def046ac6974c92b211b9ba5ac",
+      "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/npm-sbom",
+      "members": [
+        "Front.cdx.json",
+        "Judge.cdx.json",
+        "Back.cdx.json",
+        "manifest.json"
+      ]
+    },
+    {
+      "artifactId": 14247439904,
+      "artifactName": "image-audit-back-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/back.zip",
+      "bytes": 26965,
+      "sha256": "0cd1278efb96602e19d4e88c669b670715eb68298f530778a340f6340af4db92",
+      "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/back",
+      "members": [
+        "database-download.log",
+        "manifest.json",
+        "gate.json",
+        "scan.log",
+        "scanner-download.log",
+        "scanner-version-after.json",
+        "scanner-version.json",
+        "trivy.json"
+      ]
+    },
+    {
+      "artifactId": 14248613692,
+      "artifactName": "phase4-restore-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/restore.zip",
+      "bytes": 2265,
+      "sha256": "15e74add3c7d4f22624ff1a9869a472f2aa7582aafab2743b171a2fa1f0f3af8",
+      "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/restore",
+      "members": [
+        "phase4-restore.json"
+      ]
+    },
+    {
+      "artifactId": 14247944044,
+      "artifactName": "phase5-database-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/database-qualification.zip",
+      "bytes": 18074,
+      "sha256": "41b9c26f8a6e68c9a3f551a06f280f4232db099248ccc4a73c19ac7abe576d5d",
+      "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/database-qualification",
+      "members": [
+        "phase5-database.json"
+      ]
+    },
+    {
+      "artifactId": 14247629738,
+      "artifactName": "image-audit-runtime-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/runtime.zip",
+      "bytes": 1086327,
+      "sha256": "d68f31f5282e02d6fdd672e6738a0653fc56ed99fb183f7d8f26d910f3458357",
+      "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/runtime",
+      "members": [
+        "database-download.log",
+        "gate.json",
+        "applicability-evaluation.json",
+        "manifest.json",
+        "payload-verification.json",
+        "scan.log",
+        "scanner-download.log",
+        "scanner-version-after.json",
+        "scanner-version.json",
+        "trivy.json"
+      ]
+    },
+    {
+      "artifactId": 14249057796,
+      "artifactName": "phase5-verdict-matrix-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/native-verdict.zip",
+      "bytes": 5419,
+      "sha256": "5c86a8952e7268a9684b97489a448e6b62a6838193182ec7d869f7a2cd5c96dc",
+      "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/native-verdict",
+      "members": [
+        "phase5-verdict-matrix.json"
+      ]
+    },
+    {
+      "artifactId": 14248993030,
+      "artifactName": "phase5-frontend-1-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/frontend-1.zip",
+      "bytes": 543684,
+      "sha256": "a763d4fba4d19d56ee1ac02c83761c1d7bb38397520275b8b9949b986e578397",
+      "extractedTo": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/frontend-1",
+      "members": [
+        "phase5-ux/chromium-1440-dark-ready.png",
+        "phase5-ux/chromium-1440-dark-geometry.json",
+        "phase5-ux/chromium-1440-dark-refreshing.png",
+        "phase5-ux/chromium-1440-light-geometry.json",
+        "phase5-ux/chromium-1440-light-ready.png",
+        "phase5-ux/chromium-1440-light-refreshing.png",
+        "phase5-ux/chromium-320-dark-geometry.json",
+        "phase5-ux/chromium-320-dark-ready.png",
+        "phase5-ux/chromium-320-dark-refreshing.png",
+        "phase5-ux/chromium-320-light-geometry.json",
+        "phase5-ux/chromium-320-light-ready.png",
+        "phase5-ux/chromium-320-light-refreshing.png",
+        "phase5-ux/chromium-375-dark-geometry.json",
+        "phase5-ux/chromium-375-dark-ready.png",
+        "phase5-ux/chromium-375-dark-refreshing.png",
+        "phase5-ux/chromium-375-light-geometry.json",
+        "phase5-ux/chromium-375-light-ready.png",
+        "phase5-ux/chromium-375-light-refreshing.png",
+        "phase5-ux/chromium-768-dark-geometry.json",
+        "phase5-ux/chromium-768-dark-ready.png",
+        "phase5-ux/chromium-768-dark-refreshing.png",
+        "phase5-ux/chromium-768-light-geometry.json",
+        "phase5-ux/chromium-768-light-ready.png",
+        "phase5-ux/chromium-768-light-refreshing.png",
+        "phase5-browser-selection.json"
+      ]
+    }
+  ],
+  "retainedCompletedLogs": [
+    {
+      "jobId": 133462613274,
+      "name": "Detect changes",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613274.log",
+      "bytes": 20263,
+      "sha256": "e2fd580d1d98e594e3146d72d41e32a81ed86645e53be1a6d722ac6c2e3e250f"
+    },
+    {
+      "jobId": 133462613610,
+      "name": "Docker image (judge)",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613610.log",
+      "bytes": 125969,
+      "sha256": "66f56402a38a51cec7b0646cd47c6f212212add41848cc989e902e7f544dcdc3"
+    },
+    {
+      "jobId": 133462613893,
+      "name": "Dependency audit",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613893.log",
+      "bytes": 21681,
+      "sha256": "8edd8cb4e197b1bfca938ea2f894a4f129de5e07e20fb7e119dd2256ca9e5c29"
+    },
+    {
+      "jobId": 133462613974,
+      "name": "Docker image (front)",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613974.log",
+      "bytes": 143944,
+      "sha256": "fbc3f4cff2494aacf660feae289ad6c216eb33b7b52d64de44ab8a64cc94fc48"
+    },
+    {
+      "jobId": 133462777373,
+      "name": "Judge worker",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462777373.log",
+      "bytes": 35926,
+      "sha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a"
+    },
+    {
+      "jobId": 133462614697,
+      "name": "Docker image (back)",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462614697.log",
+      "bytes": 130005,
+      "sha256": "b3e7a6a1331d090c08c678f67b2686345dc9d9b62dc56d814c6de37bbb1123bb"
+    },
+    {
+      "jobId": 133462777250,
+      "name": "Backend and API",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462777250.log",
+      "bytes": 132215,
+      "sha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19"
+    },
+    {
+      "jobId": 133462613878,
+      "name": "Docker image (runtime)",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613878.log",
+      "bytes": 297972,
+      "sha256": "5e2fc350cc2ef704b839f3f6428222e124dd23dfc3b2fc2ba0989f801bca9504"
+    },
+    {
+      "jobId": 133462777344,
+      "name": "Browser tests (1/2)",
+      "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462777344.log",
+      "bytes": 185676,
+      "sha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d"
+    }
+  ],
+  "reviewReceipts": [
+    {
+      "path": "initial-metadata.json",
+      "bytes": 30698,
+      "sha256": "ceaf2eeb00f4d67fd1ee7697e7ebf8ef51bd5989af2de6ff4d59fb538d0e3d61"
+    },
+    {
+      "path": "immutable-commit-objects.json",
+      "bytes": 4622,
+      "sha256": "61f4f7b48358c2df998df00665b00180b1cf2a2c2506b154e27cf8c79c45398f"
+    },
+    {
+      "path": "source-blob-bindings.json",
+      "bytes": 25659,
+      "sha256": "3b70703e691f9fab7346692bd1b0d7449f464e49692151949e85e41dfb8cdabe"
+    },
+    {
+      "path": "backend-independent-checks.json",
+      "bytes": 32554,
+      "sha256": "f5270788ad2891f51568bd8fe07417b9569c9e1da410d688619b1ae4ab862fd4"
+    },
+    {
+      "path": "image-independent-checks.json",
+      "bytes": 49084,
+      "sha256": "ac9c21168e4e35ae17e25aec030429b1fc9e1f5126c891034a749ce404c9f863"
+    },
+    {
+      "path": "completed-log-counts.json",
+      "bytes": 4356,
+      "sha256": "b02f83ee6cb2801f59c422f6e7492efa615c5987c9e8da8b84c53d0598947ae7"
+    },
+    {
+      "path": "frontend-independent-checks.json",
+      "bytes": 11809,
+      "sha256": "48ef2b5811bfa3ffa1e020c29ed5a7d3052630502d5be13335d49ed99bd9a967"
+    },
+    {
+      "path": "visual-inspection-shard1.json",
+      "bytes": 956,
+      "sha256": "95d403e1b85eca3f5e989243880a47cd6c7a710dadfcae0d9e809e0e309bb5a1"
+    }
+  ],
+  "limits": [
+    "No new local application, browser, DB or native execution. Only hosted CI original evidence and read-only/offline verification used.",
+    "Final manual merge readiness remains pending;production readiness requires external environment evidence.",
+    "Runtime raw HIGH177/CRITICAL5 remains visible;fixed expiry2026-11-30T00:00:00Z and host readiness UNVERIFIED unchanged."
+  ]
+}

@@ -1,0 +1,1115 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "independent_qa",
+  "reviewerAgent": "/root/independent_qa",
+  "reviewedAt": "2026-11-16T17:25:47.538011+00:00",
+  "decision": "ACCEPT_EXACT_FINAL_PHASE_V_SOURCE_AND_ACTUAL_CI_FOR_MANUAL_MERGE",
+  "blockingFindings": [],
+  "scope": "Final PR92 Phase V qualification at the exact current stacked source/base/merge checkout. All required hosted CI jobs and retained evidence have been independently checked. This establishes readiness for owner manual merge of the reviewed stack after live head/base revalidation. It does not merge any PR, approve production deployment, or authorize changing protected branches.",
+  "repository": "yakisoba0728/UnsolvableOJ",
+  "pullRequest": 92,
+  "runId": 43913852145,
+  "runAttempt": 1,
+  "runUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43913852145",
+  "sourceCommit": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+  "sourceTree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+  "sourceParents": [
+    "a6588f7bedc87228c11852d8664fe20ec6b3ece3"
+  ],
+  "checkoutCommit": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+  "checkoutTree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+  "checkoutParents": [
+    "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5"
+  ],
+  "baseCommit": "d0159b1f844bf0608415dded9e84af566c8e2041",
+  "sourceBinding": {
+    "method": "Independently retrieved immutable GitHub source and checkout commit objects, run metadata, raw all-attempt job metadata and fresh PR/ref states. Source and checkout have the same full tree; checkout parents are the exact current Phase IV base and final source. The source has sole parent M4.",
+    "sourceBlobReceipt": "source-blob-bindings.json",
+    "sameApprovedLocalDocsCommit": "6ebb8e78e10c2a5e1107321e405ce49327314c1a",
+    "sameApprovedLocalDocsTree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+    "acceptedPreviousCodebase": "38824a09566fd75811704a44d65f7577d5cba9c3",
+    "nonPhase5DocTrackedPathsByteIdenticalToAcceptedPR91": 876,
+    "changedPathsAllUnderPhase5Docs": 167,
+    "applicationWorkflowAndPolicyChangesSinceAcceptedPR91": 0,
+    "priorSourceReceipts": [
+      {
+        "path": "/workspace/scratch/3d1215725852/independent-qa/database-review-9978a3e.json",
+        "sha256": "b2a50526408c8a7135aa3c451747a056cbd412a4587f84d8ce5db9cc998d1ace"
+      },
+      {
+        "path": "/workspace/scratch/3d1215725852/independent-qa/reliability-independent-accept-e9bc90d.json",
+        "sha256": "156bee47b57482a58540ae5668cc3bff4b4206c93a2f7fb7dcccab69da81fc5f"
+      },
+      {
+        "path": "/workspace/scratch/3d1215725852/independent-qa/runtime-activation-07191f0-independent-review.json",
+        "sha256": "564df9fdd8b94a0bd7f4dce2fdf2156241c33d3c77fb37e1db7c44d8f17c1cf4"
+      },
+      {
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr89-43901468081/independent-review.json",
+        "sha256": "7a80995d3184f8d43c6921d2518e41fbb6262435df74d0c0761748ea883ed538"
+      },
+      {
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/independent-review.json",
+        "sha256": "526f66fa948b4d763e43a2413d3e487f82e9259cf9dc063c1824047305662e36"
+      },
+      {
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-docs-review/docs-independent-acceptance-6ebb8e7.json",
+        "sha256": "ad50b1a3947b949824b3db02efa877f12e35af29a55d291efdb6affb82a00494"
+      }
+    ],
+    "finalDocumentationEvidenceReview": "Exact docs tree previously accepted:191 manifest-bound files/21,162,284 bytes,118 valid relative links across19 Markdown files, original accepted/failed history retained, portable offline10,875-condition arithmetic verification. That historical verifier is not relabeled as a verifier of the fresh final-run numbers."
+  },
+  "ci": {
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 133462613274,
+        "name": "Detect changes",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462613610,
+        "name": "Docker image (judge)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462613878,
+        "name": "Docker image (runtime)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462613893,
+        "name": "Dependency audit",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462613974,
+        "name": "Docker image (front)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462614697,
+        "name": "Docker image (back)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462777184,
+        "name": "Sandbox, pipeline and Compose",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462777250,
+        "name": "Backend and API",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462777344,
+        "name": "Browser tests (1/2)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462777373,
+        "name": "Judge worker",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133462778158,
+        "name": "Browser tests (2/2)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133474126427,
+        "name": "CI required",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "all12RequiredJobsActuallyExecuted": true,
+    "requiredGateActualResults": "success success success success success success success",
+    "runAttemptsObserved": 1,
+    "failedJobs": 0,
+    "cancelledJobs": 0,
+    "skippedJobs": 0,
+    "expectedStepSkips": [
+      {
+        "job": "Sandbox, pipeline and Compose",
+        "step": "Failed Compose browser artifacts (disposable test data only)"
+      },
+      {
+        "job": "Sandbox, pipeline and Compose",
+        "step": "Sandbox failure logs"
+      },
+      {
+        "job": "Browser tests (1/2)",
+        "step": "Failed browser test artifacts (disposable test data only)"
+      },
+      {
+        "job": "Browser tests (2/2)",
+        "step": "Frontend build and test types"
+      },
+      {
+        "job": "Browser tests (2/2)",
+        "step": "Failed browser test artifacts (disposable test data only)"
+      }
+    ],
+    "actualTestTruth": {
+      "dependencyAudit": "Six actual production/full npm audits each report zero vulnerabilities; three exact-source lockfile SBOMs retained.",
+      "backend": {
+        "unitTests": 392,
+        "unitFiles": 30,
+        "apiTests": 261,
+        "apiFiles": 44,
+        "migrationGuardFileTests": 5,
+        "enterpriseExportFileTests": 4,
+        "enterpriseExportRevocationFileTests": 1,
+        "fullMigrationRegression": "PASS"
+      },
+      "additionalNodeSuites": {
+        "sbom": 4,
+        "ciExecutorAndVibeFixture": 86,
+        "vibeTls": 16,
+        "boj": 7,
+        "operations": 6,
+        "enterpriseBenchmarkGuard": 4,
+        "restoreGuard": 2,
+        "databaseGuard": 2,
+        "starter": 2,
+        "note": "Counts are the actual Node test-runner reports, including parent/subtest semantics; not added again to the API or native totals."
+      },
+      "databaseQualification": {
+        "schemaVersion": 1,
+        "workloads": 7,
+        "status": "PASS",
+        "source": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+        "createdAndDropped": true
+      },
+      "restore": {
+        "schemaVersion": 2,
+        "status": "PASS",
+        "migrations": 31,
+        "tableFingerprints": 37,
+        "goals": 12,
+        "stopWriterBarrier": "37 tables SHARE, concurrent write refused, held through dump",
+        "populatedDown": "Refused and fingerprints/schema/products/ledger retained",
+        "restoredWrites": "Statistics integrity and saved-goal update passed",
+        "cleanup": "both generated databases removed"
+      },
+      "judge": {
+        "workerTests": 137,
+        "pythonRuntimeChecks": 5,
+        "pythonRuntimeScope": "One health route and four Go package-graph/runtime checks."
+      },
+      "browser": {
+        "mainShardCounts": [
+          403,
+          402
+        ],
+        "firefoxShardCounts": [
+          87,
+          87
+        ],
+        "total": 979,
+        "actualBrowserCases": 894,
+        "playwrightUnitCases": 85,
+        "projectCounts": {
+          "unit": 85,
+          "chromium": 435,
+          "firefox": 174,
+          "chromium-slow": 111,
+          "webkit": 174
+        },
+        "newUxCases": 42,
+        "newUxPerEngine": 14,
+        "newEditorCases": 1,
+        "countScope": "The42 UX cases and1 editor case are included in979. The979 total includes85 unit cases; it is not979 real-browser cases.",
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "retries": 0
+      },
+      "native": {
+        "tests": 90,
+        "matrixRows": 72,
+        "matrixRowsAreAdditionalTests": false,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "pipeline": {
+        "tests": 36,
+        "files": 9,
+        "newMultiApiCases": 1,
+        "multiApiTestFileMs": 13494,
+        "multiApiIndividualTestMs": 13492,
+        "multiApiReportElapsedBeforeWriteMs": 13488.428723
+      },
+      "compose": {
+        "realBrowserFlows": 4,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "retries": 0,
+        "actualRemovedContainers": 8,
+        "actualRemovedNetworks": 4,
+        "actualRemovedBackupVolumes": 1
+      }
+    }
+  },
+  "databaseAndRestore": {
+    "receipt": "backend-independent-checks.json",
+    "independentEvidenceChecks": 66,
+    "database": {
+      "schemaVersion": 1,
+      "fileSha256": "337cbcc2132f1fd9c27d024f034a249ca55b055cfe7be74f88467c6d493e76f0",
+      "workloads": [
+        "enterprise page offset 0",
+        "enterprise page offset 4950",
+        "whole-assessment summary 5000 candidates",
+        "scalar export SQL 5000 candidates",
+        "learning 90 days over 20000-row history",
+        "5000 distinct solver multiplicities",
+        "large source bulk transition and rollback"
+      ],
+      "elapsedMs": 1986.283389,
+      "maxDatabaseBytes": 33052339,
+      "cleanup": {
+        "created": true,
+        "dropped": true
+      }
+    },
+    "restore": {
+      "schemaVersion": 2,
+      "fileSha256": "ee077e87ef3b3f700a6a53fa0fc068125a69991fd3e575ff1d1e458d2dcf8c7c",
+      "migrations": 31,
+      "tableFingerprints": 37,
+      "products": {
+        "goals": 12,
+        "problemVersions": 24,
+        "solves": 128,
+        "xpMatchesLedger": true,
+        "solveEvidenceMatches": true,
+        "assessments": 1,
+        "candidates": 8,
+        "algorithmPins": 1,
+        "vibePins": 1,
+        "assessmentSubmissions": 8,
+        "assessmentSubmissionOwnershipVersionsMatch": true,
+        "workspaces": 8,
+        "revisions": 16,
+        "workspaceOwnershipVersionsMatch": true
+      },
+      "writerBarrier": {
+        "mode": "SHARE",
+        "tables": 37,
+        "concurrentWriteRefused": true,
+        "heldThroughDump": true
+      },
+      "archive": {
+        "bytes": 270181,
+        "sha256": "37fc6d0d24128e69e535f27fa9453e12a8e37359f625190311be8f4ad8fa7a1f"
+      },
+      "elapsedMs": 1026.56062,
+      "cleanup": "both generated databases removed"
+    },
+    "riskClosure": "P5-RELIABILITY-001 corrected source e9bc90d is carried forward unchanged. The five actual goal-migration cases include old-snapshot READ COMMITTED enforcement; actual schema2 restore exercises populated refusal and saved-goal/product preservation. Prior independent PostgreSQL baseline/fix receipts remain preserved."
+  },
+  "imageGates": {
+    "receipt": "image-independent-checks.json",
+    "independentEvidenceChecks": 626,
+    "outcomes": [
+      {
+        "component": "front",
+        "gate": "PASS_RAW_SCAN",
+        "rawExit": 0,
+        "rawCounts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "image": {
+          "manifestDigest": "sha256:005a45ae8649cedb7111b03c7a802641a32244458223ae98db92d05463f92f0f",
+          "configDigest": "sha256:26c3974ee2f8ce03d5fda907fc6ec3d73bbe5e4986956033afc1c14f5f38cf12",
+          "indexDigest": "sha256:f95939033a82a9edd0562401f877a29a4d780492615ff7afde0f43e4d7046d04",
+          "buildDigest": "sha256:87bea4fa5c1465ab36ad21d60def9d896598c1a8a5dd6c6d3858b6c14d58f6a7",
+          "platform": "linux/amd64",
+          "layerDigests": [
+            "sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17",
+            "sha256:1abafee971b93c1ae05f03c35c6fb6e3376e75e6f16b590092a822b61ebf10b6",
+            "sha256:c7dfd64eeb02740cc41e9f32ad7f75781882d4c167b77427aa9615d1419c4515",
+            "sha256:e011f124249bf1c4be27b3311c3b40cb90dd7737381af1c62b508020790b7bd5",
+            "sha256:a746bd1dc828f61bf43b775dcfecb9ded8a3d3b41789915fe135fa6b9fa85965",
+            "sha256:b9c6ee6a30f8811636d7273be348906cf0e4e9725378dd54b7d4a3725538cad4",
+            "sha256:69d81d5522572d5b7abcc8f594ecbc4cf9bea72402675a419e8d7b516e4c3f14",
+            "sha256:da90db506dd5f2d604467c4dc38442534f74c9e76c1982df0c262e144bad7bc9",
+            "sha256:d8006f3c02c1ba023aa3690181d7223c6c2753cb33a39c094bdb25c72f719a66",
+            "sha256:0b88debb8b54c85f737dc3c23eea7de6a4a54f20d40fe631555f09c0967785e1",
+            "sha256:7616fc478a1f278b2a147a15140989a87069cf240016e5ccdc86d035204c449f",
+            "sha256:60b49731a29e21526a761cc81f3a53e078605fd18c5183bd353f59a7f68a9a5f"
+          ],
+          "compressedLayerBytes": 28210628
+        }
+      },
+      {
+        "component": "back",
+        "gate": "PASS_RAW_SCAN",
+        "rawExit": 0,
+        "rawCounts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "image": {
+          "manifestDigest": "sha256:b2827ffe85520a98f26141a1ba1831ae67ab5651e93020d74b13e3302a9542a6",
+          "configDigest": "sha256:66075d0ea8e91490d677a4b36b1d9d309a4d84db72ba59708fd3f4cd4c1718b9",
+          "indexDigest": "sha256:9bde7107de3cfa6cbeabbd51e1a609caa78489a5e64d31219f7ce8cf6d8e3b8a",
+          "buildDigest": "sha256:a884b64dcb367811a19d2c1d9f8f41ce52f8463fd379ee30f98bada3253ec3a2",
+          "platform": "linux/amd64",
+          "layerDigests": [
+            "sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17",
+            "sha256:b72829bc75b7701104d057fde78fe0aef6dc0c3eaf2423e7249e8a14c37ead57",
+            "sha256:89a151fddb377af33d0dda6a24f40061bbde4b159f82c349fe01208baba8a84f",
+            "sha256:60ef5f57e09d3f24d91cfd5547a102a028a7bd629f03e79409f53a202cf9df54",
+            "sha256:97b64ceb74b7cc85b28a10c95e9e759a83a761e4cf25f4ede602b07328349f72",
+            "sha256:29e26d0602eb9c2d19f64f20b62f43b6ff99480b8b231ef1ffd59eb2397b9450",
+            "sha256:49ad3612f2eda085ab98c315e832fb6598c9370c109e7dc40242d552a703c201",
+            "sha256:150d3dcb8a1e0a6b32262a9f692bbae8ccfba2763c79193d5f05a8a950a0cdc0",
+            "sha256:3d585582ecef1ea7cc9a044da9e97ba602bd6d08138aabbb296ef8d95563ee3b",
+            "sha256:426d293df3e8c83bad1c238fbb8d1abea7144642296cbd6f7430e4c76c2824b5",
+            "sha256:d56e282261a136e5a5aa8e8667accb31626eecf1c59be81e74ad4db848749aea",
+            "sha256:ae1608041f45dd3da5d50c085a5c3a9d39901da8ba19f61f79982e13a9e3b940"
+          ],
+          "compressedLayerBytes": 119962982
+        }
+      },
+      {
+        "component": "judge",
+        "gate": "PASS_RAW_SCAN",
+        "rawExit": 0,
+        "rawCounts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "image": {
+          "manifestDigest": "sha256:950928afeb7bb77f6ab237930af4e7ffd85ae2795782b6a037155fb471bcf602",
+          "configDigest": "sha256:ace8cc6f6a6b2ccb9f96d405b8107be374091a0a64ed432999fb1ebff61a99d2",
+          "indexDigest": "sha256:45478665e99a16db99c7e0a1f54cfdaaa1e36f632244252c0d096a59bd64ae0a",
+          "buildDigest": "sha256:7d7870128e87c85327fe7a669fe235cd99ecc6becd71fea5d607ad59875b15ec",
+          "platform": "linux/amd64",
+          "layerDigests": [
+            "sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17",
+            "sha256:b72829bc75b7701104d057fde78fe0aef6dc0c3eaf2423e7249e8a14c37ead57",
+            "sha256:89a151fddb377af33d0dda6a24f40061bbde4b159f82c349fe01208baba8a84f",
+            "sha256:60ef5f57e09d3f24d91cfd5547a102a028a7bd629f03e79409f53a202cf9df54",
+            "sha256:aae7c25cc34ab5491c6c47d3d7467cb3a99208a2094f7be7e419e57a1cfd7496",
+            "sha256:dd9dfe08ccba18748a82134bd5ab2af2879214658e6d16e4f60b52d380c16f57",
+            "sha256:30629af34ddbe702b3df688a71acb948f2341c7235500fec3c70f662ca22dc75",
+            "sha256:6fad32bdb4eddb41a89a2c35afb434b0dff1a0ecf3c39f04f3fd75491b6f99cb"
+          ],
+          "compressedLayerBytes": 65796870
+        }
+      },
+      {
+        "component": "runtime",
+        "gate": "PASS_WITH_REVIEWED_COMPONENT_FINDINGS",
+        "rawExit": 2,
+        "rawCounts": {
+          "UNKNOWN": 1,
+          "LOW": 363,
+          "MEDIUM": 560,
+          "HIGH": 177,
+          "CRITICAL": 5
+        },
+        "image": {
+          "manifestDigest": "sha256:69bbc89eed8be224d184b2050d373e4fd05a62c2a280fe86306dd371bb89eff1",
+          "configDigest": "sha256:06f5267baf0431c99588473e69ef16f13898651125aa87d979c0dfc4ef14c37f",
+          "indexDigest": "sha256:c519e6dafdfbca1ce05d3935c71c91a2e6597c790408531e0b12b3e44300140a",
+          "buildDigest": "sha256:20bc102da020f954fc83e4e2e9802d72352070d3e5ae9bcad7641b2516bb02eb",
+          "platform": "linux/amd64",
+          "layerDigests": [
+            "sha256:7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+            "sha256:63543ae0e917b1c0474861f765cd39e40dd05df4a744996f754e8ec78cd0b704",
+            "sha256:bd172a69e4995cbc1be0305103fd1ba57e4dae7c0187a2ef88d9ad001645bd38",
+            "sha256:e40025dfac5f83529f91c72efbcc12a55ee3d6372fc4fab1175ab11909e5337e",
+            "sha256:425122196df8fb244a9f04c540889b14740a51df08a514733f2365d0d26a2ab9",
+            "sha256:535fb50ae673dcef3c724d3b2aca4c69d28689cfe881b7cd8f6061d722c64fe6",
+            "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+            "sha256:8891bc23ba82ec227ccf3dc5f340d517cd81c5b094915f5ef3cf5f3a609addf3",
+            "sha256:c9450852bd5a5c710cf644e273a67a48a1e2187c323bf0e9ffd7ce6df49b0220",
+            "sha256:1dc3e9e599a828c254cc29d912e2160438569a18eb39fda04baff9348b5d7421",
+            "sha256:4d22e3c5dd127834d6c6f75bd6d49d98febd7eedb97e8ab7bc86f9613da6cd4e",
+            "sha256:98c103fdb96874a5cc2e63f2f884382bc41c796b29c80873d755ebec2a4e33b8",
+            "sha256:5866ac1c47b91985e5e0fee95a7f30a85647b5a7645a67b8c0f08a8b7aac892e",
+            "sha256:eb88c88fff6cd579e860b9e1503894e594142b256fff3eff7a1c8b22e2f8bb3f"
+          ],
+          "compressedLayerBytes": 574140735
+        }
+      }
+    ],
+    "runtime": {
+      "rawHigh": 177,
+      "rawCritical": 5,
+      "reviewedRecords": 182,
+      "remainingBlocking": 0,
+      "payloadMatchedFiles": 990,
+      "policyContentSha256": "d938665f24995ea53bf0984047459de0aa9ba366dc5ebbe37055f304c68903fb",
+      "activePolicyFileSha256": "81f0bf685f2ffc22cdb0933c2c55f6f5fff05f8f252765c0af8fe56189084603",
+      "expiresAt": "2026-11-30T00:00:00Z",
+      "hostKernelReadiness": "UNVERIFIED",
+      "independentRecalculation": "All182 complete advisory hashes and current image-derived scanner fingerprints recomputed; every one of990 payload file hashes/sizes matches the approved proof. Raw Runtime scan exit2 and177HIGH/5CRITICAL remain visible."
+    }
+  },
+  "frontendCarryForward": {
+    "receipt": "frontend-independent-checks.json",
+    "geometryJson": 24,
+    "pngs": 48,
+    "matrix": "3 engines x4 widths x2 themes",
+    "loadedFonts": 24,
+    "toolbarAndSummaryMaxAbsShiftPx": 0,
+    "horizontalOverflow": false,
+    "editor": {
+      "file": "frontend-2/phase5-editor-observation.json",
+      "status": "PASS",
+      "source": {
+        "checkout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+        "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+        "sourceHead": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+        "base": "d0159b1f844bf0608415dded9e84af566c8e2041",
+        "workflowRunId": "43913852145",
+        "workflowAttempt": "1",
+        "trackedTreeClean": true
+      },
+      "actual": {
+        "heapSamples": 13,
+        "actions": 20,
+        "autosaveWrites": 10,
+        "unexpectedRequests": 0,
+        "pageErrors": 0
+      },
+      "protocolElapsedMs": 40020.498419,
+      "actualObservationMs": 40085.762096000006,
+      "observerCleanupMs": 65.25304000000324,
+      "fieldINP": {
+        "value": null,
+        "reason": "A finite automated laboratory interaction sample is not field INP."
+      },
+      "environment": {
+        "project": "chromium",
+        "browser": "chromium",
+        "browserVersion": "153.0.8010.12",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        }
+      },
+      "eventTimingEntries": 200,
+      "eventTimingReason": null,
+      "eventTimingTruncated": true,
+      "interpretation": "Correctness, counts, privacy and source binding checked here; current raw observations are retained without a field INP, leak or speedup claim."
+    },
+    "editorObservationLimits": {
+      "retainedEventTimingEntries": 200,
+      "discardedEventTimingEntries": 176,
+      "all13UsedHeapEstimatesBytes": 19300000,
+      "fieldINP": null,
+      "interpretation": "These bounded mocked-persistence observations do not establish field INP, leak absence or memory stability."
+    },
+    "physicalVisualInspection": {
+      "reviewer": "/root/independent_qa",
+      "runId": 43913852145,
+      "scope": "Representative original responsive goal PNGs; full matrix separately verified from all24 geometry records and48 binary PNGs.",
+      "visuallyInspected": [
+        {
+          "path": "frontend-1/phase5-ux/chromium-320-dark-ready.png",
+          "sha256": "bac4f4ca41e236710f3eee10dddf3d26727f15dc7667c1e1bccf72d4d5570326"
+        },
+        {
+          "path": "frontend-1/phase5-ux/chromium-320-dark-refreshing.png",
+          "sha256": "56b13caa2770960f9391af5d3fd6885bccd3658913f4edd8f1d44d6946c802d1"
+        },
+        {
+          "path": "frontend-1/phase5-ux/chromium-1440-light-ready.png",
+          "sha256": "aac83f0c308ad14e82c777fed6f56509a2a20fe5ad01e5ba67c012e06f02272a"
+        },
+        {
+          "path": "frontend-2/phase5-ux/webkit-320-light-ready.png",
+          "sha256": "a4a6fa4cc6b521a26befb024069a59f862fbdc6e1d180868bb9fba99f6511274"
+        },
+        {
+          "path": "frontend-2/phase5-ux/webkit-320-light-refreshing.png",
+          "sha256": "ef82f5462193d0a40dd3a9f2dd36c6e82ab3d270c3ed9c80981e3b07ffa3e4fb"
+        },
+        {
+          "path": "frontend-2/phase5-ux/firefox-768-dark-ready.png",
+          "sha256": "58ad42160864e024f19761880a69128fd1e70a720136ee7953917243f7b564d3"
+        },
+        {
+          "path": "frontend-2/phase5-ux/firefox-1440-light-refreshing.png",
+          "sha256": "edba4b744d94301e3d3efbd141b79ff389230f3d8cf2607ae25c1b7b05c7f1d2"
+        }
+      ],
+      "observations": [
+        "Three browser engines, both themes and320/768/1440 viewport samples were personally inspected.",
+        "Narrow layouts wrap Korean text and controls inside the card without visible clipping; wide layouts preserve readable hierarchy.",
+        "Ready/refreshing pairs retain known900/1000 progress, date range and content position while controls become disabled; the refresh label changes deliberately.",
+        "WebKit screenshots use the reviewed DPR2 project; pixel size was normalized against exact CSS geometry before comparison.",
+        "Synthetic goal card captures contain no account credentials or solution source."
+      ],
+      "result": "PASS_REPRESENTATIVE_RESPONSIVE_VISUAL_REVIEW",
+      "source": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+      "checkout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+      "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813"
+    },
+    "testLogReceipt": "browser-log-checks.json"
+  },
+  "multiApiIndependentReview": {
+    "reviewer": "/root/security",
+    "path": "/workspace/scratch/3d1215725852/security-analysis/final-pr92-43913852145/independent-acceptance.json",
+    "sha256": "631c04e5e5954ed9a12a8d2a3c94deb0726e7cf2bbdf7197757e4643f0c0dc2a",
+    "verdict": "ACCEPT_FINAL_PR92_CURRENT_SECURITY_AND_NATIVE_API_VIBE_EVIDENCE",
+    "source": {
+      "checkoutSha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+      "treeSha": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+      "sourceHeadSha": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+      "baseSha": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "runId": "43913852145",
+      "runAttempt": "1",
+      "trackedTreeClean": true
+    },
+    "reviewerReceiptAndOriginalArtifactHashesIndependentlyChecked": true,
+    "eightBoundSourceHashesVerifiedBySecurity": true,
+    "allExecutableSourceCarryForwardRecheckedByQA": true,
+    "apiRequests": [
+      4,
+      4
+    ],
+    "workerJobs": [
+      6,
+      2
+    ],
+    "terminalClaims409": 8,
+    "duplicateResultReplays200": 8,
+    "activeConflicts409": 2,
+    "persistedSubmissions": 8,
+    "solveLedgerRows": 1,
+    "xp": 10,
+    "preSetupSyntheticThrottleResets": 1,
+    "counterResetsDuringProtocol": 0,
+    "quotaRemaining": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "quotaResetSecondsBySubmission": [
+      60,
+      60,
+      60,
+      60,
+      60,
+      60,
+      60,
+      59
+    ],
+    "testFileMs": 13494,
+    "individualTestMs": 13492,
+    "reportBeforeWriteMs": 13488.428723,
+    "cleanup": {
+      "removedOwnedJobs": 8,
+      "ownedProcessesExited": 4,
+      "forcedSigkills": 0,
+      "closedObserverSets": 2,
+      "nativeCacheBeforeAfter": [
+        0,
+        0
+      ]
+    },
+    "scopeLimit": "Finite eight-job same-host observation; no production capacity, saturation or fault-domain claim."
+  },
+  "compose": {
+    "receipt": "compose-independent-checks.json",
+    "independentEvidenceChecks": 43,
+    "assessment": {
+      "publicChecks": 6,
+      "passed": 11,
+      "total": 11,
+      "outcome": 40,
+      "evaluationStatus": "unavailable",
+      "challengeVersion": "2e1df0949b196347b2820c72e2c72749011e8406ef658e45009d01f2c8324e18",
+      "persistedReloadEqual": true,
+      "outsiderDenied": true,
+      "sourceRestoredInReadOnlyEditor": true
+    },
+    "gatewayProbes": {
+      "positive": {
+        "status": 200,
+        "elapsedMs": 34.303405
+      },
+      "noClient": {
+        "status": 400,
+        "elapsedMs": 7.017568999999995
+      },
+      "wrongBearer": {
+        "status": 401,
+        "elapsedMs": 2.2953820000000036
+      },
+      "anonymous": {
+        "status": 401,
+        "elapsedMs": 0.9506039999999985
+      },
+      "wrongHostname": {
+        "errorCode": "ERR_TLS_CERT_ALTNAME_INVALID",
+        "elapsedMs": 6.890045000000001
+      },
+      "disallowed": {
+        "status": 404,
+        "elapsedMs": 1.1171439999999961
+      },
+      "query": {
+        "status": 400,
+        "elapsedMs": 0.7154049999999899
+      },
+      "requests": 7,
+      "perRequestTimeoutMs": 4000
+    },
+    "finalCleanup": true,
+    "templateSha256": "83293d5f157fefc7f5cbf6a408f3cf89cf73fb1eb247083c76bec30d5b37026b",
+    "visualInspection": {
+      "reviewer": "/root/independent_qa",
+      "runId": 43913852145,
+      "source": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+      "checkout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+      "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+      "file": "vibe-browser/phase5-vibe-browser.png",
+      "sha256": "940bf1f426e1667405e80d414a09c651ece1a5f4ca0f960fef206f84a92db4fe",
+      "result": "PASS_ACTUAL_COMPOSE_RESULT_VISUAL_REVIEW",
+      "observations": [
+        "Personally inspected the original final-run PNG. The result panel displays40/40 and11/11 passed functional checks.",
+        "Both process evaluation panels honestly show unavailable scores and explain that the outcome score was preserved.",
+        "The synthetic account label is visible; no password, token, certificate private material or solution source is captured.",
+        "The screenshot and reports describe the finite disposable CI flow; production host/certificate operations and paid provider quality remain outside this acceptance."
+      ]
+    },
+    "performanceSchema": 2,
+    "fieldInp": null,
+    "scope": "Actual disposable browser to API to production-example nginx mutual-TLS gateway to native fixture with persistence/reload/ownership checks; test-only shared native executor, zero paid provider calls, no production host/certificate readiness claim."
+  },
+  "retainedEvidence": {
+    "directory": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145",
+    "originalZipCount": 15,
+    "originalZips": [
+      {
+        "artifactId": 14249785142,
+        "artifactName": "image-audit-judge-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge.zip",
+        "bytes": 14299,
+        "sha256": "6c54d2352e3f3f81564ac14ecf13da22cf45fc256e5681a9ce8beac7ae1eef31"
+      },
+      {
+        "artifactId": 14249346705,
+        "artifactName": "image-audit-front-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/front.zip",
+        "bytes": 28893,
+        "sha256": "716fc53439810005237a9cedb95a04cb16d0bdefdd1c075f83a42d4a740f990e"
+      },
+      {
+        "artifactId": 14248558283,
+        "artifactName": "npm-sbom-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/npm-sbom.zip",
+        "bytes": 100682,
+        "sha256": "34db989e06f30ee5d97d203fb6d4c2c6134ab4def046ac6974c92b211b9ba5ac"
+      },
+      {
+        "artifactId": 14247439904,
+        "artifactName": "image-audit-back-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/back.zip",
+        "bytes": 26965,
+        "sha256": "0cd1278efb96602e19d4e88c669b670715eb68298f530778a340f6340af4db92"
+      },
+      {
+        "artifactId": 14248613692,
+        "artifactName": "phase4-restore-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/restore.zip",
+        "bytes": 2265,
+        "sha256": "15e74add3c7d4f22624ff1a9869a472f2aa7582aafab2743b171a2fa1f0f3af8"
+      },
+      {
+        "artifactId": 14247944044,
+        "artifactName": "phase5-database-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/database-qualification.zip",
+        "bytes": 18074,
+        "sha256": "41b9c26f8a6e68c9a3f551a06f280f4232db099248ccc4a73c19ac7abe576d5d"
+      },
+      {
+        "artifactId": 14247629738,
+        "artifactName": "image-audit-runtime-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/runtime.zip",
+        "bytes": 1086327,
+        "sha256": "d68f31f5282e02d6fdd672e6738a0653fc56ed99fb183f7d8f26d910f3458357"
+      },
+      {
+        "artifactId": 14249057796,
+        "artifactName": "phase5-verdict-matrix-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/native-verdict.zip",
+        "bytes": 5419,
+        "sha256": "5c86a8952e7268a9684b97489a448e6b62a6838193182ec7d869f7a2cd5c96dc"
+      },
+      {
+        "artifactId": 14248993030,
+        "artifactName": "phase5-frontend-1-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/frontend-1.zip",
+        "bytes": 543684,
+        "sha256": "a763d4fba4d19d56ee1ac02c83761c1d7bb38397520275b8b9949b986e578397"
+      },
+      {
+        "artifactId": 14249607210,
+        "artifactName": "phase5-frontend-2-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/frontend-2.zip",
+        "bytes": 2085350,
+        "sha256": "c8b1759609705d77297c938d7a0ea2606058b5673847e95841796c317e5b638d"
+      },
+      {
+        "artifactId": 14249209009,
+        "artifactName": "phase5-vibe-pipeline-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/vibe-pipeline.zip",
+        "bytes": 1422,
+        "sha256": "7f26785edfdea5785bbb4d20fecedaaf87c245577210ef9479fdc45740c347cd"
+      },
+      {
+        "artifactId": 14249198949,
+        "artifactName": "phase5-multi-api-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/multi-api.zip",
+        "bytes": 5315,
+        "sha256": "bf5ea3ba7956f67295f255c132365e677b3a2a4b45e22815f50bc94f9cd59d45"
+      },
+      {
+        "artifactId": 14248979338,
+        "artifactName": "phase2-judge-evidence-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/judge-evidence.zip",
+        "bytes": 29404,
+        "sha256": "baf3e779d420f869bd143ddcb7e68b03cd9abfbdf41f2af25228a3693b91f665"
+      },
+      {
+        "artifactId": 14250501396,
+        "artifactName": "phase5-vibe-browser-70307b3d3c7c9591ee3822e4b5ab903d3527f1b1-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/vibe-browser.zip",
+        "bytes": 56765,
+        "sha256": "70050cbbb0104c4a40f2577abb005ea724f8f806d5af7c66c949f5b314f04cc8"
+      },
+      {
+        "artifactId": 14250011866,
+        "artifactName": "phase3-browser-performance-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/browser-performance.zip",
+        "bytes": 6100,
+        "sha256": "1bbb4f8d8214e2953dbc6b2a03807f2c1ef66cfae7d34e0721f301643a640b66"
+      }
+    ],
+    "decodedJobLogCount": 12,
+    "decodedJobLogs": [
+      {
+        "jobId": 133462613274,
+        "name": "Detect changes",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613274.log",
+        "bytes": 20263,
+        "sha256": "e2fd580d1d98e594e3146d72d41e32a81ed86645e53be1a6d722ac6c2e3e250f"
+      },
+      {
+        "jobId": 133462613610,
+        "name": "Docker image (judge)",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613610.log",
+        "bytes": 125969,
+        "sha256": "66f56402a38a51cec7b0646cd47c6f212212add41848cc989e902e7f544dcdc3"
+      },
+      {
+        "jobId": 133462613893,
+        "name": "Dependency audit",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613893.log",
+        "bytes": 21681,
+        "sha256": "8edd8cb4e197b1bfca938ea2f894a4f129de5e07e20fb7e119dd2256ca9e5c29"
+      },
+      {
+        "jobId": 133462613974,
+        "name": "Docker image (front)",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613974.log",
+        "bytes": 143944,
+        "sha256": "fbc3f4cff2494aacf660feae289ad6c216eb33b7b52d64de44ab8a64cc94fc48"
+      },
+      {
+        "jobId": 133462777373,
+        "name": "Judge worker",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462777373.log",
+        "bytes": 35926,
+        "sha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a"
+      },
+      {
+        "jobId": 133462614697,
+        "name": "Docker image (back)",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462614697.log",
+        "bytes": 130005,
+        "sha256": "b3e7a6a1331d090c08c678f67b2686345dc9d9b62dc56d814c6de37bbb1123bb"
+      },
+      {
+        "jobId": 133462777250,
+        "name": "Backend and API",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462777250.log",
+        "bytes": 132215,
+        "sha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19"
+      },
+      {
+        "jobId": 133462613878,
+        "name": "Docker image (runtime)",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462613878.log",
+        "bytes": 297972,
+        "sha256": "5e2fc350cc2ef704b839f3f6428222e124dd23dfc3b2fc2ba0989f801bca9504"
+      },
+      {
+        "jobId": 133462777344,
+        "name": "Browser tests (1/2)",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462777344.log",
+        "bytes": 185676,
+        "sha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d"
+      },
+      {
+        "jobId": 133462778158,
+        "name": "Browser tests (2/2)",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462778158.log",
+        "bytes": 163970,
+        "sha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68"
+      },
+      {
+        "jobId": 133462777184,
+        "name": "Sandbox, pipeline and Compose",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133462777184.log",
+        "bytes": 335036,
+        "sha256": "c4752e237e9eaf78582484d14fac8a81199e1850a9bc7b136c1eefa59e65324e"
+      },
+      {
+        "jobId": 133474126427,
+        "name": "CI required",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/final-pr92-43913852145/job-133474126427.log",
+        "bytes": 2442,
+        "sha256": "8b68d76ddf549c2aa247c956bd7aa3704221a9f68ca480ad6f860d2e4cd0dc74"
+      }
+    ],
+    "metadataArtifactCount": 20,
+    "dockerBuildRecordMetadataOnly": 5,
+    "verification": "Every original ZIP matches current GitHub API SHA256,size,artifact ID,workflow run and source; safe extraction and individual raw report bindings verified. Each decoded completed log string has its exact UTF8 byte length and SHA256 retained. Five Docker build-record artifacts are metadata-only; complete image scan/payload bundles are retained."
+  },
+  "logRetention": {
+    "path": "/workspace/scratch/3d1215725852/security-analysis/final-pr92-43913852145/log-retention-review.json",
+    "sha256": "fb9aa6f74bb12b5e9bc649701c227925b7e1ba483ab9242861fc9df7beabbbe0",
+    "allowFullDecodedLogs": true,
+    "allowOriginalJudgeEvidenceZip": true,
+    "decodedLogs": 12,
+    "embeddedJudgeLogMembers": 4,
+    "disallowedCredentialPatternsFound": 0,
+    "generatedBrowserCredentialPatternsFound": 0,
+    "unresolvedCandidates": 0,
+    "withheldContent": 0,
+    "scope": "Exact unmodified logs and original Judge ZIP only; four source-defined disposable fixture values are explicitly classified in the separate receipt. No credential-like values were reproduced in chat."
+  },
+  "numericalAddendum": {
+    "reviewer": "/root/database",
+    "derived": {
+      "path": "/workspace/scratch/3d1215725852/report-analysis/derived-final-run-43913852145.json",
+      "sha256": "a43bf4be9fc9391e40d8f87411bec35bc531d221a91a00e5b7d3659125fb9b72"
+    },
+    "markdown": {
+      "path": "/workspace/scratch/3d1215725852/report-analysis/final-run-43913852145-addendum.md",
+      "sha256": "3f14da893e43089db579dd02ac951280baf9dadbe4bb69f3cf47b3cc1227c157"
+    },
+    "originalZipAndFiveRawJsonBindingsRecheckedByQA": true,
+    "scope": "Fresh final-run arithmetic is separate from semantic acceptance and historical PR91 verification. Adverse observations, different hosts, finite samples, coarse heap, truncated EventTiming, positive CLS and null fieldINP remain explicit; no causal speedup/capacity/memory-improvement claim."
+  },
+  "protectedState": {
+    "retrievedAt": "2026-11-16 17:19:41 UTC",
+    "main": "6176015b63a1615cc2269172f246725ef08abab3",
+    "phase5Integration": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+    "phase4Integration": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "pr63": {
+      "number": 63,
+      "state": "open",
+      "draft": false,
+      "merged": false,
+      "head": "3bcba380f92bd2da8973e6c88c00cd14b03be08e",
+      "base": "6176015b63a1615cc2269172f246725ef08abab3",
+      "mergeCommitSha": "7bb0b27e6f7a57bf2ba743dc8a765ac2ac312ecc"
+    },
+    "pr86": {
+      "number": 86,
+      "state": "open",
+      "draft": false,
+      "merged": false,
+      "head": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "base": "3bcba380f92bd2da8973e6c88c00cd14b03be08e",
+      "mergeCommitSha": "906819c36a56f1f8326e6d8743b02a102762138a"
+    },
+    "pr92": {
+      "number": 92,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+      "base": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "mergeCommitSha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1"
+    }
+  },
+  "readiness": {
+    "manualMerge": "READY_FOR_MANUAL_MERGE",
+    "production": "BLOCKED_EXTERNAL_ENVIRONMENT",
+    "finalPrAtReview": "OPEN_DRAFT_UNMERGED",
+    "manualMergeScope": "Current stacked PR92 against the exact Phase IV base. Owner must revalidate live heads/base and required full CI after any retargeting or base/head change. No merge was performed by this reviewer.",
+    "remainingExternalGates": [
+      "Actual production host/kernel readiness",
+      "Production certificate identity, issuance, rotation and revocation operations",
+      "Production backup custody and environment-specific restore/RTO/RPO rehearsal",
+      "Paid provider availability/quality where that capability is enabled"
+    ]
+  },
+  "reviewReceipts": [
+    {
+      "path": "final-metadata.json",
+      "sha256": "83825ffe064f1dd03d324e63e27fafefa8379cd3a1331a84fcbad661534e290f"
+    },
+    {
+      "path": "github-jobs-api.json",
+      "sha256": "a6fdb3130af30ea716a2f5d91978140c81f1a98f36fdd57d8fc3bee7c84ce9b0"
+    },
+    {
+      "path": "protected-heads-final.json",
+      "sha256": "a44a2dd357adb621f567ec84dd9bbaef228784cee5a789537de38dc4b4b55211"
+    },
+    {
+      "path": "immutable-commit-objects.json",
+      "sha256": "61f4f7b48358c2df998df00665b00180b1cf2a2c2506b154e27cf8c79c45398f"
+    },
+    {
+      "path": "source-blob-bindings.json",
+      "sha256": "3b70703e691f9fab7346692bd1b0d7449f464e49692151949e85e41dfb8cdabe"
+    },
+    {
+      "path": "backend-independent-checks.json",
+      "sha256": "f5270788ad2891f51568bd8fe07417b9569c9e1da410d688619b1ae4ab862fd4"
+    },
+    {
+      "path": "image-independent-checks.json",
+      "sha256": "ac9c21168e4e35ae17e25aec030429b1fc9e1f5126c891034a749ce404c9f863"
+    },
+    {
+      "path": "frontend-independent-checks.json",
+      "sha256": "3fa70be7bd8483a93317024aa0c0c73a98c04f4c5f4ce1f153555ebe359a63d6"
+    },
+    {
+      "path": "browser-log-checks.json",
+      "sha256": "bfa5386146f7c728301de1fc9c24f24641f1ee917453dd89f7be0fecdf4c40ae"
+    },
+    {
+      "path": "completed-log-counts.json",
+      "sha256": "b02f83ee6cb2801f59c422f6e7492efa615c5987c9e8da8b84c53d0598947ae7"
+    },
+    {
+      "path": "compose-independent-checks.json",
+      "sha256": "c3de122bde5675271fa792513892125d4ea08d9bdf02fbc987f1c7f7fee39018"
+    },
+    {
+      "path": "final-run-evidence-checks.json",
+      "sha256": "83f09f8481d16f94c2006302bc32b8d70c80030915dba1d2b11c61bfa057174b"
+    },
+    {
+      "path": "visual-inspection-responsive.json",
+      "sha256": "b630b7a8b93cfe500d0e716b160d8b4458794c05ebeac7f2c833aec4727af6aa"
+    },
+    {
+      "path": "visual-inspection-compose.json",
+      "sha256": "0eaf0a12beb1a6a2c19a407489289f32259e00dfb97ffde039c9cf546775bba2"
+    },
+    {
+      "path": "downloaded-artifacts.json",
+      "sha256": "470d3265a3bc864ca3beec4ffefef0408e56b1073b156ef57d5e2673c0e4c616"
+    },
+    {
+      "path": "downloaded-logs.json",
+      "sha256": "f2592fc4f422a879d4865f015c805489a732666554f3e794368b638c6bd3d4fc"
+    },
+    {
+      "path": "check-backend-artifacts.py",
+      "sha256": "018c35c93ad1fb78e764357b1f7006d6421c4d79d74d5c600679f2bd5a7df401"
+    },
+    {
+      "path": "check-image-artifacts.py",
+      "sha256": "58a9b7584c6cd0c925a1db9e96dcfb35fe0046250ac4d27b610037cd85f718e3"
+    },
+    {
+      "path": "check-frontend-artifacts.py",
+      "sha256": "62dbc8da51bb7176174e5b0518686cd3d4bc9ee7651d891156a30de3ecb4ba07"
+    },
+    {
+      "path": "check-compose-artifacts.py",
+      "sha256": "379a4bcef1b0820a1e394322049ef0773322cf4da67969fd1a48bd933ba8594a"
+    },
+    {
+      "path": "check-final-evidence.py",
+      "sha256": "518c3e83bfa6aed4b47e74903f2ec60d471e2c8e685d87f8397e95caaba077e9"
+    },
+    {
+      "path": "/workspace/scratch/3d1215725852/security-analysis/final-pr92-43913852145/independent-acceptance.json",
+      "sha256": "631c04e5e5954ed9a12a8d2a3c94deb0726e7cf2bbdf7197757e4643f0c0dc2a"
+    },
+    {
+      "path": "/workspace/scratch/3d1215725852/security-analysis/final-pr92-43913852145/log-retention-review.json",
+      "sha256": "fb9aa6f74bb12b5e9bc649701c227925b7e1ba483ab9242861fc9df7beabbbe0"
+    },
+    {
+      "path": "/workspace/scratch/3d1215725852/report-analysis/derived-final-run-43913852145.json",
+      "sha256": "a43bf4be9fc9391e40d8f87411bec35bc531d221a91a00e5b7d3659125fb9b72"
+    },
+    {
+      "path": "/workspace/scratch/3d1215725852/report-analysis/final-run-43913852145-addendum.md",
+      "sha256": "3f14da893e43089db579dd02ac951280baf9dadbe4bb69f3cf47b3cc1227c157"
+    }
+  ],
+  "qualificationLimits": [
+    "All application execution was on disposable hosted CI fixtures; no production database, host/kernel, certificate operations, restore RTO/RPO or deployment approval is claimed.",
+    "Database seven-workload and multi-API eight-job observations are finite samples; no population tail, sustainable capacity, speedup or causal regression claim.",
+    "Mocked UX/editor invariants are distinct from actual Compose observations. Stable refresh geometry does not imply zero whole-page CLS. Field INP is null; EventTiming is truncated and heap snapshots are coarse.",
+    "Runtime raw177HIGH/5CRITICAL remains visible under exact previously independent-approved component applicability with unchanged expiry2026-11-30T00:00:00Z. Supported installed-library scanning does not establish full bundled JavaScript/arbitrary binary or license coverage.",
+    "Native72 matrix rows are observations within the90 reported tests, not72 additional tests. Java over-heap normalization remains RUNTIME_ERROR where actually observed.",
+    "The final source contains the reviewed report and historical evidence; its post-run finalized report/receipts belong on a separate evidence-only archive so the tested release tree remains unchanged.",
+    "This approval binds only the exact source,tree,merge checkout and current Phase IV base. Future live head/base changes require revalidation; final merge remains the owner's manual action."
+  ],
+  "reviewerActions": {
+    "sourceEdits": false,
+    "authorWorktreeMutations": false,
+    "remoteMutations": false,
+    "newBrowserOrNativeOrDatabaseRuns": 0,
+    "activity": "Read-only immutable metadata/source comparisons, original artifact/log retrieval, offline byte/hash/report verification, representative original PNG inspection and owned scratch review receipts."
+  },
+  "harnessCorrections": [
+    "The normalized jobs tool omits started_at/completed_at. The review checker initially expected those fields; it was corrected to retrieve and bind raw all-attempt GitHub jobs metadata, verifying all12 actual start/completion times and attempt1 without changing the stable final metadata or any product gate.",
+    "The multi-API test-file total13,494ms and individual test13,492ms were separated after reading adjacent log lines. Both are distinct from the report's13,488.428723ms pre-write interval. The final receipt uses the corrected labels; original log/report bytes are unchanged."
+  ]
+}

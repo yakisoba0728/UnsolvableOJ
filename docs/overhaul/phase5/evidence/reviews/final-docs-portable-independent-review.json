@@ -1,0 +1,36 @@
+{
+  "reviewer": "/root/independent_qa",
+  "observedAt": "2026-11-16T16:56:31.454158+00:00",
+  "scope": "Retained evidence verifier only; no application tests or measurements rerun. Exact final docs commit binding follows separately.",
+  "scriptSha256": "37382c645078a6fdc88fe80b755b3e8b20d76022c5d5a63c7fafc0c4bafda936",
+  "companionSha256": "d5cefc3105a543a942a2ca5a5aceb74883542f6cc31e360102da36e6991f39c0",
+  "sourceDataSha256": "faec7207ad34587187b29d23caba2d64f7f9ced0bd2be1e9897e3f9ba3625d1c",
+  "isolatedExecution": {
+    "executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "flags": [
+      "-I"
+    ],
+    "workingDirectory": "/tmp",
+    "PATH": "",
+    "networkOrGitImports": false,
+    "sourceSnapshotFiles": 57,
+    "inputFilesUnchanged": true,
+    "bytecodeCreated": false,
+    "exit": 0,
+    "checks": 10875
+  },
+  "negativeControl": {
+    "scope": "Only owned relocated copy; original root evidence untouched.",
+    "change": "Increase derived PR91 first-read p95 by1ms without touching the raw report.",
+    "originalValue": 2.7835509999999886,
+    "changedValue": 3.7835509999999886,
+    "exit": 1,
+    "failure": {
+      "allChecks": "FAIL",
+      "checksCompleted": 6881,
+      "reason": "composed PR91 derived data.database.readSamples[0].queryLatencyMs.p95"
+    },
+    "copyRestoredExactly": true
+  },
+  "harnessNote": "The first copied layout included an existing author-side __pycache__ directory. Removed only that copied cache, reran in the clean owned relocation, and proved every input file hash and file count unchanged. Current verifier made no evidence writes."
+}

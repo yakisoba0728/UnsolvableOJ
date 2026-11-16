@@ -1,0 +1,567 @@
+{
+  "reviewer": "/root/security",
+  "observedAt": "2026-11-16T17:14:38.235099+00:00",
+  "reviewed": [
+    {
+      "jobId": 133462777373,
+      "logSha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a",
+      "line": 230,
+      "valueSha256": "ec72b9566a9c3501838ae30aeeadb527f0b7545902376fe63b7f9739a8ee4acd",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777373,
+      "logSha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a",
+      "line": 231,
+      "valueSha256": "ec72b9566a9c3501838ae30aeeadb527f0b7545902376fe63b7f9739a8ee4acd",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777373,
+      "logSha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a",
+      "line": 232,
+      "valueSha256": "ec72b9566a9c3501838ae30aeeadb527f0b7545902376fe63b7f9739a8ee4acd",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777373,
+      "logSha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a",
+      "line": 233,
+      "valueSha256": "ec72b9566a9c3501838ae30aeeadb527f0b7545902376fe63b7f9739a8ee4acd",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777373,
+      "logSha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a",
+      "line": 234,
+      "valueSha256": "68a6a8eeb9f75f868f211232bc5e59a108812e5ab463382d6c782f4777e2ed12",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777373,
+      "logSha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a",
+      "line": 325,
+      "valueSha256": "c1481e2eb555ca92ca5a8c8683c0b974c33935ccc83ca48e24b3b9a4b16f156e",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777373,
+      "logSha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a",
+      "line": 339,
+      "valueSha256": "3631e32000f7691d00a2a12ce37b5127155ddac7a3446c36b774e1f36d84e9aa",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777373,
+      "logSha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a",
+      "line": 340,
+      "valueSha256": "003fbba33610fda9578b41886ad5e8b6ff42c2ab31667400dc6606e57f387c1c",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777373,
+      "logSha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a",
+      "line": 341,
+      "valueSha256": "b7c43e8542304307355a39c444af5e1c063fa30c51e0794f66da822021a9675a",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777373,
+      "logSha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a",
+      "line": 346,
+      "valueSha256": "9a43b6dac466089780a2087bab24e7d30bbf56313b2f1b93ab455204696cfd96",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777373,
+      "logSha256": "ee4f34c58eddcb7f937ab6abf0269f9169f389fc392b6ab95178bb943268cd0a",
+      "line": 347,
+      "valueSha256": "75857a45899985be4c4d941e90b6b396d6c92a4c7437aaf0bf102089fe21379d",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777250,
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "line": 363,
+      "valueSha256": "41cf6794ba4200b839c53531555f0f3998df4cbb01a4d5cb0b94e3ca5e23947d",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777250,
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "line": 364,
+      "valueSha256": "41cf6794ba4200b839c53531555f0f3998df4cbb01a4d5cb0b94e3ca5e23947d",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777250,
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "line": 365,
+      "valueSha256": "41cf6794ba4200b839c53531555f0f3998df4cbb01a4d5cb0b94e3ca5e23947d",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777250,
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "line": 366,
+      "valueSha256": "41cf6794ba4200b839c53531555f0f3998df4cbb01a4d5cb0b94e3ca5e23947d",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777250,
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "line": 383,
+      "valueSha256": "ede4bb99d8a275b3d28abe4582afbe0b4a4337dfe69a4c035ceaeeb165037923",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777250,
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "line": 384,
+      "valueSha256": "5acbfff1b086e0f920c5857527976199018afe0cbf16e28d42c7eb9c683508e5",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777250,
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "line": 401,
+      "valueSha256": "903c1cf2a1088b0459ff8a311d01647cc743c174688f2e00d350d6d95403c34e",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777250,
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "line": 403,
+      "valueSha256": "89445ea08b55421faa49919a5fd272e9a520f701b479d6084847e161ca5b7711",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777250,
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "line": 437,
+      "valueSha256": "07fc2c9fbf70e970efcf1af2aec38dcc4dd4b4430fe8f754775de410cea0bcc3",
+      "pattern": "authorization",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777250,
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "line": 520,
+      "valueSha256": "b9d90628453938c578c7f826de5e5bd2bcac29e10c5526888384ba74fcea563e",
+      "pattern": "authorization",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777250,
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "line": 521,
+      "valueSha256": "7175517a370b5cd2e664e3fd29c4ea9db5ce17058eb9772fe090a5485e49dad6",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777250,
+      "logSha256": "0a12f9afd0f959caf5ec2ca646f697084e41024dbd23c4d0624a690638309b19",
+      "line": 663,
+      "valueSha256": "bb612d263d6024147d34a626776f3b3fa8e1ca279c2af04a9ed3f064f83f669a",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 422,
+      "valueSha256": "6c26c8f601d172e48da56f38bbcc37bfb56f3162dcc3561838183c26a1c3f195",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 571,
+      "valueSha256": "6201111b83a0cb5b0922cb37cc442b9a40e24e3b1ce100a4bb204f4c63fd2ac0",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 572,
+      "valueSha256": "428821350e9691491f616b754cd8315fb86d797ab35d843479e732ef90665324",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 572,
+      "valueSha256": "fa51fd49abf67705d6a35d18218c115ff5633aec1f9ebfdc9d5d4956416f57f6",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 737,
+      "valueSha256": "224610f102890bc0e40c49ffb456bb93d45a6dee88dc9a7bef351fa10d3f8582",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 742,
+      "valueSha256": "224610f102890bc0e40c49ffb456bb93d45a6dee88dc9a7bef351fa10d3f8582",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 752,
+      "valueSha256": "d6cc0a088c07683c65cd266860cab8d94b3a1937b17420d9da30ca299c09fb77",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 832,
+      "valueSha256": "d6cc0a088c07683c65cd266860cab8d94b3a1937b17420d9da30ca299c09fb77",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1027,
+      "valueSha256": "224610f102890bc0e40c49ffb456bb93d45a6dee88dc9a7bef351fa10d3f8582",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1027,
+      "valueSha256": "92660e384bd0e61558d02cd392550301c8ee732dacd9ee16000b34a16229eb24",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1103,
+      "valueSha256": "d6cc0a088c07683c65cd266860cab8d94b3a1937b17420d9da30ca299c09fb77",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1104,
+      "valueSha256": "224610f102890bc0e40c49ffb456bb93d45a6dee88dc9a7bef351fa10d3f8582",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1214,
+      "valueSha256": "6201111b83a0cb5b0922cb37cc442b9a40e24e3b1ce100a4bb204f4c63fd2ac0",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1218,
+      "valueSha256": "582967534d0f909d196b97f9e6921342777aea87b46fa52df165389db1fb8ccf",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1219,
+      "valueSha256": "660c9a33fdfb3401dad923f1680f3c58d7914cabae99e573b68af0c49fd61263",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1223,
+      "valueSha256": "6201111b83a0cb5b0922cb37cc442b9a40e24e3b1ce100a4bb204f4c63fd2ac0",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1226,
+      "valueSha256": "ace0cb3a64400c5d965696fa7bbe531fd3b27a3095aa13ddd98ef0720aa48219",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1235,
+      "valueSha256": "12ea12eace7d655f471ce55e34f89b1b77a3d9d05a445ca82877dd2235beaa51",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1311,
+      "valueSha256": "224610f102890bc0e40c49ffb456bb93d45a6dee88dc9a7bef351fa10d3f8582",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1316,
+      "valueSha256": "224610f102890bc0e40c49ffb456bb93d45a6dee88dc9a7bef351fa10d3f8582",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1330,
+      "valueSha256": "d6cc0a088c07683c65cd266860cab8d94b3a1937b17420d9da30ca299c09fb77",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1367,
+      "valueSha256": "d6cc0a088c07683c65cd266860cab8d94b3a1937b17420d9da30ca299c09fb77",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1402,
+      "valueSha256": "224610f102890bc0e40c49ffb456bb93d45a6dee88dc9a7bef351fa10d3f8582",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1402,
+      "valueSha256": "f1318a979095c0b3a471b746c933f4065b1ba71471b6c0225ebb4ad45b38328b",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462777344,
+      "logSha256": "29fcb931e853f8077ecd53023155245e46ceaba1811ae7e4e6a1d745ff5ca88d",
+      "line": 1416,
+      "valueSha256": "d6cc0a088c07683c65cd266860cab8d94b3a1937b17420d9da30ca299c09fb77",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 465,
+      "valueSha256": "e6ef1856e376fff10d5159f5f6f5a8d35cb7032a3954c32a616ab9b91e7d19d3",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 502,
+      "valueSha256": "05e18439b887337d8f74f0f75c9cd6e68a97ff40af8727f59f3242f9e26a4077",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 503,
+      "valueSha256": "6201111b83a0cb5b0922cb37cc442b9a40e24e3b1ce100a4bb204f4c63fd2ac0",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 506,
+      "valueSha256": "b1d6b91b67c2afa5e322988d9462638d354ddf8a1ef79dba987f815c22b4baee",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 507,
+      "valueSha256": "b1d6b91b67c2afa5e322988d9462638d354ddf8a1ef79dba987f815c22b4baee",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 927,
+      "valueSha256": "224610f102890bc0e40c49ffb456bb93d45a6dee88dc9a7bef351fa10d3f8582",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 932,
+      "valueSha256": "224610f102890bc0e40c49ffb456bb93d45a6dee88dc9a7bef351fa10d3f8582",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 935,
+      "valueSha256": "d6cc0a088c07683c65cd266860cab8d94b3a1937b17420d9da30ca299c09fb77",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 984,
+      "valueSha256": "d6cc0a088c07683c65cd266860cab8d94b3a1937b17420d9da30ca299c09fb77",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1019,
+      "valueSha256": "224610f102890bc0e40c49ffb456bb93d45a6dee88dc9a7bef351fa10d3f8582",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1019,
+      "valueSha256": "5424ae49c19fa7b7ce296adb7f778601a477187892469861e31681e4ae712cf7",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1031,
+      "valueSha256": "d6cc0a088c07683c65cd266860cab8d94b3a1937b17420d9da30ca299c09fb77",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1032,
+      "valueSha256": "224610f102890bc0e40c49ffb456bb93d45a6dee88dc9a7bef351fa10d3f8582",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1090,
+      "valueSha256": "6201111b83a0cb5b0922cb37cc442b9a40e24e3b1ce100a4bb204f4c63fd2ac0",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1091,
+      "valueSha256": "4e1676514be3ffc6731b952bada1e433fa2c4b740173b30a836baef1dcbdf347",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1094,
+      "valueSha256": "b1d6b91b67c2afa5e322988d9462638d354ddf8a1ef79dba987f815c22b4baee",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1095,
+      "valueSha256": "b1d6b91b67c2afa5e322988d9462638d354ddf8a1ef79dba987f815c22b4baee",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1142,
+      "valueSha256": "224610f102890bc0e40c49ffb456bb93d45a6dee88dc9a7bef351fa10d3f8582",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1198,
+      "valueSha256": "69201fbb970303363f12de505728dab391f616f6c9788893cea8af3babc5a325",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1199,
+      "valueSha256": "6201111b83a0cb5b0922cb37cc442b9a40e24e3b1ce100a4bb204f4c63fd2ac0",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1202,
+      "valueSha256": "b1d6b91b67c2afa5e322988d9462638d354ddf8a1ef79dba987f815c22b4baee",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    },
+    {
+      "jobId": 133462778158,
+      "logSha256": "c2c035b6d2f271afe6a48d483ccabcdd38962a31ea24f366d4fbd2e8fe68eb68",
+      "line": 1203,
+      "valueSha256": "b1d6b91b67c2afa5e322988d9462638d354ddf8a1ef79dba987f815c22b4baee",
+      "pattern": "credential-assignment",
+      "classification": "REVIEWED_STATIC_TEST_TITLE_OR_DURATION"
+    }
+  ],
+  "decision": "Matched spans reviewed in complete test-title context: ordinary words or execution duration; no generated credential value."
+}

@@ -1,5 +1,9 @@
 # Phase V risk and evidence ledger
 
+## Post-run final archive update
+
+Final PR92 source `e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5`, tree `a2a2409dfd3e73b82ba7b39c2e41808eba7b5813`, passed all12 actual jobs in run43913852145, attempt1, and independent final source/artifact acceptance. Code disposition is **READY_FOR_MANUAL_MERGE**; PR92 remains OPEN/UNMERGED. Production readiness remains BLOCKED_EXTERNAL_ENVIRONMENT. [The completed report](FINAL-REPORT.md) and [immutable acceptance data](evidence/final-acceptance.json) supersede the final-CI-pending checkpoints preserved below. This archive does not change the tested integration head.
+
 ## Current disposition after feature integration
 
 There are no known P0/P1/P2 blocking defects in the tested feature scope after the independent corrections and accepted runs recorded in [FINAL-REPORT.md](FINAL-REPORT.md). Final source acceptance still requires the final stacked PR's own complete CI and independent receipt. Neither this statement nor the subjective scope estimates certify production readiness.

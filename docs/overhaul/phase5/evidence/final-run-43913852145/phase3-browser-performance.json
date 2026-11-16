@@ -1,0 +1,2989 @@
+{
+  "schemaVersion": 2,
+  "probeVersion": "phase5-layout-attribution-v1",
+  "status": "complete",
+  "startedAt": "2026-11-16T17:17:24.790Z",
+  "completedAt": "2026-11-16T17:17:30.171Z",
+  "checkout": {
+    "sha": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+    "tree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+    "workflowRunId": "43913852145",
+    "workflowAttempt": "1"
+  },
+  "fixture": {
+    "ownership": "created by this disposable Compose test",
+    "publishedPublicProblems": 1,
+    "ordinarySubmissions": 2,
+    "acceptedSubmissions": 1,
+    "wrongAnswerSubmissions": 1,
+    "solvedProblems": 1
+  },
+  "environment": {
+    "browser": "chromium",
+    "browserVersion": "153.0.8010.12",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "node": "v24.22.2",
+    "platform": "linux",
+    "architecture": "x64",
+    "composeMode": "production",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36"
+  },
+  "protocol": {
+    "navigations": 3,
+    "periodsPerNavigation": [
+      7,
+      90,
+      30,
+      7,
+      90
+    ],
+    "initialObservationAfterUiReadyMs": 500,
+    "finalEventDeliveryWaitMs": 100,
+    "maximumRenderFrameWaitMs": 250,
+    "cache": "warm context reused after existing learning visits; no cache clearing",
+    "networkOrCpuThrottling": "none",
+    "maximumEntriesPerTypePerDocument": 1000,
+    "forcedGarbageCollection": false
+  },
+  "definitions": {
+    "lcpCandidate": "Latest browser-reported candidate by the bounded initial snapshot before scripted input; not a full-lifetime or field LCP.",
+    "observedCls": "Maximum session sum of non-recent-input shifts, gap <1s and session <5s, in this top-level document's observation window.",
+    "layoutAttribution": "Up to five browser-exposed sources per shift, fixed region labels and numerical viewport rectangles; source nodes are impacted elements, not proof of the initiating cause. Snapshot geometry includes font-loading status, without DOM text or URLs.",
+    "navigation": "Browser document Navigation Timing relative to timeOrigin, not API server processing time; period switches are same-document updates, not new document navigations.",
+    "periodLatency": "Browser click event timestamp to the second animation frame after fixture-correct new-period DOM; includes API/render work, not an actual paint timestamp or INP.",
+    "eventTiming": "Raw browser Event Timing, requested durationThreshold=16ms; reported durations have 8ms granularity. Faster events may be absent; absence is not zero latency.",
+    "heap": "CDP Runtime.getHeapUsage bytes for the inspected JavaScript isolate, without forced GC; not process RSS or a leak/long-duration stability claim."
+  },
+  "inp": {
+    "value": null,
+    "reason": "Three finite scripted page visits do not establish page-lifetime or field INP. Event Timing samples are retained separately."
+  },
+  "limitations": [
+    "One CI browser/viewport, warm cache, no CPU/network throttling, two-submission fixture.",
+    "Small dependent samples do not establish population p95/p99, device-wide performance or before/after improvement.",
+    "Observers and DOM checks add measurement overhead; late paints/shifts outside each bounded window are not measured.",
+    "Unsupported metrics are null with reasons; functional API/UI assertions remain required without latency pass thresholds."
+  ],
+  "samples": [
+    {
+      "navigation": 1,
+      "api": {
+        "days": 30,
+        "status": 200,
+        "summary": {
+          "submissions": 2,
+          "acceptedSubmissions": 1,
+          "solvedProblems": 1,
+          "attemptedProblems": 1,
+          "activeDays": 1
+        },
+        "activityRows": 30,
+        "reviewRows": 0
+      },
+      "initial": {
+        "timeOrigin": 1794849444822.9,
+        "observedThroughMs": 991.8999999999069,
+        "visibilityState": "visible",
+        "lcpCandidate": {
+          "value": {
+            "startTime": 424,
+            "renderTime": 424,
+            "loadTime": 0,
+            "size": 7410
+          },
+          "reason": null
+        },
+        "observedCls": {
+          "value": 0.048731330235799154,
+          "reason": null
+        },
+        "firstContentfulPaintMs": {
+          "value": 108,
+          "reason": null
+        },
+        "navigation": {
+          "value": {
+            "type": "navigate",
+            "redirectCount": 0,
+            "startTime": 0,
+            "fetchStart": 0.19999999995343387,
+            "requestStart": 1.099999999976717,
+            "responseStart": 1.6999999999534339,
+            "responseEnd": 2.299999999930151,
+            "domInteractive": 19.399999999906868,
+            "domContentLoadedEventEnd": 24.5,
+            "loadEventEnd": 30.699999999953434,
+            "transferSize": 1265,
+            "encodedBodySize": 965,
+            "decodedBodySize": 1915
+          },
+          "reason": null
+        },
+        "observerReasons": {
+          "largest-contentful-paint": null,
+          "layout-shift": null,
+          "event": null
+        },
+        "truncated": {
+          "largest-contentful-paint": false,
+          "layout-shift": false,
+          "event": false
+        },
+        "lcpEntries": [
+          {
+            "startTime": 108,
+            "renderTime": 108,
+            "loadTime": 0,
+            "size": 3306
+          },
+          {
+            "startTime": 396,
+            "renderTime": 396,
+            "loadTime": 0,
+            "size": 6498
+          },
+          {
+            "startTime": 424,
+            "renderTime": 424,
+            "loadTime": 0,
+            "size": 7410
+          }
+        ],
+        "layoutShifts": [
+          {
+            "startTime": 371.89999999990687,
+            "value": 0.04548344612121582,
+            "hadRecentInput": false,
+            "sources": [
+              {
+                "region": ".site-footer",
+                "tag": "footer",
+                "previous": {
+                  "x": 30,
+                  "y": 644,
+                  "width": 1220,
+                  "height": 76
+                },
+                "current": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0
+                }
+              }
+            ],
+            "sourcesTruncated": false
+          },
+          {
+            "startTime": 403.19999999995343,
+            "value": 0.003247884114583333,
+            "hadRecentInput": false,
+            "sources": [
+              {
+                "region": ".learning-toolbar",
+                "tag": "div",
+                "previous": {
+                  "x": 50,
+                  "y": 412.671875,
+                  "width": 1180,
+                  "height": 50
+                },
+                "current": {
+                  "x": 50,
+                  "y": 436.671875,
+                  "width": 1180,
+                  "height": 50
+                }
+              },
+              {
+                "region": ".learning-goal",
+                "tag": "div",
+                "previous": {
+                  "x": 75,
+                  "y": 327.671875,
+                  "width": 1130,
+                  "height": 40
+                },
+                "current": {
+                  "x": 75,
+                  "y": 351.671875,
+                  "width": 1130,
+                  "height": 40
+                }
+              }
+            ],
+            "sourcesTruncated": false
+          }
+        ],
+        "eventTiming": {
+          "value": [],
+          "reason": "No entries met the requested threshold in this window; this does not mean zero interaction latency."
+        },
+        "layout": {
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "document": {
+            "width": 1280,
+            "height": 1759
+          },
+          "fontStatus": "loaded",
+          "regions": [
+            {
+              "region": ".learning-goal",
+              "box": {
+                "x": 50,
+                "y": 208.390625,
+                "width": 1180,
+                "height": 208.28125
+              }
+            },
+            {
+              "region": ".learning-toolbar",
+              "box": {
+                "x": 50,
+                "y": 436.671875,
+                "width": 1180,
+                "height": 50
+              }
+            },
+            {
+              "region": "dl.learning-summary",
+              "box": {
+                "x": 50,
+                "y": 548.765625,
+                "width": 1180,
+                "height": 120
+              }
+            },
+            {
+              "region": ".learning-scope",
+              "box": {
+                "x": 50,
+                "y": 506.671875,
+                "width": 1180,
+                "height": 22.09375
+              }
+            },
+            {
+              "region": ".learning-panel",
+              "box": {
+                "x": 50,
+                "y": 208.390625,
+                "width": 1180,
+                "height": 208.28125
+              }
+            },
+            {
+              "region": ".page-header",
+              "box": {
+                "x": 50,
+                "y": 64,
+                "width": 1180,
+                "height": 124.390625
+              }
+            },
+            {
+              "region": ".site-header",
+              "box": {
+                "x": 0,
+                "y": 0,
+                "width": 1280,
+                "height": 64
+              }
+            },
+            {
+              "region": ".site-footer",
+              "box": {
+                "x": 30,
+                "y": 1683.234375,
+                "width": 1220,
+                "height": 76
+              }
+            }
+          ]
+        }
+      },
+      "heapBefore": {
+        "value": {
+          "usedBytes": 20492748,
+          "allocatedBytes": 39673856,
+          "embedderBytes": 8834432,
+          "backingStorageBytes": 1203873
+        },
+        "reason": null
+      },
+      "periods": [
+        {
+          "api": {
+            "days": 7,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 7,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 7,
+              "clickStartMs": 1023.5999999999767,
+              "verifiedRenderFrameMs": 1075.3999999999069,
+              "clickToVerifiedRenderFrameMs": 51.79999999993015
+            },
+            "reason": null
+          }
+        },
+        {
+          "api": {
+            "days": 90,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 90,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 90,
+              "clickStartMs": 1172.1999999999534,
+              "verifiedRenderFrameMs": 1225.8999999999069,
+              "clickToVerifiedRenderFrameMs": 53.699999999953434
+            },
+            "reason": null
+          }
+        },
+        {
+          "api": {
+            "days": 30,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 30,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 30,
+              "clickStartMs": 1339.8999999999069,
+              "verifiedRenderFrameMs": 1385.5999999999767,
+              "clickToVerifiedRenderFrameMs": 45.70000000006985
+            },
+            "reason": null
+          }
+        },
+        {
+          "api": {
+            "days": 7,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 7,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 7,
+              "clickStartMs": 1455.8999999999069,
+              "verifiedRenderFrameMs": 1504.5999999999767,
+              "clickToVerifiedRenderFrameMs": 48.70000000006985
+            },
+            "reason": null
+          }
+        },
+        {
+          "api": {
+            "days": 90,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 90,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 90,
+              "clickStartMs": 1572.5999999999767,
+              "verifiedRenderFrameMs": 1620.6999999999534,
+              "clickToVerifiedRenderFrameMs": 48.09999999997672
+            },
+            "reason": null
+          }
+        }
+      ],
+      "final": {
+        "timeOrigin": 1794849444822.9,
+        "observedThroughMs": 1824.2999999999302,
+        "visibilityState": "visible",
+        "lcpCandidate": {
+          "value": {
+            "startTime": 424,
+            "renderTime": 424,
+            "loadTime": 0,
+            "size": 7410
+          },
+          "reason": null
+        },
+        "observedCls": {
+          "value": 0.048731330235799154,
+          "reason": null
+        },
+        "firstContentfulPaintMs": {
+          "value": 108,
+          "reason": null
+        },
+        "navigation": {
+          "value": {
+            "type": "navigate",
+            "redirectCount": 0,
+            "startTime": 0,
+            "fetchStart": 0.19999999995343387,
+            "requestStart": 1.099999999976717,
+            "responseStart": 1.6999999999534339,
+            "responseEnd": 2.299999999930151,
+            "domInteractive": 19.399999999906868,
+            "domContentLoadedEventEnd": 24.5,
+            "loadEventEnd": 30.699999999953434,
+            "transferSize": 1265,
+            "encodedBodySize": 965,
+            "decodedBodySize": 1915
+          },
+          "reason": null
+        },
+        "observerReasons": {
+          "largest-contentful-paint": null,
+          "layout-shift": null,
+          "event": null
+        },
+        "truncated": {
+          "largest-contentful-paint": false,
+          "layout-shift": false,
+          "event": false
+        },
+        "lcpEntries": [
+          {
+            "startTime": 108,
+            "renderTime": 108,
+            "loadTime": 0,
+            "size": 3306
+          },
+          {
+            "startTime": 396,
+            "renderTime": 396,
+            "loadTime": 0,
+            "size": 6498
+          },
+          {
+            "startTime": 424,
+            "renderTime": 424,
+            "loadTime": 0,
+            "size": 7410
+          }
+        ],
+        "layoutShifts": [
+          {
+            "startTime": 371.89999999990687,
+            "value": 0.04548344612121582,
+            "hadRecentInput": false,
+            "sources": [
+              {
+                "region": ".site-footer",
+                "tag": "footer",
+                "previous": {
+                  "x": 30,
+                  "y": 644,
+                  "width": 1220,
+                  "height": 76
+                },
+                "current": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0
+                }
+              }
+            ],
+            "sourcesTruncated": false
+          },
+          {
+            "startTime": 403.19999999995343,
+            "value": 0.003247884114583333,
+            "hadRecentInput": false,
+            "sources": [
+              {
+                "region": ".learning-toolbar",
+                "tag": "div",
+                "previous": {
+                  "x": 50,
+                  "y": 412.671875,
+                  "width": 1180,
+                  "height": 50
+                },
+                "current": {
+                  "x": 50,
+                  "y": 436.671875,
+                  "width": 1180,
+                  "height": 50
+                }
+              },
+              {
+                "region": ".learning-goal",
+                "tag": "div",
+                "previous": {
+                  "x": 75,
+                  "y": 327.671875,
+                  "width": 1130,
+                  "height": 40
+                },
+                "current": {
+                  "x": 75,
+                  "y": 351.671875,
+                  "width": 1130,
+                  "height": 40
+                }
+              }
+            ],
+            "sourcesTruncated": false
+          }
+        ],
+        "eventTiming": {
+          "value": [
+            {
+              "name": "pointerout",
+              "startTime": 1172,
+              "duration": 16,
+              "processingStart": 1172.1999999999534,
+              "processingEnd": 1172.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerleave",
+              "startTime": 1172,
+              "duration": 16,
+              "processingStart": 1172.3999999999069,
+              "processingEnd": 1172.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerover",
+              "startTime": 1172,
+              "duration": 16,
+              "processingStart": 1172.3999999999069,
+              "processingEnd": 1172.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1172,
+              "duration": 16,
+              "processingStart": 1172.3999999999069,
+              "processingEnd": 1172.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseout",
+              "startTime": 1172,
+              "duration": 16,
+              "processingStart": 1172.3999999999069,
+              "processingEnd": 1172.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseover",
+              "startTime": 1172,
+              "duration": 16,
+              "processingStart": 1172.3999999999069,
+              "processingEnd": 1172.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerdown",
+              "startTime": 1172.0999999999767,
+              "duration": 16,
+              "processingStart": 1172.5999999999767,
+              "processingEnd": 1172.7999999999302,
+              "interactionId": 3573
+            },
+            {
+              "name": "mousedown",
+              "startTime": 1172.0999999999767,
+              "duration": 16,
+              "processingStart": 1172.7999999999302,
+              "processingEnd": 1172.7999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerup",
+              "startTime": 1172.1999999999534,
+              "duration": 16,
+              "processingStart": 1173,
+              "processingEnd": 1173.0999999999767,
+              "interactionId": 3573
+            },
+            {
+              "name": "mouseup",
+              "startTime": 1172.1999999999534,
+              "duration": 16,
+              "processingStart": 1173.0999999999767,
+              "processingEnd": 1173.1999999999534,
+              "interactionId": 0
+            },
+            {
+              "name": "click",
+              "startTime": 1172.1999999999534,
+              "duration": 16,
+              "processingStart": 1173.1999999999534,
+              "processingEnd": 1174,
+              "interactionId": 3573
+            },
+            {
+              "name": "pointerout",
+              "startTime": 1455.7999999999302,
+              "duration": 16,
+              "processingStart": 1456,
+              "processingEnd": 1456.0999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerleave",
+              "startTime": 1455.7999999999302,
+              "duration": 16,
+              "processingStart": 1456.0999999999767,
+              "processingEnd": 1456.0999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerover",
+              "startTime": 1455.7999999999302,
+              "duration": 16,
+              "processingStart": 1456.0999999999767,
+              "processingEnd": 1456.0999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1455.7999999999302,
+              "duration": 16,
+              "processingStart": 1456.0999999999767,
+              "processingEnd": 1456.0999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseout",
+              "startTime": 1455.7999999999302,
+              "duration": 16,
+              "processingStart": 1456.0999999999767,
+              "processingEnd": 1456.1999999999534,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseover",
+              "startTime": 1455.7999999999302,
+              "duration": 16,
+              "processingStart": 1456.1999999999534,
+              "processingEnd": 1456.1999999999534,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerdown",
+              "startTime": 1455.8999999999069,
+              "duration": 16,
+              "processingStart": 1456.3999999999069,
+              "processingEnd": 1456.5999999999767,
+              "interactionId": 3587
+            },
+            {
+              "name": "mousedown",
+              "startTime": 1455.8999999999069,
+              "duration": 16,
+              "processingStart": 1456.5999999999767,
+              "processingEnd": 1456.5999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerup",
+              "startTime": 1455.8999999999069,
+              "duration": 16,
+              "processingStart": 1456.8999999999069,
+              "processingEnd": 1456.8999999999069,
+              "interactionId": 3587
+            },
+            {
+              "name": "mouseup",
+              "startTime": 1455.8999999999069,
+              "duration": 16,
+              "processingStart": 1456.8999999999069,
+              "processingEnd": 1457,
+              "interactionId": 0
+            },
+            {
+              "name": "click",
+              "startTime": 1455.8999999999069,
+              "duration": 16,
+              "processingStart": 1457,
+              "processingEnd": 1457.5999999999767,
+              "interactionId": 3587
+            },
+            {
+              "name": "pointerout",
+              "startTime": 1572.3999999999069,
+              "duration": 16,
+              "processingStart": 1572.5999999999767,
+              "processingEnd": 1572.6999999999534,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerleave",
+              "startTime": 1572.3999999999069,
+              "duration": 16,
+              "processingStart": 1572.6999999999534,
+              "processingEnd": 1572.6999999999534,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerover",
+              "startTime": 1572.3999999999069,
+              "duration": 16,
+              "processingStart": 1572.6999999999534,
+              "processingEnd": 1572.7999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1572.3999999999069,
+              "duration": 16,
+              "processingStart": 1572.7999999999302,
+              "processingEnd": 1572.7999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseout",
+              "startTime": 1572.3999999999069,
+              "duration": 16,
+              "processingStart": 1572.7999999999302,
+              "processingEnd": 1572.7999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseover",
+              "startTime": 1572.3999999999069,
+              "duration": 16,
+              "processingStart": 1572.7999999999302,
+              "processingEnd": 1572.7999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerdown",
+              "startTime": 1572.5,
+              "duration": 16,
+              "processingStart": 1572.8999999999069,
+              "processingEnd": 1573.0999999999767,
+              "interactionId": 3594
+            },
+            {
+              "name": "mousedown",
+              "startTime": 1572.5,
+              "duration": 16,
+              "processingStart": 1573.0999999999767,
+              "processingEnd": 1573.0999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerup",
+              "startTime": 1572.5999999999767,
+              "duration": 16,
+              "processingStart": 1573.3999999999069,
+              "processingEnd": 1573.3999999999069,
+              "interactionId": 3594
+            },
+            {
+              "name": "mouseup",
+              "startTime": 1572.5999999999767,
+              "duration": 16,
+              "processingStart": 1573.3999999999069,
+              "processingEnd": 1573.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "click",
+              "startTime": 1572.5999999999767,
+              "duration": 16,
+              "processingStart": 1573.3999999999069,
+              "processingEnd": 1574.0999999999767,
+              "interactionId": 3594
+            }
+          ],
+          "reason": null
+        },
+        "layout": {
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "document": {
+            "width": 1280,
+            "height": 1759
+          },
+          "fontStatus": "loaded",
+          "regions": [
+            {
+              "region": ".learning-goal",
+              "box": {
+                "x": 50,
+                "y": 208.390625,
+                "width": 1180,
+                "height": 208.28125
+              }
+            },
+            {
+              "region": ".learning-toolbar",
+              "box": {
+                "x": 50,
+                "y": 436.671875,
+                "width": 1180,
+                "height": 50
+              }
+            },
+            {
+              "region": "dl.learning-summary",
+              "box": {
+                "x": 50,
+                "y": 548.765625,
+                "width": 1180,
+                "height": 120
+              }
+            },
+            {
+              "region": ".learning-scope",
+              "box": {
+                "x": 50,
+                "y": 506.671875,
+                "width": 1180,
+                "height": 22.09375
+              }
+            },
+            {
+              "region": ".learning-panel",
+              "box": {
+                "x": 50,
+                "y": 208.390625,
+                "width": 1180,
+                "height": 208.28125
+              }
+            },
+            {
+              "region": ".page-header",
+              "box": {
+                "x": 50,
+                "y": 64,
+                "width": 1180,
+                "height": 124.390625
+              }
+            },
+            {
+              "region": ".site-header",
+              "box": {
+                "x": 0,
+                "y": 0,
+                "width": 1280,
+                "height": 64
+              }
+            },
+            {
+              "region": ".site-footer",
+              "box": {
+                "x": 30,
+                "y": 1683.234375,
+                "width": 1220,
+                "height": 76
+              }
+            }
+          ]
+        }
+      },
+      "heapAfter": {
+        "value": {
+          "usedBytes": 16983728,
+          "allocatedBytes": 41508864,
+          "embedderBytes": 6663816,
+          "backingStorageBytes": 1168140
+        },
+        "reason": null
+      }
+    },
+    {
+      "navigation": 2,
+      "api": {
+        "days": 30,
+        "status": 200,
+        "summary": {
+          "submissions": 2,
+          "acceptedSubmissions": 1,
+          "solvedProblems": 1,
+          "attemptedProblems": 1,
+          "activeDays": 1
+        },
+        "activityRows": 30,
+        "reviewRows": 0
+      },
+      "initial": {
+        "timeOrigin": 1794849446661.5,
+        "observedThroughMs": 960,
+        "visibilityState": "visible",
+        "lcpCandidate": {
+          "value": {
+            "startTime": 396,
+            "renderTime": 396,
+            "loadTime": 0,
+            "size": 7410
+          },
+          "reason": null
+        },
+        "observedCls": {
+          "value": 0.048731330235799154,
+          "reason": null
+        },
+        "firstContentfulPaintMs": {
+          "value": 88,
+          "reason": null
+        },
+        "navigation": {
+          "value": {
+            "type": "navigate",
+            "redirectCount": 0,
+            "startTime": 0,
+            "fetchStart": 0.19999999995343387,
+            "requestStart": 1,
+            "responseStart": 1.5,
+            "responseEnd": 2.099999999976717,
+            "domInteractive": 13.5,
+            "domContentLoadedEventEnd": 20.79999999993015,
+            "loadEventEnd": 20.899999999906868,
+            "transferSize": 300,
+            "encodedBodySize": 965,
+            "decodedBodySize": 1915
+          },
+          "reason": null
+        },
+        "observerReasons": {
+          "largest-contentful-paint": null,
+          "layout-shift": null,
+          "event": null
+        },
+        "truncated": {
+          "largest-contentful-paint": false,
+          "layout-shift": false,
+          "event": false
+        },
+        "lcpEntries": [
+          {
+            "startTime": 88,
+            "renderTime": 88,
+            "loadTime": 0,
+            "size": 3306
+          },
+          {
+            "startTime": 384,
+            "renderTime": 384,
+            "loadTime": 0,
+            "size": 6498
+          },
+          {
+            "startTime": 396,
+            "renderTime": 396,
+            "loadTime": 0,
+            "size": 7410
+          }
+        ],
+        "layoutShifts": [
+          {
+            "startTime": 359.5,
+            "value": 0.04548344612121582,
+            "hadRecentInput": false,
+            "sources": [
+              {
+                "region": ".site-footer",
+                "tag": "footer",
+                "previous": {
+                  "x": 30,
+                  "y": 644,
+                  "width": 1220,
+                  "height": 76
+                },
+                "current": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0
+                }
+              }
+            ],
+            "sourcesTruncated": false
+          },
+          {
+            "startTime": 374.19999999995343,
+            "value": 0.003247884114583333,
+            "hadRecentInput": false,
+            "sources": [
+              {
+                "region": ".learning-toolbar",
+                "tag": "div",
+                "previous": {
+                  "x": 50,
+                  "y": 412.671875,
+                  "width": 1180,
+                  "height": 50
+                },
+                "current": {
+                  "x": 50,
+                  "y": 436.671875,
+                  "width": 1180,
+                  "height": 50
+                }
+              },
+              {
+                "region": ".learning-goal",
+                "tag": "div",
+                "previous": {
+                  "x": 75,
+                  "y": 327.671875,
+                  "width": 1130,
+                  "height": 40
+                },
+                "current": {
+                  "x": 75,
+                  "y": 351.671875,
+                  "width": 1130,
+                  "height": 40
+                }
+              }
+            ],
+            "sourcesTruncated": false
+          }
+        ],
+        "eventTiming": {
+          "value": [],
+          "reason": "No entries met the requested threshold in this window; this does not mean zero interaction latency."
+        },
+        "layout": {
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "document": {
+            "width": 1280,
+            "height": 1759
+          },
+          "fontStatus": "loaded",
+          "regions": [
+            {
+              "region": ".learning-goal",
+              "box": {
+                "x": 50,
+                "y": 208.390625,
+                "width": 1180,
+                "height": 208.28125
+              }
+            },
+            {
+              "region": ".learning-toolbar",
+              "box": {
+                "x": 50,
+                "y": 436.671875,
+                "width": 1180,
+                "height": 50
+              }
+            },
+            {
+              "region": "dl.learning-summary",
+              "box": {
+                "x": 50,
+                "y": 548.765625,
+                "width": 1180,
+                "height": 120
+              }
+            },
+            {
+              "region": ".learning-scope",
+              "box": {
+                "x": 50,
+                "y": 506.671875,
+                "width": 1180,
+                "height": 22.09375
+              }
+            },
+            {
+              "region": ".learning-panel",
+              "box": {
+                "x": 50,
+                "y": 208.390625,
+                "width": 1180,
+                "height": 208.28125
+              }
+            },
+            {
+              "region": ".page-header",
+              "box": {
+                "x": 50,
+                "y": 64,
+                "width": 1180,
+                "height": 124.390625
+              }
+            },
+            {
+              "region": ".site-header",
+              "box": {
+                "x": 0,
+                "y": 0,
+                "width": 1280,
+                "height": 64
+              }
+            },
+            {
+              "region": ".site-footer",
+              "box": {
+                "x": 30,
+                "y": 1683.234375,
+                "width": 1220,
+                "height": 76
+              }
+            }
+          ]
+        }
+      },
+      "heapBefore": {
+        "value": {
+          "usedBytes": 24507056,
+          "allocatedBytes": 42094592,
+          "embedderBytes": 11242344,
+          "backingStorageBytes": 1171679
+        },
+        "reason": null
+      },
+      "periods": [
+        {
+          "api": {
+            "days": 7,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 7,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 7,
+              "clickStartMs": 983.8999999999069,
+              "verifiedRenderFrameMs": 1030.8999999999069,
+              "clickToVerifiedRenderFrameMs": 47
+            },
+            "reason": null
+          }
+        },
+        {
+          "api": {
+            "days": 90,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 90,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 90,
+              "clickStartMs": 1100.5,
+              "verifiedRenderFrameMs": 1147,
+              "clickToVerifiedRenderFrameMs": 46.5
+            },
+            "reason": null
+          }
+        },
+        {
+          "api": {
+            "days": 30,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 30,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 30,
+              "clickStartMs": 1252,
+              "verifiedRenderFrameMs": 1296.8999999999069,
+              "clickToVerifiedRenderFrameMs": 44.89999999990687
+            },
+            "reason": null
+          }
+        },
+        {
+          "api": {
+            "days": 7,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 7,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 7,
+              "clickStartMs": 1367.0999999999767,
+              "verifiedRenderFrameMs": 1413.0999999999767,
+              "clickToVerifiedRenderFrameMs": 46
+            },
+            "reason": null
+          }
+        },
+        {
+          "api": {
+            "days": 90,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 90,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 90,
+              "clickStartMs": 1483.1999999999534,
+              "verifiedRenderFrameMs": 1531.6999999999534,
+              "clickToVerifiedRenderFrameMs": 48.5
+            },
+            "reason": null
+          }
+        }
+      ],
+      "final": {
+        "timeOrigin": 1794849446661.5,
+        "observedThroughMs": 1718,
+        "visibilityState": "visible",
+        "lcpCandidate": {
+          "value": {
+            "startTime": 396,
+            "renderTime": 396,
+            "loadTime": 0,
+            "size": 7410
+          },
+          "reason": null
+        },
+        "observedCls": {
+          "value": 0.048731330235799154,
+          "reason": null
+        },
+        "firstContentfulPaintMs": {
+          "value": 88,
+          "reason": null
+        },
+        "navigation": {
+          "value": {
+            "type": "navigate",
+            "redirectCount": 0,
+            "startTime": 0,
+            "fetchStart": 0.19999999995343387,
+            "requestStart": 1,
+            "responseStart": 1.5,
+            "responseEnd": 2.099999999976717,
+            "domInteractive": 13.5,
+            "domContentLoadedEventEnd": 20.79999999993015,
+            "loadEventEnd": 20.899999999906868,
+            "transferSize": 300,
+            "encodedBodySize": 965,
+            "decodedBodySize": 1915
+          },
+          "reason": null
+        },
+        "observerReasons": {
+          "largest-contentful-paint": null,
+          "layout-shift": null,
+          "event": null
+        },
+        "truncated": {
+          "largest-contentful-paint": false,
+          "layout-shift": false,
+          "event": false
+        },
+        "lcpEntries": [
+          {
+            "startTime": 88,
+            "renderTime": 88,
+            "loadTime": 0,
+            "size": 3306
+          },
+          {
+            "startTime": 384,
+            "renderTime": 384,
+            "loadTime": 0,
+            "size": 6498
+          },
+          {
+            "startTime": 396,
+            "renderTime": 396,
+            "loadTime": 0,
+            "size": 7410
+          }
+        ],
+        "layoutShifts": [
+          {
+            "startTime": 359.5,
+            "value": 0.04548344612121582,
+            "hadRecentInput": false,
+            "sources": [
+              {
+                "region": ".site-footer",
+                "tag": "footer",
+                "previous": {
+                  "x": 30,
+                  "y": 644,
+                  "width": 1220,
+                  "height": 76
+                },
+                "current": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0
+                }
+              }
+            ],
+            "sourcesTruncated": false
+          },
+          {
+            "startTime": 374.19999999995343,
+            "value": 0.003247884114583333,
+            "hadRecentInput": false,
+            "sources": [
+              {
+                "region": ".learning-toolbar",
+                "tag": "div",
+                "previous": {
+                  "x": 50,
+                  "y": 412.671875,
+                  "width": 1180,
+                  "height": 50
+                },
+                "current": {
+                  "x": 50,
+                  "y": 436.671875,
+                  "width": 1180,
+                  "height": 50
+                }
+              },
+              {
+                "region": ".learning-goal",
+                "tag": "div",
+                "previous": {
+                  "x": 75,
+                  "y": 327.671875,
+                  "width": 1130,
+                  "height": 40
+                },
+                "current": {
+                  "x": 75,
+                  "y": 351.671875,
+                  "width": 1130,
+                  "height": 40
+                }
+              }
+            ],
+            "sourcesTruncated": false
+          }
+        ],
+        "eventTiming": {
+          "value": [
+            {
+              "name": "pointerover",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984,
+              "processingEnd": 984.2999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984.2999999999302,
+              "processingEnd": 984.2999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984.2999999999302,
+              "processingEnd": 984.2999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984.2999999999302,
+              "processingEnd": 984.2999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984.2999999999302,
+              "processingEnd": 984.2999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984.2999999999302,
+              "processingEnd": 984.2999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984.2999999999302,
+              "processingEnd": 984.2999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984.2999999999302,
+              "processingEnd": 984.2999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984.2999999999302,
+              "processingEnd": 984.2999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984.2999999999302,
+              "processingEnd": 984.2999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984.2999999999302,
+              "processingEnd": 984.2999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseover",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984.2999999999302,
+              "processingEnd": 984.5,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerdown",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 984.6999999999534,
+              "processingEnd": 985,
+              "interactionId": 2656
+            },
+            {
+              "name": "mousedown",
+              "startTime": 983.7999999999302,
+              "duration": 16,
+              "processingStart": 985,
+              "processingEnd": 985.0999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerup",
+              "startTime": 983.8999999999069,
+              "duration": 16,
+              "processingStart": 985.1999999999534,
+              "processingEnd": 985.2999999999302,
+              "interactionId": 2656
+            },
+            {
+              "name": "mouseup",
+              "startTime": 983.8999999999069,
+              "duration": 16,
+              "processingStart": 985.2999999999302,
+              "processingEnd": 985.2999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "click",
+              "startTime": 983.8999999999069,
+              "duration": 16,
+              "processingStart": 985.2999999999302,
+              "processingEnd": 986,
+              "interactionId": 2656
+            },
+            {
+              "name": "pointerout",
+              "startTime": 1100.3999999999069,
+              "duration": 16,
+              "processingStart": 1100.5999999999767,
+              "processingEnd": 1100.6999999999534,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerleave",
+              "startTime": 1100.3999999999069,
+              "duration": 16,
+              "processingStart": 1100.6999999999534,
+              "processingEnd": 1100.6999999999534,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerover",
+              "startTime": 1100.3999999999069,
+              "duration": 16,
+              "processingStart": 1100.6999999999534,
+              "processingEnd": 1100.7999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1100.3999999999069,
+              "duration": 16,
+              "processingStart": 1100.7999999999302,
+              "processingEnd": 1100.7999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseout",
+              "startTime": 1100.3999999999069,
+              "duration": 16,
+              "processingStart": 1100.7999999999302,
+              "processingEnd": 1100.7999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseover",
+              "startTime": 1100.3999999999069,
+              "duration": 16,
+              "processingStart": 1100.7999999999302,
+              "processingEnd": 1100.7999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerdown",
+              "startTime": 1100.3999999999069,
+              "duration": 16,
+              "processingStart": 1100.8999999999069,
+              "processingEnd": 1101.1999999999534,
+              "interactionId": 2663
+            },
+            {
+              "name": "mousedown",
+              "startTime": 1100.3999999999069,
+              "duration": 16,
+              "processingStart": 1101.1999999999534,
+              "processingEnd": 1101.1999999999534,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerup",
+              "startTime": 1100.5,
+              "duration": 16,
+              "processingStart": 1101.3999999999069,
+              "processingEnd": 1101.5,
+              "interactionId": 2663
+            },
+            {
+              "name": "mouseup",
+              "startTime": 1100.5,
+              "duration": 16,
+              "processingStart": 1101.5,
+              "processingEnd": 1101.5,
+              "interactionId": 0
+            },
+            {
+              "name": "click",
+              "startTime": 1100.5,
+              "duration": 16,
+              "processingStart": 1101.5,
+              "processingEnd": 1102.1999999999534,
+              "interactionId": 2663
+            },
+            {
+              "name": "pointerout",
+              "startTime": 1367,
+              "duration": 16,
+              "processingStart": 1367.2999999999302,
+              "processingEnd": 1367.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerleave",
+              "startTime": 1367,
+              "duration": 16,
+              "processingStart": 1367.3999999999069,
+              "processingEnd": 1367.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerover",
+              "startTime": 1367,
+              "duration": 16,
+              "processingStart": 1367.3999999999069,
+              "processingEnd": 1367.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1367,
+              "duration": 16,
+              "processingStart": 1367.3999999999069,
+              "processingEnd": 1367.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseout",
+              "startTime": 1367,
+              "duration": 16,
+              "processingStart": 1367.3999999999069,
+              "processingEnd": 1367.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseover",
+              "startTime": 1367,
+              "duration": 16,
+              "processingStart": 1367.3999999999069,
+              "processingEnd": 1367.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerdown",
+              "startTime": 1367.0999999999767,
+              "duration": 16,
+              "processingStart": 1367.5,
+              "processingEnd": 1367.7999999999302,
+              "interactionId": 2677
+            },
+            {
+              "name": "mousedown",
+              "startTime": 1367.0999999999767,
+              "duration": 16,
+              "processingStart": 1367.7999999999302,
+              "processingEnd": 1367.7999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerup",
+              "startTime": 1367.0999999999767,
+              "duration": 16,
+              "processingStart": 1368,
+              "processingEnd": 1368.0999999999767,
+              "interactionId": 2677
+            },
+            {
+              "name": "mouseup",
+              "startTime": 1367.0999999999767,
+              "duration": 16,
+              "processingStart": 1368.0999999999767,
+              "processingEnd": 1368.0999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "click",
+              "startTime": 1367.0999999999767,
+              "duration": 16,
+              "processingStart": 1368.0999999999767,
+              "processingEnd": 1368.6999999999534,
+              "interactionId": 2677
+            },
+            {
+              "name": "pointerout",
+              "startTime": 1483.0999999999767,
+              "duration": 16,
+              "processingStart": 1483.2999999999302,
+              "processingEnd": 1483.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerleave",
+              "startTime": 1483.0999999999767,
+              "duration": 16,
+              "processingStart": 1483.3999999999069,
+              "processingEnd": 1483.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerover",
+              "startTime": 1483.0999999999767,
+              "duration": 16,
+              "processingStart": 1483.3999999999069,
+              "processingEnd": 1483.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1483.0999999999767,
+              "duration": 16,
+              "processingStart": 1483.3999999999069,
+              "processingEnd": 1483.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseout",
+              "startTime": 1483.0999999999767,
+              "duration": 16,
+              "processingStart": 1483.3999999999069,
+              "processingEnd": 1483.3999999999069,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseover",
+              "startTime": 1483.0999999999767,
+              "duration": 16,
+              "processingStart": 1483.3999999999069,
+              "processingEnd": 1483.5,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerdown",
+              "startTime": 1483.0999999999767,
+              "duration": 16,
+              "processingStart": 1483.5999999999767,
+              "processingEnd": 1483.7999999999302,
+              "interactionId": 2684
+            },
+            {
+              "name": "mousedown",
+              "startTime": 1483.0999999999767,
+              "duration": 16,
+              "processingStart": 1483.7999999999302,
+              "processingEnd": 1483.7999999999302,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerup",
+              "startTime": 1483.1999999999534,
+              "duration": 16,
+              "processingStart": 1484.0999999999767,
+              "processingEnd": 1484.0999999999767,
+              "interactionId": 2684
+            },
+            {
+              "name": "mouseup",
+              "startTime": 1483.1999999999534,
+              "duration": 16,
+              "processingStart": 1484.0999999999767,
+              "processingEnd": 1484.0999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "click",
+              "startTime": 1483.1999999999534,
+              "duration": 16,
+              "processingStart": 1484.0999999999767,
+              "processingEnd": 1484.6999999999534,
+              "interactionId": 2684
+            }
+          ],
+          "reason": null
+        },
+        "layout": {
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "document": {
+            "width": 1280,
+            "height": 1759
+          },
+          "fontStatus": "loaded",
+          "regions": [
+            {
+              "region": ".learning-goal",
+              "box": {
+                "x": 50,
+                "y": 208.390625,
+                "width": 1180,
+                "height": 208.28125
+              }
+            },
+            {
+              "region": ".learning-toolbar",
+              "box": {
+                "x": 50,
+                "y": 436.671875,
+                "width": 1180,
+                "height": 50
+              }
+            },
+            {
+              "region": "dl.learning-summary",
+              "box": {
+                "x": 50,
+                "y": 548.765625,
+                "width": 1180,
+                "height": 120
+              }
+            },
+            {
+              "region": ".learning-scope",
+              "box": {
+                "x": 50,
+                "y": 506.671875,
+                "width": 1180,
+                "height": 22.09375
+              }
+            },
+            {
+              "region": ".learning-panel",
+              "box": {
+                "x": 50,
+                "y": 208.390625,
+                "width": 1180,
+                "height": 208.28125
+              }
+            },
+            {
+              "region": ".page-header",
+              "box": {
+                "x": 50,
+                "y": 64,
+                "width": 1180,
+                "height": 124.390625
+              }
+            },
+            {
+              "region": ".site-header",
+              "box": {
+                "x": 0,
+                "y": 0,
+                "width": 1280,
+                "height": 64
+              }
+            },
+            {
+              "region": ".site-footer",
+              "box": {
+                "x": 30,
+                "y": 1683.234375,
+                "width": 1220,
+                "height": 76
+              }
+            }
+          ]
+        }
+      },
+      "heapAfter": {
+        "value": {
+          "usedBytes": 19099868,
+          "allocatedBytes": 46026752,
+          "embedderBytes": 29472608,
+          "backingStorageBytes": 1188335
+        },
+        "reason": null
+      }
+    },
+    {
+      "navigation": 3,
+      "api": {
+        "days": 30,
+        "status": 200,
+        "summary": {
+          "submissions": 2,
+          "acceptedSubmissions": 1,
+          "solvedProblems": 1,
+          "attemptedProblems": 1,
+          "activeDays": 1
+        },
+        "activityRows": 30,
+        "reviewRows": 0
+      },
+      "initial": {
+        "timeOrigin": 1794849448394.2,
+        "observedThroughMs": 977.8000000000466,
+        "visibilityState": "visible",
+        "lcpCandidate": {
+          "value": {
+            "startTime": 396,
+            "renderTime": 396,
+            "loadTime": 0,
+            "size": 7410
+          },
+          "reason": null
+        },
+        "observedCls": {
+          "value": 0.05432499885559082,
+          "reason": null
+        },
+        "firstContentfulPaintMs": {
+          "value": 84,
+          "reason": null
+        },
+        "navigation": {
+          "value": {
+            "type": "navigate",
+            "redirectCount": 0,
+            "startTime": 0,
+            "fetchStart": 0.19999999995343387,
+            "requestStart": 1,
+            "responseStart": 1.400000000023283,
+            "responseEnd": 2,
+            "domInteractive": 13.199999999953434,
+            "domContentLoadedEventEnd": 19.099999999976717,
+            "loadEventEnd": 19.099999999976717,
+            "transferSize": 300,
+            "encodedBodySize": 965,
+            "decodedBodySize": 1915
+          },
+          "reason": null
+        },
+        "observerReasons": {
+          "largest-contentful-paint": null,
+          "layout-shift": null,
+          "event": null
+        },
+        "truncated": {
+          "largest-contentful-paint": false,
+          "layout-shift": false,
+          "event": false
+        },
+        "lcpEntries": [
+          {
+            "startTime": 84,
+            "renderTime": 84,
+            "loadTime": 0,
+            "size": 3306
+          },
+          {
+            "startTime": 384,
+            "renderTime": 384,
+            "loadTime": 0,
+            "size": 6498
+          },
+          {
+            "startTime": 396,
+            "renderTime": 396,
+            "loadTime": 0,
+            "size": 7410
+          }
+        ],
+        "layoutShifts": [
+          {
+            "startTime": 356.4000000000233,
+            "value": 0.04548344612121582,
+            "hadRecentInput": false,
+            "sources": [
+              {
+                "region": ".site-footer",
+                "tag": "footer",
+                "previous": {
+                  "x": 30,
+                  "y": 644,
+                  "width": 1220,
+                  "height": 76
+                },
+                "current": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0
+                }
+              }
+            ],
+            "sourcesTruncated": false
+          },
+          {
+            "startTime": 364.69999999995343,
+            "value": 0.008841552734374999,
+            "hadRecentInput": false,
+            "sources": [
+              {
+                "region": null,
+                "tag": "div",
+                "previous": {
+                  "x": 50,
+                  "y": 482.671875,
+                  "width": 1180,
+                  "height": 237.328125
+                },
+                "current": {
+                  "x": 50,
+                  "y": 506.671875,
+                  "width": 1180,
+                  "height": 213.328125
+                }
+              },
+              {
+                "region": ".learning-toolbar",
+                "tag": "div",
+                "previous": {
+                  "x": 50,
+                  "y": 412.671875,
+                  "width": 1180,
+                  "height": 50
+                },
+                "current": {
+                  "x": 50,
+                  "y": 436.671875,
+                  "width": 1180,
+                  "height": 50
+                }
+              },
+              {
+                "region": ".learning-goal",
+                "tag": "div",
+                "previous": {
+                  "x": 75,
+                  "y": 327.671875,
+                  "width": 1130,
+                  "height": 40
+                },
+                "current": {
+                  "x": 75,
+                  "y": 351.671875,
+                  "width": 1130,
+                  "height": 40
+                }
+              }
+            ],
+            "sourcesTruncated": false
+          }
+        ],
+        "eventTiming": {
+          "value": [],
+          "reason": "No entries met the requested threshold in this window; this does not mean zero interaction latency."
+        },
+        "layout": {
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "document": {
+            "width": 1280,
+            "height": 1759
+          },
+          "fontStatus": "loaded",
+          "regions": [
+            {
+              "region": ".learning-goal",
+              "box": {
+                "x": 50,
+                "y": 208.390625,
+                "width": 1180,
+                "height": 208.28125
+              }
+            },
+            {
+              "region": ".learning-toolbar",
+              "box": {
+                "x": 50,
+                "y": 436.671875,
+                "width": 1180,
+                "height": 50
+              }
+            },
+            {
+              "region": "dl.learning-summary",
+              "box": {
+                "x": 50,
+                "y": 548.765625,
+                "width": 1180,
+                "height": 120
+              }
+            },
+            {
+              "region": ".learning-scope",
+              "box": {
+                "x": 50,
+                "y": 506.671875,
+                "width": 1180,
+                "height": 22.09375
+              }
+            },
+            {
+              "region": ".learning-panel",
+              "box": {
+                "x": 50,
+                "y": 208.390625,
+                "width": 1180,
+                "height": 208.28125
+              }
+            },
+            {
+              "region": ".page-header",
+              "box": {
+                "x": 50,
+                "y": 64,
+                "width": 1180,
+                "height": 124.390625
+              }
+            },
+            {
+              "region": ".site-header",
+              "box": {
+                "x": 0,
+                "y": 0,
+                "width": 1280,
+                "height": 64
+              }
+            },
+            {
+              "region": ".site-footer",
+              "box": {
+                "x": 30,
+                "y": 1683.234375,
+                "width": 1220,
+                "height": 76
+              }
+            }
+          ]
+        }
+      },
+      "heapBefore": {
+        "value": {
+          "usedBytes": 26602904,
+          "allocatedBytes": 47136768,
+          "embedderBytes": 34747096,
+          "backingStorageBytes": 1190843
+        },
+        "reason": null
+      },
+      "periods": [
+        {
+          "api": {
+            "days": 7,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 7,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 7,
+              "clickStartMs": 1017.9000000000233,
+              "verifiedRenderFrameMs": 1065.6999999999534,
+              "clickToVerifiedRenderFrameMs": 47.79999999993015
+            },
+            "reason": null
+          }
+        },
+        {
+          "api": {
+            "days": 90,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 90,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 90,
+              "clickStartMs": 1134.3000000000466,
+              "verifiedRenderFrameMs": 1183.5999999999767,
+              "clickToVerifiedRenderFrameMs": 49.29999999993015
+            },
+            "reason": null
+          }
+        },
+        {
+          "api": {
+            "days": 30,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 30,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 30,
+              "clickStartMs": 1285.9000000000233,
+              "verifiedRenderFrameMs": 1330.4000000000233,
+              "clickToVerifiedRenderFrameMs": 44.5
+            },
+            "reason": null
+          }
+        },
+        {
+          "api": {
+            "days": 7,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 7,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 7,
+              "clickStartMs": 1401.1999999999534,
+              "verifiedRenderFrameMs": 1447,
+              "clickToVerifiedRenderFrameMs": 45.800000000046566
+            },
+            "reason": null
+          }
+        },
+        {
+          "api": {
+            "days": 90,
+            "status": 200,
+            "summary": {
+              "submissions": 2,
+              "acceptedSubmissions": 1,
+              "solvedProblems": 1,
+              "attemptedProblems": 1,
+              "activeDays": 1
+            },
+            "activityRows": 90,
+            "reviewRows": 0
+          },
+          "timing": {
+            "value": {
+              "days": 90,
+              "clickStartMs": 1517.1999999999534,
+              "verifiedRenderFrameMs": 1563.8000000000466,
+              "clickToVerifiedRenderFrameMs": 46.60000000009313
+            },
+            "reason": null
+          }
+        }
+      ],
+      "final": {
+        "timeOrigin": 1794849448394.2,
+        "observedThroughMs": 1768,
+        "visibilityState": "visible",
+        "lcpCandidate": {
+          "value": {
+            "startTime": 396,
+            "renderTime": 396,
+            "loadTime": 0,
+            "size": 7410
+          },
+          "reason": null
+        },
+        "observedCls": {
+          "value": 0.05432499885559082,
+          "reason": null
+        },
+        "firstContentfulPaintMs": {
+          "value": 84,
+          "reason": null
+        },
+        "navigation": {
+          "value": {
+            "type": "navigate",
+            "redirectCount": 0,
+            "startTime": 0,
+            "fetchStart": 0.19999999995343387,
+            "requestStart": 1,
+            "responseStart": 1.400000000023283,
+            "responseEnd": 2,
+            "domInteractive": 13.199999999953434,
+            "domContentLoadedEventEnd": 19.099999999976717,
+            "loadEventEnd": 19.099999999976717,
+            "transferSize": 300,
+            "encodedBodySize": 965,
+            "decodedBodySize": 1915
+          },
+          "reason": null
+        },
+        "observerReasons": {
+          "largest-contentful-paint": null,
+          "layout-shift": null,
+          "event": null
+        },
+        "truncated": {
+          "largest-contentful-paint": false,
+          "layout-shift": false,
+          "event": false
+        },
+        "lcpEntries": [
+          {
+            "startTime": 84,
+            "renderTime": 84,
+            "loadTime": 0,
+            "size": 3306
+          },
+          {
+            "startTime": 384,
+            "renderTime": 384,
+            "loadTime": 0,
+            "size": 6498
+          },
+          {
+            "startTime": 396,
+            "renderTime": 396,
+            "loadTime": 0,
+            "size": 7410
+          }
+        ],
+        "layoutShifts": [
+          {
+            "startTime": 356.4000000000233,
+            "value": 0.04548344612121582,
+            "hadRecentInput": false,
+            "sources": [
+              {
+                "region": ".site-footer",
+                "tag": "footer",
+                "previous": {
+                  "x": 30,
+                  "y": 644,
+                  "width": 1220,
+                  "height": 76
+                },
+                "current": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0
+                }
+              }
+            ],
+            "sourcesTruncated": false
+          },
+          {
+            "startTime": 364.69999999995343,
+            "value": 0.008841552734374999,
+            "hadRecentInput": false,
+            "sources": [
+              {
+                "region": null,
+                "tag": "div",
+                "previous": {
+                  "x": 50,
+                  "y": 482.671875,
+                  "width": 1180,
+                  "height": 237.328125
+                },
+                "current": {
+                  "x": 50,
+                  "y": 506.671875,
+                  "width": 1180,
+                  "height": 213.328125
+                }
+              },
+              {
+                "region": ".learning-toolbar",
+                "tag": "div",
+                "previous": {
+                  "x": 50,
+                  "y": 412.671875,
+                  "width": 1180,
+                  "height": 50
+                },
+                "current": {
+                  "x": 50,
+                  "y": 436.671875,
+                  "width": 1180,
+                  "height": 50
+                }
+              },
+              {
+                "region": ".learning-goal",
+                "tag": "div",
+                "previous": {
+                  "x": 75,
+                  "y": 327.671875,
+                  "width": 1130,
+                  "height": 40
+                },
+                "current": {
+                  "x": 75,
+                  "y": 351.671875,
+                  "width": 1130,
+                  "height": 40
+                }
+              }
+            ],
+            "sourcesTruncated": false
+          }
+        ],
+        "eventTiming": {
+          "value": [
+            {
+              "name": "pointerover",
+              "startTime": 1017.6999999999534,
+              "duration": 16,
+              "processingStart": 1018.5999999999767,
+              "processingEnd": 1018.9000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1017.6999999999534,
+              "duration": 16,
+              "processingStart": 1018.9000000000233,
+              "processingEnd": 1018.9000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1017.6999999999534,
+              "duration": 16,
+              "processingStart": 1018.9000000000233,
+              "processingEnd": 1018.9000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1017.6999999999534,
+              "duration": 16,
+              "processingStart": 1018.9000000000233,
+              "processingEnd": 1018.9000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1017.6999999999534,
+              "duration": 16,
+              "processingStart": 1018.9000000000233,
+              "processingEnd": 1018.9000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1017.6999999999534,
+              "duration": 16,
+              "processingStart": 1018.9000000000233,
+              "processingEnd": 1018.9000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1017.6999999999534,
+              "duration": 16,
+              "processingStart": 1018.9000000000233,
+              "processingEnd": 1018.9000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1017.6999999999534,
+              "duration": 16,
+              "processingStart": 1018.9000000000233,
+              "processingEnd": 1018.9000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1017.6999999999534,
+              "duration": 16,
+              "processingStart": 1018.9000000000233,
+              "processingEnd": 1018.9000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1017.6999999999534,
+              "duration": 16,
+              "processingStart": 1018.9000000000233,
+              "processingEnd": 1018.9000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1017.6999999999534,
+              "duration": 16,
+              "processingStart": 1018.9000000000233,
+              "processingEnd": 1018.9000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseover",
+              "startTime": 1017.6999999999534,
+              "duration": 16,
+              "processingStart": 1018.9000000000233,
+              "processingEnd": 1019,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerdown",
+              "startTime": 1017.9000000000233,
+              "duration": 16,
+              "processingStart": 1019.3000000000466,
+              "processingEnd": 1019.6999999999534,
+              "interactionId": 379
+            },
+            {
+              "name": "mousedown",
+              "startTime": 1017.9000000000233,
+              "duration": 16,
+              "processingStart": 1019.6999999999534,
+              "processingEnd": 1019.6999999999534,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerup",
+              "startTime": 1017.9000000000233,
+              "duration": 16,
+              "processingStart": 1019.9000000000233,
+              "processingEnd": 1020,
+              "interactionId": 379
+            },
+            {
+              "name": "mouseup",
+              "startTime": 1017.9000000000233,
+              "duration": 16,
+              "processingStart": 1020,
+              "processingEnd": 1020,
+              "interactionId": 0
+            },
+            {
+              "name": "click",
+              "startTime": 1017.9000000000233,
+              "duration": 16,
+              "processingStart": 1020,
+              "processingEnd": 1020.9000000000233,
+              "interactionId": 379
+            },
+            {
+              "name": "pointerout",
+              "startTime": 1134.0999999999767,
+              "duration": 16,
+              "processingStart": 1134.4000000000233,
+              "processingEnd": 1134.5,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerleave",
+              "startTime": 1134.0999999999767,
+              "duration": 16,
+              "processingStart": 1134.5,
+              "processingEnd": 1134.5,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerover",
+              "startTime": 1134.0999999999767,
+              "duration": 16,
+              "processingStart": 1134.5,
+              "processingEnd": 1134.5,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1134.0999999999767,
+              "duration": 16,
+              "processingStart": 1134.5,
+              "processingEnd": 1134.5,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseout",
+              "startTime": 1134.0999999999767,
+              "duration": 16,
+              "processingStart": 1134.5,
+              "processingEnd": 1134.5999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseover",
+              "startTime": 1134.0999999999767,
+              "duration": 16,
+              "processingStart": 1134.5999999999767,
+              "processingEnd": 1134.5999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerdown",
+              "startTime": 1134.1999999999534,
+              "duration": 16,
+              "processingStart": 1134.8000000000466,
+              "processingEnd": 1135,
+              "interactionId": 386
+            },
+            {
+              "name": "mousedown",
+              "startTime": 1134.1999999999534,
+              "duration": 16,
+              "processingStart": 1135,
+              "processingEnd": 1135.0999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerup",
+              "startTime": 1134.3000000000466,
+              "duration": 16,
+              "processingStart": 1135.1999999999534,
+              "processingEnd": 1135.3000000000466,
+              "interactionId": 386
+            },
+            {
+              "name": "mouseup",
+              "startTime": 1134.3000000000466,
+              "duration": 16,
+              "processingStart": 1135.3000000000466,
+              "processingEnd": 1135.4000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "click",
+              "startTime": 1134.3000000000466,
+              "duration": 16,
+              "processingStart": 1135.4000000000233,
+              "processingEnd": 1135.9000000000233,
+              "interactionId": 386
+            },
+            {
+              "name": "pointerout",
+              "startTime": 1401.0999999999767,
+              "duration": 16,
+              "processingStart": 1401.3000000000466,
+              "processingEnd": 1401.4000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerleave",
+              "startTime": 1401.0999999999767,
+              "duration": 16,
+              "processingStart": 1401.4000000000233,
+              "processingEnd": 1401.4000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerover",
+              "startTime": 1401.0999999999767,
+              "duration": 16,
+              "processingStart": 1401.4000000000233,
+              "processingEnd": 1401.4000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1401.0999999999767,
+              "duration": 16,
+              "processingStart": 1401.4000000000233,
+              "processingEnd": 1401.4000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseout",
+              "startTime": 1401.0999999999767,
+              "duration": 16,
+              "processingStart": 1401.4000000000233,
+              "processingEnd": 1401.5,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseover",
+              "startTime": 1401.0999999999767,
+              "duration": 16,
+              "processingStart": 1401.5,
+              "processingEnd": 1401.5,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerdown",
+              "startTime": 1401.0999999999767,
+              "duration": 16,
+              "processingStart": 1401.5999999999767,
+              "processingEnd": 1401.8000000000466,
+              "interactionId": 400
+            },
+            {
+              "name": "mousedown",
+              "startTime": 1401.0999999999767,
+              "duration": 16,
+              "processingStart": 1401.8000000000466,
+              "processingEnd": 1401.9000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerup",
+              "startTime": 1401.1999999999534,
+              "duration": 16,
+              "processingStart": 1402.0999999999767,
+              "processingEnd": 1402.1999999999534,
+              "interactionId": 400
+            },
+            {
+              "name": "mouseup",
+              "startTime": 1401.1999999999534,
+              "duration": 16,
+              "processingStart": 1402.1999999999534,
+              "processingEnd": 1402.1999999999534,
+              "interactionId": 0
+            },
+            {
+              "name": "click",
+              "startTime": 1401.1999999999534,
+              "duration": 16,
+              "processingStart": 1402.1999999999534,
+              "processingEnd": 1402.8000000000466,
+              "interactionId": 400
+            },
+            {
+              "name": "pointerout",
+              "startTime": 1517.0999999999767,
+              "duration": 16,
+              "processingStart": 1517.1999999999534,
+              "processingEnd": 1517.3000000000466,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerleave",
+              "startTime": 1517.0999999999767,
+              "duration": 16,
+              "processingStart": 1517.3000000000466,
+              "processingEnd": 1517.3000000000466,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerover",
+              "startTime": 1517.0999999999767,
+              "duration": 16,
+              "processingStart": 1517.3000000000466,
+              "processingEnd": 1517.4000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerenter",
+              "startTime": 1517.0999999999767,
+              "duration": 16,
+              "processingStart": 1517.4000000000233,
+              "processingEnd": 1517.4000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseout",
+              "startTime": 1517.0999999999767,
+              "duration": 16,
+              "processingStart": 1517.4000000000233,
+              "processingEnd": 1517.4000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "mouseover",
+              "startTime": 1517.0999999999767,
+              "duration": 16,
+              "processingStart": 1517.4000000000233,
+              "processingEnd": 1517.4000000000233,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerdown",
+              "startTime": 1517.0999999999767,
+              "duration": 16,
+              "processingStart": 1517.5999999999767,
+              "processingEnd": 1517.8000000000466,
+              "interactionId": 407
+            },
+            {
+              "name": "mousedown",
+              "startTime": 1517.0999999999767,
+              "duration": 16,
+              "processingStart": 1517.8000000000466,
+              "processingEnd": 1517.8000000000466,
+              "interactionId": 0
+            },
+            {
+              "name": "pointerup",
+              "startTime": 1517.1999999999534,
+              "duration": 16,
+              "processingStart": 1518,
+              "processingEnd": 1518,
+              "interactionId": 407
+            },
+            {
+              "name": "mouseup",
+              "startTime": 1517.1999999999534,
+              "duration": 16,
+              "processingStart": 1518.0999999999767,
+              "processingEnd": 1518.0999999999767,
+              "interactionId": 0
+            },
+            {
+              "name": "click",
+              "startTime": 1517.1999999999534,
+              "duration": 16,
+              "processingStart": 1518.0999999999767,
+              "processingEnd": 1518.6999999999534,
+              "interactionId": 407
+            }
+          ],
+          "reason": null
+        },
+        "layout": {
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "document": {
+            "width": 1280,
+            "height": 1759
+          },
+          "fontStatus": "loaded",
+          "regions": [
+            {
+              "region": ".learning-goal",
+              "box": {
+                "x": 50,
+                "y": 208.390625,
+                "width": 1180,
+                "height": 208.28125
+              }
+            },
+            {
+              "region": ".learning-toolbar",
+              "box": {
+                "x": 50,
+                "y": 436.671875,
+                "width": 1180,
+                "height": 50
+              }
+            },
+            {
+              "region": "dl.learning-summary",
+              "box": {
+                "x": 50,
+                "y": 548.765625,
+                "width": 1180,
+                "height": 120
+              }
+            },
+            {
+              "region": ".learning-scope",
+              "box": {
+                "x": 50,
+                "y": 506.671875,
+                "width": 1180,
+                "height": 22.09375
+              }
+            },
+            {
+              "region": ".learning-panel",
+              "box": {
+                "x": 50,
+                "y": 208.390625,
+                "width": 1180,
+                "height": 208.28125
+              }
+            },
+            {
+              "region": ".page-header",
+              "box": {
+                "x": 50,
+                "y": 64,
+                "width": 1180,
+                "height": 124.390625
+              }
+            },
+            {
+              "region": ".site-header",
+              "box": {
+                "x": 0,
+                "y": 0,
+                "width": 1280,
+                "height": 64
+              }
+            },
+            {
+              "region": ".site-footer",
+              "box": {
+                "x": 30,
+                "y": 1683.234375,
+                "width": 1220,
+                "height": 76
+              }
+            }
+          ]
+        }
+      },
+      "heapAfter": {
+        "value": {
+          "usedBytes": 21299612,
+          "allocatedBytes": 49233920,
+          "embedderBytes": 9028952,
+          "backingStorageBytes": 1168514
+        },
+        "reason": null
+      }
+    }
+  ]
+}
