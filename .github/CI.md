@@ -1,10 +1,10 @@
 # CI 운영
 
-`main` 대상 PR과 `main` push는 빠른 기본 검사를 실행합니다. 검사는 여러 작업으로 나뉘어 GitHub 제공 `ubuntu-24.04` 러너에서 동시에 돌고(Node 24와 npm 캐시 사용), 마지막 `CI required` 작업이 결과를 모읍니다. 필요한 작업이 하나라도 실패·취소되면 `CI required`가 실패하고, 건너뛴 작업은 통과로 봅니다. 같은 PR·수동 실행의 이전 실행은 취소하지만, `main` push는 커밋마다 결과가 남도록 취소하지 않습니다. 수동·야간 전체 검사는 PR 검사와 서로 취소하지 않습니다.
+`main` 및 `overhaul/integration` 대상 PR과 `main` push는 빠른 기본 검사를 실행합니다. 검사는 여러 작업으로 나뉘어 GitHub 제공 `ubuntu-24.04` 러너에서 동시에 돌고(Node 24와 npm 캐시 사용), 마지막 `CI required` 작업이 결과를 모읍니다. 필요한 작업이 하나라도 실패·취소되면 `CI required`가 실패하고, 건너뛴 작업은 통과로 봅니다. 같은 PR·수동 실행의 이전 실행은 취소하지만, `main` push는 커밋마다 결과가 남도록 취소하지 않습니다. 수동·야간 전체 검사는 PR 검사와 서로 취소하지 않습니다.
 
-모든 실행에는 별도 작업 `Dependency audit`도 함께 돌아갑니다. Back·Front·Judge 각각 `npm audit --omit=dev --audit-level=high`로 운영 의존성의 high/critical 취약점만 실패로 처리하고 low/moderate는 로그로만 남깁니다. lockfile만 읽으므로 의존성을 설치하지 않습니다. 새 권고가 공개되면 코드 변경 없이도 실패할 수 있으며 `CI required`와는 별개입니다. 보호 규칙에 넣을지는 별도로 결정하세요.
+모든 실행에는 별도 작업 `Dependency audit`도 함께 돌아갑니다. Back·Front·Judge 각각 `npm audit --omit=dev --audit-level=high`로 운영 의존성의 high/critical 취약점만 실패로 처리하고 low/moderate는 로그로만 남깁니다. lockfile만 읽으므로 의존성을 설치하지 않습니다. 새 권고가 공개되면 코드 변경 없이도 실패할 수 있으며 실패는 `CI required`에도 반영됩니다.
 
-`Docker image (back|front|judge|runtime)` 작업은 운영 Dockerfile(`Back`, `Front`, `Judge`, `Judge/runtime`)을 빌드만 합니다. 이미지를 레지스트리에 올리거나 러너에 내보내지 않고 BuildKit 레이어를 GitHub Actions 캐시(`type=gha`, 이미지별 scope)에만 남깁니다. PR은 base와, `main` push는 직전 커밋과 비교해 해당 디렉터리나 `ci.yml`이 바뀐 항목만 빌드하고, 바뀌지 않은 항목은 빌드 단계를 건너뛴 채 성공으로 끝납니다. 비교할 커밋이 없는 새 브랜치·야간·수동 실행은 모두 빌드합니다. 이 작업은 `CI required`와 독립적이라 `CI required` 결과에 영향을 주지 않습니다. 보호 규칙에 넣으려면 4개 항목을 각각 required로 지정하세요(건너뛴 항목도 성공으로 보고됩니다). 실행 이미지 캐시는 수 GB가 될 수 있고 저장소 캐시 한도(기본 10 GB)를 넘으면 오래된 npm·이미지 캐시부터 밀려납니다.
+`Docker image (back|front|judge|runtime)` 작업은 운영 Dockerfile(`Back`, `Front`, `Judge`, `Judge/runtime`)을 빌드만 합니다. 이미지를 레지스트리에 올리거나 러너에 내보내지 않고 BuildKit 레이어를 GitHub Actions 캐시(`type=gha`, 이미지별 scope)에만 남깁니다. PR은 base와, `main` push는 직전 커밋과 비교해 해당 디렉터리나 `ci.yml`이 바뀐 항목만 빌드하고, 바뀌지 않은 항목은 빌드 단계를 건너뛴 채 성공으로 끝납니다. 비교할 커밋이 없는 새 브랜치·야간·수동 실행은 모두 빌드합니다. 이미지 작업의 실패·취소도 `CI required`에 반영됩니다. 경로가 바뀌지 않아 빌드를 생략한 항목은 성공으로 보고됩니다. 실행 이미지 캐시는 수 GB가 될 수 있고 저장소 캐시 한도(기본 10 GB)를 넘으면 오래된 npm·이미지 캐시부터 밀려납니다.
 
 ## 의존성 업데이트
 
@@ -18,7 +18,7 @@
 | `Backend and API` | 백엔드 lint·단위·빌드, 운영 Compose 정적 검사, DB 마이그레이션·API 통합 | `Back/`·`deploy/`·`scripts/`·`compose.yaml` 변경 |
 | `Judge worker` | 워커 빌드·계약 검사, Python 실행기 검사 | `Judge/`·`compose.yaml` 변경 |
 | `Browser tests (1/2, 2/2)` | Playwright 공식 이미지에서 브라우저 회귀를 둘로 나눠 동시에 실행. 1번은 프론트 빌드·타입 검사도 함 | `Front/` 변경 |
-| `Sandbox, pipeline and Compose` | go-judge·실제 채점 파이프라인·운영 Compose 브라우저 흐름 | 야간·수동 전체 검사만 |
+| `Sandbox, pipeline and Compose` | go-judge·실제 채점 파이프라인·운영 Compose 브라우저 흐름 | 야간·수동 전체 검사 및 `overhaul/integration → main` PR |
 
 `.github/workflows/ci.yml`이 바뀐 PR과 `main` push·야간·수동 실행은 경로와 상관없이 모든 작업을 돌립니다. 프론트 테스트는 API를 모의 응답으로 대신하므로 Back만 바뀐 PR에서는 브라우저 테스트를 돌리지 않습니다. 브라우저 작업은 `mcr.microsoft.com/playwright:v<버전>-noble` 컨테이너에서 돌아 apt 설치나 브라우저 다운로드가 없습니다. **`Front/package.json`의 `@playwright/test` 버전을 바꾸면 `ci.yml`의 이미지 태그도 같은 버전으로 바꾸세요.**
 
@@ -92,3 +92,9 @@ node scripts/check-compose.mjs --production
 ```
 
 check-compose.mjs는 임의 프로젝트명, RAM 기반 DB/Redis, localhost 임의 포트와 일회용 토큰을 사용하고 생성한 프로젝트만 정리합니다. Docker Compose 2.24.4 이상이 필요합니다. Windows에서는 설치된 Edge, Linux/CI에서는 Playwright Chromium을 사용합니다. 실제 흐름 결과는 Front/reports/live-browser*에 저장합니다.
+
+## 자율 개편 통합 게이트
+
+기능 PR은 `overhaul/integration`을 대상으로 동일한 경로별 검사를 실행합니다. 통합 브랜치는 push마다 중복 실행하지 않으며 최종 `overhaul/integration → main` PR에서 WebKit·실제 샌드박스·파이프라인·Compose 검사를 자동으로 포함합니다. 이 PR은 자동 병합하지 않습니다.
+
+`node --test scripts/ci-policy.test.mjs`는 필수 게이트의 모든 검사 의존성, 실패·취소 처리, 통합 PR 검사 조건, 대규모 diff에서 이미지 검사를 잘못 생략하지 않는지를 검사합니다. 이미지 변경 판정은 diff를 먼저 저장해 `pipefail`과 조기 종료하는 `grep -q`의 SIGPIPE 경합을 피합니다.
