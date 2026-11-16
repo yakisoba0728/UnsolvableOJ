@@ -120,14 +120,16 @@ export function LearningGoalPanel() {
     <div className="learning-heading">
       <div><h2 id="learning-goal-title" ref={heading} tabIndex={-1}>나의 학습 목표</h2>
         <p className="muted">오늘부터 7·30·90일 동안 해결할 공개 문제 수를 정해 보세요.</p></div>
-      <button type="button" className="button button-small button-outline" disabled={loading || busy} onClick={() => setRefresh(value => value + 1)}>목표 새로고침</button>
+      <button type="button" className="button button-small button-outline" aria-label="목표 새로고침" disabled={loading || busy} onClick={() => setRefresh(value => value + 1)}>{loading && resource ? "새로고침 중…" : "목표 새로고침"}</button>
     </div>
-    {loading ? <p className="muted" role="status">학습 목표를 불러오는 중입니다.</p> : null}
+    {loading ? <p className={resource ? "sr-only" : "muted"} role="status">학습 목표를 불러오는 중입니다.</p> : null}
     {error ? <div className="learning-goal-error" role="alert"><p>{error}</p>
       {uncertain ? <p>변경 결과가 확인되지 않았습니다. 현재 목표를 다시 불러온 뒤 이어서 진행해 주세요.</p> : null}
       <button type="button" className="button button-small button-outline" disabled={loading || busy} onClick={() => setRefresh(value => value + 1)}>목표 다시 불러오기</button>
     </div> : null}
-    {resource && !loading ? goal ? <div className="learning-goal-progress">
+    {/* The keyed page owns this resource. A same-owner refresh keeps its last
+        confirmed content visible while all writes stay disabled. */}
+    {resource ? goal ? <div className="learning-goal-progress">
       <div className="learning-goal-count"><strong>{goal.solvedProblems.toLocaleString("ko-KR")} / {goal.targetProblems.toLocaleString("ko-KR")}문제</strong><span className="pill">{labels[goal.status]}</span></div>
       <progress max={goal.targetProblems} value={Math.min(goal.solvedProblems, goal.targetProblems)} aria-label="학습 목표 달성률" aria-valuetext={`${goal.targetProblems}문제 목표, ${goal.solvedProblems}문제 해결`} />
       <p className="muted"><time dateTime={goal.startDate}>{goal.startDate}</time> ~ <time dateTime={goal.endDate}>{goal.endDate}</time> · 한국 시간 기준 {goal.days}일</p>

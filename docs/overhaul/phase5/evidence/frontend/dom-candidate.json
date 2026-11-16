@@ -1,0 +1,82 @@
+{
+  "source": {
+    "head": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "diff": "diff --git a/Front/src/components/DateTimePicker.tsx b/Front/src/components/DateTimePicker.tsx\nindex 48e79e9..917f040 100644\n--- a/Front/src/components/DateTimePicker.tsx\n+++ b/Front/src/components/DateTimePicker.tsx\n@@ -136,6 +136,13 @@ export function DateTimePicker({\n     m: selected?.m ?? today.getMonth(),\n   }));\n \n+  // Closing from inside removes the focused control. Keep the keyboard user's\n+  // place in the form; outside focus/pointer dismissal deliberately stays put.\n+  const close = () => {\n+    setOpen(false);\n+    buttonRef.current?.focus();\n+  };\n+\n   useEffect(() => {\n     if (!open) return;\n     // 바깥을 누르거나 키보드로 바깥(다른 달력 포함)에 포커스가 가면 닫는다.\n@@ -144,8 +151,7 @@ export function DateTimePicker({\n     };\n     const onKeyDown = (event: KeyboardEvent) => {\n       if (event.key === \"Escape\") {\n-        setOpen(false);\n-        buttonRef.current?.focus();\n+        close();\n       }\n     };\n     document.addEventListener(\"pointerdown\", onOutside);\n@@ -345,7 +351,7 @@ export function DateTimePicker({\n               value={base().h}\n               onCommit={(h) => onChange(format({ ...base(), h }))}\n               onFilled={() => minuteRef.current?.focus()}\n-              onEnter={() => setOpen(false)}\n+              onEnter={close}\n             />\n             <span aria-hidden=\"true\">:</span>\n             <TimeField\n@@ -354,7 +360,7 @@ export function DateTimePicker({\n               inputRef={minuteRef}\n               value={base().min}\n               onCommit={(min) => onChange(format({ ...base(), min }))}\n-              onEnter={() => setOpen(false)}\n+              onEnter={close}\n             />\n           </div>\n           <p className=\"dtp-time-hint\">\n@@ -366,7 +372,7 @@ export function DateTimePicker({\n               type=\"button\"\n               onClick={() => {\n                 onChange(\"\");\n-                setOpen(false);\n+                close();\n               }}\n             >\n               삭제\n@@ -377,7 +383,7 @@ export function DateTimePicker({\n             <button\n               type=\"button\"\n               className=\"dtp-done\"\n-              onClick={() => setOpen(false)}\n+              onClick={close}\n             >\n               확인\n             </button>\ndiff --git a/Front/src/learning/LearningGoalPanel.tsx b/Front/src/learning/LearningGoalPanel.tsx\nindex 77a6ed9..db70297 100644\n--- a/Front/src/learning/LearningGoalPanel.tsx\n+++ b/Front/src/learning/LearningGoalPanel.tsx\n@@ -120,14 +120,16 @@ export function LearningGoalPanel() {\n     <div className=\"learning-heading\">\n       <div><h2 id=\"learning-goal-title\" ref={heading} tabIndex={-1}>나의 학습 목표</h2>\n         <p className=\"muted\">오늘부터 7·30·90일 동안 해결할 공개 문제 수를 정해 보세요.</p></div>\n-      <button type=\"button\" className=\"button button-small button-outline\" disabled={loading || busy} onClick={() => setRefresh(value => value + 1)}>목표 새로고침</button>\n+      <button type=\"button\" className=\"button button-small button-outline\" aria-label=\"목표 새로고침\" disabled={loading || busy} onClick={() => setRefresh(value => value + 1)}>{loading && resource ? \"새로고침 중…\" : \"목표 새로고침\"}</button>\n     </div>\n-    {loading ? <p className=\"muted\" role=\"status\">학습 목표를 불러오는 중입니다.</p> : null}\n+    {loading ? <p className={resource ? \"sr-only\" : \"muted\"} role=\"status\">학습 목표를 불러오는 중입니다.</p> : null}\n     {error ? <div className=\"learning-goal-error\" role=\"alert\"><p>{error}</p>\n       {uncertain ? <p>변경 결과가 확인되지 않았습니다. 현재 목표를 다시 불러온 뒤 이어서 진행해 주세요.</p> : null}\n       <button type=\"button\" className=\"button button-small button-outline\" disabled={loading || busy} onClick={() => setRefresh(value => value + 1)}>목표 다시 불러오기</button>\n     </div> : null}\n-    {resource && !loading ? goal ? <div className=\"learning-goal-progress\">\n+    {/* The keyed page owns this resource. A same-owner refresh keeps its last\n+        confirmed content visible while all writes stay disabled. */}\n+    {resource ? goal ? <div className=\"learning-goal-progress\">\n       <div className=\"learning-goal-count\"><strong>{goal.solvedProblems.toLocaleString(\"ko-KR\")} / {goal.targetProblems.toLocaleString(\"ko-KR\")}문제</strong><span className=\"pill\">{labels[goal.status]}</span></div>\n       <progress max={goal.targetProblems} value={Math.min(goal.solvedProblems, goal.targetProblems)} aria-label=\"학습 목표 달성률\" aria-valuetext={`${goal.targetProblems}문제 목표, ${goal.solvedProblems}문제 해결`} />\n       <p className=\"muted\"><time dateTime={goal.startDate}>{goal.startDate}</time> ~ <time dateTime={goal.endDate}>{goal.endDate}</time> · 한국 시간 기준 {goal.days}일</p>"
+  },
+  "node": "v24.22.1",
+  "jsdom": "31.0.1",
+  "browser": false,
+  "limitations": "DOM focus and content regression only. No layout, paint, native keyboard default actions, screenshots, accessibility certification or browser performance measurement.",
+  "cases": [
+    {
+      "name": "hour-enter",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "date",
+        "focusTag": "BUTTON",
+        "submits": 0
+      }
+    },
+    {
+      "name": "minute-enter",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "date",
+        "focusTag": "BUTTON",
+        "submits": 0
+      }
+    },
+    {
+      "name": "done",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "date",
+        "focusTag": "BUTTON",
+        "submits": 0
+      }
+    },
+    {
+      "name": "clear",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "date",
+        "focusTag": "BUTTON",
+        "submits": 0
+      }
+    },
+    {
+      "name": "escape",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "date",
+        "focusTag": "BUTTON",
+        "submits": 0
+      }
+    },
+    {
+      "name": "outside-focus",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "outside",
+        "focusTag": "INPUT",
+        "submits": 0
+      }
+    },
+    {
+      "name": "goal-refresh",
+      "passed": true,
+      "observed": {
+        "beforeCount": "900 / 1,000문제",
+        "duringCount": "900 / 1,000문제",
+        "busy": "true",
+        "disabled": true
+      }
+    }
+  ]
+}

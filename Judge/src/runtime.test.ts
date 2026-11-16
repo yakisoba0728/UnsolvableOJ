@@ -1,8 +1,11 @@
 import "dotenv/config";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { cpus, platform, release } from "node:os";
 import { test } from "node:test";
-import { checkSandbox, judge, type Claim } from "./judge.js";
+import { checkSandbox, judge, type Claim, type JudgeResult } from "./judge.js";
 
 const config = {
   url: process.env.GO_JUDGE_URL ?? "http://127.0.0.1:5050",
@@ -12,6 +15,22 @@ const sources: Record<string, string> = JSON.parse(await readFile(new URL("../ru
 const verdictSources: Record<string, { source: string; syntaxError: string }> = JSON.parse(
   await readFile(new URL("../runtime/verdict-sources.json", import.meta.url), "utf8"),
 );
+const memorySources: Record<string, string> = JSON.parse(
+  await readFile(new URL("../runtime/memory-sources.json", import.meta.url), "utf8"),
+);
+
+interface MatrixObservation {
+  language: string;
+  scenario: string;
+  sourceSha256: string;
+  memoryLimitMiB: number;
+  configuredHeapFlag: string | null;
+  timeLimitMs: number;
+  elapsedMs: number;
+  result?: Pick<JudgeResult, "status" | "runtimeMs" | "memoryKb" | "passedTestCases" | "totalTestCases" | "testResults">;
+  verification: "PASS" | "FAIL";
+  error?: string;
+}
 
 function input(sourceCode: string, language = "PYTHON", memoryMb = 256, timeMs = 1000): Claim {
   return {
@@ -24,6 +43,68 @@ function input(sourceCode: string, language = "PYTHON", memoryMb = 256, timeMs =
 }
 
 test("real go-judge sandbox", { timeout: 600_000 }, async (t) => {
+  const started = performance.now();
+  const observations: MatrixObservation[] = [];
+  let completed = false;
+  const scenarios = ["AC", "WA", "RE", "TLE", "OLE", "syntax", "UTF8", "memory-under", "memory-over"];
+  const git = (...args: string[]) => execFileSync("git", args, { encoding: "utf8" }).trim();
+  const checkoutSha = git("rev-parse", "HEAD");
+  const treeSha = git("rev-parse", "HEAD^{tree}");
+  const event = process.env.GITHUB_EVENT_PATH
+    ? JSON.parse(await readFile(process.env.GITHUB_EVENT_PATH, "utf8")) as { pull_request?: { head?: { sha?: string }; base?: { sha?: string } } }
+    : undefined;
+  t.after(async () => {
+    const missing = Object.keys(sources).flatMap((language) => scenarios
+      .filter((scenario) => !observations.some((row) => row.language === language && row.scenario === scenario))
+      .map((scenario) => ({ language, scenario })));
+    const report = {
+      schemaVersion: 1,
+      status: completed && missing.length === 0 && observations.length === Object.keys(sources).length * scenarios.length
+        && observations.every((row) => row.verification === "PASS") ? "PASS" : "FAIL",
+      timestamp: new Date().toISOString(),
+      provenance: { checkoutSha, treeSha, sourceHeadSha: event?.pull_request?.head?.sha ?? checkoutSha,
+        baseSha: event?.pull_request?.base?.sha ?? null,
+        runId: process.env.GITHUB_RUN_ID ?? null, runAttempt: process.env.GITHUB_RUN_ATTEMPT ?? null,
+        trackedTreeClean: git("status", "--porcelain", "--untracked-files=no") === "" },
+      environment: { node: process.version, platform: platform(), kernel: release(), logicalCpus: cpus().length, cpu: cpus()[0]?.model },
+      limits: { suiteTimeoutMs: 600_000, sequential: true, matrixCases: Object.keys(sources).length * scenarios.length,
+        memoryProbeLimitMiB: 128, memoryAllocationsMiB: [8, 192], memoryProbeTimeLimitMs: 5000,
+        compileLimitMiB: 1024, compileTimeLimitMs: 30_000, stdoutAndStderrLimitBytes: 1_000_000 },
+      elapsedMs: performance.now() - started,
+      missing, observations,
+      limitations: [
+        "One finite observation per language/scenario; not a threshold search, saturation test or population latency estimate.",
+        "These are actual normalized JudgeResult measurements, not raw go-judge status/signal/cgroup OOM events.",
+        "Python/JavaScript syntax errors are runtime errors; compiled languages reject syntax before execution.",
+        "Memory pressure is MLE only when the engine reports MLE. A proven Java heap allocation failure may remain RE; no RE/signal is relabeled MLE.",
+        "Reported memory is executor-reported peak for a case. Compiler, worker, API, Redis and PostgreSQL resources are separate.",
+        "Dedicated production host/kernel isolation and unobserved memory thresholds remain UNVERIFIED.",
+      ],
+    };
+    await mkdir(new URL("../reports/", import.meta.url), { recursive: true });
+    await writeFile(new URL("../reports/phase5-verdict-matrix.json", import.meta.url), JSON.stringify(report, null, 2) + "\n");
+  });
+  async function observed(claim: Claim, scenario: string, verify: (result: JudgeResult) => void) {
+    const began = performance.now();
+    const row: MatrixObservation = { language: claim.language, scenario,
+      sourceSha256: createHash("sha256").update(claim.sourceCode).digest("hex"),
+      memoryLimitMiB: claim.limits.memoryMb,
+      configuredHeapFlag: claim.language === "JAVA" ? `-Xmx${claim.limits.memoryMb}m`
+        : ["JAVASCRIPT", "TYPESCRIPT"].includes(claim.language) ? `--max-old-space-size=${claim.limits.memoryMb}` : null,
+      timeLimitMs: claim.limits.timeMs, elapsedMs: 0, verification: "FAIL" };
+    observations.push(row);
+    try {
+      const result = await judge(claim, config);
+      row.result = { status: result.status, runtimeMs: result.runtimeMs, memoryKb: result.memoryKb,
+        passedTestCases: result.passedTestCases, totalTestCases: result.totalTestCases, testResults: result.testResults };
+      verify(result);
+      row.verification = "PASS";
+      return result;
+    } catch (error) {
+      row.error = error instanceof Error ? error.message.slice(0, 2000) : "Native matrix probe failed";
+      throw error;
+    } finally { row.elapsedMs = performance.now() - began; }
+  }
   await checkSandbox(config);
   const headers = { Authorization: `Bearer ${config.token}` };
   const listFiles = async () => {
@@ -35,48 +116,77 @@ test("real go-judge sandbox", { timeout: 600_000 }, async (t) => {
 
   for (const [language, source] of Object.entries(sources)) {
     await t.test(`accepts ${language}`, async () => {
-      const result = await judge(input(source, language, 256, 5000), config);
+      await observed(input(source, language, 256, 5000), "AC", (result) => {
       assert.equal(result.status, "ACCEPTED", JSON.stringify(result));
       assert.equal(result.passedTestCases, 2);
       assert.ok(result.memoryKb > 0);
       assert.deepEqual(result.debugOutputs, [{
         testCase: 1, stdout: "12\n", stderr: "", stdoutTruncated: false, stderrTruncated: false,
       }]);
+      });
     });
   }
   // Every supported language must exercise failure mapping, not only compilation
   // and the happy path. These bounded programs execute exclusively in go-judge.
   assert.deepEqual(Object.keys(verdictSources).sort(), Object.keys(sources).sort());
   for (const [language, fixture] of Object.entries(verdictSources)) {
-    for (const [mode, expected] of [
-      ["w", "WRONG_ANSWER"], ["r", "RUNTIME_ERROR"],
-      ["t", "TIME_LIMIT_EXCEEDED"], ["o", "OUTPUT_LIMIT_EXCEEDED"],
+    for (const [mode, scenario, expected] of [
+      ["w", "WA", "WRONG_ANSWER"], ["r", "RE", "RUNTIME_ERROR"],
+      ["t", "TLE", "TIME_LIMIT_EXCEEDED"], ["o", "OLE", "OUTPUT_LIMIT_EXCEEDED"],
     ]) {
       await t.test(`${language} verdict ${expected}`, async () => {
         const claim = input(fixture.source, language, 256, mode === "t" ? 1000 : 5000);
         claim.testCases = [{ input: mode, expectedOutput: "expected", isSample: true }];
-        const result = await judge(claim, config);
+        await observed(claim, scenario, (result) => {
         assert.equal(result.status, expected, JSON.stringify(result));
         assert.equal(result.passedTestCases, 0);
         assert.equal(result.testResults.length, 1);
+        });
       });
     }
     await t.test(`${language} rejects syntax errors at its compilation or interpretation stage`, async () => {
-      const result = await judge(input(fixture.syntaxError, language, 256, 5000), config);
+      await observed(input(fixture.syntaxError, language, 256, 5000), "syntax", (result) => {
       const interpreted = ["PYTHON", "JAVASCRIPT"].includes(language);
       assert.equal(result.status, interpreted ? "RUNTIME_ERROR" : "COMPILE_ERROR", JSON.stringify(result));
       assert.equal(result.passedTestCases, 0);
+      });
     });
     await t.test(`${language} preserves long UTF-8 input, CRLF and repeated-case verdicts`, async () => {
       const text = `echo\n한글 😀\r\n${"x".repeat(262_144)}\n`;
       const claim = input(fixture.source, language, 256, 5000);
       claim.testCases = [true, false].map((isSample) => ({ input: text, expectedOutput: text, isSample }));
-      const result = await judge(claim, config);
+      await observed(claim, "UTF8", (result) => {
       assert.equal(result.status, "ACCEPTED", JSON.stringify(result));
       assert.equal(result.passedTestCases, 2);
       assert.equal(result.debugOutputs.length, 1);
       assert.equal(result.debugOutputs[0].stdoutTruncated, true);
+      });
     });
+  }
+  assert.deepEqual(Object.keys(memorySources).sort(), Object.keys(sources).sort());
+  for (const [language, source] of Object.entries(memorySources)) {
+    for (const allocationMiB of [8, 192]) {
+      const scenario = allocationMiB === 8 ? "memory-under" : "memory-over";
+      await t.test(`${language} touches ${allocationMiB} MiB under a 128 MiB execution limit`, async () => {
+        const claim = input(source, language, 128, 5000);
+        claim.testCases = [{ input: `${allocationMiB}\n`, expectedOutput: `${allocationMiB * 256}\n`, isSample: true }];
+        await observed(claim, scenario, (result) => {
+          assert.equal(result.testResults.length, 1, JSON.stringify(result));
+          assert.ok(result.memoryKb > 0);
+          if (allocationMiB === 8) {
+            assert.equal(result.status, "ACCEPTED", JSON.stringify(result));
+            assert.equal(result.passedTestCases, 1);
+          } else {
+            assert.equal(result.passedTestCases, 0);
+            if (language === "JAVA" && result.status === "RUNTIME_ERROR") {
+              // -Xmx128m can refuse the single 192 MiB allocation inside the VM
+              // before a cgroup OOM. This is RE, not an inferred native MLE.
+              assert.match(result.debugOutputs[0].stderr, /java\.lang\.OutOfMemoryError: Java heap space/);
+            } else assert.equal(result.status, "MEMORY_LIMIT_EXCEEDED", JSON.stringify(result));
+          }
+        });
+      });
+    }
   }
   const checks: [string, string, string?, number?, number?][] = [
     ["WRONG_ANSWER", "print(0)"],
@@ -141,4 +251,7 @@ test("real go-judge sandbox", { timeout: 600_000 }, async (t) => {
     assert.equal(result.status, "ACCEPTED", JSON.stringify(result));
   });
   assert.deepEqual(await listFiles(), initialFiles, "Cached files leaked after judging");
+  assert.equal(observations.length, Object.keys(sources).length * scenarios.length);
+  assert.ok(observations.every((row) => row.verification === "PASS"), "Native matrix contains a failed row");
+  completed = true;
 });

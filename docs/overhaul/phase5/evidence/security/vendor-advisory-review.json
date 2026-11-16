@@ -1,0 +1,577 @@
+{
+  "schemaVersion": 1,
+  "kind": "runtime-advisory-primary-source-review",
+  "authoredBy": "/root/security",
+  "observedAt": "2026-11-16T14:40:33.986470+00:00",
+  "scope": "Fifteen changed reviewed CVEs, their twelve newly selected Rocky kernel advisories and current Linux CNA source mappings; no unrelated CVE discovery.",
+  "records": [
+    {
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:1690.json",
+      "reviewedCves": [
+        "CVE-2025-40170"
+      ],
+      "retrievedAt": "2026-11-16T14:36:12.751656+00:00",
+      "status": 200,
+      "bytes": 4738,
+      "sha256": "359d9131de545b5061a11de22a43abe80e442466c464f81bb3a857b82acc6d73",
+      "path": "RLSA-2026-1690.json",
+      "id": "RLSA-2026:1690",
+      "containsAllReviewedIds": true,
+      "publisher": "Rocky Linux",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:1690",
+      "published": "2026-02-08T09:08:42.957155Z",
+      "modified": "2026-02-08T09:10:08.217222Z",
+      "advisoryLevelSeverity": "Important",
+      "affectedPackage": {
+        "name": "kernel",
+        "ecosystem": "Rocky Linux:10"
+      },
+      "primarySourceAdvisory": null,
+      "assessment": "Listed CVEs describe the same Linux kernel implementation as the unchanged Linux CNA records; the advisory does not add vulnerable code to the exact Ubuntu exported-header payload. Rocky RPM versions and advisory severity do not establish an Ubuntu fix or host readiness."
+    },
+    {
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:2282.json",
+      "reviewedCves": [
+        "CVE-2025-39933"
+      ],
+      "retrievedAt": "2026-11-16T14:36:12.752243+00:00",
+      "status": 200,
+      "bytes": 2810,
+      "sha256": "91a1dc8a74bda8d25b6c4bb56d3f229d0c748bb0721383087c86e4066b8f3125",
+      "path": "RLSA-2026-2282.json",
+      "id": "RLSA-2026:2282",
+      "containsAllReviewedIds": true,
+      "publisher": "Rocky Linux",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:2282",
+      "published": "2026-02-15T09:09:20.412583Z",
+      "modified": "2026-02-15T09:10:51.687554Z",
+      "advisoryLevelSeverity": "Moderate",
+      "affectedPackage": {
+        "name": "kernel",
+        "ecosystem": "Rocky Linux:10"
+      },
+      "primarySourceAdvisory": null,
+      "assessment": "Listed CVEs describe the same Linux kernel implementation as the unchanged Linux CNA records; the advisory does not add vulnerable code to the exact Ubuntu exported-header payload. Rocky RPM versions and advisory severity do not establish an Ubuntu fix or host readiness."
+    },
+    {
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:45114.json",
+      "reviewedCves": [
+        "CVE-2026-31692"
+      ],
+      "retrievedAt": "2026-11-16T14:36:12.752707+00:00",
+      "status": 200,
+      "bytes": 2050,
+      "sha256": "3698eecb7e156b0be33cf56eb3ab8a270dfa4fdd422ae009e6c58182055ead4f",
+      "path": "RLSA-2026-45114.json",
+      "id": "RLSA-2026:45114",
+      "containsAllReviewedIds": true,
+      "publisher": "Rocky Linux",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:45114",
+      "published": "2026-07-27T12:07:26.942038Z",
+      "modified": "2026-07-27T12:10:26.960410Z",
+      "advisoryLevelSeverity": "Important",
+      "affectedPackage": {
+        "name": "kernel",
+        "ecosystem": "Rocky Linux:10"
+      },
+      "primarySourceAdvisory": null,
+      "assessment": "Listed CVEs describe the same Linux kernel implementation as the unchanged Linux CNA records; the advisory does not add vulnerable code to the exact Ubuntu exported-header payload. Rocky RPM versions and advisory severity do not establish an Ubuntu fix or host readiness."
+    },
+    {
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:47017.json",
+      "reviewedCves": [
+        "CVE-2026-53281"
+      ],
+      "retrievedAt": "2026-11-16T14:36:12.753463+00:00",
+      "status": 200,
+      "bytes": 1950,
+      "sha256": "3dad4aebe2d1523482a21b174000aa0c323636f172a385a311444b37cd8a85aa",
+      "path": "RLSA-2026-47017.json",
+      "id": "RLSA-2026:47017",
+      "containsAllReviewedIds": true,
+      "publisher": "Rocky Linux",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:47017",
+      "published": "2026-07-29T18:06:20.508719Z",
+      "modified": "2026-07-29T18:08:26.377144Z",
+      "advisoryLevelSeverity": "Important",
+      "affectedPackage": {
+        "name": "kernel",
+        "ecosystem": "Rocky Linux:10"
+      },
+      "primarySourceAdvisory": null,
+      "assessment": "Listed CVEs describe the same Linux kernel implementation as the unchanged Linux CNA records; the advisory does not add vulnerable code to the exact Ubuntu exported-header payload. Rocky RPM versions and advisory severity do not establish an Ubuntu fix or host readiness."
+    },
+    {
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:57251.json",
+      "reviewedCves": [
+        "CVE-2026-52991",
+        "CVE-2026-63879"
+      ],
+      "retrievedAt": "2026-11-16T14:36:19.819492+00:00",
+      "status": 200,
+      "bytes": 6433,
+      "sha256": "f069a99898963994fe12955fc7089d0ca2b1200bc7ba7251ff5f75fcef1b4b33",
+      "path": "RLSA-2026-57251.json",
+      "id": "RLSA-2026:57251",
+      "containsAllReviewedIds": true,
+      "publisher": "Rocky Linux",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:57251",
+      "published": "2026-08-21T12:07:48.154734Z",
+      "modified": "2026-08-21T12:10:46.297919Z",
+      "advisoryLevelSeverity": "Important",
+      "affectedPackage": {
+        "name": "kernel",
+        "ecosystem": "Rocky Linux:10"
+      },
+      "primarySourceAdvisory": "RHSA-2026:57251",
+      "assessment": "Listed CVEs describe the same Linux kernel implementation as the unchanged Linux CNA records; the advisory does not add vulnerable code to the exact Ubuntu exported-header payload. Rocky RPM versions and advisory severity do not establish an Ubuntu fix or host readiness."
+    },
+    {
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:65334.json",
+      "reviewedCves": [
+        "CVE-2026-68409"
+      ],
+      "retrievedAt": "2026-11-16T14:36:19.820451+00:00",
+      "status": 200,
+      "bytes": 6966,
+      "sha256": "3073c73f5f86946e871e11f4a508c0fbf67668d128b88f8b80ca68d0fa84466d",
+      "path": "RLSA-2026-65334.json",
+      "id": "RLSA-2026:65334",
+      "containsAllReviewedIds": true,
+      "publisher": "Rocky Linux",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:65334",
+      "published": "2026-09-10T00:09:11.134895Z",
+      "modified": "2026-09-10T00:13:02.521345Z",
+      "advisoryLevelSeverity": "Important",
+      "affectedPackage": {
+        "name": "kernel",
+        "ecosystem": "Rocky Linux:10"
+      },
+      "primarySourceAdvisory": "RHSA-2026:65334",
+      "assessment": "Listed CVEs describe the same Linux kernel implementation as the unchanged Linux CNA records; the advisory does not add vulnerable code to the exact Ubuntu exported-header payload. Rocky RPM versions and advisory severity do not establish an Ubuntu fix or host readiness."
+    },
+    {
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:67471.json",
+      "reviewedCves": [
+        "CVE-2026-68426",
+        "CVE-2025-68745"
+      ],
+      "retrievedAt": "2026-11-16T14:36:19.845433+00:00",
+      "status": 200,
+      "bytes": 6699,
+      "sha256": "8ffb8b6b79d0c6d5a7265a75e8f4aa5c7c2ae900ace44676c365f0adc73e7af0",
+      "path": "RLSA-2026-67471.json",
+      "id": "RLSA-2026:67471",
+      "containsAllReviewedIds": true,
+      "publisher": "Rocky Linux",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:67471",
+      "published": "2026-09-16T12:09:37.746677Z",
+      "modified": "2026-09-16T12:14:02.222300Z",
+      "advisoryLevelSeverity": "Important",
+      "affectedPackage": {
+        "name": "kernel",
+        "ecosystem": "Rocky Linux:10"
+      },
+      "primarySourceAdvisory": "RHSA-2026:67471",
+      "assessment": "Listed CVEs describe the same Linux kernel implementation as the unchanged Linux CNA records; the advisory does not add vulnerable code to the exact Ubuntu exported-header payload. Rocky RPM versions and advisory severity do not establish an Ubuntu fix or host readiness."
+    },
+    {
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:71602.json",
+      "reviewedCves": [
+        "CVE-2026-68257"
+      ],
+      "retrievedAt": "2026-11-16T14:36:19.895493+00:00",
+      "status": 200,
+      "bytes": 5674,
+      "sha256": "d71c3ae9ba7194b3a8eb7398e43e8717ec2180b6dd62515393aab7bcc45cf4f7",
+      "path": "RLSA-2026-71602.json",
+      "id": "RLSA-2026:71602",
+      "containsAllReviewedIds": true,
+      "publisher": "Rocky Linux",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:71602",
+      "published": "2026-09-26T12:11:25.039690Z",
+      "modified": "2026-09-26T12:16:09.340206Z",
+      "advisoryLevelSeverity": "Important",
+      "affectedPackage": {
+        "name": "kernel",
+        "ecosystem": "Rocky Linux:10"
+      },
+      "primarySourceAdvisory": "RHSA-2026:71602",
+      "assessment": "Listed CVEs describe the same Linux kernel implementation as the unchanged Linux CNA records; the advisory does not add vulnerable code to the exact Ubuntu exported-header payload. Rocky RPM versions and advisory severity do not establish an Ubuntu fix or host readiness."
+    },
+    {
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:85321.json",
+      "reviewedCves": [
+        "CVE-2026-74752",
+        "CVE-2026-89631"
+      ],
+      "retrievedAt": "2026-11-16T14:36:25.953685+00:00",
+      "status": 200,
+      "bytes": 5187,
+      "sha256": "7e65a87f4b3698628b79da98085d0add555f90f677dd80c3c89afc588ea046dc",
+      "path": "RLSA-2026-85321.json",
+      "id": "RLSA-2026:85321",
+      "containsAllReviewedIds": true,
+      "publisher": "Rocky Linux",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:85321",
+      "published": "2026-10-21T12:08:03.045090Z",
+      "modified": "2026-10-21T12:11:53.723974Z",
+      "advisoryLevelSeverity": "Important",
+      "affectedPackage": {
+        "name": "kernel",
+        "ecosystem": "Rocky Linux:10"
+      },
+      "primarySourceAdvisory": "RHSA-2026:85321",
+      "assessment": "Listed CVEs describe the same Linux kernel implementation as the unchanged Linux CNA records; the advisory does not add vulnerable code to the exact Ubuntu exported-header payload. Rocky RPM versions and advisory severity do not establish an Ubuntu fix or host readiness."
+    },
+    {
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:88477.json",
+      "reviewedCves": [
+        "CVE-2026-68245"
+      ],
+      "retrievedAt": "2026-11-16T14:36:25.987099+00:00",
+      "status": 200,
+      "bytes": 5013,
+      "sha256": "a8379a5cf2f8964508e460ab6ef89d8526265fd871fef4ca9f0300ffedca51b8",
+      "path": "RLSA-2026-88477.json",
+      "id": "RLSA-2026:88477",
+      "containsAllReviewedIds": true,
+      "publisher": "Rocky Linux",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:88477",
+      "published": "2026-10-24T12:08:27.748486Z",
+      "modified": "2026-10-24T12:12:25.180909Z",
+      "advisoryLevelSeverity": "Important",
+      "affectedPackage": {
+        "name": "kernel",
+        "ecosystem": "Rocky Linux:10"
+      },
+      "primarySourceAdvisory": "RHSA-2026:88477",
+      "assessment": "Listed CVEs describe the same Linux kernel implementation as the unchanged Linux CNA records; the advisory does not add vulnerable code to the exact Ubuntu exported-header payload. Rocky RPM versions and advisory severity do not establish an Ubuntu fix or host readiness."
+    },
+    {
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:91565.json",
+      "reviewedCves": [
+        "CVE-2026-64523"
+      ],
+      "retrievedAt": "2026-11-16T14:36:25.994964+00:00",
+      "status": 200,
+      "bytes": 4795,
+      "sha256": "1e70e998560f3429382187df500264659c92c5d84a005e9a8cc0c2d74e8c01c7",
+      "path": "RLSA-2026-91565.json",
+      "id": "RLSA-2026:91565",
+      "containsAllReviewedIds": true,
+      "publisher": "Rocky Linux",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:91565",
+      "published": "2026-10-29T12:08:23.381701Z",
+      "modified": "2026-10-29T12:12:34.738270Z",
+      "advisoryLevelSeverity": "Important",
+      "affectedPackage": {
+        "name": "kernel",
+        "ecosystem": "Rocky Linux:10"
+      },
+      "primarySourceAdvisory": "RHSA-2026:91565",
+      "assessment": "Listed CVEs describe the same Linux kernel implementation as the unchanged Linux CNA records; the advisory does not add vulnerable code to the exact Ubuntu exported-header payload. Rocky RPM versions and advisory severity do not establish an Ubuntu fix or host readiness."
+    },
+    {
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:93413.json",
+      "reviewedCves": [
+        "CVE-2026-98364"
+      ],
+      "retrievedAt": "2026-11-16T14:36:26.024838+00:00",
+      "status": 200,
+      "bytes": 4627,
+      "sha256": "81c44fcf38296fdb937a6045dc32ba5b94f40db33461f58de08b58ebd6d1e691",
+      "path": "RLSA-2026-93413.json",
+      "id": "RLSA-2026:93413",
+      "containsAllReviewedIds": true,
+      "publisher": "Rocky Linux",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:93413",
+      "published": "2026-11-03T12:10:03.560067Z",
+      "modified": "2026-11-03T12:15:11.607061Z",
+      "advisoryLevelSeverity": "Important",
+      "affectedPackage": {
+        "name": "kernel",
+        "ecosystem": "Rocky Linux:10"
+      },
+      "primarySourceAdvisory": "RHSA-2026:93413",
+      "assessment": "Listed CVEs describe the same Linux kernel implementation as the unchanged Linux CNA records; the advisory does not add vulnerable code to the exact Ubuntu exported-header payload. Rocky RPM versions and advisory severity do not establish an Ubuntu fix or host readiness."
+    }
+  ],
+  "changedCveAssessments": [
+    {
+      "id": "CVE-2026-64523",
+      "rawSeverityUnchanged": "CRITICAL",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel handshake file-reference lifetime",
+      "cnaProgramFiles": [
+        "net/handshake/handshake.h",
+        "net/handshake/netlink.c",
+        "net/handshake/request.c"
+      ],
+      "cnaRawSha256": "caebf76bb2f303766f0801e6baebb7377d51797e0025a9245ff04891cf819e08",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2026-68426",
+      "rawSeverityUnchanged": "CRITICAL",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel IPsec segmentation pointer lifetime",
+      "cnaProgramFiles": [
+        "net/xfrm/xfrm_device.c"
+      ],
+      "cnaRawSha256": "57f5d2c6e6d86218aaae37928e66f08b1afabaef4f002faadfc6d042752ed356",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2025-39933",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References",
+        "VendorSeverity"
+      ],
+      "issueSummary": "Kernel SMB receive-length validation",
+      "cnaProgramFiles": [
+        "fs/smb/client/smbdirect.c"
+      ],
+      "cnaRawSha256": "a2747914dc9020331ca9a4883d64c2cb50c74f97fe68eab95b084d48fcf14d44",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2025-40170",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References",
+        "VendorSeverity"
+      ],
+      "issueSummary": "Kernel network destination reference lifetime",
+      "cnaProgramFiles": [
+        "include/net/ip.h",
+        "include/net/ip6_route.h",
+        "include/net/route.h",
+        "net/core/sock.c"
+      ],
+      "cnaRawSha256": "00682aa497a14d0660cb93f44cc55272a18439fb69a5d4a3e04cedabd0583999",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2025-68745",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel SCSI command cleanup after reset",
+      "cnaProgramFiles": [
+        "drivers/scsi/qla2xxx/qla_os.c",
+        "drivers/scsi/qla2xxx/qla_target.c",
+        "drivers/scsi/qla2xxx/qla_target.h"
+      ],
+      "cnaRawSha256": "422e34cb2dab490ae023798672747c3de014fce60ac3883e0c5a68af8f7dc6bb",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2026-31692",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel network-namespace capability check",
+      "cnaProgramFiles": [
+        "net/core/rtnetlink.c"
+      ],
+      "cnaRawSha256": "111c0e9078ccb915175ca4aa70f9ea7d6d61b02f0a123394af8e82a055211abb",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2026-52991",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel cgroup pressure-file lifetime race",
+      "cnaProgramFiles": [
+        "kernel/cgroup/cgroup.c"
+      ],
+      "cnaRawSha256": "c0186f68c782354046ecee23f7298087c820b4d65f6bc8a1649f8dc005b574c2",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2026-53281",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel Intel IOMMU pointer and reference handling",
+      "cnaProgramFiles": [
+        "drivers/iommu/intel/iommu.c"
+      ],
+      "cnaRawSha256": "ae51769b9efdaa6bdff61bad316c24cc2495b8334c882023f66271ccd8c8f763",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2026-63879",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel AMD GPU page-notifier sequencing",
+      "cnaProgramFiles": [
+        "drivers/gpu/drm/amd/amdgpu/amdgpu_hmm.c"
+      ],
+      "cnaRawSha256": "d08d45a42780fc4da95bbd38a84015b9ee737fa3de7c90079c4e6a2afc661464",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2026-68245",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel AMD GPU task-information lifetime",
+      "cnaProgramFiles": [
+        "drivers/gpu/drm/amd/amdgpu/amdgpu_vm.c"
+      ],
+      "cnaRawSha256": "72011977d065edddfddca34de09a3d6f4acf5da0d7109e4341e3e31757acab0a",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2026-68257",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel AMD GPU allocation-size overflow",
+      "cnaProgramFiles": [
+        "drivers/gpu/drm/amd/amdkfd/kfd_queue.c"
+      ],
+      "cnaRawSha256": "ca27337c3e79378e80307a16a556ee5bce3a4869ebab3cfe45297aac2778d550",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2026-68409",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel wireless receive-statistics lifetime",
+      "cnaProgramFiles": [
+        "net/mac80211/sta_info.c"
+      ],
+      "cnaRawSha256": "e8c0c18d194b49aa0990b193fe51bef5281753770fae0ecd342e6b1496ca80a9",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2026-74752",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel SCTP authentication-cookie validation",
+      "cnaProgramFiles": [
+        "include/net/sctp/auth.h",
+        "net/sctp/auth.c",
+        "net/sctp/sm_make_chunk.c"
+      ],
+      "cnaRawSha256": "7dcb9d1aaf2bc764afc44716151f349ab70c12e45a9fbcf0ecb86cff11fc85c9",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2026-89631",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel SMB tree-connect response bounds",
+      "cnaProgramFiles": [
+        "fs/smb/client/cifssmb.c",
+        "fs/smb/client/trace.h"
+      ],
+      "cnaRawSha256": "f6f01d3d093f28d22b4b20f2542e0e413a817f27b126233e9fb277c7805d9b5d",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    },
+    {
+      "id": "CVE-2026-98364",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "issueSummary": "Kernel IPsec network-device reference lifetime",
+      "cnaProgramFiles": [
+        "net/xfrm/xfrm_policy.c"
+      ],
+      "cnaRawSha256": "2215a2d73fa8a831065ad37311af040ec609727ea5272bcbb2a4c461da05cac7",
+      "exportedHeaderMatches": [],
+      "assessment": "No changed primary-source or shipping-payload evidence overturns the inherited exact-component absence decision. This remains a proposal requiring separate review."
+    }
+  ],
+  "vendorSeverityChanges": [
+    {
+      "id": "CVE-2025-39933",
+      "field": "VendorSeverity.rocky",
+      "before": 3,
+      "after": 2,
+      "publisherLevel": "Moderate",
+      "advisory": "RLSA-2026:2282"
+    },
+    {
+      "id": "CVE-2025-40170",
+      "field": "VendorSeverity.rocky",
+      "before": 2,
+      "after": 3,
+      "publisherLevel": "Important",
+      "advisory": "RLSA-2026:1690"
+    }
+  ],
+  "ubuntuCriticalContext": [
+    {
+      "id": "CVE-2026-64523",
+      "url": "https://ubuntu.com/security/CVE-2026-64523",
+      "ubuntuPriority": "Critical",
+      "cvss3": 9.8,
+      "nobleLinuxObservedStatus": "Vulnerable work in progress in 6.8.0-151.151",
+      "hostKernelReadiness": "UNVERIFIED"
+    },
+    {
+      "id": "CVE-2026-68426",
+      "url": "https://ubuntu.com/security/CVE-2026-68426",
+      "ubuntuPriority": "Critical",
+      "cvss3": 9.8,
+      "nobleLinuxObservedStatus": "Vulnerable work in progress in 6.8.0-151.151",
+      "hostKernelReadiness": "UNVERIFIED"
+    }
+  ],
+  "retrieval": {
+    "path": "docs/overhaul/phase5/evidence/security/vendor-retrieval.json",
+    "sha256": "fa7833bf04b97fc7dfb9d8d712bb3e60d22bb2424a4082ca1bca9cad5879b60b"
+  },
+  "rawPublisherArchive": {
+    "path": "docs/overhaul/phase5/evidence/security/primary-vendor-records.zip",
+    "sha256": "795aaf4acc30481356a00f8682e98ff20e936f47f16815f647e0619ea1323153"
+  },
+  "cnaComparison": {
+    "path": "docs/overhaul/phase5/evidence/security/cna-revalidation.json",
+    "sha256": "9b6632f8e4dafdc36747f75c4ba3c49e05507741e92a9bfb688fdef449202cf2"
+  },
+  "limits": [
+    "References-only changes were not auto-approved. The newly selected publisher content and unchanged CNA source mappings were inspected.",
+    "Bugzilla cross-links and unrelated CVEs bundled in vendor advisories were not individually audited; they are preserved in the raw advisory delta.",
+    "No Ubuntu kernel patch installation, host test, broad severity downgrade or zero-finding claim is made."
+  ]
+}
