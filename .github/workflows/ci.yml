@@ -449,6 +449,7 @@ jobs:
           path: |
             Back/reports/phase2-*.json
             Back/reports/phase2-*.log
+            Back/reports/phase4-mixed-capacity.json
           # A pipeline setup failure can precede report creation. Its test failure
           # remains the gate; a missing artifact must not obscure that root cause.
           if-no-files-found: warn
