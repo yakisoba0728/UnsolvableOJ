@@ -101,7 +101,7 @@ test('large image diffs cannot be skipped by a pipefail/SIGPIPE race', () => {
       writeFileSync(files, 'Back/src/changed.ts\n' + Array.from({ length: 30_000 }, (_, index) => `docs/generated/path-${index}.md`).join('\n'));
       writeFileSync(output, '');
       const run = spawnSync('bash', ['-e', '-o', 'pipefail', '-c', script], {
-        env: { ...process.env, PATH: `${directory}:${process.env.PATH}`, BASE: 'test-base', CONTEXT: context, GITHUB_OUTPUT: output, CI_TEST_FILES: files },
+        env: { ...process.env, PATH: `${directory}:${process.env.PATH}`, BASE: 'test-base', CONTEXT: context, FULL: 'false', GITHUB_OUTPUT: output, CI_TEST_FILES: files },
         encoding: 'utf8',
       });
       assert.equal(run.status, 0, run.stderr);
@@ -110,6 +110,81 @@ test('large image diffs cannot be skipped by a pipefail/SIGPIPE race', () => {
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
+});
+
+function selectImage(context, paths, overrides = {}) {
+  const directory = mkdtempSync(join(tmpdir(), 'oj-ci-image-selection-'));
+  try {
+    writeFileSync(join(directory, 'git'), '#!/bin/sh\nif [ "$1" = fetch ]; then exit "$CI_TEST_FETCH_STATUS"; fi\nif [ "$1" = diff ]; then [ "$CI_TEST_DIFF_STATUS" = 0 ] || exit "$CI_TEST_DIFF_STATUS"; exec cat "$CI_TEST_FILES"; fi\nexit 1\n', { mode: 0o700 });
+    const files = join(directory, 'files');
+    const output = join(directory, 'output');
+    writeFileSync(files, paths.join('\n') + '\n');
+    writeFileSync(output, '');
+    const run = spawnSync('bash', ['-e', '-o', 'pipefail', '-c', runBlock(workflow.slice(workflow.indexOf('      - name: Detect changes')))], {
+      env: { ...process.env, PATH: `${directory}:${process.env.PATH}`, CONTEXT: context, BASE: 'test-base', FULL: 'false',
+        CI_TEST_FETCH_STATUS: '0', CI_TEST_DIFF_STATUS: '0', CI_TEST_FILES: files, GITHUB_OUTPUT: output, ...overrides },
+      encoding: 'utf8',
+    });
+    return { ...run, selected: readFileSync(output, 'utf8').trim() };
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
+
+test('full-validation selects all four image builds even for empty or unrelated diffs', () => {
+  for (const context of ['Back', 'Front', 'Judge', 'Judge/runtime']) {
+    for (const paths of [[], ['docs/overhaul/PROGRESS.md']]) {
+      const run = selectImage(context, paths, { FULL: 'true', CI_TEST_FETCH_STATUS: '99', CI_TEST_DIFF_STATUS: '99' });
+      assert.equal(run.status, 0, `${context}: ${run.stderr}`);
+      assert.equal(run.selected, 'build=true');
+    }
+  }
+  const imageSection = workflow.slice(workflow.indexOf('\n  images:'), workflow.indexOf('\n  changes:'));
+  assert.match(imageSection, /FULL:.*contains\(github\.event\.pull_request\.labels\.\*\.name, 'full-validation'\)/);
+  assert.match(imageSection, /FULL:.*inputs\.full.*github\.event_name == 'schedule'/);
+});
+
+test('every applicability evidence and implementation dependency selects its image gate', () => {
+  const policy = JSON.parse(readFileSync(new URL('./image-applicability-policy.json', import.meta.url), 'utf8'));
+  const runtimeOnly = [
+    'scripts/verify_image_payload.py', 'scripts/verify_image_payload_test.py',
+    'docs/overhaul/repro/kernel-header-applicability.py', ...Object.values(policy.evidence).map(binding => binding.path),
+  ];
+  const shared = ['scripts/image_gate.py', 'scripts/image_gate_test.py', 'scripts/image_audit.py',
+    'scripts/image_audit_test.py', 'scripts/image-audit-tool.json', '.github/workflows/ci.yml',
+    'scripts/image_applicability.py', 'scripts/image_applicability_test.py', 'scripts/image-applicability-policy.json'];
+  for (const path of [...runtimeOnly, ...shared]) {
+    const run = selectImage('Judge/runtime', [path]);
+    assert.equal(run.status, 0, `${path}: ${run.stderr}`);
+    assert.equal(run.selected, 'build=true', path);
+  }
+  for (const context of ['Back', 'Front', 'Judge']) {
+    for (const path of shared) assert.equal(selectImage(context, [path]).selected, 'build=true', `${context}: ${path}`);
+    assert.equal(selectImage(context, ['docs/overhaul/PROGRESS.md']).selected, 'build=false', context);
+  }
+});
+
+test('unknown image changes fail closed without weakening ordinary bounded selection', () => {
+  for (const overrides of [{ BASE: '' }, { CI_TEST_FETCH_STATUS: '1' }]) {
+    const run = selectImage('Judge/runtime', [], overrides);
+    assert.equal(run.status, 0, run.stderr);
+    assert.equal(run.selected, 'build=true');
+  }
+  assert.notEqual(selectImage('Judge/runtime', [], { CI_TEST_DIFF_STATUS: '2' }).status, 0);
+  assert.equal(selectImage('Front', ['Front/src/App.tsx']).selected, 'build=true');
+  assert.equal(selectImage('Back', ['Front/src/App.tsx']).selected, 'build=false');
+});
+
+test('image gate failures stay required and raw artifacts are retained without continue-on-error', () => {
+  const images = workflow.slice(workflow.indexOf('\n  images:'), workflow.indexOf('\n  changes:'));
+  assert.match(images, /python3 scripts\/image_gate\.py "\$COMPONENT" "\$IMAGE_DIRECTORY" "reports\/images\/\$COMPONENT" "\$BUILD_DIGEST"/);
+  for (const file of ['image_audit_test.py', 'image_gate_test.py', 'verify_image_payload_test.py', 'image_applicability_test.py']) {
+    assert.ok(images.includes(`-p '${file}'`), `Required image test ${file}`);
+  }
+  assert.doesNotMatch(images, /continue-on-error|\|\| true|--ignore-unfixed|--ignorefile|--skip-files|--skip-dirs/);
+  assert.match(images, /if-no-files-found: error/);
+  assert.match(images, /if: \$\{\{ !cancelled\(\) && steps\.changes\.outputs\.build == 'true' \}\}/);
+  assert.match(required, /needs: \[[^\]]*images/);
 });
 
 

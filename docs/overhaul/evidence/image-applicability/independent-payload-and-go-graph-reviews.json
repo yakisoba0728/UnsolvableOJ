@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/product_engineering",
+  "observedAt": "2026-11-16T04:10:25.772466+00:00",
+  "reviews": [
+    {
+      "candidate": "50fad46384b439a49d54aa7ebe86767ebdf56797",
+      "reviewWorktree": "/workspace/scratch/231e81830e94/image-payload-review",
+      "decision": "APPROVED_SOURCE_AND_SYNTHETIC_VALIDATION_PENDING_ACTUAL_IMAGE",
+      "sourceSha256": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0",
+      "checks": [
+        {
+          "command": "python3 -m unittest discover -s scripts -p *_test.py -v",
+          "passed": 42,
+          "failed": 0,
+          "composition": "27 payload +15 existing image scanner tests"
+        },
+        {
+          "command": "node --test scripts/ci-policy.test.mjs scripts/collect-sboms.test.mjs",
+          "passed": 14,
+          "failed": 0
+        },
+        {
+          "command": "git diff 50fad46^ 50fad46 --check",
+          "exitCode": 0
+        }
+      ],
+      "reviewedBoundaries": [
+        "BuildKit/index/manifest/config/layer/diff-id identity and bounded streaming final-layer bytes",
+        "Explicit/opaque whiteouts and current-layer additions; later replacements cannot be hidden by old correct files",
+        "Duplicate/traversal/sparse/archive-tail/link/ancestor/dpkg metadata rejection; no extraction/container execution",
+        "Exact package/source/version/arch, scanner inventory, final990 regular byte records and dpkg ownership",
+        "Original HIGH/CRITICAL scan gate remains failing; MATCH is not vulnerability acceptance"
+      ],
+      "blockingSourceFindings": [],
+      "limits": [
+        "Actual application OCI file bytes not yet independently verified.",
+        "Expected manifest must come from separately approved cc4bac evidence.",
+        "File modes/xattrs/unowned files and host kernel are outside this byte comparison.",
+        "Conservative protected-ancestor restrictions can reject unusual valid images."
+      ]
+    },
+    {
+      "candidate": "0b4c124732dc7938c609868ef4ffc3aa428eb112",
+      "reviewWorktree": "/workspace/scratch/231e81830e94/go-package-review",
+      "decision": "APPROVED_SOURCE_AND_GUARD_VALIDATION_PENDING_ACTUAL_IMAGE_NATIVE_CI",
+      "checks": [
+        {
+          "command": "python3 -m unittest discover -s Judge/runtime -p test_*.py -v",
+          "passed": 5,
+          "failed": 0,
+          "composition": "4 new graph regressions +1 existing runtime health test"
+        },
+        {
+          "command": "node --test scripts/ci-policy.test.mjs",
+          "passed": 13,
+          "failed": 0
+        },
+        {
+          "command": "AWK production guard against retained505-path list; list/source-lock/backport/checker hashes independently matched",
+          "exitCode": 0
+        }
+      ],
+      "reviewedBoundaries": [
+        "Original compile/test layer preserved; go-list uses same production build-selection flags and source/toolchain",
+        "No -e/-test/alternate module/overlay; command and sort/check errors propagate through &&",
+        "OpenPGP and every descendant rejected by anchored import prefix; invalid/empty/duplicate/missing-main input fails",
+        "Generated runtime evidence includes package list/environment/binary info/actual source-lock hashes and artifact hashes",
+        "Raw UNKNOWN scanner finding remains unchanged and visible"
+      ],
+      "blockingSourceFindings": [],
+      "limits": [
+        "Independent Go rebuild and actual Docker/native execution not performed in this review.",
+        "505-path list is retained actual local source-build evidence; its origin is author-reported, while bytes/hashes and AWK guard were independently checked.",
+        "Import-closure absence applies to this build configuration and these packages only, not all x/crypto code or host safety."
+      ],
+      "primarySources": [
+        "https://pkg.go.dev/vuln/GO-2026-5932",
+        "https://pkg.go.dev/cmd/go#hdr-List_packages_or_modules"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1581 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": "2026-11-16T03:28:21.280158+00:00",
+  "workflowRun": 43796045174,
+  "pullRequest": 68,
+  "pullRequestHead": "6d11f600006884f43d93c8deb35afe9f62acaf73",
+  "checkoutMergeCommit": "c167a1e17e7b915fc313c52357e7505f8cf56b6f",
+  "sourceTree": "7645e8024680abbd8380354372eeeabcdef32215",
+  "execution": "all four scans COMPLETED; all four gates BLOCKED_FINDINGS (exit 2)",
+  "artifacts": [
+    {
+      "component": "back",
+      "artifactId": 14194357172,
+      "jobId": 133064968687,
+      "zipFile": "before-back.zip",
+      "zipSha256": "706256f1e68ee8f646e6d80e05a6ea802e3bbb09555e4ff6a528a06bca82ea1c",
+      "rawReportSha256": "065d8c2d5535fe5d12d4d73848865c0ea6984f0eca26958524b0464396b8765e",
+      "allSeverityCounts": {
+        "MEDIUM": 13,
+        "HIGH": 6,
+        "LOW": 1
+      },
+      "blockingGroups": [
+        {
+          "package": "brace-expansion",
+          "installedVersion": "5.0.9",
+          "path": "usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json",
+          "counts": {
+            "HIGH": 2
+          },
+          "findings": [
+            {
+              "id": "CVE-2026-102276",
+              "severity": "HIGH",
+              "fixedVersion": "5.0.10, 3.0.7, 2.1.5, 1.1.19",
+              "title": "brace-expansion: brace-expansion: Denial of Service via stack exhaustion from crafted brace patterns",
+              "status": "fixed"
+            },
+            {
+              "id": "CVE-2026-102278",
+              "severity": "HIGH",
+              "fixedVersion": "5.0.11, 3.0.8, 2.1.6, 1.1.20",
+              "title": "brace-expansion: brace-expansion: Denial of Service via uncontrolled recursion in nested brace patterns",
+              "status": "fixed"
+            }
+          ]
+        },
+        {
+          "package": "undici",
+          "installedVersion": "6.28.0",
+          "path": "usr/local/lib/node_modules/npm/node_modules/undici/package.json",
+          "counts": {
+            "HIGH": 4
+          },
+          "findings": [
+            {
+              "id": "CVE-2026-109383",
+              "severity": "HIGH",
+              "fixedVersion": "6.29.1, 7.30.1, 8.12.2",
+              "title": "undici: undici: Certificate validation bypass via dropped TLS options in Agent",
+              "status": "fixed"
+            },
+            {
+              "id": "CVE-2026-109869",
+              "severity": "HIGH",
+              "fixedVersion": "6.29.1, 7.30.1, 8.12.2",
+              "title": "undici: undici: Denial of Service via unhandled stream error on excessive content encodings",
+              "status": "fixed"
+            },
+            {
+              "id": "CVE-2026-19534",
+              "severity": "HIGH",
+              "fixedVersion": "6.28.1, 7.29.1, 8.10.2",
+              "title": "undici: undici: Denial of Service via unrequested WebSocket subprotocol",
+              "status": "fixed"
+            },
+            {
+              "id": "CVE-2026-87018",
+              "severity": "HIGH",
+              "fixedVersion": "6.29.1, 7.30.1, 8.12.2",
+              "title": "undici: undici: Denial of Service via TLS renegotiation with mismatched certificate",
+              "status": "fixed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "front",
+      "artifactId": 14194596445,
+      "jobId": 133064968682,
+      "zipFile": "before-front.zip",
+      "zipSha256": "57e21f6c5c2ffc22195c34a95b872ea9ed53ed7d6b4512c212bde6c3f449dbfa",
+      "rawReportSha256": "dd10bde4d6eb08aa920cc1249f2a808b687e62ff08f8e1ab3aa7b13f5eadc0ff",
+      "allSeverityCounts": {
+        "HIGH": 3,
+        "MEDIUM": 2
+      },
+      "blockingGroups": [
+        {
+          "package": "libxslt",
+          "installedVersion": "1.1.43-r3",
+          "path": "/home/runner/work/_temp/image-front (alpine 3.24.4)",
+          "counts": {
+            "HIGH": 3
+          },
+          "findings": [
+            {
+              "id": "CVE-2026-125350",
+              "severity": "HIGH",
+              "fixedVersion": "1.1.43-r4",
+              "title": "chromium-browser: Use after free in XML",
+              "status": "fixed"
+            },
+            {
+              "id": "CVE-2026-87636",
+              "severity": "HIGH",
+              "fixedVersion": "1.1.43-r4",
+              "title": "chromium-browser: chromium-browser: Type confusion in XML",
+              "status": "fixed"
+            },
+            {
+              "id": "CVE-2026-9947",
+              "severity": "HIGH",
+              "fixedVersion": "1.1.43-r4",
+              "title": "chromium-browser: Use after free in XML",
+              "status": "fixed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "judge",
+      "artifactId": 14193928368,
+      "jobId": 133064968627,
+      "zipFile": "before-judge.zip",
+      "zipSha256": "762a79291291374c9e89ff114f6b98596cfbc56cb1f951f570eb7268c1486563",
+      "rawReportSha256": "affc9c1bd87054e1161404fe4bfc35bc12bfcb487433d1dcdf9804191c5fe885",
+      "allSeverityCounts": {
+        "MEDIUM": 13,
+        "HIGH": 6,
+        "LOW": 1
+      },
+      "blockingGroups": [
+        {
+          "package": "brace-expansion",
+          "installedVersion": "5.0.9",
+          "path": "usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json",
+          "counts": {
+            "HIGH": 2
+          },
+          "findings": [
+            {
+              "id": "CVE-2026-102276",
+              "severity": "HIGH",
+              "fixedVersion": "5.0.10, 3.0.7, 2.1.5, 1.1.19",
+              "title": "brace-expansion: brace-expansion: Denial of Service via stack exhaustion from crafted brace patterns",
+              "status": "fixed"
+            },
+            {
+              "id": "CVE-2026-102278",
+              "severity": "HIGH",
+              "fixedVersion": "5.0.11, 3.0.8, 2.1.6, 1.1.20",
+              "title": "brace-expansion: brace-expansion: Denial of Service via uncontrolled recursion in nested brace patterns",
+              "status": "fixed"
+            }
+          ]
+        },
+        {
+          "package": "undici",
+          "installedVersion": "6.28.0",
+          "path": "usr/local/lib/node_modules/npm/node_modules/undici/package.json",
+          "counts": {
+            "HIGH": 4
+          },
+          "findings": [
+            {
+              "id": "CVE-2026-109383",
+              "severity": "HIGH",
+              "fixedVersion": "6.29.1, 7.30.1, 8.12.2",
+              "title": "undici: undici: Certificate validation bypass via dropped TLS options in Agent",
+              "status": "fixed"
+            },
+            {
+              "id": "CVE-2026-109869",
+              "severity": "HIGH",
+              "fixedVersion": "6.29.1, 7.30.1, 8.12.2",
+              "title": "undici: undici: Denial of Service via unhandled stream error on excessive content encodings",
+              "status": "fixed"
+            },
+            {
+              "id": "CVE-2026-19534",
+              "severity": "HIGH",
+              "fixedVersion": "6.28.1, 7.29.1, 8.10.2",
+              "title": "undici: undici: Denial of Service via unrequested WebSocket subprotocol",
+              "status": "fixed"
+            },
+            {
+              "id": "CVE-2026-87018",
+              "severity": "HIGH",
+              "fixedVersion": "6.29.1, 7.30.1, 8.12.2",
+              "title": "undici: undici: Denial of Service via TLS renegotiation with mismatched certificate",
+              "status": "fixed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "runtime",
+      "artifactId": 14194705994,
+      "jobId": 133064968804,
+      "zipFile": "before-runtime.zip",
+      "zipSha256": "eb0737414fb6c45c6ebc866ed3a2f4892c372dba9934078299bf158ae06b7c51",
+      "rawReportSha256": "406d2627e4b48c8d248552e1f9d1d7daf8d8dd8c09d9cd33125fd1f9167a8926",
+      "allSeverityCounts": {
+        "HIGH": 181,
+        "MEDIUM": 594,
+        "LOW": 363,
+        "CRITICAL": 5,
+        "UNKNOWN": 2
+      },
+      "blockingGroups": [
+        {
+          "package": "apt",
+          "installedVersion": "2.8.3",
+          "path": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+          "counts": {
+            "HIGH": 1
+          },
+          "findings": [
+            {
+              "id": "CVE-2026-109518",
+              "severity": "HIGH",
+              "fixedVersion": "2.8.4ubuntu0.1",
+              "title": "apt: apt: Remote code execution via hard link reuse during package download retries",
+              "status": "fixed"
+            }
+          ]
+        },
+        {
+          "package": "libapt-pkg6.0t64",
+          "installedVersion": "2.8.3",
+          "path": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+          "counts": {
+            "HIGH": 1
+          },
+          "findings": [
+            {
+              "id": "CVE-2026-109518",
+              "severity": "HIGH",
+              "fixedVersion": "2.8.4ubuntu0.1",
+              "title": "apt: apt: Remote code execution via hard link reuse during package download retries",
+              "status": "fixed"
+            }
+          ]
+        },
+        {
+          "package": "linux-libc-dev",
+          "installedVersion": "6.8.0-149.149",
+          "path": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+          "counts": {
+            "CRITICAL": 5,
+            "HIGH": 177
+          },
+          "findings": [
+            {
+              "id": "CVE-2026-63825",
+              "severity": "CRITICAL",
+              "fixedVersion": null,
+              "title": "kernel: gcov: use atomic counter updates to fix concurrent access crashes",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-64523",
+              "severity": "CRITICAL",
+              "fixedVersion": null,
+              "title": "kernel: net/handshake: Take a long-lived file reference at submit",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68426",
+              "severity": "CRITICAL",
+              "fixedVersion": null,
+              "title": "kernel: xfrm: fix stale skb->prev after async crypto steals a GSO segment",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90162",
+              "severity": "CRITICAL",
+              "fixedVersion": null,
+              "title": "kernel: ksmbd: defer publishing granted locks to prevent UAF/double-free race",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-93221",
+              "severity": "CRITICAL",
+              "fixedVersion": null,
+              "title": "kernel: nfsd: convert nfsd_net boolean flags to unsigned long flags word",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2022-50240",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: binder: fix UAF of alloc->vma in race with munmap()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2024-35948",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bcachefs: Check for journal entries overruning end of sb clean section",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2024-38581",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: drm/amdgpu/mes: fix use-after-free issue",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2024-40954",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: net: do not leave a dangling sk pointer, when socket creation fails",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2024-44964",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: idpf: fix memory leaks and crashes while performing a soft reset",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2024-46742",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: smb/server: fix potential null-ptr-deref of lease_ctx_info in smb2_open()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2024-56591",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Bluetooth: hci_conn: Use disable_delayed_work_sync",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2024-57857",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: RDMA/siw: Remove direct link to net_device",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2024-58098",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: track changes_pkt_data property for global functions",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2024-58100",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: check changes_pkt_data property for extension programs",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-22043",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ksmbd: add bounds check for durable handle context",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-37743",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: ath12k: Avoid memory leak while enabling statistics",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-37776",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ksmbd: fix use-after-free in smb_break_all_levII_oplock()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-37906",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Linux kernel: ublk race condition causes kernel crash",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-38717",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: net: kcm: Fix race condition in kcm_unattach()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-39933",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: smb: client: let recv_done verify data_offset, data_length and remaining_data_length",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-40025",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: f2fs: fix to do sanity check on node footer for non inode dnode",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-40075",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: tcp_metrics: use dst_dev_net_rcu()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-40170",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: net: use dst_dev_rcu() in sk_setup_caps()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-40190",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ext4: guard against EA inode refcount underflow in xattr update",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-40274",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: KVM: guest_memfd: Remove bindings on memslot deletion when gmem is dying",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-40344",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ASoC: Intel: avs: Disable periods-elapsed work when closing PCM",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-68251",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Linux kernel (erofs): Denial of Service via corrupted subpage compact indexes",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-68304",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Bluetooth: hci_core: lookup hci_conn on RX path on protocol side",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-68360",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: mt76: wed: use proper wed reference in mt76 wed driver callabacks",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-68729",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: ath12k: Fix MSDU buffer types handling in RX error path",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-68730",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: accel/ivpu: Fix page fault in ivpu_bo_unbind_all_bos_from_context()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-68745",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Linux kernel: Denial of Service in qla2xxx SCSI driver due to improper command handling after chip reset",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-71073",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Input: lkkbd - disable pending work before freeing device",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-71074",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Linux kernel functionfs: Use-After-Free vulnerability due to open/removal races",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-71202",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Linux kernel: Memory Corruption and Kernel Crashes via IOMMU SVA coherency issue",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2025-71315",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: drm/vkms: Convert to DRM's vblank timer",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-100074",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Mark bpf_refcount field as unique",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-23208",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ALSA: usb-audio: Prevent excessive number of frames",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-23239",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Kernel: Race condition in espintcp can lead to denial of service",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-23240",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Linux kernel: Denial of service due to a race condition in the TLS subsystem",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-23265",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: f2fs: fix to do sanity check on node footer in {read,write}_end_io",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-23377",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ice: change XDP RxQ frag_size from DMA write length to xdp.frame_sz",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-23393",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bridge: cfm: Fix race condition in peer_mep deletion",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-31410",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ksmbd: use volume UUID in FS_OBJECT_ID_INFORMATION",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-31536",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: smb: server: let send_done handle a completion without IB_SEND_SIGNALED",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-31692",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: rtnetlink: add missing netlink_ns_capable() check for peer netns",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-43009",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Fix incorrect pruning due to atomic fetch precision tracking",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-43034",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bnxt_en: set backing store type from query type",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-43042",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: mpls: add seqcount to protect the platform_label{,s} pair",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-43048",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: HID: core: Mitigate potential OOB by removing bogus memset()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-43213",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: rtw89: pci: validate sequence number of TX release report",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-43263",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: media: chips-media: wave5: Fix Null reference while testing fluster",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-43379",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ksmbd: fix use-after-free in smb_lazy_parent_lease_break_close()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-43464",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: net/mlx5e: RX, Fix XDP multi-buf frag counting for legacy RQ",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-45940",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: net: stmmac: fix oops when split header is enabled",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-46181",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: RDMA/mlx4: Fix mis-use of RCU in mlx4_srq_event()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-46330",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Revert \"net/smc: Introduce TCP ULP support\"",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-52946",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: fs/fcntl: fix SOFTIRQ-unsafe lock order in fasync signaling",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-52991",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: sched/psi: fix race between file release and pressure write",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-53024",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: greybus: raw: fix use-after-free if write is called after disconnect",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-53178",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: staging: rtl8723bs: rtw_mlme: add bounds checks before ie_length subtraction",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-53281",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: iommu/vt-d: Avoid NULL pointer dereference or refcount corruption",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-53377",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: drm/msm: always recover the gpu",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-53401",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: fbdev: omap2: fix use-after-free in omapfb_mmap",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-63819",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: f2fs: fix to do sanity check on f2fs_get_node_folio_ra()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-63879",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: drm/amdgpu: fix amdgpu_hmm_range_get_pages",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-64036",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: cgroup/rstat: validate cpu before css_rstat_cpu() access",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-64052",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: block: bio-integrity: Fix null-ptr-deref in bio_integrity_map_user()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-64077",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: netfilter: ebtables: move to two-stage removal scheme",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-64078",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: netfilter: x_tables: add and use xtables_unregister_table_exit",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68081",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: KVM: nVMX: Put vmcs12 pages if nested VM-Enter fails due to invalid guest state",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68103",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: drm/amdgpu: reject mapping a reserved doorbell to a new queue",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68152",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: amt: fix use-after-free in AMT delayed works",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68245",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: drm/amdgpu: fix lifetime issue of amdgpu_vm_get_task_info_pasid()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68257",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: drm/amdkfd: fix 32-bit overflow in CWSR total size calculation",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68323",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: tipc: serialize udp bearer replicast list updates",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68401",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: firmware: arm_ffa: Fix out-of-bound writes in ffa_setup_and_transmit()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68404",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: cfg80211: use wiphy work for socket owner autodisconnect",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68409",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: mac80211: defer link RX stats percpu free to RCU",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68447",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: drm/amdkfd: clamp v9 CRIU control stack checkpoint copy to BO size",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68470",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: mac80211: validate extension-frame layout before RX",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-68471",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: ieee80211: validate MLE common info length",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-72162",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ocfs2: fix UBSAN array-index-out-of-bounds in ocfs2_sum_rightmost_rec",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-72198",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ntfs: reject non-resident records for resident-only attributes",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-72288",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: KVM: arm64: vgic: Handle race between interrupt affinity change and LPI disabling",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-72375",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: afs: Fix reinitialisation of the inode, in particular ->lock_work",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-72380",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: xen/pvcalls: bound backend response req_id before indexing rsp[]",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-72383",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: sctp: fix addr_wq_timer race in sctp_free_addr_wq()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-72423",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Guard conntrack opts error writes",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-72472",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: nfs: use nfsi->rwsem to protect traversal of the file lock list",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-72493",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: net: serialize netif_running() check in enqueue_to_backlog()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-72494",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: RDMA/irdma: Replace waitqueue and flag with completion",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74257",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: sockmap: Fix use-after-free in udp_bpf_recvmsg()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74269",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bnxt: fix head underflow on XDP head-grow",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74314",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Cancel special fields on map value recycle",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74317",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ixgbe: do not configure xps for XDP queues",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74344",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Clear rb node linkage when freeing bpf_rb_root",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74385",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: nvmet-tcp: check return value of nvmet_tcp_set_queue_sock",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74388",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ALSA: seq: oss: Fix UAF at handling events with embedded SysEx data",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74506",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: afs: Fix UAF when sending a message",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74530",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Bluetooth: hci_sync: hold conn in hci_connect_big_sync() callback",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74533",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Bluetooth: ISO: fix race of kfree vs kref_get_unless_zero",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74534",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Bluetooth: ISO: fix refcounting of iso_conn",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74537",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Bluetooth: ISO: hold sk properly in iso_conn_ready",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74578",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: crypto: algif_skcipher - force synchronous processing on trees without ctx->state",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74715",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Fix netns reference imbalance in conntrack kfuncs",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74723",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: btrfs: lzo: reject inline extents without valid headers",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-74752",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: sctp: validate cookie AUTH state before use",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-80631",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: btrfs: lzo: reject compressed segment that overflows the compressed input",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-80634",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: netfilter: flowtable: avoid num_encaps underflow on bridge VLAN untag",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-80668",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: netfilter: nf_conntrack_expect: use conntrack GC to reap expectations",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-80692",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Bluetooth: hci_sync: hold conn in hci_connect_acl/le_sync() callbacks",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-80693",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: idpf: bound interrupt-vector register fill to the allocated array",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-80721",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Bluetooth: ISO: ensure no dangling hcon references in iso_conn",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-80725",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: net: gro: properly validate BIG TCP aggregation criteria",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-80905",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: net: tap: fix wrong transport_header when sending VLAN-tagged frame",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-89528",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: svcrdma: Reject Read lists that exceed the page budget",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-89537",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: SUNRPC: Reject short RFC 4121 MIC tokens in gss_krb5_verify_mic_v2",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-89631",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: smb: client: reject a tree connect response whose byte count is too small",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-89637",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: smb: client: fix UAF and buffer leak in cifs_check_trans2() for malformed secondary T2",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-89675",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: nfsd: fix UAF in async copy cancel and shutdown",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-89788",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ksmbd: fix tree connection use-after-free in smb2_tree_connect()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-89810",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: drm/amdkfd: Fix error path at svm_migrate_copy_to_ram",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-89913",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: KVM: arm64: vgic-v3: take an LPI reference in vgic_v3_save_pending_tables",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90093",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Bluetooth: L2CAP: access chan->conn safely in get/setsockopt",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90104",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: NFSv4.1: zero referring call lists before decoding",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90111",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ip6mr: do not clone dst in ip6mr_cache_report()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90149",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: NFSv4/flexfiles: fix NULL dereference for NFSv4.0 data servers",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90155",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ksmbd: detach blocked lock requests before freeing",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90161",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: erofs: fix interlaced ztailpacking pclusters",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90167",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ksmbd: serialize oplock close with pending break ownership",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90204",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ocfs2: validate DIO orphan slot during inode read",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90205",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ocfs2: validate orphan slot during inode read",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90217",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Compare iterator types during state pruning",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90237",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: netfilter: nft_ct: move custom expectation support to helper",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90256",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: Bluetooth: L2CAP: use proto_lock for l2cap_data to fix l2cap_disconn_ind",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90317",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Invalidate RCU pointers after final spin unlock",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90320",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ocfs2: validate external xattr entries when reading metadata",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90321",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ocfs2: validate inline xattrs during inode block validation",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90324",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ublk: check import_ubuf() return value",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90343",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: cfg80211: stop PMSR before P2P and NAN teardown",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90380",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: mt76: mt792x: fix use-after-free in mt76_rx_poll_complete",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-90417",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: RDMA/cxgb4: Fix dereg_skb leak and double free in write_tpt_entry()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-92499",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ext4: validate readdir offset before accessing dirent",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-93125",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Reject rdonly/rdwr_buf_size kfunc arguments that exceed u32 max",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-93144",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Reject writes through untrusted BTF pointers",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-93148",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Reject MEM_ALLOC BTF accesses past object bounds",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-93154",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: RDMA/irdma: Add refcounting to user ring MRs",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-93175",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: drm/amd/display: Fix dangling pointer in CRTC reset function",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-93176",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: drm/amd/display: Fix dangling pointer in plane reset function",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-93282",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ksmbd: fix maximum allowed access checks",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-97493",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: drm/amdgpu: Bound GPIO I2C table entry count from VBIOS",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-97513",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: media: chips-media: wave5: Release m2m_ctx after Instance Removed from List",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-97565",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: smb: client: reject short READ responses in CIFSSMBRead()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-97603",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: idpf: disable DIM work before freeing q_vectors",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-97960",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: perf/x86/intel: Prevent drain_pebs() reentry",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-97988",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: vhost: invalidate vring access on IOTLB transitions",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98019",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: mark a NULL call argument precise",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98033",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Preserve inner map identity in callback frames",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98034",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Mark NULL kptr stores precise",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98084",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: backtracking shouldn't clear outer frame R1-R5 for callbacks",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98085",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: backtrack_insn(): Handle ld_{abs,ind} subprog exit edge",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98115",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ksmbd: safely drain sessions during logoff",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98134",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: check_cond_jmp_op(): properly infer if register is null",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98332",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: mac80211: only operate on TDLS peers in the TDLS code",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98333",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: mac80211: reset the LED state when ifup fails",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98341",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: cfg80211: don't free driver-owned scan requests",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98364",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: xfrm: hold net_device reference under RCU in bundle creation",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98420",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: ksmbd: follow SMB2 session expiration semantics",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98439",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: smb/server: cancel async requests when closing connection",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98570",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: net: ipv6: keep room for the mac header in dst_dev_overhead()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98589",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Reject pkt arguments in mutating subprogs",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98599",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Reject non-negative offsets in stack_slot_obj_get_spi()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98652",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: KVM: s390: Add missing srcu in kvm_s390_set_irq_state()",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98799",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Skip detached progs in trampoline images that are still in use",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98800",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: kernel: Denial of Service via use-after-free in BPF trampoline",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98803",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: net: stmmac: fix rx Scatter-Gather support",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98813",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: bpf: Hold map BTF for the memory allocator destructor record",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98824",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: mac80211: validate TX status rate metadata",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98829",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: wifi: mac80211: drop oversized fragments to avoid extra_len overflow",
+              "status": "affected"
+            },
+            {
+              "id": "CVE-2026-98863",
+              "severity": "HIGH",
+              "fixedVersion": null,
+              "title": "kernel: KVM: x86: Re-pend GET_NESTED_STATE_PAGES if getting said pages fails",
+              "status": "affected"
+            }
+          ]
+        },
+        {
+          "package": "golang.org/x/net",
+          "installedVersion": "v0.61.0",
+          "path": "opt/go-judge",
+          "counts": {
+            "HIGH": 1
+          },
+          "findings": [
+            {
+              "id": "CVE-2026-78661",
+              "severity": "HIGH",
+              "fixedVersion": "0.62.0",
+              "title": "golang.org/x/net/html: golang.org/x/net/html: Denial of Service via crafted HTML input",
+              "status": "fixed"
+            }
+          ]
+        },
+        {
+          "package": "stdlib",
+          "installedVersion": "v1.27.2",
+          "path": "opt/go-judge",
+          "counts": {
+            "HIGH": 1
+          },
+          "findings": [
+            {
+              "id": "CVE-2026-111943",
+              "severity": "HIGH",
+              "fixedVersion": "1.26.10, 1.27.3",
+              "title": "crypto/x509: golang: crypto/x509: Man-in-the-middle attacks via untrusted intermediate certificates",
+              "status": "fixed"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

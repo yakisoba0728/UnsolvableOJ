@@ -1,5 +1,33 @@
 # syntax=docker/dockerfile:1
-FROM criyle/go-judge:v1.13.3 AS go-judge
+# Preserve the audited v1.13.3 runtime behavior. Rebuild its immutable source
+# with patched Go/x/net and the upstream authentication-log redaction backport.
+FROM golang:1.27.4-bookworm@sha256:4fa7c968ba93f1635670522dbb01a2c78150443e1385746924566079f36570ea AS go-judge
+ENV CGO_ENABLED=0 GOTOOLCHAIN=local GOMAXPROCS=2 GOMEMLIMIT=512MiB
+WORKDIR /src
+ADD --checksum=sha256:5b5293e4300de03251c3b43d38241386937012722adb44d084f8f3eb4cc79b55 https://api.github.com/repos/criyle/go-judge/tarball/4ebd2ffe9474639c665fa21cfb438f68820fe77c /tmp/go-judge.tar.gz
+RUN tar -xzf /tmp/go-judge.tar.gz --strip-components=1 -C /src \
+    && rm /tmp/go-judge.tar.gz
+COPY go-judge-auth-redaction.patch /tmp/go-judge-auth-redaction.patch
+RUN git apply --unidiff-zero --check /tmp/go-judge-auth-redaction.patch \
+    && git apply --unidiff-zero /tmp/go-judge-auth-redaction.patch
+COPY go-judge.go.mod ./go.mod
+COPY go-judge.go.sum ./go.sum
+RUN go mod download && go mod verify \
+    && go test -mod=readonly -tags=nomsgpack,grpcnotrace -count=1 ./cmd/go-judge/... \
+    && printf '%s\n' 'v1.13.3-unsolvable.1' > cmd/go-judge/version/version.txt \
+    && go build -mod=readonly -buildvcs=false -trimpath -tags=nomsgpack,grpcnotrace -ldflags='-s -w' -o /opt/go-judge ./cmd/go-judge \
+    && go version -m /opt/go-judge
+# Retain the production package closure with the same source/toolchain/flags.
+# A separate layer preserves the verified compile/test layer above.
+COPY check-go-package-graph.awk /tmp/check-go-package-graph.awk
+RUN go list -mod=readonly -buildvcs=false -trimpath -tags=nomsgpack,grpcnotrace -deps -f '{{.ImportPath}}' ./cmd/go-judge > /opt/go-judge-packages.txt \
+    && LC_ALL=C sort -o /opt/go-judge-packages.txt /opt/go-judge-packages.txt \
+    && awk -f /tmp/check-go-package-graph.awk /opt/go-judge-packages.txt \
+    && go env -json GOOS GOARCH CGO_ENABLED GOVERSION GOTOOLCHAIN > /opt/go-judge-build-env.json \
+    && go version -m /opt/go-judge > /opt/go-judge-build-info.txt \
+    && sha256sum go.mod go.sum > /opt/go-judge-source-locks.sha256 \
+    && cd /opt \
+    && sha256sum go-judge go-judge-packages.txt go-judge-build-env.json go-judge-build-info.txt go-judge-source-locks.sha256 > go-judge-artifacts.sha256
 # Ubuntu apt의 nodejs는 지원이 끝난 18.x이므로 공식 Node 24 바이너리를 가져옵니다.
 FROM node:24.22.2-bookworm-slim@sha256:01d566e8d94d8c619591d78652babfccd3c6992a3dffa9ed5ab39e11cf6c70e9 AS node
 RUN npm install -g esbuild@0.28.2
@@ -7,8 +35,16 @@ RUN npm install -g esbuild@0.28.2
 FROM ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates gcc g++ openjdk-21-jdk-headless python3 golang-go rustc util-linux \
+# Acquire::Retries=0 is Ubuntu's mitigation while the old APT installs its own
+# security update (CVE-2026-109518); do not ship an unpatched base-image APT.
+RUN apt-get -o Acquire::Retries=0 update \
+    && apt-get -o Acquire::Retries=0 install -y --no-install-recommends \
+    apt ca-certificates gcc g++ openjdk-21-jdk-headless python3 golang-go rustc util-linux \
+    libpcre2-8-0 perl-base \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' apt)" ge 2.8.4ubuntu0.1 \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libapt-pkg6.0t64)" ge 2.8.4ubuntu0.1 \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libpcre2-8-0)" ge 10.42-4ubuntu2.2 \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' perl-base)" ge 5.38.2-3.2ubuntu0.7 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
 COPY --from=node /usr/local/LICENSE /usr/share/licenses/node/LICENSE
@@ -17,9 +53,13 @@ COPY --from=node /usr/local/lib/node_modules/esbuild /usr/local/lib/node_modules
 RUN ln -s /usr/local/bin/node /usr/bin/node && ln -s ../lib/node_modules/esbuild/bin/esbuild /usr/local/bin/esbuild
 
 WORKDIR /opt
-COPY --from=go-judge /opt/go-judge /opt/go-judge
-ADD --checksum=sha256:a84a0427c3a1c25851a4689410a54283962a759a02558058a107470993b80c5a https://raw.githubusercontent.com/criyle/go-judge/v1.13.3/LICENSE /usr/share/licenses/go-judge/LICENSE
-ADD --checksum=sha256:a8130acef4b119510fe89f6070ec27d50fbb188c8ed29c3c839bcb8dfe2b4184 https://raw.githubusercontent.com/criyle/go-judge/v1.13.3/seccomp/NOTICE /usr/share/licenses/go-judge/seccomp-NOTICE
+COPY --from=go-judge /opt/go-judge /opt/go-judge-packages.txt \
+    /opt/go-judge-build-env.json /opt/go-judge-build-info.txt \
+    /opt/go-judge-source-locks.sha256 /opt/go-judge-artifacts.sha256 /opt/
+COPY go-judge-build.json /opt/go-judge-build.json
+COPY --from=go-judge /src/LICENSE /usr/share/licenses/go-judge/LICENSE
+COPY --from=go-judge /usr/local/go/LICENSE /usr/share/licenses/go-judge/Go-LICENSE
+COPY --from=go-judge /src/seccomp/NOTICE /usr/share/licenses/go-judge/seccomp-NOTICE
 ADD --checksum=sha256:cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30 https://www.apache.org/licenses/LICENSE-2.0.txt /usr/share/licenses/go-judge/seccomp-LICENSE
 COPY mount.yaml health.py start.sh /opt/
 EXPOSE 5050

@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/product_engineering",
+  "observedAt": "2026-11-16T03:59:48.666953+00:00",
+  "sourceOnlyReview": true,
+  "localDockerOrNativeExecution": false,
+  "priorActualImageEvidence": {
+    "front": {
+      "rawReportSha256": "a1a46bf7701a824db079874250c51fe2394ddff99764e0b72fb0b650be6d0574",
+      "sourceCommit": "c1c09ab95f6e0cc073a13e602625cc01c99d6aec",
+      "imageManifestDigest": "sha256:8d5e42de71e08f2672985c6aa3615d1071b11b33e684b2ddcbb01a95187d496c",
+      "imageConfigDigest": "sha256:d92204ca344c4033adc2f80edb59f851160a438a96e148006cc67932dfd35b50",
+      "rawSeverityCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "rawGate": "PASS"
+    },
+    "back": {
+      "rawReportSha256": "c082304269eeff1a20693ce4583838accb262f15a01d0a8f94678fabc632ab40",
+      "sourceCommit": "c1c09ab95f6e0cc073a13e602625cc01c99d6aec",
+      "imageManifestDigest": "sha256:d044e55947556e538e4e4b832e2d4121077ef083e45a77a9faaa935cb4920efb",
+      "imageConfigDigest": "sha256:747a71106e86dacf00d925ecea40de8902397b85c1708ea35359d1263bbf03cc",
+      "rawSeverityCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 1,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "rawGate": "PASS"
+    },
+    "judge": {
+      "rawReportSha256": "c60009c83c1bcf1ca1589f9f5eef8bca19e5e602d7d33c3da5feb2a0061fc573",
+      "sourceCommit": "c1c09ab95f6e0cc073a13e602625cc01c99d6aec",
+      "imageManifestDigest": "sha256:c2476b1f3c9fdc810d1c00d5bfd56a97d8b8a80b3eb4d50a6c9aee2ffbf1ff78",
+      "imageConfigDigest": "sha256:ffeaf53d08698517951ce97f156e8b02956c0883bb7e74d245e35d0002680c0b",
+      "rawSeverityCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 1,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "rawGate": "PASS"
+    },
+    "runtime": {
+      "rawReportSha256": "da3daec985ffce4acb44860bd976c7cae266d29b2af677a27d476a419175fb74",
+      "sourceCommit": "c1c09ab95f6e0cc073a13e602625cc01c99d6aec",
+      "imageManifestDigest": "sha256:97d003ecba3f1b48725f261ea1083679aa407c47935f5b31115876675575b2f7",
+      "imageConfigDigest": "sha256:9cbd26448f93493937135000d145100815d413add2188adb534bc4c2729afb9c",
+      "rawSeverityCounts": {
+        "UNKNOWN": 1,
+        "LOW": 363,
+        "MEDIUM": 569,
+        "HIGH": 177,
+        "CRITICAL": 5
+      },
+      "rawGate": "BLOCKED_FINDINGS"
+    }
+  },
+  "reviews": [
+    {
+      "commit": "88204f21a1d2b6728024ea5b307df5216916019d",
+      "decision": "APPROVED_SOURCE_PENDING_EXACT_HEAD_IMAGE_AND_COMPOSE_CHECKS",
+      "scope": "Final Back/Judge Alpine installed zlib update only",
+      "sourceFindings": [],
+      "observations": [
+        "Official Alpine3.24 tracker fixes CVE-2026-4738 in1.4-r0.",
+        "Pinned Node base/digest and application lockfiles unchanged; package floor fails builds if supported update cannot resolve.",
+        "Runtime USER node, npm removal and existing HIGH/CRITICAL gate preserved.",
+        "Upstream1.4 has behavior/build changes; actual image/native integration must verify compatibility.",
+        "Prior scan sourceCommit is c1c09ab merge ref; published PR head1b670054 is a distinct lineage field."
+      ],
+      "primarySources": [
+        "https://security.alpinelinux.org/vuln/CVE-2026-4738",
+        "https://zlib.net/"
+      ]
+    },
+    {
+      "commit": "5d42003acbd1702358323acb74865593528870c9",
+      "decision": "APPROVED_SOURCE_PENDING_EXACT_HEAD_RUNTIME_SCAN_AND_NATIVE_CHECKS",
+      "scope": "Already installed Noble libpcre2-8-0 and perl-base supported security package updates",
+      "sourceFindings": [],
+      "observations": [
+        "Prior actual runtime scan contains seven MEDIUM libpcre2-8-0 findings at10.42-4ubuntu2.1 and one MEDIUM perl-base finding at5.38.2-3.2ubuntu0.6.",
+        "Explicit apt install updates those existing packages; dpkg minimum checks use official Noble release versions and fail stale mirrors.",
+        "Runtime distribution/compiler selection, header policy and scanner gate unchanged.",
+        "Perl USN identifies Pod::Text in perl-modules; this image only inventories perl-base. Updating its supported source release is conservative maintenance, not proof that an exploitable Pod::Text path existed.",
+        "Other findings including UNKNOWN Go OpenPGP record remain visible; no severity guess or suppression."
+      ],
+      "primarySources": [
+        "https://ubuntu.com/security/notices/USN-8974-1",
+        "https://ubuntu.com/security/notices/USN-9006-1"
+      ]
+    }
+  ]
+}
