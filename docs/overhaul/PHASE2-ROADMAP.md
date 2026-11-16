@@ -15,8 +15,24 @@ Newly confirmed P0/P1 defects may interrupt this scope. Feature count is not a g
 
 Current stack is retained unless dependency compatibility supplies concrete reasons for a targeted update. Unpaginated enterprise results, large-history query distributions, long-duration mixed failures, image CVE execution and browser vitals are investigated after core changes; any deferred item is explicitly recorded rather than claimed complete. New feature expansion stops until these core acceptance criteria are met.
 
-The core implementations are now in independent review/CI. One bounded existing scaling backlog is admitted while those gates execute: **P2-RESULTS**, paginated owner results with preserved whole-assessment summary, deterministic order, owner authorization, accessible page navigation, and real HTTP/DB before/after evidence. This does not authorize an unbounded feature expansion. All remaining investigations retain explicit completed/blocked/deferred accounting.
+The following bounded extension was admitted during the implementation/review gates: **P2-RESULTS**, paginated owner results with preserved whole-assessment summary, deterministic order, owner authorization, accessible page navigation, and real HTTP/DB before/after evidence. This does not authorize an unbounded feature expansion. All remaining investigations retain explicit completed/blocked/deferred accounting.
 
 ## Integration sequence
 
 IMPLEMENTED → TESTED → INDEPENDENTLY REVIEWED → CI VERIFIED → INTEGRATED. Coordinator owns GitHub publication/merge; authors use isolated worktrees. All feature PRs target existing `overhaul/integration`. No force push, main merge or deployment.
+
+## Implementation checkpoint closure
+
+The seven implementation PRs in PHASE2-PROGRESS are integrated after independent
+review and exact-source full CI. P2-DEP, BOOKMARK, EXAM-VERSION (algorithm
+problems), EXAM-START, EXAM-UI, RESULTS and SUPPLY have the stated bounded code
+and test evidence. P2-JUDGE includes all eight languages, actual natural-lease
+and owned Redis/API/rejudge recovery, and finite worker-scaling trials; full
+MLE coverage, sustained extreme-scale capacity and dangerous host-isolation
+experiments are explicitly outside the completed evidence.
+
+P2-VERIFY closes only when the final evidence PR passes its own review/full CI
+and the post-merge exact integration HEAD passes all12 jobs. PR #63 stores that
+final receipt without predicting future hashes in this report. The wider
+unimplemented investigations remain in PHASE2-FINAL-REPORT, with operational
+readiness separate from code integration.

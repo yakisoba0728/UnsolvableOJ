@@ -117,3 +117,56 @@ remain unverified, and no production connection or deployment is involved.
 The native CI selector also covers `*.pipeline-helpers.ts`; changing only the
 new process or Redis helper must still run the real pipeline. The existing CI
 policy regression exercises both helper paths and both new scenario paths.
+
+## Actual execution and integration
+
+The new scenarios executed in [CI43800127993](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43800127993)
+at source `d5dc5a9cfa627a505efeeac6458a7d9556b71e06`. All12 jobs passed,
+including native74, full pipeline28 and all3 real Compose browser flows.
+PR #70 was integrated as `e7caa9b3aa23ac051e3a786780bc3b8c0780affa` only
+after independent review and this exact-source-head gate.
+
+| Actual scenario | Result |
+|---|---|
+| Owned Redis clean stop/start | Exit0, server run ID changed, AOF enabled; restart interval8.70s, final4 accepted jobs10.31s |
+| API request during Redis outage | HTTP500 after453ms, zero rows created; retry after reconnect completed |
+| Result callback while Redis stopped | Active result persisted in PostgreSQL; other two jobs remained queued |
+| Redis queue/data consistency | All4 accepted submissions generation1, zero recoveries; XP10 once, learning/notifications/solve assertions passed; owned cleanup succeeded |
+| Accepted submission interrupted during rejudge | Original accepted generation1, killed worker during generation2, natural lease/timer recovery to generation3 in86.52s, final ACCEPTED in89.84s |
+| Rejudge fencing/data | Stale callback409, duplicate final callback200, one solve/learning/notification, XP10, one recovery; lease clock unchanged |
+
+`restartMs` includes the stopped interval and observation/callback work; it is
+not just Redis process boot time. These are one bounded scenario per exact run,
+not a recovery SLO distribution. HTTP500 is the observed fail-closed admission
+behavior, not a claimed503 contract or uninterrupted availability.
+
+The original artifact was downloaded, checked against GitHub's SHA256 digest,
+and retained with all four raw JSON reports and source/base/checkout/job identities:
+[evidence/judge-run-43800127993/provenance.json](evidence/judge-run-43800127993/provenance.json).
+Later combined image/final-head validation remains a separate gate. This
+completed run supersedes the earlier implementation-time pending statements;
+crash durability, prolonged mixed failures and production-host conditions remain
+unverified.
+
+## Accepted rebuilt-runtime rerun
+
+The independently accepted image source0e70/full run43805214804 executed
+native74, pipeline28 and all3 live Compose flows again. Its original artifact
+14198052584 has SHA256
+`9923d054856a03fb6bc2541af6e372a63a93ddbfafc08c143a0132605cd23e44`
+and is retained with four byte-verified JSON records and independent QA in
+[evidence/judge-run-43805214804](evidence/judge-run-43805214804/provenance.json).
+
+Owned API replacement took1.042s, and all3 accepted submissions finished
+in8.142s. Clean owned Redis/AOF restart took8.698s including the stopped
+observation interval; all4 accepted submissions finished by10.302s in
+generation1 with no recovery. The outage request returned500 in453.30ms
+and created zero submission rows. The owned resource cleanup succeeded.
+
+A killed rejudge recovered naturally at86.510s and completed at89.780s:
+generation3, one recovery, XP10, one solve/learning/notification row, stale
+callback409, duplicate terminal callback200. The ordinary worker kill recovered
+at77.677s and completed at79.915s. Neither test edited lease time. These are
+one-run scenario timings, not recovery SLOs or a controlled before/after claim.
+The prior clean-stop, power-loss, whole-host and prolonged-load limitations
+continue to apply.

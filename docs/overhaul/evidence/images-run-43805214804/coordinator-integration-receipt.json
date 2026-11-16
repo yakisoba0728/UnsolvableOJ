@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-16 04:57:59 UTC",
+  "scope": "PR68 implementation integration only; final documentation and post-merge integration CI remain separate.",
+  "pullRequest": 68,
+  "source": "0e70a2fe6d725362bcb248836c3697d310e16742",
+  "base": "e7caa9b3aa23ac051e3a786780bc3b8c0780affa",
+  "tree": "f302cef7d2459736d3810ee930f1c9e63662ed65",
+  "actualCheckout": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+  "runId": 43805214804,
+  "runConclusion": "success",
+  "jobs": [
+    {
+      "id": 133094309456,
+      "name": "Detect changes",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309702,
+      "name": "Docker image (runtime)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309704,
+      "name": "Docker image (back)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309774,
+      "name": "Docker image (judge)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309797,
+      "name": "Docker image (front)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309862,
+      "name": "Dependency audit",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349727,
+      "name": "Sandbox, pipeline and Compose",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349764,
+      "name": "Backend and API",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349828,
+      "name": "Judge worker",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349839,
+      "name": "Browser tests (2/2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349864,
+      "name": "Browser tests (1/2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133098126260,
+      "name": "CI required",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "merge": "bfb6adaa28d5d99d34d6bc8051f06fe1aa0c6ee3",
+  "mergeTree": "f302cef7d2459736d3810ee930f1c9e63662ed65",
+  "mainUnchanged": "6176015b63a1615cc2269172f246725ef08abab3",
+  "reviews": [
+    "final-pr68-independent-qa-0e70a2f.json",
+    "../judge-run-43805214804/independent-final-qa.json"
+  ]
+}

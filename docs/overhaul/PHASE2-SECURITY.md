@@ -96,23 +96,61 @@ corresponding to 465/263/29 lock records. Both build and runtime metadata are
 included; these counts are not counts of shipped binaries or vulnerabilities.
 The generator and its coverage validation fail the job on an incomplete graph.
 
-## Remaining image and licensing scope
+## Shipping images and remaining license scope
 
-The runtime's Ubuntu and copied Debian Node base images are digest-pinned and
-three downloaded notices are checksum-pinned. Several other sources remain
-version-tagged: Node Alpine, nginx Alpine, go-judge, PostgreSQL, Redis and the
-Playwright CI image. A version tag is not an immutable image digest. This pass
-does not invent digests or change language/OS images without rebuilding and
-re-running the native gates.
+The initial ORM handoff had no installed-image scan: local Docker was unavailable,
+and a successful CI image build was not treated as vulnerability evidence.
+Subsequent image work supplied real OCI scans. At source
+`0e70a2fe6d725362bcb248836c3697d310e16742`, run43805214804, all four actual image
+jobs and their explicit evidence gates passed. This image-job result is distinct
+from the separately required completed full CI and final integration gate.
 
-Docker is not available in the local task environment. No local container CVE
-scan or installed-image SBOM is claimed. A follow-up can export the exact built
-images from the existing CI image job and run a pinned scanner with a recorded
-advisory-database timestamp. Image build success alone is not a CVE scan.
+| Original package-finding counts | Before HIGH / CRITICAL | Current HIGH / CRITICAL | Decision |
+|---|---:|---:|---|
+| Back | 6 / 0 | 0 / 0 | Current unmodified raw scan PASS; zero findings at all reported severities |
+| Front | 3 / 0 | 0 / 0 | Current unmodified raw scan PASS; zero findings at all reported severities |
+| Judge worker | 6 / 0 | 0 / 0 | Current unmodified raw scan PASS; zero findings at all reported severities |
+| Runtime | 181 / 5 | 177 / 5 | Original raw exit2 and BLOCKED_FINDINGS retained; exact182 header-component decisions independently reviewed |
+
+These are scanner package records, not counts of distinct independently
+exploitable vulnerabilities. Node/nginx application base images and the
+Ubuntu/Node/Go runtime stages now use actual reviewed image digests. Targeted
+supported library updates, removal of unused global npm tooling from final
+application images, a pinned-source go-judge security rebuild and authentication
+log redaction address the patchable observations. PostgreSQL, Redis and the
+Playwright CI image remain version-tagged; full deployment-image immutability
+is still a follow-up. No tag was represented as an immutable digest.
+
+The remaining runtime raw counts are UNKNOWN1, LOW363, MEDIUM561, HIGH177 and
+CRITICAL5. The182 HIGH/CRITICAL records refer to an exact Ubuntu UAPI header
+package. Linux CNA source evidence, the official package and actual OCI proof
+of all990 files establish the reviewed component's absent vulnerable code;
+they do not patch the running host kernel. Full raw reports and the separate
+per-record decisions remain available. Changed/new/missing/downgraded records,
+changed files/package/source, stale evidence, missing coverage, EOSL and expired
+review block reuse. Approval expires **2026-11-30 00:00 UTC**, without automatic
+renewal. Host readiness remains UNVERIFIED.
+
+The actual final build lists505 production Go packages with no OpenPGP import
+or descendant and retains generated source/binary provenance. The raw UNKNOWN
+OpenPGP module finding remains visible; absence from that exact import closure
+is not a general module-safety assertion. The source-built main Go module's
+`(devel)` inventory version also remains an explicit analyzer limitation.
+Supported OS/library inventory does not guarantee complete bundled-JavaScript
+or arbitrary-binary coverage; complete npm SBOM/audit and image analysis are
+complementary scopes.
+
+Original final-image ZIPs, exact source/checkout/image/database identities,
+raw counts, byte-proof hashes and independent review are retained in
+[evidence/images-run-43805214804](evidence/images-run-43805214804/provenance.json).
+The image-specific design documents describe the unmodified scanner,
+read-only payload verifier, explicit applicability evaluator and strict wrapper.
+No local Docker execution, production host assessment or sandbox escape test
+is claimed.
 
 The repository still has no top-level license grant. Back's `UNLICENSED`
-metadata and third-party package/asset notices are separate matters. This
-change adds no application license and makes no legal-compliance claim. SBOM
+metadata and third-party package/asset notices are separate matters. This work
+adds no application license and makes no legal-compliance claim. SBOM/image
 license fields preserve package metadata; they do not adjudicate every notice.
 
 ## Execution record

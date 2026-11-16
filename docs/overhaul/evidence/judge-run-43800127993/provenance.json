@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "runId": 43800127993,
+  "runUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43800127993",
+  "pullRequest": 70,
+  "testedSourceHead": "d5dc5a9cfa627a505efeeac6458a7d9556b71e06",
+  "testedTree": "4a9a1c557a2850f48029f550e7cf0adfc97af1e2",
+  "testedIntegrationBase": "e97b08a238798f740438118818d8dd75e68173d8",
+  "actualCheckout": "793443c40a2022b30e11ebf52dce4af1a62f467a",
+  "integratedCommit": "e7caa9b3aa23ac051e3a786780bc3b8c0780affa",
+  "ciJobs": [
+    {
+      "id": 133078185067,
+      "name": "Docker image (front)",
+      "conclusion": "success"
+    },
+    {
+      "id": 133078185327,
+      "name": "Dependency audit",
+      "conclusion": "success"
+    },
+    {
+      "id": 133078185333,
+      "name": "Detect changes",
+      "conclusion": "success"
+    },
+    {
+      "id": 133078185345,
+      "name": "Docker image (judge)",
+      "conclusion": "success"
+    },
+    {
+      "id": 133078185383,
+      "name": "Docker image (runtime)",
+      "conclusion": "success"
+    },
+    {
+      "id": 133078185474,
+      "name": "Docker image (back)",
+      "conclusion": "success"
+    },
+    {
+      "id": 133078238869,
+      "name": "Judge worker",
+      "conclusion": "success"
+    },
+    {
+      "id": 133078238898,
+      "name": "Backend and API",
+      "conclusion": "success"
+    },
+    {
+      "id": 133078238928,
+      "name": "Browser tests (2/2)",
+      "conclusion": "success"
+    },
+    {
+      "id": 133078238985,
+      "name": "Sandbox, pipeline and Compose",
+      "conclusion": "success"
+    },
+    {
+      "id": 133078238991,
+      "name": "Browser tests (1/2)",
+      "conclusion": "success"
+    },
+    {
+      "id": 133081901254,
+      "name": "CI required",
+      "conclusion": "success"
+    }
+  ],
+  "executedCases": {
+    "backendUnits": 320,
+    "postgresApi": 209,
+    "nativeRuntime": 74,
+    "realPipeline": 28,
+    "realComposeBrowser": 3,
+    "frontByProject": {
+      "unit": 85,
+      "chromium": 372,
+      "firefox": 112,
+      "chromium-slow": 111,
+      "webkit": 112
+    }
+  },
+  "artifact": {
+    "id": 14196168783,
+    "name": "phase2-judge-evidence-1",
+    "size_in_bytes": 21495,
+    "expired": false,
+    "created_at": "2026-11-16T03:56:16Z",
+    "expires_at": "2026-11-23T03:56:16Z",
+    "updated_at": "2026-11-16T03:56:16Z",
+    "digest": "sha256:457e5bd9b8b3d7cd4c8db31152aeadf721b434597ded403c5527f29e80c6bdf8"
+  },
+  "limits": [
+    "Clean owned Redis daemon restart/AOF reload, not crash-fsync or power-loss durability.",
+    "Small bounded mixed-language burst; no prolonged chaos or production capacity claim.",
+    "Actual image security update is a separate PR and not certified by this head."
+  ],
+  "files": {
+    "phase2-api-restart.json": {
+      "sha256": "3a5cbf4c4849ec491bef5b107ca3af1047e7a8dbb25bc90aac133c5bbbf0a259",
+      "bytes": 470
+    },
+    "phase2-judge-capacity.json": {
+      "sha256": "efbd3f19823a05918000ffb17321bfaab89066ac3efbfc24251679941c2744c2",
+      "bytes": 26937
+    },
+    "phase2-redis-restart.json": {
+      "sha256": "da8658c27090e6282654ee89f53fecbe521dc4ad028e722d00000269e2ddfc26",
+      "bytes": 2144
+    },
+    "phase2-rejudge-recovery.json": {
+      "sha256": "9ba01fd6ef03f92d31ab6ee5e4972b9ce0be47c030d3208fda8e05f46c1c10a3",
+      "bytes": 550
+    }
+  }
+}
