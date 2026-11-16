@@ -10,10 +10,12 @@ Main is never automatically merged. Production servers/data/volumes/Redis and re
 
 | Question | Document |
 |---|---|
+| What was delivered and what is its readiness? |[Final engineering report](FINAL-REPORT.md), [live final validation record](https://github.com/yakisoba0728/UnsolvableOJ/pull/61) |
 | What exists and how does data flow? |[Architecture/features](ARCHITECTURE.md), [API inventory](API.md), [machine inventory](INVENTORY.json), [data model](DATA-MODEL.md) |
+| What dependencies and licenses were recorded? |[Locked dependencies](DEPENDENCIES.md) |
 | What changed and why? |[Audit register](AUDIT.md), [ADRs](DECISIONS.md), [API behavior changes](API-CHANGES.md) |
 | Who independently reviewed it? |[Review ledger](REVIEW.md) |
-| What actually ran? |[Test results](TESTING.md), [coverage and limits](VALIDATION-COVERAGE.md) |
+| What actually ran? |[Test results](TESTING.md), [coverage and limits](VALIDATION-COVERAGE.md), [worker recovery](RECOVERY.md) |
 | What measurably improved? |[Performance and raw evidence](PERFORMANCE.md) |
 | What remains? |[Backlog](BACKLOG.md), [progress/handoff](PROGRESS.md) |
 | Detailed workstream evidence |[Backend](BACKEND.md), [Security](SECURITY.md), [Frontend](FRONTEND.md), [Judge](JUDGE.md), [Database](DATABASE.md), [Infrastructure](INFRASTRUCTURE.md), [Reliability](RELIABILITY.md) |

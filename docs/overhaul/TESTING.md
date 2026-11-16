@@ -23,7 +23,7 @@ A test counted here was actually executed. Discovery/compilation, mocks, React D
 | Judge |94 tests plus1Python health test passed;160,000 differential input pairs included. Root reran full check; QA reran4focused tests. |
 | Front |Build, answer guard,7telemetry tests, test types and85browser-free units passed.12 notification browser regressions compile/discover; actual execution is recorded in CI. |
 | Notification independent review |4confirmed ordering failures in initial patch; final4/4 ordinary and4/4StrictMode React DOM cases passed, including visible rows. This is not browser E2E. |
-| CI policy |Initial gate regressions reproduced. Final9/9 actual-shell tests passed, including38native-risk paths and fail-closed cases. |
+| CI policy |Initial gate regressions reproduced. PR57 had9/9 actual-shell tests; PR62's final10/10 pass includes40native-risk paths, generic pipeline-spec/config selection and fail-closed cases. |
 | Combined Back/Security/DB candidate |Lint/type/unit/build:296 units /22files. All26 migrations passed. Actual API/DB:175 tests /28files,72.77s. |
 | New HTTP harness safety |Independent8/8 passed: target/protocol/opt-in/email/server DB guard, preservation of nonempty Redis, SIGINT130/SIGTERM143 cleanup during HTTP activity. |
 
@@ -40,8 +40,11 @@ Native local DB environment: PostgreSQL17.11, Redis8.10.3, Node24.22.1; services
 | #56 `de6a80706604e85781b795e2f3573830f35fd3f8` | [43782820352](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43782820352) | All applicable build/privacy/browser/audit/image/required checks passed; native not selected for UI-only diff |
 | #59 `4e5bc9400470f4c65a737acd98f81ba94c5d1360` | [43782676706](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43782676706) | All12full jobs successful |
 | #60 `7752dd94b9ea85cce29234d0bd3bd6aaf33f53fa` | [43782682001](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43782682001) | All12full jobs successful |
+| #62 `8801454dc297d0d1af0e195408767dcc002fe584` | [43784688710](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43784688710) | All12jobs success; all4 images built; native26, pipeline17 including real worker recovery, Compose2; standard browser selection603 including85browser-free units, additional actual Firefox74 |
 
-Final validation-follow-up and combined main-PR runs are recorded when they actually finish. An older green run is never substituted for a changed head. Review metadata is in REVIEW.md; final readiness is in FINAL-REPORT.md.
+PR62's pipeline suite passed2files/17tests in54.00s; the recovery case itself took35.228s. Firefox ran37 cases in34.4s and37 in42.9s, with four workers per shard and no retries. Standard full selection passed302+301, including85 browser-free units,444 Chromium cases and74 selected WebKit cases. These are distinct layers, not677 live-backend browser scenarios.
+
+This evidence commit precedes its own merge and the final main-PR run. Final exact-head results are recorded in the descriptions of [PR61](https://github.com/yakisoba0728/UnsolvableOJ/pull/61) and the [integration→main PR](https://github.com/yakisoba0728/UnsolvableOJ/pulls?q=is%3Apr+head%3Aoverhaul%2Fintegration+base%3Amain), after they actually finish. An older green run is never substituted for a changed head. Review metadata is in REVIEW.md; scoped readiness and remaining work are in FINAL-REPORT.md.
 
 ## Failure and environment ledger
 
@@ -51,6 +54,7 @@ Final validation-follow-up and combined main-PR runs are recorded when they actu
 - A security API run overlapped rebuilding its dist tree and failed8seed CLI imports. The sequential replay passed167/167 with no assertion removed.
 - New fixture/import/type/invocation errors were corrected and rerun. Independent review caught actual notification and benchmark-tool defects; fixes were re-reviewed. These are not hidden as environmental passes.
 - A migration refusal message for case-colliding legacy usernames is an expected asserted negative case, followed by successful migration-runner exit; it is not an ignored failure.
+- Recovery run43784164298 failed with `expect.poll() must be called inside a test` in setup: existing16pipeline cases passed, new case skipped. Moving only the first worker start into the test body retained15s readiness/90s test bounds and all assertions. Two scratch Vitest semantic checks passed, then corrected full CI43784688710 passed the actual recovery scenario. No local native execution is claimed.
 
 ## Reproduction and gates
 

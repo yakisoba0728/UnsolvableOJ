@@ -43,8 +43,8 @@ This register includes correctness, privacy, performance and verification-proces
 | SEC-002 | P2 defense | Detailed callback self-labelled diagnostic visibility; validate immutable case membership | #60 |
 | SEC-003 | P2 defense | Vibe readiness did not prove auth enforcement; anonymous rejection | #60 |
 | SEC-004 | P2 | Pending-password identity retained privileged optional-route visibility; anonymous visibility until replacement | #60 |
-| DB-001 | P2 performance | Reverse profile lookup lacked user-first indexes; add two measured composite indexes | #58, DATABASE.md |
-| DB-002 | P2 performance | Enterprise score assembly repeatedly scanned all rows; index once | #58 |
+| DB-001 | P2 performance | Enterprise score assembly repeatedly scanned all rows; index once | #58, DATABASE.md |
+| DB-002 | P2 performance | Reverse profile lookup lacked user-first indexes; add two measured composite indexes | #58 |
 | TOOL-001 | P2 introduced/reviewed | New benchmarks checked URL text rather than effective DB destination; reject overrides/protocol mismatch | #58 and audit-evidence |
 | TOOL-002 | P2 introduced/reviewed | New HTTP harness cleanup/ownership gaps; bounded cleanup, empty Redis and signal handling | audit-evidence, 8-case safety evidence |
 

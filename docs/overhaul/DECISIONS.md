@@ -26,7 +26,7 @@ A claimed email is not verified mailbox ownership. Shared enterprise access requ
 
 ## ADR-007 — Apply measured local data improvements
 
-Two user/post indexes support existing reverse profile queries; no table or foreign key is removed. Use a reversible transactional migration under the existing convention, documenting lock duration before a future production rollout. In-memory enterprise grouping changes repeated scans to one nested Map while preserving order/score/status. Index storage is about9.96MB each at200k rows; write overhead remains unmeasured. Map assembly uses about1.64MiB more process RSS in the recorded fixture. Those costs are disclosed, not hidden behind speed percentages.
+Two user/post indexes support existing reverse profile queries; no table or foreign key is removed. Use a reversible transactional migration under the existing convention, documenting lock duration before a future production rollout. In-memory enterprise grouping changes repeated scans to one nested Map while preserving order/score/status. Index storage is about9.96MB each at200k rows; write overhead remains unmeasured. Map assembly uses 1,640KiB more process RSS in the recorded fixture. Those costs are disclosed, not hidden behind speed percentages.
 
 ## ADR-008 — Defer optional telemetry safely
 
