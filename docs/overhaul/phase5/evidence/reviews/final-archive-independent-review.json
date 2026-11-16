@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/independent_qa",
+  "reviewedAt": "2026-11-16T17:32:41.488103+00:00",
+  "decision": "ACCEPT_EXACT_EVIDENCE_ONLY_ARCHIVE_TREE_FOR_PUBLICATION",
+  "blockingFindings": [],
+  "localArchiveCommit": "62492dbf76a91b1fcffe5d4b66c5037bf114228e",
+  "archiveTree": "d071f732fc046a25994af9ced2da9596633f08e7",
+  "localParent": "6ebb8e78e10c2a5e1107321e405ce49327314c1a",
+  "localParentTree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+  "testedReleaseSource": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+  "testedReleaseTree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+  "testedCheckout": "70307b3d3c7c9591ee3822e4b5ab903d3527f1b1",
+  "testedBase": "d0159b1f844bf0608415dded9e84af566c8e2041",
+  "testedRun": 43913852145,
+  "publicationBoundary": "This accepts the exact archive tree for evidence-only publication. The remote archive commit must use tested release e1bbab81 as parent and preserve this tree. It must not advance the tested integration branch or enter the release merge sequence.",
+  "changedPaths": 86,
+  "allChangesUnderPhase5Docs": true,
+  "unchangedNonPhase5DocTrackedPaths": 876,
+  "manifest": {
+    "path": "docs/overhaul/phase5/evidence/retained-files.json",
+    "sha256": "7cefc368e726729a75a5f7eca8f8995fd4840c8b770f59ee7c94928121156cbe",
+    "fileCount": 267,
+    "totalBytes": 27406430,
+    "exactRegularFileCoverageExceptManifestItself": true,
+    "everyHashAndSizeVerified": true
+  },
+  "relativeLinks": {
+    "checked": 153,
+    "broken": 0
+  },
+  "finalAcceptance": {
+    "sha256": "9705926344d0c0e1ff24ae2e2e05348f42989cae05cad937f69af4b80b201137",
+    "actualTestTruthByteSemanticsEqualToIndependentReceipt": true,
+    "all12ActualJobIdsAndConclusionsPreserved": true,
+    "canonicalReportCompleteAndScopeAccurate": true
+  },
+  "retainedEvidence": {
+    "originalArtifactZips": 15,
+    "allOriginalZipBytesAndGithubBindingsMatch": true,
+    "flatRawJsonCopies": {
+      "phase5-vibe-compose.json": {
+        "zip": "vibe-browser.zip",
+        "sha256": "20202160bcff45ef32631d4878d30c8634cc82175a0dee223a0fe8efac38a9bd"
+      },
+      "phase5-multi-api.json": {
+        "zip": "multi-api.zip",
+        "sha256": "644afcd93bf7902815f6eb3a9b0c094e9419bf3cceb9a9f6a35d44790e626f2a"
+      },
+      "phase5-vibe-dedicated.json": {
+        "zip": "vibe-pipeline.zip",
+        "sha256": "b0b4c9a5c7d87ea14a63a5332fb56966680f73c28c4c9d43301ef20a3a93e11e"
+      },
+      "phase5-vibe-browser.json": {
+        "zip": "vibe-browser.zip",
+        "sha256": "0dd2b958a0e472d0308c9bbdce1ce6bc53a7d46ce1a72c0e22d0cf5b1adbb13f"
+      },
+      "phase4-restore.json": {
+        "zip": "restore.zip",
+        "sha256": "ee077e87ef3b3f700a6a53fa0fc068125a69991fd3e575ff1d1e458d2dcf8c7c"
+      },
+      "phase3-browser-performance.json": {
+        "zip": "browser-performance.zip",
+        "sha256": "7832745ab70125a085db97afb1c2393720af5cf72218d34badf25e310574478b"
+      },
+      "phase5-database.json": {
+        "zip": "database-qualification.zip",
+        "sha256": "337cbcc2132f1fd9c27d024f034a249ca55b055cfe7be74f88467c6d493e76f0"
+      },
+      "phase5-editor-observation.json": {
+        "zip": "frontend-2.zip",
+        "sha256": "fbfff690fdc12cda92ff0575a9db7173fec6da400ba47ab2ab2f9c6c0de1ae7e"
+      },
+      "phase5-verdict-matrix.json": {
+        "zip": "native-verdict.zip",
+        "sha256": "89db22d466552844fae4db2fe3114a4928a8971025942059a6fc9c9200d973a5"
+      }
+    },
+    "decodedLogZipSha256": "584f017b50a8e26af8a503515f328c2bf45fea619b6a36868db58e627ba14cf6",
+    "decodedLogMembers": 12,
+    "exactReviewedUtf8BytesMatch": true,
+    "fixedTimestampSortedZipMembers": true,
+    "fourEmbeddedJudgeLogsMatchRetainedAndReviewedBytes": true,
+    "securityRetentionSha256": "fb9aa6f74bb12b5e9bc649701c227925b7e1ba483ab9242861fc9df7beabbbe0"
+  },
+  "performance": {
+    "standaloneAddendumSha256": "3f14da893e43089db579dd02ac951280baf9dadbe4bb69f3cf47b3cc1227c157",
+    "derivedSha256": "a43bf4be9fc9391e40d8f87411bec35bc531d221a91a00e5b7d3659125fb9b72",
+    "appendedAddendumByteExact": true,
+    "historical10875VerifierScopeSeparatedFromFinalRun": true,
+    "adverseObservationsAndNoCausalCapacityFieldInpLeakClaimsPreserved": true
+  },
+  "reviewNotes": [
+    "The canonical report distinguishes the accepted release source/tree from this post-run evidence archive, with manual retarget/base revalidation and production external gates explicit.",
+    "Current READY disposition supersedes preserved checkpoint text; historical failed runs and original receipts keep their own scope.",
+    "Two diff-check warnings are only original extra EOF blank lines in the byte-exact numerical addendum and protected live-state snapshot; no normalization was performed.",
+    "No application test, image scan, native execution, database/browser experiment or portable performance rerun was performed for this archive review."
+  ],
+  "reviewerActions": {
+    "sourceEdits": false,
+    "remoteMutations": false,
+    "applicationTestsRun": 0
+  }
+}

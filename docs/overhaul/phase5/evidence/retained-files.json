@@ -5,8 +5,8 @@
   "testedSource": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
   "testedTree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
   "runId": 43913852145,
-  "fileCount": 267,
-  "totalBytes": 27406430,
+  "fileCount": 268,
+  "totalBytes": 27411431,
   "files": [
     {
       "path": "README.md",
@@ -974,6 +974,11 @@
       "sha256": "b2a50526408c8a7135aa3c451747a056cbd412a4587f84d8ce5db9cc998d1ace"
     },
     {
+      "path": "reviews/final-archive-independent-review.json",
+      "bytes": 5001,
+      "sha256": "f42e7d07925273a4adab3392521eb3d6b6c3df992244a3c6aadac2278a20d530"
+    },
+    {
       "path": "reviews/final-docs-independent-acceptance.json",
       "bytes": 8690,
       "sha256": "ad50b1a3947b949824b3db02efa877f12e35af29a55d291efdb6affb82a00494"
@@ -1343,5 +1348,8 @@
       "bytes": 39112,
       "sha256": "eb4e67e5147ca208dc10b67a4e183623b19779bacd0bdb0ef3e862775fa4d057"
     }
-  ]
+  ],
+  "reviewedArchiveContentCommit": "73ec799cfefc318080963b16facbb639c147f1c1",
+  "reviewedArchiveContentTree": "d071f732fc046a25994af9ced2da9596633f08e7",
+  "postReviewAttestation": "This successor adds only the sealed independent review of the preceding archive and refreshes this file manifest; original reviewed archive content is unchanged."
 }
