@@ -1,0 +1,28 @@
+{
+  "source": "working tree",
+  "node": "v24.22.1",
+  "dom": "jsdom 31.0.1",
+  "browser": false,
+  "scenarios": [
+    {
+      "name": "render-contract",
+      "passed": true
+    },
+    {
+      "name": "late-period",
+      "passed": true
+    },
+    {
+      "name": "account-clear",
+      "passed": true
+    },
+    {
+      "name": "late-account",
+      "passed": true
+    },
+    {
+      "name": "failure-retry",
+      "passed": true
+    }
+  ]
+}

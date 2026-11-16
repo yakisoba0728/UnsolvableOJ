@@ -1,0 +1,73 @@
+.learning-page { display: grid; gap: 20px; }
+.learning-page .page-header { margin-bottom: 0; }
+.learning-toolbar, .learning-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.learning-toolbar p, .learning-heading p, .learning-scope { margin: 0; font-size: 13px; }
+.learning-periods { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--color-border); border-radius: var(--radius-panel); background: var(--color-surface); }
+.learning-periods button { min-height: 40px; padding: 8px 16px; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--color-ink-600); font-weight: 600; }
+.learning-periods button[aria-pressed="true"] { background: var(--color-button); color: var(--color-on-solid); }
+.learning-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 0; }
+.learning-summary > div { min-width: 0; border: 1px solid var(--color-border); border-radius: var(--radius-panel); padding: 20px; background: var(--color-surface); }
+.learning-summary dt { color: var(--color-ink-600); font-size: 13px; }
+.learning-summary dd { margin: 12px 0 0; font-size: 28px; font-weight: 700; color: var(--color-ink-900); overflow-wrap: anywhere; }
+.learning-summary dd small { font-size: 12px; color: var(--color-ink-600); font-weight: 400; margin-left: 5px; }
+.learning-summary > div:last-child dd small { display: block; margin: 3px 0 0; }
+.learning-panel, .learning-error { min-width: 0; border: 1px solid var(--color-border); border-radius: var(--radius-panel); padding: 24px; background: var(--color-surface); }
+.learning-panel h2 { margin: 0 0 6px; font-size: 19px; }
+.learning-welcome .button { margin-top: 12px; }
+.learning-error { border-color: var(--color-danger-border); }
+.learning-error p { color: var(--color-danger); }
+.learning-loading { display: grid; gap: 20px; }
+.learning-legend { display: flex; gap: 14px; font-size: 12px; color: var(--color-ink-600); }
+.learning-legend span::before { display: inline-block; content: ""; width: 10px; height: 10px; margin-right: 6px; border-radius: 2px; background: var(--heat-2); }
+.learning-legend span:last-child::before { background: var(--color-primary); }
+.learning-chart-note { margin: 16px 0 10px; font-size: 12px; }
+.learning-chart { height: 150px; display: flex; align-items: end; gap: clamp(2px, .7vw, 8px); border-bottom: 1px solid var(--color-border); padding: 0 2px; }
+.learning-chart-column { flex: 1; height: 100%; position: relative; min-width: 0; }
+.learning-chart-total, .learning-chart-accepted { position: absolute; bottom: 0; left: 0; width: 100%; border-radius: 3px 3px 0 0; background: var(--heat-2); }
+.learning-chart-accepted { background: var(--color-primary); }
+.learning-chart-axis { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--color-ink-600); }
+.learning-activity-details { margin-top: 18px; }
+.learning-activity-details summary { cursor: pointer; padding: 8px 0; color: var(--color-primary); font-size: 13px; font-weight: 600; }
+.learning-table-scroll { overflow: auto; max-height: 360px; margin-top: 8px; border: 1px solid var(--color-border); border-radius: var(--radius-control); }
+.learning-table-scroll table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.learning-table-scroll caption { padding: 12px; font-weight: 600; text-align: left; }
+.learning-table-scroll th, .learning-table-scroll td { padding: 10px 12px; border-top: 1px solid var(--color-border); text-align: right; white-space: nowrap; }
+.learning-table-scroll th:first-child { text-align: left; }
+.learning-table-scroll thead { background: var(--color-surface-muted); }
+.learning-breakdowns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.learning-breakdown-list, .learning-tag-list, .learning-review-list { list-style: none; padding: 0; margin: 20px 0 0; }
+.learning-breakdown-list li { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; gap: 14px; align-items: center; min-height: 42px; font-size: 13px; }
+.learning-breakdown-list meter { display: block; width: 100%; height: 12px; accent-color: var(--color-primary); }
+.learning-breakdown-list meter::-webkit-meter-bar { background: var(--color-surface-muted); border: 0; }
+.learning-breakdown-list meter::-webkit-meter-optimum-value { background: var(--color-primary); }
+.learning-breakdown-list meter::-moz-meter-bar { background: var(--color-primary); }
+.learning-tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.learning-tag-list a { display: flex; gap: 12px; align-items: center; min-height: 42px; border: 1px solid var(--color-border); border-radius: var(--radius-control); padding: 8px 12px; font-size: 13px; }
+.learning-tag-list li, .learning-tag-list a, .learning-tag-list a > span { min-width: 0; overflow-wrap: anywhere; }
+.learning-tag-list strong { white-space: nowrap; font-size: 12px; color: var(--color-ink-600); }
+.learning-review-list > li { display: flex; gap: 16px; align-items: center; justify-content: space-between; padding: 18px 0; border-top: 1px solid var(--color-border); }
+.learning-review-description { min-width: 0; }
+.learning-review-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.learning-problem-title { display: inline-block; font-weight: 600; overflow-wrap: anywhere; }
+.learning-review-description p { font-size: 12px; margin: 6px 0 0; }
+.learning-review-list .button { flex-shrink: 0; }
+.learning-empty { padding: 24px 0 4px; font-size: 14px; }
+.learning-page a:focus-visible, .learning-page summary:focus-visible, .learning-page button:focus-visible, .learning-table-scroll:focus-visible { outline: var(--focus-outline); outline-offset: 3px; }
+@media (max-width: 850px) {
+  .learning-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .learning-breakdowns { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  .learning-page { gap: 16px; }
+  .learning-periods { width: 100%; }
+  .learning-periods button { flex: 1; padding: 8px 6px; }
+  .learning-summary { gap: 10px; }
+  .learning-summary > div { padding: 14px; }
+  .learning-summary dd { font-size: 24px; }
+  .learning-summary dd small { display: block; margin: 3px 0 0; }
+  .learning-panel, .learning-error { padding: 18px 14px; }
+  .learning-review-list > li { align-items: flex-start; flex-direction: column; }
+  .learning-review-list .button { align-self: flex-start; }
+  .learning-breakdown-list li { gap: 8px; }
+  .learning-table-scroll th, .learning-table-scroll td { padding: 10px 7px; font-size: 12px; }
+}

@@ -343,7 +343,7 @@ jobs:
           npx --no-install playwright test \
             enterprise-results.spec.ts \
             auth.spec.ts editor-focus.spec.ts enterprise-ownership.spec.ts enterprise-pinned-summary.spec.ts enterprise-refresh.spec.ts layout.spec.ts \
-            live-qa-followups.spec.ts problem-bookmarks.spec.ts session-refresh.spec.ts ui-harmony.spec.ts \
+            learning-dashboard.spec.ts live-qa-followups.spec.ts problem-bookmarks.spec.ts session-refresh.spec.ts ui-harmony.spec.ts \
             --project=firefox --workers=4 --shard=${{ matrix.shard }}/2 \
             --output=test-results/firefox
       - name: Failed browser test artifacts (disposable test data only)

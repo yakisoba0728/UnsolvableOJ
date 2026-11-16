@@ -44,6 +44,7 @@ const EnterpriseAttemptPage = lazyPage(() => import("./pages/EnterpriseAttemptPa
 const EnterpriseFormPage = lazyPage(() => import("./pages/EnterpriseFormPage"), "EnterpriseFormPage");
 const EnterprisePage = lazyPage(() => import("./pages/EnterprisePage"), "EnterprisePage");
 const MissionsPage = lazyPage(() => import("./pages/MissionsPage"), "MissionsPage");
+const LearningPage = lazyPage(() => import("./pages/LearningPage"), "LearningPage");
 const MyProblemsPage = lazyPage(() => import("./pages/MyProblemsPage"), "MyProblemsPage");
 const ProblemPage = lazyPage(() => import("./pages/ProblemPage"), "ProblemPage");
 const ProblemsPage = lazyPage(() => import("./pages/ProblemsPage"), "ProblemsPage");
@@ -157,6 +158,10 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               <Route
                 path="/profile"
                 element={session ? <ProfilePage key={session.user.id} /> : loginRedirect}
+              />
+              <Route
+                path="/learning"
+                element={session ? <LearningPage key={`${session.user.id}:${getSessionIdentityVersion()}`} /> : loginRedirect}
               />
               <Route
                 path="/settings"
