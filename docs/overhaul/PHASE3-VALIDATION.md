@@ -1,0 +1,91 @@
+# Phase III validation receipts
+
+This document records observed execution, not planned success. Component reports
+preserve their implementation checkpoints. Later accepted PR receipts supersede
+their pending-CI paragraphs. The newest final PR63 receipt supplies the final
+integration commit and CI after this document itself is merged.
+
+## Recovery and accepted feature gates
+
+Recovery confirmed Phase II's final run43809685401 on source45b6c9c6/tree141e2df9,
+with all12 jobs successful. Back320/API209/Judge107/native74/pipeline28/Compose3
+and707 browser +85 browser-free instances were independently read from logs.
+Those results are historical baseline evidence only.
+
+| Feature | Accepted source | Exact tree | Actual Actions checkout | Accepted full run |
+| --- | --- | --- | --- | --- |
+| Learning73 | `b09d2289e2645334070f0d067e6f8dfdef5aac49` | `b3def644fea449bb8518290db72132071d23420f` | `7d4da02ada94d10f76f16fa8d3ff678fe978c124` | [43816883930](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43816883930),12 success |
+| Executor74 | `dfcf742963f7dde8d6a5ba72edc3dec1f0b7d96b` | `54394f9af541764214155e9b44d1122965933bac` | `627d72067ff9348b49ab59f3efb1eb791e162ce6` | [43818814392](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43818814392),12 success |
+| Vibe75 | `8e640b90709d37f979f4208c186c25440b96514f` | `fe0ab0e3ccac59f3583cb493845403c5d1578d39` | `a2ce8848b16efc3862e3f9bd1ef85bd1d9b84ed7` | [43821157776](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43821157776),12 success |
+
+PR75 was tested on current integrationa30b0b3 after the executor merge. Its actual
+logs show327 Back units,230 PostgreSQL/API cases,74 native assertions,33 pipeline
+cases (including5 new Vibe cases), and3 production Compose browser flows (30.4s).
+Browser shards show359+359 standard instances and66+65 Firefox instances:
+849 total =764 browser executions +85 browser-free units. They are not849 unique
+stories and do not imply three-engine coverage of every route. Worker, actual
+Redis TLS/BullMQ, dependency audits and all four image gates completed successfully.
+
+The native HTTP Vibe case keeps real HTTP/API/PostgreSQL/runner/sandbox/result
+persistence, replacing only paid AI evaluation. Four other new native cases cover
+selected fixtures, structural hidden-diagnostic suppression and compile/runtime
+errors. This is distinct from a full browser-native Vibe E2E.
+
+## Current database candidate and final evidence work
+
+PR76 source`e3aa50c4cdcadaa0dd965a29086c0148b79261a8`, tree
+`483d4e29db0274b07fc46decf62e4bc1f8a412b0`, includes integration87cc1e7.
+Run[43822819719](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43822819719)
+is in progress at this checkpoint and is not marked accepted.
+
+Its same-tree local composition passed327 units,243 real PostgreSQL/API cases
+in40files and the full migration chain. The two migrations are registered once
+in chronological order. The separate reviewer verified13 DB files and60 incoming
+Vibe/executor files, with only the datasource union changing an overlapping blob.
+The exact benchmark implementation hashes remain unchanged.
+
+[Combined check](evidence/phase3-database-combined-check.log) ·
+[API243](evidence/phase3-database-combined-api.log) ·
+[migration execution](evidence/phase3-database-combined-migrations.log) ·
+[independent composition](evidence/phase3-database-composition-review.json)
+
+The final evidence branch adds a bounded actual-Compose browser measurement.
+Its protocol, numeric-only projection, artifact failure behavior and retained
+functional assertions were independently reviewed; Front E2E types and policy
+checks passed. It still requires actual execution and raw-result review. The
+final evidence PR must incorporate the accepted DB integration and run fresh full
+CI before its own merge, followed by the final PR63 integration-head run.
+
+## Regression and failure evidence
+
+CI caught duplicate learning GETs under development StrictMode and invalid focus
+fixtures. The former was reproduced with the real application under StrictMode;
+the latter now enters actual keyboard mode before checking the same outline.
+Original one-request/focus assertions remain. Real rendered Compose then exposed
+canonical decimal byte strings and absolute secret targets; strict equivalent
+forms were added while invalid cases remained rejected. Independent inherited-name
+secret probes caused a further own-property correction.
+
+Local build/seed races were corrected by ordering the build before API runs.
+One unchanged full Vibe run timed out in five existing Missions cases; the same
+file then passed24/24 and the full suite222/222 without changing assertions or
+timeouts. The reviewer overlong-username fixture and the benchmark pre-start
+ENOSPC failure are preserved, not counted as product fixes or measured samples.
+[Audit register](PHASE3-AUDIT.md) and [review ledger](PHASE3-REVIEW.md) link details.
+
+## Execution boundaries
+
+Local Docker was unavailable, and local Chromium failed before app launch with
+Unix socket EPERM. No sandbox control was bypassed. Actual native, images and
+three-engine browser gates use the authorized disposable GitHub Actions setup.
+Local DB/Redis runs used owned temporary clusters and random loopback ports.
+
+No new long soak, prolonged network-fault campaign, VM/host-kernel attestation,
+all-language/all-verdict memory certification, production rollout/restore or paid
+AI evaluation was executed. The retained recovery pipeline still exercises its
+existing worker/lease/API/Redis/rejudge scenarios on changed code; that is fresh
+regression coverage, not a new long-duration reliability result.
+
+Runtime raw HIGH177/CRITICAL5 remain separate from component-applicability
+decisions and their2026-11-30 00:00UTC expiry. Fresh final image scans and payload
+checks are mandatory; no existing exemption date or scanner failure gate changed.

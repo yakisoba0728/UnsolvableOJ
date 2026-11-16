@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
-  buildEnterpriseVibeScores,
+  buildEnterpriseVibeScores as assemble,
   type EnterpriseVibeRow,
 } from './enterprise-vibe-scores.js';
 import type { VibeReport } from '../vibe/vibe.types.js';
+
+const bindings = new Map(['one', 'two'].map((id) => [id, { title: `Pinned ${id}`, version: id.repeat(32) }]));
+const buildEnterpriseVibeScores = (...args: Parameters<typeof assemble> extends [...infer A, unknown] ? A : never) => assemble(...args, bindings);
 
 const complete: VibeReport = {
   outcome: 40, passed: 4, total: 5,
@@ -17,6 +20,10 @@ const row = (attempt: string, task: string, patch: Partial<EnterpriseVibeRow> = 
 });
 
 describe('enterprise vibe result assembly', () => {
+  it('uses selected metadata and refuses a missing binding without falling back to the catalog', () => {
+    expect(assemble(['one'], ['a'], [], bindings).get('a')?.[0]).toMatchObject({ title: 'Pinned one', challengeVersion: 'one'.repeat(32) });
+    expect(() => assemble(['one'], ['a'], [], new Map())).toThrow('고정된 과제');
+  });
   it('retains requested candidate and task order regardless of database row order', () => {
     const rows = [row('b', 'two'), row('a', 'one'), row('b', 'one'), row('unrequested', 'two')];
     const scores = buildEnterpriseVibeScores(['two', 'one'], ['b', 'a'], rows);

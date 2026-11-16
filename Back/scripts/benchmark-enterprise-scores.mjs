@@ -5,6 +5,8 @@ import { cpus, platform, release } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { buildEnterpriseVibeScores } from '../dist/modules/enterprise/enterprise-vibe-scores.js';
 import { challenge } from '../dist/modules/vibe/vibe.catalog.js';
+import { currentVibeSnapshot, vibeVersion } from '../dist/modules/vibe/vibe.snapshot.js';
+const bindings = new Map([[challenge.id, { title: challenge.title, version: vibeVersion(currentVibeSnapshot()) }]]);
 
 // Unchanged score assembly from EnterpriseService.vibeScores at baseline 6176015.
 function baseline(challengeIds, attemptIds, rows) {
@@ -35,10 +37,12 @@ if (process.argv[2] === '--sample') {
   const { attemptIds, rows } = fixture(count);
   const cpuStart = process.cpuUsage();
   const start = performance.now();
-  const result = compare([challenge.id], attemptIds, rows);
+  const result = compare([challenge.id], attemptIds, rows, bindings);
   const elapsedMs = performance.now() - start;
   const cpu = process.cpuUsage(cpuStart);
-  const digest = createHash('sha256').update(JSON.stringify([...result])).digest('hex');
+  // Compare the historical output projection; Phase III adds version provenance.
+  const comparable = [...result].map(([id, scores]) => [id, scores.map(({ challengeVersion, ...score }) => score)]);
+  const digest = createHash('sha256').update(JSON.stringify(comparable)).digest('hex');
   assert.equal(result.size, count);
   process.stdout.write(JSON.stringify({ elapsedMs, cpuMs: (cpu.user + cpu.system) / 1000, peakRssKiB: process.resourceUsage().maxRSS, digest }));
 } else {
@@ -50,10 +54,10 @@ if (process.argv[2] === '--sample') {
       assert.equal(child.status, 0, child.stderr);
       samples[mode].push(JSON.parse(child.stdout));
     }
-    assert.equal(new Set([...samples.before, ...samples.after].map((row) => row.digest)).size, 1, 'Both algorithms must return identical complete result payloads');
+    assert.equal(new Set([...samples.before, ...samples.after].map((row) => row.digest)).size, 1, 'Both algorithms must return the identical historical score projection');
     const median = (values) => values.toSorted((a, b) => a - b)[2];
     const summarize = (rows) => Object.fromEntries(['elapsedMs', 'cpuMs', 'peakRssKiB'].map((key) => [key, median(rows.map((row) => row[key]))]));
     results.push({ candidates: count, projects: fixture(count).rows.length, before: summarize(samples.before), after: summarize(samples.after), samples });
   }
-  process.stdout.write(JSON.stringify({ scope: 'Enterprise result assembly only; excludes SQL, HTTP and serialization time. Five fresh-process samples per mode, alternating order; identical output digests.', baseline: '6176015b63a1615cc2269172f246725ef08abab3', environment: { node: process.version, os: `${platform()} ${release()}`, cpu: cpus()[0]?.model, logicalCpus: cpus().length }, results }, null, 2) + '\n');
+  process.stdout.write(JSON.stringify({ scope: 'Enterprise result assembly only; excludes SQL, HTTP and serialization time. Five fresh-process samples per mode, alternating order; identical historical score projection digests; excludes the new challengeVersion field.', baseline: '6176015b63a1615cc2269172f246725ef08abab3', environment: { node: process.version, os: `${platform()} ${release()}`, cpu: cpus()[0]?.model, logicalCpus: cpus().length }, results }, null, 2) + '\n');
 }

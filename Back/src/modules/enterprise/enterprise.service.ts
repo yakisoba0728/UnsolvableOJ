@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { VibeService } from '../vibe/vibe.service.js';
 import { challenge } from '../vibe/vibe.catalog.js';
+import { registerVibeSnapshot } from '../vibe/vibe.snapshot.js';
 import { canJoinEnterprise as canJoin } from './enterprise-access.js';
 import { buildEnterpriseVibeScores, type EnterpriseVibeRow } from './enterprise-vibe-scores.js';
 import { enterpriseResultPageSql, enterpriseResultSummarySql } from './enterprise-result-queries.js';
@@ -11,6 +12,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -42,6 +44,7 @@ interface TestRow {
   attempt_count?: number;
   invite_usernames?: string[];
   problem_versions?: { problemId: string; version: number }[];
+  vibe_versions?: { challengeId: string; version: string; model: string }[];
 }
 
 interface AttemptRow {
@@ -57,7 +60,9 @@ const NOT_FOUND = '테스트를 찾을 수 없습니다.';
 const TEST_COLUMNS = `t.*, (SELECT count(*)::int FROM enterprise_attempts a WHERE a.test_id = t.id) AS attempt_count,
   ARRAY(SELECT u.username FROM users u WHERE u.id = ANY(t.invite_user_ids) ORDER BY lower(u.username)) AS invite_usernames,
   coalesce((SELECT json_agg(json_build_object('problemId', v.problem_id, 'version', v.version) ORDER BY v.position)
-    FROM enterprise_problem_versions v WHERE v.test_id=t.id), '[]') AS problem_versions`;
+    FROM enterprise_problem_versions v WHERE v.test_id=t.id), '[]') AS problem_versions,
+  coalesce((SELECT json_agg(json_build_object('challengeId', v.challenge_id, 'version', v.version, 'model', v.ai_model) ORDER BY v.position)
+    FROM enterprise_vibe_versions v WHERE v.test_id=t.id), '[]') AS vibe_versions`;
 
 const toTest = (row: TestRow) => ({
   id: row.id,
@@ -70,6 +75,8 @@ const toTest = (row: TestRow) => ({
   problemVersions: row.problem_versions ?? [],
   problemVersionPolicy: 'ON_SELECTION' as const,
   vibeChallengeIds: row.vibe_challenge_ids,
+  vibeChallengeVersions: (row.vibe_versions ?? []).map(({ challengeId, version }) => ({ challengeId, version })),
+  vibeVersionPolicy: 'ON_SELECTION' as const,
   inviteCode: row.invite_code,
   inviteOnly: row.invite_only,
   invitees: [...(row.invite_usernames ?? []), ...row.invite_emails],
@@ -141,6 +148,7 @@ export class EnterpriseService {
         ],
       );
       await this.bindProblemVersions(manager, row.id, dto.problemIds, user);
+      await this.bindVibeVersions(manager, row.id, dto.vibeChallengeIds ?? []);
       return toTest(await this.owned(manager, row.id, user));
     });
   }
@@ -164,7 +172,8 @@ export class EnterpriseService {
           WHERE b.test_id=$1 ORDER BY b.position`,
         [id],
       );
-      return { ...toTest(test), selectedProblems };
+      const selectedVibeChallenges = await this.vibeSummaries(test, manager);
+      return { ...toTest(test), selectedProblems, selectedVibeChallenges };
     });
   }
 
@@ -189,7 +198,7 @@ export class EnterpriseService {
         vibeChallengeIds: dto.vibeChallengeIds ?? current.vibe_challenge_ids,
       };
       this.assertSchedule(next.startsAt, next.endsAt, next.durationMin, true);
-      this.assertTasks(next.problemIds, next.vibeChallengeIds);
+      this.assertTasks(next.problemIds, next.vibeChallengeIds, dto.refreshVibeVersions ? [] : current.vibe_challenge_ids);
       const inviteOnly = dto.inviteOnly ?? current.invite_only;
       const invite =
         dto.invitees || dto.inviteOnly !== undefined
@@ -224,6 +233,8 @@ export class EnterpriseService {
           manager, id, next.problemIds, user,
           dto.refreshProblemVersions ? [] : current.problem_versions,
         );
+      if (dto.vibeChallengeIds || dto.refreshVibeVersions)
+        await this.bindVibeVersions(manager, id, next.vibeChallengeIds, dto.refreshVibeVersions ? [] : current.vibe_versions);
       return toTest(await this.owned(manager, id, user));
     });
   }
@@ -528,11 +539,11 @@ export class EnterpriseService {
     await this.vibe.finalize(vibeId, row.user_id);
     return this.reviewVibe(testId, attemptId, vibeId, user);
   }
-  private assertTasks(problems: string[], vibeIds: string[]) {
+  private assertTasks(problems: string[], vibeIds: string[], retainedVibeIds: string[] = []) {
     if (
       problems.length + vibeIds.length < 1 ||
       problems.length + vibeIds.length > 20 ||
-      vibeIds.some((id) => id !== challenge.id)
+      vibeIds.some((id) => id !== challenge.id && !retainedVibeIds.includes(id))
     )
       throw new BadRequestException(
         '일반 문제와 바이브코딩 과제를 합해 1~20개 선택해 주세요.',
@@ -546,7 +557,39 @@ export class EnterpriseService {
             [attemptIds],
           )
         : [];
-    return buildEnterpriseVibeScores(test.vibe_challenge_ids, attemptIds, rows);
+    const bindings = new Map((await this.vibeSummaries(test, manager)).map((item) => [item.id, item]));
+    return buildEnterpriseVibeScores(test.vibe_challenge_ids, attemptIds, rows, bindings);
+  }
+
+  private async vibeSummaries(test: TestRow, manager = this.dataSource.manager) {
+    const summaries: { id: string; version: string; title: string; difficulty: string; stack: string; durationMin: number }[] =
+      test.vibe_challenge_ids.length ? await manager.query(
+        `SELECT b.challenge_id AS id,b.version,v.snapshot->'challenge'->>'title' AS title,
+                v.snapshot->'challenge'->>'difficulty' AS difficulty,v.snapshot->'challenge'->>'stack' AS stack,
+                (v.snapshot->'challenge'->>'durationMin')::int AS "durationMin"
+           FROM enterprise_vibe_versions b JOIN vibe_challenge_versions v ON v.version=b.version AND v.challenge_id=b.challenge_id
+          WHERE b.test_id=$1 ORDER BY b.position`, [test.id],
+      ) : [];
+    if (summaries.length !== test.vibe_challenge_ids.length || summaries.some((row, i) => row.id !== test.vibe_challenge_ids[i] || !row.title))
+      throw new ServiceUnavailableException('고정된 과제 정보를 확인할 수 없습니다.');
+    return summaries;
+  }
+
+  private async bindVibeVersions(manager: EntityManager, testId: string, ids: string[], retained: { challengeId: string; version: string; model: string }[] = []) {
+    const versions = new Map(retained.map((row) => [row.challengeId, { version: row.version, model: row.model }]));
+    if (ids.some((id) => !versions.has(id))) {
+      const current = await registerVibeSnapshot(manager);
+      for (const id of ids) if (!versions.has(id)) {
+        if (id !== current.snapshot.challenge.id) throw new BadRequestException('출제할 수 없는 바이브코딩 과제입니다.');
+        versions.set(id, { version: current.version, model: this.vibe.assessmentModel });
+      }
+    }
+    await manager.query('DELETE FROM enterprise_vibe_versions WHERE test_id=$1', [testId]);
+    if (ids.length) await manager.query(
+      `INSERT INTO enterprise_vibe_versions(test_id,challenge_id,version,ai_model,position)
+       SELECT $1,id,version,model,position FROM unnest($2::text[],$3::text[],$4::text[]) WITH ORDINALITY b(id,version,model,position)`,
+      [testId, ids, ids.map((id) => versions.get(id)!.version), ids.map((id) => versions.get(id)!.model)],
+    );
   }
 
   private async owned(

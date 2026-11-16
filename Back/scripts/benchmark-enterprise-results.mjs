@@ -130,14 +130,20 @@ if (process.argv.includes('--serve')) {
       SELECT md5('result-submission-'||n||'-'||p)::uuid,md5('result-user-'||n)::uuid,($1::uuid[])[p],md5('result-attempt-'||n)::uuid,
         'PYTHON','fixture',CASE WHEN n%(p+1)=0 THEN 'ACCEPTED'::submission_status ELSE 'WRONG_ANSWER'::submission_status END,1,true
       FROM generate_series(1,$2::int) n CROSS JOIN generate_series(1,2) p`, [problems,count]);
-    await database.query(`INSERT INTO vibe_attempts(id,user_id,enterprise_attempt_id,challenge_id,model,state,submitted_at)
+    const [{ versions }] = await database.query("SELECT to_regclass('vibe_challenge_versions')::text AS versions");
+    let vibeVersion;
+    if (versions) {
+      [{ version: vibeVersion }] = await database.query("SELECT version FROM vibe_challenge_versions WHERE challenge_id='post-search-v1' ORDER BY created_at,version LIMIT 1");
+      await database.query("INSERT INTO enterprise_vibe_versions(test_id,challenge_id,version,ai_model,position) VALUES($1,'post-search-v1',$2,'fixture',1)", [testId, vibeVersion]);
+    }
+    await database.query(`INSERT INTO vibe_attempts(id,user_id,enterprise_attempt_id,challenge_id,model,state,submitted_at${versions ? ',challenge_version' : ''})
       SELECT md5('result-vibe-'||n)::uuid,md5('result-user-'||n)::uuid,md5('result-attempt-'||n)::uuid,'post-search-v1','fixture',
         CASE WHEN n%5=1 THEN '{}'::jsonb WHEN n%5=2 THEN '{"report":{"evaluationStatus":"unavailable"}}'::jsonb
           ELSE jsonb_build_object('report',jsonb_build_object('evaluationStatus','complete','outcome',40,
             'prompt',jsonb_build_object('score',CASE WHEN n%5=3 THEN 25 ELSE 30 END),
             'process',jsonb_build_object('score',CASE WHEN n%5=3 THEN 22 ELSE 30 END))) END,
-        CASE WHEN n%5<>1 THEN '2026-01-01 00:20:00'::timestamptz END
-      FROM generate_series(1,$1::int) n WHERE n%5<>0`, [count]);
+        CASE WHEN n%5<>1 THEN '2026-01-01 00:20:00'::timestamptz END${versions ? ',$2' : ''}
+      FROM generate_series(1,$1::int) n WHERE n%5<>0`, versions ? [count, vibeVersion] : [count]);
     for (const table of ['users','enterprise_tests','enterprise_attempts','submissions','vibe_attempts']) await database.query(`ANALYZE ${table}`);
     const endpoint = `${origin}/api/v1/enterprise/tests/${testId}/results`;
     let example;

@@ -1,0 +1,10 @@
+compiler copyIn keys: [
+  'README.md',
+  'package.json',
+  'src/search.ts',
+  'src/tags.ts',
+  'tests/search.test.ts',
+  'src/constants.ts',
+  'harness.ts'
+]
+PASS: archived immutable source dependency reaches compiler

@@ -1,3 +1,4 @@
+import { BASELINE_VERSION } from '../src/database/migrations/1796000000000-vibe-challenge-versions.js';
 import { randomUUID } from 'node:crypto';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
@@ -55,15 +56,15 @@ describe('bounded enterprise result pages with global scores', () => {
         ($2::uuid[])[p],md5($1||'-attempt-'||n)::uuid,'PYTHON','fixture',
         CASE WHEN n%(p+1)=0 THEN 'ACCEPTED'::submission_status ELSE 'WRONG_ANSWER'::submission_status END,1,true
       FROM generate_series(1,123) n CROSS JOIN generate_series(1,2) p`, [suffix, problems]);
-    await db.query(`INSERT INTO vibe_attempts(user_id,challenge_id,state,model,enterprise_attempt_id,submitted_at)
+    await db.query(`INSERT INTO vibe_attempts(user_id,challenge_id,state,model,enterprise_attempt_id,submitted_at,challenge_version)
       SELECT md5($1||'-user-'||n)::uuid,'post-search-v1',
         CASE WHEN n%5=1 THEN jsonb_build_object('files',jsonb_build_object('private.txt','WORKSPACE_NOT_FOR_RESULT_LIST'))
           WHEN n%5=2 THEN '{"report":{"evaluationStatus":"unavailable"}}'::jsonb
           ELSE jsonb_build_object('report',jsonb_build_object('evaluationStatus','complete','outcome',40,
             'prompt',jsonb_build_object('score',CASE WHEN n%5=3 THEN 25 ELSE 30 END),
             'process',jsonb_build_object('score',CASE WHEN n%5=3 THEN 22 ELSE 30 END))) END,
-        'fixture',md5($1||'-attempt-'||n)::uuid,CASE WHEN n%5<>1 THEN clock_timestamp() END
-      FROM generate_series(1,123) n WHERE n%5<>0`, [suffix]);
+        'fixture',md5($1||'-attempt-'||n)::uuid,CASE WHEN n%5<>1 THEN clock_timestamp() END,$2
+      FROM generate_series(1,123) n WHERE n%5<>0`, [suffix, BASELINE_VERSION]);
     const ids = await db.query(`SELECT md5($1||'-attempt-'||n)::uuid AS id,n FROM generate_series(1,123) n ORDER BY id`, [suffix]);
     expected = ids.map(({ id, n }: { id: string; n: number }) => {
       const solved = Number(n % 2 === 0) + Number(n % 3 === 0);

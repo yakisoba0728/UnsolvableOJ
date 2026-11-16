@@ -143,6 +143,7 @@ export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVe
   const status = testStatus(test, now);
   const sourcesById = new Map(problems.map((problem) => [problem.id, problem]));
   const selectedById = new Map((test.selectedProblems ?? []).map((problem) => [problem.id, problem]));
+  const selectedVibeById = new Map((test.selectedVibeChallenges ?? []).map(challenge => [challenge.id, challenge]));
   const timeLine =
     status === "scheduled"
       ? `시작까지 ${remainingText(Date.parse(test.startsAt) - now)}`
@@ -287,8 +288,8 @@ export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVe
                 <span className="ent-order">
                   {test.problemIds.length + index + 1}
                 </span>
-                <span className="ent-problem-title">바이브코딩 과제</span>
-                <span className="case-pill">프로젝트 수정</span>
+                <span className="ent-problem-title">{selectedVibeById.get(challengeId)?.title ?? "고정된 과제 정보를 불러올 수 없어요"}</span>
+                {selectedVibeById.has(challengeId) ? <span className="case-pill">선택 시 고정</span> : null}
               </li>
             ))}
           </ol>
@@ -443,6 +444,7 @@ export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVe
                 {test.vibeChallengeIds?.map((challengeId, index) => (
                   <th scope="col" key={challengeId}>
                     바이브코딩 {index + 1}
+                    {selectedVibeById.has(challengeId) ? <small className="ent-result-problem-title">{selectedVibeById.get(challengeId)!.title} · 선택 시 고정</small> : null}
                   </th>
                 ))}
                 <th scope="col">상태</th>
