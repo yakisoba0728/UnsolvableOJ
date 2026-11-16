@@ -254,10 +254,12 @@ jobs:
           npm run test:boj-import --prefix Back
           npm run test:operations --prefix Back
           node --test Back/scripts/benchmark-enterprise-results.test.mjs
+          node --test Back/scripts/phase4-restore-rehearsal.test.mjs
           node --test Back/scripts/starter-problems.test.mjs Back/scripts/seed-starter.test.mjs
       - name: Production Compose configuration
         run: node scripts/check-production-compose.mjs
       - name: Database migrations and API tests
+        id: database_validation
         working-directory: Back
         env:
           NODE_ENV: test
@@ -268,9 +270,20 @@ jobs:
           JWT_ACCESS_SECRET: test-jwt-secret-with-at-least-32-characters
           JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
+          PHASE4_REHEARSAL: disposable-ci
+          PHASE4_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
         run: |
           node scripts/check-migrations.mjs
           node scripts/run-integration.mjs e2e
+          node scripts/phase4-restore-rehearsal.mjs
+      - name: Preserve disposable restore evidence
+        if: ${{ always() && (steps.database_validation.outcome == 'success' || steps.database_validation.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase4-restore-${{ github.sha }}-${{ github.run_attempt }}
+          path: Back/reports/phase4-restore.json
+          if-no-files-found: ${{ steps.database_validation.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 30
 
   judge:
     name: Judge worker
