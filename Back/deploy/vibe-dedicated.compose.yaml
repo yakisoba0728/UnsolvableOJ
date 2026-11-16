@@ -1,0 +1,28 @@
+# Optional overlay for ../../deploy/compose.yaml (paths below are resolved by
+# Compose from that first file). Requires Compose >=2.24.4 for !override.
+# It moves the API's Vibe execution connection only; algorithm-host relocation
+# and the independently configured mTLS gateway remain operator responsibilities.
+services:
+  back:
+    environment:
+      VIBE_EXECUTION_MODE: dedicated
+      VIBE_SANDBOX_URL: ${VIBE_DEDICATED_ORIGIN:?Set the private verified HTTPS gateway origin}
+      VIBE_SANDBOX_TOKEN: ${VIBE_DEDICATED_TOKEN:?Set a distinct random Vibe sandbox bearer token}
+      VIBE_SANDBOX_TLS_SERVERNAME: ${VIBE_TLS_SERVERNAME:-}
+      VIBE_SANDBOX_TLS_CA_FILE: /run/secrets/vibe_tls_ca
+      VIBE_SANDBOX_TLS_CERT_FILE: /run/secrets/vibe_tls_cert
+      VIBE_SANDBOX_TLS_KEY_FILE: /run/secrets/vibe_tls_key
+    # The API no longer joins the local privileged execution service network.
+    networks: !override [app, data]
+    secrets:
+      - vibe_tls_ca
+      - vibe_tls_cert
+      - vibe_tls_key
+
+secrets:
+  vibe_tls_ca:
+    file: ${VIBE_TLS_CA_PATH:?Set the trusted gateway CA file path}
+  vibe_tls_cert:
+    file: ${VIBE_TLS_CERT_PATH:?Set the API client certificate file path}
+  vibe_tls_key:
+    file: ${VIBE_TLS_KEY_PATH:?Set the API client private key file path}

@@ -251,6 +251,7 @@ jobs:
         run: |
           node --test scripts/ci-policy.test.mjs scripts/check-executor-compose.test.mjs
           npm run check --prefix Back
+          node --test Back/scripts/check-vibe-tls.mjs
           npm run test:boj-import --prefix Back
           npm run test:operations --prefix Back
           node --test Back/scripts/benchmark-enterprise-results.test.mjs

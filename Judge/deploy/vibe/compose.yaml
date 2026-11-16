@@ -1,0 +1,35 @@
+# Dedicated execution host ONLY. Reuses the existing scanned runtime build.
+# An independently configured/approved mTLS gateway must join the named internal
+# network as well as its controlled inbound network. No gateway image is added.
+services:
+  vibe-sandbox:
+    build: ../../runtime
+    image: unsolvable-go-judge:local
+    privileged: true
+    restart: unless-stopped
+    shm_size: 512m
+    mem_limit: ${VIBE_SANDBOX_MEMORY_LIMIT:-3g}
+    memswap_limit: ${VIBE_SANDBOX_MEMORY_LIMIT:-3g}
+    cgroup: private
+    cpus: ${VIBE_SANDBOX_CPUS:-2.0}
+    networks: [vibe_sandbox]
+    environment:
+      ES_AUTH_TOKEN: ${VIBE_DEDICATED_TOKEN:?Match the dedicated API Vibe bearer token}
+    command:
+      - -no-fallback
+      - -enable-cpu-rate
+      - -parallelism=2
+      - -file-timeout=15m
+      - -time-limit-checker-interval=2ms
+      - -output-limit=64m
+      - -copy-out-limit=64m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+# No published host port, application network, database/Redis identity, bind
+# mount, Docker socket or API client private key belongs to the sandbox.
+networks:
+  vibe_sandbox:
+    name: ${VIBE_EXECUTOR_NETWORK:?Set the dedicated internal gateway/sandbox network name}
+    internal: true
