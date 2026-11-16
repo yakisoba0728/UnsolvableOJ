@@ -64,7 +64,7 @@ jobs:
           retention-days: 30
 
   images:
-    # 운영 이미지가 빌드되는지만 확인한다. 이미지는 내보내거나 푸시하지 않고 GHA 캐시에만 남긴다.
+    # 기존 네 이미지를 로컬 OCI로 빌드하고 OS·런타임 의존성과 라이선스 메타데이터를 검사한다. 레지스트리에 푸시하지 않는다.
     # 해당 경로가 바뀌지 않은 항목은 빌드 단계를 건너뛰고 성공으로 끝난다. 실패는 CI required에 반영된다.
     name: Docker image (${{ matrix.name }})
     runs-on: ubuntu-24.04
@@ -93,7 +93,7 @@ jobs:
             echo "build=true" >> "$GITHUB_OUTPUT"
           else
             files=$(git diff --name-only FETCH_HEAD HEAD)
-            if grep -qE "^($CONTEXT/|\.github/workflows/ci\.yml$)" <<<"$files"; then
+            if grep -qE "^($CONTEXT/|\.github/workflows/ci\.yml$|scripts/image[-_]audit)" <<<"$files"; then
               echo "build=true" >> "$GITHUB_OUTPUT"
             else
               echo "No changes under $CONTEXT/; skipping the image build."
@@ -103,14 +103,33 @@ jobs:
       - if: ${{ steps.changes.outputs.build == 'true' }}
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
       - name: Build ${{ matrix.context }}/Dockerfile
+        id: image
         if: ${{ steps.changes.outputs.build == 'true' }}
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: ${{ matrix.context }}
           push: false
-          outputs: type=cacheonly
+          platforms: linux/amd64
+          outputs: type=oci,dest=${{ runner.temp }}/image-${{ matrix.name }},tar=false
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+      - name: Scan installed image OS/runtime packages and license metadata
+        if: ${{ steps.changes.outputs.build == 'true' }}
+        env:
+          COMPONENT: ${{ matrix.name }}
+          IMAGE_DIRECTORY: ${{ runner.temp }}/image-${{ matrix.name }}
+          BUILD_DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          python3 -m unittest discover -s scripts -p 'image_audit_test.py'
+          python3 scripts/image_audit.py "$COMPONENT" "$IMAGE_DIRECTORY" "reports/images/$COMPONENT" "$BUILD_DIGEST"
+      - name: Image vulnerability and inventory evidence
+        if: ${{ !cancelled() && steps.changes.outputs.build == 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: image-audit-${{ matrix.name }}-${{ github.sha }}-${{ github.run_attempt }}
+          path: reports/images/${{ matrix.name }}/
+          if-no-files-found: error
+          retention-days: 30
 
   changes:
     # PR은 바뀐 경로에 해당하는 검사만 돌린다. main push·야간·수동 실행은 항상 전부 돌린다.
