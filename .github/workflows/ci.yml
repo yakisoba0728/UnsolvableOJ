@@ -192,10 +192,10 @@ jobs:
           # 문서/벤치마크와 일반 UI 변경은 이 목록에 포함하지 않는다.
           if grep -qE \
             -e '^Judge/(src/|runtime/|deploy/|scripts/check-redis-tls\.mjs$|Dockerfile$|\.dockerignore$|package(-lock)?\.json$|tsconfig\.json$)' \
-            -e '^Back/src/(modules/submissions/|modules/vibe/vibe\.(runner|service|catalog|types|snapshot|prompts|ai)\.ts$|common/queue\.constants\.ts$|config/(redis\.config|env\.validation)\.ts$)' \
+            -e '^Back/src/(modules/submissions/|modules/vibe/vibe\.(runner|transport|service|catalog|types|snapshot|prompts|ai)\.ts$|common/queue\.constants\.ts$|config/(redis\.config|env\.validation)\.ts$)' \
             -e '^Back/(Dockerfile$|\.dockerignore$|docker-entrypoint\.sh$|package(-lock)?\.json$|scripts/run-integration\.mjs$|vitest\.config\.pipeline\.ts$|test/.*\.pipeline-(spec|helpers)\.ts$)' \
             -e '^Front/(Dockerfile$|\.dockerignore$|nginx\.conf$|trusted-proxy\.conf\.template$|playwright\.live\.config\.ts$|tests-live/)' \
-            -e '^(compose\.yaml$|deploy/(compose\.yaml$|\.env\.example$)|scripts/check-(compose|production-compose|sandbox-budget|executor-compose(\.test)?)\.mjs$)' <<<"$native_files"; then
+            -e '^(compose\.yaml$|deploy/(compose\.yaml$|\.env\.example$)|scripts/(check-(compose|production-compose|sandbox-budget|executor-compose(\.test)?)|compose-vibe-gateway(\.test)?)\.mjs$)' <<<"$native_files"; then
             echo "full=true" >> "$GITHUB_OUTPUT"
             all; exit 0
           fi
@@ -249,7 +249,7 @@ jobs:
         run: npm ci --prefix Back
       - name: Backend lint, types, unit tests and build
         run: |
-          node --test scripts/ci-policy.test.mjs scripts/check-executor-compose.test.mjs
+          node --test scripts/ci-policy.test.mjs scripts/check-executor-compose.test.mjs scripts/compose-vibe-gateway.test.mjs
           npm run check --prefix Back
           node --test Back/scripts/check-vibe-tls.mjs
           npm run test:boj-import --prefix Back
@@ -435,6 +435,7 @@ jobs:
           tags: unsolvable-go-judge:local
           cache-from: type=gha,scope=runtime
       - name: go-judge language and isolation regression tests
+        id: phase5_native
         env:
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: |
@@ -442,6 +443,14 @@ jobs:
           docker compose up -d --no-build --wait --wait-timeout 180 go-judge
           node Judge/runtime/check-logs.mjs
           npm run test:runtime --prefix Judge
+      - name: Preserve Phase V native verdict matrix
+        if: ${{ always() && (steps.phase5_native.outcome == 'success' || steps.phase5_native.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-verdict-matrix-${{ github.sha }}-${{ github.run_attempt }}
+          path: Judge/reports/phase5-verdict-matrix.json
+          if-no-files-found: ${{ steps.phase5_native.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 30
       - name: Native judging pipeline
         id: phase2_pipeline
         working-directory: Back
@@ -468,9 +477,31 @@ jobs:
           # remains the gate; a missing artifact must not obscure that root cause.
           if-no-files-found: warn
           retention-days: 7
+      - name: Preserve Phase V dedicated Vibe pipeline evidence
+        if: ${{ always() && (steps.phase2_pipeline.outcome == 'success' || steps.phase2_pipeline.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-vibe-pipeline-${{ github.sha }}-${{ github.run_attempt }}
+          path: Back/reports/phase5-vibe-dedicated.json
+          if-no-files-found: ${{ steps.phase2_pipeline.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 30
       - name: Full Compose browser flow
         id: compose_live
-        run: node scripts/check-compose.mjs --production
+        run: |
+          node scripts/check-compose.mjs --production
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync, statSync } from 'node:fs';
+          const prefix = 'Front/reports/phase5-vibe-';
+          for (const suffix of ['browser.json', 'browser.png', 'compose.json']) {
+            assert.ok(statSync(prefix + suffix).size > 0, `Missing Vibe evidence: ${suffix}`);
+          }
+          const browser = JSON.parse(readFileSync(prefix + 'browser.json', 'utf8'));
+          const compose = JSON.parse(readFileSync(prefix + 'compose.json', 'utf8'));
+          assert.equal(browser.status, 'PASS');
+          assert.equal(compose.status, 'PASS');
+          assert.equal(compose.cleanup, true);
+          NODE
       - name: Preserve bounded browser performance observations
         if: ${{ always() && (steps.compose_live.outcome == 'success' || steps.compose_live.outcome == 'failure') }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -480,6 +511,17 @@ jobs:
           # A failed setup may precede the probe. Successful Compose must emit its evidence.
           if-no-files-found: ${{ steps.compose_live.outcome == 'success' && 'error' || 'warn' }}
           retention-days: 7
+      - name: Preserve Phase V real Vibe browser and gateway evidence
+        if: ${{ always() && (steps.compose_live.outcome == 'success' || steps.compose_live.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-vibe-browser-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            Front/reports/phase5-vibe-browser.json
+            Front/reports/phase5-vibe-browser.png
+            Front/reports/phase5-vibe-compose.json
+          if-no-files-found: ${{ steps.compose_live.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 30
       - name: Failed Compose browser artifacts (disposable test data only)
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
