@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "kind": "runtime-advisory-primary-source-review",
+  "authoredBy": "runtime_security_engineer",
+  "recordedAt": "2026-11-16T07:41:46.133467+00:00",
+  "scope": "Author review of 14 newly selected AlmaLinux advisories covering the 16 changed records within the exact 182-CVE component cohort; two Ubuntu critical advisories independently checked for host-risk context.",
+  "retrieval": {
+    "readOn": "2026-11-16",
+    "method": "Primary publisher pages rendered by the web search/open tool; direct shell requests to AlmaLinux returned HTTP 403.",
+    "rawHtmlBytesRetained": false,
+    "rawHtmlSha256": null,
+    "limitation": "This file binds the author assessment and exact publisher URLs, not unretained HTML bytes. Full Linux CNA JSON byte hashes and immutable source URLs are independently recorded in the fresh 182-record inventory."
+  },
+  "advisories": [
+    {
+      "url": "https://errata.almalinux.org/9/ALSA-2026-0793.html",
+      "publisher": "AlmaLinux",
+      "release": "9",
+      "advisoryId": "ALSA-2026:0793",
+      "releaseDate": "2026-01-23",
+      "advisoryLevelSeverity": "important",
+      "reviewedCves": [
+        "CVE-2025-39933"
+      ],
+      "issueSummary": "SMB receive lengths in the kernel client",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/9/ALSA-2026-2212.html",
+      "publisher": "AlmaLinux",
+      "release": "9",
+      "advisoryId": "ALSA-2026:2212",
+      "releaseDate": "2026-02-12",
+      "advisoryLevelSeverity": "moderate",
+      "reviewedCves": [
+        "CVE-2025-40170"
+      ],
+      "issueSummary": "Kernel network destination reference lifetime",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/9/ALSA-2026-67150.html",
+      "publisher": "AlmaLinux",
+      "release": "9",
+      "advisoryId": "ALSA-2026:67150",
+      "releaseDate": "2026-09-16",
+      "advisoryLevelSeverity": "important",
+      "reviewedCves": [
+        "CVE-2025-68745",
+        "CVE-2026-31692"
+      ],
+      "issueSummary": "Kernel SCSI reset handling and network namespace authorization",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/9/ALSA-2026-57252.html",
+      "publisher": "AlmaLinux",
+      "release": "9",
+      "advisoryId": "ALSA-2026:57252",
+      "releaseDate": "2026-10-26",
+      "advisoryLevelSeverity": "important",
+      "reviewedCves": [
+        "CVE-2026-52991",
+        "CVE-2026-63879"
+      ],
+      "issueSummary": "Kernel pressure-file race and AMD GPU page handling",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/9/ALSA-2026-47040.html",
+      "publisher": "AlmaLinux",
+      "release": "9",
+      "advisoryId": "ALSA-2026:47040",
+      "releaseDate": "2026-08-01",
+      "advisoryLevelSeverity": "important",
+      "reviewedCves": [
+        "CVE-2026-53281"
+      ],
+      "issueSummary": "Kernel Intel IOMMU pointer and reference-count handling",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/9/ALSA-2026-90365.html",
+      "publisher": "AlmaLinux",
+      "release": "9",
+      "advisoryId": "ALSA-2026:90365",
+      "releaseDate": "2026-10-27",
+      "advisoryLevelSeverity": "important",
+      "reviewedCves": [
+        "CVE-2026-64523"
+      ],
+      "issueSummary": "Kernel network handshake file-reference lifetime",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/9/ALSA-2026-81552.html",
+      "publisher": "AlmaLinux",
+      "release": "9",
+      "advisoryId": "ALSA-2026:81552",
+      "releaseDate": "2026-10-15",
+      "advisoryLevelSeverity": "important",
+      "reviewedCves": [
+        "CVE-2026-68245"
+      ],
+      "issueSummary": "Kernel AMD GPU task-info lifetime",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/9/ALSA-2026-71700.html",
+      "publisher": "AlmaLinux",
+      "release": "9",
+      "advisoryId": "ALSA-2026:71700",
+      "releaseDate": "2026-09-29",
+      "advisoryLevelSeverity": "important",
+      "reviewedCves": [
+        "CVE-2026-68257"
+      ],
+      "issueSummary": "Kernel AMD GPU queue-size integer overflow",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/9/ALSA-2026-83156.html",
+      "publisher": "AlmaLinux",
+      "release": "9",
+      "advisoryId": "ALSA-2026:83156",
+      "releaseDate": "2026-10-19",
+      "advisoryLevelSeverity": "important",
+      "reviewedCves": [
+        "CVE-2026-68409"
+      ],
+      "issueSummary": "Kernel wireless receive-statistics lifetime",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/9/ALSA-2026-68570.html",
+      "publisher": "AlmaLinux",
+      "release": "9",
+      "advisoryId": "ALSA-2026:68570",
+      "releaseDate": "2026-09-23",
+      "advisoryLevelSeverity": "important",
+      "reviewedCves": [
+        "CVE-2026-68426"
+      ],
+      "issueSummary": "Kernel IPsec segmentation pointer lifetime",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/9/ALSA-2026-95370.html",
+      "publisher": "AlmaLinux",
+      "release": "9",
+      "advisoryId": "ALSA-2026:95370",
+      "releaseDate": "2026-11-05",
+      "advisoryLevelSeverity": "important",
+      "reviewedCves": [
+        "CVE-2026-74752"
+      ],
+      "issueSummary": "Kernel SCTP authentication-cookie validation",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/8/ALSA-2026-85774.html",
+      "publisher": "AlmaLinux",
+      "release": "8",
+      "advisoryId": "ALSA-2026:85774",
+      "releaseDate": "2026-11-05",
+      "advisoryLevelSeverity": "important",
+      "reviewedCves": [
+        "CVE-2026-89631"
+      ],
+      "issueSummary": "Kernel SMB tree-connect response length validation",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/8/ALSA-2026-99031.html",
+      "publisher": "AlmaLinux",
+      "release": "8",
+      "advisoryId": "ALSA-2026:99031",
+      "releaseDate": "2026-11-12",
+      "advisoryLevelSeverity": "moderate",
+      "reviewedCves": [
+        "CVE-2026-97493"
+      ],
+      "issueSummary": "Kernel AMD GPU firmware-table bounds",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    },
+    {
+      "url": "https://errata.almalinux.org/9/ALSA-2026-93412.html",
+      "publisher": "AlmaLinux",
+      "release": "9",
+      "advisoryId": "ALSA-2026:93412",
+      "releaseDate": "2026-11-09",
+      "advisoryLevelSeverity": "important",
+      "reviewedCves": [
+        "CVE-2026-98364"
+      ],
+      "issueSummary": "Kernel IPsec network-device reference lifetime",
+      "componentAssessment": "The advisory describes the same Linux kernel implementation issue as the byte-identical Linux CNA record. It does not identify additional vulnerable code in the exact Ubuntu exported-header payload.",
+      "boundary": "AlmaLinux advisory severity and RPM update versions do not replace Ubuntu severity or establish a fixed Ubuntu package or host kernel."
+    }
+  ],
+  "ubuntuCriticalContext": [
+    {
+      "id": "CVE-2026-64523",
+      "url": "https://ubuntu.com/security/CVE-2026-64523",
+      "observedUbuntuPriority": "Critical",
+      "observedUbuntuCvss3Score": 9.8,
+      "observedNobleLinuxStatus": "Vulnerable work in progress in 6.8.0-151.151",
+      "hostKernelReadiness": "UNVERIFIED"
+    },
+    {
+      "id": "CVE-2026-68426",
+      "url": "https://ubuntu.com/security/CVE-2026-68426",
+      "observedUbuntuPriority": "Critical",
+      "observedUbuntuCvss3Score": 9.8,
+      "observedNobleLinuxStatus": "Vulnerable work in progress in 6.8.0-151.151",
+      "hostKernelReadiness": "UNVERIFIED"
+    }
+  ],
+  "vendorSeverityChanges": [
+    {
+      "id": "CVE-2025-39933",
+      "field": "VendorSeverity.alma",
+      "before": 2,
+      "after": 3,
+      "newAdvisorySeverity": "important"
+    },
+    {
+      "id": "CVE-2025-40170",
+      "field": "VendorSeverity.alma",
+      "before": 3,
+      "after": 2,
+      "newAdvisorySeverity": "moderate"
+    },
+    {
+      "id": "CVE-2026-97493",
+      "field": "VendorSeverity.alma",
+      "before": 3,
+      "after": 2,
+      "newAdvisorySeverity": "moderate"
+    }
+  ],
+  "conclusion": "The reviewed change is vendor-reference and vendor-level-severity metadata drift. No newly affected exported-header implementation was identified. This proposal grants no approval, does not lower the 182 original HIGH/CRITICAL findings, and does not establish host safety.",
+  "approvalState": "PROPOSED_AUTHOR_EVIDENCE_ONLY",
+  "expiresAt": "2026-11-30T00:00:00Z"
+}

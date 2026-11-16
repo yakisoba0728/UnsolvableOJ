@@ -1,0 +1,25 @@
+✔ dependency audit covers runtime and complete graphs and preserves each failure (3178.654824ms)
+✔ required gate depends on every validation job, including audit and images (0.354746ms)
+✔ required gate fails for every failure/cancellation and accepts only success or skipped (15.067635ms)
+✔ integration PRs trigger CI, and the final main PR requests full validation (0.602653ms)
+✔ adding a PR label triggers CI without replacing its original activity types (0.497918ms)
+✔ the full-validation PR label only escalates the existing full-mode input (0.171434ms)
+✔ large image diffs cannot be skipped by a pipefail/SIGPIPE race (90.887163ms)
+✔ full-validation selects all four image builds even for empty or unrelated diffs (26.171256ms)
+✔ every applicability evidence and implementation dependency selects its image gate (479.780933ms)
+✔ unknown image changes fail closed without weakening ordinary bounded selection (23.891288ms)
+✔ image gate failures stay required and raw artifacts are retained without continue-on-error (0.454694ms)
+✔ full validation selects all component suites even for a documentation-only PR (2.500355ms)
+✔ full browser validation adds the WebKit core flows on Firefox without weakening existing checks (1.362248ms)
+✔ native execution and contract changes require full validation before integration (243.896698ms)
+✔ Compose and live-test harness changes cannot skip their own execution (203.758177ms)
+✔ ordinary frontend, API, and documentation changes retain bounded checks (154.786183ms)
+✔ unknown PR changes fail closed while ordinary pushes do not add native runs (12.683157ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4592.066143
