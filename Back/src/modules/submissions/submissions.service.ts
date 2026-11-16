@@ -5,6 +5,7 @@ import {
   Injectable,
   NotFoundException,
   ServiceUnavailableException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
@@ -206,10 +207,28 @@ export class SubmissionsService {
     user: AuthenticatedUser,
   ) {
     const submission = await this.dataSource.transaction(async (manager) => {
+      // Authentication may precede a withdrawal, suspension or password change.
+      // Every role must revalidate after waiting for the account lock; NO KEY
+      // UPDATE retains compatibility with workspace foreign-key KEY SHARE locks.
+      const [active]: { id: string }[] = await manager.query(
+        `SELECT id FROM users WHERE id=$1 AND deleted_at IS NULL
+           AND suspended_at IS NULL AND NOT must_change_password
+           AND ($2::integer IS NULL OR token_version=$2) FOR NO KEY UPDATE`,
+        [user.id, user.tokenVersion ?? null],
+      );
+      if (!active) throw new UnauthorizedException('다시 로그인해야 합니다.');
+      if (user.sessionId) {
+        // Session-only revocation keeps token_version unchanged. Read its
+        // successor in a fresh statement after the user-first revocation lock.
+        const [live] = await manager.query(
+          `SELECT 1 FROM refresh_tokens WHERE family_id=$1 AND user_id=$2
+             AND revoked_at IS NULL AND expires_at > clock_timestamp() LIMIT 1`,
+          [user.sessionId, user.id],
+        );
+        if (!live) throw new UnauthorizedException('다시 로그인해야 합니다.');
+      }
       if (user.role !== UserRole.ADMIN) {
-        // Serialize quotas while permitting FK KEY SHARE checks from transactions
-        // that already hold an attempt lock (for example workspace creation).
-        await manager.query('SELECT 1 FROM users WHERE id = $1 FOR NO KEY UPDATE', [user.id]);
+        // The account lock also serializes quota checks from concurrent requests.
         // 재채점·복구로 다시 줄 선 제출(generation > 1)은 제출자가 만든 대기가 아니므로 세지 않는다.
         const [{ count }]: { count: number }[] = await manager.query(
           "SELECT count(*)::int AS count FROM submissions WHERE user_id = $1 AND status IN ('QUEUED', 'JUDGING') AND judge_generation = 1",
