@@ -1,5 +1,25 @@
 # Phase V frontend implementation and evidence
 
+## Actual accepted-candidate CI observations
+
+The corrected source `49a3674e76f79b0d1626b12f02862825c189bdff` was executed on current base `6d8556c07fd370ee97d7c55798286f5b2885cf4c`. Actions checkout `8d59c05bcc2161e3088355daf63756ed655ac234` has those two parents and the same tree `c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1` as the source. Full run [43901468081](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43901468081), attempt1, completed all12 jobs successfully. Independent acceptance and the subsequent integration merge are recorded in PR89 and the final validation ledger.
+
+Actual ordinary Playwright results were403+87 on shard1 and402+87 on shard2: **979 entries =894 real-browser cases +85 browser-free units**. The four actual Compose browser cases are separate. All **42 new UX cases** passed:14 each in Chromium, WebKit and Firefox. One additional Chromium editor observation passed. These are case counts under the selected project configuration, not a claim that every route/state is covered in all engines.
+
+The source-bound UX artifacts contain **24 geometry JSON records and48 PNGs** for320/375/768/1440px × light/dark × three engines. All tracked-tree checks are clean; fonts are loaded at both compared samples. Recomputed toolbar and summary shifts are zero in every case, and no case exceeds the one-CSS-pixel horizontal-overflow allowance. Representative mobile/light and desktop/dark screenshots were independently inspected. WebKit uses its configured device scale2; other selected engines use1, so screenshot pixels are not silently equated to CSS coordinates.
+
+The editor run lasted40,019.391ms for its observation protocol and40,104.838ms overall, recording13 heap samples,20 successful actions and10 successful autosaves with zero unexpected requests/page errors. Field INP stays null. All13 optional `performance.memory` samples report the same coarse19,300,000 used bytes,26,000,000 total bytes and3,760,000,000 limit. That resolution does not establish zero allocation or absence of a leak. The EventTiming buffer retained its maximum200 entries and discarded176 more; it is explicitly truncated and cannot represent all interactions. Action wall times include automation, assertions and autosave debounce, and are not processing/paint latency. See [PERFORMANCE.md](PERFORMANCE.md) and the original artifacts for all raw values and limits.
+
+The new live Compose attribution probe observes three warm navigations with LCP candidates[368,368,368]ms and CLS[0.048731330235799154,0.048731330235799154,0.048731330235799154]. Fifteen dependent period switches have a46.9ms median and52.1ms maximum, retaining the adverse maximum. Each navigation exposes a footer-associated shift and a later24px movement of goal-descendant and toolbar boxes. These are impacted elements. Fonts are loaded at the two snapshots per navigation, but their status is not sampled at shift time; no initiating cause is established. This initial-loading observation is distinct from the controlled same-owner goal-refresh stability test above.
+
+### Failed attempts retained
+
+Run43897227270 at source771ca0f12d79653e2ef160501676fe3d1854e23e was rejected before any job executed because the coordinator used `success()` in a workflow with-input. The correction uses step outcomes in that context, with an eighteenth independently passing policy regression.
+
+Run43898203434 at source500329305615070e4e9edbde0ca9215539ed1cc4 completed9 successful jobs and3 failed jobs (both browser shards and required). Shard1 had8 failures/395 passes; shard2 had9 failures/393 passes. The17 new failures arose at exact Git provenance reads under the container's different HOME; affected remaining geometry assertions and editor observation did not complete. Firefox was not executed after the failed shard steps. The source correctionf872de5a344dfa1055fdd5864cf7ff92936fff61 limits readonly Git trust to the real module-derived checkout per subprocess. Independent8-case reproduction preserves ordinary/wrong-path rejection, immutable SHA/tree, dirty-state accuracy and unchanged global configuration. The corrected fresh run above supplies actual browser acceptance. No pixel tolerance, font wait, assertion, existing timeout or browser selection was relaxed.
+
+## Original implementation and local checkpoint
+
 ## Fixed scope
 
 Baseline source: `d0159b1f844bf0608415dded9e84af566c8e2041`, complete tree

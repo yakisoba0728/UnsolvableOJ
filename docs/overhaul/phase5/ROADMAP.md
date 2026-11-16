@@ -1,5 +1,15 @@
 # Phase V finite acceptance backlog
 
+## Completed feature scope and final gate
+
+All four feature PRs are independently reviewed, exact-source full-CI verified and merged only into `overhaul5/integration`: [#88](https://github.com/yakisoba0728/UnsolvableOJ/pull/88), [#90](https://github.com/yakisoba0728/UnsolvableOJ/pull/90), [#89](https://github.com/yakisoba0728/UnsolvableOJ/pull/89), [#91](https://github.com/yakisoba0728/UnsolvableOJ/pull/91). The feature integration head is `a6588f7bedc87228c11852d8664fe20ec6b3ece3`, tree `0f191c89a17b984cae8706cb02137ab0e4e2c3a4`. [FINAL-REPORT.md](FINAL-REPORT.md) records actual counts, findings and limits; the [validation ledger](evidence/validation-ledger.json) preserves each source, base, checkout, twelve jobs, artifacts and independent receipt.
+
+The remaining release-code gate for this documentation commit is the final stacked PR's own complete twelve-job run and independent acceptance at its exact current source/base/tree. Its post-run receipt is authoritative; feature CI does not replace it. The final PR remains OPEN/UNMERGED for the owner. Production evidence gates remain in [REMAINING-EXTERNAL-GATES.md](REMAINING-EXTERNAL-GATES.md).
+
+The finite implementation scope finished shared focus restoration and stable goal refresh; actual eight-language native verdict/memory and dedicated Vibe browser qualification; deep-page/CSV authorization and seven database workloads; Runtime advisory revalidation; stale-snapshot-safe downgrade refusal, enriched restore and a bounded real two-API/two-worker campaign. No speculative query/index optimization was justified by the measurements. Broader signal classification, longer editor observation and production-scale saturation remain explicitly deferred or dependent on approved environments.
+
+## Original finite acceptance plan
+
 The owner requests the remaining engineering goals across UX, Judge/Vibe, DB/API, security and recovery. Discovery is bounded to changed or previously unverified areas. Existing implementations are reused. New P0/P1 evidence takes priority; speculative features and migrations do not.
 
 | Stream | Finite initial work | Acceptance |

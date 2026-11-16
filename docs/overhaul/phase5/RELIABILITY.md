@@ -1,5 +1,56 @@
 # Phase V recovery and rollback evidence
 
+## Accepted actual restore and integration — PR91
+
+**INDEPENDENTLY_REVIEWED / CI_VERIFIED / INTEGRATED into Phase V integration.**
+[Run 43905864054, attempt 1](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43905864054)
+passed all twelve required jobs. The
+[independent acceptance receipt](evidence/reviews/backend-pr91-independent-review.json)
+binds PR91 source `281d0f1a30cd772cf7417e3affb8c98be252f405`, Actions checkout
+`9aa843fad33b30270ab346bc62c4865c17697ff3` and base
+`e8b08d6ab86181859d9491d15d1881a6b10262eb`. Source, checkout and integration
+merge `a6588f7bedc87228c11852d8664fe20ec6b3ece3` have the same complete tree,
+`0f191c89a17b984cae8706cb02137ab0e4e2c3a4`.
+
+The [original schema-2 restore report](evidence/backend-run-43905864054/phase4-restore.json)
+is **PASS**. This is the actual guarded Docker `pg_dump`/`pg_restore` execution,
+superseding the earlier CI-pending checkpoint below:
+
+| Executed check | Actual result |
+|---|---|
+| Fresh migration chain and legitimate empty rollback/reapply | All 31 migrations; both stages passed |
+| Populated fixture | 128 users, 24 problems, 2,056 submissions, 12 goals, 24 problem versions, 128 solves, eight assessment candidates/workspaces and sixteen Vibe revisions |
+| Stop-writer barrier | `SHARE` across all 37 public tables; a concurrent write was refused; barrier held through the dump |
+| Restored state | All 37 table counts/digests equal, schema comparison passed, restored migration ledger complete |
+| Populated downgrade and restored writes | Goal rollback refused with fingerprints/schema/products retained; restored verdict/statistics and goal-update checks passed |
+| Source / restored database bytes | 11,278,003 / 11,589,299, each below 64 MiB |
+| Custom archive | 270,084 bytes; SHA256 `4b7b3024c42252b5048195635c2d6849154306dbedc2b1929ab6ae1c475e3b36` |
+| Timings | Dump 124.624 ms; restore 142.817 ms; whole rehearsal including cleanup 1,027.631 ms |
+| Cleanup | Both generated databases removed before PASS |
+
+The [independent backend checks](evidence/backend-run-43905864054/backend-independent-checks.json)
+verify the immutable source, original report hash, limits, product oracles,
+stage outcomes and actual hosted test log. The corrected `e9bc90d` migration
+source is carried forward exactly; all **five rollback-guard regressions**
+passed within the **261-case real PostgreSQL API suite**. The complete migration
+regression also passed, closing **P5-RELIABILITY-001** for this accepted source.
+
+The archive bytes and databases were deliberately not retained. The preserved
+JSON contains archive size/SHA256, table counts/digests, the schema-comparison
+method and stage evidence. Equality and write/refusal outcomes rely on the
+reviewed source assertions and their successful hosted execution; this receipt
+does not claim an independent replay from a retained dump. The finite synthetic
+timings are neither production RTO/RPO nor a capacity or performance-improvement
+claim. This acceptance does not pre-approve a later final source/documentation
+commit or any production deployment.
+
+## Historical implementation and local checkpoints
+
+The following records preserve the original defect, failed candidate, independent
+review correction and local-only evidence. Their implementation-time pending
+statuses are superseded by the exact PR91 acceptance above; raw evidence bytes
+and the distinction between local fixture proof and hosted restore are retained.
+
 ## Finding and implemented correction
 
 The last migration, `LearningGoals1796200000000`, previously dropped
@@ -57,7 +108,9 @@ the correction; default READ COMMITTED concurrent-writer refusal and legitimate
 empty down/up continue to pass. [Complete captures](evidence/reliability/goal-isolation-tests.json)
 preserve the failures, the 13-pass candidate suite, full migration rerun and
 fixture rerun. Three unselected baseline cases come from the explicit test-name
-filter; the candidate suite has no skips. Independent re-review remains required.
+filter; the candidate suite has no skips. Independent re-review was still required
+at that author checkpoint; the corrected source and actual hosted execution are
+now accepted in the receipt above.
 
 ## Extend the existing restore gate
 
@@ -118,7 +171,7 @@ ceiling. A 64 KiB fixture `work_mem` is transition pressure, not a claim of
 measured disk spill or peak PostgreSQL memory. Cleanup runs after failures; an
 entire CI process/runner kill is outside the JavaScript `finally` guarantee.
 
-## Actual local execution
+## Historical actual local execution
 
 The two goal-test `.log` displays omit only trailing empty lines for Git
 whitespace hygiene. Their complete original UTF-8 captures, byte counts and
@@ -135,7 +188,7 @@ SHA256 values are preserved losslessly in
 | Shared fixture and populated refusal | **PASS**: 31 migrations, 37 preserved table fingerprints, 12 goals and all product oracles | [Source-bound JSON](evidence/reliability/fixture-proof.json), [executable narrow proof](evidence/reliability/fixture-proof.mjs) |
 | Restore environment/name guards | **2 passed** | `node --test Back/scripts/phase4-restore-rehearsal.test.mjs` |
 | Backend lint, typecheck and production build | **PASS** | Normal local module paths; no compiler/source relaxation |
-| Actual custom archive/restore | **NOT_EXECUTED locally** | Docker is unavailable; exact candidate CI must execute the guarded full entrypoint |
+| Actual custom archive/restore | **NOT_EXECUTED locally** | Docker was unavailable locally; the later accepted PR91 CI executed the guarded full entrypoint as recorded above |
 
 The local fixture proof used an owned PostgreSQL 17.11 cluster and Node 24.22.1.
 It records source-file SHA256 values, its base commit, safe table counts/digests,
@@ -181,11 +234,12 @@ receipts must bind full CI to their actual source/checkout trees.
 
 ## Readiness and handoff
 
-Implementation and the local checks above are complete. Independent review of
-this rollback/restore patch and the exact candidate full CI remain coordinator
-gates. The unchanged workflow already selects the new `*.e2e-spec.ts` file and
-runs/uploads the existing restore entrypoint/report; no workflow edit is needed
-for this stream. Do not reuse a schema-1 report to satisfy the schema-2 gate.
+The corrected rollback/restore implementation is independently reviewed, verified
+in the actual PR91 full CI and integrated at the source/tree recorded above. The
+workflow selects the new `*.e2e-spec.ts` file and runs/uploads the existing restore
+entrypoint/report; this stream required no replacement restore workflow. A later
+final source/base still requires its own applicable full CI and acceptance.
+Do not reuse a schema-1 report to satisfy the schema-2 gate.
 
 The [release runbook](RELEASE-RUNBOOK.md) makes staging preflight, drains,
 migration sequencing, backup/restore, rollback refusals, credentials, alerts and

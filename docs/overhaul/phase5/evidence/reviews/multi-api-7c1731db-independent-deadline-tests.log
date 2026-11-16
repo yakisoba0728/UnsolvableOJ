@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/3d1215725852/oj-multiapi/Back
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  01:08:25
+   Duration  664ms (transform 67ms, setup 0ms, import 133ms, tests 286ms, environment 0ms)
+

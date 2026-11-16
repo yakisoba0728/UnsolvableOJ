@@ -1,8 +1,50 @@
 # Phase V PostgreSQL/API qualification
 
-## Disposition and exact scope
+## Accepted actual CI and integration — PR91
 
-**IMPLEMENTED / LOCALLY TESTED. Independent review, remote CI and integration are separate gates recorded by the coordinator.**
+**INDEPENDENTLY_REVIEWED / CI_VERIFIED / INTEGRATED into Phase V integration.**
+[Run 43905864054, attempt 1](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43905864054)
+completed all twelve required jobs successfully. The
+[independent acceptance receipt](evidence/reviews/backend-pr91-independent-review.json)
+binds the actual source, merge-test checkout, base and complete tree:
+
+| Identity | Accepted value |
+|---|---|
+| PR91 source | `281d0f1a30cd772cf7417e3affb8c98be252f405` |
+| Actions checkout | `9aa843fad33b30270ab346bc62c4865c17697ff3` |
+| Tested base | `e8b08d6ab86181859d9491d15d1881a6b10262eb` |
+| Source / checkout / integration tree | `0f191c89a17b984cae8706cb02137ab0e4e2c3a4` |
+| Integration merge | `a6588f7bedc87228c11852d8664fe20ec6b3ece3` |
+
+The [original CI database report](evidence/backend-run-43905864054/phase5-database.json)
+records **PASS**, all seven workloads, all 31 migrations and successful creation
+and removal of its generated database. Total harness time was **1,808.688 ms**;
+the largest recorded database size was **33,068,723 bytes**, within the fixed
+160 MiB limit. The five serial samples, plans, buffers/WAL, source hashes and
+correctness oracles remain in the original report. These CI observations are a
+separate environment/run from the historical local measurements below; they do
+not demonstrate a speedup.
+
+The Backend job actually passed **392 unit tests in 30 files**, **261 real
+PostgreSQL API tests in 44 files**, and the complete migration regression. These
+are whole-job totals, not counts of newly added DB tests. The
+[backend evidence checks](evidence/backend-run-43905864054/backend-independent-checks.json)
+record 68 independent checks of source bindings, bounded data qualification,
+the schema-2 restore and actual test logs. The separately implemented saved-goal
+rollback correction and actual restore are described in [RELIABILITY.md](RELIABILITY.md);
+the actual two-API native execution is in [MULTI-API.md](MULTI-API.md).
+
+This accepts the PR91 code and disposable execution for Phase V integration.
+It does not approve production deployment or pre-approve a later final
+documentation/source commit. Production locking, recovery and capacity gates
+remain unchanged. The author checkpoints and original local evidence below are
+preserved as history, not relabeled as this hosted execution.
+
+## Implementation scope and historical author checkpoint
+
+At the author checkpoint this stream was **IMPLEMENTED / LOCALLY TESTED**;
+independent review, remote CI and integration were still separate pending gates.
+Those gates for the PR91 candidate are completed by the receipt above.
 
 The Phase IV source is `d0159b1f844bf0608415dded9e84af566c8e2041`,
 with its existing final CI `43852089830`. Phase IV already tested the exact
@@ -28,7 +70,7 @@ observations with their original scope and tradeoffs.
 This is qualification code and regression coverage, not a speculative rewrite
 of a working database path.
 
-## Immutable local execution
+## Historical immutable local execution
 
 The final local harness ran at source commit
 `f037d5c91f6b9cc5561fb46a3e7ed13d0289aa77`, complete tree
@@ -87,7 +129,7 @@ error name/code without SQL parameters or connection URLs; reporting is still
 attempted if disconnection fails. Abrupt machine loss remains outside what an
 in-process `finally` block can guarantee.
 
-## Measured current-source behavior
+## Historical local measured behavior
 
 For each read: one untimed warmup, five serial query samples, complete result
 checks and then a separate EXPLAIN execution. Times include PostgreSQL work,
@@ -168,10 +210,11 @@ NODE_ENV=test PHASE5_DB_QUALIFICATION=disposable \
   node scripts/phase5-db-qualification.mjs
 ```
 
-The coordinator wires the safety tests and this execution into the existing
+The coordinator wired the safety tests and this execution into the existing
 Backend job and preserves `Back/reports/phase5-database.json` on both success and
-failure. Exact-head CI and independent review receipts are recorded on the
-Phase V PR; this local result does not pre-approve them.
+failure. The accepted PR91 hosted execution and independent review are recorded
+above. The historical local result did not pre-approve them; any later source or
+base change still requires its own applicable CI/review binding.
 
 Still **DEFERRED_NONBLOCKING** in this bounded increment: histories well beyond
 20,000 per learner, enterprise sets beyond the current export cap, long mixed

@@ -7,7 +7,35 @@ This increment preserves the production Judge, its verdict mapping, resource
 limits, admission policy, worker recovery and Vibe transport. It adds targeted
 execution evidence where Phase IV explicitly had missing coverage.
 
-## Status at implementation checkpoint
+## Accepted Phase V execution
+
+[PR90](https://github.com/yakisoba0728/UnsolvableOJ/pull/90) was accepted at source `1583ee1c5f30310b37c02d30d53fb9226f776f19`, current base `e7a61bce79d39d2571c810e6edbdf04c7fa41361`, actual checkout `af29ece67e20e06b0cce453434b482cc5215d4f6`, equal source/checkout tree `8a5843db4feba7ba619159731f62d4d824369520`. Full run [43893025800](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43893025800), attempt1, completed all12 jobs successfully. It merged only into Phase V at `6d8556c07fd370ee97d7c55798286f5b2885cf4c`. The independent [source/artifact receipt](evidence/reviews/judge-43893025800-independent-acceptance.json) binds the actual ZIPs and all72 source hashes.
+
+Actual native results were **90/90** including the parent, with **72/72 observed matrix cells**, no missing cells, and zero cached-file delta. The actual pipeline had **35/35 cases**. Real Compose completed **4/4 browser flows**, including the separate dedicated Vibe browser path. These accepted feature results remain tied to their named source; the final stacked PR receipt separately binds the final whole-tree revalidation.
+
+| Language | AC | WA | Syntax | RE | TLE | OLE | UTF-8 |8MiB allocation|192MiB allocation|
+|---|---|---|---|---|---|---|---|---|---|
+|C|AC|WA|CE|RE|TLE|OLE|AC|AC|MLE|
+|CPP|AC|WA|CE|RE|TLE|OLE|AC|AC|MLE|
+|JAVA|AC|WA|CE|RE|TLE|OLE|AC|AC|RE|
+|PYTHON|AC|WA|RE|RE|TLE|OLE|AC|AC|MLE|
+|JAVASCRIPT|AC|WA|RE|RE|TLE|OLE|AC|AC|MLE|
+|TYPESCRIPT|AC|WA|CE|RE|TLE|OLE|AC|AC|MLE|
+|GO|AC|WA|CE|RE|TLE|OLE|AC|AC|MLE|
+|RUST|AC|WA|CE|RE|TLE|OLE|AC|AC|MLE|
+
+Memory allocations are tested against a128MiB execution limit. Every below-limit probe was AC. Over-allocation produced seven MLE classifications at executor-reported131,088KiB. Java's over-allocation produced the explicitly checked heap-space OOM as RE at20,596KiB; its under-allocation observation was27,508KiB. These are observed executor results from one case per cell, not a threshold search, raw OOM-event telemetry or a complete signal taxonomy. Six compiled syntax failures have no successful execution measurement; the other66 rows retain execution results.
+
+The [native ZIP](evidence/judge-run-43893025800/native.zip) SHA256 is `ee20097c8e16054d020c001c90e2d90687020310aaf0755876d248f04375d123`; [native JSON](evidence/judge-run-43893025800/phase5-verdict-matrix.json) is `f3749ed4d30109ec60cab0e77dd349ce5395484bb471c86a840025054088aaba`. The suite elapsed104,271.980ms in this particular CI observation. Per-cell source/heap flags/time/memory/verdict details remain in the raw file.
+
+The dedicated Node gateway pipeline forwarded32 actual mTLS requests, including the deliberately missing/wrong-bearer probes. It does not mean all32 were bearer-authorized. Nineteen run requests and six metadata requests returned200; two anonymous requests and one wrong-bearer request returned401. The saved assessment passed11/11 functional checks, unauthorized reads failed, four owned cached files were deleted, and the final file set equaled the baseline. Cleanup failures were zero. The1,783.670ms elapsed time is one observation, not a capacity result. [Pipeline JSON](evidence/judge-run-43893025800/phase5-vibe-dedicated.json) SHA256: `f84fae1c0d507be6f04fa4e5410b486773b39e9f90cf64873aed77f606ef16da`.
+
+A separate actual browser/Compose test executes the production nginx template and persists the final grade through dedicated transport; see [VIBE-BROWSER.md](VIBE-BROWSER.md). Its seven negative/positive transport probes,11/11 final checks,40/40 functional points, ownership/read-only/reload observations and final cleanup are retained in the [browser](evidence/judge-run-43893025800/phase5-vibe-browser.json) and [Compose](evidence/judge-run-43893025800/phase5-vibe-compose.json) reports. No browser API mocking or paid provider call was used there. The ordinary editor observation is a different mocked-backend protocol.
+
+The later bounded two-API qualification is separately documented in [MULTI-API.md](MULTI-API.md). Historical32-job and24-job campaigns used one API and multiple workers; neither is relabeled as multi-API. [PERFORMANCE.md](PERFORMANCE.md) separates the protocols, admission waits, resources and limits.
+
+## Implementation checkpoint (historical)
+
 
 | Item | State at this commit | Evidence / next gate |
 |---|---|---|
@@ -115,9 +143,7 @@ tokens, keys or cached file identifiers.
 CI must retain `Back/reports/phase5-vibe-dedicated.json` on pipeline success or
 failure. The report is not interchangeable with the existing TLS protocol-only
 test or embedded Vibe native test: it adds their actual connected native path.
-It still does **not** execute the production nginx configuration, a browser
-through dedicated mode, a deployed remote gateway, certificate rotation or paid
-provider quality. Those limits remain explicit.
+This Node pipeline fixture does not itself execute production nginx or a browser. The separate actual Compose/browser path above covers those disposable contracts. A deployed remote gateway, operational certificate rotation and paid-provider quality remain unverified.
 
 ## Load and recovery evidence reused
 
@@ -138,9 +164,11 @@ platform memory. Small-sample p99 remains an order statistic.
   certificate issuance/revocation/rotation.
 - **BLOCKED_EXTERNAL_ENVIRONMENT:** production-scale sustained multi-API and
   multi-worker performance and complete platform resource observation.
-- **DEFERRED_NONBLOCKING:** browser-through-dedicated-gateway combination;
-  actual browser/embedded-native flows and dedicated API-native flow are
-  distinct evidence and do not prove that complete combined path.
+- **CI_VERIFIED in the disposable environment:** the complete browser → API →
+  actual nginx/mTLS gateway → existing native executor → persisted assessment
+  path passed in PR90 and was repeated in PR89/PR91. This closes the earlier
+  combined-path deferral. Production host separation and operational certificate
+  issuance/revocation/rotation remain blocked as described above.
 - **UNVERIFIED outside the finite protocol:** all runtime signals, precise
   memory thresholds, long-term saturation, host power loss and provider quality.
 

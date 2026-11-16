@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "source": {
+    "checkout": "af29ece67e20e06b0cce453434b482cc5215d4f6",
+    "tree": "8a5843db4feba7ba619159731f62d4d824369520",
+    "sourceHead": "1583ee1c5f30310b37c02d30d53fb9226f776f19",
+    "base": "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+    "workflowRunId": "43893025800",
+    "workflowAttempt": "1",
+    "trackedTreeClean": true
+  },
+  "fixture": {
+    "mode": "dedicated",
+    "servername": "vibe-executor.internal",
+    "templateSha256": "83293d5f157fefc7f5cbf6a408f3cf89cf73fb1eb247083c76bec30d5b37026b",
+    "serverCertificateFingerprint": "69:00:3D:DA:26:53:7D:E5:A7:3D:6A:C7:92:5C:28:CD:05:F2:19:DE:17:23:A9:8C:49:C3:BC:D8:94:8A:FA:45",
+    "clientCertificateFingerprint": "F3:44:03:8E:73:DD:A3:6C:AA:51:69:12:F5:1F:56:A6:53:9A:FD:38:03:4C:F0:5D:55:5C:C3:CE:DD:AE:3D:96",
+    "certificateLifetimeDays": 1,
+    "serverAndClientCertificateRequired": true,
+    "applicationSandboxNetwork": false,
+    "newPrivilegedExecutors": 0,
+    "providerConfigured": false,
+    "testOnlySharedNativeExecutor": true
+  },
+  "imageId": "sha256:9bc70712e5c819120751103dfa8305a4e42277a6f5464888c52903586be1bef5",
+  "probes": {
+    "positive": {
+      "status": 200,
+      "elapsedMs": 33.992405000000005
+    },
+    "noClient": {
+      "status": 400,
+      "elapsedMs": 6.640796999999992
+    },
+    "wrongBearer": {
+      "status": 401,
+      "elapsedMs": 2.3290310000000005
+    },
+    "anonymous": {
+      "status": 401,
+      "elapsedMs": 0.9755789999999962
+    },
+    "wrongHostname": {
+      "errorCode": "ERR_TLS_CERT_ALTNAME_INVALID",
+      "elapsedMs": 6.592196999999999
+    },
+    "disallowed": {
+      "status": 404,
+      "elapsedMs": 1.0162849999999963
+    },
+    "query": {
+      "status": 400,
+      "elapsedMs": 0.6901770000000056
+    },
+    "requests": 7,
+    "perRequestTimeoutMs": 4000
+  },
+  "started": true,
+  "cleanup": true
+}

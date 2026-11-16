@@ -1,6 +1,21 @@
 # Phase V browser through dedicated Vibe transport
 
-## Status and scope
+## Actual accepted execution
+
+The connected path completed in accepted PR90 full run [43893025800](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43893025800), source `1583ee1c5f30310b37c02d30d53fb9226f776f19`, checkout `af29ece67e20e06b0cce453434b482cc5215d4f6`, tree `8a5843db4feba7ba619159731f62d4d824369520`. All12 jobs succeeded; the actual Compose suite completed4/4 cases. PR89 subsequently re-executed the connected path successfully at source49a367/treec90c955 in run43901468081. The final whole-tree receipt separately binds the final integration run.
+
+The actual browser performs signup, opens the Vibe editor in another tab, edits and autosaves the real file, switches files, executes public checks, submits the final native assessment, reloads persisted results and verifies readonly source and outsider404. There are **zero browser API route mocks and zero paid provider calls** in this flow. This is distinct from the mocked-backend editor-performance observation.
+
+At the accepted PR90 observation, six public checks succeeded and the persisted final report recorded11/11 functional checks and40/40 functional points. Paid evaluation was unavailable as configured, owner/version/source equality survived reload, and page errors were zero. Public execution took405.35ms and final submit831.09ms in that single observation; those are not capacity or tail-latency estimates. The main browser body was4,606.638ms. A separate61,000.66ms pre-test idle interval retained the unchanged authentication admission limit across the four sequential Compose flows.
+
+All seven actual gateway probes passed their expected result: version200, missing client certificate400, absent/wrong bearer401, wrong hostname`ERR_TLS_CERT_ALTNAME_INVALID`, unsupported route404 and query400. Correctly mounted one-day client/server/CA material was used; the CA private key was never mounted. The final [Compose receipt](evidence/judge-run-43893025800/phase5-vibe-compose.json) reports PASS and cleanuptrue. Its nested earlier preflight snapshot precedes final cleanup; that historical snapshot is not a cleanup failure.
+
+Original [browser JSON](evidence/judge-run-43893025800/phase5-vibe-browser.json), [screenshot](evidence/judge-run-43893025800/phase5-vibe-browser.png) and [ZIP](evidence/judge-run-43893025800/browser.zip) are retained. ZIP SHA256: `fc661ef4110307d4f904c4cee2225aa930dc35fcd8397db73340db1933159748`; browser JSON SHA256: `5be590125d64c1ffac9a8a1f9e8801b3e0a6891344af033082da92ca4b104ef3`; Compose JSON SHA256: `ca4969e982354d710b558f65f4db97e96da33eaf26d69037c8bac541657be34c`. Independent review checked exact source, actual transport artifacts, persisted grade and final removal logs.
+
+Operational host/network separation, actual certificate rotation and paid-provider quality remain separate gates. The fixture reuses the existing isolated CI native executor sequentially; it does not create a second privileged executor or establish an independent production fault domain.
+
+## Original implementation checkpoint and scope
+
 
 This increment connects the real browser flow to the dedicated Vibe transport,
 the repository's nginx gateway configuration, the existing native executor and

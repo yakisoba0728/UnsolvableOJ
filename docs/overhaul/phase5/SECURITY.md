@@ -1,6 +1,30 @@
 # Phase V security evidence and deployment limits
 
-## Decision at this checkpoint
+## Accepted Phase V image and review evidence
+
+The exact proposal was independently approved before activation and subsequently passed fresh full CI. Accepted runs [43890166522](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43890166522) (PR88), [43893025800](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43893025800) (PR90), [43901468081](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43901468081) (PR89) and [43905864054](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43905864054) (PR91) each completed all12 actual jobs, including all four image gates. Exact source/base/checkout/tree/job/artifact bindings and independent receipts are in [validation-ledger.json](evidence/validation-ledger.json). The final PR receipt must separately bind the final whole-tree execution.
+
+| Image | Observed accepted gate | Exact scope |
+|---|---|---|
+| Back | PASS; zero raw findings across severities in retained image reports | Built application image and retained package/SBOM/inventory evidence |
+| Front | PASS; zero raw findings across severities | Built frontend image; includes the nginx used by the actual dedicated Vibe fixture |
+| Judge | PASS; zero raw findings across severities | Worker image; not a certificate for its deployed host |
+| Runtime | PASS_WITH_REVIEWED_COMPONENT_FINDINGS | Raw HIGH177/CRITICAL5 and scanner exit2 retained;182 exact reviewed records, zero remaining applicability blockers,990 payload-file matches |
+
+The active policy file SHA256 is `81f0bf685f2ffc22cdb0933c2c55f6f5fff05f8f252765c0af8fe56189084603`; approved content SHA256 is `d938665f24995ea53bf0984047459de0aa9ba366dc5ebbe37055f304c68903fb`. Expiry remains **2026-11-30T00:00:00Z**. Later advisory/finding/payload mismatch or expiry is **CI/integration and deployment blocking**. This phase did not change the scanner severity threshold, evaluator, exception lifetime or fail-closed behavior.
+
+The [fresh foundation Runtime ZIP](evidence/foundation-run-43890166522/runtime.zip) SHA256 is `3d7d71d5f4b7a5fe408b41fc97e84958628e3afb1c14d6c39b677aab35871cd1`. Its [artifact-binding check](evidence/reviews/foundation-reviewed-artifact-check.json) is distinct from the independent policy-content approval: the security proposer rechecked the fresh artifact, while Independent QA and the coordinator supplied separate approval of exact policy content. That role separation is explicit in the receipts; no human review or approval is claimed.
+
+The [PR90 independent source/artifact review](evidence/reviews/judge-43893025800-independent-acceptance.json) covers the native matrix, actual Vibe pipeline/browser, gateway boundaries and fresh images. The [PR89 independent review](evidence/reviews/frontend-43901468081-independent-review.json) replays Runtime against its exact policy/payload and checks the fresh four-image reports, frontend evidence privacy and actual full CI. Original archives and hashes are retained rather than relying only on expiring Actions links.
+
+The [PR91 whole-run review](evidence/reviews/backend-pr91-independent-review.json) independently repeats the four-image and Runtime990-file/182-advisory checks at the combined source. Its [separate multi-API/native acceptance](evidence/reviews/multi-api-pr91-actual-acceptance.json) closes the originally blocked deadline/lifecycle finding only after the six focused adversarial tests and actual eight-language two-API/two-worker campaign. Both receipt scopes and authors are explicit. These finite tests do not qualify production credentials, network boundaries or host-kernel isolation.
+
+Before the actual Vibe browser run, independent review identified two artifact credential channels: failure traces and test reporter arguments/HTTP timeout logs. The corrected fixture generates credentials within the browser and makes real owner/outsider requests there, with traces disabled for that credential-bearing test. An inert loopback timeout canary reproduced the APIRequest logging behavior before correction. The accepted actual artifacts contain selected numerical/status/source fields and a generated disposable account display label; no paid provider was called. This scoped privacy fix is not a repository-wide new penetration test.
+
+The original failed scan and initial proposal checkpoint below remain historical evidence. No failure is relabeled as a pass, and no header-package applicability finding is relabeled as a patched or safe host kernel.
+
+## Original proposal checkpoint (historical)
+
 
 **The exact component policy is independently reviewed; fresh full CI is still required.** The
 fresh foundation run [43884655462](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43884655462)

@@ -1,15 +1,63 @@
 # Bounded multi-API qualification
 
-## Status and purpose
+## Accepted actual native execution and integration — PR91
 
-IMPLEMENTED; native execution and CI results are PENDING. This document describes
-the protocol and its evidence contract, not a measured performance result.
+**INDEPENDENTLY_REVIEWED / CI_VERIFIED / INTEGRATED into Phase V integration.**
+[Run 43905864054, attempt 1](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43905864054)
+passed all twelve required jobs, including **36 pipeline cases in nine files**
+and the one new two-API native case. The
+[overall PR91 acceptance](evidence/reviews/backend-pr91-independent-review.json) and
+[independent actual multi-API acceptance](evidence/reviews/multi-api-pr91-actual-acceptance.json)
+bind source `281d0f1a30cd772cf7417e3affb8c98be252f405`, Actions checkout
+`9aa843fad33b30270ab346bc62c4865c17697ff3`, base
+`e8b08d6ab86181859d9491d15d1881a6b10262eb` and complete tree
+`0f191c89a17b984cae8706cb02137ab0e4e2c3a4`. Integration merge
+`a6588f7bedc87228c11852d8664fe20ec6b3ece3` has that same tree.
+
+The [original actual report](evidence/backend-run-43905864054/phase5-multi-api.json)
+records **PASS** with the following independently checked observations:
+
+| Check | Observed result |
+|---|---|
+| Topology | Two actual API processes with distinct owned IPv4 loopback listeners; two actual workers; one shared disposable PostgreSQL/Redis/native-executor environment |
+| Native outcomes | Eight languages, eight HTTP 202 admissions, eight generation-one ACCEPTED submissions, one started/completed queue attempt each and zero recoveries |
+| Shared admission | Four requests per API; remaining quota exactly 12 through 19 at limit 20; three admission lanes; zero submission retries or counter resets during the campaign |
+| Worker completion / overlap | Six jobs and two jobs; maximum recorded queue overlap two overall and one per worker |
+| Fencing / replay | Both active competing claims returned 409; all eight terminal claims returned 409; all eight opposite-API result replays returned 200 without changing retained results |
+| Persistence | Eight learned submissions, eight notifications, one solve-ledger row and 10 XP; all eight immutable source hashes matched |
+| Cleanup | All eight owned queue jobs removed; all four children terminated without forced SIGKILL; both observer sets closed with zero pending operations/close failures; native cache unchanged |
+
+There was one normal disposable-fixture throttle reset **before** API setup;
+none occurred during the measured campaign. Recorded pending-row overlap was
+three and queue overlap two; these are timestamp observations, not separately
+measured transaction-commit or native instruction intervals.
+
+The report records **8,864.358 ms** for setup/actions, **7,361.630 ms** for the
+active batch and **44.566 ms** for cleanup. Its total **8,912.917 ms** is sampled
+before report writing; the completed-test log records **8,915 ms** for the
+enclosing test, within the unchanged 90-second timeout and allocated 84-second
+budget. These are one eight-job observation, with no capacity, fairness,
+population-tail or throughput-envelope claim. CPU/RSS samples cover the Node
+processes, not native compilers or whole-host memory.
+
+The independent receipt closes **PHASE5-MULTIAPI-001** through the corrected
+source, focused deadline tests and this actual execution. It also confirms
+source carry-forward and cleanup against the hosted job log. This acceptance is
+for PR91 on Phase V integration; it does not pre-approve a later final source or
+production deployment. The author checkpoints below remain historical evidence.
+
+## Historical status and purpose
+
+At the original author checkpoint the protocol was IMPLEMENTED, while native
+execution and CI results were PENDING. The description below established the
+protocol and evidence contract before the accepted actual run above.
 
 The initial candidate `da8deeba` was blocked by independent finding
 PHASE5-MULTIAPI-001: its cancellation signal did not bound in-process Nest setup
 or sequential observer awaits. The correction removes that setup lifecycle and
 uses owned transports and operation deadlines described below. Independent
-re-review and the actual native CI qualification remain pending.
+re-review and the actual native CI qualification were pending at that checkpoint;
+both are now recorded in the accepted current-source receipts above.
 
 Local validation: Back TypeScript (`tsc --noEmit --incremental false
 --preserveSymlinks`), focused type-aware oxlint and six deadline/ownership tests
@@ -190,8 +238,9 @@ The existing `test/*.pipeline-spec.ts` selection includes this test. Run it only
 through `Back/scripts/run-integration.mjs pipeline` with the existing authorized
 native sandbox and built Back/Judge outputs. A local type/lint check or test
 listing does not qualify native execution. Preserve the raw report as a CI
-artifact, including failure cases, and bind a measured result to the exact
-source/head/base/tree before changing this document's PENDING status.
+artifact, including failure cases, and bind every measured result to its exact
+source/head/base/tree. The accepted PR91 report above satisfies that execution
+gate; local type/lint results remain distinct from actual native evidence.
 
 This topology provides two independent API processes on one host. It does not
 establish host fault tolerance, production load-balancer behavior, cross-zone

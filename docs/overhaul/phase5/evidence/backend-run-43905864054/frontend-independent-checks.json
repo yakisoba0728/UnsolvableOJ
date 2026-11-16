@@ -1,0 +1,1299 @@
+{
+  "scope": "Downloaded browser artifacts only; see separate metadata/log receipt for hosted CI conclusion.",
+  "result": "PASS_ALL_BROWSER_ARTIFACTS",
+  "checkout": {
+    "sha": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+    "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+    "trackedTreeClean": true
+  },
+  "selections": [
+    {
+      "shard": "frontend-1",
+      "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+      "all": 1,
+      "selected": 0
+    },
+    {
+      "shard": "frontend-2",
+      "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+      "all": 1,
+      "selected": 1
+    }
+  ],
+  "geometryRecords": 24,
+  "pngs": 48,
+  "geometry": [
+    {
+      "project": "chromium",
+      "browserVersion": "153.0.8010.12",
+      "width": 1440,
+      "theme": "dark",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "chromium-1440-dark-ready.png",
+          "width": 1180,
+          "height": 297,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "chromium-1440-dark-refreshing.png",
+          "width": 1180,
+          "height": 297,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "chromium",
+      "browserVersion": "153.0.8010.12",
+      "width": 1440,
+      "theme": "light",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "chromium-1440-light-ready.png",
+          "width": 1180,
+          "height": 297,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "chromium-1440-light-refreshing.png",
+          "width": 1180,
+          "height": 297,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "chromium",
+      "browserVersion": "153.0.8010.12",
+      "width": 320,
+      "theme": "dark",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "chromium-320-dark-ready.png",
+          "width": 290,
+          "height": 500,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "chromium-320-dark-refreshing.png",
+          "width": 290,
+          "height": 500,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "chromium",
+      "browserVersion": "153.0.8010.12",
+      "width": 320,
+      "theme": "light",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "chromium-320-light-ready.png",
+          "width": 290,
+          "height": 500,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "chromium-320-light-refreshing.png",
+          "width": 290,
+          "height": 500,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "chromium",
+      "browserVersion": "153.0.8010.12",
+      "width": 375,
+      "theme": "dark",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "chromium-375-dark-ready.png",
+          "width": 345,
+          "height": 407,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "chromium-375-dark-refreshing.png",
+          "width": 345,
+          "height": 407,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "chromium",
+      "browserVersion": "153.0.8010.12",
+      "width": 375,
+      "theme": "light",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "chromium-375-light-ready.png",
+          "width": 345,
+          "height": 407,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "chromium-375-light-refreshing.png",
+          "width": 345,
+          "height": 407,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "chromium",
+      "browserVersion": "153.0.8010.12",
+      "width": 768,
+      "theme": "dark",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "chromium-768-dark-ready.png",
+          "width": 720,
+          "height": 319,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "chromium-768-dark-refreshing.png",
+          "width": 720,
+          "height": 319,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "chromium",
+      "browserVersion": "153.0.8010.12",
+      "width": 768,
+      "theme": "light",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "chromium-768-light-ready.png",
+          "width": 720,
+          "height": 319,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "chromium-768-light-refreshing.png",
+          "width": 720,
+          "height": 319,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "firefox",
+      "browserVersion": "155.0",
+      "width": 1440,
+      "theme": "dark",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "firefox-1440-dark-ready.png",
+          "width": 1180,
+          "height": 297,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "firefox-1440-dark-refreshing.png",
+          "width": 1180,
+          "height": 297,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "firefox",
+      "browserVersion": "155.0",
+      "width": 1440,
+      "theme": "light",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "firefox-1440-light-ready.png",
+          "width": 1180,
+          "height": 297,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "firefox-1440-light-refreshing.png",
+          "width": 1180,
+          "height": 297,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "firefox",
+      "browserVersion": "155.0",
+      "width": 320,
+      "theme": "dark",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "firefox-320-dark-ready.png",
+          "width": 290,
+          "height": 522,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "firefox-320-dark-refreshing.png",
+          "width": 290,
+          "height": 522,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "firefox",
+      "browserVersion": "155.0",
+      "width": 320,
+      "theme": "light",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "firefox-320-light-ready.png",
+          "width": 290,
+          "height": 522,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "firefox-320-light-refreshing.png",
+          "width": 290,
+          "height": 522,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "firefox",
+      "browserVersion": "155.0",
+      "width": 375,
+      "theme": "dark",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "firefox-375-dark-ready.png",
+          "width": 345,
+          "height": 407,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "firefox-375-dark-refreshing.png",
+          "width": 345,
+          "height": 407,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "firefox",
+      "browserVersion": "155.0",
+      "width": 375,
+      "theme": "light",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "firefox-375-light-ready.png",
+          "width": 345,
+          "height": 407,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "firefox-375-light-refreshing.png",
+          "width": 345,
+          "height": 407,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "firefox",
+      "browserVersion": "155.0",
+      "width": 768,
+      "theme": "dark",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "firefox-768-dark-ready.png",
+          "width": 720,
+          "height": 319,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "firefox-768-dark-refreshing.png",
+          "width": 720,
+          "height": 319,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "firefox",
+      "browserVersion": "155.0",
+      "width": 768,
+      "theme": "light",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "firefox-768-light-ready.png",
+          "width": 720,
+          "height": 319,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        },
+        {
+          "name": "firefox-768-light-refreshing.png",
+          "width": 720,
+          "height": 319,
+          "deviceScaleFactor": 1,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "webkit",
+      "browserVersion": "26.6",
+      "width": 1440,
+      "theme": "dark",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "webkit-1440-dark-ready.png",
+          "width": 2360,
+          "height": 582,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        },
+        {
+          "name": "webkit-1440-dark-refreshing.png",
+          "width": 2360,
+          "height": 582,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "webkit",
+      "browserVersion": "26.6",
+      "width": 1440,
+      "theme": "light",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "webkit-1440-light-ready.png",
+          "width": 2360,
+          "height": 582,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        },
+        {
+          "name": "webkit-1440-light-refreshing.png",
+          "width": 2360,
+          "height": 582,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "webkit",
+      "browserVersion": "26.6",
+      "width": 320,
+      "theme": "dark",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "webkit-320-dark-ready.png",
+          "width": 580,
+          "height": 1032,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        },
+        {
+          "name": "webkit-320-dark-refreshing.png",
+          "width": 580,
+          "height": 1032,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "webkit",
+      "browserVersion": "26.6",
+      "width": 320,
+      "theme": "light",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "webkit-320-light-ready.png",
+          "width": 580,
+          "height": 1032,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        },
+        {
+          "name": "webkit-320-light-refreshing.png",
+          "width": 580,
+          "height": 1032,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "webkit",
+      "browserVersion": "26.6",
+      "width": 375,
+      "theme": "dark",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "webkit-375-dark-ready.png",
+          "width": 690,
+          "height": 802,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        },
+        {
+          "name": "webkit-375-dark-refreshing.png",
+          "width": 690,
+          "height": 802,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "webkit",
+      "browserVersion": "26.6",
+      "width": 375,
+      "theme": "light",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "webkit-375-light-ready.png",
+          "width": 690,
+          "height": 802,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        },
+        {
+          "name": "webkit-375-light-refreshing.png",
+          "width": 690,
+          "height": 802,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "webkit",
+      "browserVersion": "26.6",
+      "width": 768,
+      "theme": "dark",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "webkit-768-dark-ready.png",
+          "width": 1440,
+          "height": 626,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        },
+        {
+          "name": "webkit-768-dark-refreshing.png",
+          "width": 1440,
+          "height": 626,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "webkit",
+      "browserVersion": "26.6",
+      "width": 768,
+      "theme": "light",
+      "fontStatus": "loaded",
+      "toolbarShiftPx": 0,
+      "summaryShiftPx": 0,
+      "allGeometryEqual": true,
+      "pngs": [
+        {
+          "name": "webkit-768-light-ready.png",
+          "width": 1440,
+          "height": 626,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        },
+        {
+          "name": "webkit-768-light-refreshing.png",
+          "width": 1440,
+          "height": 626,
+          "deviceScaleFactor": 2,
+          "chunks": [
+            "IDAT",
+            "IEND",
+            "IHDR",
+            "sBIT",
+            "sRGB"
+          ]
+        }
+      ]
+    }
+  ],
+  "editor": {
+    "file": "frontend-2/phase5-editor-observation.json",
+    "status": "PASS",
+    "source": {
+      "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+      "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+      "sourceHead": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+      "base": "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+      "workflowRunId": "43905864054",
+      "workflowAttempt": "1",
+      "trackedTreeClean": true
+    },
+    "actual": {
+      "heapSamples": 13,
+      "actions": 20,
+      "autosaveWrites": 10,
+      "unexpectedRequests": 0,
+      "pageErrors": 0
+    },
+    "protocolElapsedMs": 40016.476672000004,
+    "actualObservationMs": 40075.255401,
+    "observerCleanupMs": 58.765182000002824,
+    "fieldINP": {
+      "value": null,
+      "reason": "A finite automated laboratory interaction sample is not field INP."
+    },
+    "environment": {
+      "project": "chromium",
+      "browser": "chromium",
+      "browserVersion": "153.0.8010.12",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      }
+    },
+    "eventTimingEntries": 200,
+    "eventTimingReason": null,
+    "eventTimingTruncated": true,
+    "interpretation": "Correctness, counts, privacy and source binding checked here; performance arithmetic is independently reviewed by the database reviewer."
+  },
+  "privacy": {
+    "jsonCredentialMarkers": 0,
+    "pngTextOrExifChunks": 0,
+    "hiddenArchivePaths": 0,
+    "captureScope": "Synthetic goal region only; editor retains bounded scalar timing/heap/action fields."
+  },
+  "reviewHarnessNote": "Uses the previously reviewed exact outward floor/ceil rounding and committed project device scale factors (Safari 2, Chrome/Firefox 1). This replay reads current artifacts only; no browser was run locally.",
+  "files": [
+    {
+      "path": "frontend-1/phase5-browser-selection.json",
+      "bytes": 77,
+      "sha256": "df4e4c399f8d1abccaaf253e574b86f12faaa5974e46777266f2ad7fbcfdb713"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-1440-dark-geometry.json",
+      "bytes": 1219,
+      "sha256": "e06dd1e4d9887bd32d1b80f54a77ccc0a011b847d584f46842c3aaf87e2e017d"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-1440-dark-ready.png",
+      "bytes": 35192,
+      "sha256": "22688e2adc0ce105fa38230916611c9871aef20a1bbcefba321576f623324440"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-1440-dark-refreshing.png",
+      "bytes": 35106,
+      "sha256": "e3c6616c562eb075fb4f1f8abda47294bdf3fbbaaf26472d22abe29c754f90bd"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-1440-light-geometry.json",
+      "bytes": 1220,
+      "sha256": "f7dde217936bef4b59d16289f99a10813b7b52e7bf7892fd6f8cfe5f94a8bdd4"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-1440-light-ready.png",
+      "bytes": 34775,
+      "sha256": "aac83f0c308ad14e82c777fed6f56509a2a20fe5ad01e5ba67c012e06f02272a"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-1440-light-refreshing.png",
+      "bytes": 34885,
+      "sha256": "918c9b1206be73205d6e366305ee335294f989de0c97564f55611f4427db447d"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-320-dark-geometry.json",
+      "bytes": 1200,
+      "sha256": "f09ed659d4d25b26471d7178308e6df45389138c2ff1742b7f4fa6fcabc6dc36"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-320-dark-ready.png",
+      "bytes": 34905,
+      "sha256": "bac4f4ca41e236710f3eee10dddf3d26727f15dc7667c1e1bccf72d4d5570326"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-320-dark-refreshing.png",
+      "bytes": 34810,
+      "sha256": "56b13caa2770960f9391af5d3fd6885bccd3658913f4edd8f1d44d6946c802d1"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-320-light-geometry.json",
+      "bytes": 1201,
+      "sha256": "d25f7fcef649f2c1cf73ecfcca7751c7a3bd7947ffa613f3d54e077e95b7fd8c"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-320-light-ready.png",
+      "bytes": 34454,
+      "sha256": "ae9b427a27e16de88f3af1651c419ba79fd12c3fed5a7d59727057e4955b06dd"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-320-light-refreshing.png",
+      "bytes": 34581,
+      "sha256": "42f60df32eb2e9e2405e76463182538050e70c998fe0a4e7e11158e7689ae5d0"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-375-dark-geometry.json",
+      "bytes": 1212,
+      "sha256": "7e93d5479b1e5901e659999e7ef81f716e4539da8a74eaa9bebfc9a03d478f31"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-375-dark-ready.png",
+      "bytes": 34392,
+      "sha256": "c9ad95182dfbd2834a940ce94a02c1c73a857ef88fd677f074315ab31cf23167"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-375-dark-refreshing.png",
+      "bytes": 34296,
+      "sha256": "ea4a4394f6a804fd063246ba08de14dc1b7d0848cbfc3df3f027a13312156a53"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-375-light-geometry.json",
+      "bytes": 1213,
+      "sha256": "4d195f899f00561cde6db1857925e2d24879daa9c546bcceaffeaa251ab33855"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-375-light-ready.png",
+      "bytes": 33973,
+      "sha256": "baf10f5fd7085dd25fa83901502d7bdfe04b8453e40baee2d21097265ca88058"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-375-light-refreshing.png",
+      "bytes": 34098,
+      "sha256": "732eac9b28b2b68273be7368a7978c037d195ba6cdfcb1f3fa92355b588331cd"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-768-dark-geometry.json",
+      "bytes": 1198,
+      "sha256": "b916e335e2596b4569fe49d2b5547c5c319802cdee1196a4b83fc23c8685303f"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-768-dark-ready.png",
+      "bytes": 35635,
+      "sha256": "8ffbaa7b14397571926b68edba095347d8f3a3e59dd4ed40701ce0370b38ee90"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-768-dark-refreshing.png",
+      "bytes": 35552,
+      "sha256": "e430f196f8dc8d0bcd3f37e80f013812756d58c50d087838a08dd9e00ae5d64c"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-768-light-geometry.json",
+      "bytes": 1199,
+      "sha256": "ecc0b45ed7c3877f28df0d50f644651d109413e6896015da415e54871ccedc61"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-768-light-ready.png",
+      "bytes": 35220,
+      "sha256": "eb09787cd0d23173e1fa75332d5f039e0083216754814d07e7d4af08f2a9e5b8"
+    },
+    {
+      "path": "frontend-1/phase5-ux/chromium-768-light-refreshing.png",
+      "bytes": 35316,
+      "sha256": "2072ff513aeb84c9428adcf8763a8033b92fd52683bb06c17920842c774cce6e"
+    },
+    {
+      "path": "frontend-2/phase5-browser-selection.json",
+      "bytes": 77,
+      "sha256": "577056150f34cacb1fc2fc54e58d942d9e819a27746034b901382d35cba6ef8a"
+    },
+    {
+      "path": "frontend-2/phase5-editor-observation.json",
+      "bytes": 65643,
+      "sha256": "ced30244f507f6b8d5388b497004bf1163ef8a53bea217ce272cbd7ab19a0e5b"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-1440-dark-geometry.json",
+      "bytes": 1272,
+      "sha256": "2323a5fd9533ad7540309803eb5829aa53ece466afaef2bf6c858484d6d9f8f8"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-1440-dark-ready.png",
+      "bytes": 43043,
+      "sha256": "841e51a4968f4e7bebbb6c7cced2a8bce001f40f460bb56a7cad68dd38e69179"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-1440-dark-refreshing.png",
+      "bytes": 42779,
+      "sha256": "a4d3130a35197109ce75317482db91743181249869a0f7845d26a41e7b3c4306"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-1440-light-geometry.json",
+      "bytes": 1273,
+      "sha256": "8aa2b6d487adf9b0ee76b3842782f575bc9fd789087d617719b72626e420523f"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-1440-light-ready.png",
+      "bytes": 42886,
+      "sha256": "b60fd339c59b5c5f03d22a33915c6b220e61aa94886933858425b09c8ded0d8e"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-1440-light-refreshing.png",
+      "bytes": 42563,
+      "sha256": "edba4b744d94301e3d3efbd141b79ff389230f3d8cf2607ae25c1b7b05c7f1d2"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-320-dark-geometry.json",
+      "bytes": 1255,
+      "sha256": "0011ca25316169b2fb301c75edce4b365046c4eacc33a344d5684cb621c4432a"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-320-dark-ready.png",
+      "bytes": 42081,
+      "sha256": "6c5d184c909d60f71ee64b322304e2509d00d2ffb3db9e701da02da1ed9b0627"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-320-dark-refreshing.png",
+      "bytes": 41730,
+      "sha256": "bd0ba107eb517407dd35f39678751c94270e49a90bfdc8f7342dd3aba340136c"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-320-light-geometry.json",
+      "bytes": 1256,
+      "sha256": "ab35421a495d943ea3a3c2b2ce69631da127250902531748a0425a951f1b3ad7"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-320-light-ready.png",
+      "bytes": 41687,
+      "sha256": "ff9b0abb178fa9f3c8e1994f1a8975d28f8782011967e023c1408f3fb0d0a1c0"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-320-light-refreshing.png",
+      "bytes": 41376,
+      "sha256": "edd625b9e992d161deadb89d9bdc9ef58c935080f841a2f999e2a5e23c179827"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-375-dark-geometry.json",
+      "bytes": 1255,
+      "sha256": "f019c12b28459c070a616e2c7f2b926d9926ab506b92654151581b6c7b284192"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-375-dark-ready.png",
+      "bytes": 40730,
+      "sha256": "b1f4f9c45383b8d68b2602b5c68d78757866a8751106856d5ad0b2a53ade2210"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-375-dark-refreshing.png",
+      "bytes": 40502,
+      "sha256": "ad89704aab091dc47b98eff8f6052f6393959c40d47a873d4884f1be24802ad8"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-375-light-geometry.json",
+      "bytes": 1256,
+      "sha256": "3c63fff5a148bb000d7c9d0a9c03e1883ff36afe4693f2987b3ace6d2903f7cc"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-375-light-ready.png",
+      "bytes": 40243,
+      "sha256": "c6eedc67fcfb416ce6e48f5a324413cf6084a636205690bf47eb2bb86b01d7c2"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-375-light-refreshing.png",
+      "bytes": 39991,
+      "sha256": "2b1c7f43f691366ab824989eae21ecded1e9e77fc4a7a0b570e7a95386fb38d4"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-768-dark-geometry.json",
+      "bytes": 1253,
+      "sha256": "18b70443a744362ee35f40c5944f45bb0d2c8cc602e71efddd4d57d1bf8d9874"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-768-dark-ready.png",
+      "bytes": 42683,
+      "sha256": "58ad42160864e024f19761880a69128fd1e70a720136ee7953917243f7b564d3"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-768-dark-refreshing.png",
+      "bytes": 42400,
+      "sha256": "6a32a7a36bd61b1bbcdff1631a7112e6aa44bd2a7f3b035b4c79cc3c749a7f60"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-768-light-geometry.json",
+      "bytes": 1254,
+      "sha256": "66ec84debfe403c3e29c1090fe80ccc29015c27d905c6cdc52682a39788b8dc0"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-768-light-ready.png",
+      "bytes": 42320,
+      "sha256": "dfeb8e03708a8d0f06aafad69bcfea6df9cdd9768dcedb89675ef3d747403b98"
+    },
+    {
+      "path": "frontend-2/phase5-ux/firefox-768-light-refreshing.png",
+      "bytes": 41981,
+      "sha256": "097fdaa4cb40cc67929c639bedaba2c8bb4e8ade56dae63f1603d469dc278369"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-1440-dark-geometry.json",
+      "bytes": 1208,
+      "sha256": "ebcdb07c5343908d61e5447d3358726c4c87479ea9bb1be0e62380e6ce5ba207"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-1440-dark-ready.png",
+      "bytes": 96214,
+      "sha256": "9cdc159fbe11ca021ae350cb44135f449707cf004d655dfec107b9dd51c617a9"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-1440-dark-refreshing.png",
+      "bytes": 95637,
+      "sha256": "398019836739730d24a2577f20ceeffcfb003ba860e14ea15cab7e5f7e1b65b3"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-1440-light-geometry.json",
+      "bytes": 1209,
+      "sha256": "8ee5cf4ae002c3e59e2a7b6d09f47e9c14cbfa09503eff94a0445c84ce6f1ffd"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-1440-light-ready.png",
+      "bytes": 95607,
+      "sha256": "69de2f02390a520770125b7f8b8625feaf61ff127d98a7c199e2098e6d273585"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-1440-light-refreshing.png",
+      "bytes": 95424,
+      "sha256": "a7591f37fb1aa847c2b1346a350e65d0fa854bf714ed9cbb4d3cc6f136259231"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-320-dark-geometry.json",
+      "bytes": 1193,
+      "sha256": "2b91b8c80202119deb0f9e715541ebda52f81f5fb8a90734da3e4b5622eceaf9"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-320-dark-ready.png",
+      "bytes": 94823,
+      "sha256": "a06b38a31db0aa7d9537f4d853e6eca5d49b037e94248a7fadadc007b588acd4"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-320-dark-refreshing.png",
+      "bytes": 94249,
+      "sha256": "99574a720c010252d79a1ef9211546cc8e85ee2f46a57128cbb721581f2987af"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-320-light-geometry.json",
+      "bytes": 1194,
+      "sha256": "df22f7b550e9ce9ad30d55ec2f0ccf9eff9a8ab8c3a27bcc942b9e362ccc3f8d"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-320-light-ready.png",
+      "bytes": 94049,
+      "sha256": "a4a6fa4cc6b521a26befb024069a59f862fbdc6e1d180868bb9fba99f6511274"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-320-light-refreshing.png",
+      "bytes": 93885,
+      "sha256": "ef82f5462193d0a40dd3a9f2dd36c6e82ab3d270c3ed9c80981e3b07ffa3e4fb"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-375-dark-geometry.json",
+      "bytes": 1201,
+      "sha256": "7411ba001938f17f6e50a31555614b88d57f64c1e3e40e4949b03b315c2dedf5"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-375-dark-ready.png",
+      "bytes": 91971,
+      "sha256": "3fbd1dbf4dbc3d2e59e50dd85f36c2b720afd9713392f4fe7a048ca042b49137"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-375-dark-refreshing.png",
+      "bytes": 91601,
+      "sha256": "b475f2f92b95d0a611cb88567dc95a36b58c7f75f4faf149d3a5c2923574794b"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-375-light-geometry.json",
+      "bytes": 1202,
+      "sha256": "0a1f36f7b30b303ec3a9a278374d1c9832c6d9dba7cd356ac125f6b3bef89681"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-375-light-ready.png",
+      "bytes": 91098,
+      "sha256": "6cf628ac87a097a8a69dd8b6c15a3adcee2f984dc69dff190a89176006f320e6"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-375-light-refreshing.png",
+      "bytes": 90995,
+      "sha256": "1ba9ff7177a4bdc99fb3a3ee355370ae4645c7121966b04392d8a5ac9f3ed942"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-768-dark-geometry.json",
+      "bytes": 1187,
+      "sha256": "8b57ca1657c60b4a4ecdb2a737a6014475dc6c7e6cefe73be9e74c8a6fda6395"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-768-dark-ready.png",
+      "bytes": 93947,
+      "sha256": "30cd003c07f02e0194303e230af1a871d64182bf92bc1fdbf17b084a91bb3a4b"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-768-dark-refreshing.png",
+      "bytes": 93442,
+      "sha256": "320e9d2331c412590586f4ff536283cf730759450046abc27bc694e7e65db51e"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-768-light-geometry.json",
+      "bytes": 1188,
+      "sha256": "8bcc2010f103224b6767f4b6ef7c727c7897fe0187fc20c0a5cebd1dcd6a4735"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-768-light-ready.png",
+      "bytes": 93146,
+      "sha256": "8afefe885b80b0080795f66122689e25fc7bfb5e6182c1214ca06a9bc763e037"
+    },
+    {
+      "path": "frontend-2/phase5-ux/webkit-768-light-refreshing.png",
+      "bytes": 92983,
+      "sha256": "ee1a9f578663154eaa81053d413609c9853bfb0888adb7f0bc70c69c6f9e3c49"
+    }
+  ]
+}

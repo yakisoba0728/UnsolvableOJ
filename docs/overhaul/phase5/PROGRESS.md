@@ -1,5 +1,25 @@
 # Phase V progress
 
+## Current source checkpoint — all feature increments integrated
+
+Four feature PRs are MERGED into Phase V only: #88 (foundation/security), #90 (Judge/Vibe), #89 (Frontend), and #91 (DB/API, multi-API and recovery). Each passed independent review and its own current-source/current-base full twelve-job CI before merge. The latest merge is `a6588f7bedc87228c11852d8664fe20ec6b3ece3`, tree `0f191c89a17b984cae8706cb02137ab0e4e2c3a4`; PR91 run [43905864054](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43905864054) tested checkout `9aa843fad33b30270ab346bc62c4865c17697ff3` with the expected M3/source parents and identical tree.
+
+| Milestone | State at this report source |
+|---|---|
+| M0 live baseline and protected stack | COMPLETE; immutable [BASELINE.md](BASELINE.md) preserved |
+| M1 finite discovery and independent workstreams | COMPLETE; six unique workers, maximum three workers plus coordinator |
+| M2 implementation and small feature PRs | COMPLETE; all four feature PRs merged into Phase V only |
+| M3 actual bounded qualification | COMPLETE for the stated disposable scope; raw artifacts and adverse observations retained |
+| M4 independent feature review | COMPLETE; both discovered reliability/deadline blockers corrected and actual CI verified |
+| M4 final integration source gate | This report commit must receive its own twelve-job full CI and independent acceptance |
+| M5 final manual handoff | Post-run receipt and evidence-only archive must bind the tested source; final PR remains OPEN/UNMERGED |
+
+The accepted combined run contains392 Backend units,261 real PostgreSQL API cases,137 Judge worker cases,5 Python runtime checks,90 native tests/72 matrix rows,36 pipeline cases,979 ordinary Playwright entries (894 browser +85 browser-free),4 real Compose browser flows,7 DB workloads and the schema2 enriched restore. Required jobs were not skipped/cancelled. Browser retries are0. These are feature-run observations; the final receipt records the final run separately.
+
+Resume from [Issue87 checkpoint](https://github.com/yakisoba0728/UnsolvableOJ/issues/87#issuecomment-6922895867), the [validation ledger](evidence/validation-ledger.json), and the final stacked PR receipt. Re-read live heads before any action. No new measurement or old green run can substitute for the exact final source gate. Manual order remains #63 → #86 → Phase V, with compatible-base revalidation if state changes. No production deployment is authorized.
+
+## Historical initial checkpoint (superseded by the current source section above)
+
 Authoritative changing checkpoints are posted to [Issue87](https://github.com/yakisoba0728/UnsolvableOJ/issues/87); this committed document records its own source checkpoint, not a future CI result.
 
 | Milestone | Current state |

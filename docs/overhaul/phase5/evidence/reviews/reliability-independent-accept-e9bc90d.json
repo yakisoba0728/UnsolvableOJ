@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "independent_qa",
+  "reviewerAgent": "/root/independent_qa",
+  "reviewedAt": "2026-11-16T15:13:28.459640+00:00",
+  "decision": "SOURCE_ACCEPTABLE_CI_PENDING",
+  "sourceCommit": "e9bc90d8c7347960fe70f8503267f695805c93e0",
+  "sourceTree": "92323845477e3c27308ea28a576a59ffda0ae6de",
+  "parentCommit": "f6f11ed41865226a26a86927d1fe97a8a961915f",
+  "baselineCommit": "ce26659b816c1dc1450cdc48f0c58d6e41ecea1e",
+  "remoteMapping": "Not supplied or independently verified in this re-review; approval binds the exact local commit and tree above.",
+  "scope": "Independent source and release-runbook review, actual PostgreSQL isolation reproduction, targeted API/migration tests, existing migration regression, enriched fixture proof and restore safety unit tests. This accepts source for gated integration; it does not assert CI, full archive restore or deployment success.",
+  "findingDisposition": {
+    "id": "P5-RELIABILITY-001",
+    "severity": "HIGH",
+    "previousStatus": "CONFIRMED_REAL_POSTGRESQL_BLOCKER_AT_f6f11ed",
+    "status": "FIXED_AND_INDEPENDENTLY_VERIFIED_AT_e9bc90d",
+    "correction": "After requiring an active transaction, down() queries SHOW transaction_isolation and rejects anything other than read committed before taking a table lock or executing destructive SQL. The existing ACCESS EXCLUSIVE lock still spans the populated-goal check and DROP.",
+    "originalFailure": "An old REPEATABLE READ or SERIALIZABLE migration-ledger snapshot missed a separately committed goal, allowing DROP at f6f11ed. The independent baseline probe always rolled back the destructive transaction; no real user data was used or lost.",
+    "independentSameScenario": "The original probe logic was rerun unchanged except for its output filename and sourceCommit label. READ COMMITTED refuses the populated table; REPEATABLE READ and SERIALIZABLE explicitly refuse unsupported isolation. One committed synthetic row survives each safety rollback.",
+    "additionalRegressionOracle": "The two actual-PG old-snapshot tests independently rerun in the 13-test set assert the table remains present inside the still-active transaction, and exact goal rows plus migration ledger remain unchanged after rollback.",
+    "baselineEvidencePreservedByteExactly": true,
+    "primarySourceContext": "https://www.postgresql.org/docs/17/sql-lock.html"
+  },
+  "sourceChecks": {
+    "fileSha256": {
+      "Back/src/database/migrations/1796200000000-learning-goals.ts": "eb31ae84cf3c994e38aa666148555c2eea7af0a0d9301eadd82fe674d7eafcce",
+      "Back/test/learning-goal-migration.e2e-spec.ts": "af331d6a22ba46d53325921cb34daf4164f72a52be1b2e61ef82081a4eba7ca5",
+      "Back/scripts/phase4-restore-rehearsal.mjs": "ba7ccd1dc85a1926e5f71ba1b18a8e4a72a9d583d725a9e18f89243e48b0c1c5",
+      "Back/scripts/phase4-restore-rehearsal.test.mjs": "d3f1879608307c1843362e842135290206a5ffc96cfa9545773f745e2bc7ee3b",
+      "docs/overhaul/phase5/evidence/reliability/fixture-proof.mjs": "058ad24dc73fdc35cf5e65fe055b2b2f0b42bce8a3718d36d4415aa47e58e33f",
+      "docs/overhaul/phase5/RELIABILITY.md": "3dd818b8beb7dfe61c52d23938b09e9a69fcb22553d95fc16f440a55cc5a210c",
+      "docs/overhaul/phase5/RELEASE-RUNBOOK.md": "f88518c25d961a407dc247d7e697e5bac46ec917ed6095aa4ac67236baa7df1d"
+    },
+    "upAndPrecedingClassBytesIdenticalToBaseline": true,
+    "onlyRuntimeBehaviorChange": "Safer learning-goals down() refusal/locking; no up-schema, index, API or migration-registration change.",
+    "diffCheck": "PASS: git diff --check ce26659 e9bc90d",
+    "reviewCheckoutClean": true,
+    "runbookRelativeLinks": "All local Markdown targets in RELIABILITY.md and RELEASE-RUNBOOK.md exist.",
+    "remainingBlockingSourceFindings": []
+  },
+  "independentExecution": {
+    "postgres": "17.11",
+    "node": "v24.22.1",
+    "redis": "8.10.3",
+    "environment": "Fresh reviewer-owned PostgreSQL data directory and dynamic loopback port; separate reviewer-owned Redis; generated synthetic test databases; no author database, external service or production resource.",
+    "dependencySetup": "Read-only reuse through normal local package directories with hardlinked installed package files; package caches excluded. No dependency install, source change or compiler-option relaxation.",
+    "build": {
+      "command": "npm run build",
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "reliability-e9bc90d-build.log"
+    },
+    "originalIsolationProbe": {
+      "reviewer": "independent_qa",
+      "checkedAt": "2026-11-16T15:08:53.627Z",
+      "sourceCommit": "e9bc90d8c7347960fe70f8503267f695805c93e0",
+      "migrationSha256": "eb31ae84cf3c994e38aa666148555c2eea7af0a0d9301eadd82fe674d7eafcce",
+      "results": [
+        {
+          "isolation": "READ COMMITTED",
+          "committedRowsBeforeDown": 1,
+          "downRejected": true,
+          "error": "Cannot roll back learning goals with saved goals; preserve goal history before reverting.",
+          "tableAfterDownInsideTransaction": "not-inspected",
+          "rowsAfterSafetyRollback": 1
+        },
+        {
+          "isolation": "REPEATABLE READ",
+          "committedRowsBeforeDown": 1,
+          "downRejected": true,
+          "error": "Learning goals rollback requires READ COMMITTED isolation.",
+          "tableAfterDownInsideTransaction": "not-inspected",
+          "rowsAfterSafetyRollback": 1
+        },
+        {
+          "isolation": "SERIALIZABLE",
+          "committedRowsBeforeDown": 1,
+          "downRejected": true,
+          "error": "Learning goals rollback requires READ COMMITTED isolation.",
+          "tableAfterDownInsideTransaction": "not-inspected",
+          "rowsAfterSafetyRollback": 1
+        }
+      ],
+      "cleanup": "Owned generated database dropped; destructive migration effects were always rolled back."
+    },
+    "targetedApiAndMigration": {
+      "result": "PASS",
+      "tests": 13,
+      "files": 2,
+      "skipped": 0,
+      "coverage": [
+        "Goal API validation, privacy, KST boundaries, restart, concurrent replacement/removal, withdrawal, database bounds and empty down/reapply.",
+        "Nontransactional refusal, exact populated-row/ledger preservation, old-snapshot REPEATABLE READ and SERIALIZABLE refusal, and observed lock wait for an in-flight writer followed by refusal after its commit."
+      ]
+    },
+    "existingMigrationRegression": {
+      "result": "PASS",
+      "command": "node scripts/check-migrations.mjs",
+      "note": "The captured username-case migration error is an intentional negative refusal assertion; the overall command exited zero and printed its success result."
+    },
+    "enrichedFixture": {
+      "result": "PASS",
+      "migrations": 31,
+      "tableFingerprintsPreserved": 37,
+      "goals": 12,
+      "databaseBytes": 11245235,
+      "products": {
+        "goals": 12,
+        "problemVersions": 24,
+        "solves": 128,
+        "xpMatchesLedger": true,
+        "solveEvidenceMatches": true,
+        "assessments": 1,
+        "candidates": 8,
+        "algorithmPins": 1,
+        "vibePins": 1,
+        "assessmentSubmissions": 8,
+        "assessmentSubmissionOwnershipVersionsMatch": true,
+        "workspaces": 8,
+        "revisions": 16,
+        "workspaceOwnershipVersionsMatch": true
+      },
+      "scope": "fixture seed, product relationships, empty rollback/reapply, populated rollback refusal and all-table preservation only",
+      "archiveRestore": "NOT_EXECUTED_DOCKER_UNAVAILABLE",
+      "providerCalls": 0
+    },
+    "restoreSafetyTests": {
+      "result": "PASS",
+      "tests": 2,
+      "skipped": 0
+    },
+    "executionReceipt": "reliability-e9bc90d-execution.json",
+    "cleanup": "Destructive probe effects always rolled back; generated databases removed; the local launcher stopped its owned PostgreSQL/Redis processes. Reviewer fixture output was copied outside the checkout and the checkout evidence file restored byte-exactly from its committed blob."
+  },
+  "restoreAndRunbookReview": [
+    "The guarded full restore entrypoint still requires explicit disposable CI/test settings, loopback connection and a verified owned PostgreSQL 17.x Actions container. No local bypass or spoofing was used.",
+    "The enriched synthetic fixture checks learning goals, solve/XP ledger, pinned assessment history and Vibe ownership/revisions with explicit product invariants; it makes no native-judge/provider/API-award execution claim.",
+    "Source holds SHARE locks over public-table fingerprints, schema and dump, with a bounded writer-denial assertion; the full path uses bounded dump/restore commands, archive and database limits and exact generated-name cleanup.",
+    "Schema2 full restore must compare all 37 table fingerprints/schema/ledger, preserve populated-goal state on refused rollback, perform post-restore stat/goal writes, and complete cleanup before reporting success.",
+    "The release runbook binds evidence/source/images, drains writers, requires backup and isolated recovery verification, stops on destructive migration refusals, states active READ COMMITTED explicitly, preserves fixed runtime expiry and separates external operations from completed code evidence."
+  ],
+  "requiredNextGates": [
+    "Publish or map this exact source/tree to the remote feature PR without unreviewed runtime changes and run current-base CI.",
+    "Inspect the actual schema2 Docker restore artifact/log on the tested source: pg_dump/pg_restore, writer denial, 37 table fingerprints, schema/ledger and product equality, populated rollback preservation, post-restore writes and cleanup.",
+    "Recheck final combined source and required CI job logs/artifacts before overall Phase V acceptance; this local receipt does not grant deployment or final-main-merge approval."
+  ],
+  "notClaimed": [
+    "Local full Docker archive restore",
+    "Fresh full CI success for this feature",
+    "Production RTO/RPO, capacity, deployment or host-crash recovery",
+    "Real AI provider/native judging or production award execution"
+  ],
+  "reviewArtifactSha256": {
+    "reliability-independent-block-f6f11ed.json": "f9d7103733c03a6beeef5f4015f75cb9a3d5cfd47659f020b64e971205c6fa37",
+    "goal-isolation-repro.mjs": "e9449add1521c9f3edb2934c956e3ac272370b768720f729d6fbfaad0171da7e",
+    "goal-isolation-repro.json": "cb01fda89f969733082863d5afadae25dcf5477eb654060ecb4962e488f09068",
+    "goal-isolation-candidate.mjs": "9784fbf540d2b55eef13fa94255dd144ef422d0dde2c9ad908328c32eb37f4b8",
+    "goal-isolation-candidate.json": "3151545fd53bbc14f6bf9e3d46e391736b1a80cc5ba2aee3d16d34a344a5867d",
+    "reliability-e9bc90d-execution.json": "29a04c211ca1b02b10e670a9b0c7baffa55f24559fad63c2e009ea659c57337b",
+    "reliability-e9bc90d-fixture-proof.json": "1cf86d31340b87a4ec50b76ac0102d9219df24d722e1dabdce47cebeee4f650c",
+    "reliability-e9bc90d-build.log": "b80b81ecb89523f89402c9f049875462d1651744fb08bf654d0ec4b205c85bfd",
+    "run-reliability-local.py": "d092b8b70cea61608793d8f48ed495106c06e6ae0e858fb4a2552147425923e6",
+    "run-reliability-checks.py": "b8fbdcf998d80c9349e0738c6c9d44367255334e6f988e9091b5147e01c48fa9",
+    "reliability-e9bc90d-isolation-probe.log": "3151545fd53bbc14f6bf9e3d46e391736b1a80cc5ba2aee3d16d34a344a5867d",
+    "reliability-e9bc90d-targeted-api.log": "5d29d7368d730d9e2933f404e3f1e20ddb727e949fd261560c2b723ad078eddc",
+    "reliability-e9bc90d-fixture-proof.log": "7b86d6fc13a3f8f501270e3d1ca998f3dda7a60c8989e599b35b8b26b716ec41",
+    "reliability-e9bc90d-migration-regression.log": "c4fa5c836280745d4b47f42dc4a33a737ee7d2612b6dd3fdcfdf02d60f119ca9",
+    "reliability-e9bc90d-restore-guards.log": "f58297eed778ada13f3a30be057e37138ab3d5a5614fad18c27b98673b966f4b"
+  },
+  "authorshipBoundary": "Reviewer wrote only owned scratch review/execution artifacts; did not modify author source, weaken gates, edit remote data, comment, merge or deploy."
+}

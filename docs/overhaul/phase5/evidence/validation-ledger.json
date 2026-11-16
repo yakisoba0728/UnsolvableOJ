@@ -1,0 +1,884 @@
+{
+  "schemaVersion": 1,
+  "status": "ALL_FEATURES_INTEGRATED_FINAL_SOURCE_RECEIPT_REQUIRED",
+  "protected": {
+    "main": "6176015b63a1615cc2269172f246725ef08abab3",
+    "pr63": {
+      "state": "OPEN_UNMERGED",
+      "head": "3bcba380f92bd2da8973e6c88c00cd14b03be08e",
+      "base": "main",
+      "tree": "bb7a10752038434c79b51282a5227186143ff405"
+    },
+    "pr86": {
+      "state": "OPEN_UNMERGED",
+      "head": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "base": "overhaul/integration",
+      "tree": "f12f6c377ea07f0cb4b498ca0fe5889ed4401a66"
+    }
+  },
+  "agents": {
+    "uniqueWorkers": 6,
+    "maximumConcurrentWorkers": 3,
+    "coordinator": 1,
+    "followupTurnsAreNotNewAgents": true
+  },
+  "acceptedFeaturePullRequests": [
+    {
+      "pr": 88,
+      "run": {
+        "id": 43890166522,
+        "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43890166522",
+        "attempt": 1,
+        "conclusion": "success"
+      },
+      "source": "6ec519261b1103b2eadcfe0afcc0dec961353405",
+      "checkout": "93b753d73b12efe2ce6e71805feca6522f7428d2",
+      "tree": "5588cb3e8648afed8fe10146d4da961a0ebb4035",
+      "parents": [
+        "d0159b1f844bf0608415dded9e84af566c8e2041",
+        "6ec519261b1103b2eadcfe0afcc0dec961353405"
+      ],
+      "merge": "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+      "review": {
+        "path": "evidence/reviews/foundation-reviewed-artifact-check.json",
+        "sha256": "d8f1b7c9f00f6faf3a7074e4580357e99bcebb1295fa1eb3386f39f1bc71b561",
+        "role": "Proposal author fresh-artifact recheck, not independent policy approval"
+      },
+      "jobs": [
+        {
+          "id": 133378896866,
+          "name": "Detect changes",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133378897568,
+          "name": "Docker image (back)",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133378897674,
+          "name": "Dependency audit",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133378898008,
+          "name": "Docker image (runtime)",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133378898276,
+          "name": "Docker image (front)",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133378898723,
+          "name": "Docker image (judge)",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133379073275,
+          "name": "Backend and API",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133379073306,
+          "name": "Browser tests (1/2)",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133379073328,
+          "name": "Browser tests (2/2)",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133379073377,
+          "name": "Sandbox, pipeline and Compose",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133379073381,
+          "name": "Judge worker",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133387151070,
+          "name": "CI required",
+          "conclusion": "success",
+          "status": "completed"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 14236831410,
+          "name": "image-audit-back-93b753d73b12efe2ce6e71805feca6522f7428d2-1",
+          "sha256": "sha256:eae4312629b05640cb76532f92ac7c7bd49dd43444bb74e3e6e37b235ea30d27",
+          "bytes": 26953,
+          "expiresAt": "2026-12-16T14:52:15Z"
+        },
+        {
+          "id": 14236297660,
+          "name": "image-audit-front-93b753d73b12efe2ce6e71805feca6522f7428d2-1",
+          "sha256": "sha256:b5836ce8a110e39f6ce15e9d55785efac2453ab2d46369a1d5e60ff6e1a479dd",
+          "bytes": 28885,
+          "expiresAt": "2026-12-16T14:53:01Z"
+        },
+        {
+          "id": 14236152484,
+          "name": "image-audit-runtime-93b753d73b12efe2ce6e71805feca6522f7428d2-1",
+          "sha256": "sha256:3d7d71d5f4b7a5fe408b41fc97e84958628e3afb1c14d6c39b677aab35871cd1",
+          "bytes": 1086359,
+          "expiresAt": "2026-12-16T14:54:00Z"
+        },
+        {
+          "id": 14235728704,
+          "name": "npm-sbom-93b753d73b12efe2ce6e71805feca6522f7428d2-1",
+          "sha256": "sha256:6b3927d22f601a9b1eba2231060aafc81cf5823b44fdce0a04e1b445434db762",
+          "bytes": 100680,
+          "expiresAt": "2026-12-16T14:51:59Z"
+        },
+        {
+          "id": 14235394641,
+          "name": "phase4-restore-93b753d73b12efe2ce6e71805feca6522f7428d2-1",
+          "sha256": "sha256:3ca8927fed6a0c673d7554f5c86f081c2a691534989072639a1de31621779e6e",
+          "bytes": 1664,
+          "expiresAt": "2026-12-16T14:53:53Z"
+        },
+        {
+          "id": 14235319172,
+          "name": "image-audit-judge-93b753d73b12efe2ce6e71805feca6522f7428d2-1",
+          "sha256": "sha256:c0758d689c90d8c710baaa167302f48da0a49978fe34af702e1f689a2ed60b04",
+          "bytes": 14400,
+          "expiresAt": "2026-12-16T14:52:20Z"
+        }
+      ],
+      "state": "MERGED_IN_PHASE5_ONLY",
+      "acceptanceComment": 6920206577,
+      "independentPolicyReview": {
+        "path": "evidence/security/independent-policy-review.json",
+        "sha256": "ab82aafc7d54ce990db775732eb96de7a56bc4abfbc2cfef3ed22e765a93da93"
+      },
+      "coordinatorPolicyReview": {
+        "path": "evidence/security/coordinator-review.json",
+        "sha256": "3fc1a70d24401c8ac5de54d102f5e361976e901e97eeaa40a41b374084d9a357"
+      }
+    },
+    {
+      "pr": 90,
+      "run": {
+        "id": 43893025800,
+        "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43893025800",
+        "attempt": 1,
+        "conclusion": "success"
+      },
+      "source": "1583ee1c5f30310b37c02d30d53fb9226f776f19",
+      "checkout": "af29ece67e20e06b0cce453434b482cc5215d4f6",
+      "tree": "8a5843db4feba7ba619159731f62d4d824369520",
+      "parents": [
+        "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+        "1583ee1c5f30310b37c02d30d53fb9226f776f19"
+      ],
+      "merge": "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+      "review": {
+        "path": "evidence/reviews/judge-43893025800-independent-acceptance.json",
+        "sha256": "be699d0c9f9bc56da95e57ef84f2edc7fb2692398263388cffd04412a7e4e9bd"
+      },
+      "jobs": [
+        {
+          "id": 133389000820,
+          "name": "Detect changes",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133389001403,
+          "name": "Dependency audit",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133389001408,
+          "name": "Docker image (judge)",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133389001464,
+          "name": "Docker image (runtime)",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133389001573,
+          "name": "Docker image (back)",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133389001629,
+          "name": "Docker image (front)",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133389104520,
+          "name": "Backend and API",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133389104547,
+          "name": "Browser tests (2/2)",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133389104616,
+          "name": "Sandbox, pipeline and Compose",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133389104704,
+          "name": "Browser tests (1/2)",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133389105221,
+          "name": "Judge worker",
+          "conclusion": "success",
+          "status": "completed"
+        },
+        {
+          "id": 133400012095,
+          "name": "CI required",
+          "conclusion": "success",
+          "status": "completed"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 14239281138,
+          "name": "phase5-vibe-pipeline-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+          "sha256": "sha256:372e71e189a2856a9736b202bb54d158b5667ec3bea0b6b32568d8e24f5c3424",
+          "bytes": 1408,
+          "expiresAt": "2026-12-16T15:21:15Z"
+        },
+        {
+          "id": 14239165466,
+          "name": "phase5-verdict-matrix-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+          "sha256": "sha256:ee20097c8e16054d020c001c90e2d90687020310aaf0755876d248f04375d123",
+          "bytes": 5481,
+          "expiresAt": "2026-12-16T15:13:32Z"
+        },
+        {
+          "id": 14238570469,
+          "name": "phase4-restore-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+          "sha256": "sha256:8d0efb4f1f5eb68e2a11e95364cc9bb27d86a2b6020de021645a07b809f499d9",
+          "bytes": 1670,
+          "expiresAt": "2026-12-16T15:09:58Z"
+        },
+        {
+          "id": 14238531958,
+          "name": "phase2-judge-evidence-1",
+          "sha256": "sha256:fa1780a83b9d67e8d73854cc4bdc33ba5315feb1867159ce585f78a44b91aa13",
+          "bytes": 29364,
+          "expiresAt": "2026-11-23T15:21:13Z"
+        },
+        {
+          "id": 14238306046,
+          "name": "image-audit-front-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+          "sha256": "sha256:2d1b256495b276512d54cd2fe0d3fb4eb2e152f7a059f7fa199207b657896956",
+          "bytes": 29049,
+          "expiresAt": "2026-12-16T15:09:07Z"
+        },
+        {
+          "id": 14238084547,
+          "name": "phase3-browser-performance-1",
+          "sha256": "sha256:17b014ee50c05bcbd7753f374c7b48c508d41dc77f246398644f854a5f5e0f09",
+          "bytes": 5119,
+          "expiresAt": "2026-11-23T15:24:46Z"
+        },
+        {
+          "id": 14238019102,
+          "name": "phase5-vibe-browser-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+          "sha256": "sha256:fc661ef4110307d4f904c4cee2225aa930dc35fcd8397db73340db1933159748",
+          "bytes": 56667,
+          "expiresAt": "2026-12-16T15:24:47Z"
+        },
+        {
+          "id": 14237841672,
+          "name": "image-audit-judge-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+          "sha256": "sha256:51a094741578ecedf9f19887cae06c4d95be296baf5b3850204bdd638e04dd7f",
+          "bytes": 14334,
+          "expiresAt": "2026-12-16T15:08:29Z"
+        },
+        {
+          "id": 14237537622,
+          "name": "image-audit-runtime-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+          "sha256": "sha256:05870c8b6d40dc8fe7afc803779a8eadca473a42716db76735fff41b9051305b",
+          "bytes": 1086327,
+          "expiresAt": "2026-12-16T15:12:39Z"
+        },
+        {
+          "id": 14237258001,
+          "name": "npm-sbom-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+          "sha256": "sha256:e6b20a1ecbeb829e9c7cb3dc22189b166184116ab75525d0f6553ebe4f087cb5",
+          "bytes": 100682,
+          "expiresAt": "2026-12-16T15:07:52Z"
+        },
+        {
+          "id": 14236974421,
+          "name": "image-audit-back-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+          "sha256": "sha256:d95609fadf504c9578bed91296a66ef5009420f2b454fd7a5645e007d1480b4e",
+          "bytes": 26945,
+          "expiresAt": "2026-12-16T15:09:03Z"
+        }
+      ],
+      "state": "MERGED_IN_PHASE5_ONLY",
+      "acceptanceComment": 6920841790
+    },
+    {
+      "pr": 89,
+      "state": "MERGED_IN_PHASE5_ONLY",
+      "run": {
+        "id": 43901468081,
+        "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43901468081",
+        "attempt": 1,
+        "conclusion": "success"
+      },
+      "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+      "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+      "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+      "parents": [
+        "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+        "49a3674e76f79b0d1626b12f02862825c189bdff"
+      ],
+      "merge": "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+      "acceptanceComment": 6922037186,
+      "review": {
+        "path": "evidence/reviews/frontend-43901468081-independent-review.json",
+        "sha256": "7a80995d3184f8d43c6921d2518e41fbb6262435df74d0c0761748ea883ed538"
+      },
+      "counts": {
+        "ordinaryPlaywrightEntries": 979,
+        "ordinaryRealBrowserCases": 894,
+        "browserFreeUnits": 85,
+        "newUxCases": 42,
+        "newEditorObservations": 1,
+        "nativeIncludingParent": 90,
+        "pipeline": 35,
+        "composeLive": 4
+      },
+      "jobs": [
+        {
+          "id": 133418916142,
+          "name": "Dependency audit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133418916710,
+          "name": "Detect changes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133418916750,
+          "name": "Docker image (back)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133418916820,
+          "name": "Docker image (judge)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133418916832,
+          "name": "Docker image (front)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133418916958,
+          "name": "Docker image (runtime)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133419107558,
+          "name": "Backend and API",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133419107627,
+          "name": "Judge worker",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133419107689,
+          "name": "Sandbox, pipeline and Compose",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133419107740,
+          "name": "Browser tests (1/2)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133419107874,
+          "name": "Browser tests (2/2)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133428699193,
+          "name": "CI required",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 14245410256,
+          "name": "phase3-browser-performance-1",
+          "sha256": "sha256:04fbf189a4a116e2c1fbae657467f45c282f429bd38312e8669f97e8c6ebf7bc",
+          "bytes": 6418,
+          "expiresAt": "2026-11-23T16:08:44Z"
+        },
+        {
+          "id": 14244910336,
+          "name": "phase5-vibe-browser-8d59c05bcc2161e3088355daf63756ed655ac234-1",
+          "sha256": "sha256:77f34a217ca0dd7b203dfac4cc6a990c0d8f471f10f9fefaddb7cb808e70e6f6",
+          "bytes": 56747,
+          "expiresAt": "2026-12-16T16:08:46Z"
+        },
+        {
+          "id": 14244406128,
+          "name": "phase2-judge-evidence-1",
+          "sha256": "sha256:0c8fb1981926811c0ee57040a7019eef05ab047a3314007cfc210f0b1c5567bc",
+          "bytes": 29167,
+          "expiresAt": "2026-11-23T16:05:40Z"
+        },
+        {
+          "id": 14244051736,
+          "name": "phase5-vibe-pipeline-8d59c05bcc2161e3088355daf63756ed655ac234-1",
+          "sha256": "sha256:702802b5a7a713e4ff226fc7121c1c54b4036283037a589821bc4aec82e0818f",
+          "bytes": 1409,
+          "expiresAt": "2026-12-16T16:05:42Z"
+        },
+        {
+          "id": 14243895683,
+          "name": "phase5-frontend-1-8d59c05bcc2161e3088355daf63756ed655ac234-1",
+          "sha256": "sha256:c1529160bfeac3efe75228040d167bfef9fb34f9cbb03669916ef0a9cdf90a81",
+          "bytes": 543695,
+          "expiresAt": "2026-12-16T16:00:24Z"
+        },
+        {
+          "id": 14243710142,
+          "name": "phase5-verdict-matrix-8d59c05bcc2161e3088355daf63756ed655ac234-1",
+          "sha256": "sha256:0582faa6ca779000dc6f55110d18372e367d94eebeb4b21303575a50ce7828c2",
+          "bytes": 5396,
+          "expiresAt": "2026-12-16T15:58:10Z"
+        },
+        {
+          "id": 14242761020,
+          "name": "phase5-frontend-2-8d59c05bcc2161e3088355daf63756ed655ac234-1",
+          "sha256": "sha256:7a0be788d7884f53f138f64064f833832c8cd74d3baf3d6d13e6266bc788b8fb",
+          "bytes": 2085420,
+          "expiresAt": "2026-12-16T16:05:59Z"
+        },
+        {
+          "id": 14242160790,
+          "name": "image-audit-judge-8d59c05bcc2161e3088355daf63756ed655ac234-1",
+          "sha256": "sha256:62cd69cc54ebcb62235374ddc7b4f74ab0d81fdc18f954f413e0603ea971ac9c",
+          "bytes": 14287,
+          "expiresAt": "2026-12-16T15:54:49Z"
+        },
+        {
+          "id": 14241093894,
+          "name": "npm-sbom-8d59c05bcc2161e3088355daf63756ed655ac234-1",
+          "sha256": "sha256:d41a52359deeab3d16cde38a13495044f3b48116e801c96feae3465dc4a14436",
+          "bytes": 100681,
+          "expiresAt": "2026-12-16T15:54:21Z"
+        },
+        {
+          "id": 14241083422,
+          "name": "image-audit-back-8d59c05bcc2161e3088355daf63756ed655ac234-1",
+          "sha256": "sha256:eb5997f00d44f4d374e157214a158217a2d83b86f565177d7626b7270178075c",
+          "bytes": 26979,
+          "expiresAt": "2026-12-16T15:54:55Z"
+        },
+        {
+          "id": 14240938787,
+          "name": "image-audit-front-8d59c05bcc2161e3088355daf63756ed655ac234-1",
+          "sha256": "sha256:f681cf2ac20635f080465fc538fd6c0b96e78348d842b1a0b09c7362d334b998",
+          "bytes": 28920,
+          "expiresAt": "2026-12-16T15:55:18Z"
+        },
+        {
+          "id": 14240159543,
+          "name": "image-audit-runtime-8d59c05bcc2161e3088355daf63756ed655ac234-1",
+          "sha256": "sha256:0449010d12b10712b3c2496a3abcc0794e3a1f5fd3540c3f6a23d4258c44c750",
+          "bytes": 1086392,
+          "expiresAt": "2026-12-16T15:56:05Z"
+        },
+        {
+          "id": 14240119485,
+          "name": "phase4-restore-8d59c05bcc2161e3088355daf63756ed655ac234-1",
+          "sha256": "sha256:b72b436c669c6ebedff41090476e23a6e532e90fb619cf11ab388027dcbcab0b",
+          "bytes": 1666,
+          "expiresAt": "2026-12-16T15:56:30Z"
+        }
+      ]
+    },
+    {
+      "pr": 91,
+      "state": "MERGED_IN_PHASE5_ONLY",
+      "run": {
+        "id": 43905864054,
+        "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43905864054",
+        "attempt": 1,
+        "conclusion": "success"
+      },
+      "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+      "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+      "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+      "parents": [
+        "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+        "281d0f1a30cd772cf7417e3affb8c98be252f405"
+      ],
+      "merge": "a6588f7bedc87228c11852d8664fe20ec6b3ece3",
+      "acceptanceComment": 6922734884,
+      "review": {
+        "path": "evidence/reviews/backend-pr91-independent-review.json",
+        "sha256": "526f66fa948b4d763e43a2413d3e487f82e9259cf9dc063c1824047305662e36"
+      },
+      "separateMultiApiReview": {
+        "path": "evidence/reviews/multi-api-pr91-actual-acceptance.json",
+        "sha256": "12a4d6f1f414e32e05db7a9c328d4ce5000867b903d1bebb8a2dabcd58ebbf15"
+      },
+      "counts": {
+        "backendUnit": 392,
+        "backendUnitFiles": 30,
+        "realPostgresqlApi": 261,
+        "apiFiles": 44,
+        "judgeWorker": 137,
+        "nativeIncludingParent": 90,
+        "nativeScenarioRowsNotAdditionalTests": 72,
+        "pipeline": 36,
+        "pipelineFiles": 9,
+        "ordinaryPlaywrightEntries": 979,
+        "ordinaryRealBrowserCases": 894,
+        "browserFreeUnits": 85,
+        "composeLive": 4,
+        "databaseWorkloads": 7,
+        "restoredMigrations": 31,
+        "restoredTables": 37,
+        "pythonRuntimeChecks": 5
+      },
+      "jobs": [
+        {
+          "id": 133434380407,
+          "name": "Dependency audit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133434381058,
+          "name": "Docker image (front)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133434381067,
+          "name": "Detect changes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133434381207,
+          "name": "Docker image (judge)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133434381309,
+          "name": "Docker image (runtime)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133434381899,
+          "name": "Docker image (back)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133434471688,
+          "name": "Browser tests (1/2)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133434471718,
+          "name": "Browser tests (2/2)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133434471759,
+          "name": "Judge worker",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133434472142,
+          "name": "Backend and API",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133434472878,
+          "name": "Sandbox, pipeline and Compose",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133444654700,
+          "name": "CI required",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 14246995865,
+          "name": "phase5-vibe-pipeline-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:60866ea8b753d5b8ee895f0db829f5591f554e0f46e4c6031a8236fb622112ac",
+          "bytes": 1428,
+          "expiresAt": "2026-12-16T16:30:00Z"
+        },
+        {
+          "id": 14246816098,
+          "name": "phase5-multi-api-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:0f3294c747851ff1650dc61a371457e864a6d9074ce9958901a1db1b356f627d",
+          "bytes": 5265,
+          "expiresAt": "2026-12-16T16:30:02Z"
+        },
+        {
+          "id": 14246621238,
+          "name": "phase2-judge-evidence-1",
+          "sha256": "sha256:2d05283e74e8e2fdb22199a0f7cb0cb9ed375c4e353fb8ed0760f6903353c2da",
+          "bytes": 29126,
+          "expiresAt": "2026-11-23T16:29:59Z"
+        },
+        {
+          "id": 14245879774,
+          "name": "phase3-browser-performance-1",
+          "sha256": "sha256:2528d6771ce4524f8a6a5c18da5a188770ff38eb437c7e08c5c90ec65e3cb3df",
+          "bytes": 6679,
+          "expiresAt": "2026-11-23T16:33:03Z"
+        },
+        {
+          "id": 14245827596,
+          "name": "image-audit-runtime-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:d1d82603c5933f1806fcb0650731cd5428a37b593f4c5995c74c0955193138ce",
+          "bytes": 1086441,
+          "expiresAt": "2026-12-16T16:24:14Z"
+        },
+        {
+          "id": 14245549799,
+          "name": "phase5-vibe-browser-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:14e8e075fba9cfcb53da8b71e2609cfd05ad701cc51c8609f4b6763ad1f75bf0",
+          "bytes": 56807,
+          "expiresAt": "2026-12-16T16:33:04Z"
+        },
+        {
+          "id": 14245512021,
+          "name": "phase4-restore-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:7b848a59bf71babcd757b1b4bf9f508234ff6499b226321569522bac3255f20a",
+          "bytes": 2263,
+          "expiresAt": "2026-12-16T16:19:44Z"
+        },
+        {
+          "id": 14245317143,
+          "name": "image-audit-front-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:887a21064f55c674cebcdd98eaadb88c747ecfbb964673e1dfca07f9374978f9",
+          "bytes": 28914,
+          "expiresAt": "2026-12-16T16:18:47Z"
+        },
+        {
+          "id": 14245176857,
+          "name": "image-audit-judge-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:8ac91a465df953369cac8e084c72667f87be779e2f80d26af87ed80c30cf28b2",
+          "bytes": 14306,
+          "expiresAt": "2026-12-16T16:18:26Z"
+        },
+        {
+          "id": 14245087563,
+          "name": "phase5-verdict-matrix-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:c5ba86df716e40778ac7858403bdf0ac715c1b9bf7048d2fb8feaf6fc61bd5e8",
+          "bytes": 5436,
+          "expiresAt": "2026-12-16T16:22:19Z"
+        },
+        {
+          "id": 14244922097,
+          "name": "phase5-database-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:0bfc67d9f0d4d4364fffb6c42bacc8765033129b3296334153e40d76cfa6d38a",
+          "bytes": 18137,
+          "expiresAt": "2026-12-16T16:19:48Z"
+        },
+        {
+          "id": 14244698713,
+          "name": "phase5-frontend-2-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:493d46fff37a6dec5be608746dda676141735457a452de334ca5dfead0f1873b",
+          "bytes": 2085369,
+          "expiresAt": "2026-12-16T16:25:46Z"
+        },
+        {
+          "id": 14244119474,
+          "name": "image-audit-back-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:2a4332a9c0fe01b5b1e1f7ee718bd3f0ef1bbbbac5b3cd6b4808037d410dbd10",
+          "bytes": 26957,
+          "expiresAt": "2026-12-16T16:19:47Z"
+        },
+        {
+          "id": 14243959921,
+          "name": "phase5-frontend-1-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:ab64e9735723dea28612dbddb8f49178eb010fb0be00a8a0c961343111458b8a",
+          "bytes": 543704,
+          "expiresAt": "2026-12-16T16:23:41Z"
+        },
+        {
+          "id": 14243883975,
+          "name": "npm-sbom-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+          "sha256": "sha256:b0c09091953ab8d90bee237703eccca6dd0243f6f4dc886871de2d101cc76e4e",
+          "bytes": 100682,
+          "expiresAt": "2026-12-16T16:17:45Z"
+        }
+      ],
+      "composition": {
+        "localHead": "38824a09566fd75811704a44d65f7577d5cba9c3",
+        "reviewedAuthorBlobs": [
+          {
+            "source": "9978a3ec33d551c899c9bb50415dd4cb2d030bdf",
+            "files": 8
+          },
+          {
+            "source": "e9bc90d8c7347960fe70f8503267f695805c93e0",
+            "files": 17
+          },
+          {
+            "source": "7c1731dbcef91b8e8828acdd428d7274d667007c",
+            "files": 5,
+            "clarification": "Entire multi-API increment vs e9f056b has five files; correction vs da8deeba has four. The fifth file changes only the dedicated Vibe limitation string."
+          },
+          {
+            "source": "f872de5a344dfa1055fdd5864cf7ff92936fff61",
+            "files": 3
+          }
+        ]
+      }
+    }
+  ],
+  "rejectedOrSuperseded": [
+    {
+      "pr": 88,
+      "run": 43884655462,
+      "source": "ce26659b816c1dc1450cdc48f0c58d6e41ecea1e",
+      "checkout": "a5c85b0f4a32fb1451a51f6db95d7a6abbee3970",
+      "tree": "6fcefbd2a2714b1cad1e2c51fa090958c73b6048",
+      "result": "FAILED",
+      "failedJobs": 2,
+      "passedJobs": 10,
+      "reason": "Runtime exact advisory drift blocked as designed; proposal independently reviewed and new full run required."
+    },
+    {
+      "pr": 89,
+      "run": 43897227270,
+      "source": "771ca0f12d79653e2ef160501676fe3d1854e23e",
+      "tree": "180724e0fe9e072c0ff22e12634d4547f7c321d0",
+      "result": "FAILED_WORKFLOW_VALIDATION_NOT_EXECUTED",
+      "executedJobs": 0,
+      "reason": "Coordinator used success() in a steps.with input where status functions are unsupported; replaced by steps.outcome and added an independent 18th policy regression."
+    },
+    {
+      "pr": 89,
+      "run": 43898203434,
+      "source": "500329305615070e4e9edbde0ca9215539ed1cc4",
+      "checkout": "a996275996d543b89e0bd72c140bc993fe71df56",
+      "tree": "e0b79def06480dc462754b5cc039e25b48df37db",
+      "result": "FAILED",
+      "shards": [
+        {
+          "job": 133407542696,
+          "failed": 8,
+          "passed": 395
+        },
+        {
+          "job": 133407542752,
+          "failed": 9,
+          "passed": 393
+        }
+      ],
+      "reason": "Exact Git provenance call rejected container ownership; new 16geometry cases and1editor failed before remaining assertions/body. Firefox step not executed after shard failure.",
+      "passedJobs": 9,
+      "failedJobs": 3
+    }
+  ],
+  "reviewFindings": [
+    {
+      "id": "P5-RELIABILITY-001",
+      "original": "f6f11ed41865226a26a86927d1fe97a8a961915f",
+      "corrected": "e9bc90d8c7347960fe70f8503267f695805c93e0",
+      "state": "FIXED_INDEPENDENT_POSTGRES_REPLAY_ACCEPTED",
+      "reason": "Restrict guarded down migration to READ COMMITTED; table lock alone does not refresh old higher-isolation snapshot."
+    },
+    {
+      "id": "PHASE5-MULTIAPI-001",
+      "original": "da8deeba09e0ad0009fddbb884728ab68d1274e5",
+      "state": "FIXED_INDEPENDENT_SOURCE_ADVERSARIAL_TESTS_AND_ACTUAL_CI_ACCEPTED",
+      "reason": "Setup/observer lifecycle not fully bounded; late-resource ownership and cleanup/report margin required.",
+      "corrected": "7c1731dbcef91b8e8828acdd428d7274d667007c",
+      "independentReceiptSha256": "8c2a1c9912c1ddea1f082131ab76dd197997bb8c47a154ddd8d1deacb8425596",
+      "actualCiReceiptSha256": "12a4d6f1f414e32e05db7a9c328d4ce5000867b903d1bebb8a2dabcd58ebbf15",
+      "actualCiRun": 43905864054
+    }
+  ],
+  "finalAcceptance": {
+    "state": "REQUIRED_AFTER_THIS_REPORT_COMMIT",
+    "branch": "overhaul5/integration",
+    "baseBranch": "overhaul4/integration",
+    "base": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "receiptLocation": "Final stacked PR immutable acceptance comment and evidence-only overhaul5/final-receipts archive commit; neither changes the tested release source.",
+    "requirements": [
+      "12 actually executed successful jobs at final source/current base",
+      "merge-checkout expected parents and equal intended source tree",
+      "independent final source and artifacts acceptance",
+      "live protected main, PR63 and PR86 heads/states",
+      "final PR OPEN and UNMERGED"
+    ]
+  },
+  "integrationBeforeReportCommit": {
+    "sha": "a6588f7bedc87228c11852d8664fe20ec6b3ece3",
+    "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4"
+  }
+}
