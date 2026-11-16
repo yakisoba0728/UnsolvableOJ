@@ -21,8 +21,11 @@ The contract remains:
 | `finished_count` | Non-test submissions outside `QUEUED`, `JUDGING`, `SYSTEM_ERROR`, and `CANCELLED` |
 
 An accepted verdict changed by rejudging can therefore reduce the current solver
-count. The immutable XP solve ledger and retained learning evidence have different
-semantics and are deliberately not used for these counters.
+count. The separate solve/XP ledger and retained learning-completion evidence
+have different semantics and are deliberately not used for these counters.
+The solve/XP ledger is not immutable: rejudging the credited submission can revoke
+the solve and its XP when no qualifying alternative remains. An ordinary later
+wrong submission does not itself revoke an earlier credited acceptance.
 
 ## Implementation and concurrency
 

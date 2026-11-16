@@ -1,3 +1,4 @@
+import { VibeChallengeVersions1796000000000 } from './migrations/1796000000000-vibe-challenge-versions.js';
 import { EnterpriseProblemVersions1795800000000 } from './migrations/1795800000000-enterprise-problem-versions.js';
 import { CommunityProfileIndexes1795700000000 } from './migrations/1795700000000-community-profile-indexes.js';
 import { ProblemBookmarks1795900000000 } from './migrations/1795900000000-problem-bookmarks.js';
@@ -76,6 +77,7 @@ export default new DataSource({
     CommunityProfileIndexes1795700000000,
     EnterpriseProblemVersions1795800000000,
     ProblemBookmarks1795900000000,
+    VibeChallengeVersions1796000000000,
     IncrementalProblemStats1796100000000,
   ],
   synchronize: false,
