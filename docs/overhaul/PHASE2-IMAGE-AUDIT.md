@@ -3,10 +3,14 @@
 Baseline: `8a72b3701a94153a5b5ab353a6af5efc15378d3c`. This follow-up closes the
 missing scan path identified in [PHASE2-SECURITY.md](PHASE2-SECURITY.md). A
 successful image build and a successful npm audit are different evidence from
-an operating-system package scan. The four actual application-image scan
-results remain **pending exact-commit GitHub Actions execution** until their
-artifacts are reviewed. No local Docker build or application-image scan is
-claimed in this document.
+an operating-system package scan. The first actual four-image run,
+[43796045174](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43796045174),
+completed all scans and correctly **blocked all four image gates on findings**.
+Raw artifacts, package paths, supported fixes, and remaining header/kernel
+applicability work are recorded in
+[PHASE2-IMAGE-REMEDIATION.md](PHASE2-IMAGE-REMEDIATION.md). The original adapter
+methodology below is unchanged; no local Docker build or application-image scan
+is claimed.
 
 ## Scope and acceptance
 

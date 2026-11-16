@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "applicationVersion": "v1.13.3-unsolvable.1",
+  "upstreamRepository": "https://github.com/criyle/go-judge",
+  "upstreamVersion": "v1.13.3",
+  "upstreamCommit": "4ebd2ffe9474639c665fa21cfb438f68820fe77c",
+  "sourceArchive": {
+    "url": "https://api.github.com/repos/criyle/go-judge/tarball/4ebd2ffe9474639c665fa21cfb438f68820fe77c",
+    "sha256": "5b5293e4300de03251c3b43d38241386937012722adb44d084f8f3eb4cc79b55"
+  },
+  "securityBackport": {
+    "upstreamCommit": "57165afa402dad1b8b83274120560274b4e498c0",
+    "path": "go-judge-auth-redaction.patch",
+    "sha256": "6028a08141401f6e3d04ee2ff6259a3e967fdd0f5f4b3e7a281d1883c6afc501"
+  },
+  "goVersion": "1.27.4",
+  "builderImage": "golang:1.27.4-bookworm@sha256:4fa7c968ba93f1635670522dbb01a2c78150443e1385746924566079f36570ea",
+  "moduleChanges": [
+    {
+      "module": "golang.org/x/net",
+      "from": "v0.61.0",
+      "to": "v0.62.0",
+      "advisory": "https://pkg.go.dev/vuln/GO-2026-6860"
+    }
+  ],
+  "goModSha256": "8534d496bf9a2740227dee47c2c35574500e5e1f7b3c54e37ccf33b4aa17f55e",
+  "goSumSha256": "68618e489aead517a346cffc44564342f53905c6503c6792628ab4a365750ca6",
+  "buildTags": [
+    "nomsgpack",
+    "grpcnotrace"
+  ],
+  "cgoEnabled": false,
+  "mainModuleVersionInGoBuildInfo": "(devel)",
+  "note": "Source archive build; actual application version is embedded in /version. No upstream release or main-module version is forged."
+}

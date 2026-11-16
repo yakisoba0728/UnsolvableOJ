@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { useConfirm } from "../components/ConfirmDialog";
@@ -24,6 +24,7 @@ import { useEnterpriseProblems, useDocumentTitle, useNow } from "../hooks";
 import { problemPath } from "../paths";
 import { difficultyLabel } from "../difficulty";
 import { invalidResourceIdMessage } from "../resourceErrors";
+import { useRequestOwner } from "../community/useRequestOwner";
 
 function Missing({ children }: { children: React.ReactNode }) {
   return (
@@ -37,11 +38,22 @@ function Missing({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function EnterpriseDetailPage() {
+export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { id } = useParams();
-  const { session } = useAuth();
+  const { session, getSessionIdentityVersion } = useAuth();
   const navigate = useNavigate();
   const [saveError, setSaveError] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const deletingRef = useRef(false);
+  const begin = useRequestOwner(getNavigationVersion, true);
+  const resultsKey = `${id}:${getSessionIdentityVersion()}`;
+  const [pageSelection, setPageSelection] = useState({ key: resultsKey, page: 1 });
+  const resultsPage = pageSelection.key === resultsKey ? pageSelection.page : 1;
+  const resultsHeading = useRef<HTMLHeadingElement>(null);
+  const changeResultsPage = (page: number) => {
+    resultsHeading.current?.focus();
+    setPageSelection({ key: resultsKey, page });
+  };
   const [confirm, confirmDialog] = useConfirm();
   const now = useNow(10_000);
   const {
@@ -57,7 +69,11 @@ export function EnterpriseDetailPage() {
     session,
     id,
     liveStatus !== null && liveStatus !== "scheduled",
+    resultsPage,
   );
+  // A page transition never labels old rows as the newly requested page.
+  const resultData = results.data?.pagination.page === resultsPage ? results.data : null;
+  const resultPageOutOfRange = resultData !== null && resultsPage > Math.max(1, resultData.pagination.totalPages);
   const refreshResults = results.retry;
   // 진행 중에는 30초마다 다시 받는다. 탭이 숨겨져 있으면 쉬고, 돌아오면 바로 받는다.
   useEffect(() => {
@@ -132,26 +148,31 @@ export function EnterpriseDetailPage() {
         : `${formatEnd(test)}에 마감됐어요`;
 
   async function remove() {
-    if (
-      !(await confirm({
+    if (deletingRef.current) return;
+    deletingRef.current = true;
+    const current = begin();
+    setDeleting(true);
+    try {
+      if (!(await confirm({
         title: `‘${test!.title}’ 테스트를 삭제할까요?`,
         message: "삭제하면 되돌릴 수 없어요.",
         confirmLabel: "삭제",
         danger: true,
-      }))
-    )
-      return;
-    try {
+      })) || !current()) return;
+      setSaveError("");
       await enterpriseApi.remove(session!.accessToken, test!.id);
-      navigate("/enterprise");
+      if (current()) navigate("/enterprise");
     } catch (cause) {
-      setSaveError(
+      if (current()) setSaveError(
         cause instanceof Error ? cause.message : "테스트를 삭제하지 못했어요.",
       );
+    } finally {
+      deletingRef.current = false;
+      if (current()) setDeleting(false);
     }
   }
   const link = inviteUrl(test.inviteCode);
-  const summary = results.data?.summary;
+  const summary = resultData?.summary;
   // 테스트 정보는 처음 연 때의 값이라, 자동 갱신되는 결과의 응시자 수를 우선한다.
   const attemptCount = summary?.candidates ?? test.attemptCount;
 
@@ -184,6 +205,7 @@ export function EnterpriseDetailPage() {
             {attemptCount === 0 ? (
               <button
                 className="button button-outline ent-danger"
+                disabled={deleting}
                 onClick={() => void remove()}
               >
                 삭제
@@ -334,13 +356,15 @@ export function EnterpriseDetailPage() {
       <section
         className="form-card ent-card ent-results"
         aria-labelledby="ent-results-title"
+        aria-busy={results.loading}
       >
         <div className="ent-pick-head">
-          <h2 id="ent-results-title">응시 결과</h2>
-          {results.data ? (
+          <h2 id="ent-results-title" ref={resultsHeading} tabIndex={-1}>응시 결과</h2>
+          {resultData ? (
             <button
               className="button button-outline button-small"
               onClick={results.retry}
+              disabled={results.loading}
             >
               새로고침
             </button>
@@ -354,22 +378,41 @@ export function EnterpriseDetailPage() {
             {summary?.pending ? ` 현재 ${summary.pending}명 평가 대기.` : ""}
           </p>
         ) : null}
-        {!attemptCount ? (
+        {results.error ? (
+          <p className="error-message" role="alert">
+            {results.error}{" "}
+            <button className="text-button" onClick={results.retry} disabled={results.loading}>
+              다시 시도
+            </button>
+            {resultsPage > 1 && !resultPageOutOfRange ? <button className="text-button" onClick={() => changeResultsPage(1)}>첫 페이지로</button> : null}
+          </p>
+        ) : null}
+        {results.loading ? (
+          <p className="muted" role="status">{resultData ? "결과를 갱신하는 중…" : "결과를 불러오는 중…"}</p>
+        ) : null}
+        {resultPageOutOfRange ? (
+          <div className="ent-note">
+            <p className="muted" role="status">
+              응시자 목록이 변경되어 이 페이지에 표시할 결과가 없어요.{" "}
+              <span>전체 {resultData!.pagination.total}명</span>
+            </p>
+            <button className="button button-outline button-small" type="button"
+              disabled={results.loading} onClick={() => changeResultsPage(1)}>
+              첫 페이지로
+            </button>
+          </div>
+        ) : !attemptCount && !results.loading && !results.error ? (
           <p className="muted">
             아직 응시한 사람이 없어요. 응시 링크를 보내 보세요.
           </p>
-        ) : results.error && !results.data ? (
-          <p className="error-message" role="alert">
-            {results.error}{" "}
-            <button className="text-button" onClick={results.retry}>
-              다시 시도
-            </button>
+        ) : resultData ? (
+          <>
+          <p className="muted ent-note" role="status">
+            전체 {resultData.pagination.total}명 중{" "}
+            {resultData.candidates.length ? (resultData.pagination.page - 1) * resultData.pagination.limit + 1 : 0}
+            –{Math.min(resultData.pagination.page * resultData.pagination.limit, resultData.pagination.total)}명
+            {" · "}{resultData.pagination.page}/{Math.max(1, resultData.pagination.totalPages)}페이지
           </p>
-        ) : !results.data ? (
-          <p className="muted" role="status">
-            결과를 불러오는 중…
-          </p>
-        ) : (
           <table className="ent-table ent-result-table">
             <thead>
               <tr>
@@ -389,7 +432,7 @@ export function EnterpriseDetailPage() {
               </tr>
             </thead>
             <tbody>
-              {results.data.candidates.map((candidate) => {
+              {resultData.candidates.map((candidate) => {
                 const byProblem = new Map(
                   candidate.problems.map((item) => [item.problemId, item]),
                 );
@@ -464,7 +507,23 @@ export function EnterpriseDetailPage() {
               })}
             </tbody>
           </table>
-        )}
+          {resultData.pagination.totalPages > 1 ? (
+            <nav className="pagination" aria-label="응시 결과 페이지">
+              <button className="page-button page-nav" type="button"
+                disabled={results.loading || resultsPage <= 1}
+                onClick={() => changeResultsPage(resultsPage - 1)}>
+                이전 결과
+              </button>
+              <span aria-current="page">{resultsPage}페이지</span>
+              <button className="page-button page-nav" type="button"
+                disabled={results.loading || resultsPage >= resultData.pagination.totalPages}
+                onClick={() => changeResultsPage(resultsPage + 1)}>
+                다음 결과
+              </button>
+            </nav>
+          ) : null}
+          </>
+        ) : null}
       </section>
     </div>
   );

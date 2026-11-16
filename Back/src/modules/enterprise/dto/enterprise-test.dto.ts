@@ -81,4 +81,9 @@ export class CreateEnterpriseTestDto {
 
 export class UpdateEnterpriseTestDto extends PartialType(
   CreateEnterpriseTestDto,
-) {}
+) {
+  /** Deliberate pre-start refresh. Ordinary metadata edits retain selected versions. */
+  @IsOptional()
+  @IsBoolean()
+  refreshProblemVersions?: boolean;
+}

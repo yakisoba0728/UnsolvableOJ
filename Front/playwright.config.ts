@@ -22,7 +22,10 @@ const slowSpecs = [
 
 // WebKit은 전체를 돌리면 CI가 10분 넘게 늘어나므로, 브라우저마다 동작이 갈렸던 영역(인증·세션 갱신·레이아웃·편집기 포커스·복사)만 돌린다.
 const webkitSpecs = [
+  "enterprise-refresh.spec.ts",
+  "enterprise-ownership.spec.ts",
   "problem-bookmarks.spec.ts",
+  "enterprise-results.spec.ts",
   "auth.spec.ts",
   "editor-focus.spec.ts",
   "layout.spec.ts",

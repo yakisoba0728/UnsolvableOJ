@@ -8,6 +8,7 @@ import { delimiter, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import { checkSandboxBudget } from './check-sandbox-budget.mjs';
+import { checkSandboxStartupLogs } from '../Judge/runtime/check-logs.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const productionMode = process.argv.includes('--production');
@@ -107,6 +108,7 @@ ${productionMode ? `networks:
   console.log(`Starting isolated Compose project ${project}`);
   created = true;
   compose('up', '-d', '--build', '--wait', '--wait-timeout', '180');
+  checkSandboxStartupLogs(compose('logs', '--no-color', 'go-judge'), env.GO_JUDGE_TOKEN);
   const binding = compose('port', 'front', '80').trim();
   assert.match(binding, /^127\.0\.0\.1:\d+$/);
   env.LIVE_BASE_URL = `http://${binding}`;

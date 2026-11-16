@@ -1,0 +1,14 @@
+diff --git a/cmd/go-judge/main.go b/cmd/go-judge/main.go
+--- a/cmd/go-judge/main.go
++++ b/cmd/go-judge/main.go
+@@ -63 +63,6 @@
+-		ce.Write(zap.String("config", fmt.Sprintf("%+v", conf)))
++		// log a copy without the auth token
++		logConf := *conf
++		if logConf.AuthToken != "" {
++			logConf.AuthToken = "[redacted]"
++		}
++		ce.Write(zap.String("config", fmt.Sprintf("%+v", &logConf)))
+@@ -334 +339 @@
+-		logger.Info("Attach token auth", zap.String("token", conf.AuthToken))
++		logger.Info("Attach token auth")

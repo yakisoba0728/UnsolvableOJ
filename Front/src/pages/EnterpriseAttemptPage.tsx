@@ -15,6 +15,7 @@ import { remainingText, type AttemptView } from "../enterprise/model";
 import { useDocumentTitle, useNow, useRequest } from "../hooks";
 import type { Language, Submission } from "../types";
 import { verdictLabel } from "../verdict";
+import { useRequestOwner } from "../community/useRequestOwner";
 
 const draftKey = (attemptId: string, problemId: string, language: Language) =>
   `unsolvable-oj-attempt:${attemptId}:${problemId}:${language}`;
@@ -36,7 +37,7 @@ function writeDraft(key: string, value: string) {
 }
 
 /** 기업 테스트 응시 화면: 남은 시간, 문제 이동, 문제별 코드 작성·제출과 결과. */
-export function EnterpriseAttemptPage() {
+export function EnterpriseAttemptPage({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { id = "" } = useParams();
   const { session } = useAuth();
   const [confirm, confirmDialog] = useConfirm();
@@ -60,6 +61,11 @@ export function EnterpriseAttemptPage() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [finishing, setFinishing] = useState(false);
+  const submittingRef = useRef(false);
+  const finishingRef = useRef(false);
+  const openingRef = useRef(false);
+  const [opening, setOpening] = useState(false);
+  const begin = useRequestOwner(getNavigationVersion, true);
   const editorRef = useRef<CodeEditorHandle>(null);
   const unitsRef = useRef<number[]>([]);
   const unitsBaseRef = useRef("");
@@ -151,7 +157,9 @@ export function EnterpriseAttemptPage() {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (!problem || submitting || closed || !source.trim()) return;
+    if (!problem || submittingRef.current || closed || !source.trim()) return;
+    submittingRef.current = true;
+    const current = begin();
     setSubmitting(true);
     setMessage("");
     try {
@@ -163,37 +171,39 @@ export function EnterpriseAttemptPage() {
         },
         token,
       );
-      setSubmitted((current) => ({ ...current, [problem.id]: created.id }));
+      if (current()) setSubmitted((previous) => ({ ...previous, [problem.id]: created.id }));
     } catch (cause) {
+      if (!current()) return;
       setMessage(cause instanceof Error ? cause.message : "제출하지 못했어요.");
       // 시간이 끝났다는 거절이면 화면도 마감 상태로 맞춘다.
       retry();
     } finally {
-      setSubmitting(false);
+      submittingRef.current = false;
+      if (current()) setSubmitting(false);
     }
   }
 
   async function finish() {
-    if (
-      finishing ||
-      !(await confirm({
+    if (finishingRef.current) return;
+    finishingRef.current = true;
+    const current = begin();
+    setFinishing(true);
+    try {
+      if (!(await confirm({
         title: "시험을 종료할까요?",
         message: "종료하면 더 제출할 수 없어요.",
         confirmLabel: "시험 종료",
         danger: true,
-      }))
-    )
-      return;
-    setFinishing(true);
-    try {
+      })) || !current()) return;
       await api(`/enterprise/attempts/${id}/finish`, { method: "POST" }, token);
-      retry();
+      if (current()) retry();
     } catch (cause) {
-      setMessage(
+      if (current()) setMessage(
         cause instanceof Error ? cause.message : "시험을 종료하지 못했어요.",
       );
     } finally {
-      setFinishing(false);
+      finishingRef.current = false;
+      if (current()) setFinishing(false);
     }
   }
 
@@ -293,12 +303,16 @@ export function EnterpriseAttemptPage() {
               </div>
               <button
                 className="button button-outline"
-                disabled={!task.id && closed}
+                disabled={opening || (!task.id && closed)}
                 onClick={async () => {
                   if (task.id) {
                     navigate(`/vibe/attempts/${task.id}`);
                     return;
                   }
+                  if (openingRef.current) return;
+                  openingRef.current = true;
+                  const current = begin();
+                  setOpening(true);
                   setMessage("");
                   try {
                     const created = await api<{ id: string }>(
@@ -306,13 +320,16 @@ export function EnterpriseAttemptPage() {
                       { method: "POST" },
                       token,
                     );
-                    navigate(`/vibe/attempts/${created.id}`);
+                    if (current()) navigate(`/vibe/attempts/${created.id}`);
                   } catch (cause) {
-                    setMessage(
+                    if (current()) setMessage(
                       cause instanceof Error
                         ? cause.message
                         : "과제를 열지 못했습니다.",
                     );
+                  } finally {
+                    openingRef.current = false;
+                    if (current()) setOpening(false);
                   }
                 }}
               >
