@@ -146,9 +146,11 @@ test('full-validation selects all four image builds even for empty or unrelated 
 
 test('every applicability evidence and implementation dependency selects its image gate', () => {
   const policy = JSON.parse(readFileSync(new URL('./image-applicability-policy.json', import.meta.url), 'utf8'));
+  const manual = JSON.parse(readFileSync(new URL(`../${policy.evidence.manualReview.path}`, import.meta.url), 'utf8'));
   const runtimeOnly = [
     'scripts/verify_image_payload.py', 'scripts/verify_image_payload_test.py',
     'docs/overhaul/repro/kernel-header-applicability.py', ...Object.values(policy.evidence).map(binding => binding.path),
+    ...Object.values(manual.revalidation?.evidenceBindings ?? {}).map(binding => binding.path),
   ];
   const shared = ['scripts/image_gate.py', 'scripts/image_gate_test.py', 'scripts/image_audit.py',
     'scripts/image_audit_test.py', 'scripts/image-audit-tool.json', '.github/workflows/ci.yml',
@@ -162,6 +164,7 @@ test('every applicability evidence and implementation dependency selects its ima
     for (const path of shared) assert.equal(selectImage(context, [path]).selected, 'build=true', `${context}: ${path}`);
     assert.equal(selectImage(context, ['docs/overhaul/PROGRESS.md']).selected, 'build=false', context);
   }
+  assert.equal(selectImage('Judge/runtime', ['docs/overhaul/measurements/phase3-browser-performance.json']).selected, 'build=false');
 });
 
 test('unknown image changes fail closed without weakening ordinary bounded selection', () => {

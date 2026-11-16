@@ -1,0 +1,51 @@
+✔ dependency audit covers runtime and complete graphs and preserves each failure (3166.424152ms)
+✔ required gate depends on every validation job, including audit and images (0.385551ms)
+✔ required gate fails for every failure/cancellation and accepts only success or skipped (13.473719ms)
+✔ integration PRs trigger CI, and the final main PR requests full validation (0.347243ms)
+✔ adding a PR label triggers CI without replacing its original activity types (0.395325ms)
+✔ the full-validation PR label only escalates the existing full-mode input (0.161479ms)
+✔ large image diffs cannot be skipped by a pipefail/SIGPIPE race (72.264147ms)
+✔ full-validation selects all four image builds even for empty or unrelated diffs (25.783705ms)
+✖ every applicability evidence and implementation dependency selects its image gate (65.806527ms)
+✔ unknown image changes fail closed without weakening ordinary bounded selection (23.818887ms)
+✔ image gate failures stay required and raw artifacts are retained without continue-on-error (0.439881ms)
+✔ full validation selects all component suites even for a documentation-only PR (2.687387ms)
+✔ full browser validation adds the WebKit core flows on Firefox without weakening existing checks (2.097223ms)
+✔ native execution and contract changes require full validation before integration (248.130096ms)
+✔ Compose and live-test harness changes cannot skip their own execution (218.247835ms)
+✔ ordinary frontend, API, and documentation changes retain bounded checks (173.254895ms)
+✔ unknown PR changes fail closed while ordinary pushes do not add native runs (17.455781ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 16
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4179.28297
+
+✖ failing tests:
+
+test at scripts/ci-policy.test.mjs:147:1
+✖ every applicability evidence and implementation dependency selects its image gate (65.806527ms)
+  AssertionError [ERR_ASSERTION]: docs/overhaul/measurements/phase3-runtime-advisory-revalidation/blocked-runtime.zip
+  + actual - expected
+  
+  + 'build=false'
+  - 'build=true'
+           ^
+  
+      at TestContext.<anonymous> (file:///workspace/scratch/86de5f814139/oj-runtime-revalidation/scripts/ci-policy.test.mjs:159:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'build=false',
+    expected: 'build=true',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

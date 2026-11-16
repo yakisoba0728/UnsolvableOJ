@@ -33,6 +33,26 @@ is a policy-contract check, not a new image build, scan or CI acceptance.
 
 ## Author proposal checkpoint — 2026-11-16
 
+### Subsequent CI selection correction
+
+The first PR78 full run43827390883 failed the existing policy test because the
+new bound `blocked-runtime.zip` path was outside the image selector's original
+Phase II-only measurement path. The failure was reproduced locally:16/17 tests
+passed and the unchanged dependency-selection assertion rejected `build=false`.
+
+The correction explicitly includes the Phase III Runtime evidence directory and
+its independent CNA collector in Runtime image selection. The same test now also
+walks every additional provenance binding in the manual review. All original
+assertions remain, and an unrelated browser measurement still does not trigger
+the Runtime image. After correction,17/17 policy tests pass. The policy content,
+review metadata, evaluator, scanner, image gate and expiry do not change. The
+workflow's selection coverage is strengthened; fresh exact-head CI is required.
+
+[Before reproduction](evidence/runtime-new-evidence-selector-before.log) ·
+[After correction](evidence/runtime-new-evidence-selector-after.log)
+
+### Original unapproved proposal
+
 This checkpoint is an **unapproved, exact-component revalidation proposal** based
 on integration commit `87cc1e724f3c5bba8ee4a1d3e138c16a18202f02`. The archived
 proposal and the active policy at this checkpoint are `PROPOSED`; their approval
