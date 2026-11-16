@@ -18,9 +18,9 @@
 | `Backend and API` | 백엔드 lint·단위·빌드, 운영 Compose 정적 검사, DB 마이그레이션·API 통합 | `Back/`·`deploy/`·`scripts/`·`compose.yaml` 변경 |
 | `Judge worker` | 워커 빌드·계약 검사, Python 실행기 검사 | `Judge/`·`compose.yaml` 변경 |
 | `Browser tests (1/2, 2/2)` | Playwright 공식 이미지에서 브라우저 회귀를 둘로 나눠 동시에 실행. 1번은 프론트 빌드·타입 검사도 함 | `Front/` 변경 |
-| `Sandbox, pipeline and Compose` | go-judge·실제 채점 파이프라인·운영 Compose 브라우저 흐름 | 야간·수동 전체 검사 및 `overhaul/integration → main` PR |
+| `Sandbox, pipeline and Compose` | go-judge·실제 채점 파이프라인·운영 Compose 브라우저 흐름 | 실행·큐 계약·Compose 변경 PR, 야간·수동 전체 검사 및 `overhaul/integration → main` PR |
 
-`.github/workflows/ci.yml`이 바뀐 PR과 `main` push·야간·수동 실행은 경로와 상관없이 모든 작업을 돌립니다. 프론트 테스트는 API를 모의 응답으로 대신하므로 Back만 바뀐 PR에서는 브라우저 테스트를 돌리지 않습니다. 브라우저 작업은 `mcr.microsoft.com/playwright:v<버전>-noble` 컨테이너에서 돌아 apt 설치나 브라우저 다운로드가 없습니다. **`Front/package.json`의 `@playwright/test` 버전을 바꾸면 `ci.yml`의 이미지 태그도 같은 버전으로 바꾸세요.**
+`.github/workflows/ci.yml`만 바뀐 PR과 일반 `main` push·수동 실행은 모든 기본 검사를 돌립니다. 전체 실행 요청·야간 실행·최종 통합 PR은 native 검사와 WebKit도 포함합니다. 프론트 테스트는 API를 모의 응답으로 대신하므로 일반 Back 변경만 있는 PR에서는 브라우저 테스트를 돌리지 않습니다. 아래의 실행·계약 관련 경로는 예외로 전체 검사를 선택합니다. 브라우저 작업은 `mcr.microsoft.com/playwright:v<버전>-noble` 컨테이너에서 돌아 apt 설치나 브라우저 다운로드가 없습니다. **`Front/package.json`의 `@playwright/test` 버전을 바꾸면 `ci.yml`의 이미지 태그도 같은 버전으로 바꾸세요.**
 
 ## 기본 검사
 
@@ -51,7 +51,7 @@ gh workflow run ci.yml --ref main -f full=true
 - 실제 워커를 사용하는 채점 파이프라인 통합 검사
 - 운영 `deploy/compose.yaml`을 사용하는 별도 Compose 프로젝트에서 회원가입 → 문제 게시 → 실제 채점 → XP → 로그아웃 및 커뮤니티 브라우저 흐름(`--production`). 개발 Compose 실실행은 로컬 명령으로 남기며, 기본 CI는 운영 정적검사를 유지합니다.
 
-실행 이미지·격리 설정·Dockerfile·배포 경로 변경이나 릴리스 전에는 전체 검사를 실행하세요. 기본 검사 성공이 세 브라우저와 실제 채점 환경의 전체 검증까지 의미하지는 않습니다. 수동 검사는 선택한 ref를 실행하므로 검사할 브랜치를 지정합니다.
+실행 이미지·격리 설정·실행 관련 Dockerfile·배포 경로 변경 PR은 아래 정책으로 전체 검사를 자동 선택합니다. 목록 밖의 변경이 실제 실행 계약에 영향을 주거나 릴리스 직전이면 전체 검사를 수동 실행하세요. 기본 검사 성공이 세 브라우저와 실제 채점 환경의 전체 검증까지 의미하지는 않습니다. 수동 검사는 선택한 ref를 실행하므로 검사할 브랜치를 지정합니다.
 
 운영 Compose 테스트도 일회용 localhost ingress를 사용하므로 실제 Traefik·Cloudflare·DNS·HTTPS 경로 검증은 아닙니다. 기본 예산은 sandbox 10 GiB, 전체 13.375 GiB 상한이며 일반 CI 흐름은 최대 메모리 동시 부하를 검증하지 않습니다.
 
@@ -98,3 +98,22 @@ check-compose.mjs는 임의 프로젝트명, RAM 기반 DB/Redis, localhost 임�
 기능 PR은 `overhaul/integration`을 대상으로 동일한 경로별 검사를 실행합니다. 통합 브랜치는 push마다 중복 실행하지 않으며 최종 `overhaul/integration → main` PR에서 WebKit·실제 샌드박스·파이프라인·Compose 검사를 자동으로 포함합니다. 이 PR은 자동 병합하지 않습니다.
 
 `node --test scripts/ci-policy.test.mjs`는 필수 게이트의 모든 검사 의존성, 실패·취소 처리, 통합 PR 검사 조건, 대규모 diff에서 이미지 검사를 잘못 생략하지 않는지를 검사합니다. 이미지 변경 판정은 diff를 먼저 저장해 `pipefail`과 조기 종료하는 `grep -q`의 SIGPIPE 경합을 피합니다.
+
+## 통합 전 native 검사 경로
+
+`Detect changes`는 PR의 실제 변경 파일로 다음 그룹을 검사합니다. 하나라도 해당하면 `full=true`로 두고 Back·Front·Judge 기본 검사와 WebKit·native sandbox·실제 큐 파이프라인·일회용 Compose 검사를 모두 실행합니다. 이 선택은 `main`과 `overhaul/integration` 대상 PR에 동일하게 적용됩니다.
+
+| 경로 그룹 | 포함되는 검사 대상 변경 |
+|---|---|
+| Judge | `src/`, `runtime/`, `deploy/`, Dockerfile, `.dockerignore`, package/lockfile, tsconfig |
+| Backend 실행 계약 | `modules/submissions/`, Vibe runner/service/catalog/types, queue constants, Redis 및 환경 검증 설정 |
+| Backend 실행 이미지/의존성 | Dockerfile, `.dockerignore`, entrypoint, package/lockfile |
+| Front 실행 프록시 | Dockerfile, `.dockerignore`, nginx/proxy 설정 |
+| Compose | 루트 `compose.yaml`, `deploy/compose.yaml`, 운영 `.env.example` |
+| 실제 실행 검사기 | Compose/예산 검사 스크립트, backend 통합 실행기와 judging pipeline spec, Front live 설정과 `tests-live/` |
+
+일반 Front 컴포넌트, 일반 API 모듈, DB 마이그레이션 및 문서 변경은 기존 경로별 검사를 유지합니다. 예를 들어 알림 UI 변경만으로 native 이미지를 다시 실행하지 않습니다. Judge README와 벤치마크 결과만 바뀌어도 native 검사를 추가하지 않습니다.
+
+PR의 base가 없거나 fetch에 실패해 변경 경로를 알 수 없으면 전체 검사를 선택합니다. diff 자체가 실패하면 변경 판정 작업이 실패하고 `CI required`도 실패합니다. 이미 열린 PR은 새 정책을 포함한 integration을 작업 브랜치에 병합해 새 head의 검사를 실행한 후 native 결과를 확인해야 합니다. 기존의 성공 실행은 새 head의 증거로 재사용하지 않습니다.
+
+`node --test scripts/ci-policy.test.mjs`의 9개 테스트는 실제 workflow shell을 실행해 38개 중요 경로, 가벼운 경로, base/fetch/diff 실패와 기존 필수 게이트를 검사합니다. 이 정책 테스트는 실제 sandbox 검사를 대신하지 않습니다.

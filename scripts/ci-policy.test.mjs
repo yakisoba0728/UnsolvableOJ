@@ -80,3 +80,88 @@ test('full validation selects all component suites even for a documentation-only
     rmSync(directory, { recursive: true, force: true });
   }
 });
+
+function selectJobs(paths, overrides = {}) {
+  const directory = mkdtempSync(join(tmpdir(), 'oj-ci-selection-'));
+  try {
+    writeFileSync(join(directory, 'git'), '#!/bin/sh\nif [ "$1" = fetch ]; then exit "$CI_TEST_FETCH_STATUS"; fi\nif [ "$1" = diff ]; then [ "$CI_TEST_DIFF_STATUS" = 0 ] || exit "$CI_TEST_DIFF_STATUS"; exec cat "$CI_TEST_FILES"; fi\nexit 1\n', { mode: 0o700 });
+    const files = join(directory, 'files');
+    const output = join(directory, 'output');
+    writeFileSync(files, paths.join('\n') + '\n');
+    writeFileSync(output, '');
+    const run = spawnSync('bash', ['-e', '-o', 'pipefail', '-c', runBlock(workflow.slice(workflow.indexOf('      - id: diff')))], {
+      env: {
+        ...process.env, PATH: `${directory}:${process.env.PATH}`, EVENT: 'pull_request', BASE: 'test-base',
+        FULL: 'false', GITHUB_OUTPUT: output, CI_TEST_FILES: files,
+        CI_TEST_FETCH_STATUS: '0', CI_TEST_DIFF_STATUS: '0', ...overrides,
+      }, encoding: 'utf8',
+    });
+    return {
+      ...run,
+      selected: Object.fromEntries(readFileSync(output, 'utf8').trim().split('\n').filter(Boolean).map((line) => line.split('='))),
+    };
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
+
+test('native execution and contract changes require full validation before integration', () => {
+  for (const path of [
+    'Judge/src/worker.ts', 'Judge/src/output.ts', 'Judge/runtime/Dockerfile',
+    'Judge/runtime/mount.yaml', 'Judge/runtime/health.py', 'Judge/runtime/start.sh',
+    'Judge/deploy/compose.yaml', 'Judge/package-lock.json', 'Judge/Dockerfile', 'Judge/.dockerignore',
+    'Back/src/modules/submissions/judge.service.ts', 'Back/src/modules/submissions/dto/judge-result.dto.ts',
+    'Back/src/modules/vibe/vibe.runner.ts', 'Back/src/modules/vibe/vibe.service.ts',
+    'Back/src/modules/vibe/vibe.catalog.ts', 'Back/src/modules/vibe/vibe.types.ts',
+    'Back/src/common/queue.constants.ts', 'Back/src/config/redis.config.ts', 'Back/src/config/env.validation.ts',
+    'Back/package.json', 'Back/package-lock.json',
+  ]) {
+    const run = selectJobs([path]);
+    assert.equal(run.status, 0, `${path}: ${run.stderr}`);
+    assert.deepEqual(run.selected, { full: 'true', back: 'true', front: 'true', judge: 'true' }, path);
+  }
+});
+
+test('Compose and live-test harness changes cannot skip their own execution', () => {
+  for (const path of [
+    'compose.yaml', 'deploy/compose.yaml', 'deploy/.env.example',
+    'Back/Dockerfile', 'Back/.dockerignore', 'Back/docker-entrypoint.sh',
+    'Front/Dockerfile', 'Front/.dockerignore', 'Front/nginx.conf', 'Front/trusted-proxy.conf.template',
+    'scripts/check-compose.mjs', 'scripts/check-production-compose.mjs', 'scripts/check-sandbox-budget.mjs',
+    'Back/scripts/run-integration.mjs', 'Back/test/judge.pipeline-spec.ts',
+    'Front/playwright.live.config.ts', 'Front/tests-live/judge-flow.spec.ts',
+  ]) {
+    const run = selectJobs([path]);
+    assert.equal(run.status, 0, `${path}: ${run.stderr}`);
+    assert.equal(run.selected.full, 'true', path);
+  }
+});
+
+test('ordinary frontend, API, and documentation changes retain bounded checks', () => {
+  for (const [path, expected] of [
+    ['Front/src/components/NotificationBell.tsx', { full: 'false', back: 'false', front: 'true', judge: 'false' }],
+    ['Back/src/modules/community/community.service.ts', { full: 'false', back: 'true', front: 'false', judge: 'false' }],
+    ['Back/src/database/migrations/1796000000000-indexes.ts', { full: 'false', back: 'true', front: 'false', judge: 'false' }],
+    ['docs/overhaul/PROGRESS.md', { full: 'false', back: 'false', front: 'false', judge: 'false' }],
+    ['.github/workflows/ci.yml', { full: 'false', back: 'true', front: 'true', judge: 'true' }],
+  ]) {
+    const run = selectJobs([path]);
+    assert.equal(run.status, 0, run.stderr);
+    assert.deepEqual(run.selected, expected, path);
+  }
+  for (const path of ['Judge/README.md', 'Judge/runtime/README.md', 'Judge/deploy/README.md', 'Judge/benchmarks/output-comparison.json', 'deploy/README.md', 'Front/src/Dockerfile.example']) {
+    assert.equal(selectJobs([path]).selected.full, 'false', path);
+  }
+});
+
+test('unknown PR changes fail closed while ordinary pushes do not add native runs', () => {
+  for (const overrides of [{ BASE: '' }, { CI_TEST_FETCH_STATUS: '1' }]) {
+    const run = selectJobs([], overrides);
+    assert.equal(run.status, 0, run.stderr);
+    assert.deepEqual(run.selected, { full: 'true', back: 'true', front: 'true', judge: 'true' });
+  }
+  const push = selectJobs([], { EVENT: 'push' });
+  assert.equal(push.status, 0, push.stderr);
+  assert.deepEqual(push.selected, { full: 'false', back: 'true', front: 'true', judge: 'true' });
+  assert.notEqual(selectJobs([], { CI_TEST_DIFF_STATUS: '2' }).status, 0, 'A failed diff must fail change detection');
+});
