@@ -16,7 +16,7 @@ execution, native execution and final integration are distinct states.
 | Recovery | Coordinator | Independent recovery agent re-queried PR/CI metadata and actual historical logs; [baseline](PHASE3-BASELINE.md) |
 | Learning API | Coordinator | Frontend engineer reviewed endpoint/SQL contract; security engineer later reviewed current-caller scope, projections and request ownership independently; [cross-feature review](evidence/phase3-cross-feature-security-review.md) |
 | Learning UI | Frontend engineer | Coordinator inspected actual source and ran DOM checks; independent recovery agent reran the StrictMode correction5/5 after the CI failure; [follow-up record](evidence/phase3-ci-followup-independent-review.json) |
-| Executor TLS/configuration | Runtime/security engineer | Independent recovery agent reviewed the worker/template boundary; coordinator separately ran real owned Redis/BullMQ and policy checks; later coordinator checker fixes were independently attacked and rechecked |
+| Executor TLS/configuration | Runtime/security engineer | Coordinator reviewed the other author's worker TLS/configuration and separately ran real owned Redis/BullMQ and policy checks. Independent recovery agent reviewed CI/preflight changes, reproduced the inherited-name bypass, and rechecked the coordinator's fixes and composition |
 | Vibe API/archive/runner | Vibe engineer | Independent recovery agent reproduced two parity gaps, then reran identical probes plus25 PostgreSQL/API and16 unit cases; [initial corrected review](evidence/phase3-vibe-independent-review.json) |
 | Vibe owner UI | Frontend engineer | Independent recovery agent reviewed selected metadata/refresh wiring separately; actual three-engine cases remain CI evidence |
 | Statistics migration/benchmark | Database engineer | Independent recovery agent built a separate worktree and ran11 repository PG cases plus2 independent race/corruption probes; those probes remain in CI. Separate arithmetic/source verification checked all12 benchmark rounds |
@@ -72,6 +72,20 @@ moving a branch with an expected-head lease. Merge commits include the current
 integration parent. Review/CI receipts bind local source, remote source, tree,
 actual Actions merge checkout and resulting integration commit; no force push or
 manual human approval impersonation is used.
+
+## Observed browser artifact review
+
+The Vibe implementation specialist, who did not author the browser probe,
+independently reviewed artifact14206046513 from run43823181757 against actual
+checkout9e4ce9df2aa4338a99a8deb7f32e161458a39a04/tree0e90a396 and documentation
+checkpointf5b871c8fd9c8a9648474ee1d2a87ee5f1049abe. ZIP/JSON digests match GitHub
+and retained bytes; five source blobs match the executed tree. All18 API records,
+15 latency differences and six observed-CLS snapshots recompute correctly.
+No blocking discrepancy was found. The recorded192 invariants are source/data
+and arithmetic checks, not192 new application tests. The reviewer separately
+confirmed successful Compose3(37.7s) and overall Runtime/required-gate failure.
+
+[Independent raw-result review](evidence/phase3-browser-performance-independent-review.json)
 
 ## Evidence access and limits
 

@@ -7,16 +7,21 @@ AC and WA submissions. It uses that flow's own account, one newly published publ
 problem and two ordinary submissions. It creates no additional account and does
 not relax authentication, rate limits, browser assertions or the existing timeout.
 
-At implementation time, the managed local environment cannot launch the browser
-or Docker. The probe has **not** been executed there. Type checking and independent
-source review are distinct from the later production Compose run in Actions.
-This document defines the experiment; actual measurements must come from an
-artifact whose checkout SHA/tree identifies the executed code.
+The managed local environment cannot launch the browser or Docker. Local checks
+covered Front E2E TypeScript, the existing CI-policy tests and Playwright discovery;
+discovery does not launch a browser. Independent source review was followed by
+actual execution in the disposable production-build Compose setup in Actions.
 
-Local checks completed: Front E2E TypeScript check, all 17 existing CI-policy tests,
-and Playwright test discovery (the existing three live tests). Discovery does not
-launch a browser. Independent review and real production Compose execution remain
-pending at this checkpoint; no measured numbers are asserted here.
+Run [43823181757](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43823181757)
+completed its Sandbox/pipeline/Compose job133150846420 successfully, including all
+three live browser flows in37.7s. **The workflow as a whole failed the separate
+Runtime advisory gate.** This successful browser observation is not an accepted
+whole-run CI receipt. Subsequent acceptance must use a fresh complete-head run.
+
+The executed source was PR77 head`e23729640b0ce18b6bb5ab82c578dc1eb35c7392`, actual
+checkout`9e4ce9df2aa4338a99a8deb7f32e161458a39a04`, tree
+`0e90a39685e1246c8f9a3ab1637fc0c89b4d85e7`. The raw report carries those identifiers;
+it is not relabelled with a later documentation or integration commit.
 
 Run the existing command from the repository root:
 
@@ -28,6 +33,47 @@ The runner builds the production frontend, serves it through nginx and uses real
 API, PostgreSQL, Redis and Judge services inside its disposable Compose project.
 The probe runs inside `Front/tests-live/judge-flow.spec.ts` and is implemented in
 `Front/tests-live/learning-performance.ts`; it never enters the shipped bundle.
+
+## Observed finite sample
+
+The report completed on2026-11-16 at07:35:15UTC with Chromium153.0.8010.12,
+1280×720 viewport, Linux x64 and Node24.22.2. The configured desktop browser user
+agent contains Windows; it does not change the recorded Linux runner platform.
+All18 API observations (three initial plus15 period changes) returned200 with the
+expected owned fixture values. There were no truncated performance streams or
+missing frame samples.
+
+| Observation | Visit1 | Visit2 | Visit3 |
+| --- | ---: | ---: | ---: |
+| Bounded initial LCP candidate | 384ms | 380ms | 388ms |
+| First Contentful Paint | 96ms | 92ms | 88ms |
+| Bounded observed CLS | 0.029427 | 0.029427 | 0.029427 |
+| Document loadEventEnd | 23.1ms | 24.6ms | 22.6ms |
+| Isolate used heap before five changes | 29,607,932B | 25,218,960B | 26,004,000B |
+| Isolate used heap after five changes | 17,935,088B | 18,788,152B | 32,774,296B |
+
+Across15 dependent period changes, click-to-verified-second-frame latency has
+observed minimum42.7ms, median47.3ms and maximum52.6ms. These are sample summaries,
+not population tails or INP. Final raw Event Timing counts are33/22/22; these
+include multiple event types per interaction. INP remains explicitly null. Heap
+falls on two visits and rises on one without forced GC; neither leak freedom nor
+a memory regression follows from these short isolate samples. Document load end
+precedes asynchronous application rendering and is not a whole-screen ready time.
+
+The original artifact14206046513 ZIP has SHA256
+`140148586cce0cd4ca2f129ff5e735bbd1b48559e457131ba5e68349a8f80bc7`, checked against
+GitHub metadata. Its unmodified JSON SHA256 is
+`94919ac0010e0339f349e679b61178ab91364f36e9ecc7c8537da5cf5bfbf681`.
+Both are retained before the original seven-day expiry:
+[raw JSON](measurements/phase3-browser-performance.json),
+[original ZIP](measurements/phase3-browser-performance.zip),
+[source/artifact provenance](measurements/phase3-browser-performance-provenance.json),
+[selected Compose log lines](evidence/phase3-browser-compose-excerpt.log).
+An author-separated [raw-result review](evidence/phase3-browser-performance-independent-review.json)
+checked GitHub provenance, the immutable executed source, all18 responses,15
+duration differences and six CLS snapshots. It found no blocking discrepancy in
+this bounded evidence. Its192 source/data/arithmetic invariants are not additional
+application test cases and do not make the failed whole workflow accepted.
 
 ## Fixed finite workload
 

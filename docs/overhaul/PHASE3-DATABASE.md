@@ -255,7 +255,7 @@ claimed.
 The new counter relation occupied 65,536 bytes including its index in each measured
 fixture after reset, with 140 live solver pairs. Storage grows with distinct
 accepted problem/user pairs, not just with the number of problems. At 50,000
-history rows the sampled database-process RSS endpoints ranged from 35,324 to
+history rows the sampled database-process RSS endpoints ranged from 35,252 to
 57,324 KiB across both modes; the same backends and shared buffers were reused.
 This does not isolate a memory saving or establish peak/long-term memory bounds.
 The single uncontended 50,000-row upgrade took 47.85 ms in this fixture; it is not

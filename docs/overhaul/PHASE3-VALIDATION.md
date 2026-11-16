@@ -36,7 +36,10 @@ errors. This is distinct from a full browser-native Vibe E2E.
 PR76 source`e3aa50c4cdcadaa0dd965a29086c0148b79261a8`, tree
 `483d4e29db0274b07fc46decf62e4bc1f8a412b0`, includes integration87cc1e7.
 Run[43822819719](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43822819719)
-is in progress at this checkpoint and is not marked accepted.
+completed all12 jobs successfully at actual checkout
+`257e795ca89f1c1a425ed54d8150db009c65a65b`. Logs show327 Back units,243 API cases,
+74 native assertions,33 pipeline cases and3 Compose flows(32.9s). PR76 remains
+unmerged while a subsequently observed Runtime advisory change is revalidated.
 
 Its same-tree local composition passed327 units,243 real PostgreSQL/API cases
 in40files and the full migration chain. The two migrations are registered once
@@ -52,9 +55,29 @@ The exact benchmark implementation hashes remain unchanged.
 The final evidence branch adds a bounded actual-Compose browser measurement.
 Its protocol, numeric-only projection, artifact failure behavior and retained
 functional assertions were independently reviewed; Front E2E types and policy
-checks passed. It still requires actual execution and raw-result review. The
-final evidence PR must incorporate the accepted DB integration and run fresh full
-CI before its own merge, followed by the final PR63 integration-head run.
+checks passed. PR77 source`e23729640b0ce18b6bb5ab82c578dc1eb35c7392`, tree
+`0e90a39685e1246c8f9a3ab1637fc0c89b4d85e7`, actual checkout
+`9e4ce9df2aa4338a99a8deb7f32e161458a39a04`, executed the probe in
+[run43823181757](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43823181757).
+Its Compose job passed3 flows(37.7s), and the complete3-visit/15-interaction report
+was downloaded with its GitHub ZIP digest verified. The raw report and provenance
+are in [browser performance](PHASE3-BROWSER-PERFORMANCE.md). This run failed the
+Runtime image job and dependent required gate; its successful browser measurement
+does not make the overall candidate accepted. The final evidence PR must
+incorporate accepted security/DB integration and run fresh full CI before its own
+merge, followed by the final PR63 integration-head run.
+
+## Fresh Runtime advisory block
+
+Run43823181757 correctly rejected reuse of the prior exact applicability approval:
+`EXACT_CVE_COHORT_REVALIDATION_REQUIRED`. Its newer Trivy DB, updated07:10:39UTC
+(accepted prior DB01:11:02UTC), changed16 HIGH/CRITICAL advisory fingerprints.
+Raw HIGH177/CRITICAL5 and the990-file payload match remained the same. Initial
+comparison isolated References plus three AlmaLinux vendor-severity fields; these
+facts do not authorize bypassing the exact gate. A separate source-bound primary
+advisory revalidation is being authored and independently reviewed. Historical
+Phase II evidence, strict fingerprinting and the existing November30 expiry must
+be retained. Both pending merges are held until that work passes fresh full CI.
 
 ## Regression and failure evidence
 

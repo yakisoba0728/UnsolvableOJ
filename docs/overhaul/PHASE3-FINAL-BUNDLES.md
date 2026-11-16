@@ -1,10 +1,11 @@
 # Phase III final frontend bundle comparison
 
 Measured on 2026-11-16. This **replaces the final-delivery interpretation** of the
-earlier `3038961b835a4a435e12205ff022c7b1d91226bd` measurement, whose frontend source
-predates the final learning request-cancellation fix. Keep that old file as a
-historical checkpoint; use the numbers and immutable sources below in the final
-Phase III report.
+earlier exploratory local `3038961b835a4a435e12205ff022c7b1d91226bd` measurement,
+whose frontend source predates the final learning request-cancellation fix.
+That exploratory artifact is not part of this accepted evidence bundle; the
+raw metadata retains its original identifier for provenance. Use the numbers
+and immutable sources below in the final Phase III report.
 
 ## Exact sources and conditions
 

@@ -41,7 +41,8 @@ At the 1,000-row size, serial p95 also rises from1.418 to1.509ms (+6.4%). These
 regressions are retained alongside the large-history improvement. The new counter
 relation and index occupy65,536B for the measured140 accepted pairs. Storage grows
 with accepted problem/user cardinality. RSS samples are endpoints, not peaks or
-leak tests; the observed35,324–57,324KiB range does not isolate a memory saving.
+leak tests; the50,000-row fixture's observed35,252–57,324KiB endpoint range does
+not isolate a memory saving.
 One uncontended50,000-row upgrade took47.85ms and is not a production lock estimate.
 
 The independent reviewer recomputed all twelve crossover rounds, raw quantiles,
@@ -107,6 +108,12 @@ original three flows, assertions, timeout and retry policy remain in place.
 Actual observations must be read with their retained source/tree/run and browser
 context. Three visits and fifteen dependent interactions cannot estimate field
 p95/p99, all-device performance, long editor sessions or memory leak freedom.
+The first observed Actions sample (run43823181757, successful Compose job but
+overall Runtime-gate failure) produced LCP candidates384/380/388ms, FCP96/92/88ms
+and observed CLS0.029427 on each visit. The15 click-to-verified-second-frame
+samples range42.7–52.6ms, median47.3ms. All18 actual API/UI observations match the
+fixture. Heap before/after values vary in both directions without forced GC;
+INP remains null. This is a new-feature observation, not a before/after speedup.
 [Protocol and evidence location](PHASE3-BROWSER-PERFORMANCE.md) and the final
 [validation receipt](PHASE3-VALIDATION.md) identify the executed run.
 
