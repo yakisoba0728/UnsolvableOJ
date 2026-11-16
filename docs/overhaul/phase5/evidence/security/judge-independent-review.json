@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "phase5-judge-security-independent-review",
+  "reviewer": "/root/security",
+  "recordedAt": "2026-11-16T14:43:07.816963+00:00",
+  "reviewedCommit": "4fbb5156e2d94a2148b49cdb42ae10ea54ffedf3",
+  "reviewedTree": "a7807edce7904c955fc6b4bb84aecda7793218ed",
+  "baseCommit": "d0159b1f844bf0608415dded9e84af566c8e2041",
+  "verdict": "ACCEPT_SCOPED_IMPLEMENTATION_PENDING_ACTUAL_NATIVE_AND_PIPELINE_CI",
+  "blockingSourceFindings": [],
+  "files": [
+    {
+      "path": "Back/test/phase5-vibe-gateway.pipeline-helpers.ts",
+      "sha256": "45b4f2a6bc16f2939bac45a8c1ee6ec375dad9ba4f77cdd8d5967813a64ce5fa"
+    },
+    {
+      "path": "Back/test/vibe-dedicated.pipeline-spec.ts",
+      "sha256": "8448398ac962bdf0ef2ceb6736a83fc394bf4689c670a0ca7134ee3fa032f0f8"
+    },
+    {
+      "path": "Judge/runtime/memory-sources.json",
+      "sha256": "cd37a24f944921615a673473d574d0d9cc2b312df895fca79fe12d6fa01edd09"
+    },
+    {
+      "path": "Judge/src/runtime.test.ts",
+      "sha256": "480a7afe1b2b63bd6e6214e8b8b797216c8fd575b2d385a647c566b79781ed46"
+    },
+    {
+      "path": "docs/overhaul/phase5/JUDGE.md",
+      "sha256": "9e1f016f052f57fa7ecab997473b896e530f85b41dd2202b8d767a00a0e27412"
+    }
+  ],
+  "checks": [
+    {
+      "area": "native matrix",
+      "result": "Exactly 72 language/category rows; missing, failed or duplicate-cell replacement cannot become successful output. Sixteen new memory probes run sequentially with 128 MiB limits, 8 MiB under and 192 MiB over. Java RE only qualifies with explicit java.lang.OutOfMemoryError: Java heap space; other over-limit rows require engine MLE. Signal or generic RE is not invented as MLE."
+    },
+    {
+      "area": "forwarding",
+      "result": "Loopback-only native upstream; real TLS/mTLS server and SAN identity; Authorization and request bodies forwarded unchanged, including absent/wrong bearer checks. No canned successful execution response."
+    },
+    {
+      "area": "bounds",
+      "result": "128 requests, 1 MiB direction caps, 15-second forwarding deadline, 90-second pipeline deadline, ephemeral TLS identities and owned ports. Existing production limits, worker mapping and admission are unchanged."
+    },
+    {
+      "area": "persistence",
+      "result": "The reviewed pipeline expects 404 for unauthorized owner access. Persisted 11/11 result, snapshot and file invariants, four artifact deletions, equal cache state and zero upstream errors are asserted."
+    },
+    {
+      "area": "secret hygiene",
+      "result": "Reports omit bearer values, private keys, source bodies and cache identifiers. Config getter spy is scoped and restored, avoiding process.env mutation via ConfigService.set. Only the paid provider is replaced by an explicitly unavailable deterministic double."
+    },
+    {
+      "area": "cleanup",
+      "result": "Cleanup is awaited and failure is observable in the report/test; resources and ephemeral identities are removed in finally."
+    }
+  ],
+  "independentlyExecuted": {
+    "command": "npm run check --prefix Judge",
+    "sourceCommit": "4fbb5156e2d94a2148b49cdb42ae10ea54ffedf3",
+    "passed": 137,
+    "failures": 0,
+    "skipped": 0,
+    "durationMs": 2582.59554,
+    "meaning": "Build and worker/unit checks; not the native 72-cell matrix or persisted native pipeline execution."
+  },
+  "nativeExecution": "NOT_EXECUTED_LOCALLY_DOCKER_UNAVAILABLE",
+  "nonblockingObservations": [
+    {
+      "area": "Java OOM report",
+      "observation": "Matrix output omits raw debugOutputs, so accepted Java heap OOM is asserted during execution but its sanitized classifier is not retained in each row. A classification string or hash would make the acceptance evidence easier to inspect without retaining raw program output.",
+      "blocking": false
+    }
+  ],
+  "limits": [
+    "No production deployment, paid provider call or privileged host-escape experiment.",
+    "Acceptance applies to this exact reviewed commit and its tests, not an unreviewed later source tree or a future CI outcome."
+  ],
+  "implementationOwner": "Judge implementation agent; this reviewer did not implement the patch"
+}
