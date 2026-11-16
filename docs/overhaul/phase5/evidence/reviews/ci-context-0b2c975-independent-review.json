@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "independent_qa",
+  "reviewerAgent": "/root/independent_qa",
+  "reviewedAt": "2026-11-16T15:38:38.754889+00:00",
+  "decision": "SOURCE_ACCEPTABLE_ACTUAL_CI_PENDING",
+  "sourceCommit": "0b2c9750e05d89bad2cb4d0a5d1817d49d26b2cd",
+  "sourceTree": "e0b79def06480dc462754b5cc039e25b48df37db",
+  "parentCommit": "9c52eb9227a197ee4140ff0ccdf3dc518778fb45",
+  "parentTree": "180724e0fe9e072c0ff22e12634d4547f7c321d0",
+  "scope": "Narrow GitHub Actions expression-context correction and its added regression test only. No application behavior change or broad frontend requalification is claimed by this receipt.",
+  "priorFailureContext": {
+    "reportedByCoordinator": {
+      "runId": "43897227270",
+      "candidatePrefix": "771ca0f",
+      "jobCount": 0,
+      "tree": "180724e0fe9e072c0ff22e12634d4547f7c321d0"
+    },
+    "independentObservation": "The parent tree equals the reported failed-candidate tree, and its with.if-no-files-found uses success(). The historical remote run was not re-fetched in this narrow review."
+  },
+  "primarySources": [
+    {
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability",
+      "independentlyOpened": true,
+      "supports": "steps.with permits steps and needs contexts and hashFiles, but does not list always/cancelled/success/failure status functions. steps.if permits those status functions."
+    },
+    {
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#steps-context",
+      "independentlyOpened": true,
+      "supports": "Step outcome is the pre-continue-on-error result; completed outcomes include success, failure, cancelled and skipped."
+    },
+    {
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#operators",
+      "independentlyOpened": true,
+      "supports": "Equality, inequality, logical grouping, && and || operators and truthiness of nonempty strings are supported."
+    }
+  ],
+  "changes": {
+    "workflow": "Adds phase5_browser and phase5_firefox IDs to existing test steps and replaces one unsupported status-function input with supported outcome/needs comparisons.",
+    "regressionTest": "Adds a targeted check rejecting always(), cancelled(), failure() and success() in the workflow single-line if-no-files-found inputs, with four negative examples and an allowed outcome-expression example."
+  },
+  "artifactPolicy": "${{ steps.phase5_browser.outcome == 'success' && (needs.changes.outputs.full != 'true' || steps.phase5_firefox.outcome == 'success') && 'error' || 'warn' }}",
+  "semanticReview": [
+    {
+      "full": "false",
+      "browserOutcome": "success",
+      "firefoxOutcome": "skipped",
+      "missingFiles": "error"
+    },
+    {
+      "full": "true",
+      "browserOutcome": "success",
+      "firefoxOutcome": "success",
+      "missingFiles": "error"
+    },
+    {
+      "full": "true",
+      "browserOutcome": "success",
+      "firefoxOutcome": "failure/skipped/missing",
+      "missingFiles": "warn",
+      "gateEffect": "The unchanged failed browser step or required full run remains the validation gate; no failure is converted to success."
+    },
+    {
+      "full": "true or false",
+      "browserOutcome": "failure/skipped/missing",
+      "firefoxOutcome": "any",
+      "missingFiles": "warn",
+      "gateEffect": "Earlier setup/test failure remains a job failure; artifact absence does not obscure it."
+    },
+    {
+      "jobCancelled": true,
+      "upload": "Skipped by unchanged !cancelled() step condition."
+    }
+  ],
+  "independentChecks": {
+    "policyTests": {
+      "command": "node --test scripts/ci-policy.test.mjs",
+      "exitCode": 0,
+      "tests": 18,
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "log": "ci-context-0b2c975-tests.log",
+      "logSha256": "aee852706a53d3e29dee107e1a047fa21684f124f08c8a7335a1d8c5bcab5e45"
+    },
+    "yamlParse": "PASS",
+    "normalizedWorkflowEquality": "PASS: after removing the two new step IDs and restoring the one old input expression, parsed YAML equals the parent workflow exactly.",
+    "existingPolicyTestsBytePreserved": "PASS: removing the inserted regression test yields the exact parent test-file bytes.",
+    "stepReferences": "Both IDs are unique within the front job, precede upload, and the job declares needs: changes.",
+    "failureSemantics": "Neither browser step has continue-on-error; their existing run bodies, selectors and report assertions are unchanged.",
+    "gatePreservation": "All job conditions, required dependencies, required failure/cancellation handling, timeouts, upload paths, retention and existing artifact/shard assertions remain unchanged.",
+    "diffCheck": "PASS",
+    "sourceFileSha256": {
+      ".github/workflows/ci.yml": "2331b2cf6ddecd144ac890eaedcdc6eccdcb4a85c5ff1af1cb36d2a13bb554e4",
+      "scripts/ci-policy.test.mjs": "c54fc7fb5d4a1c3f20b96d3b7a6845049c7133a35dad31910d1ebfd03fdaedef"
+    },
+    "trackedReviewedFilesMatchCommitBytes": true,
+    "worktreeNote": "An existing untracked Front/node_modules entry is present; it was not modified or used by this dependency-free policy test."
+  },
+  "findings": [],
+  "limits": [
+    "The new test targets single-line if-no-files-found inputs; it is not a general GitHub workflow or expression validator.",
+    "Local YAML parsing and policy tests do not establish remote workflow acceptance or successful 12-job execution.",
+    "The prior selected-shard/editor/three-engine application review is outside this correction receipt and was not rerun."
+  ],
+  "requiredNextGate": "Verify actual GitHub Actions starts and completes all required jobs on the published fix/current base, then inspect required logs and artifacts before merge.",
+  "authorshipBoundary": "Reviewer made no repository edits, gate changes, remote comments, pushes or merges; wrote only this scratch receipt and captured test log."
+}

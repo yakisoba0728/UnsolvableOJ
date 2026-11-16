@@ -1,0 +1,107 @@
+[
+  {
+    "artifactId": 14245512021,
+    "artifactName": "phase4-restore-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/restore.zip",
+    "bytes": 2263,
+    "sha256": "7b848a59bf71babcd757b1b4bf9f508234ff6499b226321569522bac3255f20a"
+  },
+  {
+    "artifactId": 14244922097,
+    "artifactName": "phase5-database-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/database-qualification.zip",
+    "bytes": 18137,
+    "sha256": "0bfc67d9f0d4d4364fffb6c42bacc8765033129b3296334153e40d76cfa6d38a"
+  },
+  {
+    "artifactId": 14245317143,
+    "artifactName": "image-audit-front-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/image-front.zip",
+    "bytes": 28914,
+    "sha256": "887a21064f55c674cebcdd98eaadb88c747ecfbb964673e1dfca07f9374978f9"
+  },
+  {
+    "artifactId": 14245176857,
+    "artifactName": "image-audit-judge-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/image-judge.zip",
+    "bytes": 14306,
+    "sha256": "8ac91a465df953369cac8e084c72667f87be779e2f80d26af87ed80c30cf28b2"
+  },
+  {
+    "artifactId": 14244119474,
+    "artifactName": "image-audit-back-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/image-back.zip",
+    "bytes": 26957,
+    "sha256": "2a4332a9c0fe01b5b1e1f7ee718bd3f0ef1bbbbac5b3cd6b4808037d410dbd10"
+  },
+  {
+    "artifactId": 14243883975,
+    "artifactName": "npm-sbom-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/npm-sbom.zip",
+    "bytes": 100682,
+    "sha256": "b0c09091953ab8d90bee237703eccca6dd0243f6f4dc886871de2d101cc76e4e"
+  },
+  {
+    "artifactId": 14245827596,
+    "artifactName": "image-audit-runtime-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/image-runtime.zip",
+    "bytes": 1086441,
+    "sha256": "d1d82603c5933f1806fcb0650731cd5428a37b593f4c5995c74c0955193138ce"
+  },
+  {
+    "artifactId": 14245087563,
+    "artifactName": "phase5-verdict-matrix-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/native-verdict.zip",
+    "bytes": 5436,
+    "sha256": "c5ba86df716e40778ac7858403bdf0ac715c1b9bf7048d2fb8feaf6fc61bd5e8"
+  },
+  {
+    "artifactId": 14243959921,
+    "artifactName": "phase5-frontend-1-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/frontend-1.zip",
+    "bytes": 543704,
+    "sha256": "ab64e9735723dea28612dbddb8f49178eb010fb0be00a8a0c961343111458b8a"
+  },
+  {
+    "artifactId": 14244698713,
+    "artifactName": "phase5-frontend-2-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/frontend-2.zip",
+    "bytes": 2085369,
+    "sha256": "493d46fff37a6dec5be608746dda676141735457a452de334ca5dfead0f1873b"
+  },
+  {
+    "artifactId": 14246816098,
+    "artifactName": "phase5-multi-api-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/multi-api.zip",
+    "bytes": 5265,
+    "sha256": "0f3294c747851ff1650dc61a371457e864a6d9074ce9958901a1db1b356f627d"
+  },
+  {
+    "artifactId": 14246995865,
+    "artifactName": "phase5-vibe-pipeline-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/vibe-pipeline.zip",
+    "bytes": 1428,
+    "sha256": "60866ea8b753d5b8ee895f0db829f5591f554e0f46e4c6031a8236fb622112ac"
+  },
+  {
+    "artifactId": 14246621238,
+    "artifactName": "phase2-judge-evidence-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/judge-evidence.zip",
+    "bytes": 29126,
+    "sha256": "2d05283e74e8e2fdb22199a0f7cb0cb9ed375c4e353fb8ed0760f6903353c2da"
+  },
+  {
+    "artifactId": 14245879774,
+    "artifactName": "phase3-browser-performance-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/browser-performance.zip",
+    "bytes": 6679,
+    "sha256": "2528d6771ce4524f8a6a5c18da5a188770ff38eb437c7e08c5c90ec65e3cb3df"
+  },
+  {
+    "artifactId": 14245549799,
+    "artifactName": "phase5-vibe-browser-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/vibe-browser.zip",
+    "bytes": 56807,
+    "sha256": "14e8e075fba9cfcb53da8b71e2609cfd05ad701cc51c8609f4b6763ad1f75bf0"
+  }
+]

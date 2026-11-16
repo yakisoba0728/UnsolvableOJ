@@ -1,0 +1,146 @@
+{
+  "verification": {
+    "allChecks": "PASS",
+    "checks": 10875,
+    "networkCalls": 0,
+    "gitCalls": 0,
+    "benchmarksExecuted": 0,
+    "originalFoundationSectionsUnchanged": [
+      "foundation",
+      "database",
+      "judge",
+      "phase2ScalingTrials",
+      "recovery",
+      "browser",
+      "bundle"
+    ],
+    "dbWorkloads": 7,
+    "dbReadSamplesPerWorkload": 5,
+    "dbNearestRankP95P99EqualMaximum": true,
+    "mixedCampaignJobs": 24,
+    "separatePhase2Jobs": 32,
+    "submissionIdOverlap": 0,
+    "recoveryObservations": 7,
+    "historicalBrowserReports": 3,
+    "historicalProbeReceipts": 5,
+    "observedCandidateRunId": 43898203434,
+    "observedCandidateOverallConclusion": "failure",
+    "observedCandidateComposeConclusion": "success",
+    "candidateProbeBytesEqualAtCorrectedHead": true,
+    "correctedCandidateVerified": true,
+    "correctedCandidateRunId": 43901468081,
+    "correctedEditorEventTimingTruncated": true,
+    "composedCandidateRunId": 43905864054,
+    "composedCandidateDatabaseSchema": 1,
+    "composedCandidateRestoreSchema": 2,
+    "composedCandidateMultiApiJobs": 8,
+    "composedCandidateApiProcesses": 2,
+    "composedCandidateWorkerProcesses": 2,
+    "failedCandidateVectors": {
+      "lcpCandidateMs": {
+        "raw": [
+          392,
+          388,
+          416
+        ],
+        "median": 392,
+        "max": 416
+      },
+      "initialObservedCls": {
+        "raw": [
+          0.05432499885559082,
+          0.05432499885559082,
+          0.048731330235799154
+        ],
+        "median": 0.05432499885559082,
+        "max": 0.05432499885559082
+      },
+      "clickToSecondVerifiedFrameMs": {
+        "raw": [
+          47.5,
+          50,
+          44.60000000009313,
+          46.60000000009313,
+          48.09999999997672,
+          46.800000000046566,
+          48.5,
+          45.60000000009313,
+          43.29999999993015,
+          46.90000000002328,
+          45.59999999997672,
+          46.800000000046566,
+          45.5,
+          45.90000000002328,
+          48.29999999993015
+        ],
+        "median": 46.800000000046566,
+        "max": 50
+      },
+      "lcpCandidateAreas": [
+        7410,
+        7410,
+        7410
+      ],
+      "heapDeltaUsedBytes": [
+        -11212376,
+        -5513892,
+        -5483664
+      ]
+    },
+    "currentRepositoryMeasuredFileBinding": {
+      "status": "NOT_CHECKED_NO_REPOSITORY_SOURCE_PRESENT",
+      "files": []
+    },
+    "verificationScope": "Retained byte integrity, receipt consistency and independent arithmetic only; not experiment replay, remote authentication, causal improvement, current CI acceptance or a capacity claim."
+  },
+  "relocation": {
+    "onlyRetainedEvidenceCopied": true,
+    "workingDirectoryOutsideCopy": true,
+    "pathEnvironmentEmpty": true,
+    "pythonIsolatedMode": true,
+    "noBytecodeCreated": true,
+    "exitCode": 0,
+    "sameResultAsOriginal": true
+  },
+  "multiApiArithmeticNegativeControl": {
+    "fixture": "derived PR91 maximumObservedQueueOverlap changed from 2 to 3 in a disposable evidence-only copy; immutable raw queue timestamps untouched",
+    "exitCode": 1,
+    "result": {
+      "allChecks": "FAIL",
+      "checksCompleted": 8936,
+      "reason": "composed PR91 derived data.multiApi.workerBound.maximumObservedQueueOverlap"
+    }
+  },
+  "historicalProofsPreserved": {
+    "portable-verification.json": {
+      "sha256": "4d7e443b4a745a283f0d2751f881a336690c002e9a0c9982e6ac869405da8508",
+      "unchanged": true
+    },
+    "portable-verification-corrected-43901468081.json": {
+      "sha256": "e39249072ab6c4f42450c271a3af91e093b626fad6b128e83c1f72359d673078",
+      "unchanged": true
+    }
+  },
+  "artifacts": {
+    "verify-performance.py": {
+      "sha256": "37382c645078a6fdc88fe80b755b3e8b20d76022c5d5a63c7fafc0c4bafda936",
+      "bytes": 41392
+    },
+    "verify-pr91.py": {
+      "sha256": "d5cefc3105a543a942a2ca5a5aceb74883542f6cc31e360102da36e6991f39c0",
+      "bytes": 32594
+    },
+    "performance-source-data.json": {
+      "sha256": "faec7207ad34587187b29d23caba2d64f7f9ced0bd2be1e9897e3f9ba3625d1c",
+      "bytes": 287822
+    },
+    "performance-source-data-foundation.json": {
+      "sha256": "d2d971d21d70d1054612ae8e5e7096ab43c89bcf9594153cc16fdf45b9e0d025",
+      "bytes": 42990
+    },
+    "observed-candidates/43905864054/github-metadata.json": {
+      "sha256": "b19d8cad682ff1601c6dcf29b09b47439c93efe4ec1ecd71eebdcc829e27386f",
+      "bytes": 45162
+    }
+  }
+}

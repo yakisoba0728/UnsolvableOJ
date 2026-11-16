@@ -1,0 +1,35 @@
+
+ RUN  v4.1.12 /workspace/scratch/3d1215725852/oj-database/Back
+
+ ❯ test/enterprise-export.e2e-spec.ts (5 tests | 1 failed) 1006ms
+     × rejects revoked owner tokens on CSV and deep pages before invoking authorized service methods 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/enterprise-export.e2e-spec.ts > owner-only complete enterprise CSV export > rejects revoked owner tokens on CSV and deep pages before invoking authorized service methods
+Error: expected 401 "Unauthorized", got 429 "Too Many Requests"
+ ❯ test/enterprise-export.e2e-spec.ts:170:55
+    168|     try {
+    169|       await db.query('UPDATE users SET token_version=token_version+1 W…
+    170|       await http().get(endpoint()).set(bearer(owner)).expect(401);
+       |                                                       ^
+    171|       await http().get(`${base}/enterprise/tests/${testId}/results?pag…
+    172|       expect(exportSpy).not.toHaveBeenCalled();
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:404:14
+ ❯ node_modules/supertest/lib/test.js:460:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:437:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:302:23
+ ❯ localAssert node_modules/supertest/lib/test.js:220:38
+ ❯ finish node_modules/supertest/lib/test.js:233:7
+ ❯ fn node_modules/superagent/src/node/index.js:904:2
+ ❯ callback node_modules/superagent/src/node/index.js:1183:17
+ ❯ fn node_modules/superagent/src/node/parsers/json.js:19:6
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 25 passed (26)
+   Start at  23:24:13
+   Duration  10.02s (transform 740ms, setup 0ms, import 5.52s, tests 2.97s, environment 0ms)
+

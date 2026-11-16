@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "authoredBy": "/root/security",
+  "recordedAt": "2026-11-16T14:43:07.816963+00:00",
+  "sourceCommit": "ce26659b816c1dc1450cdc48f0c58d6e41ecea1e",
+  "baselineSuites": [
+    {
+      "command": "python3 -m unittest discover -s scripts -p image_audit_test.py",
+      "passed": 15,
+      "failures": 0,
+      "durationSeconds": 0.12
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p image_gate_test.py",
+      "passed": 15,
+      "failures": 0,
+      "durationSeconds": 10.37
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p verify_image_payload_test.py",
+      "passed": 27,
+      "failures": 0,
+      "durationSeconds": 0.458
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p image_applicability_test.py",
+      "passed": 35,
+      "failures": 0,
+      "durationSeconds": 35.76
+    }
+  ],
+  "proposalRerun": {
+    "command": "python3 -m unittest discover -s scripts -p image_applicability_test.py",
+    "passed": 35,
+    "failures": 0,
+    "durationSeconds": 37.683,
+    "policyContentSha256": "d938665f24995ea53bf0984047459de0aa9ba366dc5ebbe37055f304c68903fb"
+  },
+  "evaluatorSha256": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f",
+  "gateSha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b",
+  "evidence": "Actual local command outputs observed by reviewer; full stdout files were not separately saved. Tests use synthetic negative fixtures and do not constitute native OCI or host execution.",
+  "unexecuted": [
+    "Local Docker/native matrix",
+    "Production host/kernel or network verification"
+  ]
+}

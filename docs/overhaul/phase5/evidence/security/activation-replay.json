@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-16T14:49:54.789262+00:00",
+  "policyContentSha256": "d938665f24995ea53bf0984047459de0aa9ba366dc5ebbe37055f304c68903fb",
+  "policyFileSha256": "81f0bf685f2ffc22cdb0933c2c55f6f5fff05f8f252765c0af8fe56189084603",
+  "gate": "PASS_WITH_REVIEWED_COMPONENT_FINDINGS",
+  "code": 0,
+  "rawCounts": {
+    "UNKNOWN": 1,
+    "LOW": 363,
+    "MEDIUM": 560,
+    "HIGH": 177,
+    "CRITICAL": 5
+  },
+  "reviewed": 182,
+  "proposed": 0,
+  "remaining": 0,
+  "reasons": [],
+  "method": "Replay retained failed scan through unchanged evaluator with independently approved metadata; fresh CI image rebuild remains mandatory."
+}

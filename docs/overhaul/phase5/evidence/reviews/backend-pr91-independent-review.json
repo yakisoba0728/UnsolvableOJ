@@ -1,0 +1,778 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "independent_qa",
+  "reviewerAgent": "/root/independent_qa",
+  "reviewedAt": "2026-11-16T16:40:23.716292+00:00",
+  "decision": "ACCEPT_EXACT_PR91_CANDIDATE_SOURCE_AND_ACTUAL_CI",
+  "blockingFindings": [],
+  "scope": "PR91 combined database, saved-goal rollback/restore and bounded multi-API candidate, with all current full-CI jobs on the exact immutable source/checkout/base below. This accepts the candidate for the Phase V integration branch only. It is not production deployment approval, final Phase V documentation approval or permission to merge protected main/PR63/PR86; final main PR remains manual-only.",
+  "repository": "yakisoba0728/UnsolvableOJ",
+  "pullRequest": 91,
+  "runId": 43905864054,
+  "runAttempt": 1,
+  "runUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43905864054",
+  "sourceCommit": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+  "sourceTree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+  "sourceParents": [
+    "c84e5ed66af7b3e299c761a6cdb578f8bf4c037a",
+    "e8b08d6ab86181859d9491d15d1881a6b10262eb"
+  ],
+  "checkoutCommit": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+  "checkoutTree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+  "checkoutParents": [
+    "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+    "281d0f1a30cd772cf7417e3affb8c98be252f405"
+  ],
+  "baseCommit": "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+  "sourceBinding": {
+    "method": "Independently retrieved immutable GitHub commit objects and actual run metadata. Source and merge checkout have the same complete tree. Local composition38824a09566fd75811704a44d65f7577d5cba9c3 has that tree; exact author-blob comparisons carry8DB,17Reliability and5complete multi-API increment paths. Earlier accepted Frontend/real-Vibe/gateway/CI-policy boundaries remain identical to M3.",
+    "sourceBlobReceipt": "source-blob-bindings.json",
+    "compositionReceipt": "composition-independent-checks.json",
+    "workflowChange": {
+      "commit": "fa809280d014d6896e9ddeb5dd95f4a5d90c8ee6",
+      "currentBlob": "afbf6980e7e262d6dd93f9ffa9c911aa6f0cd02a",
+      "additions": 36,
+      "deletions": 0,
+      "review": [
+        "Adds two fail-closed DB safety tests, bounded disposable DB execution and seven-workload/source/cleanup assertions.",
+        "Database report upload requires a file on successful execution and preserves failure artifacts.",
+        "Multi-API artifact upload is tied to actual pipeline outcome and requires a file on success.",
+        "No gate, test, assertion, timeout or protected branch rule is weakened. Outcome contexts are valid; no status function is used in an action input."
+      ]
+    },
+    "priorSourceReceipts": [
+      {
+        "path": "/workspace/scratch/3d1215725852/independent-qa/database-review-9978a3e.json",
+        "sha256": "b2a50526408c8a7135aa3c451747a056cbd412a4587f84d8ce5db9cc998d1ace"
+      },
+      {
+        "path": "/workspace/scratch/3d1215725852/independent-qa/reliability-independent-accept-e9bc90d.json",
+        "sha256": "156bee47b57482a58540ae5668cc3bff4b4206c93a2f7fb7dcccab69da81fc5f"
+      },
+      {
+        "path": "/workspace/scratch/3d1215725852/independent-qa/runtime-activation-07191f0-independent-review.json",
+        "sha256": "564df9fdd8b94a0bd7f4dce2fdf2156241c33d3c77fb37e1db7c44d8f17c1cf4"
+      },
+      {
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr89-43901468081/independent-review.json",
+        "sha256": "7a80995d3184f8d43c6921d2518e41fbb6262435df74d0c0761748ea883ed538"
+      }
+    ],
+    "multiApiCountClarification": "Complete increment from e9f056 has five exact paths. Relative 7c1731 correction has four. The fifth dedicated-Vibe file only corrects a limitations string to reference separate real browser/nginx artifacts; no setup logic change."
+  },
+  "ci": {
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 133434380407,
+        "name": "Dependency audit",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133434381058,
+        "name": "Docker image (front)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133434381067,
+        "name": "Detect changes",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133434381207,
+        "name": "Docker image (judge)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133434381309,
+        "name": "Docker image (runtime)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133434381899,
+        "name": "Docker image (back)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133434471688,
+        "name": "Browser tests (1/2)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133434471718,
+        "name": "Browser tests (2/2)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133434471759,
+        "name": "Judge worker",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133434472142,
+        "name": "Backend and API",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133434472878,
+        "name": "Sandbox, pipeline and Compose",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133444654700,
+        "name": "CI required",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "all12RequiredJobsActuallyExecuted": true,
+    "requiredGateActualResults": "success success success success success success success",
+    "expectedStepSkips": [
+      "Failure-only artifact/log steps",
+      "Duplicate Frontend build on shard2; shard1 executed build and test types"
+    ],
+    "actualTestTruth": {
+      "dependencyAudit": "Six complete/production npm audits each report zero vulnerabilities; complete npm SBOM ZIP retained.",
+      "backend": {
+        "unitTests": 392,
+        "unitFiles": 30,
+        "apiTests": 261,
+        "apiFiles": 44,
+        "migrationGuardFileTests": 5,
+        "enterpriseExportFileTests": 4,
+        "enterpriseExportRevocationFileTests": 1,
+        "fullMigrationRegression": "PASS"
+      },
+      "databaseQualification": {
+        "schemaVersion": 1,
+        "workloads": 7,
+        "status": "PASS",
+        "source": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "createdAndDropped": true
+      },
+      "restore": {
+        "schemaVersion": 2,
+        "status": "PASS",
+        "migrations": 31,
+        "tableFingerprints": 37,
+        "goals": 12,
+        "stopWriterBarrier": "37 tables SHARE, concurrent write refused, held through dump",
+        "populatedDown": "Refused and fingerprints/schema/products/ledger retained",
+        "restoredWrites": "Statistics integrity and saved-goal update passed",
+        "cleanup": "both generated databases removed"
+      },
+      "judge": {
+        "workerTests": 137,
+        "pythonGatewayTests": 5
+      },
+      "browser": {
+        "mainShardCounts": [
+          403,
+          402
+        ],
+        "firefoxShardCounts": [
+          87,
+          87
+        ],
+        "total": 979,
+        "newUxCases": 42,
+        "newUxPerEngine": 14,
+        "newEditorCases": 1
+      },
+      "native": {
+        "tests": 90,
+        "matrixRows": 72,
+        "failed": 0,
+        "skipped": 0
+      },
+      "pipeline": {
+        "tests": 36,
+        "files": 9,
+        "newMultiApiCases": 1
+      },
+      "compose": {
+        "realBrowserFlows": 4,
+        "actualRemovedContainers": 8,
+        "actualRemovedNetworks": 4,
+        "actualRemovedBackupVolumes": 1
+      }
+    }
+  },
+  "databaseAndRestore": {
+    "receipt": "backend-independent-checks.json",
+    "independentEvidenceChecks": 68,
+    "database": {
+      "schemaVersion": 1,
+      "fileSha256": "6e0122375e083564564e99ea134c4159809aa2decd58bffb133d51e2d7230a67",
+      "workloads": [
+        "enterprise page offset 0",
+        "enterprise page offset 4950",
+        "whole-assessment summary 5000 candidates",
+        "scalar export SQL 5000 candidates",
+        "learning 90 days over 20000-row history",
+        "5000 distinct solver multiplicities",
+        "large source bulk transition and rollback"
+      ],
+      "elapsedMs": 1808.687898,
+      "maxDatabaseBytes": 33068723,
+      "cleanup": {
+        "created": true,
+        "dropped": true
+      }
+    },
+    "restore": {
+      "schemaVersion": 2,
+      "fileSha256": "5fb52eed038d766de4ba7bc54ecbd315591853465f5a264424f02158d1c1d965",
+      "migrations": 31,
+      "tableFingerprints": 37,
+      "products": {
+        "goals": 12,
+        "problemVersions": 24,
+        "solves": 128,
+        "xpMatchesLedger": true,
+        "solveEvidenceMatches": true,
+        "assessments": 1,
+        "candidates": 8,
+        "algorithmPins": 1,
+        "vibePins": 1,
+        "assessmentSubmissions": 8,
+        "assessmentSubmissionOwnershipVersionsMatch": true,
+        "workspaces": 8,
+        "revisions": 16,
+        "workspaceOwnershipVersionsMatch": true
+      },
+      "writerBarrier": {
+        "mode": "SHARE",
+        "tables": 37,
+        "concurrentWriteRefused": true,
+        "heldThroughDump": true
+      },
+      "archive": {
+        "bytes": 270084,
+        "sha256": "4b7b3024c42252b5048195635c2d6849154306dbedc2b1929ab6ae1c475e3b36"
+      },
+      "elapsedMs": 1027.631163,
+      "cleanup": "both generated databases removed"
+    },
+    "riskClosure": "P5-RELIABILITY-001 corrected source e9bc90d is preserved exactly and its5real migration regressions passed here, including old-snapshot refusal cases. Existing prior independent PG reproduction/correction receipts remain retained."
+  },
+  "imageGates": {
+    "receipt": "image-independent-checks.json",
+    "independentEvidenceChecks": 626,
+    "outcomes": [
+      {
+        "component": "front",
+        "gate": "PASS_RAW_SCAN",
+        "rawExit": 0,
+        "rawCounts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "imageManifestDigest": "sha256:5637865976f1d2145442430f974ecfd646d2a7861706987a29e8e5c826915f9c"
+      },
+      {
+        "component": "back",
+        "gate": "PASS_RAW_SCAN",
+        "rawExit": 0,
+        "rawCounts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "imageManifestDigest": "sha256:2ab675747a8f95abd00ced2ef8b6cdafd169efa4e021c183b53636c7c6be59cf"
+      },
+      {
+        "component": "judge",
+        "gate": "PASS_RAW_SCAN",
+        "rawExit": 0,
+        "rawCounts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "imageManifestDigest": "sha256:bf1ea7e31aa541533cc6301781f30777c5fce187e5de2854ff2abfffc1c3cd67"
+      },
+      {
+        "component": "runtime",
+        "gate": "PASS_WITH_REVIEWED_COMPONENT_FINDINGS",
+        "rawExit": 2,
+        "rawCounts": {
+          "UNKNOWN": 1,
+          "LOW": 363,
+          "MEDIUM": 560,
+          "HIGH": 177,
+          "CRITICAL": 5
+        },
+        "imageManifestDigest": "sha256:16081bd8adbdf9ccf4b9dd0a26a4bc7df7f93c7a8d643cb08c050ace801e343d"
+      }
+    ],
+    "runtime": {
+      "rawHigh": 177,
+      "rawCritical": 5,
+      "reviewedRecords": 182,
+      "remainingBlocking": 0,
+      "payloadMatchedFiles": 990,
+      "policyContentSha256": "d938665f24995ea53bf0984047459de0aa9ba366dc5ebbe37055f304c68903fb",
+      "activePolicyFileSha256": "81f0bf685f2ffc22cdb0933c2c55f6f5fff05f8f252765c0af8fe56189084603",
+      "expiresAt": "2026-11-30T00:00:00Z",
+      "hostKernelReadiness": "UNVERIFIED",
+      "independentRecalculation": "All182complete advisory hashes and current image-derived scanner fingerprints recomputed and matched;990individual expected/actual payload hashes and sizes match."
+    }
+  },
+  "frontendCarryForward": {
+    "receipt": "frontend-independent-checks.json",
+    "geometryJson": 24,
+    "pngs": 48,
+    "matrix": "3engines x4widths x2themes",
+    "loadedFonts": 24,
+    "toolbarAndSummaryMaxAbsShiftPx": 0,
+    "horizontalOverflow": false,
+    "editor": {
+      "file": "frontend-2/phase5-editor-observation.json",
+      "status": "PASS",
+      "source": {
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "sourceHead": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "base": "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+        "workflowRunId": "43905864054",
+        "workflowAttempt": "1",
+        "trackedTreeClean": true
+      },
+      "actual": {
+        "heapSamples": 13,
+        "actions": 20,
+        "autosaveWrites": 10,
+        "unexpectedRequests": 0,
+        "pageErrors": 0
+      },
+      "protocolElapsedMs": 40016.476672000004,
+      "actualObservationMs": 40075.255401,
+      "observerCleanupMs": 58.765182000002824,
+      "fieldINP": {
+        "value": null,
+        "reason": "A finite automated laboratory interaction sample is not field INP."
+      },
+      "environment": {
+        "project": "chromium",
+        "browser": "chromium",
+        "browserVersion": "153.0.8010.12",
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        }
+      },
+      "eventTimingEntries": 200,
+      "eventTimingReason": null,
+      "eventTimingTruncated": true,
+      "interpretation": "Correctness, counts, privacy and source binding checked here; performance arithmetic is independently reviewed by the database reviewer."
+    },
+    "physicalVisualInspection": {
+      "files": [
+        "frontend-1/phase5-ux/chromium-320-light-ready.png",
+        "frontend-2/phase5-ux/webkit-375-dark-refreshing.png",
+        "frontend-2/phase5-ux/firefox-1440-dark-ready.png"
+      ],
+      "finding": "Readable labels, complete goal region, natural narrow wrapping, no horizontal clipping/overlap or credentials; expected disabled controls while refreshing."
+    },
+    "testLogReceipt": "browser-log-checks.json"
+  },
+  "multiApiIndependentReview": {
+    "reviewer": "/root/security",
+    "path": "/workspace/scratch/3d1215725852/security-analysis/pr91-43905864054/independent-acceptance.json",
+    "sha256": "12a4d6f1f414e32e05db7a9c328d4ce5000867b903d1bebb8a2dabcd58ebbf15",
+    "verdict": "ACCEPT_SCOPED_PR91_ACTUAL_MULTI_API_AND_NATIVE_PIPELINE",
+    "source": {
+      "checkoutSha": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+      "treeSha": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+      "sourceHeadSha": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+      "baseSha": "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+      "runId": "43905864054",
+      "runAttempt": "1",
+      "trackedTreeClean": true
+    },
+    "reviewerReceiptAndAllOriginalArtifactHashesIndependentlyChecked": true,
+    "eightBoundSourceHashesAndSevenCarryForwardFileHashesVerifiedBySecurity": true,
+    "sevenCarryForwardFileHashesRecheckedByQA": true,
+    "apiRequests": [
+      4,
+      4
+    ],
+    "workerJobs": [
+      6,
+      2
+    ],
+    "terminalClaims409": 8,
+    "duplicateResultReplays200": 8,
+    "activeConflicts409": 2,
+    "persistedSubmissions": 8,
+    "solveLedgerRows": 1,
+    "xp": 10,
+    "preSetupSyntheticThrottleResets": 1,
+    "counterResetsDuringProtocol": 0,
+    "cleanup": {
+      "removedOwnedJobs": 8,
+      "ownedProcessesExited": 4,
+      "forcedSigkills": 0,
+      "closedObserverSets": 2,
+      "nativeCacheBeforeAfter": [
+        0,
+        0
+      ]
+    },
+    "scopeLimit": "Finite8-job same-host observation; no production capacity/throughput envelope or fault-domain claim."
+  },
+  "compose": {
+    "receipt": "compose-independent-checks.json",
+    "independentEvidenceChecks": 43,
+    "assessment": {
+      "publicChecks": 6,
+      "passed": 11,
+      "total": 11,
+      "outcome": 40,
+      "evaluationStatus": "unavailable",
+      "challengeVersion": "2e1df0949b196347b2820c72e2c72749011e8406ef658e45009d01f2c8324e18",
+      "persistedReloadEqual": true,
+      "outsiderDenied": true,
+      "sourceRestoredInReadOnlyEditor": true
+    },
+    "gatewayProbes": {
+      "positive": {
+        "status": 200,
+        "elapsedMs": 19.288555000000002
+      },
+      "noClient": {
+        "status": 400,
+        "elapsedMs": 4.128425
+      },
+      "wrongBearer": {
+        "status": 401,
+        "elapsedMs": 1.1888409999999965
+      },
+      "anonymous": {
+        "status": 401,
+        "elapsedMs": 0.8152720000000002
+      },
+      "wrongHostname": {
+        "errorCode": "ERR_TLS_CERT_ALTNAME_INVALID",
+        "elapsedMs": 4.353816999999999
+      },
+      "disallowed": {
+        "status": 404,
+        "elapsedMs": 0.7860270000000043
+      },
+      "query": {
+        "status": 400,
+        "elapsedMs": 0.45096000000000913
+      },
+      "requests": 7,
+      "perRequestTimeoutMs": 4000
+    },
+    "finalCleanup": true,
+    "templateSha256": "83293d5f157fefc7f5cbf6a408f3cf89cf73fb1eb247083c76bec30d5b37026b",
+    "visualInspection": "Personally inspected current result PNG: 40/40 outcome and 11/11 checks; provider process-score columns remain unavailable. Synthetic account label is visible; no password, token, certificate private material or solution body is captured.",
+    "performanceSchema": 2,
+    "fieldInp": null
+  },
+  "retainedEvidence": {
+    "directory": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054",
+    "originalZipCount": 15,
+    "originalZips": [
+      {
+        "artifactId": 14245512021,
+        "artifactName": "phase4-restore-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/restore.zip",
+        "bytes": 2263,
+        "sha256": "7b848a59bf71babcd757b1b4bf9f508234ff6499b226321569522bac3255f20a"
+      },
+      {
+        "artifactId": 14244922097,
+        "artifactName": "phase5-database-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/database-qualification.zip",
+        "bytes": 18137,
+        "sha256": "0bfc67d9f0d4d4364fffb6c42bacc8765033129b3296334153e40d76cfa6d38a"
+      },
+      {
+        "artifactId": 14245317143,
+        "artifactName": "image-audit-front-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/image-front.zip",
+        "bytes": 28914,
+        "sha256": "887a21064f55c674cebcdd98eaadb88c747ecfbb964673e1dfca07f9374978f9"
+      },
+      {
+        "artifactId": 14245176857,
+        "artifactName": "image-audit-judge-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/image-judge.zip",
+        "bytes": 14306,
+        "sha256": "8ac91a465df953369cac8e084c72667f87be779e2f80d26af87ed80c30cf28b2"
+      },
+      {
+        "artifactId": 14244119474,
+        "artifactName": "image-audit-back-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/image-back.zip",
+        "bytes": 26957,
+        "sha256": "2a4332a9c0fe01b5b1e1f7ee718bd3f0ef1bbbbac5b3cd6b4808037d410dbd10"
+      },
+      {
+        "artifactId": 14243883975,
+        "artifactName": "npm-sbom-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/npm-sbom.zip",
+        "bytes": 100682,
+        "sha256": "b0c09091953ab8d90bee237703eccca6dd0243f6f4dc886871de2d101cc76e4e"
+      },
+      {
+        "artifactId": 14245827596,
+        "artifactName": "image-audit-runtime-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/image-runtime.zip",
+        "bytes": 1086441,
+        "sha256": "d1d82603c5933f1806fcb0650731cd5428a37b593f4c5995c74c0955193138ce"
+      },
+      {
+        "artifactId": 14245087563,
+        "artifactName": "phase5-verdict-matrix-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/native-verdict.zip",
+        "bytes": 5436,
+        "sha256": "c5ba86df716e40778ac7858403bdf0ac715c1b9bf7048d2fb8feaf6fc61bd5e8"
+      },
+      {
+        "artifactId": 14243959921,
+        "artifactName": "phase5-frontend-1-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/frontend-1.zip",
+        "bytes": 543704,
+        "sha256": "ab64e9735723dea28612dbddb8f49178eb010fb0be00a8a0c961343111458b8a"
+      },
+      {
+        "artifactId": 14244698713,
+        "artifactName": "phase5-frontend-2-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/frontend-2.zip",
+        "bytes": 2085369,
+        "sha256": "493d46fff37a6dec5be608746dda676141735457a452de334ca5dfead0f1873b"
+      },
+      {
+        "artifactId": 14246816098,
+        "artifactName": "phase5-multi-api-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/multi-api.zip",
+        "bytes": 5265,
+        "sha256": "0f3294c747851ff1650dc61a371457e864a6d9074ce9958901a1db1b356f627d"
+      },
+      {
+        "artifactId": 14246995865,
+        "artifactName": "phase5-vibe-pipeline-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/vibe-pipeline.zip",
+        "bytes": 1428,
+        "sha256": "60866ea8b753d5b8ee895f0db829f5591f554e0f46e4c6031a8236fb622112ac"
+      },
+      {
+        "artifactId": 14246621238,
+        "artifactName": "phase2-judge-evidence-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/judge-evidence.zip",
+        "bytes": 29126,
+        "sha256": "2d05283e74e8e2fdb22199a0f7cb0cb9ed375c4e353fb8ed0760f6903353c2da"
+      },
+      {
+        "artifactId": 14245879774,
+        "artifactName": "phase3-browser-performance-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/browser-performance.zip",
+        "bytes": 6679,
+        "sha256": "2528d6771ce4524f8a6a5c18da5a188770ff38eb437c7e08c5c90ec65e3cb3df"
+      },
+      {
+        "artifactId": 14245549799,
+        "artifactName": "phase5-vibe-browser-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/vibe-browser.zip",
+        "bytes": 56807,
+        "sha256": "14e8e075fba9cfcb53da8b71e2609cfd05ad701cc51c8609f4b6763ad1f75bf0"
+      }
+    ],
+    "decodedJobLogCount": 12,
+    "decodedJobLogs": [
+      {
+        "jobId": 133434380407,
+        "name": "Dependency audit",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434380407.log",
+        "bytes": 21679,
+        "sha256": "7501d92b2de05e3fd49a4421c4ca98edd845c76f3f8fb21d4b22d143360e957b"
+      },
+      {
+        "jobId": 133434381058,
+        "name": "Docker image (front)",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434381058.log",
+        "bytes": 143962,
+        "sha256": "e50c9d0fbf389eee2354e0d6156f819a136944b5eee31019675b308ce9149192"
+      },
+      {
+        "jobId": 133434381067,
+        "name": "Detect changes",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434381067.log",
+        "bytes": 20270,
+        "sha256": "fa66c83542fd627dace14e9d596579826193275526d6f9a6ba3dd7ef38141bbd"
+      },
+      {
+        "jobId": 133434381207,
+        "name": "Docker image (judge)",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434381207.log",
+        "bytes": 125400,
+        "sha256": "9b53549b1d5c580a26c1924efd53cc4f7123c405b27e06d18a4748b36478fc19"
+      },
+      {
+        "jobId": 133434381309,
+        "name": "Docker image (runtime)",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434381309.log",
+        "bytes": 302735,
+        "sha256": "33fb2bd4bd36595a3c693c375156171ef27614d3f534e074e61722d48859354b"
+      },
+      {
+        "jobId": 133434381899,
+        "name": "Docker image (back)",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434381899.log",
+        "bytes": 129218,
+        "sha256": "5b18467781e9ee69ca8f6965bf71a88d18b77f1f25456bc75769307b4a7ee218"
+      },
+      {
+        "jobId": 133434471688,
+        "name": "Browser tests (1/2)",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434471688.log",
+        "bytes": 186049,
+        "sha256": "cd1cf8f7220fb3627006a3b87f30277045818910951cef4d7266ae397963c7c0"
+      },
+      {
+        "jobId": 133434471718,
+        "name": "Browser tests (2/2)",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434471718.log",
+        "bytes": 163896,
+        "sha256": "3f55e960643f4615a77b26e98c49d2ba163270acf4b992450838e5edfd26c8b3"
+      },
+      {
+        "jobId": 133434471759,
+        "name": "Judge worker",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434471759.log",
+        "bytes": 35980,
+        "sha256": "845748929bfe1ee2cd8ec28be5582ad5c1eeccdc0f9b469dad41f919bbb1887c"
+      },
+      {
+        "jobId": 133434472142,
+        "name": "Backend and API",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434472142.log",
+        "bytes": 131963,
+        "sha256": "a3d8955daba8cac3942c119200e49ef49c695a98cc06022fe43efaf46731c2b6"
+      },
+      {
+        "jobId": 133434472878,
+        "name": "Sandbox, pipeline and Compose",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434472878.log",
+        "bytes": 333143,
+        "sha256": "a881db0cfe3ca06e7af23fe3385f9d14c636a257090faddc8552806c17298a34"
+      },
+      {
+        "jobId": 133444654700,
+        "name": "CI required",
+        "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133444654700.log",
+        "bytes": 2442,
+        "sha256": "ae15621fc5d38ac7e1dd9998d2ced4ba8b1dfd21c72c310f02eb2c9f47235113"
+      }
+    ],
+    "metadataArtifactCount": 20,
+    "dockerBuildRecordMetadataOnly": 5,
+    "verification": "Every retained originalZIP SHA256 and byte size matches the current GitHub artifact metadata; extraction paths/expanded sizes checked. All12downloaded decoded job-log strings retained with exact UTF-8 byte lengths and localSHA256. The5Docker build-record ZIPs are metadata-only because the four complete image-gate artifacts carry the reviewed image/scanner/payload evidence."
+  },
+  "reviewReceipts": [
+    {
+      "path": "final-metadata.json",
+      "sha256": "b19d8cad682ff1601c6dcf29b09b47439c93efe4ec1ecd71eebdcc829e27386f"
+    },
+    {
+      "path": "immutable-commit-objects.json",
+      "sha256": "0a63758bace67d7ade44c4adad33f18fc300cf238329e8075841bbadf9ccc9c6"
+    },
+    {
+      "path": "source-blob-bindings.json",
+      "sha256": "6de7b34cbd6221e4818b4488378904cd4ec7fa71bf46b57fa6c138c721214efa"
+    },
+    {
+      "path": "backend-independent-checks.json",
+      "sha256": "e61f7b09d3639b4b431c3a988f5077d2fae156b11a1a6022a3a431711e063b7c"
+    },
+    {
+      "path": "image-independent-checks.json",
+      "sha256": "0e4561f508cf55473044c79b6aa6e7e493a87074449c749e8378b764ead7307f"
+    },
+    {
+      "path": "frontend-independent-checks.json",
+      "sha256": "1dde1ad31e9d36ccfe680d54f4fc7301b8e1f4fd381fd32b97ddc2c36a0fe928"
+    },
+    {
+      "path": "browser-log-checks.json",
+      "sha256": "6d3e6cc865877f8700a7368273e6f20fbaf6814009a25c150649c0655c67a4b3"
+    },
+    {
+      "path": "composition-independent-checks.json",
+      "sha256": "3b867e59bb0ab7ebd99e966426ee6548d920e38ae9fff514b023aa2125cf4f92"
+    },
+    {
+      "path": "compose-independent-checks.json",
+      "sha256": "ae406ad260372b3ad9f9f67e88c902367993c0ea84d9bc2d2109a4a242ee0755"
+    },
+    {
+      "path": "downloaded-artifacts.json",
+      "sha256": "93bbbb736aa49146329d7749cc31c35c1e08d546096c088399615a3d48274cca"
+    },
+    {
+      "path": "downloaded-logs.json",
+      "sha256": "03badd9a9cdf5ff630483af4dec6579c1fede0d344915ede98574af4a2f40b0a"
+    },
+    {
+      "path": "check-backend-artifacts.py",
+      "sha256": "ee6201506a533922eb0893f5448c7f604640c84bf923f4c566259319e551a289"
+    },
+    {
+      "path": "check-image-artifacts.py",
+      "sha256": "3455c678cc8ae0d2f0b0df5b7810d6e411c67c9e68c620bd4a0a00cbca79aca1"
+    },
+    {
+      "path": "check-frontend-artifacts.py",
+      "sha256": "364b9140758b6ba7bcf1cea7994cb82e4a0b08e038b294a47cf4eba50e111785"
+    },
+    {
+      "path": "check-compose-artifacts.py",
+      "sha256": "a04cd24b893f178aa6eb74d8dc40161781ef3c91bec1483135ad032286e644f6"
+    }
+  ],
+  "qualificationLimits": [
+    "All execution was on disposable CI fixtures; no production database, restore/RTO/RPO, host kernel readiness or deployment validation is claimed.",
+    "Database7workloads and multi-API8jobs are bounded current-source observations; no speedup, population tail, saturation or capacity claim.",
+    "Browser routed UX/editor observations remain separated from real Compose flows; fieldINP is null. Editor EventTiming is capped/truncated and heap observations are coarse; neither proves leak absence.",
+    "Supported installed library scanning does not prove complete bundled JavaScript/arbitrary binary coverage or license approval. Runtime raw177HIGH/5CRITICAL findings remain visible under the exact independently approved component policy with unchanged expiry.",
+    "Performance arithmetic/documentation is owned by the separate database reviewer and is not inferred from CI success.",
+    "This approval binds only the exact source/checkout/tree/base. The coordinator must confirm the live head/base before merging into Phase V; final main PR requires manual user merge."
+  ],
+  "reviewerActions": {
+    "sourceEdits": false,
+    "authorWorktreeMutations": false,
+    "remoteMutations": false,
+    "newBrowserOrNativeOrDatabaseRuns": 0,
+    "activity": "Independent read-only source comparisons, immutable GitHub metadata/log/artifact retrieval, original-byte hashing, rawreport checks, representative PNG inspection, and owned scratch review receipts only."
+  },
+  "harnessCorrections": [
+    "The initial checker incorrectly equated current and historical image-derived scanner fingerprints. After reading the unchanged approved evaluator, the checker now independently recomputes every current image-derived fingerprint and every complete advisory hash. No product gate or acceptance policy was changed.",
+    "Initial local receipt-index validation was adjusted to resolve earlier relative ZIP paths against the evidence directory; all15original files passed byte/hash verification. No product source or acceptance gate changed."
+  ]
+}

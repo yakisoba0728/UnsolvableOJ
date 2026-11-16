@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/security",
+  "recordedAt": "2026-11-16T14:58:57.982614+00:00",
+  "scope": "Independent verification of fresh CI artifact bytes and bindings. This agent authored the proposal; this is not its independent policy approval. Separate independent_qa and coordinator review records govern activation.",
+  "verdict": "ACCEPT_FRESH_RUNTIME_ARTIFACT_BINDINGS",
+  "sourceCommit": "6ec519261b1103b2eadcfe0afcc0dec961353405",
+  "actionsCheckout": "93b753d73b12efe2ce6e71805feca6522f7428d2",
+  "checkoutTreeReportedByCoordinator": "5588cb3e8648afed8fe10146d4da961a0ebb4035",
+  "artifact": "/workspace/scratch/3d1215725852/evidence/phase5-foundation-reviewed-runtime.zip",
+  "artifactSha256": "3d7d71d5f4b7a5fe408b41fc97e84958628e3afb1c14d6c39b677aab35871cd1",
+  "runId": "43890166522",
+  "policyFileSha256": "81f0bf685f2ffc22cdb0933c2c55f6f5fff05f8f252765c0af8fe56189084603",
+  "policyContentSha256": "d938665f24995ea53bf0984047459de0aa9ba366dc5ebbe37055f304c68903fb",
+  "rawReportSha256": "802f901ef6351ddda3f27c86f3109e2cdc5fe939a930286d56293063526232fd",
+  "scanManifestSha256": "14e61f7f64d6914a238566007f8ee3254469c20405395fe1a1f602a30dd2a2d7",
+  "payloadProofSha256": "13564d37e3c3fbb46fbce5811eabc35864bc8fa979282550cc15e258b942314d",
+  "applicabilityReportSha256": "ac52805e1fb9f5cf92196fbaf0e6a1f1dac185639adb041b43844b857ef72288",
+  "recomputedEvaluatorExit": 0,
+  "gate": "PASS_WITH_REVIEWED_COMPONENT_FINDINGS",
+  "rawCounts": {
+    "UNKNOWN": 1,
+    "LOW": 363,
+    "MEDIUM": 560,
+    "HIGH": 177,
+    "CRITICAL": 5
+  },
+  "rawScannerExit": 2,
+  "reviewedCount": 182,
+  "remainingCount": 0,
+  "unresolvedCount": 0,
+  "actualRetainedPayloadFilesRechecked": 990,
+  "normalizedInstalledPackageIdentitiesUnchanged": 225,
+  "expiresAt": "2026-11-30T00:00:00Z",
+  "databaseSha256": "e7587cc3528c2d401dfae2bb327d6d7e2943cb04d714ae7d413c6dbe64a38db3",
+  "limits": [
+    "No independent policy-author approval is claimed.",
+    "No fresh local OCI extraction or running host validation was performed; retained CI file hashes and exact bindings were checked.",
+    "HIGH177/CRITICAL5 remain raw findings, not patched or zero."
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "source": {
+    "head": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "diff": ""
+  },
+  "node": "v24.22.1",
+  "jsdom": "31.0.1",
+  "browser": false,
+  "limitations": "DOM focus and content regression only. No layout, paint, native keyboard default actions, screenshots, accessibility certification or browser performance measurement.",
+  "cases": [
+    {
+      "name": "hour-enter",
+      "passed": false,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "",
+        "focusTag": "BODY",
+        "submits": 0
+      },
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'' !== 'date'\n"
+    },
+    {
+      "name": "minute-enter",
+      "passed": false,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "",
+        "focusTag": "BODY",
+        "submits": 0
+      },
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'' !== 'date'\n"
+    },
+    {
+      "name": "done",
+      "passed": false,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "",
+        "focusTag": "BODY",
+        "submits": 0
+      },
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'' !== 'date'\n"
+    },
+    {
+      "name": "clear",
+      "passed": false,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "",
+        "focusTag": "BODY",
+        "submits": 0
+      },
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'' !== 'date'\n"
+    },
+    {
+      "name": "escape",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "date",
+        "focusTag": "BUTTON",
+        "submits": 0
+      }
+    },
+    {
+      "name": "outside-focus",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "outside",
+        "focusTag": "INPUT",
+        "submits": 0
+      }
+    },
+    {
+      "name": "goal-refresh",
+      "passed": false,
+      "observed": {
+        "beforeCount": "900 / 1,000문제",
+        "duringCount": null,
+        "busy": "true",
+        "disabled": true
+      },
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ null\n- '900 / 1,000문제'\n"
+    }
+  ]
+}

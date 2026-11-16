@@ -1,0 +1,86 @@
+[
+  {
+    "jobId": 133434380407,
+    "name": "Dependency audit",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434380407.log",
+    "bytes": 21679,
+    "sha256": "7501d92b2de05e3fd49a4421c4ca98edd845c76f3f8fb21d4b22d143360e957b"
+  },
+  {
+    "jobId": 133434381058,
+    "name": "Docker image (front)",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434381058.log",
+    "bytes": 143962,
+    "sha256": "e50c9d0fbf389eee2354e0d6156f819a136944b5eee31019675b308ce9149192"
+  },
+  {
+    "jobId": 133434381067,
+    "name": "Detect changes",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434381067.log",
+    "bytes": 20270,
+    "sha256": "fa66c83542fd627dace14e9d596579826193275526d6f9a6ba3dd7ef38141bbd"
+  },
+  {
+    "jobId": 133434381207,
+    "name": "Docker image (judge)",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434381207.log",
+    "bytes": 125400,
+    "sha256": "9b53549b1d5c580a26c1924efd53cc4f7123c405b27e06d18a4748b36478fc19"
+  },
+  {
+    "jobId": 133434381309,
+    "name": "Docker image (runtime)",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434381309.log",
+    "bytes": 302735,
+    "sha256": "33fb2bd4bd36595a3c693c375156171ef27614d3f534e074e61722d48859354b"
+  },
+  {
+    "jobId": 133434381899,
+    "name": "Docker image (back)",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434381899.log",
+    "bytes": 129218,
+    "sha256": "5b18467781e9ee69ca8f6965bf71a88d18b77f1f25456bc75769307b4a7ee218"
+  },
+  {
+    "jobId": 133434471688,
+    "name": "Browser tests (1/2)",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434471688.log",
+    "bytes": 186049,
+    "sha256": "cd1cf8f7220fb3627006a3b87f30277045818910951cef4d7266ae397963c7c0"
+  },
+  {
+    "jobId": 133434471718,
+    "name": "Browser tests (2/2)",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434471718.log",
+    "bytes": 163896,
+    "sha256": "3f55e960643f4615a77b26e98c49d2ba163270acf4b992450838e5edfd26c8b3"
+  },
+  {
+    "jobId": 133434471759,
+    "name": "Judge worker",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434471759.log",
+    "bytes": 35980,
+    "sha256": "845748929bfe1ee2cd8ec28be5582ad5c1eeccdc0f9b469dad41f919bbb1887c"
+  },
+  {
+    "jobId": 133434472142,
+    "name": "Backend and API",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434472142.log",
+    "bytes": 131963,
+    "sha256": "a3d8955daba8cac3942c119200e49ef49c695a98cc06022fe43efaf46731c2b6"
+  },
+  {
+    "jobId": 133434472878,
+    "name": "Sandbox, pipeline and Compose",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434472878.log",
+    "bytes": 333143,
+    "sha256": "a881db0cfe3ca06e7af23fe3385f9d14c636a257090faddc8552806c17298a34"
+  },
+  {
+    "jobId": 133444654700,
+    "name": "CI required",
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133444654700.log",
+    "bytes": 2442,
+    "sha256": "ae15621fc5d38ac7e1dd9998d2ced4ba8b1dfd21c72c310f02eb2c9f47235113"
+  }
+]

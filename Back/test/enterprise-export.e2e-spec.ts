@@ -101,6 +101,21 @@ describe('owner-only complete enterprise CSV export', () => {
     await addCandidates(124, ENTERPRISE_EXPORT_LIMIT);
     const atLimit = await http().get(endpoint()).set(bearer(owner)).expect(200);
     expect(atLimit.text.split('\r\n')).toHaveLength(ENTERPRISE_EXPORT_LIMIT + 2);
+    // The 5k boundary also exercises a deep page through the actual API. The
+    // export cap must not become a paging cap or change global score semantics.
+    const expectedLast = await db.query(`SELECT id FROM enterprise_attempts
+      WHERE test_id=$1 ORDER BY started_at,id LIMIT 50 OFFSET 4950`, [testId]);
+    const lastPage = await http().get(`${base}/enterprise/tests/${testId}/results?page=100`)
+      .set(bearer(owner)).expect(200);
+    expect(lastPage.body.pagination).toEqual({ page: 100, limit: 50, total: 5000, totalPages: 100 });
+    expect(lastPage.body.candidates.map((row: { id: string }) => row.id)).toEqual(expectedLast.map((row: { id: string }) => row.id));
+    expect(lastPage.body.summary).toEqual({ candidates: 5000, pending: 0, averageScore: 0, perfect: 1 });
+    expect(lastPage.body.analytics).toEqual({ finished: 1667, active: 1666, expired: 1667, scoreBands: [4999, 0, 0, 0, 1] });
+    expect(JSON.stringify(lastPage.body)).not.toMatch(/EXPORT_SOURCE_PRIVATE|EXPORT_PASSWORD_PRIVATE|HIDDEN_INPUT_PRIVATE|HIDDEN_OUTPUT_PRIVATE|@example.invalid/);
+    const beyond = await http().get(`${base}/enterprise/tests/${testId}/results?page=101`)
+      .set(bearer(owner)).expect(200);
+    expect(beyond.body.candidates).toEqual([]);
+    expect(beyond.body.summary).toEqual(lastPage.body.summary);
     // A join between the cap check and projection belongs to the next export,
     // rather than turning this whole-snapshot download into a truncated report.
     let checked!: () => void;
@@ -146,4 +161,5 @@ describe('owner-only complete enterprise CSV export', () => {
       expect(projected).not.toHaveBeenCalled();
     } finally { spy.mockRestore(); }
   });
+
 });

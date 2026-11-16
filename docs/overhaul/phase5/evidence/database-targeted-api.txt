@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/3d1215725852/oj-database/Back
+
+
+ Test Files  5 passed (5)
+      Tests  26 passed (26)
+   Start at  23:26:14
+   Duration  11.98s (transform 1.05s, setup 0ms, import 6.65s, tests 4.06s, environment 0ms)
+

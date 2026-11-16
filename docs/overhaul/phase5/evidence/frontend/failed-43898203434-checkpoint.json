@@ -1,0 +1,101 @@
+{
+  "capturedAt": "2026-11-16T15:47:00Z",
+  "run": 43898203434,
+  "head": "500329305615070e4e9edbde0ca9215539ed1cc4",
+  "base": "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+  "checkout": "a996275996d543b89e0bd72c140bc993fe71df56",
+  "tree": "e0b79def06480dc462754b5cc039e25b48df37db",
+  "status": "RUNNING_WITH_BROWSER_FAILURE",
+  "jobs": [
+    {
+      "id": 133407401519,
+      "name": "Dependency audit",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407402087,
+      "name": "Docker image (back)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407402094,
+      "name": "Docker image (runtime)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407402245,
+      "name": "Docker image (front)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407402272,
+      "name": "Detect changes",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407402416,
+      "name": "Docker image (judge)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407542604,
+      "name": "Sandbox, pipeline and Compose",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 133407542652,
+      "name": "Judge worker",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407542696,
+      "name": "Browser tests (1/2)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 133407542752,
+      "name": "Browser tests (2/2)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 133407542776,
+      "name": "Backend and API",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "failedJob": 133407542696,
+  "failedTests": 8,
+  "passedTests": 395,
+  "failureExcerpt": [
+    "2026-11-16T15:41:15.8871088Z     Error: Command failed: git rev-parse HEAD",
+    "2026-11-16T15:41:15.8874939Z     fatal: detected dubious ownership in repository at '/__w/UnsolvableOJ/UnsolvableOJ'",
+    "2026-11-16T15:41:15.8875452Z     To add an exception for this directory, call:",
+    "2026-11-16T15:41:15.8875678Z ",
+    "2026-11-16T15:41:15.8875946Z     \tgit config --global --add safe.directory /__w/UnsolvableOJ/UnsolvableOJ",
+    "2026-11-16T15:41:15.8876308Z ",
+    "2026-11-16T15:41:15.8876336Z ",
+    "2026-11-16T15:41:15.8876608Z       114 |       // Record the original geometry even when a regression assertion below fails.",
+    "2026-11-16T15:41:15.8877313Z       115 |       const geometryReport = JSON.stringify({ fixture: \"synthetic browser-routed API responses; not real server performance\",",
+    "2026-11-16T15:41:15.8878074Z     > 116 |         checkout: { sha: execFileSync(\"git\", [\"rev-parse\", \"HEAD\"], { encoding: \"utf8\" }).trim(),",
+    "2026-11-16T15:41:15.8878534Z           |                          ^",
+    "2026-11-16T15:41:15.8879038Z       117 |           tree: execFileSync(\"git\", [\"rev-parse\", \"HEAD^{tree}\"], { encoding: \"utf8\" }).trim() },",
+    "2026-11-16T15:41:15.8879925Z       118 |         browser: page.context().browser()?.version(), project: testInfo.project.name,",
+    "2026-11-16T15:41:15.8880628Z       119 |         width, colorScheme, before, during, toolbarShiftPx: during.toolbar.y - before.toolbar.y,",
+    "2026-11-16T15:41:15.8881212Z         at /__w/UnsolvableOJ/UnsolvableOJ/Front/tests/phase5-ux.spec.ts:116:26",
+    "2026-11-16T15:41:15.8881702Z ",
+    "2026-11-16T15:41:15.8882304Z     attachment #3: screenshot (image/png) ──────────────────────────────────────────────────────────",
+    "2026-11-16T15:41:15.8883074Z     test-results/phase5-ux-goal-refresh-kee-c9ef6--geometry-at-320px-in-light-chromium/test-failed-1.png"
+  ],
+  "interpretation": "New provenance calls failed the exact-checkout dubious-ownership check inside Playwright container. Full 1px geometry assertions not reached; not accepted as frontend pass."
+}

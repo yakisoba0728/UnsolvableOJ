@@ -1,0 +1,8 @@
+
+ RUN  v4.1.12 /workspace/scratch/3d1215725852/oj-reliability/Back
+
+
+ Test Files  2 passed (2)
+      Tests  11 passed (11)
+   Start at  23:32:57
+   Duration  4.52s (transform 758ms, setup 0ms, import 3.10s, tests 1.10s, environment 0ms)

@@ -99,6 +99,102 @@ async function semantics(db) {
   return result;
 }
 
+/** Synthetic rows only; exported for a real-PostgreSQL fixture proof without Docker. */
+export async function seedRestoreFixture(manager) {
+  await manager.query("SET LOCAL work_mem='64kB'; SET LOCAL statement_timeout='30s'; SET LOCAL lock_timeout='2s'");
+  await manager.query(`INSERT INTO users(email,username,password_hash)
+    SELECT 'rehearsal-'||i||'@example.invalid','rehearsal_'||i,'disposable-no-login' FROM generate_series(1,128) i`);
+  const users = (await manager.query('SELECT id FROM users ORDER BY username')).map(row => row.id);
+  await manager.query(`INSERT INTO problems(slug,title,statement_md,difficulty,status,author_id)
+    SELECT 'restore-fixture-'||i,'Restore fixture '||i,'Disposable','BEGINNER','PUBLISHED',$1
+    FROM generate_series(1,24) i`, [users[0]]);
+  const problems = (await manager.query('SELECT id FROM problems ORDER BY slug')).map(row => row.id);
+  await manager.query(`INSERT INTO submissions(user_id,problem_id,language,source_code,status,is_test)
+    SELECT ($1::uuid[])[1+(i%128)],($2::uuid[])[1+(i%24)],'PYTHON',
+      repeat('x', CASE WHEN i%16=0 THEN 16384 ELSE 256 END),
+      CASE WHEN i%5=0 THEN 'WRONG_ANSWER'::submission_status ELSE 'ACCEPTED'::submission_status END,
+      i%17=0 FROM generate_series(1,2048) i`, [users, problems]);
+  await manager.query(`INSERT INTO problem_bookmarks(user_id,problem_id)
+    SELECT ($1::uuid[])[1+(i%128)],($2::uuid[])[1+(i%24)] FROM generate_series(1,128) i`, [users, problems]);
+  await manager.query(`INSERT INTO learning_goals(user_id,target_problems,days,start_date)
+    SELECT ($1::uuid[])[i],10+i,CASE WHEN i%3=0 THEN 7 WHEN i%3=1 THEN 30 ELSE 90 END,'2026-11-16'
+    FROM generate_series(1,12) i`, [users]);
+  await manager.query(`INSERT INTO problem_versions(problem_id,version,snapshot)
+    SELECT id,current_version,jsonb_build_object('title',title,'statementMarkdown',statement_md,
+      'difficulty',difficulty,'timeLimitMs',time_limit_ms,'memoryLimitMb',memory_limit_mb,'testCases','[]'::jsonb)
+    FROM problems`);
+  await manager.query(`INSERT INTO user_problem_solves(user_id,problem_id,accepted_submission_id,awarded_xp)
+    SELECT user_id,problem_id,id,10 FROM (
+      SELECT DISTINCT ON(user_id,problem_id) user_id,problem_id,id
+      FROM submissions WHERE status='ACCEPTED' AND NOT is_test ORDER BY user_id,problem_id,id
+    ) firsts ORDER BY user_id,problem_id LIMIT 128`);
+  await manager.query(`UPDATE submissions SET accepted_for_xp=true,completed_for_learning=true
+    WHERE id IN (SELECT accepted_submission_id FROM user_problem_solves)`);
+  await manager.query(`UPDATE users u SET xp=coalesce((SELECT sum(awarded_xp)::integer
+    FROM user_problem_solves s WHERE s.user_id=u.id),0)`);
+  const [version] = await manager.query('SELECT challenge_id,version FROM vibe_challenge_versions ORDER BY version LIMIT 1');
+  const [{ id: testId }] = await manager.query(`INSERT INTO enterprise_tests(owner_id,title,starts_at,ends_at,
+    duration_min,problem_ids,vibe_challenge_ids,invite_code,invite_only,invite_user_ids)
+    VALUES($1,'Synthetic restore assessment','2026-11-16T00:00:00Z','2026-11-17T00:00:00Z',60,
+      $2,$3,'restore-disposable-invite',true,$4) RETURNING id`,
+  [users[0], [problems[0]], [version.challenge_id], users.slice(1, 9)]);
+  await manager.query(`INSERT INTO enterprise_problem_versions(test_id,problem_id,version,position)
+    VALUES($1,$2,1,1)`, [testId, problems[0]]);
+  await manager.query(`INSERT INTO enterprise_vibe_versions(test_id,challenge_id,version,ai_model,position)
+    VALUES($1,$2,$3,'restore-fixture-unavailable-model',1)`, [testId, version.challenge_id, version.version]);
+  for (let index = 1; index <= 8; index++) {
+    const done = index % 2 === 0;
+    const [{ id: attemptId }] = await manager.query(`INSERT INTO enterprise_attempts(test_id,user_id,started_at,deadline_at,finished_at)
+      VALUES($1,$2,'2026-11-16T00:00:00Z','2026-11-16T01:00:00Z',CASE WHEN $3 THEN '2026-11-16T00:30:00Z'::timestamptz ELSE NULL END)
+      RETURNING id`, [testId, users[index], done]);
+    await manager.query(`INSERT INTO submissions(user_id,problem_id,language,source_code,status,is_test,attempt_id)
+      VALUES($1,$2,'PYTHON','synthetic assessment source','ACCEPTED',true,$3)`, [users[index], problems[0], attemptId]);
+    const files = { 'src/search.ts': `// Synthetic restore revision ${index}\nexport const fixture = ${index};\n` };
+    const state = { files, messages: [], events: [], runs: [], undo: null, aiRequests: 0, evaluations: 0,
+      report: done ? { outcome: 0, passed: 0, total: 1, prompt: null, process: null, evaluationStatus: 'unavailable',
+        model: 'restore-fixture-unavailable-model', reflection: 'Synthetic backup fixture; no provider call', checks: [] } : null };
+    const [{ id: workspaceId }] = await manager.query(`INSERT INTO vibe_attempts(user_id,challenge_id,challenge_version,
+      revision,state,model,enterprise_attempt_id,started_at,submitted_at)
+      VALUES($1,$2,$3,1,$4,'restore-fixture-unavailable-model',$5,'2026-11-16T00:00:00Z',
+        CASE WHEN $6 THEN '2026-11-16T00:30:00Z'::timestamptz ELSE NULL END) RETURNING id`,
+    [users[index], version.challenge_id, version.version, JSON.stringify(state), attemptId, done]);
+    await manager.query(`INSERT INTO vibe_revisions(attempt_id,revision,action,files,paths)
+      VALUES($1,0,'baseline',$2,ARRAY['src/search.ts']),($1,1,'save',$3,ARRAY['src/search.ts'])`,
+    [workspaceId, JSON.stringify({ 'src/search.ts': '// Synthetic restore baseline\n' }), JSON.stringify(files)]);
+  }
+}
+
+export async function productSemantics(db) {
+  const [value] = await db.query(`SELECT
+    (SELECT count(*)::int FROM learning_goals) AS goals,
+    (SELECT count(*)::int FROM problem_versions) AS "problemVersions",
+    (SELECT count(*)::int FROM user_problem_solves) AS solves,
+    NOT EXISTS(SELECT 1 FROM users u WHERE xp<>coalesce((SELECT sum(awarded_xp) FROM user_problem_solves s WHERE s.user_id=u.id),0)) AS "xpMatchesLedger",
+    NOT EXISTS(SELECT 1 FROM user_problem_solves s JOIN submissions a ON a.id=s.accepted_submission_id
+      WHERE a.user_id<>s.user_id OR a.problem_id<>s.problem_id OR NOT a.accepted_for_xp OR a.is_test) AS "solveEvidenceMatches",
+    (SELECT count(*)::int FROM enterprise_tests) AS assessments,
+    (SELECT count(*)::int FROM enterprise_attempts) AS candidates,
+    (SELECT count(*)::int FROM enterprise_problem_versions) AS "algorithmPins",
+    (SELECT count(*)::int FROM enterprise_vibe_versions) AS "vibePins",
+    (SELECT count(*)::int FROM submissions WHERE attempt_id IS NOT NULL AND is_test) AS "assessmentSubmissions",
+    NOT EXISTS(SELECT 1 FROM submissions s JOIN enterprise_attempts a ON a.id=s.attempt_id
+      LEFT JOIN enterprise_problem_versions pin ON pin.test_id=a.test_id AND pin.problem_id=s.problem_id
+      LEFT JOIN problem_versions v ON v.problem_id=pin.problem_id AND v.version=pin.version
+      WHERE s.user_id<>a.user_id OR NOT s.is_test OR s.accepted_for_xp OR v.problem_id IS NULL) AS "assessmentSubmissionOwnershipVersionsMatch",
+    (SELECT count(*)::int FROM vibe_attempts) AS workspaces,
+    (SELECT count(*)::int FROM vibe_revisions) AS revisions,
+    NOT EXISTS(SELECT 1 FROM vibe_attempts w JOIN enterprise_attempts a ON a.id=w.enterprise_attempt_id
+      LEFT JOIN enterprise_vibe_versions v ON v.test_id=a.test_id AND v.challenge_id=w.challenge_id
+      LEFT JOIN vibe_revisions r ON r.attempt_id=w.id AND r.revision=w.revision
+      WHERE w.user_id<>a.user_id OR v.version IS DISTINCT FROM w.challenge_version OR v.ai_model IS DISTINCT FROM w.model
+        OR r.files IS DISTINCT FROM w.state->'files') AS "workspaceOwnershipVersionsMatch"`);
+  assert.deepEqual(value, { goals: 12, problemVersions: 24, solves: 128, xpMatchesLedger: true,
+    solveEvidenceMatches: true, assessments: 1, candidates: 8, algorithmPins: 1, vibePins: 1,
+    assessmentSubmissions: 8, assessmentSubmissionOwnershipVersionsMatch: true,
+    workspaces: 8, revisions: 16, workspaceOwnershipVersionsMatch: true });
+  return value;
+}
+
 export async function rehearse(env = process.env) {
   const settings = rehearsalConfig(env);
   // Assert the owned service image before executing backup tools inside it.
@@ -116,6 +212,7 @@ export async function rehearse(env = process.env) {
   const stages = [];
   const started = performance.now();
   let report;
+  let writerBarrier;
   let stage = 'create disposable databases';
   const timed = async (name, run) => {
     stage = name;
@@ -139,24 +236,30 @@ export async function rehearse(env = process.env) {
     }
     const source = await connect(sourceName);
     const migrations = await timed('fresh migrations', () => source.runMigrations());
-    await timed('bounded fixture with transition-table spill pressure', async () => {
-      await source.transaction(async manager => {
-        await manager.query("SET LOCAL work_mem='64kB'; SET LOCAL statement_timeout='30s'; SET LOCAL lock_timeout='2s'");
-        await manager.query(`INSERT INTO users(email,username,password_hash)
-          SELECT 'rehearsal-'||i||'@example.invalid','rehearsal_'||i,'disposable-no-login' FROM generate_series(1,128) i`);
-        const users = (await manager.query('SELECT id FROM users ORDER BY username')).map(row => row.id);
-        await manager.query(`INSERT INTO problems(slug,title,statement_md,difficulty,status,author_id)
-          SELECT 'restore-fixture-'||i,'Restore fixture '||i,'Disposable','BEGINNER','PUBLISHED',$1
-          FROM generate_series(1,24) i`, [users[0]]);
-        const problems = (await manager.query('SELECT id FROM problems ORDER BY slug')).map(row => row.id);
-        await manager.query(`INSERT INTO submissions(user_id,problem_id,language,source_code,status,is_test)
-          SELECT ($1::uuid[])[1+(i%128)],($2::uuid[])[1+(i%24)],'PYTHON',
-            repeat('x', CASE WHEN i%16=0 THEN 16384 ELSE 256 END),
-            CASE WHEN i%5=0 THEN 'WRONG_ANSWER'::submission_status ELSE 'ACCEPTED'::submission_status END,
-            i%17=0 FROM generate_series(1,2048) i`, [users, problems]);
-        await manager.query(`INSERT INTO problem_bookmarks(user_id,problem_id)
-          SELECT ($1::uuid[])[1+(i%128)],($2::uuid[])[1+(i%24)] FROM generate_series(1,128) i`, [users, problems]);
-      });
+    await timed('empty final migration rollback and reapply', async () => {
+      await source.undoLastMigration();
+      assert.equal((await source.runMigrations()).length, 1);
+    });
+    await timed('bounded fixture with product history and transition pressure', () => source.transaction(seedRestoreFixture));
+    const [{ bytes: sourceBytes }] = await source.query('SELECT pg_database_size(current_database())::int AS bytes');
+    assert.ok(sourceBytes < 64 * 1024 * 1024, 'Synthetic source database exceeded its 64 MiB cap');
+    const sourceProducts = await productSemantics(source);
+    // This barrier exists only in the randomly named disposable source database.
+    // SHARE permits pg_dump's reads while preventing any fixture writer.
+    writerBarrier = source.createQueryRunner();
+    await writerBarrier.connect();
+    await writerBarrier.startTransaction();
+    await writerBarrier.query("SET LOCAL lock_timeout='2s'; SET LOCAL statement_timeout='30s'");
+    const lockedTables = await source.query("SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename");
+    await writerBarrier.query(`LOCK TABLE ${lockedTables.map(({ tablename }) => `public.${quotedIdentifier(tablename)}`).join(',')} IN SHARE MODE`);
+    await timed('stop-writer barrier rejects concurrent writes', async () => {
+      const writer = source.createQueryRunner();
+      await writer.connect();
+      await writer.startTransaction();
+      try {
+        await writer.query("SET LOCAL lock_timeout='100ms'");
+        await assert.rejects(writer.query('UPDATE users SET xp=xp'), /lock timeout/);
+      } finally { await writer.rollbackTransaction(); await writer.release(); }
     });
     const before = await fingerprints(source);
     const sourceSchema = await schema(source);
@@ -166,11 +269,16 @@ export async function rehearse(env = process.env) {
       '--format=custom', '--no-owner', '--no-acl',
     ], { timeout: 60_000, maxBuffer: 32 * 1024 * 1024 }));
     assert.ok(archive.length > 0 && archive.length < 32 * 1024 * 1024);
+    await writerBarrier.rollbackTransaction();
+    await writerBarrier.release();
+    writerBarrier = undefined;
     await timed('pg_restore into second generated database', () => execFileSync('docker', [
       'exec', '-i', settings.container, 'pg_restore', '--username', settings.username, '--dbname', restoredName,
       '--no-owner', '--no-acl', '--exit-on-error',
     ], { input: archive, timeout: 60_000, maxBuffer: 2 * 1024 * 1024 }));
     const restored = await connect(restoredName);
+    const [{ bytes: restoredBytes }] = await restored.query('SELECT pg_database_size(current_database())::int AS bytes');
+    assert.ok(restoredBytes < 64 * 1024 * 1024, 'Synthetic restored database exceeded its 64 MiB cap');
     await timed('all restored table fingerprints', async () => {
       const actual = await fingerprints(restored);
       for (const expected of before) {
@@ -197,11 +305,12 @@ export async function rehearse(env = process.env) {
     await timed('restored migration ledger', async () => {
       assert.deepEqual(await restored.runMigrations(), [], 'Restored migration ledger must be complete');
     });
-    await timed('last migration rollback and reapply', async () => {
-      await restored.undoLastMigration();
-      assert.equal((await restored.runMigrations()).length, 1);
+    await timed('populated goal rollback refusal and product history preservation', async () => {
+      await assert.rejects(restored.undoLastMigration(), /Cannot roll back learning goals with saved goals/);
+      assert.deepEqual(await fingerprints(restored), before);
       assert.deepEqual(await semantics(restored), sourceSemantics);
       assert.deepEqual(await schema(restored), sourceSchema);
+      assert.deepEqual(await productSemantics(restored), sourceProducts);
     });
     // Exercise restored triggers, not merely matching stored counter bytes.
     await timed('restored write and statistics integrity', async () => {
@@ -217,18 +326,26 @@ export async function rehearse(env = process.env) {
         WHERE p.solver_count<>actual.solvers OR p.accepted_count<>actual.accepted OR p.finished_count<>actual.finished
       ) AS valid`);
       assert.equal(integrity.valid, true);
+      const [goal] = await restored.query('SELECT user_id,target_problems FROM learning_goals ORDER BY user_id LIMIT 1');
+      await restored.query('UPDATE learning_goals SET target_problems=target_problems+1 WHERE user_id=$1', [goal.user_id]);
+      assert.equal((await restored.query('SELECT target_problems FROM learning_goals WHERE user_id=$1', [goal.user_id]))[0].target_problems, goal.target_problems + 1);
+      assert.deepEqual(await productSemantics(restored), sourceProducts);
     });
     report = {
-      schemaVersion: 1, checkedAt: new Date().toISOString(), source: env.GITHUB_SHA ?? null,
+      schemaVersion: 2, checkedAt: new Date().toISOString(), source: env.GITHUB_SHA ?? null,
       workflowRunId: env.GITHUB_RUN_ID ?? null, result: 'PASS', migrations: migrations.length,
-      fixture: { users: 128, problems: 24, submissions: 2048, largeSourceBytes: 16384, workMem: '64kB' },
+      fixture: { users: 128, problems: 24, submissions: 2056, ordinaryFixtureSubmissions: 2048,
+        largeSourceBytes: 16384, workMem: '64kB', products: sourceProducts },
+      writerBarrier: { mode: 'SHARE', tables: lockedTables.length, concurrentWriteRefused: true, heldThroughDump: true },
+      databaseBytes: { source: sourceBytes, restored: restoredBytes, capEach: 64 * 1024 * 1024 },
       archive: { bytes: archive.length, sha256: createHash('sha256').update(archive).digest('hex') },
       tables: before, schemaComparison: 'Exact columns/indexes/triggers/non-CHECK definitions and flags; stable PostgreSQL-parser-normalized CHECK definitions',
       stages, elapsedMs: performance.now() - started,
       limits: ['One finite synthetic fixture, not production RTO/RPO or capacity.',
         'No production connection or existing database is modified.',
         'work_mem pressure does not establish measured spill volume or peak PostgreSQL RSS.',
-        'Rollback/reapply covers the final migration; full-chain/refusal checks remain in check-migrations.mjs.',
+        'Empty rollback/reapply and populated final-migration refusal are distinct checks; full-chain checks remain in check-migrations.mjs.',
+        'Seeded product/XP history is synthetic; reference integrity is not API authorization or live award execution.',
         'No before/after performance improvement is claimed.'],
     };
   } catch (cause) {
@@ -236,6 +353,11 @@ export async function rehearse(env = process.env) {
   } finally {
     const cleanupStarted = performance.now();
     const cleanupErrors = [];
+    if (writerBarrier) {
+      try { if (writerBarrier.isTransactionActive) await writerBarrier.rollbackTransaction(); }
+      catch (error) { cleanupErrors.push(error); }
+      try { await writerBarrier.release(); } catch (error) { cleanupErrors.push(error); }
+    }
     for (const db of connections.reverse()) {
       try { if (db.isInitialized) await db.destroy(); } catch (error) { cleanupErrors.push(error); }
     }

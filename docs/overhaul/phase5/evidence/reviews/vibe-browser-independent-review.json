@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "kind": "phase5-vibe-browser-independent-security-review",
+  "reviewer": "/root/security",
+  "recordedAt": "2026-11-16T15:07:39.466708+00:00",
+  "verdict": "ACCEPT_SCOPED_IMPLEMENTATION_PENDING_ACTUAL_COMPOSE_NATIVE_BROWSER_CI",
+  "sourceCommit": "9535fbc36456929382f9f12a729e15a6ae2b82ac",
+  "sourceTree": "1a5ebef33fe857746ad76492c857c43c52b7e8a3",
+  "sourceBase": "4fbb5156e2d94a2148b49cdb42ae10ea54ffedf3",
+  "initialCommit": "6b42ad49f4fc33dcc8deb8c48397a4091e5c5483",
+  "files": [
+    {
+      "path": "Front/tests-live/vibe-flow.spec.ts",
+      "sha256": "fb330fe8a6546d74b99d7cffeebb421cfed25f55b07f6f9d40d788e490d8f890"
+    },
+    {
+      "path": "docs/overhaul/phase5/VIBE-BROWSER.md",
+      "sha256": "809a623e24db3a91956b1504344a65f1f18bef44783772305778f540b493e88f"
+    },
+    {
+      "path": "scripts/check-compose.mjs",
+      "sha256": "6f1490c84491296d312ea04270c11a20604db9e0667fa2e18eb59f4f67f8dd17"
+    },
+    {
+      "path": "scripts/compose-vibe-gateway.mjs",
+      "sha256": "9e274ac77ad10b390d6dc99b20a3bf4bca112b0f3bf7bb47ed7498ff54067e60"
+    },
+    {
+      "path": "scripts/compose-vibe-gateway.test.mjs",
+      "sha256": "b9a9a92ae8f0df440afbfbd13408ccd072dcbb50d710723db8288e2e88ddbcf0"
+    }
+  ],
+  "blockingSourceFindings": [],
+  "resolvedFindings": [
+    {
+      "id": "vibe-retained-network-trace",
+      "problem": "Inherited retain-on-failure tracing would retain real registration responses and bearer traffic in uploaded failure artifacts.",
+      "resolution": "The new Vibe spec explicitly uses trace:off.",
+      "fixedBy": "6b42ad49f4fc33dcc8deb8c48397a4091e5c5483"
+    },
+    {
+      "id": "vibe-reporter-credential-metadata",
+      "problem": "Installed Playwright renders Frame.fill value in HTML step metadata; APIRequestContext timeout exception includes Authorization bearer values even though ordinary request step params only render URL/method.",
+      "validation": {
+        "method": "Installed package rendering functions and a disposable loopback HTTP server with inert canaries; no browser or production endpoint.",
+        "timeoutMs": 100,
+        "fillTitleContainedPasswordCanary": true,
+        "ordinaryRequestParamsContainedCredential": false,
+        "requestTimeoutExceptionContainedBearerCanary": true,
+        "requestTimeoutExceptionContainedPasswordBodyCanary": false,
+        "cleanup": "API request context disposed and owned server/connections closed."
+      },
+      "resolution": "Passwords generated and used only inside the page; owner and outsider API requests are real same-origin fetches with 5-second deadlines, returning only status/report/version or status fields. No credential is supplied as a Playwright argument or returned to its reporter.",
+      "fixedBy": "9535fbc36456929382f9f12a729e15a6ae2b82ac"
+    }
+  ],
+  "inspectedBoundaries": [
+    {
+      "area": "actual chain",
+      "finding": "No browser route, API, persistence or native execution double. Back is configured for dedicated HTTPS, removed from sandbox network; gateway runs the byte-identical existing nginx template and must share the actual Front image ID. Native upstream remains the existing privileged service. Real public/final runs, 6 public checks, 11 final checks, persisted reload/version and outsider 404 are asserted."
+    },
+    {
+      "area": "identity files",
+      "finding": "Back Dockerfile USER node; generated mounted files mode 0444 avoids host-runner UID mismatch. Host temporary parent mode 0700 and exact read-only per-service mounts protect identities. CA private key is not mounted; Back and nginx receive only their own private key. Expected bind-mount readability follows the file mode; actual container readability remains required CI."
+    },
+    {
+      "area": "TLS and network",
+      "finding": "Server certificate SAN, Docker alias, HTTPS origin and checked servername all equal vibe-executor.internal. Exact nginx paths match mounts and ssl_verify_client remains on. Seven probes each have 4-second deadlines and explicit success/denial expectations; unexpected outcomes fail."
+    },
+    {
+      "area": "bounds and cost",
+      "finding": "Gateway unprivileged, no published port, read-only filesystem, bounded tmpfs, 128 MiB memory, 0.25 CPU and 32 PID limits. No extra privileged executor, production operation or paid provider. OPENAI_API_KEY explicitly empty and email disabled."
+    },
+    {
+      "area": "authentication",
+      "finding": "Dedicated API algorithm secret remains distinct. Shared native bearer is synthetic and reused only inside the owned sequential fixture; the documentation does not recommend production credential reuse. 61-second admission idle preserves the existing five-per-minute registration limit."
+    },
+    {
+      "area": "cleanup and evidence",
+      "finding": "Browser close is awaited and failure marks the report FAIL. Compose down with volumes is awaited; cleanup failure fails the command and report, followed by owned temporary-key removal. Nested PREFLIGHT_PASS is explicitly distinguished from authoritative final Compose cleanup."
+    }
+  ],
+  "independentlyExecuted": [
+    {
+      "command": "node --test scripts/compose-vibe-gateway.test.mjs",
+      "sourceCommit": "6b42ad49f4fc33dcc8deb8c48397a4091e5c5483",
+      "passed": 22,
+      "failed": 0,
+      "skipped": 0,
+      "durationMs": 562.596973,
+      "scope": "Plan mutations and actual ephemeral certificates; helper unchanged in credential follow-up."
+    },
+    {
+      "command": "npm run test:e2e:types --prefix Front",
+      "sourceCommit": "9535fbc36456929382f9f12a729e15a6ae2b82ac",
+      "exitCode": 0
+    },
+    {
+      "command": "node --check scripts/check-compose.mjs && node --check scripts/compose-vibe-gateway.mjs",
+      "sourceCommit": "6b42ad49f4fc33dcc8deb8c48397a4091e5c5483",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check 6b42ad49f4fc33dcc8deb8c48397a4091e5c5483..9535fbc36456929382f9f12a729e15a6ae2b82ac",
+      "exitCode": 0
+    }
+  ],
+  "playwrightEvidence": {
+    "version": "1.63.0",
+    "stepRecorderSourceSha256": "54bf5935cf339938408c656bde958047a1217bf77434acdf75a0c717cddaaeae",
+    "parameterRendererSourceSha256": "549070af3acabb3efcc4f55bfe6210f9f7c2fcf633cf7eaa59bfe60719969171"
+  },
+  "workflowReview": {
+    "commit": "b0c5b59e10fe1e8f290d141894cce987facec491",
+    "tree": "3eda03b7d41156ffdd8a9a9114cc23c5f115be7b",
+    "files": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "sha256": "199dd1bc58b20b95dc7a90b9a5d92eba310d14209637e45b2320914a5536787b"
+      },
+      {
+        "path": "scripts/ci-policy.test.mjs",
+        "sha256": "8521f96a4d5680742ecf59ebd1e1cf6b3094ca69491677f2d89ef306a2c23ed3"
+      }
+    ],
+    "verdict": "ACCEPT_ADDITIVE_CI_WIRING",
+    "observations": [
+      "Gateway helper and its tests plus vibe.transport.ts require full validation.",
+      "Backend job invokes the 22 local gateway tests.",
+      "Native matrix and dedicated pipeline each have a separate exact-path artifact with failure retention and successful missing-file errors.",
+      "Successful Compose requires all three nonempty browser/compose artifacts, browser PASS, Compose PASS and cleanup true before artifact upload.",
+      "Required jobs, existing timeouts, no-skip rules and strict Runtime gate are unchanged."
+    ],
+    "executed": {
+      "command": "node --test scripts/ci-policy.test.mjs",
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0,
+      "durationMs": 5476.878441
+    }
+  },
+  "limits": [
+    "Docker/nginx/native/browser execution was not available locally; no new successful chain is claimed before actual CI.",
+    "No production host, firewall, certificate rotation, paid evaluator quality, field INP or long-duration editor qualification.",
+    "Independent source review is not a human GitHub approval. No author files, production resources or remote refs were mutated by this reviewer."
+  ]
+}

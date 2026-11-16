@@ -1,0 +1,39 @@
+{
+  "jobId": 133389104616,
+  "runId": 43893025800,
+  "source": "GitHub decoded workflow job logs fetched after success",
+  "inspectedTextCharacters": 327708,
+  "credentialChecks": {
+    "privateKeyMarkerMatches": 0,
+    "jwtLikeMatches": 0,
+    "ownedPasswordValueMatches": 0,
+    "authorizationHeaderMatches": 1,
+    "authorizationHeaderExplanation": "Only one matched line: GitHub checkout's masked AUTHORIZATION: basic *** value. No dynamic browser bearer or password values were found by these patterns.",
+    "limitation": "Pattern checks plus source/report inspection; not a proof that every arbitrary secret can be recognized. Static synthetic CI fixture capability values are part of the existing public test setup."
+  },
+  "excerpts": [
+    "2026-11-16T15:08:38.2545521Z {\"result\":\"PASS\",\"transport\":\"actual Redis TLS with mutual authentication\",\"rejected\":[\"untrusted CA\",\"wrong hostname\",\"missing client certificate\",\"wrong Redis password\"],\"bullmqJobs\":1,\"ownedResourcesOnly\":true,\"cleanup\":\"completed\"}",
+    "2026-11-16T15:13:31.9457643Z \u2139 tests 90",
+    "2026-11-16T15:13:31.9458809Z \u2139 pass 90",
+    "2026-11-16T15:13:31.9459213Z \u2139 fail 0",
+    "2026-11-16T15:13:31.9459603Z \u2139 cancelled 0",
+    "2026-11-16T15:13:31.9460000Z \u2139 skipped 0",
+    "2026-11-16T15:13:31.9460577Z \u2139 todo 0",
+    "2026-11-16T15:21:13.4469719Z  Test Files  8 passed (8)",
+    "2026-11-16T15:21:13.4490897Z       Tests  35 passed (35)",
+    "2026-11-16T15:24:40.2400968Z   4 passed (1.8m)",
+    "2026-11-16T15:24:45.8899535Z  Container unsolvable-e2e-8f8e21eeb7ec-judge-1  Removed",
+    "2026-11-16T15:24:45.8900191Z  Container unsolvable-e2e-8f8e21eeb7ec-vibe-gateway-1  Removed",
+    "2026-11-16T15:24:45.8902215Z  Container unsolvable-e2e-8f8e21eeb7ec-go-judge-1  Removed",
+    "2026-11-16T15:24:45.8903642Z  Container unsolvable-e2e-8f8e21eeb7ec-front-1  Removed",
+    "2026-11-16T15:24:45.8905727Z  Container unsolvable-e2e-8f8e21eeb7ec-back-1  Removed",
+    "2026-11-16T15:24:45.8907706Z  Container unsolvable-e2e-8f8e21eeb7ec-redis-1  Removed",
+    "2026-11-16T15:24:45.8909751Z  Container unsolvable-e2e-8f8e21eeb7ec-postgres-backup-1  Removed",
+    "2026-11-16T15:24:45.8911737Z  Container unsolvable-e2e-8f8e21eeb7ec-postgres-1  Removed",
+    "2026-11-16T15:24:45.8914359Z  Volume unsolvable-e2e-8f8e21eeb7ec_postgres-backups  Removed",
+    "2026-11-16T15:24:45.8914809Z  Network unsolvable-e2e-8f8e21eeb7ec_sandbox  Removed",
+    "2026-11-16T15:24:45.8915209Z  Network unsolvable-e2e-8f8e21eeb7ec-edge  Removed",
+    "2026-11-16T15:24:45.8915593Z  Network unsolvable-e2e-8f8e21eeb7ec_app  Removed",
+    "2026-11-16T15:24:45.8915982Z  Network unsolvable-e2e-8f8e21eeb7ec_data  Removed"
+  ]
+}

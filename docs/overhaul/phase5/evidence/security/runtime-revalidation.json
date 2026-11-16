@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "kind": "phase5-runtime-author-revalidation",
+  "authoredBy": "/root/security",
+  "observedAt": "2026-11-16T14:40:33.986470+00:00",
+  "state": "PROPOSED_AUTHOR_EVIDENCE_ONLY",
+  "policyContentSha256": "d938665f24995ea53bf0984047459de0aa9ba366dc5ebbe37055f304c68903fb",
+  "source": {
+    "branch": "overhaul5/security-evidence",
+    "baseCommit": "ce26659b816c1dc1450cdc48f0c58d6e41ecea1e",
+    "testedPrHead": "ce26659b816c1dc1450cdc48f0c58d6e41ecea1e",
+    "actionsCheckout": "a5c85b0f4a32fb1451a51f6db95d7a6abbee3970",
+    "actionsCheckoutTree": "6fcefbd2a2714b1cad1e2c51fa090958c73b6048",
+    "actionsBase": "d0159b1f844bf0608415dded9e84af566c8e2041"
+  },
+  "ci": {
+    "runId": "43884655462",
+    "jobId": "133359405067",
+    "artifactId": "14235035954",
+    "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43884655462",
+    "artifactUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43884655462/artifacts/14235035954",
+    "gate": "BLOCKED_FINDINGS",
+    "rawScannerExit": 2,
+    "payloadExit": 0,
+    "applicabilityExit": 2
+  },
+  "failedArtifact": {
+    "path": "docs/overhaul/phase5/evidence/security/blocked-runtime.zip",
+    "sha256": "d373738b4b069fb081ea29563f28bd495ee9b32bbaeb9dfc4fd067267e0778c2"
+  },
+  "rawReportSha256": "74db85c657ba7e8cdc9c664bd395101c93b98a2e3d6adabca28998d9a47c1b84",
+  "scanManifestSha256": "a4c32b39023fb3eb497dcef28bb6a0ebee2f580c73917034124772474d615eac",
+  "payloadProofSha256": "5f1fe7a0fef155e2c2c90c948b07fc0fe2e23cfcbc6f8f96c3abccf5899e66d4",
+  "rawCounts": {
+    "UNKNOWN": 1,
+    "LOW": 363,
+    "MEDIUM": 560,
+    "HIGH": 177,
+    "CRITICAL": 5
+  },
+  "database": {
+    "Version": 2,
+    "NextUpdate": "2026-11-17T13:03:44.830426014Z",
+    "UpdatedAt": "2026-11-16T13:03:44.830426244Z",
+    "DownloadedAt": "2026-11-16T14:26:32.678698877Z"
+  },
+  "databaseSha256": "e7587cc3528c2d401dfae2bb327d6d7e2943cb04d714ae7d413c6dbe64a38db3",
+  "javaDatabase": {
+    "Version": 1,
+    "NextUpdate": "2026-11-19T00:57:00.601023403Z",
+    "UpdatedAt": "2026-11-16T00:57:00.601024044Z",
+    "DownloadedAt": "2026-11-16T14:26:54.847139115Z"
+  },
+  "javaDatabaseSha256": "daccf4e446cddb30d061d57f131a1acda3728935e95f79e94d462d38b95b24f4",
+  "image": {
+    "manifestDigest": "sha256:66143fbd17ff0afa9f5a43808104f318ab729fe143c03654c033f3aad28850cb",
+    "configDigest": "sha256:5183d74ef1e1299ffd899fd4a624d9ca37307f873d86f1c29d5fabb255fa7e06",
+    "indexDigest": "sha256:bc08c5749dc403e538d8cb3b84a596848964c54a4ce1bd2ebab87463ae85c19a",
+    "buildDigest": "sha256:a75b09d7160b30f575c8459bee9967253289910f777688f8398c06c9ce1ffdc2",
+    "platform": "linux/amd64",
+    "layerDigests": [
+      "sha256:7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+      "sha256:99ca7189d5f020f315be1821046bf1fbf306299b61273a113964cd6287c92479",
+      "sha256:1fef4eba945eae2dc438470912766c526e8cdf77177055f85a0057b3bc202961",
+      "sha256:20a94cc5aeaace1909633461be2ee9375c9c72d86d9b53fb4282a4bb1bd7d63e",
+      "sha256:8ceb92351bfecebab350f74e0aca9c388267e8ba10c4e9b1b3de872c08e4e908",
+      "sha256:5566da6b6aa00570b7e5d34a36e1c50d82e4db6d72a3dae8e3891e969e897087",
+      "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+      "sha256:85323f8909a22b355d3e3820cc54ffb941e2318edad194a9a01307b93b8990b0",
+      "sha256:804e606fb50b96f0620f086de9a78c4b519fcdefd710fc3c79ee02541372b95c",
+      "sha256:ac7f032600d65dbf8cbc9699cc328506c7be0b0c301286858d9116c2a424f429",
+      "sha256:417507cee35458c28a9476380e651f78b74c4532fb86c59222eaa2a469087702",
+      "sha256:b1e565c1545ccdf0f35b758e3a3e8b6908ef424df9ab0209a927e3830f7ccb92",
+      "sha256:6f1a446e48b38e918f4031bf71cd9f9a0139670399d1327bfb12373b1fca2442",
+      "sha256:f991aac138504e1a49ea8a4e6688de2e9286ad97f8e281bfcc65dafdd47045e7"
+    ],
+    "compressedLayerBytes": 574140047
+  },
+  "payloadComparison": {
+    "expectedFiles": 990,
+    "matchedFiles": 990,
+    "missingFiles": 0,
+    "changedFiles": 0,
+    "nonRegularFiles": 0,
+    "unexpectedOwnedFiles": [],
+    "missingOwnedFiles": []
+  },
+  "delta": {
+    "changedTotal": 64,
+    "changedReviewed": 15,
+    "unchangedReviewed": 167,
+    "addedIds": [],
+    "removedIds": [
+      [
+        "os-pkgs",
+        "ubuntu",
+        "linux-libc-dev",
+        "CVE-2026-80920"
+      ]
+    ],
+    "reviewedCohortUnchanged": true,
+    "currentRawScannerExit": 2,
+    "expiryUnchanged": "2026-11-30T00:00:00Z"
+  },
+  "proposalEvaluation": {
+    "path": "docs/overhaul/phase5/evidence/security/proposed-evaluation.json",
+    "sha256": "67bd4a60d3533690a5444712864f6d2880418d65d30888bd53127ff434a69e3a",
+    "exitCode": 2,
+    "gate": "BLOCKED_REVIEW",
+    "blockingReasons": [
+      "INDEPENDENT_POLICY_REVIEW_REQUIRED"
+    ],
+    "proposedCount": 182,
+    "reviewedCount": 0,
+    "blockingCount": 182
+  },
+  "limits": [
+    "Policy proposal is not CI success or independent approval.",
+    "Host/kernel readiness is UNVERIFIED.",
+    "No scanner suppression, severity rewrite, package deletion, expiry extension, evaluator change, workflow change or production action is included."
+  ]
+}

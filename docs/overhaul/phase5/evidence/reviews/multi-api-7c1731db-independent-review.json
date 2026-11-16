@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "kind": "phase5-independent-multi-api-lifecycle-correction-review",
+  "reviewer": "/root/security",
+  "observedAt": "2026-11-16T16:11:02.473559+00:00",
+  "verdict": "ACCEPT_SCOPED_IMPLEMENTATION_PENDING_ACTUAL_NATIVE_CI",
+  "source": {
+    "commit": "7c1731dbcef91b8e8828acdd428d7274d667007c",
+    "tree": "b651e94d0f6ece704d6f8c558c9d75c86ffd48ee",
+    "parent": "da8deeba09e0ad0009fddbb884728ab68d1274e5"
+  },
+  "scope": "All four files changed by the immutable lifecycle correction; prior multi-API admission, claim, result, observer and cleanup assertions carried forward by source review. Supporting installed transport implementations inspected where their semantics determine ownership.",
+  "sourceSha256": {
+    "Back/test/phase5-multi-api-deadline.spec.ts": "4486fe78f5ac64abee367f0af59ce057da7c5b84e3643ee3c9a18b8c85a39285",
+    "Back/test/phase5-multi-api.pipeline-helpers.ts": "6e638dab7639ec0b3e955734c9972602ff9562b057479f601da0cfa621152f09",
+    "Back/test/phase5-multi-api.pipeline-spec.ts": "9bbb38c3834a6a9f39c9c27224a9ad7aee097804fe5d8cad0bb55f3824cfa5a8",
+    "docs/overhaul/phase5/MULTI-API.md": "5930c37ab23f2663299139e9d7212beae95ab01ced1bb1be4c58411b6fc58260"
+  },
+  "supportingSourceSha256": {
+    "Back/test/process.pipeline-helpers.ts": "679ef4bf37e81492fd3661914658a4e6878e93983a1a89bb93fdc16696108098",
+    "Back/src/config/database.config.ts": "be9f76a46940d2531779facf7bc8ece421635acaf68cb437dbe84a062b07c4c4",
+    "Back/src/config/env.validation.ts": "82dc9da7996e40f64006001e74dace3d9ec6b7548f641b07b625067003edaf07",
+    "Back/src/main.ts": "11ef21b4d3da1c2073534bb60f107e15f8d0986835d3459466171e184b05f3ba",
+    "Back/vitest.config.ts": "2a17b2bdf16a40c87ad0f82ffe7ce378f2b971accc48b6d7a5e54f3df6ff3884",
+    "Back/vitest.config.pipeline.ts": "b02a171b8cfbd88d9d47822e66928b9a8800a15668b21281d74fe8f227bee7b2",
+    "Back/scripts/run-integration.mjs": "5ca93ebd9588f39aea661f9fa90950e4879a8814681fb3274b5dd5399a45d1e7",
+    "Judge/src/worker.ts": "73fa2c716ead7d5e9af7ae8788a934603a1ca8126c68cfaa76c84b9a6a3a8b9b",
+    "Judge/src/judge.ts": "03698b951764dbb0bb4c9f012445d29995bd420d4c9bf7f81ffd2c6610c7c11f",
+    ".github/workflows/ci.yml": "199dd1bc58b20b95dc7a90b9a5d92eba310d14209637e45b2320914a5536787b"
+  },
+  "installedVersions": {
+    "pg": "8.23.1",
+    "ioredis": "5.8.2",
+    "bullmq": "6.7.1",
+    "joi": "18.3.2",
+    "vitest": "4.1.12"
+  },
+  "installedLibrarySha256": {
+    "Back/node_modules/pg/lib/client.js": "ad6aa93c26b0bf26db1f2ebe74216212790a04c41af5585c63760f9fa8322a32",
+    "Back/node_modules/pg/lib/connection.js": "f93e914bf408657f2301393489da561a5a464e9c30f4f51b681b18a21a5f1c84",
+    "Back/node_modules/ioredis/built/Redis.js": "ae6ddf61ee1afcaeb3033172d59412a8d354232872d5ad271ff25fb673c428de",
+    "Back/node_modules/ioredis/built/redis/event_handler.js": "6249ca8246dcc8c6ea8a0d64440622da09d2d2eb1efa81031a26469d253e08fd",
+    "Back/node_modules/bullmq/dist/cjs/classes/queue.js": "7bb52315e3258fc838a3475c82d94794b1b90704ab03947eebc89ef62dab431e",
+    "Back/node_modules/bullmq/dist/cjs/classes/queue-base.js": "ce3e738e06d05fd266c6a6ca622a08e581f536e5af9211717fd12bacd3b28e4d",
+    "Back/node_modules/bullmq/dist/cjs/classes/redis-connection.js": "a55c0fba160a5e958ec095d9ecd22510cb5e38879be5d11d5aecb95a7815d8e4",
+    "Back/node_modules/joi/lib/types/number.js": "5626f1172c26d5618cfa868211dede1af508e1bd9eb3949c07de4bfafafab33e"
+  },
+  "findingResolution": {
+    "id": "PHASE5-MULTIAPI-001",
+    "status": "RESOLVED_IN_SOURCE_AND_FOCUSED_TESTS",
+    "priorBlockedReceipt": {
+      "path": "/workspace/scratch/3d1215725852/security-analysis/multi-api-da8deeba-independent-review.json",
+      "sha256": "908ea5809a423278568c5d87e6344e3e0d4233c5e0fdc76287c645b66ec1e36e",
+      "preservedUnchanged": true
+    },
+    "reason": "The unbounded in-process Nest setup and parent port reservation have been removed. Existing owned API children now provide real deadline-aware fixture HTTP. One shared action scope rejects pending operations, forbids new factories after cutoff, force-closes observer transports registered before connect, consumes late results/rejections and the Vitest cancellation signal. Cleanup has separately owned transports, explicit drain and bounded abortable reporting."
+  },
+  "checks": [
+    {
+      "area": "Action cutoff",
+      "result": "DeadlineScope checks its absolute deadline before enqueuing an operation and again before invoking the factory. Expiry synchronously invokes registered force-closers and rejects outstanding waiters. Promise handlers consume late resolution/rejection, remove pending entries and reject completion after the deadline."
+    },
+    {
+      "area": "Actual setup and process ownership",
+      "result": "The same two Back/dist/main.js children bind HOST127.0.0.1 and PORT0. Their listener inode must belong to the owned child PID; the observed IPv4 loopback socket supplies the client URL. Distinct positive ports and four unique API/worker PIDs are required. The installed Joi port rule permits0. No parent Nest context, listener reservation or extra setup API remains."
+    },
+    {
+      "area": "PostgreSQL ownership",
+      "result": "A raw TCP Socket and close-event promise exist and are registered with the scope before Client.connect. The client has two-second connect/query/statement limits; cutoff destroys the supplied transport with an error. Installed pg source and the real stalled-startup socket test confirm this settles startup rather than suppressing its callback through Client.end. This transport also underlies a possible TLS wrapper."
+    },
+    {
+      "area": "Redis ownership",
+      "result": "The lazy client is registered before connect, has offline queuing disabled, two-second command/connect limits, retryStrategy returningnull and manual disconnect(false). Installed ioredis source confirms manual close cancels reconnect timers and prevents reconnect; the stalled socket test observes statusend and exactly one connection."
+    },
+    {
+      "area": "Observer sequences",
+      "result": "Every SQL call is executed through the scoped pg wrapper; getJob/getState and all other queue work are scoped factories. Read-only procfs operations, source/event-file reads, HTTP fetch/body reads and sleeps are bounded. The sequential SQL-to-getJob-to-getState overshoot path is removed. The synchronous provenance subprocesses use remaining-time timeouts."
+    },
+    {
+      "area": "Cleanup and report",
+      "result": "Action observers are closed on enteringfinally. Existing owned-process stops remain two sequential phases with parallel workers and parallel APIs, each at most15s. Fresh cleanup observers use a5s scope and are closed before a1s drain checks pending operations, raw socket close, Redis end and retained queue-close promises. The3s reporting scope passes its signal towriteFile; expiry fails the test. A partial/unwritable report does not turn a failed pipeline into success."
+    },
+    {
+      "area": "Source-level bound",
+      "result": "45s actions +15s worker stop +15s API stop +5s cleanup +1s drain +3s reporting =84s allocated under the unchanged90s test timeout, leaving6s scheduling/report bookkeeping margin. No existing gate or timeout was extended."
+    },
+    {
+      "area": "Admission and proof integrity",
+      "result": "The original eight immutable language sources, one regular solver, three lanes, four submissions per API, shared remaining-budget values12..19, both-worker participation, one queue attempt, active-Go conflicts, terminal claims, cross-API result replay, unchanged persisted rows, exactly8learning/notification rows, one solve ledger row and10XP remain required. No workload retries or quota reset during the campaign were introduced."
+    },
+    {
+      "area": "Scoped cleanup",
+      "result": "One bounded pre-setup throttle reset remains. Queue cleanup still queries only the fresh solver/problem, removes at most eight owned submissions across bounded generations, and never drains the queue. Native cache file IDs must match baseline; no arbitrary native deletion is introduced."
+    },
+    {
+      "area": "Secrets and privileges",
+      "result": "No production application source or sandbox privilege changes. Real fixture tokens/passwords remain local variables used only for real HTTP; report fields retain synthetic identifiers/hashes/metrics and generic failure phase/name, without source bodies, headers, environment or complete child logs. OpenAI is empty and email disabled for both API children."
+    },
+    {
+      "area": "CI selection",
+      "result": "The new .pipeline-helpers.ts file matches the existing full-native selector. The new -deadline.spec.ts is included by the existing Backend unit-test glob. Existing pipeline glob includes the main spec; root CI wiring acceptance remains separate."
+    },
+    {
+      "area": "Documentation",
+      "result": "The original blocked candidate and finding are retained. The revised document accurately describes ownership,84s allocation, actual tests, the initially discovered pg startup-callback issue, and pending native/CI status."
+    }
+  ],
+  "independentTests": {
+    "command": "./node_modules/.bin/vitest run test/phase5-multi-api-deadline.spec.ts",
+    "workingDirectory": "/workspace/scratch/3d1215725852/oj-multiapi/Back",
+    "sourceCommit": "7c1731dbcef91b8e8828acdd428d7274d667007c",
+    "filesPassed": 1,
+    "testsPassed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "durationMs": 664,
+    "testDurationMs": 286,
+    "log": {
+      "path": "independent-deadline-tests.log",
+      "sha256": "e2c767060cb144deba03cd6908094a2cfd7567cc6a9452e0742785518527fe5f"
+    },
+    "cases": [
+      "Stalled setup reaches cleanup and a written FAIL; late resolution cannot start next setup or change receipt.",
+      "SQL crossing cutoff does not schedule getJob/getState; late rejection consumed.",
+      "getJob crossing cutoff does not schedule getState; late rejection consumed.",
+      "Actual owned PostgreSQL startup socket is destroyed and startup promise settles.",
+      "Actual owned Redis startup ends with no reconnection.",
+      "Vitest parent cancellation closes owners and immediately rejects new factories."
+    ],
+    "scope": "Deferred promises, temporary report file and tiny owned loopback socket fixtures only; no PostgreSQL server, Redis server or native workload was started."
+  },
+  "otherVerification": {
+    "gitDiffCheck": "PASS",
+    "sourceWorktreeMatchesImmutableCommit": true,
+    "authorReportedTypeAndLint": "PASS; source/hash-bound implementer receipt verified, not rerun as a substitute for nativeCI",
+    "implementerReceipt": {
+      "path": "/workspace/scratch/3d1215725852/evidence/multiapi-lifecycle-correction-implementer.json",
+      "sha256": "02674dbfea319f6c58899e8806256adb3ee665fe590a842534788ff8430fe657"
+    },
+    "nativeExecution": "NOT_EXECUTED",
+    "remoteActions": false,
+    "authorSourceModified": false
+  },
+  "blockers": [],
+  "acceptanceConditions": [
+    "Run the existing complete CI pipeline on the composed immutable source before merge.",
+    "Independently inspect the actual phase5-multi-api report for matching head/base/checkout/tree/run,8real jobs, both APIs/workers, observed active-claim and terminal/replay checks, shared quota values, zero cleanup failures, observer sockets destroyed/Redis ended/no pending operations and reported durations.",
+    "The84s budget is an allocated source bound supported by focused cancellation tests; actual complete native elapsed time and performance remain unmeasured untilCI.",
+    "No production host/fault-domain, throughput capacity, saturation, p95/p99 or long-duration memory claim follows from this finite test."
+  ]
+}
