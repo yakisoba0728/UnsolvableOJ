@@ -1,8 +1,8 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
-import { execFileSync } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { authenticate, mockProblemApi } from "./fixtures";
+import { checkoutProvenance } from "./checkout-provenance";
 
 async function enterpriseForm(page: Page) {
   await mockProblemApi(page);
@@ -113,8 +113,7 @@ for (const width of [320, 375, 768, 1440]) {
       await testInfo.attach("goal-refreshing", { body: refreshingCapture, contentType: "image/png" });
       // Record the original geometry even when a regression assertion below fails.
       const geometryReport = JSON.stringify({ fixture: "synthetic browser-routed API responses; not real server performance",
-        checkout: { sha: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
-          tree: execFileSync("git", ["rev-parse", "HEAD^{tree}"], { encoding: "utf8" }).trim() },
+        checkout: checkoutProvenance(),
         browser: page.context().browser()?.version(), project: testInfo.project.name,
         width, colorScheme, before, during, toolbarShiftPx: during.toolbar.y - before.toolbar.y,
         summaryShiftPx: during.summary.y - before.summary.y }, null, 2);

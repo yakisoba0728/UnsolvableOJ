@@ -1,10 +1,10 @@
-import { execFileSync } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { expect, test } from "@playwright/test";
 import type { VibeAttempt } from "../src/vibe/types";
 import { authenticate, mockProblemApi } from "./fixtures";
+import { checkoutProvenance } from "./checkout-provenance";
 
 // Only this new finite observation receives the authorized 90-second ceiling.
 // Existing test timeouts remain unchanged. No screenshots or network traces
@@ -77,8 +77,7 @@ function installProbe() {
 }
 
 test("bounded editor heap and interaction observation with mocked persistence", async ({ page }, testInfo) => {
-  const git = (...args: string[]) => execFileSync("git", args, { encoding: "utf8" }).trim();
-  const checkout = git("rev-parse", "HEAD");
+  const checkout = checkoutProvenance();
   const event = process.env.GITHUB_EVENT_PATH
     ? JSON.parse(await readFile(process.env.GITHUB_EVENT_PATH, "utf8")) as { pull_request?: { head?: { sha?: string }; base?: { sha?: string } } }
     : undefined;
@@ -87,9 +86,9 @@ test("bounded editor heap and interaction observation with mocked persistence", 
   const raw: { heapSamples: Sample[]; actions: typeof actions; eventTiming: Events | null } = { heapSamples: samples, actions, eventTiming: null };
   const report: Record<string, unknown> = {
     schemaVersion: 1, status: "FAIL", timestamp: new Date().toISOString(),
-    source: { checkout, tree: git("rev-parse", "HEAD^{tree}"), sourceHead: event?.pull_request?.head?.sha ?? checkout,
+    source: { checkout: checkout.sha, tree: checkout.tree, sourceHead: event?.pull_request?.head?.sha ?? checkout.sha,
       base: event?.pull_request?.base?.sha ?? null, workflowRunId: process.env.GITHUB_RUN_ID ?? null,
-      workflowAttempt: process.env.GITHUB_RUN_ATTEMPT ?? null, trackedTreeClean: git("status", "--porcelain", "--untracked-files=no") === "" },
+      workflowAttempt: process.env.GITHUB_RUN_ATTEMPT ?? null, trackedTreeClean: checkout.trackedTreeClean },
     environment: { project: testInfo.project.name, browser: page.context().browser()?.browserType().name(),
       browserVersion: page.context().browser()?.version(), viewport: page.viewportSize() },
     protocol: { trials: 1, scope: "Real frontend editor with deterministic browser-routed mock API and synthetic authentication; no real backend, native executor or provider.",
