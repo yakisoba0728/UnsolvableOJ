@@ -3,6 +3,7 @@ import { VibeService } from '../vibe/vibe.service.js';
 import { challenge } from '../vibe/vibe.catalog.js';
 import type { VibeReport } from '../vibe/vibe.types.js';
 import { canJoinEnterprise as canJoin } from './enterprise-access.js';
+import { buildEnterpriseVibeScores, type EnterpriseVibeRow } from './enterprise-vibe-scores.js';
 import {
   BadRequestException,
   ConflictException,
@@ -511,51 +512,14 @@ export class EnterpriseService {
       );
   }
   private async vibeScores(test: TestRow, attemptIds: string[]) {
-    const rows: {
-      id: string;
-      enterprise_attempt_id: string;
-      challenge_id: string;
-      submitted_at: Date | null;
-      report: VibeReport | null;
-    }[] =
+    const rows: EnterpriseVibeRow[] =
       attemptIds.length && test.vibe_challenge_ids.length
         ? await this.dataSource.query(
             "SELECT id,enterprise_attempt_id,challenge_id,submitted_at,state->'report' AS report FROM vibe_attempts WHERE enterprise_attempt_id=ANY($1::uuid[])",
             [attemptIds],
           )
         : [];
-    return new Map(
-      attemptIds.map((id) => [
-        id,
-        test.vibe_challenge_ids.map((challengeId) => {
-          const row = rows.find(
-            (row) =>
-              row.enterprise_attempt_id === id &&
-              row.challenge_id === challengeId,
-          );
-          const report = row?.report;
-          const score = !row
-            ? 0
-            : report?.evaluationStatus === 'complete'
-              ? report.outcome + report.prompt!.score + report.process!.score
-              : null;
-          return {
-            challengeId,
-            title: challenge.title,
-            id: row?.id ?? null,
-            submittedAt: row?.submitted_at ?? null,
-            score,
-            status: !row
-              ? 'not_started'
-              : !row.submitted_at
-                ? 'working'
-                : score === null
-                  ? 'pending'
-                  : 'complete',
-          };
-        }),
-      ]),
-    );
+    return buildEnterpriseVibeScores(test.vibe_challenge_ids, attemptIds, rows);
   }
 
   private async owned(
