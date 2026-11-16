@@ -563,6 +563,30 @@ describe('submission debug output lifecycle', () => {
     ).toEqual([]);
   });
 
+  it('uses the assessment version title even before the Judge reports debug output', async () => {
+    const { service, submission, user, db } = setup();
+    submission.attemptId = randomUUID();
+    submission.problemVersion = 1;
+    submission.problem = { id: submission.problemId, slug: 'immutable-slug', title: 'Later private title' } as Problem;
+    db.query.mockResolvedValue([{ snapshot: { title: 'Selected title', testCases: [] } }]);
+    const result = await service.findMineById(submission.id, user);
+    expect(result.problem).toEqual({ id: submission.problemId, slug: 'immutable-slug', title: 'Selected title' });
+    expect(result.sampleTestCases).toEqual([]);
+    expect(submission.problem.title).toBe('Later private title');
+    expect(db.query).toHaveBeenCalledOnce();
+  });
+
+  it.each([
+    { name: 'missing', rows: [] },
+    { name: 'incomplete', rows: [{ snapshot: { testCases: [] } }] },
+  ])('fails closed when an assessment title snapshot is $name', async ({ rows }) => {
+    const { service, submission, user, db } = setup();
+    submission.attemptId = randomUUID();
+    submission.problem = { id: submission.problemId, title: 'Later private title' } as Problem;
+    db.query.mockResolvedValue(rows);
+    await expect(service.findMineById(submission.id, user)).rejects.toThrow('제출한 문제 버전을 불러올 수 없습니다.');
+  });
+
   it('does not read samples for a queued submission or another user', async () => {
     const { service, submission, user, db, repository } = setup();
     expect(

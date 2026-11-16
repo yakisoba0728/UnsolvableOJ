@@ -29,8 +29,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -o Acquire::Retries=0 update \
     && apt-get -o Acquire::Retries=0 install -y --no-install-recommends \
     apt ca-certificates gcc g++ openjdk-21-jdk-headless python3 golang-go rustc util-linux \
+    libpcre2-8-0 perl-base \
     && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' apt)" ge 2.8.4ubuntu0.1 \
     && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libapt-pkg6.0t64)" ge 2.8.4ubuntu0.1 \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libpcre2-8-0)" ge 10.42-4ubuntu2.2 \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' perl-base)" ge 5.38.2-3.2ubuntu0.7 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
 COPY --from=node /usr/local/LICENSE /usr/share/licenses/node/LICENSE

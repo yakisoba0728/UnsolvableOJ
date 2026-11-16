@@ -36,6 +36,7 @@ import { Submission } from './submission.entity.js';
 import { learningStatuses, SubmissionStatus } from './submission.enums.js';
 
 interface ProblemSnapshot {
+  title: string;
   difficulty: ProblemDifficulty;
   timeLimitMs: number;
   memoryLimitMb: number;
@@ -340,8 +341,12 @@ export class SubmissionsService {
       input: string;
       expectedOutput: string;
     }[] = [];
+    // An assessment grants access to the submitted version, not later private
+    // edits. Even a queued result with no debug output needs its pinned title.
+    const snapshot = submission.attemptId || submission.debugOutputs?.length
+      ? await findProblemSnapshot(this.dataSource, submission)
+      : undefined;
     if (submission.debugOutputs?.length) {
-      const snapshot = await findProblemSnapshot(this.dataSource, submission);
       const visible = new Set(
         submission.debugOutputs.map((item) => item.testCase),
       );
@@ -359,7 +364,19 @@ export class SubmissionsService {
         }
       });
     }
-    return { ...toSubmissionResponse(submission, true), sampleTestCases };
+    const response = toSubmissionResponse(submission, true);
+    if (submission.attemptId) {
+      if (typeof snapshot?.title !== 'string')
+        throw new ServiceUnavailableException('제출한 문제 버전을 불러올 수 없습니다.');
+      // The canonical slug cannot be edited through the problem API and is not
+      // a versioned field. Only the mutable title must come from the snapshot.
+      return {
+        ...response,
+        problem: { ...response.problem, title: snapshot.title },
+        sampleTestCases,
+      };
+    }
+    return { ...response, sampleTestCases };
   }
 
   async rejudge(id: string, user: AuthenticatedUser) {

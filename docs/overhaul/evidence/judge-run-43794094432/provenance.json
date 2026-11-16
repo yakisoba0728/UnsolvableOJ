@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "repository": "yakisoba0728/UnsolvableOJ",
+  "pullRequest": 65,
+  "head": "f1985dd19e3baf094bf82131250fb46bc5398941",
+  "sourceTree": "7a4df22d030ec42f05651a4b021bb847573f226e",
+  "localSourceCommit": "1c4256d34712bae5bafe09a616cca4cde6f6d2ee",
+  "runId": 43794094432,
+  "fullJobId": 133058884124,
+  "artifactId": 14194041426,
+  "allJobsPassed": 12,
+  "nativeCasesPassed": 74,
+  "pipelineCasesPassed": 26,
+  "composeBrowserFlowsPassed": 2,
+  "files": {
+    "phase2-judge-capacity.json": {
+      "sha256": "8689fe15e71d5959acdcf9627e1064720614fab13ef72d67ebb7fc9759745b2c",
+      "bytes": 26920
+    },
+    "phase2-api-restart.json": {
+      "sha256": "2b6a9ffce6b85c739e6a8cdf4f789fb7d04db7137aa601e7100b3b9a4bfa11ab",
+      "bytes": 470
+    }
+  },
+  "limits": [
+    "CPU/RSS cover Node worker processes, not go-judge/compiler/solution resource usage.",
+    "Two repetitions of eight admitted jobs per worker configuration; p95/p99 are sample maxima.",
+    "One-versus-two worker scaling, not Phase I-versus-II speedup.",
+    "Admission pauses occur outside the burst and are separately recorded; per-IP ingress limit remains20/min."
+  ]
+}

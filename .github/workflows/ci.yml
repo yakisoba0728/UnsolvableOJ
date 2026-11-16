@@ -30,7 +30,7 @@ defaults:
 
 jobs:
   audit:
-    # 운영 의존성의 moderate/high/critical 취약점은 실패로 본다. low는 보고한다.
+    # 운영 및 빌드/테스트 의존성의 moderate/high/critical 취약점은 실패로 본다. low는 보고한다.
     name: Dependency audit
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -41,12 +41,13 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
-      - name: npm audit (production dependencies)
+      - name: npm audit (production and complete dependency graphs)
         run: |
           status=0
           for package in Back Front Judge; do
             echo "::group::$package"
             npm audit --prefix "$package" --omit=dev --audit-level=moderate || status=1
+            npm audit --prefix "$package" --audit-level=moderate || status=1
             echo "::endgroup::"
           done
           exit "$status"
@@ -94,7 +95,9 @@ jobs:
             echo "build=true" >> "$GITHUB_OUTPUT"
           else
             files=$(git diff --name-only FETCH_HEAD HEAD)
-            if grep -qE "^($CONTEXT/|\.github/workflows/ci\.yml$|scripts/image[-_]audit)" <<<"$files"; then
+            if grep -qE "^($CONTEXT/|\.github/workflows/ci\.yml$|scripts/image[-_]audit)" <<<"$files" || {
+              [ "$CONTEXT" = 'Judge/runtime' ] && grep -qE '^(scripts/verify_image_payload|docs/overhaul/evidence/linux-libc-dev-.*-files\.json$)' <<<"$files";
+            }; then
               echo "build=true" >> "$GITHUB_OUTPUT"
             else
               echo "No changes under $CONTEXT/; skipping the image build."
@@ -115,6 +118,7 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
       - name: Scan installed image OS/runtime packages and license metadata
+        id: image_scan
         if: ${{ steps.changes.outputs.build == 'true' }}
         env:
           COMPONENT: ${{ matrix.name }}
@@ -123,6 +127,21 @@ jobs:
         run: |
           python3 -m unittest discover -s scripts -p 'image_audit_test.py'
           python3 scripts/image_audit.py "$COMPONENT" "$IMAGE_DIRECTORY" "reports/images/$COMPONENT" "$BUILD_DIGEST"
+      - name: Compare actual runtime package bytes with official payload evidence
+        # Preserve this evidence even when the original vulnerability gate fails.
+        # A byte match does not accept or suppress any scanner finding.
+        if: ${{ !cancelled() && matrix.name == 'runtime' && steps.image.outcome == 'success' && (steps.image_scan.outcome == 'success' || steps.image_scan.outcome == 'failure') }}
+        env:
+          IMAGE_DIRECTORY: ${{ runner.temp }}/image-runtime
+          BUILD_DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          python3 -m unittest discover -s scripts -p 'verify_image_payload_test.py'
+          python3 scripts/verify_image_payload.py \
+            --oci "$IMAGE_DIRECTORY" \
+            --build-digest "$BUILD_DIGEST" \
+            --expected-manifest docs/overhaul/evidence/linux-libc-dev-6.8.0-149.149-amd64-files.json \
+            --scan-report reports/images/runtime/trivy.json \
+            --output reports/images/runtime/payload-verification.json
       - name: Image vulnerability and inventory evidence
         if: ${{ !cancelled() && steps.changes.outputs.build == 'true' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -176,7 +195,7 @@ jobs:
           if grep -qE \
             -e '^Judge/(src/|runtime/|deploy/|Dockerfile$|\.dockerignore$|package(-lock)?\.json$|tsconfig\.json$)' \
             -e '^Back/src/(modules/submissions/|modules/vibe/vibe\.(runner|service|catalog|types)\.ts$|common/queue\.constants\.ts$|config/(redis\.config|env\.validation)\.ts$)' \
-            -e '^Back/(Dockerfile$|\.dockerignore$|docker-entrypoint\.sh$|package(-lock)?\.json$|scripts/run-integration\.mjs$|vitest\.config\.pipeline\.ts$|test/.*\.pipeline-spec\.ts$)' \
+            -e '^Back/(Dockerfile$|\.dockerignore$|docker-entrypoint\.sh$|package(-lock)?\.json$|scripts/run-integration\.mjs$|vitest\.config\.pipeline\.ts$|test/.*\.pipeline-(spec|helpers)\.ts$)' \
             -e '^Front/(Dockerfile$|\.dockerignore$|nginx\.conf$|trusted-proxy\.conf\.template$|playwright\.live\.config\.ts$|tests-live/)' \
             -e '^(compose\.yaml$|deploy/(compose\.yaml$|\.env\.example$)|scripts/check-(compose|production-compose|sandbox-budget)\.mjs$)' <<<"$native_files"; then
             echo "full=true" >> "$GITHUB_OUTPUT"
@@ -325,7 +344,7 @@ jobs:
           node -e 'const fs = require("node:fs"); const { firefox } = require("@playwright/test"); fs.accessSync(firefox.executablePath(), fs.constants.X_OK); console.log("Firefox executable:", firefox.executablePath());'
           npx --no-install playwright test \
             enterprise-results.spec.ts \
-            auth.spec.ts editor-focus.spec.ts enterprise-ownership.spec.ts enterprise-refresh.spec.ts layout.spec.ts \
+            auth.spec.ts editor-focus.spec.ts enterprise-ownership.spec.ts enterprise-pinned-summary.spec.ts enterprise-refresh.spec.ts layout.spec.ts \
             live-qa-followups.spec.ts problem-bookmarks.spec.ts session-refresh.spec.ts ui-harmony.spec.ts \
             --project=firefox --workers=4 --shard=${{ matrix.shard }}/2 \
             --output=test-results/firefox

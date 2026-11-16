@@ -1,0 +1,10 @@
+Owned disposable PostgreSQL17.11/Redis8.10.3 started on loopback.
+
+ RUN  v4.1.12 /workspace/scratch/231e81830e94/UnsolvableOJ/Back
+
+
+ Test Files  4 passed (4)
+      Tests  22 passed (22)
+   Start at  12:20:12
+   Duration  9.57s (transform 515ms, setup 0ms, import 4.60s, tests 4.38s, environment 0ms)
+

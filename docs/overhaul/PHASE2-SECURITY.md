@@ -136,3 +136,39 @@ The first upgraded type check correctly failed on three existing test-helper
 signatures. The narrow type adaptations above fixed them; no test was removed
 or relaxed. Remote independent review, the exact branch HEAD CI, native
 runtime/pipeline and final integration CI remain separate required gates.
+
+## Complete development graph follow-up
+
+A subsequent complete audit, rather than `--omit=dev`, found four moderate Back
+package nodes. They were Vitest/coverage/mocker 4.1.11 and fast-uri 3.1.8 in
+build/test dependencies. The production-only zero result above remains true;
+it did not establish a clean development environment.
+
+The maintainers identify 4.1.12 as the backport for
+[manual mock registration](https://github.com/vitest-dev/vitest/security/advisories/GHSA-qxg6-89mg-rqv8)
+and [Windows redirect normalization](https://github.com/vitest-dev/vitest/security/advisories/GHSA-xp26-3454-mjgp).
+The fast-uri maintainers identify 3.1.9 for the affected 3.x line in their
+[URI normalization advisory](https://github.com/fastify/fast-uri/security/advisories/GHSA-w74x-v6f9-j3xg).
+No public application route to these development-only packages was established.
+That does not justify leaving known development-tool vulnerabilities installed.
+
+Vitest and matching coverage are now exactly 4.1.12; normal npm resolution
+updates fast-uri to 3.1.9 and compatible development peers. The generated lock
+also updates development Vite/rolldown and their optional platform bindings;
+every pre-existing production package version remains unchanged. No override,
+forced peer installation or major test-framework migration is used.
+
+Fresh complete audits report zero findings for Back, Front and Judge.
+[Raw before/after audit data and exact lock hashes](evidence/phase2-complete-npm-audit-2026-11-16.json)
+retain the dirty pre-commit execution state. The new engine passes Back lint,
+type check, build and 317 unit cases, plus 199 actual PostgreSQL API cases in
+32 files (78.20 seconds). Fifteen CI/SBOM policy cases pass. The workflow keeps
+the separate production audit and adds the complete graph audit at the same
+moderate threshold. A behavioral regression runs the actual shell block with
+each of six component/scope failures and proves every failure survives all
+later successful audits. Exact-head CI and independent review remain required.
+
+This npm result is distinct from installed-image scanning: global npm tooling,
+OS libraries, copied language runtimes and compiler packages may still have
+findings even when the application lockfiles are clean. Image findings are
+tracked in the image-audit PR and must not be hidden by this statement.

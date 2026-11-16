@@ -62,7 +62,9 @@ export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVe
     error: testError,
     retry,
   } = useEnterpriseTest(session, id);
-  const { problems, loading } = useEnterpriseProblems(session);
+  // The live catalog only authorizes navigation to the current source. It must
+  // not describe the immutable revision actually selected for this assessment.
+  const { problems } = useEnterpriseProblems(session);
   const liveStatus = test ? testStatus(test, now) : null;
   // 응시자가 아직 없어도 시작된 테스트는 결과를 받아, 응시가 생기면 바로 보이게 한다.
   const results = useTestResults(
@@ -139,7 +141,8 @@ export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVe
     );
 
   const status = testStatus(test, now);
-  const byId = new Map(problems.map((problem) => [problem.id, problem]));
+  const sourcesById = new Map(problems.map((problem) => [problem.id, problem]));
+  const selectedById = new Map((test.selectedProblems ?? []).map((problem) => [problem.id, problem]));
   const timeLine =
     status === "scheduled"
       ? `시작까지 ${remainingText(Date.parse(test.startsAt) - now)}`
@@ -232,18 +235,22 @@ export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVe
           </div>
           <ol className="ent-problem-list">
             {test.problemIds.map((problemId, index) => {
-              const problem = byId.get(problemId);
+              const problem = selectedById.get(problemId);
+              const source = sourcesById.get(problemId);
               return (
                 <li key={problemId}>
                   <span className="ent-order">{index + 1}</span>
                   {problem ? (
                     <>
                       <span className="ent-problem-title">{problem.title}</span>
-                      {problem.isPrivate ? (
-                        <span className="case-pill status-private">
-                          기업 전용
-                        </span>
-                      ) : null}
+                      <span className="ent-problem-badges">
+                        <span className="case-pill">고정 v{problem.version}</span>
+                        {source?.isPrivate ? (
+                          <span className="case-pill status-private">
+                            원본: 기업 전용
+                          </span>
+                        ) : null}
+                      </span>
                       <span
                         className={`difficulty difficulty-${problem.difficulty.toLowerCase()}`}
                       >
@@ -252,22 +259,24 @@ export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVe
                       <small>
                         {problem.timeLimitMs}ms · {problem.memoryLimitMb}MB
                       </small>
-                      {/* 기업 전용 문제는 공개 화면이 없어 출제 화면으로 연다. */}
-                      <Link
-                        className="button button-outline button-small"
-                        to={
-                          problem.isPrivate
-                            ? `/my-problems/${problem.id}/edit`
-                            : problemPath(problem.slug)
-                        }
-                        aria-label={`${problem.title} 문제 보기`}
-                      >
-                        문제 보기
-                      </Link>
+                      {/* This link deliberately opens the current source, not the frozen revision. */}
+                      {source ? (
+                        <Link
+                          className="button button-outline button-small"
+                          to={
+                            source.isPrivate
+                              ? `/my-problems/${source.id}/edit`
+                              : problemPath(source.slug)
+                          }
+                          aria-label={`${problem.title} 현재 원본 보기`}
+                        >
+                          현재 원본 보기
+                        </Link>
+                      ) : null}
                     </>
                   ) : (
                     <span className="ent-problem-title muted">
-                      {loading ? "불러오는 중…" : "비공개 또는 삭제된 문제"}
+                      고정된 문제 정보를 불러올 수 없어요
                     </span>
                   )}
                 </li>
@@ -418,11 +427,19 @@ export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVe
               <tr>
                 <th scope="col">응시자</th>
                 <th scope="col">점수</th>
-                {test.problemIds.map((problemId, index) => (
-                  <th scope="col" key={problemId}>
-                    {index + 1}번
-                  </th>
-                ))}
+                {test.problemIds.map((problemId, index) => {
+                  const selected = selectedById.get(problemId);
+                  return (
+                    <th scope="col" key={problemId}>
+                      {index + 1}번
+                      {selected ? (
+                        <small className="ent-result-problem-title">
+                          {selected.title} · 고정 v{selected.version}
+                        </small>
+                      ) : null}
+                    </th>
+                  );
+                })}
                 {test.vibeChallengeIds?.map((challengeId, index) => (
                   <th scope="col" key={challengeId}>
                     바이브코딩 {index + 1}

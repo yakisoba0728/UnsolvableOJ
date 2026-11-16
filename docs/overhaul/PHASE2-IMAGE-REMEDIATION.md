@@ -184,3 +184,46 @@ recovery suites pass. Follow-up should obtain supported vendor fixes or complete
 evidence-based applicability decisions, then rescan every actual image without
 weakening coverage. Retire the small source backport when a reviewed upstream
 release contains all required fixes and passes the same native acceptance suite.
+
+## First patched image execution and zlib follow-up
+
+At published head `1b6700546e44d67a3a6d78fd8a1087500cca1fa5`,
+run [43800123825](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43800123825)
+checked out PR merge ref `c1c09ab95f6e0cc073a13e602625cc01c99d6aec` and
+built and scanned Back, Front and Judge successfully. All three actual scans
+reported zero HIGH/CRITICAL findings with required analyzer coverage. Front
+reported zero findings at any severity. Back and Judge each retained one MEDIUM
+Alpine zlib finding, CVE-2026-4738, at `1.3.2-r1`, with fixed version `1.4-r0`.
+This was reported rather than hidden by the passing HIGH/CRITICAL gate.
+
+The [official Alpine security tracker](https://security.alpinelinux.org/vuln/CVE-2026-4738)
+identifies `1.4-r0` on the supported 3.24 branch. The
+[upstream 1.4 release notes](https://zlib.net/) include the contrib/infback9
+correction and describe API/build behavior changes; no externally reachable
+application exploit was established. Both final Node Alpine images now request
+that supported security package explicitly. Builders and application locks are
+unchanged. This is a package update, not an applicability exception. The next
+actual image scan and Compose/API/Judge checks must establish its result;
+the first patched scan cannot verify a subsequent Dockerfile.
+
+The same run's actual updated runtime scan completed (artifact14195693161,
+ZIP SHA256 `1fe33a51e5690f6b06fcd1522738890fdfafdaa5e484836542c05e612f09bfd2`).
+Its only remaining HIGH177/CRITICAL5 records are the exact kernel-header
+component under separate applicability review. APT and the rebuilt binary's
+previous HIGH findings are absent. The scan still correctly blocks, preserves
+all LOW/MEDIUM/UNKNOWN entries and identifies the real Go stdlib/dependencies.
+
+Two installed base libraries have supported fixed versions even though their
+reported severity is MEDIUM: seven PCRE2 records at `10.42-4ubuntu2.1` and one
+Perl record at `5.38.2-3.2ubuntu0.6`. The Dockerfile now explicitly installs their
+Noble security updates and checks minimum versions `10.42-4ubuntu2.2` and
+`5.38.2-3.2ubuntu0.7`, following official
+[USN-8974-1](https://ubuntu.com/security/notices/USN-8974-1) and
+[USN-9006-1](https://ubuntu.com/security/notices/USN-9006-1).
+These are targeted updates to already installed packages; the supported
+compiler/runtime selection, header contents and distribution remain unchanged.
+Other currently reported non-header LOW/MEDIUM records have no fixed version
+in that report and remain visible; no blanket clean-image claim is made.
+The one UNKNOWN Go record concerns unmaintained OpenPGP in x/crypto; its actual
+build-package reachability is being checked separately, not assigned an
+invented severity or silently removed.

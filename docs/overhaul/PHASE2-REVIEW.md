@@ -1,0 +1,22 @@
+# Phase II independent review ledger
+
+The coordinator and three concurrent specialists used isolated implementation/review worktrees. Reviews below are independent AI engineering reviews, not human GitHub approvals. Authors did not approve their own changes. Component approval is conditional on the exact-head CI and current-base checks required by the user.
+
+| Change | Independent review and correction | Disposition |
+|---|---|---|
+| TypeORM 1.1.3 and SBOM | Coordinator compared old/new locks, compatibility paths, actual ORM/API/migrations and complete graph validation | Integrated #64 after exact-head full CI |
+| Private bookmarks | Coordinator/security review corrected initial lock-order risk; real draft-transition and withdrawal races, visibility and account isolation checked | Integrated #66 after exact-head full CI |
+| Judge readiness/capacity/recovery | Coordinator reproduced premature readiness; required both Redis connections, removed warmup fairness assumption, checked actual metrics boundaries; first rate-limit fixture failure preserved and fixed with normal-budget pacing | Integrated #65 after exact-head full CI |
+| Exam full-version binding and start transaction | Security reviewer reproduced stale save reverting refreshed versions and withdrawal deadlock; fixes reran the same real PostgreSQL regressions | Integrated #67 after exact-head full CI |
+| Enterprise request ownership and token refresh | Coordinator executed original failing/changed passing DOM probes; identity/route guards and preserved draft behavior reviewed | Integrated #67 after selected three-engine/full CI |
+| Owner result pagination | Coordinator checked authorization, deterministic page queries, REPEATABLE READ, rounding and global summary equivalence; reproduced missing-page UX and requested explicit first-page recovery; measured evidence reviewed without sustained-throughput claims | Integrated #69 only after positive full selection ran all required engines/native cases |
+| Complete dependency audits | Security reviewer performed fresh install/graph/audits/SBOM/checks; all existing production lock records identical, no force or override; coordinator reran full API under updated Vitest | REVIEWED b8b8a6d; combined CI pending |
+| Candidate submission title | Product reviewer freshly built and reran 38 submission units plus actual API regression; authorization precedes snapshot lookup, only bound title is projected, missing metadata fails closed | REVIEWED b479145; combined CI pending |
+| Owner pinned metadata and real exam flow | Coordinator and Judge reviewer inspected the explicit owner whitelist, current-source navigation isolation, privacy and real concurrent API tests | REVIEWED c135303; combined browser/native CI pending |
+| Redis/rejudge follow-up | Security reviewer reproduced database URL query override reaching initialize; no-connection guard corrected and 18 cases passed. Owned Docker IDs/labels/volume/resource bounds and finite cleanup inspected | REVIEWED dada9b5; actual new scenarios pending |
+| Combined results/pinned/ownership/API changes | Product reviewer compared approved source identities, independently installed Front and executed actual React DOM probes; all checks pass; only raw-log trailing EOF whitespace noted | APPROVED source3d43b4d, conditional on combined full CI |
+| Shipping image remediation | Security reviewer verified immutable archive/patch/lock/builder hashes, exact upstream auth redaction and untouched actual auth, ordinary one-module change and local protocol tests. Coordinator reviewed combined Docker/workflow changes and reran adapters/policy/redaction checks | APPROVED ef6e96e, published1b670054; actual build/scan/native pending; unresolved findings still block |
+
+The combined composition evidence is retained in [evidence/composition-review-3d43b4d.json](evidence/composition-review-3d43b4d.json). Recreated GitHub commits use verified equal tree hashes; local and remote commit IDs are not conflated. For exact source-head/run/merge hashes consult PHASE2-PROGRESS and live PR records.
+
+No force push, main merge, deployment or production data change was used. Tests were not deleted/skipped to create a pass. New scenarios have finite separately justified time budgets; existing assertions/limits remain. Unprotected branches mean the process is enforced by explicit checks rather than repository settings; no protection was silently installed or claimed.

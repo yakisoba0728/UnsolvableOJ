@@ -12,8 +12,10 @@ FROM node:24.22.2-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7
 ENV NODE_ENV=production
 WORKDIR /app
 COPY package.json package-lock.json ./
-# The worker starts with Node and never installs packages at runtime.
-RUN npm ci --omit=dev \
+# Apply the supported Alpine zlib security package. The worker starts with Node
+# and never installs packages at runtime.
+RUN apk add --no-cache --upgrade 'zlib>=1.4-r0' \
+    && npm ci --omit=dev \
     && rm -rf /root/.npm /usr/local/lib/node_modules/npm \
     && rm -f /usr/local/bin/npm /usr/local/bin/npx
 COPY --from=build /app/dist ./dist
