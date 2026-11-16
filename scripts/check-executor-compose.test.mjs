@@ -31,7 +31,29 @@ test('dedicated plan accepts isolated topology and optional named TLS identity f
   plan.services.judge.secrets = ['ca', 'cert', 'key'].map(suffix => ({ source: `redis_tls_${suffix}`, target: `redis_tls_${suffix}` }));
   for (const suffix of ['ca', 'cert', 'key']) plan.services.judge.environment[`REDIS_TLS_${suffix.toUpperCase()}_FILE`] = `/run/secrets/redis_tls_${suffix}`;
   checkExecutorCompose(plan);
+  for (const secret of plan.services.judge.secrets) secret.target = `/run/secrets/${secret.source}`;
+  checkExecutorCompose(plan);
 });
+
+for (const target of ['/etc/redis_tls_key', '/run/secrets/../redis_tls_key', '/run/secrets/renamed', 'redis_tls_cert']) {
+  test(`preflight rejects a renamed or relocated TLS key target ${target}`, () => {
+    const plan = fixture();
+    plan.services.judge.secrets = [{ source: 'redis_tls_key', target }];
+    plan.services.judge.environment.REDIS_TLS_KEY_FILE = '/run/secrets/redis_tls_key';
+    assert.throws(() => checkExecutorCompose(plan), /targets must retain/);
+  });
+}
+
+for (const source of ['constructor', 'toString', '__proto__', ['redis_tls_key']]) {
+  test(`preflight rejects inherited or coerced secret source ${JSON.stringify(source)}`, () => {
+    const plan = fixture();
+    const settings = { redis_tls_key: 'REDIS_TLS_KEY_FILE' };
+    plan.services.judge.secrets = [{ source, target: `/run/secrets/${source}` }];
+    // Supply the value an inherited-property lookup would otherwise accept.
+    plan.services.judge.environment[String(settings[source])] = `/run/secrets/${source}`;
+    assert.throws(() => checkExecutorCompose(plan), /only its named Redis TLS/);
+  });
+}
 
 test('rendered Compose decimal byte strings retain the same finite memory and swap checks', () => {
   const plan = fixture();

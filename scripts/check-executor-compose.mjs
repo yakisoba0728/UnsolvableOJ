@@ -64,10 +64,13 @@ export function checkExecutorCompose(plan) {
   assert.equal(worker.configs?.length ?? 0, 0, 'Use only the named Redis TLS secrets');
   const secretSettings = { redis_tls_ca: 'REDIS_TLS_CA_FILE', redis_tls_cert: 'REDIS_TLS_CERT_FILE', redis_tls_key: 'REDIS_TLS_KEY_FILE' };
   for (const secret of worker.secrets ?? []) {
-    assert.ok(secretSettings[secret.source], 'Worker may mount only its named Redis TLS identity files');
+    assert.ok(typeof secret.source === 'string' && Object.hasOwn(secretSettings, secret.source),
+      'Worker may mount only its named Redis TLS identity files');
     const target = secret.target ?? secret.source;
-    assert.ok(target === secret.source, 'Redis TLS secret targets must retain their names');
-    assert.ok(env[secretSettings[secret.source]] === `/run/secrets/${target}`, 'TLS file settings must match their read-only secret mounts');
+    const path = `/run/secrets/${secret.source}`;
+    // Compose can normalize the default target to its absolute container path.
+    assert.ok(target === secret.source || target === path, 'Redis TLS secret targets must retain their names');
+    assert.ok(env[secretSettings[secret.source]] === path, 'TLS file settings must match their read-only secret mounts');
   }
   for (const [source, setting] of Object.entries(secretSettings)) {
     if (env[setting]) assert.ok(worker.secrets?.some(secret => secret.source === source), 'Configured TLS files must be mounted as named secrets');
