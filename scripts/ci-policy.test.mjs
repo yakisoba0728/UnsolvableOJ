@@ -256,7 +256,8 @@ function selectJobs(paths, overrides = {}) {
 
 test('native execution and contract changes require full validation before integration', () => {
   for (const path of [
-    'Judge/src/worker.ts', 'Judge/src/output.ts', 'Judge/runtime/Dockerfile',
+    'Judge/src/worker.ts', 'Judge/scripts/check-redis-tls.mjs',
+    'scripts/check-executor-compose.mjs', 'scripts/check-executor-compose.test.mjs', 'Judge/src/output.ts', 'Judge/runtime/Dockerfile',
     'Judge/runtime/mount.yaml', 'Judge/runtime/health.py', 'Judge/runtime/start.sh',
     'Judge/deploy/compose.yaml', 'Judge/package-lock.json', 'Judge/Dockerfile', 'Judge/.dockerignore',
     'Back/src/modules/submissions/judge.service.ts', 'Back/src/modules/submissions/dto/judge-result.dto.ts',

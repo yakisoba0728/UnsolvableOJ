@@ -53,11 +53,13 @@ npm run start:dev
 - `-no-fallback`, seccomp, cpu/memory/pids controller와 `/w`를 healthcheck 및 워커 시작 시 검사합니다. 잘못된 인증/격리 설정에서는 채점을 시작하지 않습니다. `-no-seccomp`, `-net-share`를 켜지 마세요.
 - 호스트 swap이 꺼져 있으면 cgroup 루트 제한을 쓰지 않습니다. swap이 켜진 v2에서는 서비스 상위 `memory.swap.max=0` 설정에 성공해야 시작하며, v1은 호스트 swap이 꺼져 있어야 합니다. 실제 호스트 루트 cgroup은 제한할 수 없으므로 그런 환경에서는 관리자가 swap을 끄거나 위임된 cgroup을 제공해야 합니다.
 - 제출에는 해당 소스/산출물과 해당 테스트 입력만 전달합니다. 읽기 전용 도구·라이브러리와 임시 `/w`·`/tmp`만 mount하며, API/DB 비밀키·정답·호스트 디렉터리·Docker socket을 넣지 않습니다.
-- upstream은 시작 로그에 설정/인증 토큰을 기록할 수 있으므로 실행 노드 로그도 접근을 제한하세요. 이미지/호스트 패치와 실제 자원 제한 검증은 별도로 필요합니다.
+- 이 저장소의 고정 소스 이미지는 upstream 인증 로그 수정과 토큰 비노출 검사를 포함합니다. 원본/다른 이미지를 사용할 때는 같은 보장을 추정하지 마세요. 실행 노드 로그의 접근 제한, 이미지/호스트 패치와 실제 자원 제한 검증은 별도로 필요합니다.
 
 실행 이미지 변경 후 `docker compose up -d --build --wait go-judge`로 다시 빌드하세요. [공식 API](https://docs.goj.ac/api), [설계·제한](https://docs.goj.ac/design), [전환 조사](../docs/research/go-judge-migration.md)를 참고하세요.
 
 별도 승인 후 사용할 [전용 실행 노드 템플릿](./deploy/README.md)은 필수 비밀키가 없으면 시작하지 않으며 host port를 공개하지 않습니다. 전체 앱의 실제 브라우저 검사는 저장소 루트에서 `node scripts/check-compose.mjs`로 실행합니다. 기존 개발 DB와 서비스는 재사용하지 않습니다.
+
+전용 실행 모드는 HTTPS API와 검증된 Redis TLS/mTLS를 요구합니다. 일반 로컬/동일 호스트 모드는 기존 사설 HTTP 연결을 유지합니다. `REDIS_TLS=true`와 선택적 `REDIS_TLS_SERVERNAME`, `REDIS_TLS_CA_FILE`, `REDIS_TLS_CERT_FILE`/`REDIS_TLS_KEY_FILE`을 지원하며 인증서 검증을 끄는 옵션은 없습니다. 포트·DB·동시성(1~128)과 URL·비밀키 설정은 연결 전에 검증합니다. 동시성 상한은 구성 오류 방지 한도이며 실제 호스트 처리 용량을 의미하지 않습니다.
 
 ## Optional worker measurements
 
