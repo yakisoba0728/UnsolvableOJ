@@ -122,6 +122,67 @@ lockfile, candidate component bytes and built entry files by SHA256. Entry impor
 hashes changed; a one-byte gzip difference is not a meaningful performance gain.
 The total payload cost is retained. Payload bytes are not browser latency.
 
+## Bounded editor observation follow-up
+
+`Front/tests/phase5-editor-observation.spec.ts` adds one **Chromium-only**
+laboratory observation. Local TypeScript and list-only discovery are required
+before handoff; actual execution remains **NOT_EXECUTED locally** and belongs
+to the coordinator's immutable CI receipt. The normal Front configuration
+selects it only in Chromium: Firefox explicitly ignores that filename, and
+the other projects retain their existing positive filename lists. No skipped
+test is introduced. Only this new spec declares the authorized 90-second
+ceiling; existing test and action timeouts remain unchanged.
+
+The actual Vibe editor uses deterministic browser-routed mock persistence and
+the existing synthetic authentication helper. Two fixed 81-line TypeScript
+fixtures (80 declarations and a comment) receive ten eight-character keyboard edits and ten alternating file
+tab clicks. Each edit must retain focus and its exact value, autosave through
+the normal one-second debounce, and agree with the mock's saved revision and
+files. Each tab switch must preserve its file content, focus the selected tab,
+and allow explicit return to the editor. Unexpected Vibe requests and page
+errors fail the observation. No native executor, real backend or provider is
+part of this measurement.
+
+The schedule has a five-second initial idle, ten three-second slots and a
+five-second final idle: approximately 40 seconds, with a **45-second bounded
+action/autosave/sampling budget**. Observer disposal and report writing use
+the remaining test deadline; protocol time, cleanup time and total observer
+time are reported separately. It records thirteen heap snapshots when
+`performance.memory` is available. Unsupported/invalid heap data is null with
+a reason. These optional, potentially coarse/shared JS-heap estimates include
+the page and instrumentation; they are not isolated editor allocations,
+renderer RSS or whole-platform memory. All raw increases, decreases and equal
+values remain in order; no GC is forced and no heap-size threshold is imposed.
+
+An EventTiming observer retains at most 200 entries at the requested 16 ms
+threshold, with fixed editor/file-tab region labels and numerical timing.
+Unsupported EventTiming is null; a supported empty sample explicitly does not
+mean zero latency. Truncation and discarded-entry counts remain visible. No
+text, keys, source values, arbitrary target selectors, session data or tokens
+enter the JSON. Tracing and screenshots are off for this observation. A
+short-lived observer is disconnected before writing the final receipt.
+
+The artifact is `Front/reports/phase5-editor-observation.json`. It binds PR
+source/base, checkout/tree, workflow run/attempt, tracked-tree cleanliness,
+browser/version, protocol, actual duration, raw heap/event/action samples and
+limitations. Field INP is explicitly null. One finite trial cannot establish
+a leak, absence of leaks, long-term capacity, speedup or population tail.
+No historical comparison is fabricated.
+
+```sh
+npm run test:e2e:types --prefix Front
+# From Front, discovery only (no browser execution):
+node node_modules/@playwright/test/cli.js test phase5-editor-observation.spec.ts --list
+# Actual replay, when the normal Playwright browser is available:
+node node_modules/@playwright/test/cli.js test phase5-editor-observation.spec.ts --project=chromium
+```
+
+The coordinator must retain this artifact on success and failure from its
+owning frontend shard. The successful shard must supply the one observation;
+the other shard is not expected to produce a duplicate. Actual CI results,
+including adverse heap deltas and slow/capped/empty interactions, must be
+reported without recasting this short observation as a long-term test.
+
 ## Handoff status
 
 Implementation and the stated local DOM/static checks are complete. Independent

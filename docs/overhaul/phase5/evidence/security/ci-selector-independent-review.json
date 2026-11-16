@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "independent_qa",
+  "observedAt": "2026-11-16T14:49:58.103230+00:00",
+  "decision": "APPROVE_ADDITIVE_RUNTIME_EVIDENCE_PATH_SELECTOR",
+  "sourceBaseCommit": "d4bf025935481a089d5660b308ab522548b812e0",
+  "path": ".github/workflows/ci.yml",
+  "oldSha256": "5fa992ec0197ea25361eb12f5acbaa9911c5683b898efac6c51cb25b7daf1fe5",
+  "newSha256": "e3e157059fecf17b4c34cce97b20259c28bf468bf6556d66ca6b13b508ba2ed2",
+  "exactChange": "Add phase5/evidence/security/ alternative under the existing anchored docs/overhaul/ regex in the Judge/runtime image-build selector.",
+  "independentChecks": [
+    "Full-file bytes equal exactly the single expected alternative insertion",
+    "Existing Runtime context restriction, prefix anchor, all previous alternatives and build true/false logic retained",
+    "New evidence changes select Runtime image rebuild; this insertion does not suppress findings, bypass evaluation or alter security approval/expiry",
+    "Phase V forced-full selection is untouched"
+  ],
+  "testAttribution": "Root reported17 CI-policy tests passed. This reviewer performed source/byte review and did not rerun that suite.",
+  "limits": "Review binds these exact workflow bytes, separately from the exact policy-content approval. Final combined CI must use reviewed source and actual checkout/tree."
+}

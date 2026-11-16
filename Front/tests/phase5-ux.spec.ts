@@ -67,7 +67,7 @@ async function learningGeometry(page: Page) {
       return { x: rect.x, y: rect.y + scrollY, width: rect.width, height: rect.height };
     };
     return { goal: box(".learning-goal"), toolbar: box(".learning-toolbar"), summary: box("dl.learning-summary"),
-      documentWidth: document.documentElement.scrollWidth, viewportWidth: innerWidth };
+      documentWidth: document.documentElement.scrollWidth, viewportWidth: innerWidth, fontStatus: document.fonts.status };
   });
 }
 
@@ -94,6 +94,9 @@ for (const width of [320, 375, 768, 1440]) {
       await expect(page.locator("html")).toHaveAttribute("data-theme", colorScheme);
       await expect(goal).toContainText("900 / 1,000문제");
       await expect(page.getByRole("definition")).toHaveCount(4);
+      // Match the screenshot's font wait before the first geometry sample;
+      // otherwise only the second sample benefits from that wait.
+      await page.evaluate(() => document.fonts.ready);
       const before = await learningGeometry(page);
       const evidenceDirectory = resolve("reports/phase5-ux");
       await mkdir(evidenceDirectory, { recursive: true });
