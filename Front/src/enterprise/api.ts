@@ -56,7 +56,7 @@ export function useTestResults(session: Session | null, id: string | undefined, 
 export const enterpriseApi = {
   create: (token: string, input: TestInput) =>
     api<EnterpriseTest>("/enterprise/tests", { method: "POST", body: JSON.stringify(input) }, token),
-  update: (token: string, id: string, input: TestInput & { refreshProblemVersions?: boolean }) =>
+  update: (token: string, id: string, input: TestInput & { refreshProblemVersions?: boolean; refreshVibeVersions?: boolean }) =>
     api<EnterpriseTest>(`/enterprise/tests/${id}`, { method: "PATCH", body: JSON.stringify(input) }, token),
   remove: (token: string, id: string) =>
     api<{ id: string }>(`/enterprise/tests/${id}`, { method: "DELETE" }, token),

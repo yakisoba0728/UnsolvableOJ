@@ -1,0 +1,49 @@
+{
+  "reviewer": "independent_recovery",
+  "authorSeparated": true,
+  "reviewedHead": "830f5a735c21139fa585f11f62fb95b10b94c714",
+  "reviewedTree": "358846022aaea1dcf4fc3495470115e3c684cc65",
+  "base": "45b6c9c6f879b8966b8f0c14eecdd06fb5a588e4",
+  "disposition": "Source and targeted independent local validation accepted; publication/merge remains conditional on final exact-head CI, native runner and browser gates.",
+  "fixedFindings": [
+    {
+      "id": "P3-VIBE-REVIEW-MODEL",
+      "severity": "P2 contract consistency",
+      "before": "Independent real PostgreSQL API probe at c3fa9b2 observed later-fixture-model-0 and later-fixture-model-1 for two candidates despite selecting with selected-fixture-model.",
+      "after": "The identical independent API probe passes at reviewedHead; both candidates retain selected-fixture-model. The identifier is not exposed in workspace JSON.",
+      "qualification": "The test simulates a future deployment policy by replacing the configured-model getter. Current environment validation permits only gpt-6-luna; this was not a current arbitrary-model configuration exploit."
+    },
+    {
+      "id": "P3-VIBE-REVIEW-TEMPLATE",
+      "severity": "P2 contract consistency",
+      "before": "At c3fa9b2 a stored noneditable src/constants.ts dependency was omitted from the actual runner compile request payload.",
+      "after": "Identical payload assertion passes at reviewedHead. Compiler input includes immutable initialFiles, edited saved files and the archived harness.",
+      "qualification": "This probe captures the compile request using a test double, not native execution. Baseline template did not yet import a noneditable source module."
+    }
+  ],
+  "sourceReview": [
+    "Canonical archive hashing, immutable update trigger and restricted foreign-key deletion",
+    "Frozen migration baseline, unknown historical challenge refusal, divergent historical model refusal and conservative rollback refusal",
+    "Selection/explicit refresh and fresh post-lock ordinary-save binding preservation",
+    "Candidate, owner and staff authorization/projections; server-only fixtures, prompts and model configuration excluded",
+    "Archived file editing, AI assistance/evaluation, runner input, result denominator and revision lineage",
+    "Structural hidden-test diagnostic suppression independent of display label",
+    "Frontend selected metadata and explicit refresh contract from author-separated companion commit 94fe15d"
+  ],
+  "executed": [
+    { "head": "c3fa9b25d926c3ec2b86fcdf1666a5d2a358d42a", "command": "npm run check", "result": "lint, types, 327 units in 26 files and build passed" },
+    { "head": "830f5a735c21139fa585f11f62fb95b10b94c714", "command": "npm run build", "result": "passed" },
+    { "head": "830f5a735c21139fa585f11f62fb95b10b94c714", "command": "Four Vibe/archive/AI/score unit files", "result": "16 passed" },
+    { "head": "830f5a735c21139fa585f11f62fb95b10b94c714", "command": "Owned PostgreSQL API: four repository Vibe/version/migration files plus one independent model parity regression", "result": "25 passed in 5 files; 22.81 seconds" },
+    { "head": "830f5a735c21139fa585f11f62fb95b10b94c714", "command": "Independent immutable template compiler-payload probe", "result": "passed" }
+  ],
+  "environment": "Owned temporary PostgreSQL17.11/Redis8.10.3, random loopback endpoints, Node24.22.1; no paid AI/provider call or production resource",
+  "limits": [
+    "API suites use a runner/provider test double; native direct-runner and actual browser behavior still require CI.",
+    "This does not establish browser-to-API-to-native-Vibe full E2E, cross-image binary equivalence, provider determinism or production migration readiness.",
+    "Frontend companion was statically reviewed, not locally browser-executed by this reviewer.",
+    "Final workflow must select native validation for vibe.snapshot.ts, vibe.prompts.ts and vibe.ai.ts and select new browser cases for required engines.",
+    "Application-source whitespace clean; diff-check reports only preserved original raw log EOF blank lines."
+  ],
+  "humanApprovalClaim": false
+}

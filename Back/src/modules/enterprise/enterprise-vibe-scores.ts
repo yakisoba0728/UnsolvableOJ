@@ -1,4 +1,4 @@
-import { challenge } from '../vibe/vibe.catalog.js';
+import { ServiceUnavailableException } from '@nestjs/common';
 import type { VibeReport } from '../vibe/vibe.types.js';
 
 export interface EnterpriseVibeRow {
@@ -14,6 +14,7 @@ export function buildEnterpriseVibeScores(
   challengeIds: readonly string[],
   attemptIds: readonly string[],
   rows: readonly EnterpriseVibeRow[],
+  bindings: ReadonlyMap<string, { title: string; version: string }>,
 ) {
   const byAttempt = new Map<string, Map<string, EnterpriseVibeRow>>();
   for (const row of rows) {
@@ -29,6 +30,8 @@ export function buildEnterpriseVibeScores(
     attemptIds.map((id) => [
       id,
       challengeIds.map((challengeId) => {
+        const binding = bindings.get(challengeId);
+        if (!binding) throw new ServiceUnavailableException('고정된 과제 정보를 확인할 수 없습니다.');
         const row = byAttempt.get(id)?.get(challengeId);
         const report = row?.report;
         const score = !row
@@ -38,7 +41,8 @@ export function buildEnterpriseVibeScores(
             : null;
         return {
           challengeId,
-          title: challenge.title,
+          title: binding.title,
+          challengeVersion: binding.version,
           id: row?.id ?? null,
           submittedAt: row?.submitted_at ?? null,
           score,

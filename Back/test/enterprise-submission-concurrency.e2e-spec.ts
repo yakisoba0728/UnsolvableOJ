@@ -1,3 +1,4 @@
+import { BASELINE_VERSION } from '../src/database/migrations/1796000000000-vibe-challenge-versions.js';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -155,12 +156,12 @@ describe('enterprise submission eligibility after lock waits (e2e)', () => {
     const response = await withBlockedSubmission(exam.id,
       (runner) => runner.query('SELECT id FROM enterprise_attempts WHERE id=$1 FOR UPDATE', [exam.id]),
       (runner) => runner.query(
-        `INSERT INTO vibe_attempts(user_id,challenge_id,state,model,enterprise_attempt_id,deadline_at)
-         SELECT $1,'post-search-v1',$3::jsonb,'test',id,deadline_at FROM enterprise_attempts WHERE id=$2`,
+        `INSERT INTO vibe_attempts(user_id,challenge_id,state,model,enterprise_attempt_id,deadline_at,challenge_version)
+         SELECT $1,'post-search-v1',$3::jsonb,'test',id,deadline_at,$4 FROM enterprise_attempts WHERE id=$2`,
         [candidate.user.id, exam.id, JSON.stringify({
           files: {}, messages: [], events: [], runs: [], undo: null,
           report: null, aiRequests: 0, evaluations: 0,
-        })],
+        }), BASELINE_VERSION],
       ),
     );
     expect(response.status).toBe(202);

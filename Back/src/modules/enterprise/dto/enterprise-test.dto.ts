@@ -86,4 +86,9 @@ export class UpdateEnterpriseTestDto extends PartialType(
   @IsOptional()
   @IsBoolean()
   refreshProblemVersions?: boolean;
+
+  /** Explicit refresh of Vibe content, fixtures and runner/review contract before start. */
+  @IsOptional()
+  @IsBoolean()
+  refreshVibeVersions?: boolean;
 }

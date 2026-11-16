@@ -15,6 +15,7 @@ import {
   toLocalInput,
   validateDraft,
   type EnterpriseTest,
+  type EnterpriseTestDetail,
   type TestDraft,
   type TestErrors,
 } from "../enterprise/model";
@@ -182,7 +183,7 @@ function TestForm({
   getNavigationVersion,
 }: {
   token: string;
-  existing?: EnterpriseTest;
+  existing?: EnterpriseTestDetail;
   getNavigationVersion: () => number;
 }) {
   const navigate = useNavigate();
@@ -202,6 +203,13 @@ function TestForm({
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
   const [refreshProblemVersions, setRefreshProblemVersions] = useState(false);
+  const [refreshVibeVersions, setRefreshVibeVersions] = useState(false);
+  const pinnedVibeById = new Map((existing?.selectedVibeChallenges ?? []).map(item => [item.id, item]));
+  const currentVibeById = new Map((catalog.data?.items ?? []).map(item => [item.id, item]));
+  const vibeChoices = [
+    ...(catalog.data?.items ?? []),
+    ...(existing?.selectedVibeChallenges ?? []).filter(item => !currentVibeById.has(item.id)),
+  ];
   const errors = showErrors ? validateDraft(draft) : {};
   const patch = (next: Partial<TestDraft>) =>
     setDraft((prev) => ({ ...prev, ...next }));
@@ -242,7 +250,7 @@ function TestForm({
     setSaving(true);
     try {
       const saved = existing
-        ? await enterpriseApi.update(token, existing.id, { ...input, refreshProblemVersions })
+        ? await enterpriseApi.update(token, existing.id, { ...input, refreshProblemVersions, refreshVibeVersions })
         : await enterpriseApi.create(token, input);
       if (ownsRequest()) navigate(`/enterprise/${saved.id}`);
     } catch (cause) {
@@ -460,7 +468,7 @@ function TestForm({
             <h3 className="ent-vibe-heading">바이브코딩 과제</h3>
             <p className="field-help">
               기존 프로젝트의 버그 수정·기능 추가와 프롬프트·검증 과정을
-              평가합니다.
+              평가합니다. 과제 내용과 실행·평가 기준은 시험에 추가할 때 고정됩니다.
             </p>
             {catalog.error ? (
               <p className="error-message" role="alert">
@@ -476,11 +484,17 @@ function TestForm({
             ) : catalog.loading ? (
               <p className="muted">과제를 불러오는 중…</p>
             ) : (
-              catalog.data?.items.map((item) => (
+              vibeChoices.map((item) => {
+                const selected = draft.vibeChallengeIds?.includes(item.id) ?? false;
+                const pinned = pinnedVibeById.get(item.id);
+                const unavailable = !currentVibeById.has(item.id);
+                const title = selected && pinned && !refreshVibeVersions ? pinned.title : item.title;
+                return (
                 <label className="ent-problem" key={item.id}>
                   <input
                     type="checkbox"
-                    checked={draft.vibeChallengeIds?.includes(item.id) ?? false}
+                    checked={selected}
+                    disabled={unavailable && !selected}
                     onChange={() =>
                       patch({
                         vibeChallengeIds: draft.vibeChallengeIds?.includes(
@@ -493,10 +507,11 @@ function TestForm({
                       })
                     }
                   />
-                  <span className="ent-problem-title">{item.title}</span>
-                  <span className="case-pill">바이브코딩</span>
+                  <span className="ent-problem-title">{title}</span>
+                  <span className="case-pill">{selected && pinned && !refreshVibeVersions ? "선택 시 고정" : "바이브코딩"}</span>
+                  {unavailable ? <span className="field-help">현재 목록에 없는 고정 과제</span> : null}
                 </label>
-              ))
+              ); })
             )}
             {err("problemIds")}
             {privateError ? (
@@ -526,6 +541,16 @@ function TestForm({
                 </span>
               </label>
             )}
+            {existing && (draft.vibeChallengeIds?.length ?? 0) > 0 ? (
+              <label className="field-help">
+                <input type="checkbox" checked={refreshVibeVersions}
+                  onChange={(event) => setRefreshVibeVersions(event.target.checked)} />{" "}
+                저장할 때 선택한 바이브코딩 과제를 모두 최신 버전으로 갱신
+                <span className="field-help">
+                  선택하지 않으면 고정된 과제와 평가 기준을 유지합니다. 시험 시작 후에는 갱신할 수 없습니다.
+                </span>
+              </label>
+            ) : null}
           </section>
         </div>
 

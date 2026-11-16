@@ -12,6 +12,8 @@ export interface EnterpriseTest {
   problemVersions?: { problemId: string; version: number }[];
   problemVersionPolicy?: 'ON_SELECTION';
   vibeChallengeIds?: string[];
+  vibeChallengeVersions?: { challengeId: string; version: string }[];
+  vibeVersionPolicy?: 'ON_SELECTION';
   /** 응시 링크 코드: /enterprise/join/:code */
   inviteCode: string;
   /** true면 invitees에 적은 사람만 응시할 수 있다. */
@@ -27,6 +29,14 @@ export interface EnterpriseTest {
 
 /** Owner/admin-only detail; never part of the invitation or candidate test summary. */
 export interface EnterpriseTestDetail extends EnterpriseTest {
+  selectedVibeChallenges?: {
+    id: string;
+    version: string;
+    title: string;
+    difficulty: string;
+    stack: string;
+    durationMin: number;
+  }[];
   selectedProblems: {
     id: string;
     version: number;
@@ -79,6 +89,7 @@ export interface AttemptView extends Attempt {
 
 export interface EnterpriseVibeTask {
   challengeId: string;
+  challengeVersion?: string;
   title: string;
   id: string | null;
   submittedAt: string | null;

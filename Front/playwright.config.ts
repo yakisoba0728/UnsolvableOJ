@@ -24,6 +24,7 @@ const slowSpecs = [
 const webkitSpecs = [
   "learning-dashboard.spec.ts",
   "enterprise-pinned-summary.spec.ts",
+  "enterprise-vibe-versioning.spec.ts",
   "enterprise-refresh.spec.ts",
   "enterprise-ownership.spec.ts",
   "problem-bookmarks.spec.ts",
