@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "timestamp": "2026-11-16T03:53:30.675Z",
+  "evidence": [
+    {
+      "scenario": "actual clean owned Redis daemon restart with AOF and mixed queued work",
+      "restartMs": 8703.546706000001,
+      "completionMs": 10306.620968,
+      "originalLanguages": [
+        "PYTHON",
+        "C",
+        "JAVASCRIPT"
+      ],
+      "acceptedSubmissions": 4,
+      "failedDuringDowntime": 1,
+      "failureStatus": 500,
+      "failureLatencyMs": 453.051563,
+      "generation": 1,
+      "recoveries": 0,
+      "xp": 10,
+      "redisImage": "redis:8.10.3",
+      "redisImageId": "sha256:978293674c6b207a799aa6003064828846a7771cd521603c41e9a4c7f28ec4dc",
+      "appendonly": true,
+      "appendfsync": "everysec",
+      "cleanStopExitCode": 0,
+      "firstRunId": "a24bdeb9a1b81d0552816a9199af4dd22be7a13c",
+      "secondRunId": "29d52a8c1452d028e2b7dd9c42811288cfcc5f63",
+      "workflowRedisRestarted": false,
+      "crashDurabilityTested": false
+    }
+  ],
+  "events": [
+    {
+      "stage": "mixed work accepted",
+      "submissions": [
+        "ad779262-679a-414c-8a21-cc99b35c9549",
+        "ca9a61e4-c625-4035-9c8a-91b70f94dbb8",
+        "20c5f39d-42e2-4529-b1b4-15030342e5e6"
+      ],
+      "containerId": "c07d45dc3a251e9914b96582d9ebed4a332e72f0fec134d97ecd6b1b97fa7bef",
+      "volume": "unsolvable-p2-redis-37b4712084a041a2bf6e46660e09a2a1-data",
+      "imageId": "sha256:978293674c6b207a799aa6003064828846a7771cd521603c41e9a4c7f28ec4dc"
+    },
+    {
+      "stage": "Redis daemon cleanly stopped",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T03:53:20.263391335Z"
+    },
+    {
+      "stage": "outage submission rejected",
+      "status": 500,
+      "elapsedMs": 453.051563,
+      "createdRows": 0
+    },
+    {
+      "stage": "active result committed while Redis is stopped",
+      "elapsedMs": 8085.306272999999,
+      "queuedJobs": 2
+    },
+    {
+      "stage": "Redis restarted with persisted jobs",
+      "restartMs": 8703.546706000001,
+      "firstRunId": "a24bdeb9a1b81d0552816a9199af4dd22be7a13c",
+      "secondRunId": "29d52a8c1452d028e2b7dd9c42811288cfcc5f63"
+    }
+  ],
+  "cleanupSucceeded": true
+}

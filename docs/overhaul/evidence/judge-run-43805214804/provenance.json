@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "runId": 43805214804,
+  "runUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43805214804",
+  "pullRequest": 68,
+  "testedSourceHead": "0e70a2fe6d725362bcb248836c3697d310e16742",
+  "testedTree": "f302cef7d2459736d3810ee930f1c9e63662ed65",
+  "testedIntegrationBase": "e7caa9b3aa23ac051e3a786780bc3b8c0780affa",
+  "actualCheckout": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+  "integratedCommit": "bfb6adaa28d5d99d34d6bc8051f06fe1aa0c6ee3",
+  "artifact": {
+    "id": 14198052584,
+    "node_id": "MDg6QXJ0aWZhY3QxNDE5ODA1MjU4NA==",
+    "name": "phase2-judge-evidence-1",
+    "size_in_bytes": 21497,
+    "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14198052584",
+    "archive_download_url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14198052584/zip",
+    "expired": false,
+    "digest": "sha256:9923d054856a03fb6bc2541af6e372a63a93ddbfafc08c143a0132605cd23e44",
+    "created_at": "2026-11-16T04:47:13Z",
+    "updated_at": "2026-11-16T04:47:13Z",
+    "expires_at": "2026-11-23T04:47:12Z",
+    "workflow_run": {
+      "id": 43805214804,
+      "repository_id": 1379559648,
+      "head_repository_id": 1379559648,
+      "head_branch": "overhaul2/image-security",
+      "head_sha": "0e70a2fe6d725362bcb248836c3697d310e16742"
+    }
+  },
+  "files": {
+    "phase2-api-restart.json": {
+      "sha256": "69c9e37ed9775474ee72a16bf1b24c481fe30160ed3610c1f4afcc156292393f",
+      "bytes": 471
+    },
+    "phase2-redis-restart.json": {
+      "sha256": "f2893e70e2115ba54341790e4f1eec9f3e9dda00134dffb34bb3b4c7769b7850",
+      "bytes": 2126
+    },
+    "phase2-rejudge-recovery.json": {
+      "sha256": "fff56fe5b59b37e6b2b2cf18dc3c5461c3f4636c715c1f8ca01853ad6a4eeffa",
+      "bytes": 545
+    },
+    "phase2-judge-capacity.json": {
+      "sha256": "912edc64833da1d2e4b21119ecb9a0e9972592e6b27d42e278d5cef113450ea5",
+      "bytes": 26944
+    }
+  },
+  "executedCases": {
+    "nativeRuntime": 74,
+    "realPipeline": 28,
+    "realComposeBrowser": 3
+  },
+  "limits": [
+    "Clean owned Redis daemon/AOF restart, not power-loss, corrupt-log or crash-fsync durability.",
+    "Eight submissions per alternating worker trial; p95/p99 are sample maxima, no steady-state or controlled Phase I/II comparison.",
+    "Dedicated host kernel and full MLE matrix remain unverified.",
+    "Original ZIP and selected JSON are retained byte-for-byte; full log hashes and independent review are in independent-final-qa.json."
+  ]
+}

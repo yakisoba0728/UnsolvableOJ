@@ -40,3 +40,51 @@ PHASE2-PERFORMANCE and PHASE2-RESULTS contain fixed source hashes, environments,
 Initial image run 43796045174 completed all four scans and correctly failed on HIGH/CRITICAL findings. Patchable package/toolchain issues have a reviewed candidate; exact image bytes/native behavior and residual kernel-header applicability are separate gates. Image build success and clean npm audits cannot clear these findings. Raw scans, immutable image/source identity, database freshness and all severities are preserved.
 
 After pending candidates pass and are integrated, run full CI at the final integration HEAD, update this ledger with the exact evidence, and update PR #63. Until then, this document does not declare final merge readiness or deployment readiness.
+
+## Completed combined verification gate
+
+PR #70 source `d5dc5a9cfa627a505efeeac6458a7d9556b71e06` passed all12 jobs in
+[43800127993](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43800127993)
+against base `e97b08a238798f740438118818d8dd75e68173d8`, then integrated as
+`e7caa9b3aa23ac051e3a786780bc3b8c0780affa`. Backend320 units and actual API209
+passed in Actions. Native74, pipeline28 and all3 real Compose browser flows
+passed, including the new real exam/Judge flow. Six complete/production npm
+audits reported zero findings. The Front logs contain85 browser-free unit
+instances plus372 Chromium,111 Chromium-slow,112 WebKit and112 Firefox cases:
+707 actual browser instances,792 total. No retry-only/flaky success was reported.
+
+The previously pending pinned-summary, owned Redis restart and interrupted
+rejudge cases have now actually executed. The raw artifact and exact job/source
+identities are retained under evidence/judge-run-43800127993. This certifies that
+component combination, not the subsequently rebuilt runtime image or final
+integration HEAD. Those still require their own observed gates.
+
+## Accepted shipping-image and combined runtime gate
+
+PR #68 source `0e70a2fe6d725362bcb248836c3697d310e16742`, actual checkout
+`71370b28d8a30d3ac79cf18de5facd291b6447d2`, and source/checkout tree
+`f302cef7d2459736d3810ee930f1c9e63662ed65` passed all12 jobs in
+[43805214804](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43805214804).
+The current base was `e7caa9b3aa23ac051e3a786780bc3b8c0780affa`; integration
+`bfb6adaa28d5d99d34d6bc8051f06fe1aa0c6ee3` has the same accepted tree.
+
+Product, Judge and coordinator independently checked the actual job results
+and public Git identities before merge. Back320, API209, Judge107, native74,
+pipeline28, Compose3, browser707 and browser-free85 all passed. Six npm audits
+reported zero findings. The runtime image job executed88 evidence/gate tests
+and generated the actual505-package Go closure with no OpenPGP import.
+Back/Front/Judge pass the unmodified raw image scanner. Runtime preserves raw
+exit2,177 HIGH and5 CRITICAL, with the separate reviewed182-record decision
+and990-file actual-OCI proof. Host readiness is UNVERIFIED.
+
+The final raw image ZIPs/independent QA are retained under
+[evidence/images-run-43805214804](evidence/images-run-43805214804/provenance.json);
+the rebuilt runtime's original recovery ZIP and four JSON records are under
+[evidence/judge-run-43805214804](evidence/judge-run-43805214804/provenance.json).
+These observed results supersede the earlier image-candidate pending entries,
+while preserving their historical failed attempts.
+
+The final documentation PR still receives independent review and full CI;
+after integration, the post-merge integration HEAD is checked separately.
+The final verification receipt on PR #63 records those exact head/tree/run
+identities and any failure. This document cannot predeclare that later result.

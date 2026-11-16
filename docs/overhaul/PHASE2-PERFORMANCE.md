@@ -42,6 +42,33 @@ UNSOLVABLE_BENCHMARK=1 node Back/scripts/benchmark-community-indexes.mjs --with-
 
 The completed bookmark-only controlled build comparison is in [PHASE2-FEATURES.md](PHASE2-FEATURES.md). Initial entry gzip grew22 bytes; total emitted JavaScript gzip grew1,127 bytes at immutable feature35d9d77. These are file sizes and exclude later enterprise changes. They do not measure LCP, INP, CLS, browser main-thread CPU or memory leaks. Final combined bundle results, if measured, are a separate snapshot.
 
+### Combined Phase II frontend snapshot
+
+A fresh controlled build compares Phase I `c8ba9712d1a29ac633519511e50428ef647edf66`
+with application composition local `b65c861eff79b0f7e795814d59e5904bf3aeb084`,
+published as `d5dc5a9cfa627a505efeeac6458a7d9556b71e06`. Both worktrees were
+clean and used the identical unchanged Front lockfile, Node24.22.1/npm11.9.0,
+and `env -u VITE_SENTRY_DSN -u VITE_API_BASE_URL npm run build --prefix Front`.
+This snapshot includes bookmarks, enterprise ownership/draft preservation,
+selected-version metadata and bounded result navigation.
+
+| Compressed artifact metric | Phase I | Combined Phase II | Change |
+|---|---:|---:|---:|
+| HTML module entry bytes | 381,317 | 381,551 | +234 |
+| Entry gzip, level9 | 122,616 | 122,690 | +74 (+0.060%) |
+| Entry Brotli, quality11 | 105,818 | 105,887 | +69 (+0.065%) |
+| Total emitted JavaScript bytes | 1,462,761 | 1,470,378 | +7,617 |
+| Total JavaScript gzip | 482,612 | 485,346 | +2,734 (+0.567%) |
+| Total JavaScript Brotli | 410,297 | 412,793 | +2,496 (+0.608%) |
+
+Totals sum separately compressed files, including lazy chunks and theme-init.js.
+One fresh build per source measured deterministic artifact size; no build-time
+or browser latency distribution is inferred. No heavy dependency was added to
+Front. This is a measured delivery cost, not a claimed rendering speedup. Raw
+per-file sizes/hashes and build provenance are in
+[phase2-combined-frontend-bundles.json](measurements/phase2-combined-frontend-bundles.json).
+LCP/INP/CLS and long-running browser CPU/memory remain N/A.
+
 ## Real authenticated owner-results HTTP
 
 The bounded pagination change was measured against source `1011e35` before and `1b2b1e7` after, with the identical measurement script. Each condition uses a fresh owned PostgreSQL/Redis/API process. The sequence is before 1,000, after 1,000, after 5,000, before 5,000 candidates; the reverse order for the larger fixture reduces a simple warmup-order bias. Each fixture has two algorithm questions and one Vibe task with deterministic accepted, incorrect, missing and pending results. All global summaries and normalized first-50 result digests match.
@@ -92,3 +119,35 @@ Exact raw records and hashes are committed under [evidence/judge-run-43794094432
 ## Explicit unmeasured domains
 
 Production-sized mixed concurrent writes, full-platform CPU/RSS, distributed queue clocks, cold-cache API capacity, sustained load, long-duration failure combinations and real-user browser vitals remain unmeasured. Current evidence supports the stated bounded improvements and recovery cases, not an extreme-scale production capacity claim.
+
+## Rebuilt runtime: additional accepted capacity observation
+
+The accepted image source `0e70a2fe6d725362bcb248836c3697d310e16742`
+was measured again in full CI43805214804. The original artifact, four JSON
+records, exact source/checkout/tree and independent review are retained in
+[evidence/judge-run-43805214804](evidence/judge-run-43805214804/provenance.json).
+This is an additional same-code worker-scaling observation. It is not a
+controlled comparison with run43794094432 or a Phase I/II speedup.
+
+Environment: Node24.22.2, Linux7.0.0-1017-azure, four logical CPUs reported as
+AMD EPYC9V74 on a shared Actions runner. Each trial submitted eight actual
+accepted languages through HTTP/PostgreSQL/BullMQ/worker/go-judge/callback,
+after Python warmup, in1/2/2/1-worker order. Normal20/min admission pauses
+remain outside each timed burst. Two trials per worker count supply these
+observed ranges; p95/p99 are eight-sample maxima.
+
+| Metric | One worker | Two workers | Scope |
+|---|---:|---:|---|
+| Jobs/s | 0.795–0.815 | 0.910–0.942 | Admitted finite burst |
+| Queue wait p50 | 1.373–1.410s | 0.122–0.375s | Two trial medians |
+| Queue wait p95/p99 | 1.881–9.407s | 1.209–1.299s | Sample maxima; one-worker variability retained |
+| HTTP submission p95/p99 | 30.86–62.25ms | 53.93–58.27ms | Sample maxima, not all API traffic |
+| Worker CPU per eight jobs | 100–110ms | 110–140ms | Aggregate Node-worker procfs deltas |
+| Per-worker peak RSS | About107MiB | About107MiB each | Two processes roughly double this part of RSS |
+| API-only or compiler/executor CPU/RSS | N/A | N/A | Harness shares API; compiler/executor not measured |
+
+The broader single-worker queue range reinforces why these data must not be
+presented as steady-state tail estimates or a causal runtime-image speedup.
+All jobs completed; duplicate/stale/recovery assertions passed in the same
+finite run. Long-duration saturation, production hardware and isolated
+compiler/executor profiling remain unmeasured.

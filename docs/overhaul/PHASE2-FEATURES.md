@@ -97,3 +97,11 @@ node Front/scripts/measure-bundles.mjs BEFORE_DIST AFTER_DIST
 ```
 
 All remaining browser/CI/integration status must be read from the actual branch HEAD and coordinator records; an earlier build or baseline CI is not the final gate.
+
+## Completed integration and broader user-facing changes
+
+The bookmark source was independently reviewed and integrated through [PR #66](https://github.com/yakisoba0728/UnsolvableOJ/pull/66) only after all12 jobs in [43792648475](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43792648475) passed. Its browser regressions and real-service save/reload/list/remove flow subsequently passed again in combined run43800127993. The local discovery/pending statements above describe the original implementation handoff, not the final observed execution state.
+
+The same release also implements immutable enterprise problem selection with an explicit pre-start version refresh, candidate-consistent statements/limits/Judge results, owner-visible pinned metadata, and bounded result navigation with whole-test summaries. These are separate implemented product changes, documented in PHASE2-ENTERPRISE, PHASE2-ENTERPRISE-SUMMARY and PHASE2-RESULTS. Request ownership, keyboard feedback, failed-page retry and first-page recovery are covered by focused browser tests. Actual CI exercised the full private-version exam lifecycle through signup, author edit, candidate start, real judging, completion and owner results. No mock API response was used in that Compose flow.
+
+Run43800127993 executed707 actual browser instances across Chromium/slow Chromium/WebKit/Firefox, plus85 browser-free unit instances and3 live Compose flows. These are suite-wide counts, not707 unique bookmark scenarios. Whole-front-end measured delivery cost, including the combined changes, is in PHASE2-PERFORMANCE and its raw bundle manifest; no real-user Web Vitals claim is made.
