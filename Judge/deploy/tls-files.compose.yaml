@@ -1,0 +1,20 @@
+# Optional overlay for a private Redis CA and mutual TLS. Files are mounted only
+# into the unprivileged worker; the execution service receives no Redis identity.
+services:
+  judge:
+    environment:
+      REDIS_TLS_CA_FILE: /run/secrets/redis_tls_ca
+      REDIS_TLS_CERT_FILE: /run/secrets/redis_tls_cert
+      REDIS_TLS_KEY_FILE: /run/secrets/redis_tls_key
+    secrets:
+      - redis_tls_ca
+      - redis_tls_cert
+      - redis_tls_key
+
+secrets:
+  redis_tls_ca:
+    file: ${EXECUTOR_REDIS_CA_PATH:?Set the private Redis CA bundle path}
+  redis_tls_cert:
+    file: ${EXECUTOR_REDIS_CERT_PATH:?Set the worker client certificate path}
+  redis_tls_key:
+    file: ${EXECUTOR_REDIS_KEY_PATH:?Set the worker client private key path}
