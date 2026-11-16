@@ -338,6 +338,7 @@ jobs:
         if: ${{ matrix.shard == 1 }}
         run: npm run check --prefix Front
       - name: Browser regression tests
+        id: phase5_browser
         working-directory: Front
         env:
           # 컨테이너는 root로 돈다. HOME이 /github/home이면 일부 브라우저가 프로필을 만들지 못한다.
@@ -376,6 +377,7 @@ jobs:
           }
           NODE
       - name: Firefox core-flow regression tests
+        id: phase5_firefox
         if: ${{ needs.changes.outputs.full == 'true' }}
         working-directory: Front
         env:
@@ -401,7 +403,7 @@ jobs:
             Front/reports/phase5-browser-selection.json
             Front/reports/phase5-editor-observation.json
           # One shard owns the editor observation; its selected-run check requires that report.
-          if-no-files-found: ${{ success() && 'error' || 'warn' }}
+          if-no-files-found: ${{ steps.phase5_browser.outcome == 'success' && (needs.changes.outputs.full != 'true' || steps.phase5_firefox.outcome == 'success') && 'error' || 'warn' }}
           retention-days: 30
       - name: Failed browser test artifacts (disposable test data only)
         if: ${{ failure() }}
