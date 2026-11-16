@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import type { DataSource } from 'typeorm';
 import { describe, expect, it, vi } from 'vitest';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
@@ -15,13 +15,16 @@ import {
 import type { VibeAttemptRow } from './vibe.types.js';
 
 const actor: AuthenticatedUser = {
-  id: 'candidate',
+  id: '00000000-0000-4000-8000-000000000002',
   role: UserRole.USER,
   tokenVersion: 7,
   sessionId: 'candidate-session',
 };
 
-function fixture(access: 'inactive' | 'revoked-session' | 'active') {
+function fixture(
+  access: 'inactive' | 'revoked-session' | 'active',
+  ownerDeleted = false,
+) {
   const content = currentVibeSnapshot();
   const row: VibeAttemptRow = {
     id: 'attempt',
@@ -59,6 +62,14 @@ function fixture(access: 'inactive' | 'revoked-session' | 'active') {
   };
   const writes: string[] = [];
   const query = vi.fn(async (sql: string, parameters?: unknown[]) => {
+    if (sql.trimStart().startsWith('SELECT id,deleted_at FROM users ')) {
+      const ids = parameters?.[0];
+      if (!Array.isArray(ids)) throw new Error('Expected user IDs for row locks');
+      return ids.map((id) => ({
+        id,
+        deleted_at: id === actor.id && ownerDeleted ? new Date() : null,
+      }));
+    }
     if (sql.trimStart().startsWith('SELECT id FROM users '))
       return access === 'inactive' ? [] : [{ id: parameters?.[0] }];
     if (sql.includes('FROM refresh_tokens'))
@@ -183,39 +194,82 @@ describe('Vibe mutation actor fencing after guard authentication', () => {
     );
   }
 
-  it('locks the actual staff actor and session while finalizing the candidate owner', async () => {
-    const { row, query, runner, service } = fixture('active');
-    const staff: AuthenticatedUser = {
-      id: 'staff',
-      role: UserRole.ADMIN,
-      tokenVersion: 9,
-      sessionId: 'staff-session',
-    };
-    const result = await service.finalize(row.id, row.user_id, staff);
-    expect(result.id).toBe(row.id);
-    expect(result.report?.outcome).toBe(40);
-    expect(runner.run).toHaveBeenCalledOnce();
-    const locked = query.mock.calls.filter(([sql]) =>
-      sql.includes('FOR NO KEY UPDATE'),
-    );
-    expect(locked).toHaveLength(1);
-    expect(locked[0][1]).toEqual([staff.id, staff.tokenVersion]);
-    expect(
-      query.mock.calls.find(([sql]) =>
-        sql.includes('FROM refresh_tokens'),
-      )?.[1],
-    ).toEqual([staff.sessionId, staff.id]);
-    const lockIndex = query.mock.calls.findIndex(([sql]) =>
-      sql.includes('FOR NO KEY UPDATE'),
-    );
-    const admissionIndex = query.mock.calls.findIndex(([sql]) =>
-      sql.includes('vibe-operations'),
-    );
-    expect(admissionIndex).toBeGreaterThan(lockIndex);
-    expect(
-      query.mock.calls
-        .filter(([sql]) => sql.includes('FROM vibe_attempts v'))
-        .every(([, parameters]) => parameters?.[1] === actor.id),
-    ).toBe(true);
-  });
+  it.each(['submit', 'evaluate'] as const)(
+    'rejects staff %s when the candidate was deleted after the initial ownership read',
+    async (kind) => {
+      const { row, writes, ai, runner, service } = fixture('active', true);
+      if (kind === 'evaluate') {
+        row.submitted_at = new Date();
+        row.state.report = {
+          outcome: 0,
+          passed: 0,
+          total: 11,
+          prompt: null,
+          process: null,
+          model: row.model,
+          evaluationStatus: 'unavailable',
+          reflection: '',
+          checks: [],
+        };
+      }
+      const retained = structuredClone(row);
+      await expect(
+        service.finalize(row.id, row.user_id, {
+          id: '00000000-0000-4000-8000-000000000001',
+          role: UserRole.ADMIN,
+          tokenVersion: 9,
+          sessionId: 'staff-session',
+        }),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(row).toEqual(retained);
+      expect(writes).toEqual([]);
+      expect(ai.assist).not.toHaveBeenCalled();
+      expect(ai.evaluate).not.toHaveBeenCalled();
+      expect(runner.run).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    '00000000-0000-4000-8000-000000000001',
+    '00000000-0000-4000-8000-000000000003',
+  ])(
+    'orders both user locks before validating staff %s and finalizing the owner',
+    async (staffId) => {
+      const { row, query, runner, service } = fixture('active');
+      const staff: AuthenticatedUser = {
+        id: staffId,
+        role: UserRole.ADMIN,
+        tokenVersion: 9,
+        sessionId: 'staff-session',
+      };
+      const result = await service.finalize(row.id, row.user_id, staff);
+      expect(result.id).toBe(row.id);
+      expect(result.report?.outcome).toBe(40);
+      expect(runner.run).toHaveBeenCalledOnce();
+      const locked = query.mock.calls.filter(([sql]) =>
+        sql.includes('FOR NO KEY UPDATE'),
+      );
+      expect(locked).toHaveLength(2);
+      expect(locked[0][0]).toContain('ORDER BY id FOR NO KEY UPDATE');
+      expect(locked[0][1]).toEqual([[staff.id, actor.id]]);
+      expect(locked[1][1]).toEqual([staff.id, staff.tokenVersion]);
+      expect(
+        query.mock.calls.find(([sql]) =>
+          sql.includes('FROM refresh_tokens'),
+        )?.[1],
+      ).toEqual([staff.sessionId, staff.id]);
+      const lockIndex = query.mock.calls.findIndex(([sql]) =>
+        sql.includes('FOR NO KEY UPDATE'),
+      );
+      const admissionIndex = query.mock.calls.findIndex(([sql]) =>
+        sql.includes('vibe-operations'),
+      );
+      expect(admissionIndex).toBeGreaterThan(lockIndex);
+      expect(
+        query.mock.calls
+          .filter(([sql]) => sql.includes('FROM vibe_attempts v'))
+          .every(([, parameters]) => parameters?.[1] === actor.id),
+      ).toBe(true);
+    },
+  );
 });

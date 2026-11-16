@@ -452,9 +452,25 @@ export class VibeService {
     actor: AuthenticatedUser,
   ) {
     return this.db.transaction(async (manager) => {
-      // Account/session changes serialize before admission, then parent/workspace
-      // locks. Staff finalization authenticates the staff actor, not the owner.
+      // Staff grading also serializes with candidate withdrawal. Lock both
+      // users in UUID order before either actor validation or child-row locks,
+      // so reciprocal staff/candidate operations cannot reverse their order.
+      let owner: { deleted_at: Date | null } | undefined;
+      if (actor.id !== userId) {
+        const users: { id: string; deleted_at: Date | null }[] =
+          await manager.query(
+            'SELECT id,deleted_at FROM users WHERE id=ANY($1::uuid[]) ORDER BY id FOR NO KEY UPDATE',
+            [[actor.id, userId]],
+          );
+        owner = users.find((user) => user.id === userId);
+      }
+      // Authenticate only the real actor. Staff may grade retained work without
+      // a candidate session, but a withdrawn candidate permits reads only.
       await lockActiveActor(manager, actor);
+      if (actor.id !== userId && (!owner || owner.deleted_at))
+        throw new ConflictException(
+          '탈퇴한 응시자의 답안은 조회만 가능하며 새 평가를 요청할 수 없습니다.',
+        );
       await manager.query(
         "SELECT pg_advisory_xact_lock(hashtextextended('vibe-operations', 0))",
       );
