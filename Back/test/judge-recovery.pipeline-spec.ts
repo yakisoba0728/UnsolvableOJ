@@ -77,10 +77,12 @@ describe('real worker termination and lease recovery', () => {
       })
       .expect(201);
     problemId = created.body.id;
-    await startWorker();
   });
 
   it('recovers after SIGKILL, fences the old attempt and records learning/XP once (simulated lease expiry)', async () => {
+    // Vitest expect.poll requires an active test; the same readiness assertion is
+    // used for both process starts, including the first one after beforeAll setup.
+    await startWorker();
     const submitted = await request(app.getHttpServer())
       .post(`${base}/problems/${problemId}/submissions`)
       .set(bearer(solverToken))

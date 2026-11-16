@@ -28,7 +28,10 @@ The existing pipeline test timeout remains 90 seconds. There are no increased re
 | Backend TypeScript (`npm run typecheck`) | Passed locally. |
 | Backend build (`npm run build`) | Passed locally. |
 | `git diff --check` | Passed locally. |
-| Native recovery scenario | Pending GitHub native CI; not run locally because Docker/go-judge are absent. |
+| First native CI attempt | [Run 43784164298, job 133027976114](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43784164298/job/133027976114) failed in the new setup hook: `expect.poll() must be called inside a test`. Existing 16 pipeline cases passed; the new recovery case was skipped because setup failed. |
+| Recovery-test correction | Move the first worker start from `beforeAll` into the test body so both readiness polls run inside the test. Preserve the readiness assertion, 15-second bound and existing 90-second test timeout. |
+| Focused local Vitest check | 2/2 scratch tests passed on the installed Vitest 4.1.11: polling in `beforeAll` raises the observed error, while both readiness polls succeed inside a test body. This verifies the test-framework correction, not native worker recovery. |
+| Native recovery rerun | Pending GitHub native CI after correction; not run locally because Docker/go-judge are absent. |
 | Independent review | Pending coordinator/QA review. |
 
 Full command: `npm run test:pipeline --prefix Back`, with the existing disposable PostgreSQL/Redis runner settings and an authorized test-only go-judge instance. The existing `vitest.config.pipeline.ts` pattern automatically includes the new file. Worker diagnostics are saved to `Back/reports/pipeline-recovery-worker.log` without real user credentials.
