@@ -375,7 +375,7 @@ describe('withdrawal (real PostgreSQL, authentication, preserved content and rac
           if (
             armed &&
             sql.includes('INSERT INTO refresh_tokens') &&
-            params?.[0] === a.user.id
+            Array.isArray(params) && params[0] === a.user.id
           ) {
             armed = false;
             entered();

@@ -2,7 +2,9 @@
 
 `main` 및 `overhaul/integration` 대상 PR과 `main` push는 빠른 기본 검사를 실행합니다. 검사는 여러 작업으로 나뉘어 GitHub 제공 `ubuntu-24.04` 러너에서 동시에 돌고(Node 24와 npm 캐시 사용), 마지막 `CI required` 작업이 결과를 모읍니다. 필요한 작업이 하나라도 실패·취소되면 `CI required`가 실패하고, 건너뛴 작업은 통과로 봅니다. 같은 PR·수동 실행의 이전 실행은 취소하지만, `main` push는 커밋마다 결과가 남도록 취소하지 않습니다. 수동·야간 전체 검사는 PR 검사와 서로 취소하지 않습니다.
 
-모든 실행에는 별도 작업 `Dependency audit`도 함께 돌아갑니다. Back·Front·Judge 각각 `npm audit --omit=dev --audit-level=high`로 운영 의존성의 high/critical 취약점만 실패로 처리하고 low/moderate는 로그로만 남깁니다. lockfile만 읽으므로 의존성을 설치하지 않습니다. 새 권고가 공개되면 코드 변경 없이도 실패할 수 있으며 실패는 `CI required`에도 반영됩니다.
+모든 실행에는 별도 작업 `Dependency audit`도 함께 돌아갑니다. Back·Front·Judge 각각 `npm audit --omit=dev --audit-level=moderate`로 운영 의존성의 moderate/high/critical 취약점을 실패로 처리하고 low는 로그로 남깁니다. lockfile만 읽으므로 의존성을 설치하지 않습니다. 새 권고가 공개되면 코드 변경 없이도 실패할 수 있으며 실패는 `CI required`에도 반영됩니다.
+
+이 작업은 `node scripts/collect-sboms.mjs`로 세 컴포넌트의 **런타임·빌드·선택적 의존성을 모두 포함한 lockfile 기반 CycloneDX SBOM**을 생성합니다. 모든 lock record의 이름·버전과 그래프 참조를 검증한 뒤 `npm-sbom-<commit>-<attempt>` artifact에 30일 보관합니다. `manifest.json`에는 실제 체크아웃 커밋과 lockfile SHA-256을 남깁니다. npm의 `--omit=dev` SBOM 선택에서 런타임과 개발 도구가 공유하는 패키지가 누락되는 사례를 확인했으므로 전체 그래프를 사용합니다. 이 artifact는 설치된 Docker 이미지·OS 패키지나 실제 브라우저 번들 목록이 아니며, 취약점 검사나 라이선스 허가를 대신하지 않습니다. 생성/커버리지 검증 실패도 필수 게이트를 실패시킵니다.
 
 `Docker image (back|front|judge|runtime)` 작업은 운영 Dockerfile(`Back`, `Front`, `Judge`, `Judge/runtime`)을 빌드만 합니다. 이미지를 레지스트리에 올리거나 러너에 내보내지 않고 BuildKit 레이어를 GitHub Actions 캐시(`type=gha`, 이미지별 scope)에만 남깁니다. PR은 base와, `main` push는 직전 커밋과 비교해 해당 디렉터리나 `ci.yml`이 바뀐 항목만 빌드하고, 바뀌지 않은 항목은 빌드 단계를 건너뛴 채 성공으로 끝납니다. 비교할 커밋이 없는 새 브랜치·야간·수동 실행은 모두 빌드합니다. 이미지 작업의 실패·취소도 `CI required`에 반영됩니다. 경로가 바뀌지 않아 빌드를 생략한 항목은 성공으로 보고됩니다. 실행 이미지 캐시는 수 GB가 될 수 있고 저장소 캐시 한도(기본 10 GB)를 넘으면 오래된 npm·이미지 캐시부터 밀려납니다.
 
