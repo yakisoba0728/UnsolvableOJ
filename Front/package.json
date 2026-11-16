@@ -16,9 +16,9 @@
     "check:telemetry": "node --test scripts/monitoring-privacy.test.mjs"
   },
   "dependencies": {
-    "@sentry/react": "^11.11.0",
+    "@sentry/react": "^11.12.0",
     "katex": "^0.19.1",
-    "lucide-react": "^1.70.0",
+    "lucide-react": "^1.72.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-markdown": "^10.1.0",
@@ -30,7 +30,7 @@
     "remark-math": "^6.0.0"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.65.0",
     "@types/node": "24.19.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
