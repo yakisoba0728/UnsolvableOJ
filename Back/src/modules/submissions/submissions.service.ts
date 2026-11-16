@@ -23,6 +23,7 @@ import {
   type JudgeSubmissionJob,
 } from '../../common/queue.constants.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
+import { canJoinEnterprise } from '../enterprise/enterprise-access.js';
 import { Problem } from '../problems/problem.entity.js';
 import { ProblemDifficulty, ProblemStatus } from '../problems/problem.enums.js';
 import { UserRole } from '../users/user-role.enum.js';
@@ -192,22 +193,12 @@ export class SubmissionsService {
     dto: CreateSubmissionDto,
     user: AuthenticatedUser,
   ) {
-    const [row]: { open: boolean; version: number }[] = await this.dataSource.query(
-      `SELECT a.finished_at IS NULL AND a.deadline_at > now() AS open, p.current_version AS version
-         FROM enterprise_attempts a
-         JOIN enterprise_tests t ON t.id = a.test_id
-         JOIN problems p ON p.id = $2
-        WHERE a.id = $1 AND a.user_id = $3 AND $2 = ANY(t.problem_ids)`,
-      [attemptId, problemId, user.id],
-    );
-    if (!row) throw new NotFoundException('제출할 문제를 찾을 수 없습니다.');
-    if (!row.open) throw new ForbiddenException('응시 시간이 끝나 더 제출할 수 없어요.');
-    return this.submitNew(problemId, row.version, true, attemptId, dto, user);
+    return this.submitNew(problemId, null, true, attemptId, dto, user);
   }
 
   private async submitNew(
     problemId: string,
-    problemVersion: number,
+    problemVersion: number | null,
     isTest: boolean,
     attemptId: string | null,
     dto: CreateSubmissionDto,
@@ -215,8 +206,9 @@ export class SubmissionsService {
   ) {
     const submission = await this.dataSource.transaction(async (manager) => {
       if (user.role !== UserRole.ADMIN) {
-        // 같은 계정의 동시 제출을 직렬화해 상한을 넘지 않게 한다.
-        await manager.query('SELECT 1 FROM users WHERE id = $1 FOR UPDATE', [user.id]);
+        // Serialize quotas while permitting FK KEY SHARE checks from transactions
+        // that already hold an attempt lock (for example workspace creation).
+        await manager.query('SELECT 1 FROM users WHERE id = $1 FOR NO KEY UPDATE', [user.id]);
         // 재채점·복구로 다시 줄 선 제출(generation > 1)은 제출자가 만든 대기가 아니므로 세지 않는다.
         const [{ count }]: { count: number }[] = await manager.query(
           "SELECT count(*)::int AS count FROM submissions WHERE user_id = $1 AND status IN ('QUEUED', 'JUDGING') AND judge_generation = 1",
@@ -228,6 +220,30 @@ export class SubmissionsService {
             HttpStatus.TOO_MANY_REQUESTS,
           );
       }
+      if (attemptId) {
+        // finish() locks the same parent row. Keep eligibility and insertion in
+        // one transaction so no submission can commit after a prior finish.
+        // Lock separately: time and joined rows need a fresh statement snapshot
+        // after waiting for an earlier transaction, including the user lock above.
+        await manager.query(
+          'SELECT id FROM enterprise_attempts WHERE id = $1 AND user_id = $2 FOR UPDATE',
+          [attemptId, user.id],
+        );
+        const [row]: { open: boolean; version: number }[] = await manager.query(
+          `SELECT a.finished_at IS NULL AND LEAST(a.deadline_at, t.ends_at) > clock_timestamp() AS open,
+                  p.current_version AS version
+             FROM enterprise_attempts a
+             JOIN enterprise_tests t ON t.id = a.test_id
+             JOIN problems p ON p.id = $2
+            WHERE a.id = $1 AND a.user_id = $3 AND $2 = ANY(t.problem_ids)
+              AND ${canJoinEnterprise('$3')}`,
+          [attemptId, problemId, user.id],
+        );
+        if (!row) throw new NotFoundException('제출할 문제를 찾을 수 없습니다.');
+        if (!row.open)
+          throw new ForbiddenException('응시 시간이 끝나 더 제출할 수 없어요.');
+        problemVersion = row.version;
+      }
       const repository = manager.getRepository(Submission);
       return repository.save(
         repository.create({
@@ -235,7 +251,7 @@ export class SubmissionsService {
           userId: user.id,
           language: dto.language,
           sourceCode: dto.sourceCode,
-          problemVersion,
+          problemVersion: problemVersion!,
           judgeGeneration: 1,
           status: SubmissionStatus.QUEUED,
           isTest,

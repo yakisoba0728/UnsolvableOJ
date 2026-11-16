@@ -148,13 +148,20 @@ export class VibeService {
   }
   async startEnterprise(examId: string, challengeId: string, userId: string) {
     return this.db.transaction(async (manager) => {
+      // Acquire the parent lock before deriving eligibility. A candidate can
+      // spend the remaining exam time waiting behind another workspace/finish
+      // transaction; PostgreSQL now() remains fixed at transaction start.
+      await manager.query(
+        'SELECT id FROM enterprise_attempts WHERE id=$1 AND user_id=$2 FOR UPDATE',
+        [examId, userId],
+      );
       const [exam]: {
         deadline_at: Date;
         closed: boolean;
         vibe_challenge_ids: string[];
       }[] = await manager.query(
-        `SELECT LEAST(a.deadline_at,t.ends_at) AS deadline_at, (a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now()) AS closed, t.vibe_challenge_ids
-         FROM enterprise_attempts a JOIN enterprise_tests t ON t.id=a.test_id WHERE a.id=$1 AND a.user_id=$2 AND ${canJoinEnterprise('$2')} FOR UPDATE OF a`,
+        `SELECT LEAST(a.deadline_at,t.ends_at) AS deadline_at, (a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=clock_timestamp()) AS closed, t.vibe_challenge_ids
+         FROM enterprise_attempts a JOIN enterprise_tests t ON t.id=a.test_id WHERE a.id=$1 AND a.user_id=$2 AND ${canJoinEnterprise('$2')}`,
         [examId, userId],
       );
       if (
