@@ -9,6 +9,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import type { DataSource, EntityManager } from 'typeorm';
@@ -38,6 +39,7 @@ interface TestRow {
   updated_at: Date;
   attempt_count?: number;
   invite_usernames?: string[];
+  problem_versions?: { problemId: string; version: number }[];
 }
 
 interface AttemptRow {
@@ -51,7 +53,9 @@ interface AttemptRow {
 
 const NOT_FOUND = '테스트를 찾을 수 없습니다.';
 const TEST_COLUMNS = `t.*, (SELECT count(*)::int FROM enterprise_attempts a WHERE a.test_id = t.id) AS attempt_count,
-  ARRAY(SELECT u.username FROM users u WHERE u.id = ANY(t.invite_user_ids) ORDER BY lower(u.username)) AS invite_usernames`;
+  ARRAY(SELECT u.username FROM users u WHERE u.id = ANY(t.invite_user_ids) ORDER BY lower(u.username)) AS invite_usernames,
+  coalesce((SELECT json_agg(json_build_object('problemId', v.problem_id, 'version', v.version) ORDER BY v.position)
+    FROM enterprise_problem_versions v WHERE v.test_id=t.id), '[]') AS problem_versions`;
 
 const toTest = (row: TestRow) => ({
   id: row.id,
@@ -61,6 +65,8 @@ const toTest = (row: TestRow) => ({
   endsAt: row.ends_at,
   durationMin: row.duration_min,
   problemIds: row.problem_ids,
+  problemVersions: row.problem_versions ?? [],
+  problemVersionPolicy: 'ON_SELECTION' as const,
   vibeChallengeIds: row.vibe_challenge_ids,
   inviteCode: row.invite_code,
   inviteOnly: row.invite_only,
@@ -107,7 +113,6 @@ export class EnterpriseService {
     this.assertSchedule(dto.startsAt, dto.endsAt, dto.durationMin, true);
     return this.dataSource.transaction(async (manager) => {
       this.assertTasks(dto.problemIds, dto.vibeChallengeIds ?? []);
-      await this.assertProblems(manager, dto.problemIds, user);
       const invite = await this.resolveInvitees(
         manager,
         dto.inviteOnly ?? false,
@@ -133,6 +138,7 @@ export class EnterpriseService {
           dto.vibeChallengeIds ?? [],
         ],
       );
+      await this.bindProblemVersions(manager, row.id, dto.problemIds, user);
       return toTest(await this.owned(manager, row.id, user));
     });
   }
@@ -163,8 +169,6 @@ export class EnterpriseService {
       };
       this.assertSchedule(next.startsAt, next.endsAt, next.durationMin, true);
       this.assertTasks(next.problemIds, next.vibeChallengeIds);
-      if (dto.problemIds)
-        await this.assertProblems(manager, dto.problemIds, user);
       const inviteOnly = dto.inviteOnly ?? current.invite_only;
       const invite =
         dto.invitees || dto.inviteOnly !== undefined
@@ -194,6 +198,11 @@ export class EnterpriseService {
           next.vibeChallengeIds,
         ],
       );
+      if (dto.problemIds || dto.refreshProblemVersions)
+        await this.bindProblemVersions(
+          manager, id, next.problemIds, user,
+          dto.refreshProblemVersions ? [] : current.problem_versions,
+        );
       return toTest(await this.owned(manager, id, user));
     });
   }
@@ -299,6 +308,21 @@ export class EnterpriseService {
   /** 응시를 시작한다. 이미 시작했으면 그 응시를 그대로 돌려준다. */
   async start(code: string, user: AuthenticatedUser) {
     return this.dataSource.transaction(async (manager) => {
+      // Withdrawal locks user before removing invitations from tests. Keep that
+      // order and reject a request authenticated before account revocation.
+      const [active]: { id: string }[] = await manager.query(
+        `SELECT id FROM users WHERE id=$1 AND deleted_at IS NULL
+           AND suspended_at IS NULL AND NOT must_change_password
+           AND ($2::integer IS NULL OR token_version=$2) FOR SHARE`,
+        [user.id, user.tokenVersion ?? null],
+      );
+      if (!active) throw new UnauthorizedException('다시 로그인해야 합니다.');
+      // SHARE allows concurrent candidates but conflicts with schedule/invite edits
+      // and deletion. Re-read eligibility after the wait in a fresh statement.
+      await manager.query(
+        'SELECT id FROM enterprise_tests WHERE invite_code=$1 FOR SHARE',
+        [code.slice(0, 32)],
+      );
       const test = await this.byCode(manager, code, user);
       const [existing]: AttemptRow[] = await manager.query(
         'SELECT * FROM enterprise_attempts WHERE test_id = $1 AND user_id = $2',
@@ -310,10 +334,12 @@ export class EnterpriseService {
           '테스트를 만든 계정으로는 응시할 수 없어요.',
         );
       const [inserted]: AttemptRow[] = await manager.query(
-        `INSERT INTO enterprise_attempts (test_id, user_id, deadline_at)
-         SELECT t.id, $2, LEAST(now() + make_interval(mins => t.duration_min), t.ends_at)
+        `WITH wall AS MATERIALIZED (SELECT clock_timestamp() AS current_time)
+         INSERT INTO enterprise_attempts (test_id, user_id, started_at, deadline_at)
+         SELECT t.id, $2, wall.current_time, LEAST(wall.current_time + make_interval(mins => t.duration_min), t.ends_at)
            FROM enterprise_tests t
-          WHERE t.id = $1 AND t.starts_at <= now() AND now() < t.ends_at
+           CROSS JOIN wall
+          WHERE t.id = $1 AND t.starts_at <= wall.current_time AND wall.current_time < t.ends_at
          ON CONFLICT (test_id, user_id) DO NOTHING
          RETURNING *`,
         [test.id, user.id],
@@ -348,18 +374,20 @@ export class EnterpriseService {
       outputDescriptionMarkdown: string;
       timeLimitMs: number;
       memoryLimitMb: number;
+      problemVersion: number;
       samples: { input: string; expectedOutput: string }[];
     }[] = await this.dataSource.query(
-      `SELECT p.id, p.title, p.difficulty, p.statement_md AS "statementMarkdown",
-              p.input_description_md AS "inputDescriptionMarkdown",
-              p.output_description_md AS "outputDescriptionMarkdown",
-              p.time_limit_ms AS "timeLimitMs", p.memory_limit_mb AS "memoryLimitMb",
-              coalesce((SELECT json_agg(json_build_object('input', c.input, 'expectedOutput', c.expected_output) ORDER BY c."order")
-                          FROM test_cases c WHERE c.problem_id = p.id AND c.is_sample), '[]') AS samples
-         FROM unnest($1::uuid[]) WITH ORDINALITY AS o(id, position)
-         JOIN problems p ON p.id = o.id
-        ORDER BY o.position`,
-      [test.problem_ids],
+      `SELECT b.problem_id AS id, b.version AS "problemVersion", v.snapshot->>'title' AS title,
+              v.snapshot->>'difficulty' AS difficulty, v.snapshot->>'statementMarkdown' AS "statementMarkdown",
+              v.snapshot->>'inputDescriptionMarkdown' AS "inputDescriptionMarkdown",
+              v.snapshot->>'outputDescriptionMarkdown' AS "outputDescriptionMarkdown",
+              (v.snapshot->>'timeLimitMs')::int AS "timeLimitMs", (v.snapshot->>'memoryLimitMb')::int AS "memoryLimitMb",
+              coalesce((SELECT json_agg(json_build_object('input', c->>'input', 'expectedOutput', c->>'expectedOutput') ORDER BY (c->>'order')::int)
+                        FROM jsonb_array_elements(v.snapshot->'testCases') c WHERE c->>'isSample'='true'), '[]') AS samples
+         FROM enterprise_problem_versions b
+         JOIN problem_versions v ON v.problem_id=b.problem_id AND v.version=b.version
+        WHERE b.test_id=$1 ORDER BY b.position`,
+      [test.id],
     );
     const statuses: {
       problemId: string;
@@ -527,8 +555,12 @@ export class EnterpriseService {
     user: AuthenticatedUser,
     lock = false,
   ) {
+    // Row locks recheck t.* after a wait, but correlated aggregates retain the
+    // statement snapshot. Lock first, then read bindings/counts in a new statement.
+    if (lock)
+      await manager.query('SELECT id FROM enterprise_tests WHERE id=$1 FOR UPDATE', [id]);
     const [row]: TestRow[] = await manager.query(
-      `SELECT ${TEST_COLUMNS} FROM enterprise_tests t WHERE t.id = $1 ${lock ? 'FOR UPDATE' : ''}`,
+      `SELECT ${TEST_COLUMNS} FROM enterprise_tests t WHERE t.id = $1`,
       [id],
     );
     // 남의 테스트는 존재 여부를 드러내지 않는다.
@@ -604,19 +636,36 @@ export class EnterpriseService {
   }
 
   /** 출제 화면에서 고를 수 있는 문제만 허용: 공개 문제, 내가 만든 문제(기업 전용 포함), 관리자는 전부. */
-  private async assertProblems(
+  private async bindProblemVersions(
     manager: EntityManager,
+    testId: string,
     ids: string[],
     user: AuthenticatedUser,
+    retained: { problemId: string; version: number }[] = [],
   ) {
-    const [{ count }]: { count: number }[] = await manager.query(
-      `SELECT count(*)::int AS count FROM problems
-        WHERE id = ANY($1::uuid[]) AND (status = 'PUBLISHED' OR author_id = $2 OR $3)`,
-      [ids, user.id, user.role === UserRole.ADMIN],
+    // One statement chooses an authorized, committed immutable version. A content
+    // edit publishes its new version atomically, so body/cases/limits cannot mix.
+    const rows: { id: string; version: number }[] = await manager.query(
+      `SELECT p.id, p.current_version AS version FROM problems p
+        JOIN problem_versions v ON v.problem_id=p.id AND v.version=p.current_version
+        WHERE p.id = ANY($1::uuid[]) AND ((p.status = 'PUBLISHED' AND NOT p.is_private) OR p.author_id = $2 OR $3
+          OR p.id=ANY($4::uuid[]))`,
+      [ids, user.id, user.role === UserRole.ADMIN, retained.map((row) => row.problemId)],
     );
-    if (count !== ids.length)
+    if (rows.length !== ids.length)
       throw new BadRequestException(
         '출제할 수 없는 문제가 포함되어 있어요. 문제 목록을 다시 확인해 주세요.',
+      );
+    const versions = new Map(rows.map((row) => [row.id, row.version]));
+    for (const row of retained) if (versions.has(row.problemId)) versions.set(row.problemId, row.version);
+    // At most 20 rows, under the assessment lock. Replace atomically so reorder
+    // cannot transiently conflict with the unique per-test position constraint.
+    await manager.query('DELETE FROM enterprise_problem_versions WHERE test_id=$1', [testId]);
+    if (ids.length)
+      await manager.query(
+        `INSERT INTO enterprise_problem_versions(test_id, problem_id, version, position)
+         SELECT $1, id, version, position FROM unnest($2::uuid[], $3::int[]) WITH ORDINALITY AS b(id, version, position)`,
+        [testId, ids, ids.map((id) => versions.get(id)!)],
       );
   }
 }

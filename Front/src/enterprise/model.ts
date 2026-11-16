@@ -8,6 +8,9 @@ export interface EnterpriseTest {
   durationMin: number;
   /** 출제 순서대로의 문제 id */
   problemIds: string[];
+  /** 일반 문제를 시험에 추가했을 때 고정한 버전. */
+  problemVersions?: { problemId: string; version: number }[];
+  problemVersionPolicy?: 'ON_SELECTION';
   vibeChallengeIds?: string[];
   /** 응시 링크 코드: /enterprise/join/:code */
   inviteCode: string;

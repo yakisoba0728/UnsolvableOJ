@@ -49,7 +49,7 @@ The route declarations and page modules in `Front/src/App.tsx` and `Front/src/pa
 | Problem catalog, authoring, solving, submissions | Read server filtering, existing continuation/draft features, solver ownership and error states. Added bookmarks without replacing valid existing features. |
 | Home, profile, rankings, analysis and missions | Routes and existing coverage indexed. Whole submission-history consumers remain a scaling follow-up; no new measurement or full UX review claimed. |
 | Community and notifications | Read `SiteHeader`, `NotificationBell`, request-owner helper, request client, and regression tests. Phase I identity key, cancellation, query epoch invalidation, mutation reconciliation, and deduplication are present in actual source. Browser rerun remains the CI gate. |
-| Enterprise list/detail/join/attempt | Noted unkeyed account/route ownership and retained editor/async state in existing pages; reported separately to coordinator for a scoped enterprise fix. This feature does not mark that issue resolved. |
+| Enterprise list/detail/join/attempt | Found unkeyed account/route ownership and unguarded async mutation/navigation. A separately reviewed follow-up is recorded in [PHASE2-FRONTEND-OWNERSHIP.md](PHASE2-FRONTEND-OWNERSHIP.md); bookmark feature evidence and measurements remain scoped to `35d9d77`. |
 | Vibe workspace/catalog and administration | Routes, ownership pattern and coverage indexed; no paid AI calls, native Vibe parity, complete visual audit or operational claim. |
 | Shared shell/error boundary | Existing skip link, lazy route fallback, error recovery and focus behavior read. New controls use native buttons, pressed states, live feedback and viewport tests. |
 
@@ -67,7 +67,7 @@ Environment: Node `24.22.1`, npm `11.9.0`, Linux x86-64. Isolated local tests us
 | Migration checker | Passed legacy upgrade, refusal cases, partial rollback, fresh install/full rollback/reapply through 27 migrations. Expected case-colliding legacy username refusal remained asserted. |
 | Front build, answer privacy guard, telemetry, E2E typecheck | Passed; 7 telemetry cases. |
 | Existing browser-free unit project | 85/85 passed. |
-| New browser regression discovery | 13 scenarios / 39 instances across Chromium, Firefox, WebKit. Discovered/typechecked, **not locally executed**. |
+| New browser regression discovery | Original bookmark commit: 13 scenarios / 39 instances across Chromium, Firefox, WebKit. Follow-up adds 2 defensive nonpublic-status cases (15 / 45). Discovered/typechecked, **not locally executed**. |
 | Real-service browser flow | Existing disposable Compose signup/publication/Judge flow extended with save/reload/list/remove assertions. Execution pending Actions. |
 | Independent review and exact-commit CI | Coordinator gate, pending at this document's commit. |
 
@@ -77,7 +77,7 @@ System Chromium startup was attempted with the project Playwright client. It fai
 
 ## Measured delivery cost
 
-Both source versions used independent `npm ci --no-fund --no-audit` installs from the identical Front lockfile, Node/npm versions above, and clean `npm run build` with `VITE_SENTRY_DSN` and `VITE_API_BASE_URL` unset. Baseline is the immutable integration commit above. Feature source is this commit's application code. Measurements are artifact sizes, not LCP/INP/CLS, CPU, or network timings.
+Both source versions used independent `npm ci --no-fund --no-audit` installs from the identical Front lockfile, Node/npm versions above, and clean `npm run build` with `VITE_SENTRY_DSN` and `VITE_API_BASE_URL` unset. Baseline is the immutable integration commit above. Feature source is `35d9d77daabc4b80246d63bc4399fa1b23f1b983`; later enterprise ownership changes are not included in this size snapshot. Measurements are artifact sizes, not LCP/INP/CLS, CPU, or network timings.
 
 | Bytes | Before | After | Difference |
 | --- | ---: | ---: | ---: |

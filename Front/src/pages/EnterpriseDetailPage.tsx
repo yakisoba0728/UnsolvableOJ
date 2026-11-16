@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth";
 import { useConfirm } from "../components/ConfirmDialog";
@@ -24,6 +24,7 @@ import { useEnterpriseProblems, useDocumentTitle, useNow } from "../hooks";
 import { problemPath } from "../paths";
 import { difficultyLabel } from "../difficulty";
 import { invalidResourceIdMessage } from "../resourceErrors";
+import { useRequestOwner } from "../community/useRequestOwner";
 
 function Missing({ children }: { children: React.ReactNode }) {
   return (
@@ -37,11 +38,14 @@ function Missing({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function EnterpriseDetailPage() {
+export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { id } = useParams();
   const { session } = useAuth();
   const navigate = useNavigate();
   const [saveError, setSaveError] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const deletingRef = useRef(false);
+  const begin = useRequestOwner(getNavigationVersion, true);
   const [confirm, confirmDialog] = useConfirm();
   const now = useNow(10_000);
   const {
@@ -132,22 +136,27 @@ export function EnterpriseDetailPage() {
         : `${formatEnd(test)}에 마감됐어요`;
 
   async function remove() {
-    if (
-      !(await confirm({
+    if (deletingRef.current) return;
+    deletingRef.current = true;
+    const current = begin();
+    setDeleting(true);
+    try {
+      if (!(await confirm({
         title: `‘${test!.title}’ 테스트를 삭제할까요?`,
         message: "삭제하면 되돌릴 수 없어요.",
         confirmLabel: "삭제",
         danger: true,
-      }))
-    )
-      return;
-    try {
+      })) || !current()) return;
+      setSaveError("");
       await enterpriseApi.remove(session!.accessToken, test!.id);
-      navigate("/enterprise");
+      if (current()) navigate("/enterprise");
     } catch (cause) {
-      setSaveError(
+      if (current()) setSaveError(
         cause instanceof Error ? cause.message : "테스트를 삭제하지 못했어요.",
       );
+    } finally {
+      deletingRef.current = false;
+      if (current()) setDeleting(false);
     }
   }
   const link = inviteUrl(test.inviteCode);
@@ -184,6 +193,7 @@ export function EnterpriseDetailPage() {
             {attemptCount === 0 ? (
               <button
                 className="button button-outline ent-danger"
+                disabled={deleting}
                 onClick={() => void remove()}
               >
                 삭제

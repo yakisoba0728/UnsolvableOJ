@@ -20,6 +20,8 @@ assert.ok(['localhost', '127.0.0.1', '::1'].includes(effectiveHost), 'The effect
 const admin = await new DataSource({ ...configured.options, entities: [], migrations: [] }).initialize();
 const name = `unsolvable_benchmark_${randomUUID().replaceAll('-', '')}`;
 url.pathname = `/${name}`;
+const includeWrites = process.argv.includes('--with-writes');
+const writeCosts = {};
 let db;
 let created = false;
 try {
@@ -51,6 +53,37 @@ try {
   const targets = [['voted', statements[1]], ['saved', statements[2]]];
   const measured = {};
   const digest = (rows) => createHash('sha256').update(JSON.stringify(rows)).digest('hex');
+  async function writeSamples(table) {
+    const samples = [];
+    // Slot 37 is outside the seeded slots 1..20. Each operation inserts or
+    // deletes exactly the same 1,000 distinct relationships in both modes.
+    const insert = `INSERT INTO ${table}(user_id,post_id)
+      SELECT md5('benchmark-user-'||u)::uuid,md5('benchmark-post-'||(((u+37*53)%2000)+1))::uuid
+      FROM generate_series(1,1000) AS g(u)`;
+    const remove = `DELETE FROM ${table} r USING generate_series(1,1000) AS g(u)
+      WHERE r.user_id=md5('benchmark-user-'||u)::uuid
+        AND r.post_id=md5('benchmark-post-'||(((u+37*53)%2000)+1))::uuid`;
+    const count = async () => Number((await db.query(`SELECT count(*) AS n FROM ${table}`))[0].n);
+    assert.equal(await count(), 200000);
+    for (let sample = 0; sample < 10; sample++) {
+      const started = performance.now();
+      const [inserted] = await db.query(`EXPLAIN (ANALYZE, BUFFERS, WAL, FORMAT JSON) ${insert}`);
+      const insertCallMs = performance.now() - started;
+      assert.equal(await count(), 201000, 'Every measured insert must commit all 1,000 rows');
+      const deleteStarted = performance.now();
+      const [deleted] = await db.query(`EXPLAIN (ANALYZE, BUFFERS, WAL, FORMAT JSON) ${remove}`);
+      const deleteCallMs = performance.now() - deleteStarted;
+      assert.equal(await count(), 200000, 'Every measured delete must restore the original row count');
+      if (sample >= 3) samples.push({ insertCallMs, deleteCallMs,
+        insert: inserted['QUERY PLAN'][0], delete: deleted['QUERY PLAN'][0] });
+      // Cleanup happens outside timing; no rolled-back index entries accumulate
+      // between samples. This is single-writer maintenance cost, not mixed load.
+      await db.query(`VACUUM (ANALYZE, INDEX_CLEANUP ON) ${table}`);
+    }
+    return samples;
+  }
+  if (includeWrites) for (const table of ['community_votes', 'community_saved'])
+    writeCosts[table] = { before: await writeSamples(table) };
   for (const [label, statement] of targets) {
     for (let warmup = 0; warmup < 3; warmup++) await db.query(statement.sql, statement.params);
     const rows = await db.query(statement.sql, statement.params);
@@ -61,7 +94,9 @@ try {
     }
   }
   const runner = db.createQueryRunner();
+  const indexBuildStarted = performance.now();
   try { await new CommunityProfileIndexes1795700000000().up(runner); } finally { await runner.release(); }
+  const indexBuildMs = performance.now() - indexBuildStarted;
   await db.query('ANALYZE community_votes');
   await db.query('ANALYZE community_saved');
   for (const [label, statement] of targets) {
@@ -73,13 +108,15 @@ try {
       measured[label].after.push(result['QUERY PLAN'][0]);
     }
   }
+  if (includeWrites) for (const table of ['community_votes', 'community_saved'])
+    writeCosts[table].after = await writeSamples(table);
   const median = (values) => values.toSorted((a, b) => a - b)[Math.floor(values.length / 2)];
   const summary = (plans) => ({ executionMs: median(plans.map((plan) => plan['Execution Time'])), sharedHitBlocks: median(plans.map((plan) => plan.Plan['Shared Hit Blocks'])), sharedReadBlocks: median(plans.map((plan) => plan.Plan['Shared Read Blocks'])) });
   const indexes = await db.query("SELECT indexname,pg_relation_size(indexname::regclass)::int AS bytes FROM pg_indexes WHERE schemaname='public' AND indexname IN ('idx_community_votes_user_post','idx_community_saved_user_post') ORDER BY indexname");
   const constraints = await db.query("SELECT conrelid::regclass::text AS table_name,conname,contype,pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE connamespace='public'::regnamespace ORDER BY conrelid::regclass::text,conname");
   const [{ version }] = await db.query('SELECT version() AS version');
   const settings = await db.query("SELECT name,setting,unit FROM pg_settings WHERE name IN ('shared_buffers','work_mem','max_connections','max_parallel_workers_per_gather') ORDER BY name");
-  console.log(JSON.stringify({ scope: 'Exact CommunityService.mine saved/voted SQL only; warmed single-connection EXPLAIN ANALYZE, no HTTP throughput claim.', baseline: '6176015b63a1615cc2269172f246725ef08abab3', dataset: { users: 10000, posts: 2000, savedRows: 200000, voteRows: 200000, warmups: 3, samples: 7, concurrency: 1 }, environment: { postgres: version, node: process.version, os: `${platform()} ${release()}`, cpu: cpus()[0]?.model, logicalCpus: cpus().length, settings }, indexes, constraints, results: Object.entries(measured).map(([name, result]) => ({ name, rowCount: result.rowCount, before: summary(result.before), after: summary(result.after), outputDigest: result.afterDigest, sql: result.sql, samples: { beforeMs: result.before.map((plan) => plan['Execution Time']), afterMs: result.after.map((plan) => plan['Execution Time']) }, beforePlan: result.before[0], afterPlan: result.after[0] })) }, null, 2));
+  console.log(JSON.stringify({ scope: 'Exact CommunityService.mine saved/voted SQL; warmed single-connection EXPLAIN ANALYZE, no HTTP throughput claim.', baseline: 'Index-absent mode compared with production migration1795700000000 on the same fixture/current runtime; not an entire old application deployment.', dataset: { users: 10000, posts: 2000, savedRows: 200000, voteRows: 200000, warmups: 3, samples: 7, concurrency: 1 }, environment: { postgres: version, node: process.version, os: `${platform()} ${release()}`, cpu: cpus()[0]?.model, logicalCpus: cpus().length, settings }, indexes, indexBuildMs, constraints, writeCosts: includeWrites ? { scope: 'Single-connection committed 1,000-row insert/delete batches, three warmups/seven samples; EXPLAIN records database execution/WAL, CallMs includes driver/plan/commit. Vacuum outside timing. No concurrent lock-wait or production build-lock claim.', tables: writeCosts } : undefined, results: Object.entries(measured).map(([name, result]) => ({ name, rowCount: result.rowCount, before: summary(result.before), after: summary(result.after), outputDigest: result.afterDigest, sql: result.sql, samples: { beforeMs: result.before.map((plan) => plan['Execution Time']), afterMs: result.after.map((plan) => plan['Execution Time']) }, beforePlan: result.before[0], afterPlan: result.after[0] })) }, null, 2));
 } finally {
   if (db?.isInitialized) await db.destroy();
   if (created) await admin.query(`DROP DATABASE "${name}" WITH (FORCE)`);

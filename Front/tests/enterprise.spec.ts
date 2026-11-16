@@ -149,6 +149,25 @@ test("empty state invites the first test", async ({ page }) => {
   await expect(page).toHaveURL(/\/enterprise\/new$/);
 });
 
+test("assessment versions refresh only when the scheduled-test owner explicitly selects it", async ({ page }) => {
+  const saved = enterpriseTest({ id: "t-pinned", title: "고정 버전 시험", problemVersions: [{ problemId: "p1", version: 1 }] });
+  const { requests } = await setup(page, [saved]);
+  await page.goto("/enterprise/t-pinned/edit");
+  const refresh = page.getByRole("checkbox", { name: /선택한 일반 문제를 모두 최신 버전으로 갱신/ });
+  await expect(refresh).not.toBeChecked();
+  await expect(page.getByText(/일반 문제의 본문·예제·채점 기준은 시험에 추가할 때 고정/)).toBeVisible();
+  await page.getByRole("button", { name: "변경 저장", exact: true }).click();
+  await expect(page).toHaveURL(/\/enterprise\/t-pinned$/);
+  expect(requests.filter((item) => item.method === "PATCH").at(-1)?.body).toMatchObject({ refreshProblemVersions: false });
+  await page.goto("/enterprise/t-pinned/edit");
+  await refresh.focus();
+  await page.keyboard.press("Space");
+  await expect(refresh).toBeChecked();
+  await page.getByRole("button", { name: "변경 저장", exact: true }).click();
+  await expect(page).toHaveURL(/\/enterprise\/t-pinned$/);
+  expect(requests.filter((item) => item.method === "PATCH").at(-1)?.body).toMatchObject({ refreshProblemVersions: true });
+});
+
 test("dashboard groups tests by status, totals candidates and offers the right management action", async ({
   page,
 }) => {

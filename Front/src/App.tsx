@@ -65,8 +65,11 @@ const menu = [
 ];
 
 export function App({ getNavigationVersion }: { getNavigationVersion: () => number }) {
-  const { session, setSession } = useAuth();
+  const { session, setSession, getSessionIdentityVersion } = useAuth();
   const { pathname, search, hash, key: locationKey } = useLocation();
+  // A login identity and navigation entry own private exam data and editor state.
+  // Access-token refresh does not change this identity or reset in-progress code.
+  const enterpriseOwner = `${session?.user.id ?? "guest"}:${getSessionIdentityVersion()}:${pathname}:${locationKey}`;
   const navigationType = useNavigationType();
   // 다른 화면으로 이동하면 스크롤을 맨 위로 올린다(뒤로 가기는 브라우저 동작에 맡기고,
   // 같은 화면에서 필터·검색 주소만 바뀔 때는 위치를 유지한다).
@@ -192,13 +195,13 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               <Route path="/vibe/attempts/:id" element={session ? <VibeWorkspacePage key={`${session.user.id}:${pathname}`} /> : loginRedirect} />
               <Route path="/analysis/:id" element={<AnalysisQuestionPage />} />
               <Route path="/missions" element={<MissionsPage />} />
-              <Route path="/enterprise" element={<EnterprisePage />} />
-              <Route path="/enterprise/new" element={session ? <EnterpriseFormPage key={session.user.id} /> : loginRedirect} />
-              <Route path="/enterprise/:id" element={<EnterpriseDetailPage />} />
-              <Route path="/enterprise/join/:code" element={<EnterpriseJoinPage />} />
-              <Route path="/enterprise/attempts/:id" element={<EnterpriseAttemptPage />} />
-              <Route path="/enterprise/:testId/attempts/:attemptId/vibe/:id" element={session ? <EnterpriseVibeReviewPage key={`${session.user.id}:${pathname}`} /> : loginRedirect} />
-              <Route path="/enterprise/:id/edit" element={session ? <EnterpriseFormPage key={`${session.user.id}:${pathname}`} /> : loginRedirect} />
+              <Route path="/enterprise" element={<EnterprisePage key={enterpriseOwner} />} />
+              <Route path="/enterprise/new" element={session ? <EnterpriseFormPage key={enterpriseOwner} getNavigationVersion={getNavigationVersion} /> : loginRedirect} />
+              <Route path="/enterprise/:id" element={<EnterpriseDetailPage key={enterpriseOwner} getNavigationVersion={getNavigationVersion} />} />
+              <Route path="/enterprise/join/:code" element={<EnterpriseJoinPage key={enterpriseOwner} getNavigationVersion={getNavigationVersion} />} />
+              <Route path="/enterprise/attempts/:id" element={<EnterpriseAttemptPage key={enterpriseOwner} getNavigationVersion={getNavigationVersion} />} />
+              <Route path="/enterprise/:testId/attempts/:attemptId/vibe/:id" element={session ? <EnterpriseVibeReviewPage key={enterpriseOwner} /> : loginRedirect} />
+              <Route path="/enterprise/:id/edit" element={session ? <EnterpriseFormPage key={enterpriseOwner} getNavigationVersion={getNavigationVersion} /> : loginRedirect} />
               <Route
                 path="/submissions"
                 element={session ? <SubmissionsPage key={session.user.id} /> : loginRedirect}

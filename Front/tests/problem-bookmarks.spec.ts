@@ -33,6 +33,22 @@ test("a guest can sign in to save and return to the current problem", async ({ p
   expect(await page.evaluate(() => history.state.usr.from)).toBe("/problems/view/sum");
 });
 
+for (const status of ["DRAFT", "ARCHIVED"]) {
+  test(`a ${status} problem cannot request or expose a bookmark control`, async ({ page }) => {
+    await setup(page);
+    let statusRequests = 0;
+    await page.route("**/api/v1/problems/by-slug/sum", route => route.fulfill({ json: { ...problem, status } }));
+    await page.route(endpoint, route => {
+      statusRequests++;
+      return route.fulfill({ status: 404, json: { message: "문제를 찾을 수 없습니다." } });
+    });
+    await page.goto("/problems/view/sum");
+    await expect(page.getByRole("heading", { name: problem.title, exact: true })).toBeVisible();
+    await expect(control(page)).toHaveCount(0);
+    expect(statusRequests).toBe(0);
+  });
+}
+
 test("keyboard save survives a reload and can be removed", async ({ page }) => {
   await setup(page);
   let bookmarked = false;
