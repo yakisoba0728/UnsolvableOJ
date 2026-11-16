@@ -101,6 +101,10 @@ test("resizing cannot leave keyboard focus inside the hidden menu or on a hidden
   await expect(toggle).toBeFocused();
   await toggle.click();
   await page.setViewportSize({ width: 1440, height: 900 });
+  // Wait for the observable desktop transition. WebKit may coalesce an
+  // immediate desktop/mobile round trip before delivering matchMedia events.
+  await expect(page.locator(".menu-button")).toHaveAttribute("aria-expanded", "false");
+  await expect(toggle).toBeHidden();
   await page.setViewportSize({ width: 390, height: 760 });
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await expect(nav).toBeHidden();
