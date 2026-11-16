@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { AuthService } from '../src/modules/auth/auth.service.js';
 import { EnterpriseService } from '../src/modules/enterprise/enterprise.service.js';
 import { SubmissionsService } from '../src/modules/submissions/submissions.service.js';
@@ -112,6 +112,49 @@ describe('submission actor revocation after authentication (real PostgreSQL)', (
       expect(await db.query('SELECT id FROM submissions WHERE user_id=$1', [actor.id])).toEqual([]);
     });
   }
+
+  it('accepts the same session family after an in-flight refresh commits its successor', async () => {
+    const { session, actor } = await account();
+    let release!: () => void, entered!: () => void;
+    const paused = new Promise<void>((resolve) => { release = resolve; });
+    const inserted = new Promise<void>((resolve) => { entered = resolve; });
+    // oxlint-disable-next-line typescript/unbound-method -- The original receiver is restored with call(this).
+    const original = EntityManager.prototype.query;
+    const spy = vi.spyOn(EntityManager.prototype, 'query').mockImplementation(async function (this: EntityManager, sql, params) {
+      const result = await original.call(this, sql, params);
+      if (sql.includes('INSERT INTO refresh_tokens') && params?.[0] === actor.id) {
+        entered();
+        await paused;
+      }
+      return result;
+    });
+    let refreshing: ReturnType<AuthService['refresh']> | undefined;
+    let submitting: Promise<request.Response> | undefined;
+    try {
+      refreshing = app.get(AuthService).refresh(session.refreshToken!);
+      await inserted;
+      submitting = http().post(`${base}/problems/${problemId}/submissions`)
+        .set(bearer(session.accessToken)).send(payload).then((response) => {
+          if (response.body.id) jobIds.push(`${response.body.id}-1`);
+          return response;
+        });
+      await expect.poll(async () => {
+        const [{ blocked }]: { blocked: boolean }[] = await db.query(
+          `SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname=current_database()
+             AND wait_event_type='Lock' AND query LIKE '%FOR NO KEY UPDATE%') AS blocked`,
+        );
+        return blocked;
+      }, { timeout: 2500 }).toBe(true);
+      release();
+      await refreshing;
+      expect((await submitting).status).toBe(202);
+      expect(await db.query('SELECT id FROM submissions WHERE user_id=$1', [actor.id])).toHaveLength(1);
+    } finally {
+      release();
+      await Promise.allSettled([refreshing, submitting]);
+      spy.mockRestore();
+    }
+  });
 
   it('does not exempt an administrator from post-authentication account revalidation', async () => {
     const { actor } = await account(UserRole.ADMIN);
