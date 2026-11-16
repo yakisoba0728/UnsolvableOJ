@@ -253,3 +253,94 @@ test.describe("community request ownership", () => {
     });
   }
 });
+
+test.describe("account settings request ownership", () => {
+  async function setup(page: Page) {
+    await seed(page, Date.now() + 900_000);
+    await mockProblemApi(page);
+    await page.route("**/api/v1/auth/sessions", route => route.fulfill({ json: [] }));
+    await page.goto("/settings");
+    await page.getByLabel("새 사용자 이름").fill("renamed");
+    await page.getByLabel("현재 비밀번호").fill("old-password-1");
+    await page.getByLabel("새 비밀번호", { exact: true }).fill("new-password-2");
+    await page.getByLabel("새 비밀번호 확인").fill("new-password-2");
+  }
+
+  for (const action of ["username", "password"] as const) {
+    test(`a ${action} change accepts its renewed session after automatic access-token refresh`, async ({ page }) => {
+      await setup(page);
+      let refreshes = 0;
+      await page.route("**/api/v1/auth/refresh", route => {
+        refreshes++;
+        return route.fulfill({ json: refreshed("new-access", "r2") });
+      });
+      let pending: Route | undefined;
+      const authorizations: string[] = [];
+      await page.route(`**/api/v1/auth/${action}`, route => {
+        const authorization = route.request().headers().authorization ?? "";
+        authorizations.push(authorization);
+        if (authorization === "Bearer old-access")
+          return route.fulfill({ status: 401, json: { message: "다시 로그인해야 합니다." } });
+        pending = route;
+      });
+      try {
+        await page.getByRole("button", { name: action === "username" ? "이름 변경" : "비밀번호 변경", exact: true }).click();
+        await expect.poll(() => Boolean(pending)).toBe(true);
+        await expect(page.getByRole("button", { name: action === "username" ? "비밀번호 변경" : "이름 변경", exact: true })).toBeDisabled();
+        await expect(page.getByLabel("현재 비밀번호")).toHaveValue("old-password-1");
+        const accepted = { ...refreshed("accepted-session", "accepted-refresh"),
+          user: { ...session.user, username: action === "username" ? "renamed" : session.user.username } };
+        await pending!.fulfill({ json: accepted });
+        pending = undefined;
+        await expect(page.getByRole("status").filter({ hasText: action === "username" ? "사용자 이름을 바꿨습니다." : "비밀번호를 바꿨습니다." })).toBeVisible();
+        await expect.poll(async () => (await saved(page)).session.accessToken).toBe("accepted-session");
+        expect(refreshes).toBe(1);
+        expect(authorizations).toEqual(["Bearer old-access", "Bearer new-access"]);
+        await expect(page.getByRole("button", { name: "처리 중…", exact: true })).toHaveCount(0);
+        if (action === "password") {
+          await expect(page.getByLabel("현재 비밀번호")).toHaveValue("");
+          await expect(page.getByLabel("새 비밀번호", { exact: true })).toHaveValue("");
+          await expect(page.getByLabel("새 비밀번호 확인")).toHaveValue("");
+        } else await expect(page.locator(".account-name")).toHaveText("renamed");
+      } finally {
+        await pending?.abort().catch(() => {});
+      }
+    });
+  }
+
+  for (const mode of ["account", "login"] as const) for (const outcome of ["success", "failure"] as const) {
+    test(`a new ${mode} clears settings secrets and ignores a late mutation ${outcome}`, async ({ page }) => {
+      await setup(page);
+      let pending: Route | undefined;
+      await page.route("**/api/v1/auth/username", route => { pending = route; });
+      try {
+        await page.getByRole("button", { name: "이름 변경", exact: true }).click();
+        await expect.poll(() => Boolean(pending)).toBe(true);
+        const next = { ...refreshed("explicit-new-login", "new-family"),
+          user: mode === "account" ? { ...session.user, id: "second", username: "second" } : session.user };
+        await page.evaluate(({ key, nextSession }) => {
+          const oldValue = localStorage.getItem(key);
+          const newValue = JSON.stringify({ session: nextSession, expiresAt: Date.now() + 900_000 });
+          localStorage.setItem(key, newValue);
+          window.dispatchEvent(new StorageEvent("storage", { key, oldValue, newValue, storageArea: localStorage }));
+        }, { key: storageKey, nextSession: next });
+        await expect(page.locator(".account-name")).toHaveText(next.user.username);
+        await expect(page.getByLabel("새 사용자 이름")).toHaveValue(next.user.username);
+        await expect(page.getByLabel("현재 비밀번호")).toHaveValue("");
+        await expect(page.getByLabel("새 비밀번호", { exact: true })).toHaveValue("");
+        await expect(page.getByLabel("새 비밀번호 확인")).toHaveValue("");
+        await pending!.fulfill(outcome === "success"
+          ? { json: { ...refreshed("old-write-response", "old-family"), user: { ...session.user, username: "renamed" } } }
+          : { status: 503, json: { message: "old login mutation failed" } });
+        pending = undefined;
+        await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+        expect((await saved(page)).session.accessToken).toBe("explicit-new-login");
+        await expect(page.getByText("사용자 이름을 바꿨습니다.", { exact: true })).toHaveCount(0);
+        await expect(page.getByText("old login mutation failed", { exact: true })).toHaveCount(0);
+        await expect(page.getByRole("button", { name: "처리 중…", exact: true })).toHaveCount(0);
+      } finally {
+        await pending?.abort().catch(() => {});
+      }
+    });
+  }
+});

@@ -4,16 +4,16 @@ import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 
-const [worktree, probeDirectory, reportName = "community-session-dom.json"] = process.argv.slice(2);
-if (!worktree || !probeDirectory || path.basename(reportName) !== reportName)
-  throw new Error("usage: node consolidation-session-dom-probe.mjs WORKTREE JSDOM_DIRECTORY [REPORT_BASENAME]");
+const [worktree, probeDirectory, reportName = "community-session-dom.json", suite = "community"] = process.argv.slice(2);
+if (!worktree || !probeDirectory || path.basename(reportName) !== reportName || !["community", "settings"].includes(suite))
+  throw new Error("usage: node consolidation-session-dom-probe.mjs WORKTREE JSDOM_DIRECTORY [REPORT_BASENAME] [community|settings]");
 const root = path.resolve(worktree);
 const probe = path.resolve(probeDirectory);
 const require = createRequire(path.join(root, "Front/package.json"));
 const probeRequire = createRequire(path.join(probe, "package.json"));
 const { JSDOM } = probeRequire("jsdom");
 const { build } = require("esbuild");
-const bundle = path.join(probe, "community-session.cjs");
+const bundle = path.join(probe, `session-${reportName}.cjs`);
 await build({
   stdin: { contents: `
     import { act } from 'react';
@@ -53,13 +53,14 @@ const post = {
 };
 const report = {
   source: { head: execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim(),
-    diff: execFileSync("git", ["diff", "--", "Front/src/App.tsx", "Front/src/pages/CommunityWritePage.tsx", "Front/src/pages/CommunityPostPage.tsx"], { cwd: root, encoding: "utf8" }).trim() },
+    diff: execFileSync("git", ["diff", "--", "Front/src/App.tsx", "Front/src/pages/CommunityWritePage.tsx", "Front/src/pages/CommunityPostPage.tsx", "Front/src/pages/SettingsPage.tsx"], { cwd: root, encoding: "utf8" }).trim() },
   node: process.version, jsdom: probeRequire("jsdom/package.json").version, browser: false,
-  limitations: "Actual React router/auth/community DOM execution with synthetic fetch. No native browser, layout, screen reader, backend authorization or performance claim.",
+  suite, limitations: "Actual React router/auth/page DOM execution with synthetic fetch. No native browser, layout, screen reader, backend authorization or performance claim.",
   cases: [],
 };
-for (const kind of ["post", "answer"]) for (const mode of ["refresh", "account", "login"]) {
-  const route = kind === "post" ? "/community/new" : "/community/p1";
+for (const kind of suite === "settings" ? ["username", "password"] : ["post", "answer"]) for (const mode of ["refresh", "account", "login"]) {
+  const settings = suite === "settings";
+  const route = settings ? "/settings" : kind === "post" ? "/community/new" : "/community/p1";
   const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', { url: `http://localhost${route}`, pretendToBeVisual: true });
   const win = dom.window;
   for (const key of ["window", "document", "localStorage", "sessionStorage", "navigator", "HTMLElement", "Element", "Node", "Event", "CustomEvent", "KeyboardEvent", "StorageEvent", "HTMLInputElement", "HTMLTextAreaElement", "HTMLSelectElement", "getComputedStyle"])
@@ -80,15 +81,19 @@ for (const kind of ["post", "answer"]) for (const mode of ["refresh", "account",
     const pathname = new URL(url, "http://localhost").pathname;
     const method = options.method ?? "GET";
     if (pathname === "/api/v1/notifications/unread-count") return Response.json({ unread: 0 });
+    if (pathname === "/api/v1/auth/sessions") return Response.json([]);
+    if (pathname === "/api/v1/email/preferences") return Response.json({ verified: false, answer: false, accepted: false, enabled: false });
     if (pathname === "/api/v1/auth/refresh") { refreshes++; return Response.json(fresh); }
-    const writePath = kind === "post" ? "/api/v1/community/posts" : "/api/v1/community/posts/p1/comments";
-    if (method === "POST" && pathname === writePath) {
+    const writePath = settings ? `/api/v1/auth/${kind}` : kind === "post" ? "/api/v1/community/posts" : "/api/v1/community/posts/p1/comments";
+    if (method === (settings ? "PATCH" : "POST") && pathname === writePath) {
       writes.push({ authorization: options.headers.Authorization, body: JSON.parse(options.body) });
       if (mode === "refresh" && options.headers.Authorization === `Bearer ${session.accessToken}`)
         return Response.json({ message: "Expired" }, { status: 401 });
       return new Promise(resolve => { release = () => {
+        release = undefined;
         if (kind === "answer") answers.push({ id: "a1", authorId: "solver", author: post.author, body: "작성한 답변 내용", createdAt: post.createdAt, voteCount: 0 });
-        resolve(Response.json(kind === "post" ? { ...post, title: "작성한 글 제목", body: "작성한 글 본문" } : { id: "a1" }, { status: 201 }));
+        resolve(Response.json(settings ? { ...fresh, accessToken: token(3), user: { ...session.user, username: kind === "username" ? "renamed" : "solver" } }
+          : kind === "post" ? { ...post, title: "작성한 글 제목", body: "작성한 글 본문" } : { id: "a1" }, { status: settings ? 200 : 201 }));
       }; });
     }
     if (pathname === "/api/v1/community/posts/p1") return Response.json(post);
@@ -113,11 +118,18 @@ for (const kind of ["post", "answer"]) for (const mode of ["refresh", "account",
   const observed = {};
   try {
     await act(async () => { mounted = mount(route); });
-    const selector = kind === "post" ? 'input[placeholder^="예: 다익스트라"]' : 'textarea[aria-label="답변 내용"]';
+    const selector = settings ? `input[autocomplete="${kind === "username" ? "username" : "current-password"}"]`
+      : kind === "post" ? 'input[placeholder^="예: 다익스트라"]' : 'textarea[aria-label="답변 내용"]';
     await wait(() => document.querySelector(selector));
     const input = document.querySelector(selector);
-    await fill(input, kind === "post" ? "작성한 글 제목" : "작성한 답변 내용");
-    if (kind === "post") await fill(document.querySelector("#body-input"), "작성한 글 본문");
+    if (settings) {
+      await fill(document.querySelector('input[autocomplete="username"]'), "renamed");
+      await fill(document.querySelector('input[autocomplete="current-password"]'), "disposable-old-password");
+      for (const field of document.querySelectorAll('input[autocomplete="new-password"]')) await fill(field, "disposable-new-password");
+    } else {
+      await fill(input, kind === "post" ? "작성한 글 제목" : "작성한 답변 내용");
+      if (kind === "post") await fill(document.querySelector("#body-input"), "작성한 글 본문");
+    }
     await act(async () => input.closest("form").dispatchEvent(new win.Event("submit", { bubbles: true, cancelable: true })));
     await wait(() => release);
     if (mode !== "refresh") await act(async () => {
@@ -131,11 +143,14 @@ for (const kind of ["post", "answer"]) for (const mode of ["refresh", "account",
     });
     await tick();
     observed.sameInput = document.querySelector(selector) === input;
-    observed.pending = document.querySelector(selector)?.matches(":disabled");
+    observed.pending = settings ? document.querySelector(selector)?.closest("form").querySelector("button").disabled
+      : document.querySelector(selector)?.matches(":disabled");
+    if (settings) observed.secretsCleared = [...document.querySelectorAll('#settings-password + form input')].every(field => field.value === "");
     await act(async () => release());
     for (let i = 0; i < 8; i++) await tick();
     observed.path = mounted.router.state.location.pathname;
-    observed.notice = document.body.textContent.includes(kind === "post" ? "글을 등록했어요." : "답변을 등록했어요.");
+    observed.notice = document.body.textContent.includes(kind === "username" ? "사용자 이름을 바꿨습니다." : kind === "password" ? "비밀번호를 바꿨습니다."
+      : kind === "post" ? "글을 등록했어요." : "답변을 등록했어요.");
     observed.refreshes = refreshes;
     observed.writes = writes.length;
     if (mode === "refresh") {
@@ -144,10 +159,14 @@ for (const kind of ["post", "answer"]) for (const mode of ["refresh", "account",
       assert.equal(observed.notice, true, "the confirmed write must complete in the same login");
       assert.equal(observed.refreshes, 1);
       assert.equal(observed.writes, 2);
-      if (kind === "post") assert.equal(observed.path, "/community/p1");
+      if (settings) assert.equal(JSON.parse(localStorage.getItem(storageKey)).session.accessToken, token(3));
+      else if (kind === "post") assert.equal(observed.path, "/community/p1");
       else assert.equal(document.querySelector(selector).value, "");
     } else {
-      assert.equal(observed.sameInput, false, "a different login must replace the old component");
+      if (settings) {
+        assert.equal(observed.secretsCleared, true, "a new login must clear the previous password fields");
+        assert.notEqual(JSON.parse(localStorage.getItem(storageKey)).session.accessToken, token(3));
+      } else assert.equal(observed.sameInput, false, "a different login must replace the old component");
       assert.equal(observed.notice, false, "a stale write must not update the new login");
       assert.equal(observed.path, route);
       assert.equal(observed.writes, 1);
