@@ -6,7 +6,9 @@ import type { LearningDashboard, LearningDays } from "../src/learning/types";
 
 type Metric<T> = { value: T | null; reason: string | null };
 type LcpEntry = { startTime: number; renderTime: number; loadTime: number; size: number };
-type ShiftEntry = { startTime: number; value: number; hadRecentInput: boolean };
+type Geometry = { x: number; y: number; width: number; height: number };
+type ShiftSource = { region: string | null; tag: string | null; previous: Geometry; current: Geometry };
+type ShiftEntry = { startTime: number; value: number; hadRecentInput: boolean; sources: ShiftSource[]; sourcesTruncated: boolean };
 type EventEntry = {
   name: string; startTime: number; duration: number; processingStart: number | null;
   processingEnd: number | null; interactionId: number | null;
@@ -23,6 +25,8 @@ type BrowserSnapshot = {
   observerReasons: Record<string, string | null>;
   truncated: Record<string, boolean>;
   lcpEntries: LcpEntry[]; layoutShifts: ShiftEntry[]; eventTiming: Metric<EventEntry[]>;
+  layout: { viewport: { width: number; height: number }; document: { width: number; height: number };
+    fontStatus: string | null; regions: { region: string; box: Geometry | null }[] };
 };
 declare global {
   interface Window {
@@ -42,6 +46,13 @@ function installProbe() {
   const reasons: Record<string, string | null> = {};
   const truncated: Record<string, boolean> = {};
   const collectors: { observer: PerformanceObserver; collect: (entries: PerformanceEntry[]) => void }[] = [];
+  // Only fixed, source-owned region names and numbers leave the browser. Never
+  // retain DOM nodes, text, arbitrary IDs/classes, URLs, account data or input.
+  const regions = [".learning-goal", ".learning-toolbar", "dl.learning-summary", ".learning-scope",
+    ".learning-panel", ".page-header", ".site-header", ".site-footer"];
+  const tags = new Set(["DIV", "P", "SPAN", "DL", "DT", "DD", "SECTION", "H1", "H2", "BUTTON", "A",
+    "HEADER", "FOOTER", "MAIN", "NAV", "UL", "OL", "LI", "PROGRESS"]);
+  const geometry = (rect: DOMRectReadOnly): Geometry => ({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
   const observe = (type: string, collect: (entry: PerformanceEntry) => void) => {
     reasons[type] = null;
     truncated[type] = false;
@@ -69,8 +80,16 @@ function installProbe() {
     lcpEntries.push({ startTime: value.startTime, renderTime: value.renderTime, loadTime: value.loadTime, size: value.size });
   });
   observe("layout-shift", entry => {
-    const value = entry as PerformanceEntry & ShiftEntry;
-    layoutShifts.push({ startTime: value.startTime, value: value.value, hadRecentInput: value.hadRecentInput });
+    const value = entry as PerformanceEntry & { value: number; hadRecentInput: boolean;
+      sources?: { node?: Node; previousRect: DOMRectReadOnly; currentRect: DOMRectReadOnly }[] };
+    const sources = value.sources ?? [];
+    layoutShifts.push({ startTime: value.startTime, value: value.value, hadRecentInput: value.hadRecentInput,
+      sources: sources.slice(0, 5).map(source => {
+        const element = source.node instanceof Element ? source.node : source.node?.parentElement;
+        return { region: regions.find(selector => element?.closest(selector)) ?? null,
+          tag: element && tags.has(element.tagName) ? element.tagName.toLowerCase() : null,
+          previous: geometry(source.previousRect), current: geometry(source.currentRect) };
+      }), sourcesTruncated: sources.length > 5 });
   });
   observe("event", entry => {
     const value = entry as PerformanceEntry & Partial<EventEntry>;
@@ -157,6 +176,13 @@ function installProbe() {
         lcpEntries: [...lcpEntries], layoutShifts: [...layoutShifts],
         eventTiming: { value: reasons.event ? null : [...eventTiming], reason: reasons.event || (eventTiming.length
           ? null : "No entries met the requested threshold in this window; this does not mean zero interaction latency.") },
+        layout: { viewport: { width: innerWidth, height: innerHeight },
+          document: { width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight },
+          fontStatus: document.fonts?.status ?? null,
+          regions: regions.map(region => {
+            const element = document.querySelector(region);
+            return { region, box: element ? geometry(element.getBoundingClientRect()) : null };
+          }) },
       };
     },
   };
@@ -216,7 +242,7 @@ export async function measureLearningPerformance(page: Page, testInfo: TestInfo)
     final: BrowserSnapshot | null; heapAfter: Awaited<ReturnType<typeof heapSample>> | null;
   }[] = [];
   const report = {
-    schemaVersion: 1, status: "incomplete", startedAt: new Date().toISOString(), completedAt: null as string | null,
+    schemaVersion: 2, probeVersion: "phase5-layout-attribution-v1", status: "incomplete", startedAt: new Date().toISOString(), completedAt: null as string | null,
     checkout: { sha: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
       tree: execFileSync("git", ["rev-parse", "HEAD^{tree}"], { encoding: "utf8" }).trim(),
       workflowRunId: process.env.GITHUB_RUN_ID ?? null, workflowAttempt: process.env.GITHUB_RUN_ATTEMPT ?? null },
@@ -234,6 +260,7 @@ export async function measureLearningPerformance(page: Page, testInfo: TestInfo)
     definitions: {
       lcpCandidate: "Latest browser-reported candidate by the bounded initial snapshot before scripted input; not a full-lifetime or field LCP.",
       observedCls: "Maximum session sum of non-recent-input shifts, gap <1s and session <5s, in this top-level document's observation window.",
+      layoutAttribution: "Up to five browser-exposed sources per shift, fixed region labels and numerical viewport rectangles; source nodes are impacted elements, not proof of the initiating cause. Snapshot geometry includes font-loading status, without DOM text or URLs.",
       navigation: "Browser document Navigation Timing relative to timeOrigin, not API server processing time; period switches are same-document updates, not new document navigations.",
       periodLatency: "Browser click event timestamp to the second animation frame after fixture-correct new-period DOM; includes API/render work, not an actual paint timestamp or INP.",
       eventTiming: "Raw browser Event Timing, requested durationThreshold=16ms; reported durations have 8ms granularity. Faster events may be absent; absence is not zero latency.",
