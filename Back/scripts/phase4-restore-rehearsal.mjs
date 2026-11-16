@@ -131,9 +131,30 @@ export async function rehearse(env = process.env) {
       '--no-owner', '--no-acl', '--exit-on-error',
     ], { input: archive, timeout: 60_000, maxBuffer: 2 * 1024 * 1024 }));
     const restored = await connect(restoredName);
-    await timed('all table and schema equality', async () => {
-      assert.deepEqual(await fingerprints(restored), before);
-      assert.deepEqual(await schema(restored), sourceSchema);
+    await timed('all restored table fingerprints', async () => {
+      const actual = await fingerprints(restored);
+      for (const expected of before) {
+        const found = actual.find(table => table.table === expected.table);
+        if (JSON.stringify(found) !== JSON.stringify(expected))
+          console.error(JSON.stringify({ kind: 'safe table mismatch', expected, actual: found ?? null }));
+      }
+      assert.deepEqual(actual, before);
+    });
+    await timed('restored schema equality', async () => {
+      const actual = await schema(restored);
+      for (const kind of ['indexes', 'triggers', 'constraints']) {
+        if (JSON.stringify(actual[kind]) !== JSON.stringify(sourceSchema[kind]))
+          console.error(JSON.stringify({ kind: `safe ${kind} mismatch`,
+            expectedCount: sourceSchema[kind].length, actualCount: actual[kind].length,
+            expectedHash: createHash('sha256').update(JSON.stringify(sourceSchema[kind])).digest('hex'),
+            actualHash: createHash('sha256').update(JSON.stringify(actual[kind])).digest('hex'),
+            changedNames: sourceSchema[kind].filter((item, index) => JSON.stringify(item) !== JSON.stringify(actual[kind][index]))
+              .map(item => item.indexname ?? item.tgname ?? item.conname),
+          }));
+      }
+      assert.deepEqual(actual, sourceSchema);
+    });
+    await timed('restored migration ledger', async () => {
       assert.deepEqual(await restored.runMigrations(), [], 'Restored migration ledger must be complete');
     });
     await timed('last migration rollback and reapply', async () => {
