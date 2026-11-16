@@ -58,3 +58,31 @@ npm run start:dev
 실행 이미지 변경 후 `docker compose up -d --build --wait go-judge`로 다시 빌드하세요. [공식 API](https://docs.goj.ac/api), [설계·제한](https://docs.goj.ac/design), [전환 조사](../docs/research/go-judge-migration.md)를 참고하세요.
 
 별도 승인 후 사용할 [전용 실행 노드 템플릿](./deploy/README.md)은 필수 비밀키가 없으면 시작하지 않으며 host port를 공개하지 않습니다. 전체 앱의 실제 브라우저 검사는 저장소 루트에서 `node scripts/check-compose.mjs`로 실행합니다. 기존 개발 DB와 서비스는 재사용하지 않습니다.
+
+## Optional worker measurements
+
+Set `JUDGE_METRICS=json` on a worker process to emit one `judge_completed` JSON
+record after the API acknowledges a verdict. It includes queue wait, claim,
+compile/run/cleanup combined (`judgeMs`), result-delivery/retry duration, and worker
+process CPU/RSS. Source code, input, expected output, diagnostics and credentials
+are excluded. The metric sink cannot fail a successfully committed job.
+
+CPU counters are cumulative **process** microseconds, not per-submission CPU.
+Subtract samples from the same worker to measure an interval; do not add
+per-job deltas from overlapping executions. RSS peak is the process lifetime
+high-water mark in KiB and includes warmup. Judge CPU/memory fields in the result
+remain sandbox execution measurements and are separate from worker overhead.
+
+The worker connects/pings Redis before startup presence, then stops renewing
+API readiness while either its main or blocking queue Redis connection is
+unavailable. Initial API authentication still precedes blocking-client construction.
+Queue wait is elapsed time since the BullMQ enqueue timestamp at claim, including
+retries and outage waits; cross-host values require synchronized clocks. The existing API presence TTL still applies; local liveness remains
+fresh while ioredis reconnects, avoiding restart loops during a short outage.
+
+`Back/test/judge-capacity.pipeline-spec.ts` runs finite disposable pipeline trials,
+worker link interruptions, duplicate deliveries and real lease-expiry recovery.
+It writes `Back/reports/phase2-judge-capacity.json` and redacted synthetic worker
+logs. Eight jobs/trial and two repetitions/configuration are CI smoke evidence,
+not a maximum-throughput or production p99 estimate. The test never runs submitted
+code outside go-judge, restarts production services or changes lease timestamps.

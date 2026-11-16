@@ -9,6 +9,9 @@ const config = {
   token: process.env.GO_JUDGE_TOKEN ?? "",
 };
 const sources: Record<string, string> = JSON.parse(await readFile(new URL("../runtime/smoke-sources.json", import.meta.url), "utf8"));
+const verdictSources: Record<string, { source: string; syntaxError: string }> = JSON.parse(
+  await readFile(new URL("../runtime/verdict-sources.json", import.meta.url), "utf8"),
+);
 
 function input(sourceCode: string, language = "PYTHON", memoryMb = 256, timeMs = 1000): Claim {
   return {
@@ -39,6 +42,40 @@ test("real go-judge sandbox", { timeout: 600_000 }, async (t) => {
       assert.deepEqual(result.debugOutputs, [{
         testCase: 1, stdout: "12\n", stderr: "", stdoutTruncated: false, stderrTruncated: false,
       }]);
+    });
+  }
+  // Every supported language must exercise failure mapping, not only compilation
+  // and the happy path. These bounded programs execute exclusively in go-judge.
+  assert.deepEqual(Object.keys(verdictSources).sort(), Object.keys(sources).sort());
+  for (const [language, fixture] of Object.entries(verdictSources)) {
+    for (const [mode, expected] of [
+      ["w", "WRONG_ANSWER"], ["r", "RUNTIME_ERROR"],
+      ["t", "TIME_LIMIT_EXCEEDED"], ["o", "OUTPUT_LIMIT_EXCEEDED"],
+    ]) {
+      await t.test(`${language} verdict ${expected}`, async () => {
+        const claim = input(fixture.source, language, 256, mode === "t" ? 1000 : 5000);
+        claim.testCases = [{ input: mode, expectedOutput: "expected", isSample: true }];
+        const result = await judge(claim, config);
+        assert.equal(result.status, expected, JSON.stringify(result));
+        assert.equal(result.passedTestCases, 0);
+        assert.equal(result.testResults.length, 1);
+      });
+    }
+    await t.test(`${language} rejects syntax errors at its compilation or interpretation stage`, async () => {
+      const result = await judge(input(fixture.syntaxError, language, 256, 5000), config);
+      const interpreted = ["PYTHON", "JAVASCRIPT"].includes(language);
+      assert.equal(result.status, interpreted ? "RUNTIME_ERROR" : "COMPILE_ERROR", JSON.stringify(result));
+      assert.equal(result.passedTestCases, 0);
+    });
+    await t.test(`${language} preserves long UTF-8 input, CRLF and repeated-case verdicts`, async () => {
+      const text = `echo\n한글 😀\r\n${"x".repeat(262_144)}\n`;
+      const claim = input(fixture.source, language, 256, 5000);
+      claim.testCases = [true, false].map((isSample) => ({ input: text, expectedOutput: text, isSample }));
+      const result = await judge(claim, config);
+      assert.equal(result.status, "ACCEPTED", JSON.stringify(result));
+      assert.equal(result.passedTestCases, 2);
+      assert.equal(result.debugOutputs.length, 1);
+      assert.equal(result.debugOutputs[0].stdoutTruncated, true);
     });
   }
   const checks: [string, string, string?, number?, number?][] = [

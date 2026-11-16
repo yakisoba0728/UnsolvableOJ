@@ -104,14 +104,14 @@ function harness(
   });
   return {
     requests, intervals, sleeps, consumer, consume, errors, logs,
-    start: (token = "unit-token", heartbeatFile?: string) => startWorker(
-      { url: "http://api.test/api/v1", token, heartbeatFile },
+    start: (token = "unit-token", heartbeatFile?: string, options: Partial<Parameters<typeof startWorker>[0]> = {}) => startWorker(
+      { url: "http://api.test/api/v1", token, heartbeatFile, ...options },
       { url: "http://sandbox.test", token: "sandbox-token" },
       consume, runJudge,
     ),
-    process() {
+    process(timestamp?: number) {
       assert.ok(processor);
-      return processor({ data: { submissionId: "submission", generation: 7 } });
+      return processor({ data: { submissionId: "submission", generation: 7 }, timestamp });
     },
     async heartbeat() {
       for (const callback of [...intervals.values()]) callback();
@@ -550,4 +550,68 @@ test("closing stops worker presence heartbeats but retains the active lease thro
   assert.equal(h.consumer.close.mock.callCount(), 1);
   assert.equal(h.intervals.size, 0);
   assert.equal(h.requests.at(-1)?.path, `${path}/result`);
+});
+
+test("Redis disconnection stops advertised readiness and reconnect restores it without stopping the worker", async (t) => {
+  let ready = true;
+  const h = harness(t);
+  const running = await h.start("unit-token", undefined, { isQueueReady: () => ready });
+  t.after(() => running.close());
+  const count = () => h.requests.filter((r) => r.path === "/api/v1/internal/judge/heartbeat").length;
+  assert.equal(count(), 1);
+  ready = false;
+  await h.heartbeat();
+  await h.heartbeat();
+  assert.equal(count(), 1, "disconnected consumer must not renew API readiness");
+  assert.equal(h.consumer.close.mock.callCount(), 0, "ioredis must be allowed to reconnect");
+  ready = true;
+  await h.heartbeat();
+  assert.equal(count(), 2);
+});
+
+test("completion measurements describe acknowledged execution and exclude code, test data and credentials", async (t) => {
+  const measurements: unknown[] = [];
+  const acknowledgment = deferred<Response>();
+  const h = harness(t, (r) => r.path.endsWith("/result") ? acknowledgment.promise : Response.json({ ok: true }));
+  const running = await h.start("unit-token", undefined, { observe: (m) => measurements.push(m) });
+  t.after(() => running.close());
+  const invocation = h.process(Date.now() - 100);
+  await setImmediate();
+  assert.equal(measurements.length, 0, "no completion metric before acknowledgment");
+  acknowledgment.resolve(Response.json({ ok: true }));
+  await invocation;
+  assert.equal(measurements.length, 1);
+  const measurement = measurements[0] as Record<string, unknown>;
+  assert.equal(measurement.event, "judge_completed");
+  assert.equal(measurement.status, "ACCEPTED");
+  assert.equal(measurement.language, "PYTHON");
+  assert.equal(measurement.generation, 7);
+  assert.ok(Number(measurement.queueWaitMs) >= 100);
+  for (const name of ["claimMs", "judgeMs", "reportMs", "totalMs", "processCpuUserUs", "processCpuSystemUs", "processRssBytes", "processPeakRssKiB"]) {
+    assert.ok(Number.isFinite(measurement[name]) && Number(measurement[name]) >= 0, name);
+  }
+  const serialized = JSON.stringify(measurement);
+  for (const secret of ["print(3)", "expectedOutput", "debugOutputs", "unit-token", "sandbox-token"]) assert.ok(!serialized.includes(secret));
+});
+
+test("a broken measurement observer cannot fail a committed result or duplicate its callback", async (t) => {
+  const h = harness(t);
+  const running = await h.start("unit-token", undefined, { observe: () => { throw new Error("sink unavailable"); } });
+  t.after(() => running.close());
+  await h.process();
+  assert.equal(h.requests.filter((r) => r.path.endsWith("/result")).length, 1);
+  assert.deepEqual(h.errors.mock.calls.at(-1)?.arguments, ["Judge measurement observer failed"]);
+});
+
+test("startup does not advertise a disconnected queue and can start after reconnect", async (t) => {
+  let ready = false;
+  const h = harness(t);
+  await assert.rejects(h.start("unit-token", undefined, { isQueueReady: () => ready }), /queue is not ready/);
+  assert.equal(h.requests.length, 0);
+  assert.equal(h.consume.mock.callCount(), 0);
+  ready = true;
+  const running = await h.start("unit-token", undefined, { isQueueReady: () => ready });
+  await running.close();
+  assert.equal(h.requests.length, 1);
+  assert.equal(h.consume.mock.callCount(), 1);
 });

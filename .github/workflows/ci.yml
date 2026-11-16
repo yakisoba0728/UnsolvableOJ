@@ -386,6 +386,7 @@ jobs:
           docker compose up -d --no-build --wait --wait-timeout 180 go-judge
           npm run test:runtime --prefix Judge
       - name: Native judging pipeline
+        id: phase2_pipeline
         working-directory: Back
         env:
           NODE_ENV: test
@@ -397,6 +398,18 @@ jobs:
           JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: node scripts/run-integration.mjs pipeline
+      - name: Preserve Phase II Judge measurements and recovery evidence
+        if: ${{ always() && (steps.phase2_pipeline.outcome == 'success' || steps.phase2_pipeline.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase2-judge-evidence-${{ github.run_attempt }}
+          path: |
+            Back/reports/phase2-*.json
+            Back/reports/phase2-*.log
+          # A pipeline setup failure can precede report creation. Its test failure
+          # remains the gate; a missing artifact must not obscure that root cause.
+          if-no-files-found: warn
+          retention-days: 7
       - name: Full Compose browser flow
         run: node scripts/check-compose.mjs --production
       - name: Failed Compose browser artifacts (disposable test data only)
