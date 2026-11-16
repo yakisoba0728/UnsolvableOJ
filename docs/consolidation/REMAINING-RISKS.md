@@ -16,6 +16,7 @@
 | Hours-long editor memory and exhaustive signal taxonomy | DEFERRED_NONBLOCKING | Separate controlled duration/signal protocol; short heap samples do not prove absence of leaks |
 | Java hard-limit MLE | DEFERRED_NONBLOCKING | Separate bounded native cgroup-pressure proof; existing heap OOM stays RE |
 | Paid-provider quality and repository license | OWNER_DECISION_REQUIRED | Explicit authorized provider scope/spend or copyright-owner license choice |
+| Following an existing post by a withdrawn author | CONTRACT_UNCONFIRMED, nonblocking audit observation | Product decision on target eligibility; the acting follower is fenced, and no broader target-account rule was invented |
 
 The historical [external gate detail](../overhaul/phase5/REMAINING-EXTERNAL-GATES.md)
 supplies prior evidence and operator requirements. Its old phase status and manual

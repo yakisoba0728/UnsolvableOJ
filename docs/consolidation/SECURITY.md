@@ -24,6 +24,10 @@ alone could not close. The actor helper checks current account state under a use
 row lock and checks family validity in a separate statement after that lock. Routine
 refresh successors in the same active family remain valid. Staff-triggered grading
 must check the staff principal separately from the candidate whose work is graded.
+For distinct staff and candidate identities, both user rows are locked in database
+UUID order before admission. Candidate deletion is rechecked under that lock;
+the candidate does not need a live session and is not impersonated. The existing
+retained-work read-only contract after withdrawal is preserved.
 
 The Vibe runner's cleanup inventory is collected before malformed response
 rejection. Only validated file-map identifiers enter bounded cleanup; string

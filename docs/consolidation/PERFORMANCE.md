@@ -15,6 +15,30 @@ receipt. A different CI runner is not a controlled before/after experiment.
 Field INP remains **null**; field LCP/CLS and long-duration memory stability are
 unmeasured.
 
+## Controlled consolidation bundle comparison
+
+The same Node24.22.1 host, installed dependencies, byte-identical package lock and
+Vite configuration, and absent `VITE_*` overrides produced both builds. The final
+measured `Front` subtree is `df7596ff304e82efb122e7dbfa0c34f105bb9fcd` and includes
+community, Settings and Vibe corrections. Gzip uses level9; Brotli uses quality11.
+The whole-JavaScript rows sum independently compressed emitted files, including
+lazy chunks; they are not a single page-load size or latency measurement.
+
+| Metric, bytes | Phase V baseline | Final Front candidate | Delta |
+|---|---:|---:|---:|
+| HTML module entry | 383,981 | 383,958 | -23 |
+| Entry gzip | 123,403 | 123,376 | -27 |
+| Entry Brotli | 106,467 | 106,603 | +136 |
+| All emitted JavaScript | 1,494,009 | 1,494,483 | +474 |
+| Summed per-file gzip | 492,887 | 493,084 | +197 |
+| Summed per-file Brotli | 419,149 | 419,614 | +465 |
+
+The total-size increases and inherited large-chunk warning remain visible. No
+runtime optimization is newly accepted. Build durations on a shared host are not
+used to infer improvement. [Performance audit](audits/PERFORMANCE.md) identifies
+the raw reports, source/lock/config hashes and commands; the final evidence archive
+retains those bytes alongside the earlier intermediate and adverse observations.
+
 ## Preserved historical baseline: final Phase V run43913852145
 
 These values belong only to source `e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5`,

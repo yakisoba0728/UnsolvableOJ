@@ -38,6 +38,13 @@ responsive, reduced-motion and editor checks continue in the selected browser
 projects. Firefox/WebKit are a defined core-flow subset; the whole Chromium suite
 must not be reported as running unchanged on all three engines.
 
+The [Frontend audit](audits/FRONTEND.md) lists all thirty page modules and route
+coverage boundaries. New Vibe regressions also cover stale start completion after
+logout, replacement login or navigation and staff grading delayed by candidate
+withdrawal. Twenty browser cases per engine were added to the already selected
+session-refresh spec; the final CI receipt must distinguish discovery from actual
+execution and report any retries or skips.
+
 ## Database preservation
 
 All 31 migrations and their order are inherited unchanged. In particular, immutable
