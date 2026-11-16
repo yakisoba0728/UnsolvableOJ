@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { Submission } from "../src/types";
-import { authenticate } from "./fixtures";
+import { answerConfirm, authenticate } from "./fixtures";
 
 const report = (id: string, extra: Record<string, unknown> = {}) => ({
   id,
@@ -110,25 +110,25 @@ test("admins review community reports, resolve them, and hide targets", async ({
 
   const reads = () => requests.filter(({ url }) => url.pathname === "/api/v1/admin/community/reports").length;
   // 확인 창을 취소하면 보내지 않는다.
-  page.once("dialog", (dialog) => dialog.dismiss());
   await rows.first().getByRole("button", { name: "글 숨기기" }).click();
+  await answerConfirm(page, false);
   expect(requests.some(({ url }) => url.pathname.endsWith("/hidden"))).toBe(false);
 
   const before = reads();
-  page.once("dialog", (dialog) => dialog.accept());
   await rows.first().getByRole("button", { name: "글 숨기기" }).click();
+  await answerConfirm(page, true, "숨기기");
   await expect(rows.first().getByRole("button", { name: "글 숨김 해제" })).toBeVisible();
   await expect(rows.first().getByText("숨김", { exact: true })).toBeVisible();
   expect(requests.find(({ url }) => url.pathname === "/api/v1/admin/community/posts/p-1/hidden")!.method).toBe("PUT");
   expect(reads()).toBe(before + 1);
 
-  page.once("dialog", (dialog) => dialog.accept());
   await rows.first().getByRole("button", { name: "글 숨김 해제" }).click();
+  await answerConfirm(page, true, "숨김 해제");
   await expect(rows.first().getByRole("button", { name: "글 숨기기" })).toBeVisible();
   expect(requests.filter(({ url }) => url.pathname.endsWith("/p-1/hidden")).at(-1)!.method).toBe("DELETE");
 
-  page.once("dialog", (dialog) => dialog.accept());
   await rows.nth(1).getByRole("button", { name: "처리 완료" }).click();
+  await answerConfirm(page, true, "처리 완료");
   await expect.poll(() => requests.some(({ method, url }) => method === "PUT" && url.pathname.endsWith("/reports/r-2/resolved"))).toBe(true);
 
   await page.getByRole("combobox", { name: "신고 상태 필터" }).click();
@@ -147,15 +147,13 @@ test("admins issue a one-time temporary password, never for themselves", async (
   await expect(rows).toHaveCount(2);
   await expect(rows.first().getByRole("button", { name: "임시 비밀번호" })).toHaveCount(0);
 
-  page.once("dialog", (dialog) => dialog.dismiss());
   await rows.nth(1).getByRole("button", { name: "임시 비밀번호" }).click();
+  await answerConfirm(page, false);
   expect(requests.some(({ url }) => url.pathname.endsWith("/temporary-password"))).toBe(false);
 
-  page.once("dialog", (dialog) => {
-    expect(dialog.message()).toContain("모든 로그인이 끊깁니다");
-    return dialog.accept();
-  });
   await rows.nth(1).getByRole("button", { name: "임시 비밀번호" }).click();
+  await expect(page.getByRole("dialog")).toContainText("모든 로그인이 끊깁니다");
+  await answerConfirm(page, true, "발급");
   const panel = page.locator(".admin-issued");
   await expect(panel.locator("code")).toHaveText("Tmp-9fQ2-xyz");
   await expect(panel).toContainText("사용자에게 안전하게 전달하고 로그인 후 바꾸게 하세요");
@@ -171,11 +169,11 @@ test("problem authors rejudge one submission after confirming", async ({ page })
   await page.goto("/submissions/s-1");
   const button = page.getByRole("button", { name: "다시 채점" });
   await expect(button).toBeVisible();
-  page.once("dialog", (dialog) => dialog.dismiss());
   await button.click();
+  await answerConfirm(page, false);
   expect(requests.some(({ url }) => url.pathname.endsWith("/rejudge"))).toBe(false);
-  page.once("dialog", (dialog) => dialog.accept());
   await button.click();
+  await answerConfirm(page, true, "다시 채점");
   await expect(page.getByText("채점 대기").first()).toBeVisible();
   expect(requests.find(({ url }) => url.pathname.endsWith("/rejudge"))!.url.pathname).toBe("/api/v1/submissions/s-1/rejudge");
 });
@@ -194,12 +192,12 @@ test("bulk rejudge continues from the next cursor until nothing remains", async 
   const requests = await mockApi(page);
   await page.goto("/my-problems");
   const rejudges = () => requests.filter(({ url }) => url.pathname === "/api/v1/problems/problem-id/rejudge");
-  page.once("dialog", (dialog) => dialog.dismiss());
   await page.getByRole("button", { name: "전체 재채점" }).click();
+  await answerConfirm(page, false);
   expect(rejudges()).toHaveLength(0);
 
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "전체 재채점" }).click();
+  await answerConfirm(page, true, "모두 다시 채점");
   const notice = page.locator(".my-problem-rejudge");
   await expect(notice).toContainText("198건");
   await expect(notice).toContainText("남은 제출 3건");

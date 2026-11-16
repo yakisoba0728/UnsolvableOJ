@@ -8478,11 +8478,12 @@ label.check-row input[type="radio"] {
 
 /* 화면 안 확인 창 (components/ConfirmDialog) */
 .confirm-dialog {
-  width: min(420px, calc(100vw - 32px));
+  width: min(560px, calc(100vw - 32px));
   max-width: none;
-  padding: 24px;
+  /* 여백은 안쪽 .confirm-body가 가진다: dialog 자신을 누른 것만 배경 클릭으로 본다. */
+  padding: 0;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-feature);
+  border-radius: 24px;
   background: var(--color-surface);
   color: var(--color-ink-900);
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
@@ -8491,23 +8492,31 @@ label.check-row input[type="radio"] {
 .confirm-dialog::backdrop {
   background: rgba(12, 17, 26, 0.45);
 }
+.confirm-body {
+  padding: 32px;
+}
 .confirm-dialog h2 {
-  margin: 0 0 8px;
-  font-size: 18px;
+  margin: 0 0 12px;
+  font-size: 22px;
   font-weight: var(--weight-title);
   line-height: 1.4;
 }
 .confirm-dialog p {
   margin: 0;
   color: var(--color-ink-600);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.7;
 }
 .confirm-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 24px;
+  gap: 12px;
+  margin-top: 32px;
+}
+.confirm-actions .button {
+  min-height: 48px;
+  padding-inline: 24px;
+  font-size: 16px;
 }
 .button.button-danger {
   background: var(--color-danger);

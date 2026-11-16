@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { answerConfirm } from "./fixtures";
 import type { Session } from "../src/types";
 import type { AttemptView, PublicTest } from "../src/enterprise/model";
 
@@ -96,8 +97,8 @@ test("a candidate opens the invite link, starts, submits and sees the problem ma
   await page.goto("/enterprise/join/abc");
   await expect(page.getByRole("heading", { name: "백엔드 채용 1차" })).toBeVisible();
   await expect(page.getByText("30분 안에 풀어 주세요.")).toBeVisible();
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "응시 시작" }).click();
+  await answerConfirm(page, true, "응시 시작");
   await expect(page).toHaveURL(/\/enterprise\/attempts\/a1$/);
   expect(started).toBe(true);
 

@@ -229,7 +229,7 @@ export function CreateProblemPage() {
   );
   const latestRef = useRef({ draft, dirty, loading });
   latestRef.current = { draft, dirty, loading };
-  useUnsavedChanges(dirty && !loading, doneRef);
+  const unsavedDialog = useUnsavedChanges(dirty && !loading, doneRef);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -466,6 +466,7 @@ export function CreateProblemPage() {
 
   return (
     <div className="page-width create-page">
+      {unsavedDialog}
       <PageHeader
         back={{
           to: editing ? "/my-problems" : "/problems",

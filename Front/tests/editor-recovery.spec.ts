@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { Problem, Session } from "../src/types";
-import { storageKey as sessionKey } from "./fixtures";
+import { answerConfirm, storageKey as sessionKey } from "./fixtures";
 
 const author: Session = {
   accessToken: "editor-token", tokenType: "Bearer", expiresIn: "15m",
@@ -79,15 +79,11 @@ test("author SPA exits can be cancelled, accepted exits recover, and explicit di
   await page.goto("/problems/new");
   await page.getByLabel("제목", { exact: true }).fill("Keep this work");
   expect(await page.evaluate(() => window.dispatchEvent(new Event("beforeunload", { cancelable: true })))).toBe(false);
-  await Promise.all([
-    page.waitForEvent("dialog").then((dialog) => dialog.dismiss()),
-    page.getByRole("link", { name: "← 문제 목록", exact: true }).click(),
-  ]);
+  await page.getByRole("link", { name: "← 문제 목록", exact: true }).click();
+  await answerConfirm(page, false);
   await expect(page).toHaveURL(/\/problems\/new$/);
-  await Promise.all([
-    page.waitForEvent("dialog").then((dialog) => dialog.accept()),
-    page.getByRole("link", { name: "← 문제 목록", exact: true }).click(),
-  ]);
+  await page.getByRole("link", { name: "← 문제 목록", exact: true }).click();
+  await answerConfirm(page, true, "나가기");
   await expect(page).toHaveURL(/\/problems$/);
   // The URL changes before the lazy page commits; wait for the editor to unmount.
   await expect(page.getByRole("heading", { name: "문제 목록", exact: true })).toBeVisible();
@@ -216,6 +212,7 @@ test("an abandoned POST cannot navigate away from or clear a newer creation", as
   await page.getByRole("button", { name: "문제 게시하기 →" }).click();
   await expect(page.getByLabel("제목", { exact: true })).toBeDisabled();
   await page.getByRole("link", { name: "← 문제 목록", exact: true }).click();
+  await answerConfirm(page, true, "나가기");
   await expect(page).toHaveURL(/\/problems$/);
   // The URL changes before the lazy page commits; wait for the editor to unmount.
   await expect(page.getByRole("heading", { name: "문제 목록", exact: true })).toBeVisible();
@@ -242,8 +239,8 @@ test("author storage failure is honest and memory recovery survives an immediate
   await page.goto("/problems/new");
   await page.getByLabel("제목", { exact: true }).fill("Memory only latest");
   await expect(page.getByText(/임시 저장소를 읽거나 저장하지 못했어요/)).toBeVisible();
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("link", { name: "← 문제 목록", exact: true }).click();
+  await answerConfirm(page, true, "나가기");
   await expect(page).toHaveURL(/\/problems$/);
   // A changed URL can precede a lazy route's commit. Wait for unmount before
   // testing recovery on a fresh editor, rather than reusing the old form.

@@ -37,6 +37,7 @@ import {
 import { useRequestOwner } from "../community/useRequestOwner";
 import { savedTime, useDocumentTitle, useRequest } from "../hooks";
 import { isImeEnter } from "../keyboard";
+import { useConfirm } from "../components/ConfirmDialog";
 import { useUnsavedChanges } from "../useUnsavedChanges";
 
 const MAX_TAGS = 5;
@@ -209,6 +210,7 @@ function WriteForm({
   const ownerId = session?.user.id ?? "";
   const navigate = useNavigate();
   const location = useLocation();
+  const [confirm, confirmDialog] = useConfirm();
   const [params] = useSearchParams();
   const beginRequest = useRequestOwner(getNavigationVersion);
   const linkState = location.state as {
@@ -285,7 +287,7 @@ function WriteForm({
   const pendingRef = useRef(false);
 
   const dirty = isDirty(fields, original);
-  useUnsavedChanges(dirty && Boolean(session), bypass);
+  const unsavedDialog = useUnsavedChanges(dirty && Boolean(session), bypass);
   const latest = useRef({ ...fields, dirty });
   latest.current = { ...fields, dirty };
 
@@ -372,18 +374,23 @@ function WriteForm({
     }));
   }
 
-  function cancel() {
+  async function cancel() {
     if (bypass.current || pendingRef.current) return;
     if (
       dirty &&
-      !window.confirm(
-        editing
-          ? "수정한 내용이 저장되지 않아요. 나갈까요?"
-          : "작성 중인 초안을 버리고 나갈까요?",
-      )
+      !(await confirm({
+        title: editing ? "수정한 내용이 저장되지 않아요" : "작성 중인 초안을 버릴까요?",
+        message: editing
+          ? "나가면 수정한 내용이 사라져요. 나갈까요?"
+          : "나가면 작성 중인 초안이 사라져요.",
+        confirmLabel: "나가기",
+        danger: true,
+      }))
     ) {
       return;
     }
+    // 확인하는 사이에 저장·이동이 시작됐다면 그쪽을 따른다.
+    if (bypass.current || pendingRef.current) return;
     if (!clearDraft(ownerId, editingId)) {
       setSubmitError(
         "초안을 지우지 못했어요. 내용을 유지했으니 다시 시도해 주세요.",
@@ -496,6 +503,8 @@ function WriteForm({
 
   return (
     <div className="write-page">
+      {unsavedDialog}
+      {confirmDialog}
       <PageHeader
         back={{
           to: editingId ? `/community/${editingId}` : "/community",

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { AdminAuditEvent, AdminUser } from "../src/types";
-import { authenticate } from "./fixtures";
+import { answerConfirm, authenticate } from "./fixtures";
 
 const user = (id: string, username: string, extra: Partial<AdminUser> = {}): AdminUser => ({
   id,
@@ -120,14 +120,12 @@ test("admins search users, change roles, and suspend with confirmation", async (
   await expect(rows.first().getByText("정지됨")).toBeVisible();
 
   // 확인 창을 취소하면 아무것도 보내지 않는다.
-  page.once("dialog", (dialog) => dialog.dismiss());
   await rows.first().getByRole("button", { name: "정지 해제" }).click();
+  await answerConfirm(page, false);
   expect(requests.some(({ url }) => url.pathname.endsWith("/suspension"))).toBe(false);
-  page.once("dialog", (dialog) => {
-    expect(dialog.message()).toContain("bob의 정지를 해제할까요?");
-    return dialog.accept();
-  });
   await rows.first().getByRole("button", { name: "정지 해제" }).click();
+  await expect(page.getByRole("dialog")).toContainText("bob의 정지를 해제할까요?");
+  await answerConfirm(page, true, "정지 해제");
   await expect(rows.first().getByText("정상")).toBeVisible();
   expect(requests.at(-1)!.body).toEqual({ suspended: false });
 
@@ -135,15 +133,15 @@ test("admins search users, change roles, and suspend with confirmation", async (
   await page.getByRole("option", { name: "모든 역할" }).click();
   await expect(rows).toHaveCount(3);
   const alice = rows.filter({ hasText: "alice" });
-  page.once("dialog", (dialog) => dialog.accept());
   await alice.getByRole("button", { name: "정지", exact: true }).click();
+  await answerConfirm(page, true, "정지");
   await expect(alice.getByText("정지됨")).toBeVisible();
   expect(requests.at(-1)!.url.pathname).toBe("/api/v1/admin/users/u-alice/suspension");
   expect(requests.at(-1)!.body).toEqual({ suspended: true });
 
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("combobox", { name: "alice 역할" }).click();
   await page.getByRole("option", { name: "작성자" }).click();
+  await answerConfirm(page, true, "역할 바꾸기");
   await expect(page.getByRole("combobox", { name: "alice 역할" })).toHaveText(/작성자/);
   expect(requests.at(-1)!.url.pathname).toBe("/api/v1/admin/users/u-alice/role");
   expect(requests.at(-1)!.body).toEqual({ role: "AUTHOR" });

@@ -10,6 +10,7 @@ import { Select } from "../components/Select";
 import { difficultyLabel } from "../difficulty";
 import { addUnits, remapUnits } from "../editor/codeEditing";
 import { languages, starter } from "../editor/languages";
+import { useConfirm } from "../components/ConfirmDialog";
 import { remainingText, type AttemptView } from "../enterprise/model";
 import { useDocumentTitle, useNow, useRequest } from "../hooks";
 import type { Language, Submission } from "../types";
@@ -38,6 +39,7 @@ function writeDraft(key: string, value: string) {
 export function EnterpriseAttemptPage() {
   const { id = "" } = useParams();
   const { session } = useAuth();
+  const [confirm, confirmDialog] = useConfirm();
   const navigate = useNavigate();
   const token = session?.accessToken;
   // 본문·편집기를 매초 다시 그리지 않도록 초 단위 표시는 AttemptTimer가 맡는다.
@@ -174,7 +176,12 @@ export function EnterpriseAttemptPage() {
   async function finish() {
     if (
       finishing ||
-      !window.confirm("시험을 종료할까요? 종료하면 더 제출할 수 없어요.")
+      !(await confirm({
+        title: "시험을 종료할까요?",
+        message: "종료하면 더 제출할 수 없어요.",
+        confirmLabel: "시험 종료",
+        danger: true,
+      }))
     )
       return;
     setFinishing(true);
@@ -192,6 +199,7 @@ export function EnterpriseAttemptPage() {
 
   return (
     <div className="page-width enterprise-page ent-attempt">
+      {confirmDialog}
       <PageHeader
         title={data.test.title}
         description={`${taskCount}문항 · 맞힌 문제 ${solved}개`}

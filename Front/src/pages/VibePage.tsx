@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Code2,
@@ -18,7 +18,6 @@ import "../vibe.css";
 export function VibePage() {
   useDocumentTitle("바이브코딩");
   const { session } = useAuth();
-  const navigate = useNavigate();
   const catalog = useRequest<VibeCatalog | null>(
     (signal) => api("/vibe/challenges", { signal }),
     null,
@@ -39,14 +38,23 @@ export function VibePage() {
     if (!session || pending) return;
     setPending(true);
     setError("");
+    // 문제 목록처럼 연습은 새 탭에서 연다. 요청이 끝난 뒤에 열면 팝업으로 막히므로
+    // 클릭 안에서 빈 탭을 먼저 열어 두고 주소를 채운다(막혔다면 이 탭에서 이동한다).
+    const tab = window.open("about:blank", "_blank");
+    if (tab) tab.opener = null;
     try {
       const attempt = await api<VibeAttempt>(
         `/vibe/challenges/${challengeId}/attempts`,
         { method: "POST" },
         session.accessToken,
       );
-      navigate(`/vibe/attempts/${attempt.id}`);
+      const path = `/vibe/attempts/${attempt.id}`;
+      // 기다리는 사이 빈 탭을 닫았다면 연습은 만들어졌으니 오류 없이 목록에 남는다(최근 연습에서 이어 연다).
+      if (tab) {
+        if (!tab.closed) tab.location.href = `${window.location.origin}${path}`;
+      } else window.location.assign(path);
     } catch (cause) {
+      tab?.close();
       setError(
         cause instanceof Error ? cause.message : "연습을 시작하지 못했습니다.",
       );
@@ -58,22 +66,9 @@ export function VibePage() {
     <div className="page-width page-body vibe-page">
       <PageHeader
         title="바이브코딩"
-        description="프로젝트를 읽고, 코드를 고치고, 테스트로 확인하세요."
+        description="프로젝트를 읽고, 코드를 고치고, 테스트로 확인하세요. 결과물·프롬프트·검증 과정을 함께 돌아봅니다."
       />
-      <section className="vibe-intro">
-        <div>
-          <span className="vibe-eyebrow">바이브코딩 테스트</span>
-          <h2>
-            좋은 지시에서
-            <br />
-            검증된 코드까지.
-          </h2>
-          <p>
-            작동하는 결과물, 문제를 전달하는 프롬프트,
-            <br />
-            실패를 확인하고 고치는 과정까지 돌아봅니다.
-          </p>
-        </div>
+      <section className="vibe-intro" aria-label="진행 방식">
         <ol className="vibe-steps">
           {[
             {
@@ -126,12 +121,18 @@ export function VibePage() {
         catalog.data?.items.map((item) => (
           <section className="vibe-challenge" key={item.id}>
             <div className="vibe-challenge-body">
-              <div className="vibe-tags">
-                <span>{item.stack}</span>
-                <span>{item.difficulty}</span>
-                <span>{item.durationMin}분</span>
-              </div>
               <h2>{item.title}</h2>
+              <div className="meta-strip vibe-meta">
+                <span>
+                  <strong>언어</strong> {item.stack}
+                </span>
+                <span>
+                  <strong>유형</strong> {item.difficulty}
+                </span>
+                <span>
+                  <strong>제한시간</strong> {item.durationMin}분
+                </span>
+              </div>
               <p>{item.summary}</p>
               <ul>
                 {item.requirements.slice(0, 3).map((requirement) => (
@@ -158,6 +159,7 @@ export function VibePage() {
                   onClick={() => void start(item.id)}
                 >
                   {pending ? "준비 중…" : "연습 시작 / 이어하기"}
+                  <span className="sr-only">(새 탭에서 열려요)</span>
                   <ArrowRight size={16} aria-hidden="true" />
                 </button>
               ) : (
@@ -201,9 +203,15 @@ export function VibePage() {
             <SkeletonRows count={2} />
           ) : history.data.length ? (
             history.data.map((item) => (
-              <Link key={item.id} to={`/vibe/attempts/${item.id}`}>
+              <Link
+                key={item.id}
+                to={`/vibe/attempts/${item.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <div>
                   <strong>게시글 검색 API 개선하기</strong>
+                  <span className="sr-only">(새 탭에서 열려요)</span>
                   <span>
                     {new Date(item.startedAt).toLocaleString("ko-KR")} ·{" "}
                     {item.submittedAt

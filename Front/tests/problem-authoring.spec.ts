@@ -1,5 +1,5 @@
 import { expect, test, type Route } from "@playwright/test";
-import { authenticate, mockProblemApi, problem, session, storageKey } from "./fixtures";
+import { answerConfirm, authenticate, mockProblemApi, problem, session, storageKey } from "./fixtures";
 
 test.beforeEach(({ page }) => mockProblemApi(page));
 
@@ -58,38 +58,31 @@ test("authors archive a problem only after confirming and can unarchive it back 
   });
   await page.goto("/my-problems");
   const row = page.locator(".my-problem-row", { hasText: "문제 A" });
-  const dialogs: string[] = [];
-  let accept = false;
-  page.on("dialog", (dialog) => {
-    dialogs.push(dialog.message());
-    void (accept ? dialog.accept() : dialog.dismiss());
-  });
+  const dialog = page.getByRole("dialog");
   await row.getByRole("button", { name: "보관", exact: true }).click();
-  await expect.poll(() => dialogs.length).toBe(1);
-  expect(dialogs[0]).toContain("문제 A");
+  await expect(dialog).toContainText("문제 A");
+  await answerConfirm(page, false);
   expect(sent).toHaveLength(0);
   await expect(row).toContainText("공개 중");
 
-  accept = true;
   await row.getByRole("button", { name: "보관", exact: true }).click();
+  await answerConfirm(page, true, "보관");
   await expect(row).toContainText("보관됨");
   expect(sent).toEqual([{ status: "ARCHIVED" }]);
   await expect(page.getByRole("status")).toHaveText("문제를 보관했어요.");
   await expect(row.getByRole("link", { name: "문제 보기" })).toHaveCount(0);
 
-  accept = false;
   await row.getByRole("button", { name: "보관 해제" }).click();
-  await expect.poll(() => dialogs.length).toBe(3);
-  expect(dialogs[2]).toContain("보관을 해제할까요?");
+  await expect(dialog).toContainText("보관을 해제할까요?");
+  await answerConfirm(page, false);
   expect(sent).toHaveLength(1);
   await expect(row).toContainText("보관됨");
 
-  accept = true;
   await row.getByRole("button", { name: "보관 해제" }).click();
+  await answerConfirm(page, true, "보관 해제");
   await expect(row).toContainText("초안 · 검수 대기");
   expect(sent).toEqual([{ status: "ARCHIVED" }, { status: "DRAFT" }]);
   await expect(page.getByRole("status")).toHaveText("보관을 해제했어요. 초안으로 돌아왔어요.");
-  expect(dialogs).toHaveLength(4);
 });
 
 for (const boundary of ["token", "account", "page"] as const) {
