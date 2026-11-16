@@ -48,7 +48,10 @@ describe('vibe project trust boundaries', () => {
               cgroupControllers: ['cpu', 'memory', 'pids'],
             },
           });
-        if (path === '/file') return Response.json([]);
+        if (path === '/file')
+          return new Headers(options.headers).has('Authorization')
+            ? Response.json([])
+            : new Response(null, { status: 401 });
         if (typeof options.body !== 'string')
           throw new Error('Expected a JSON request');
         const { cmd } = JSON.parse(options.body);
@@ -116,6 +119,42 @@ describe('vibe project trust boundaries', () => {
     );
   });
 
+  it('rejects a sandbox that accepts anonymous file access before executing code', async () => {
+    const fetcher = vi.fn(async (url: URL) => {
+      if (url.pathname === '/version') return Response.json({ os: 'linux' });
+      if (url.pathname === '/config')
+        return Response.json({
+          runnerConfig: {
+            seccomp: true,
+            cgroupType: 2,
+            workDir: '/w',
+            cgroupControllers: ['cpu', 'memory', 'pids'],
+          },
+        });
+      if (url.pathname === '/file') return Response.json([]);
+      return Response.json([
+        {
+          status: 'Accepted',
+          exitStatus: 0,
+          fileIds: { 'main.cjs': 'a', 'checks.cjs': 'b' },
+        },
+      ]);
+    });
+    vi.stubGlobal('fetch', fetcher);
+    const runner = new VibeRunner(
+      new ConfigService({
+        VIBE_SANDBOX_URL: 'http://sandbox.test',
+        VIBE_SANDBOX_TOKEN: 'fixture-token',
+      }),
+    );
+    await expect(runner.run(editableFiles(), false)).rejects.toThrow(
+      '격리 실행기',
+    );
+    expect(fetcher.mock.calls.some(([url]) => url.pathname === '/run')).toBe(
+      false,
+    );
+  });
+
   it('does not accept a forged assertion message as a passing functional test', async () => {
     vi.stubGlobal(
       'fetch',
@@ -131,7 +170,10 @@ describe('vibe project trust boundaries', () => {
               cgroupControllers: ['cpu', 'memory', 'pids'],
             },
           });
-        if (url.pathname === '/file') return Response.json([]);
+        if (url.pathname === '/file')
+          return new Headers(options.headers).has('Authorization')
+            ? Response.json([])
+            : new Response(null, { status: 401 });
         return Response.json([
           {
             status: 'Accepted',

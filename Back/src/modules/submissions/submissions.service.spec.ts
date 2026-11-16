@@ -265,7 +265,8 @@ describe('submission debug output lifecycle', () => {
       getRepository: () => ({ findOne }),
       findOneByOrFail: vi.fn().mockResolvedValue({ authorId: user.id }),
       save: vi.fn().mockResolvedValue(submission),
-      query: vi.fn().mockResolvedValue([]),
+      query: vi.fn().mockImplementation(async (sql: string) => sql.startsWith('SELECT snapshot')
+        ? [{ snapshot: { testCases: [{ order: 1, isSample: true }] } }] : []),
     };
     const repository = { findOne: vi.fn().mockResolvedValue(submission) };
     const queue = { add: vi.fn().mockResolvedValue({}) };
