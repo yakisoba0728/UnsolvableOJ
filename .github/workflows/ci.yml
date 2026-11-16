@@ -303,7 +303,7 @@ jobs:
           node -e 'const fs = require("node:fs"); const { firefox } = require("@playwright/test"); fs.accessSync(firefox.executablePath(), fs.constants.X_OK); console.log("Firefox executable:", firefox.executablePath());'
           npx --no-install playwright test \
             auth.spec.ts editor-focus.spec.ts layout.spec.ts \
-            live-qa-followups.spec.ts session-refresh.spec.ts ui-harmony.spec.ts \
+            live-qa-followups.spec.ts problem-bookmarks.spec.ts session-refresh.spec.ts ui-harmony.spec.ts \
             --project=firefox --workers=4 --shard=${{ matrix.shard }}/2 \
             --output=test-results/firefox
       - name: Failed browser test artifacts (disposable test data only)

@@ -70,6 +70,7 @@ export function problemListResponse(
   const tag = get("tag");
   const stateOf = (item: ProblemSummary) => states[item.id] ?? "none";
   const matches = (item: ProblemSummary, skip: string | null) =>
+    (get("bookmarked") !== "true" || item.bookmarked === true) &&
     (!keyword ||
       item.title.toLowerCase().includes(keyword) ||
       item.slug.toLowerCase().includes(keyword)) &&
@@ -169,6 +170,8 @@ export async function mockProblemApi(page: Page) {
     }
     if (path === "/api/v1/problems") {
       await route.fulfill({ json: problemListResponse([problem], url) });
+    } else if (path === `/api/v1/problems/${problem.id}/bookmark`) {
+      await route.fulfill({ json: { bookmarked: route.request().method() === "PUT" } });
     } else if (path.startsWith("/api/v1/problems/by-slug/")) {
       await route.fulfill({
         json: { ...problem, slug: path.split("/").at(-1) },

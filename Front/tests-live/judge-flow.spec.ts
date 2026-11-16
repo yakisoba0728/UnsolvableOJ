@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { promisify } from "node:util";
 import { expect, test } from "@playwright/test";
 
-test("real signup, publication, judging, XP and logout through nginx", async ({ page }) => {
+test("real signup, publication, private bookmarks, judging, XP and logout through nginx", async ({ page }) => {
   const suffix = randomUUID().replaceAll("-", "").slice(0, 12);
   const email = `browser-${suffix}@example.com`;
   const password = `browser-${randomUUID()}`;
@@ -49,6 +49,16 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
   await expect(page).toHaveURL(new RegExp(`/problems/view/${slug}$`));
   await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
 
+  // Real Front -> nginx -> API -> PostgreSQL persistence, without mocked API routes.
+  await page.getByRole("button", { name: "문제 저장", exact: true }).click();
+  await expect(page.getByRole("button", { name: "문제 저장 취소" })).toHaveAttribute("aria-pressed", "true");
+  await page.reload();
+  await expect(page.getByRole("button", { name: "문제 저장 취소" })).toBeEnabled();
+  await page.getByRole("link", { name: "저장한 문제", exact: true }).click();
+  await expect(page.locator(".problem-row").filter({ hasText: title })).toBeVisible();
+  await expect(page.getByRole("button", { name: "저장한 문제", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.goto(`/problems/view/${slug}`);
+
   await page.getByRole("combobox", { name: "언어", exact: true }).click();
   await page.getByRole("option", { name: "Python 3", exact: true }).click();
   await page.getByLabel("소스 코드").fill("print(sum(map(int,input().split())))");
@@ -86,6 +96,11 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
   const row = page.getByRole("link").filter({ hasText: title });
   await expect(row).toContainText("1명");
   await expect(row).toContainText("50%");
+  await page.goto(`/problems/view/${slug}`);
+  await page.getByRole("button", { name: "문제 저장 취소" }).click();
+  await expect(page.getByRole("button", { name: "문제 저장", exact: true })).toHaveAttribute("aria-pressed", "false");
+  await page.goto(`/problems?saved=1&q=${slug}`);
+  await expect(page.locator(".problem-row")).toHaveCount(0);
   await page.getByRole("button", { name: "로그아웃" }).click();
   await expect(page).toHaveURL(/\/$/);
   await page.goto("/submissions");
