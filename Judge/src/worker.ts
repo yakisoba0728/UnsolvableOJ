@@ -2,12 +2,41 @@ import { randomUUID } from "node:crypto";
 import { writeFile } from "node:fs/promises";
 import timers from "node:timers/promises";
 import { pathToFileURL } from "node:url";
-import { Worker } from "bullmq";
+import { Worker, type RedisClient } from "bullmq";
 import { Redis } from "ioredis";
 import { checkSandbox, judge, SandboxUnavailableError, type Claim, type JudgeResult, type SandboxConfig } from "./judge.js";
 
 interface JudgeJob {
   data: { submissionId: string; generation: number };
+  timestamp?: number;
+}
+
+/** No source, test data, diagnostics or credentials are included. CPU values are
+ * process totals, not per-job attribution when executions overlap. */
+export interface JudgeMeasurement {
+  event: "judge_completed";
+  workerId: string;
+  submissionId: string;
+  generation: number;
+  language: string;
+  status: string;
+  queueWaitMs?: number;
+  claimMs: number;
+  judgeMs: number;
+  reportMs: number;
+  totalMs: number;
+  processCpuUserUs: number;
+  processCpuSystemUs: number;
+  processRssBytes: number;
+  processPeakRssKiB: number;
+}
+
+interface WorkerApi {
+  url: string;
+  token: string;
+  heartbeatFile?: string;
+  isQueueReady?: () => boolean;
+  observe?: (measurement: JudgeMeasurement) => void;
 }
 
 class JudgeApiError extends Error {
@@ -17,7 +46,7 @@ class JudgeApiError extends Error {
 }
 
 export async function startWorker(
-  api: { url: string; token: string; heartbeatFile?: string },
+  api: WorkerApi,
   sandbox: SandboxConfig,
   consume: (processor: (job: JudgeJob) => Promise<void>) => Pick<Worker, "close">,
   runJudge = judge,
@@ -89,18 +118,24 @@ export async function startWorker(
   }
 
   await checkSandbox(sandbox);
+  if (api.isQueueReady?.() === false) throw new Error("Judge queue is not ready");
   await heartbeat();
   worker = consume(async (job) => {
+    const started = performance.now();
     // 장애 중이면 lease를 잡기 전에 기다린다. 종료 중이면 작업을 실패시켜 BullMQ가 나중에 다시 시도하게 한다.
     if (sandboxOutage) await sandboxOutage;
+    const queueWaitMs = Number.isFinite(job.timestamp)
+      ? Math.max(0, Date.now() - job.timestamp!) : undefined;
     const path = `/internal/judge/submissions/${job.data.submissionId}`;
     const attempt = { generation: job.data.generation, attemptId: randomUUID() };
     const cancellation = new AbortController();
     active.add(cancellation);
     let leaseHeartbeat: ReturnType<typeof setInterval> | undefined;
     try {
+      const claimStarted = performance.now();
       const claim = (await callApi(path, "GET", undefined, attempt, cancellation.signal)) as Claim | null;
       if (!claim || cancellation.signal.aborted) return;
+      const claimMs = performance.now() - claimStarted;
       let renewing = false;
       leaseHeartbeat = setInterval(() => {
         if (renewing || cancellation.signal.aborted) return;
@@ -112,6 +147,7 @@ export async function startWorker(
       }, 10_000);
       leaseHeartbeat.unref();
       let result: JudgeResult;
+      const judgeStarted = performance.now();
       try {
         result = await runJudge(claim, sandbox, cancellation.signal);
       } catch (error) {
@@ -138,12 +174,33 @@ export async function startWorker(
           judgeMessage: "채점 중 시스템 오류가 발생했습니다.",
         };
       }
+      const judgeMs = performance.now() - judgeStarted;
+      const reportStarted = performance.now();
       // Replay this attempt's result: a new BullMQ invocation cannot reclaim its live lease.
       for (let retry = 0; ; retry++) {
         if (cancellation.signal.aborted) return;
         try {
           await callApi(`${path}/result`, "PATCH", result, attempt, cancellation.signal);
-          if (!cancellation.signal.aborted) console.log(`Judged ${job.data.submissionId}`);
+          if (!cancellation.signal.aborted) {
+            console.log(`Judged ${job.data.submissionId}`);
+            if (api.observe) {
+              const usage = process.resourceUsage();
+              // Observability must never turn an acknowledged result into a failed queue job.
+              try {
+                api.observe({
+                  event: "judge_completed", workerId,
+                  submissionId: job.data.submissionId, generation: attempt.generation,
+                  language: claim.language, status: result.status, queueWaitMs,
+                  claimMs, judgeMs, reportMs: performance.now() - reportStarted,
+                  totalMs: performance.now() - started,
+                  processCpuUserUs: usage.userCPUTime, processCpuSystemUs: usage.systemCPUTime,
+                  processRssBytes: process.memoryUsage().rss, processPeakRssKiB: usage.maxRSS,
+                });
+              } catch {
+                console.error("Judge measurement observer failed");
+              }
+            }
+          }
           return;
         } catch (error) {
           if (cancellation.signal.aborted) return;
@@ -166,7 +223,9 @@ export async function startWorker(
   workerHeartbeat = setInterval(() => {
     // 실행 서비스 장애 중에는 존재 신호를 멈춰 운영 조회에 채점 가능한 워커로 보이지 않게 한다.
     // 워커 자체는 살아서 복구를 기다리므로 컨테이너 healthcheck 파일은 계속 갱신한다.
-    if (sandboxOutage) {
+    // A live process disconnected from Redis cannot consume work. Keep its local
+    // liveness file fresh during reconnect, but let API readiness expire normally.
+    if (sandboxOutage || api.isQueueReady?.() === false) {
       if (api.heartbeatFile) void writeFile(api.heartbeatFile, "").catch(() => {});
       return;
     }
@@ -187,27 +246,40 @@ export async function startWorker(
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   await import("dotenv/config");
-  let redis: Redis;
+  const redis = new Redis({
+    host: process.env.REDIS_HOST ?? "localhost",
+    port: Number(process.env.REDIS_PORT ?? 6379),
+    username: process.env.REDIS_USERNAME || undefined,
+    password: process.env.REDIS_PASSWORD || undefined,
+    db: Number(process.env.REDIS_DB ?? 0),
+    maxRetriesPerRequest: null,
+  });
+  redis.on("error", (error) => console.error("Judge Redis connection error:", error.message));
+  // Do not advertise even the initial API presence for a disconnected queue.
+  await redis.ping();
+  let consumerConstructed = false;
+  let blockingClient: RedisClient | undefined;
   const running = await startWorker({
     url: process.env.API_BASE_URL ?? "http://localhost:3000/api/v1",
     token: process.env.JUDGE_SERVICE_TOKEN ?? "",
     heartbeatFile: process.env.JUDGE_HEARTBEAT_FILE || undefined,
+    isQueueReady: () => redis.status === "ready" &&
+      (!consumerConstructed || blockingClient?.status === "ready"),
+    observe: process.env.JUDGE_METRICS === "json"
+      ? (measurement) => console.log(JSON.stringify(measurement)) : undefined,
   }, {
     url: process.env.GO_JUDGE_URL ?? "http://127.0.0.1:5050",
     token: process.env.GO_JUDGE_TOKEN ?? "",
   }, (processor) => {
-    redis = new Redis({
-      host: process.env.REDIS_HOST ?? "localhost",
-      port: Number(process.env.REDIS_PORT ?? 6379),
-      username: process.env.REDIS_USERNAME || undefined,
-      password: process.env.REDIS_PASSWORD || undefined,
-      db: Number(process.env.REDIS_DB ?? 0),
-      maxRetriesPerRequest: null,
-    });
+    consumerConstructed = true;
     const worker = new Worker("judge-submissions", processor, {
       connection: redis,
       concurrency: Number(process.env.JUDGE_CONCURRENCY ?? 2),
     });
+    // BullMQ owns a second Redis connection for its blocking queue read. A
+    // main-client ping alone cannot prove that this consumer can receive work.
+    void worker.getBackend().blockingClient?.then((client) => { blockingClient = client; })
+      .catch((error: unknown) => console.error("Judge blocking connection initialization failed:", error));
     worker.on("ready", () => console.log("Judge worker ready"));
     worker.on("failed", (job, error) => console.error(`Failed ${job?.id}: ${error.message}`));
     worker.on("error", (error) => console.error("Judge worker error:", error));
