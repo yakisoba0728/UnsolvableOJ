@@ -28,4 +28,4 @@ The first Phase IV change adds its integration branch to CI's PR trigger and ful
 
 ## Environment and measurement limits
 
-The initial local workspace has Node 24.22.1 and npm 11.9.0, but no Docker/Podman/PostgreSQL/Redis executable. Local build/unit/browser checks and actual GitHub Actions execution are recorded separately. Finite CI measurements are not field Web Vitals, production capacity, host isolation, or multi-hour leak evidence. No production state or paid service is used.
+The initial local workspace has Node 24.22.1 and npm 11.9.0, but no Docker/Podman/PostgreSQL/Redis executable on PATH. A native PostgreSQL17 installation was later located outside PATH and used only in an owned temporary cluster for CHECK-parser diagnostics; it did not replace Docker restore CI. Local build/unit/browser checks and actual GitHub Actions execution are recorded separately. Finite CI measurements are not field Web Vitals, production capacity, host isolation, or multi-hour leak evidence. No production state or paid service is used.

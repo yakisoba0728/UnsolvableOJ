@@ -57,12 +57,27 @@ Lifetime peak RSS cannot establish leak freedom. This AC-only fixture does not
 complete the eight-language verdict/memory matrix, a long fault campaign or
 production capacity validation. No optimization or speedup is claimed.
 
-## Execution status
+## Actual run and retained evidence
 
-**PENDING actual pipeline CI.** No local PostgreSQL, Redis or native worker
-campaign has been executed for this addition. Measured values, exact run links
-and the independent review receipt must be taken from the eventual report and
-Actions run, not invented from earlier Phase II observations. The coordinator
-retains the compact report as a CI artifact without committing duplicated raw logs.
-Local TypeScript verification passed with `--preserveSymlinks` for the shared
-dependency layout; it does not execute or certify the native campaign.
+**PASSED finite campaign:** [run43844858225](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43844858225), attempt1, full job. Source dd7523b48679a6e3fb68cfed65a4b1a606840e52, checkout9c7114cf9912c6390c82bda98243c787a7604ffa, treece6c1fdd5ea92695b9fc9727abec1dc4ea87970f; tracked tree clean. All twelve jobs and independent QA passed.
+
+The fixture ran on Node24.22.2, Linux7.0.0-1017-azure, four logical CPUs, AMD EPYC7763. It started at2026-11-16T10:07:08.928Z and finished at10:08:57.052Z. These are observations from a shared CI runner, not controlled before/after optimization results.
+
+| Wave | Jobs | Active seconds | Admission wait seconds | Active jobs/s | Queue p50/p95/p99 ms | Node-worker CPU ms |
+|---|---:|---:|---:|---:|---|---:|
+| 1 | 8 | 10.193 | 36.500 | 0.78485 | 536/2266/2266 | 160 |
+| 2 | 8 | 10.519 | 0.000 | 0.76055 | 131/2044/2044 | 120 |
+| 3 | 8 | 10.606 | 39.642 | 0.75432 | 565/1454/1454 | 170 |
+| Aggregate | 24 | 31.317 | 76.143 | 0.76635 | 536/2199/2266 | 450 |
+
+Wall time including startup, waits, checks and shutdown was108.138seconds: **0.22194jobs/s**. Wave2's unrounded admission-helper duration was0.029825ms with no quota pause.
+
+Twenty-four admitted jobs produced twenty-four distinct accepted acknowledgements, generation1, one queue attempt each and no failure, recovery or retry. The same two worker PIDs processed all waves.
+
+**Adverse drift is retained:** wave2 throughput was3.10% lower than wave1; wave3 was3.89% lower. Wave3 queue p95 fell812ms while worker CPU rose10ms. This is descriptive variation, not evidence that code changes improved performance.
+
+Node-worker CPU totaled450ms in active batches and570ms including intervening waits/checks, sampled with100Hz procfs ticks. Lifetime peak RSS was111336/111196KiB (108.73/108.59MiB), with no recorded peak increase across the three waves. These exclude API, DB, Redis, compilers and executor; unchanged short-run lifetime peaks do not establish leak freedom.
+
+[Compact aggregate evidence](evidence/mixed-capacity-run-43844858225.json) preserves provenance, limits and observations without per-job IDs or raw logs. Original artifact14214399509 ZIP SHA256 is9924b104210308f19fecaf498ade4c709df6fdede61db84e2c0ee46a5b030373. Its23964-byte source JSON SHA256 isdcbe4b7c0b2f59f2f7b4f1530f4da4622ec8cc23ba71897c4125359602c46e5c. The final combined run has its own artifact and receipt; these values remain bound to this feature checkpoint.
+
+Local TypeScript verification used --preserveSymlinks for the shared dependency layout. Actual native/DB/Redis execution above is Actions evidence. No production capacity, population-tail, compiler-RSS, full verdict-matrix or causal speedup claim follows.
