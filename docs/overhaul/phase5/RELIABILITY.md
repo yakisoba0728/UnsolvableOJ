@@ -13,21 +13,51 @@ transaction back. No existing database or user data was changed.
 The [baseline log](evidence/reliability/goal-rollback-baseline.log) retains the
 failure. Its two unselected cases are the explicit baseline test-name filter;
 they are not skipped candidate acceptance tests. The candidate changes only
-`down()` in the existing migration: require an active transaction, acquire
+`down()` in the existing migration: require an active READ COMMITTED transaction, acquire
 `ACCESS EXCLUSIVE` on the goal table, refuse if any row exists, and drop only
 the empty table while holding that lock. `up()`, migration registration, API
 contracts and the schema are unchanged. The lock covers both the check and the
 drop, so an in-flight writer cannot commit a goal between them.
 
-Three new real-PostgreSQL tests in
+Five new real-PostgreSQL tests in
 [`learning-goal-migration.e2e-spec.ts`](../../../Back/test/learning-goal-migration.e2e-spec.ts)
 verify transaction refusal, exact row/ledger preservation on populated refusal,
-and the concurrent-writer case. The latter observes the pending database lock,
+old-snapshot refusal for both higher isolation levels, and the concurrent-writer
+case. The latter observes the pending database lock,
 commits the writer, requires the rollback to refuse, and checks the goal survives.
-All eleven targeted tests passed, including the eight existing learning-goal
+All thirteen targeted tests passed, including the eight existing learning-goal
 tests and their legitimate empty-table down/up check. The existing full-chain
 migration regression also passed. This is a defensive rollback correction, not
 a new migration or an instruction to downgrade a live database.
+
+### Independent review correction: P5-RELIABILITY-001
+
+The first candidate `f6f11ed41865226a26a86927d1fe97a8a961915f` required a
+transaction and an exclusive lock but did not restrict isolation. Independent QA
+found that a REPEATABLE READ or SERIALIZABLE transaction could read the migration
+ledger, retain that old snapshot, then miss a goal committed by another connection
+before the lock. The migration dropped the table inside the probe transaction.
+All probe transactions were rolled back and the committed goal survived cleanup.
+
+The original independent [JSON](evidence/reliability/goal-isolation-independent-baseline.json)
+and [probe script](evidence/reliability/goal-isolation-independent-baseline.mjs)
+are retained byte-for-byte, including their original historical scratch paths.
+This was a blocking review finding, not an accepted limitation. PostgreSQL's
+[LOCK documentation](https://www.postgresql.org/docs/17/sql-lock.html) explains
+that a late table lock does not refresh an established higher-isolation snapshot.
+
+The correction checks `SHOW transaction_isolation` before locking or dropping and
+refuses anything other than READ COMMITTED. It does not change an existing
+transaction's isolation or assume that a table lock refreshes a snapshot. The two
+new tests establish their old snapshot with a migration-ledger read, commit a
+goal through a separate connection, and require the explicit isolation refusal
+while the table still exists. Rows and ledger remain exact after rollback.
+Both tests first failed against the previous implementation, then passed with
+the correction; default READ COMMITTED concurrent-writer refusal and legitimate
+empty down/up continue to pass. [Complete captures](evidence/reliability/goal-isolation-tests.json)
+preserve the failures, the 13-pass candidate suite, full migration rerun and
+fixture rerun. Three unselected baseline cases come from the explicit test-name
+filter; the candidate suite has no skips. Independent re-review remains required.
 
 ## Extend the existing restore gate
 
@@ -98,8 +128,10 @@ SHA256 values are preserved losslessly in
 | Check | Observed result | Evidence / boundary |
 |---|---|---|
 | Baseline populated rollback | **FAIL as reproduced**; saved table dropped inside a rolled-back test transaction | [Raw failure](evidence/reliability/goal-rollback-baseline.log) |
-| Candidate real PostgreSQL goal/migration suite | **11 passed**, two files, no candidate skips | [Raw result](evidence/reliability/goal-rollback-candidate.log) |
-| Existing migration regression | **PASS**: historical upgrade, evidence/idempotency/refusal, fresh full rollback/reapply | [Raw result](evidence/reliability/migration-regression.log); the expected username-case refusal is retained |
+| Initial candidate real PostgreSQL goal/migration suite | **11 passed** before independent QA exposed the higher-isolation coverage gap | [Historical result](evidence/reliability/goal-rollback-candidate.log); superseded by the corrected 13-case suite |
+| Higher-isolation baseline regressions | **2 failed as reproduced** against `f6f11ed`; table dropped under old REPEATABLE READ and SERIALIZABLE snapshots | [Complete captures](evidence/reliability/goal-isolation-tests.json); destructive transactions rolled back |
+| Corrected candidate real PostgreSQL goal/migration suite | **13 passed**, two files, no candidate skips | [Complete captures](evidence/reliability/goal-isolation-tests.json) |
+| Existing migration regression after isolation correction | **PASS**: historical upgrade, evidence/idempotency/refusal, fresh full rollback/reapply | [Complete captures](evidence/reliability/goal-isolation-tests.json); the expected username-case refusal is retained |
 | Shared fixture and populated refusal | **PASS**: 31 migrations, 37 preserved table fingerprints, 12 goals and all product oracles | [Source-bound JSON](evidence/reliability/fixture-proof.json), [executable narrow proof](evidence/reliability/fixture-proof.mjs) |
 | Restore environment/name guards | **2 passed** | `node --test Back/scripts/phase4-restore-rehearsal.test.mjs` |
 | Backend lint, typecheck and production build | **PASS** | Normal local module paths; no compiler/source relaxation |

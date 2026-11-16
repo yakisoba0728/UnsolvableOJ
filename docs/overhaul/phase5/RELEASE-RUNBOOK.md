@@ -359,6 +359,18 @@ Populated goals now produce:
 Cannot roll back learning goals with saved goals; preserve goal history before reverting.
 ```
 
+Rollback also requires an active **READ COMMITTED** transaction. A transaction
+with an old REPEATABLE READ or SERIALIZABLE snapshot can miss a goal committed
+after its migration-ledger read even after obtaining the table lock. The
+corrected migration checks isolation before destructive work and refuses with
+`Learning goals rollback requires READ COMMITTED isolation.` If this occurs,
+end that transaction and reconsider the rollback against current data; a
+separately approved empty-schema rollback must start a new READ COMMITTED
+transaction before the migration runner reads its ledger. Do not change
+isolation inside an already established transaction or use an older binary to
+bypass the check. The real PostgreSQL regression and review correction are
+recorded in [RELIABILITY.md](RELIABILITY.md).
+
 Treat this as an intentional preservation stop. Do not delete goals, alter the
 migration ledger, disable the guard or use an old migration binary to force the
 drop. Other existing guards protect solve/evidence, token/version and assessment

@@ -60,6 +60,42 @@ describe('Learning-goal migration preservation (real PostgreSQL)', () => {
     expect(await db.query('SELECT * FROM migrations ORDER BY id')).toEqual(ledger);
   });
 
+  it.each(['REPEATABLE READ', 'SERIALIZABLE'] as const)(
+    'refuses an old %s snapshot before destructive schema work', async (isolation) => {
+      const runner = db.createQueryRunner();
+      await runner.connect();
+      await runner.startTransaction(isolation);
+      const ledger = await db.query('SELECT * FROM migrations ORDER BY id');
+      let before: unknown;
+      try {
+        await runner.query('SET LOCAL statement_timeout=5000; SET LOCAL lock_timeout=2000');
+        // MigrationRunner reads its ledger before down(). Establish the same
+        // old snapshot, then commit a goal through a different connection.
+        await runner.query('SELECT count(*) FROM migrations');
+        await insertGoal(db);
+        before = await db.query('SELECT * FROM learning_goals ORDER BY user_id');
+        expect((before as unknown[]).length).toBeGreaterThan(0);
+        let rejected: unknown;
+        try { await migration.down(runner); } catch (error) { rejected = error; }
+        if (!rejected) {
+          const [{ name }] = await runner.query("SELECT to_regclass('learning_goals') AS name");
+          console.log(JSON.stringify({ proof: 'old-snapshot-goal-rollback', isolation,
+            committedGoal: true, tableAfterDown: name }));
+        }
+        expect(rejected).toBeInstanceOf(Error);
+        expect((rejected as Error).message).toContain('Learning goals rollback requires READ COMMITTED isolation');
+        expect((await runner.query("SELECT to_regclass('learning_goals') AS name"))[0].name).toBe('learning_goals');
+      } finally {
+        // Also protects the committed goal when running the regression against
+        // the known-bad baseline, whose DDL would otherwise remove the table.
+        await runner.rollbackTransaction();
+        await runner.release();
+      }
+      expect(await db.query('SELECT * FROM learning_goals ORDER BY user_id')).toEqual(before);
+      expect(await db.query('SELECT * FROM migrations ORDER BY id')).toEqual(ledger);
+    },
+  );
+
   it('waits for an in-flight writer then refuses dropping its committed goal', async () => {
     const writer = db.createQueryRunner();
     const reverting = db.createQueryRunner();

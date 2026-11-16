@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-11-16T14:40:36.210Z",
+  "checkedAt": "2026-11-16T15:03:18.162Z",
   "result": "PASS",
   "scope": "fixture seed, product relationships, empty rollback/reapply, populated rollback refusal and all-table preservation only",
   "postgres": "PostgreSQL 17.11 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0, 64-bit",
   "node": "v24.22.1",
-  "baseHead": "ce26659b816c1dc1450cdc48f0c58d6e41ecea1e",
+  "baseHead": "f6f11ed41865226a26a86927d1fe97a8a961915f",
   "fileSha256": {
     "Back/scripts/phase4-restore-rehearsal.mjs": "ba7ccd1dc85a1926e5f71ba1b18a8e4a72a9d583d725a9e18f89243e48b0c1c5",
-    "Back/src/database/migrations/1796200000000-learning-goals.ts": "d6b423e773f20e9a7baa4f80a7c1053a99667cdbc0f5df1105a9be1a82067dee",
-    "Back/test/learning-goal-migration.e2e-spec.ts": "4a8dcb82d7cf928cae36930f493a5442092240ead9ea59111aa827b0f136b6f2"
+    "Back/src/database/migrations/1796200000000-learning-goals.ts": "eb31ae84cf3c994e38aa666148555c2eea7af0a0d9301eadd82fe674d7eafcce",
+    "Back/test/learning-goal-migration.e2e-spec.ts": "af331d6a22ba46d53325921cb34daf4164f72a52be1b2e61ef82081a4eba7ca5"
   },
   "migrations": 31,
-  "databaseBytes": 11245235,
+  "databaseBytes": 11237043,
   "products": {
     "goals": 12,
     "problemVersions": 24,
@@ -108,27 +108,27 @@
     {
       "table": "enterprise_attempts",
       "rows": 8,
-      "digest": "e439f1d10916f62bad7abd5d79559b8e"
+      "digest": "84a40d4d7eed76b6d6d354a95ebf91ea"
     },
     {
       "table": "enterprise_problem_versions",
       "rows": 1,
-      "digest": "80eaa1b4c8e5bdd85e7415cde4d6efa2"
+      "digest": "cfe301193bc6aa7f6350312bd838a8fe"
     },
     {
       "table": "enterprise_tests",
       "rows": 1,
-      "digest": "f3e1bf476f95af9abca0492b504a4f68"
+      "digest": "3decd2512ddf6ad138ddb91d888ca149"
     },
     {
       "table": "enterprise_vibe_versions",
       "rows": 1,
-      "digest": "048bf6fb159fb035c3c8a891c0c63c22"
+      "digest": "b8f30a26729fe595ec3815e58adbd2ce"
     },
     {
       "table": "learning_goals",
       "rows": 12,
-      "digest": "0230926751c18ea1c3f6aabd241c6af5"
+      "digest": "d52435b6832df0898606db552c1ba7e0"
     },
     {
       "table": "migrations",
@@ -148,27 +148,27 @@
     {
       "table": "problem_bookmarks",
       "rows": 128,
-      "digest": "efb3ef7525add1eb38380c4f650f4dda"
+      "digest": "10b742a0abf056ac0eb9067e5895552f"
     },
     {
       "table": "problem_solver_counts",
       "rows": 384,
-      "digest": "c60b6df804332f48a02f57e5d197e717"
+      "digest": "356f898c1eb88eb2840b79bd1ec92bf8"
     },
     {
       "table": "problem_stats",
       "rows": 24,
-      "digest": "2693210c663036d46ea3cf6a1bb11b03"
+      "digest": "cd377d70a55277a2e7b4cb7f5a81b17c"
     },
     {
       "table": "problem_versions",
       "rows": 24,
-      "digest": "7fd5f8c6922baa7f157b8d911f0e92f9"
+      "digest": "4b97e51909558b70b505151e7f9d6949"
     },
     {
       "table": "problems",
       "rows": 24,
-      "digest": "e3b149a5b2c7fb7bcb673983979ef308"
+      "digest": "468539ff64123d435ae2f5e09b51249b"
     },
     {
       "table": "refresh_tokens",
@@ -178,7 +178,7 @@
     {
       "table": "submissions",
       "rows": 2056,
-      "digest": "4db2427be075f2dfffd8789fa9368b4e"
+      "digest": "ea02be2e53e52aeccb72acef77e22087"
     },
     {
       "table": "test_cases",
@@ -193,27 +193,27 @@
     {
       "table": "user_problem_solves",
       "rows": 128,
-      "digest": "8db701f80a514b603165b941a1294d47"
+      "digest": "7ed3d6e761899fff11db9e0b15475d14"
     },
     {
       "table": "users",
       "rows": 128,
-      "digest": "88d7f29fd1b7fd90e3efe6fe24018037"
+      "digest": "9faf161bd05360ffeb890843349f5b49"
     },
     {
       "table": "vibe_attempts",
       "rows": 8,
-      "digest": "5dbf410be04d0f892733bea4a70f3725"
+      "digest": "003b859defa3849804a31c93f036353f"
     },
     {
       "table": "vibe_challenge_versions",
       "rows": 1,
-      "digest": "00c81660a88cbe81ce16011588db375d"
+      "digest": "5915add8512222b7173cce052f62d47a"
     },
     {
       "table": "vibe_revisions",
       "rows": 16,
-      "digest": "33e3bd10e65aebf550cfd8ea61c8806c"
+      "digest": "9568606855ee4a602b182aaa804def9e"
     }
   ],
   "archiveRestore": "NOT_EXECUTED_DOCKER_UNAVAILABLE",
