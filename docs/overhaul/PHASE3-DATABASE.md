@@ -188,7 +188,7 @@ the corrected migration hash recorded by the final benchmark artifact.
 
 ## Final measured results
 
-Final raw evidence: [phase3-problem-stats.json](measurements/phase3-problem-stats.json).
+Final raw evidence: [phase3-problem-stats.json](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase3-problem-stats.json).
 An independent reviewer recomputed all quantiles, throughput values, pooled CPU
 and WAL totals, per-round oracle digests, and all three source hashes against
 `git show 0db4481`; the [independent calculation record](evidence/phase3-database-benchmark-review.json)

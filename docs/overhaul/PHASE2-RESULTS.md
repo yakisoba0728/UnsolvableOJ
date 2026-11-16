@@ -186,10 +186,10 @@ is inferred from this HTTP experiment.
 
 Raw evidence:
 
-- [1,000 before](measurements/phase2-results-before-1000.json)
-- [1,000 after](measurements/phase2-results-after-1000.json)
-- [5,000 before](measurements/phase2-results-before-5000.json)
-- [5,000 after](measurements/phase2-results-after-5000.json)
+- [1,000 before](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase2-results-before-1000.json)
+- [1,000 after](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase2-results-after-1000.json)
+- [5,000 before](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase2-results-before-5000.json)
+- [5,000 after](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase2-results-after-5000.json)
 - [Means, medians, ranges and equivalence checks](measurements/phase2-results-summary.json)
 
 Example for an already provisioned owned loopback PostgreSQL/Redis pair:

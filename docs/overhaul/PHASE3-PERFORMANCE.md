@@ -53,7 +53,7 @@ file hashes bind the script and both migration implementations to the published
 code even though API publication creates a different commit object.
 
 [Full conditions, every size and reproduction](PHASE3-DATABASE.md) ·
-[all samples](measurements/phase3-problem-stats.json) ·
+[all samples](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase3-problem-stats.json) ·
 [independent calculation](evidence/phase3-database-benchmark-review.json)
 
 ## Frontend asset cost
@@ -82,7 +82,7 @@ Git objects, output inventory arithmetic, dependency inventory and all four log
 hashes. No second build or browser transfer measurement is implied by that review.
 
 [Exact sources, monitoring variant and compression caveat](PHASE3-FINAL-BUNDLES.md) ·
-[raw build inventories](measurements/phase3-final-bundles/phase3-final-frontend-bundles.json) ·
+[raw build inventories](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase3-final-bundles/phase3-final-frontend-bundles.json) ·
 [independent verification](evidence/phase3-final-bundles-independent-review.json)
 
 ## Actual browser observation protocol

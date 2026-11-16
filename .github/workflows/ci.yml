@@ -249,6 +249,9 @@ jobs:
         run: npm ci --prefix Back
       - name: Backend lint, types, unit tests and build
         run: |
+          git fetch --no-tags --depth=1 origin e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5
+          python3 -m unittest discover -s scripts -p 'check_consolidation_evidence_test.py'
+          python3 scripts/check_consolidation_evidence.py --verify-git
           node --test scripts/ci-policy.test.mjs scripts/check-executor-compose.test.mjs scripts/compose-vibe-gateway.test.mjs
           npm run check --prefix Back
           node --test Back/scripts/check-vibe-tls.mjs

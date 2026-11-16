@@ -90,7 +90,7 @@ Both source versions used independent `npm ci --no-fund --no-audit` installs fro
 
 Total sums per-file compressed sizes and includes lazy/optional chunks and `theme-init.js`; the initial entry is only the module referenced by HTML. This feature adds capability with a modest bundle increase; no frontend performance improvement is claimed. Static query structure adds one indexed join to authenticated page selection and uses that join for saved-only facets. Actual production DB latency/lock load remains unmeasured.
 
-Raw per-file lengths, compression results and SHA-256 values: [measurements/phase2-product-bundles.json](measurements/phase2-product-bundles.json). Reproduce after separately building baseline and candidate:
+Raw per-file lengths, compression results and SHA-256 values: [measurements/phase2-product-bundles.json](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase2-product-bundles.json). Reproduce after separately building baseline and candidate:
 
 ```sh
 node Front/scripts/measure-bundles.mjs BEFORE_DIST AFTER_DIST

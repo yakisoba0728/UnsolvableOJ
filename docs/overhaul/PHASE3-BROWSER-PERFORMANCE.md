@@ -65,7 +65,7 @@ The original artifact14206046513 ZIP has SHA256
 GitHub metadata. Its unmodified JSON SHA256 is
 `94919ac0010e0339f349e679b61178ab91364f36e9ecc7c8537da5cf5bfbf681`.
 Both are retained before the original seven-day expiry:
-[raw JSON](measurements/phase3-browser-performance.json),
+[raw JSON](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase3-browser-performance.json),
 [original ZIP](measurements/phase3-browser-performance.zip),
 [source/artifact provenance](measurements/phase3-browser-performance-provenance.json),
 [selected Compose log lines](evidence/phase3-browser-compose-excerpt.log).

@@ -29,7 +29,7 @@ The raw artifact also records whole SQL-call time, including driver/EXPLAIN seri
 
 The two indexes each occupy9,961,472 bytes. Combined creation took205.54ms on this uncontended fixture. That does not predict production migration lock duration: ordinary transactional CREATE INDEX can block writes, and a populated deployment still needs a migration/rollback rehearsal. The extra index improves the measured read path while adding measurable write/log cost. There is no basis here to remove it or to add more indexes without workload evidence.
 
-Raw environment, SQL, all timings/WAL/buffer samples, plans, constraints and source digest: [measurements/phase2-community-index-cost.json](measurements/phase2-community-index-cost.json).
+Raw environment, SQL, all timings/WAL/buffer samples, plans, constraints and source digest: [measurements/phase2-community-index-cost.json](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase2-community-index-cost.json).
 
 Reproduce only against an explicitly owned disposable local PostgreSQL service:
 
@@ -66,7 +66,7 @@ One fresh build per source measured deterministic artifact size; no build-time
 or browser latency distribution is inferred. No heavy dependency was added to
 Front. This is a measured delivery cost, not a claimed rendering speedup. Raw
 per-file sizes/hashes and build provenance are in
-[phase2-combined-frontend-bundles.json](measurements/phase2-combined-frontend-bundles.json).
+[phase2-combined-frontend-bundles.json](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase2-combined-frontend-bundles.json).
 LCP/INP/CLS and long-running browser CPU/memory remain N/A.
 
 ## Real authenticated owner-results HTTP

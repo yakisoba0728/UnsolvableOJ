@@ -91,8 +91,8 @@ product optimization.
 
 ## Evidence and reproduction
 
-- [Raw measurements and complete input/output hashes](measurements/phase3-final-bundles/phase3-final-frontend-bundles.json)
-- [Installed dependency inventory](measurements/phase3-final-bundles/installed-dependencies.json)
+- [Raw measurements and complete input/output hashes](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase3-final-bundles/phase3-final-frontend-bundles.json)
+- [Installed dependency inventory](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/docs/overhaul/measurements/phase3-final-bundles/installed-dependencies.json)
 - [CSS compression cross-check](measurements/phase3-final-bundles/compression-crosscheck.json)
 - [Reproduction script](repro/phase3-final-bundles.mjs)
 - Build logs: [baseline/default](measurements/phase3-final-bundles/baseline-default.build.log),

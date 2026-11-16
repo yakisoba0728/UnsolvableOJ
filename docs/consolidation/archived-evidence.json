@@ -1,0 +1,898 @@
+{
+  "schemaVersion": 1,
+  "repository": "yakisoba0728/UnsolvableOJ",
+  "preservedCommit": "e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5",
+  "preservedTree": "a2a2409dfd3e73b82ba7b39c2e41808eba7b5813",
+  "archiveUrlPrefix": "https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/",
+  "reason": "Remove duplicated historical raw bytes from the final review tree; immutable Git originals remain available.",
+  "limits": [
+    "Null execution fields were not recorded by the original file and are not invented.",
+    "Source/source-tree fields describe historical observations, not current consolidation acceptance.",
+    "Policy-bound inputs, historical security replay inputs and the complete offline performance verifier inputs remain in this checkout."
+  ],
+  "summary": {
+    "files": 51,
+    "bytes": 13205154,
+    "textLines": 66151,
+    "rewrittenMarkdownLinks": 22
+  },
+  "rewrittenDocuments": [
+    {
+      "path": "docs/overhaul/DATA-MODEL.md",
+      "links": 1
+    },
+    {
+      "path": "docs/overhaul/PERFORMANCE.md",
+      "links": 1
+    },
+    {
+      "path": "docs/overhaul/PHASE2-FEATURES.md",
+      "links": 1
+    },
+    {
+      "path": "docs/overhaul/PHASE2-PERFORMANCE.md",
+      "links": 2
+    },
+    {
+      "path": "docs/overhaul/PHASE2-RESULTS.md",
+      "links": 4
+    },
+    {
+      "path": "docs/overhaul/PHASE3-BROWSER-PERFORMANCE.md",
+      "links": 1
+    },
+    {
+      "path": "docs/overhaul/PHASE3-DATABASE.md",
+      "links": 1
+    },
+    {
+      "path": "docs/overhaul/PHASE3-FINAL-BUNDLES.md",
+      "links": 2
+    },
+    {
+      "path": "docs/overhaul/PHASE3-PERFORMANCE.md",
+      "links": 2
+    },
+    {
+      "path": "docs/overhaul/phase5/DATABASE.md",
+      "links": 1
+    },
+    {
+      "path": "docs/overhaul/phase5/JUDGE.md",
+      "links": 1
+    },
+    {
+      "path": "docs/overhaul/phase5/MULTI-API.md",
+      "links": 1
+    },
+    {
+      "path": "docs/overhaul/phase5/REMAINING-EXTERNAL-GATES.md",
+      "links": 1
+    },
+    {
+      "path": "docs/overhaul/phase5/SECURITY.md",
+      "links": 1
+    },
+    {
+      "path": "docs/overhaul/phase5/VIBE-BROWSER.md",
+      "links": 2
+    }
+  ],
+  "files": [
+    {
+      "path": "Back/benchmarks/community-indexes.json",
+      "bytes": 117091,
+      "sha256": "5a94ee95999ba92a652cef64bec46636ff31139eee738dc143c8f0480d66341d",
+      "gitBlob": "17befc0a0d9bb94e8edb4c45dc999ced8aee5b10",
+      "textLines": 2710,
+      "execution": {
+        "runId": null,
+        "source": null,
+        "checkout": null,
+        "tree": null
+      }
+    },
+    {
+      "path": "Back/benchmarks/http-comparison.json",
+      "bytes": 42226,
+      "sha256": "f7e37ece45d9bcacc88a4d17e3c2843ea86407214d3100ac50376cd941e47ca7",
+      "gitBlob": "fba01d31b0481bdf271d751d3ea766f674693c23",
+      "textLines": 1216,
+      "execution": {
+        "runId": null,
+        "source": null,
+        "checkout": null,
+        "tree": null
+      }
+    },
+    {
+      "path": "docs/overhaul/measurements/phase2-combined-frontend-bundles.json",
+      "bytes": 24716,
+      "sha256": "e25069b29fce47c70a2618e3d2b4ada1f26ce01b5ede168abed2938678cd5aa4",
+      "gitBlob": "2c7c19f64e122f099e58624df2ef90cccdee041a",
+      "textLines": 778,
+      "execution": {
+        "runId": null,
+        "source": null,
+        "checkout": null,
+        "tree": null
+      }
+    },
+    {
+      "path": "docs/overhaul/measurements/phase2-community-index-cost.json",
+      "bytes": 393244,
+      "sha256": "cb551b139b35eedc8c3bb2aab582f2710222b7b5818c5594a2cbbce8c1b862f1",
+      "gitBlob": "a8d300980a6e2efb4068d94d05077aa87e6938fc",
+      "textLines": 9423,
+      "execution": {
+        "runId": null,
+        "source": null,
+        "checkout": null,
+        "tree": null
+      }
+    },
+    {
+      "path": "docs/overhaul/measurements/phase2-product-bundles.json",
+      "bytes": 23785,
+      "sha256": "ea70effc1a77561db89dfa207088211f0571ffdfd04aae8775dce3cdfc75a6a2",
+      "gitBlob": "c33d0956edf63a3a579218579e134056e349901a",
+      "textLines": 759,
+      "execution": {
+        "runId": null,
+        "source": null,
+        "checkout": null,
+        "tree": null
+      }
+    },
+    {
+      "path": "docs/overhaul/measurements/phase2-results-after-1000.json",
+      "bytes": 84513,
+      "sha256": "2c80743ddf76dd9c1df25f32ac6e14c9338575f01ba643a190020807e32f81f7",
+      "gitBlob": "e354dfba18b072a1c2eb3820b238bbe8650a08e4",
+      "textLines": 1950,
+      "execution": {
+        "runId": null,
+        "source": "1b2b1e73cad864c4b12021e42b9b05dbfd70ef1b",
+        "checkout": null,
+        "tree": "4e3f375b72da1e02810aa307474dbefa9e4ed8f2"
+      }
+    },
+    {
+      "path": "docs/overhaul/measurements/phase2-results-after-5000.json",
+      "bytes": 87620,
+      "sha256": "4fa0b36edabc11bb389f5d0e3c5cb8e85246b90d70272d9d2c4462cd51178c35",
+      "gitBlob": "5c2ca5210b7fd08512811a04c16fc4ac6f9b3728",
+      "textLines": 1980,
+      "execution": {
+        "runId": null,
+        "source": "1b2b1e73cad864c4b12021e42b9b05dbfd70ef1b",
+        "checkout": null,
+        "tree": "4e3f375b72da1e02810aa307474dbefa9e4ed8f2"
+      }
+    },
+    {
+      "path": "docs/overhaul/measurements/phase2-results-before-1000.json",
+      "bytes": 136197,
+      "sha256": "c3507cbd8eccf75732542c5c60c3451c9025a5d532116a756a1902620c0ac278",
+      "gitBlob": "0d6da1364d077fc72f0b401ab241c42b066dbf6e",
+      "textLines": 2264,
+      "execution": {
+        "runId": null,
+        "source": "1011e35e1fbad2327794e5a615bba9bc3115ece0",
+        "checkout": null,
+        "tree": "cc1e63b5cd466c247c6670a6b67a50c75b0579a7"
+      }
+    },
+    {
+      "path": "docs/overhaul/measurements/phase2-results-before-5000.json",
+      "bytes": 492263,
+      "sha256": "b01ff5a541f0ad269a5acfdc1053ff6d1336f7b6a508d9ea81ccb5bab4f394c0",
+      "gitBlob": "eb5be16d1023645b426829088ca91ce5ebe18068",
+      "textLines": 6264,
+      "execution": {
+        "runId": null,
+        "source": "1011e35e1fbad2327794e5a615bba9bc3115ece0",
+        "checkout": null,
+        "tree": "cc1e63b5cd466c247c6670a6b67a50c75b0579a7"
+      }
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-browser-performance.json",
+      "bytes": 49465,
+      "sha256": "94919ac0010e0339f349e679b61178ab91364f36e9ecc7c8537da5cf5bfbf681",
+      "gitBlob": "c5d1eccb27777456218a0efc6af97f303259e9a9",
+      "textLines": 1607,
+      "execution": {
+        "runId": null,
+        "source": null,
+        "checkout": null,
+        "tree": null
+      }
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-final-bundles/installed-dependencies.json",
+      "bytes": 64844,
+      "sha256": "e6bd1efa1e838193d53f1e8ff26ccd6ef65b648a5f02cfadd915cb428f0f762d",
+      "gitBlob": "c170c3ffe95143e8f470807f0953a67c7308afe3",
+      "textLines": 1783,
+      "execution": {
+        "runId": null,
+        "source": null,
+        "checkout": null,
+        "tree": null
+      }
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-final-bundles/phase3-final-frontend-bundles.json",
+      "bytes": 181877,
+      "sha256": "8e38205dcf2b855abd064c764e4a21bd56cf23e14ced0817885a67c2786da98c",
+      "gitBlob": "6d52df984b5744cbf2e1a7c25d4c33b0b01b7346",
+      "textLines": 5063,
+      "execution": {
+        "runId": null,
+        "source": null,
+        "checkout": null,
+        "tree": null
+      }
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-problem-stats.json",
+      "bytes": 153523,
+      "sha256": "a099d704403e9b2a4f94abc6c97c99848185ef69ba61462df2987a1912cd4333",
+      "gitBlob": "08093c42cfbd9ea24177b3f580e76a25e5c19b6c",
+      "textLines": 4661,
+      "execution": {
+        "runId": null,
+        "source": null,
+        "checkout": null,
+        "tree": null
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/final-metadata.json",
+      "bytes": 45162,
+      "sha256": "b19d8cad682ff1601c6dcf29b09b47439c93efe4ec1ecd71eebdcc829e27386f",
+      "gitBlob": "f9df29c6a3590f9e6419e41ceb831bbfeba1f3bf",
+      "textLines": 1373,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/frontend-1.zip",
+      "bytes": 543704,
+      "sha256": "ab64e9735723dea28612dbddb8f49178eb010fb0be00a8a0c961343111458b8a",
+      "gitBlob": "662833852070ecc16e2c5553ea68948b757565e0",
+      "textLines": null,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/frontend-2.zip",
+      "bytes": 2085369,
+      "sha256": "493d46fff37a6dec5be608746dda676141735457a452de334ca5dfead0f1873b",
+      "gitBlob": "a851813aabec127847c1341821ef001e5b61a44c",
+      "textLines": null,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/frontend-independent-checks.json",
+      "bytes": 35213,
+      "sha256": "1dde1ad31e9d36ccfe680d54f4fc7301b8e1f4fd381fd32b97ddc2c36a0fe928",
+      "gitBlob": "dded0e0f73dd357df6f5b6354be73f52acce9316",
+      "textLines": 1299,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/image-back.zip",
+      "bytes": 26957,
+      "sha256": "2a4332a9c0fe01b5b1e1f7ee718bd3f0ef1bbbbac5b3cd6b4808037d410dbd10",
+      "gitBlob": "bfb1e0dbf75e1629f34d376d0ecc2db7baa61ccc",
+      "textLines": null,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/image-front.zip",
+      "bytes": 28914,
+      "sha256": "887a21064f55c674cebcdd98eaadb88c747ecfbb964673e1dfca07f9374978f9",
+      "gitBlob": "c8ddc7af0819b732cefb3b4b8a4706a0846926cd",
+      "textLines": null,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/image-independent-checks.json",
+      "bytes": 49133,
+      "sha256": "0e4561f508cf55473044c79b6aa6e7e493a87074449c749e8378b764ead7307f",
+      "gitBlob": "2bfd0935dbb942982ca2a8c3e31afbbc8d3ac1d3",
+      "textLines": 817,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/image-runtime.zip",
+      "bytes": 1086441,
+      "sha256": "d1d82603c5933f1806fcb0650731cd5428a37b593f4c5995c74c0955193138ce",
+      "gitBlob": "82fff52cf6f0cae20f571c7d6ced2fadade7e239",
+      "textLines": null,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/judge-evidence.zip",
+      "bytes": 29126,
+      "sha256": "2d05283e74e8e2fdb22199a0f7cb0cb9ed375c4e353fb8ed0760f6903353c2da",
+      "gitBlob": "a2d081ba677d6b3516b24f52c00ac6a1aa075eaa",
+      "textLines": null,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/npm-sbom.zip",
+      "bytes": 100682,
+      "sha256": "b0c09091953ab8d90bee237703eccca6dd0243f6f4dc886871de2d101cc76e4e",
+      "gitBlob": "40506f74a36f17af30e6dacef0b25949159b57e6",
+      "textLines": null,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/phase3-browser-performance.json",
+      "bytes": 100476,
+      "sha256": "2bd71b7aa203a091feacb3505e357a6aeefccbb14dee4aa6e5fdf0424be27dd9",
+      "gitBlob": "4154a026db6a70482fcc7042ba7d6c75e6c0ee47",
+      "textLines": 3341,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/phase5-database.json",
+      "bytes": 243599,
+      "sha256": "6e0122375e083564564e99ea134c4159809aa2decd58bffb133d51e2d7230a67",
+      "gitBlob": "8d7a870eb2c30e657b54eee74b86b6acfb983bd9",
+      "textLines": 5383,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/phase5-multi-api.json",
+      "bytes": 25486,
+      "sha256": "aa59b7edaab1aefc9e763b6eb9723a4c6f5ce5274ce980933dba162e4cbf3d99",
+      "gitBlob": "738e628d1c20299b93292b263e6d96e6b22b98cd",
+      "textLines": 800,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/phase5-verdict-matrix.json",
+      "bytes": 54280,
+      "sha256": "471a00d35365601dd7effd6c3a7aa4f01aebe561abb6fdbff762f326edcc08ed",
+      "gitBlob": "f4fce339ee992f1b380bd4ca56c65e273c27366d",
+      "textLines": 1983,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/backend-run-43905864054/vibe-browser.zip",
+      "bytes": 56807,
+      "sha256": "14e8e075fba9cfcb53da8b71e2609cfd05ad701cc51c8609f4b6763ad1f75bf0",
+      "gitBlob": "7176ef88cdb7867312c029d61ffe5ac312d688b5",
+      "textLines": null,
+      "execution": {
+        "runId": 43905864054,
+        "source": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+        "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+        "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+        "parents": [
+          "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+          "281d0f1a30cd772cf7417e3affb8c98be252f405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/foundation-run-43890166522/runtime.zip",
+      "bytes": 1086359,
+      "sha256": "3d7d71d5f4b7a5fe408b41fc97e84958628e3afb1c14d6c39b677aab35871cd1",
+      "gitBlob": "0435d57ff61d677d982282665ab5eca004a9f0c5",
+      "textLines": null,
+      "execution": {
+        "runId": 43890166522,
+        "source": "6ec519261b1103b2eadcfe0afcc0dec961353405",
+        "checkout": "93b753d73b12efe2ce6e71805feca6522f7428d2",
+        "tree": "5588cb3e8648afed8fe10146d4da961a0ebb4035",
+        "parents": [
+          "d0159b1f844bf0608415dded9e84af566c8e2041",
+          "6ec519261b1103b2eadcfe0afcc0dec961353405"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/chromium-1440-dark-ready.png",
+      "bytes": 35192,
+      "sha256": "22688e2adc0ce105fa38230916611c9871aef20a1bbcefba321576f623324440",
+      "gitBlob": "5732641a89d131a1062d9b4c7ab247b49daa4f08",
+      "textLines": null,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/chromium-1440-dark-refreshing.png",
+      "bytes": 35106,
+      "sha256": "e3c6616c562eb075fb4f1f8abda47294bdf3fbbaaf26472d22abe29c754f90bd",
+      "gitBlob": "48815e4c3bd249878772ace29edd59f791dc8515",
+      "textLines": null,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/chromium-320-light-ready.png",
+      "bytes": 34454,
+      "sha256": "ae9b427a27e16de88f3af1651c419ba79fd12c3fed5a7d59727057e4955b06dd",
+      "gitBlob": "8735c1c5d24c39c9d67f993617db219a27467610",
+      "textLines": null,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/chromium-320-light-refreshing.png",
+      "bytes": 34581,
+      "sha256": "42f60df32eb2e9e2405e76463182538050e70c998fe0a4e7e11158e7689ae5d0",
+      "gitBlob": "abc51f07a64d56c64a12723113bc5c71aa61bb78",
+      "textLines": null,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/final-metadata.json",
+      "bytes": 42945,
+      "sha256": "f742420f5eb73723a1d906f4f7bdf253e8bb6d78441effe928f2931f3f0f78ba",
+      "gitBlob": "0b39d715e8560b188a847dfaefd41e27355b3512",
+      "textLines": 1325,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/frontend-independent-checks.json",
+      "bytes": 36222,
+      "sha256": "ab4fbef01d94df38bd15cddd0afab9e225f795bc27475756485c336c3d541d1d",
+      "gitBlob": "3e7c4a962edc4a37f3f1222bf2e1b36d5f1e75eb",
+      "textLines": 1299,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/image-back.zip",
+      "bytes": 26979,
+      "sha256": "eb5997f00d44f4d374e157214a158217a2d83b86f565177d7626b7270178075c",
+      "gitBlob": "c6ea65bb24055ba7349fd14d8be448acf1a92d00",
+      "textLines": null,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/image-front.zip",
+      "bytes": 28920,
+      "sha256": "f681cf2ac20635f080465fc538fd6c0b96e78348d842b1a0b09c7362d334b998",
+      "gitBlob": "b95154cc5edff89cec0aa69e2a576ae183840c82",
+      "textLines": null,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/image-runtime.zip",
+      "bytes": 1086392,
+      "sha256": "0449010d12b10712b3c2496a3abcc0794e3a1f5fd3540c3f6a23d4258c44c750",
+      "gitBlob": "3f14f0643bd271daa040dbe387f391fb428b15fe",
+      "textLines": null,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/npm-sbom.zip",
+      "bytes": 100681,
+      "sha256": "d41a52359deeab3d16cde38a13495044f3b48116e801c96feae3465dc4a14436",
+      "gitBlob": "c74d9d35d566dca9b2b8682bda0a450c20a9ec8e",
+      "textLines": null,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/phase2-pipeline.zip",
+      "bytes": 29167,
+      "sha256": "0c8fb1981926811c0ee57040a7019eef05ab047a3314007cfc210f0b1c5567bc",
+      "gitBlob": "a837de9c2fec066690a73577964e9f1137b3507a",
+      "textLines": null,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/phase5-frontend-shard1.zip",
+      "bytes": 543695,
+      "sha256": "c1529160bfeac3efe75228040d167bfef9fb34f9cbb03669916ef0a9cdf90a81",
+      "gitBlob": "b3d2ddc8b5310cc41da0b70a0c262afac2da9a7b",
+      "textLines": null,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/phase5-frontend-shard2.zip",
+      "bytes": 2085420,
+      "sha256": "7a0be788d7884f53f138f64064f833832c8cd74d3baf3d6d13e6266bc788b8fb",
+      "gitBlob": "326114b6b10034aa6dbae212a633638709715d2e",
+      "textLines": null,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/phase5-vibe-browser.zip",
+      "bytes": 56747,
+      "sha256": "77f34a217ca0dd7b203dfac4cc6a990c0d8f471f10f9fefaddb7cb808e70e6f6",
+      "gitBlob": "c1f299eadf3a96c785ecbad71dbe34f85df65bb1",
+      "textLines": null,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/frontend-run-43901468081/runtime-independent-replay.json",
+      "bytes": 234469,
+      "sha256": "0b9b692ce437354f69dca2b745d50204a5925d0c5f3dc3082c79a81b59ac7944",
+      "gitBlob": "17923defab96ba247b28e222c229daef2f655c28",
+      "textLines": 5018,
+      "execution": {
+        "runId": 43901468081,
+        "source": "49a3674e76f79b0d1626b12f02862825c189bdff",
+        "checkout": "8d59c05bcc2161e3088355daf63756ed655ac234",
+        "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+        "parents": [
+          "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+          "49a3674e76f79b0d1626b12f02862825c189bdff"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/judge-run-43893025800/back.zip",
+      "bytes": 26945,
+      "sha256": "d95609fadf504c9578bed91296a66ef5009420f2b454fd7a5645e007d1480b4e",
+      "gitBlob": "28034deb74081f0592dbc95942065e5318992e0e",
+      "textLines": null,
+      "execution": {
+        "runId": 43893025800,
+        "source": "1583ee1c5f30310b37c02d30d53fb9226f776f19",
+        "checkout": "af29ece67e20e06b0cce453434b482cc5215d4f6",
+        "tree": "8a5843db4feba7ba619159731f62d4d824369520",
+        "parents": [
+          "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+          "1583ee1c5f30310b37c02d30d53fb9226f776f19"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/judge-run-43893025800/browser.zip",
+      "bytes": 56667,
+      "sha256": "fc661ef4110307d4f904c4cee2225aa930dc35fcd8397db73340db1933159748",
+      "gitBlob": "232fab102cfccda5f1506b18cdaca53048650ab0",
+      "textLines": null,
+      "execution": {
+        "runId": 43893025800,
+        "source": "1583ee1c5f30310b37c02d30d53fb9226f776f19",
+        "checkout": "af29ece67e20e06b0cce453434b482cc5215d4f6",
+        "tree": "8a5843db4feba7ba619159731f62d4d824369520",
+        "parents": [
+          "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+          "1583ee1c5f30310b37c02d30d53fb9226f776f19"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/judge-run-43893025800/front.zip",
+      "bytes": 29049,
+      "sha256": "2d1b256495b276512d54cd2fe0d3fb4eb2e152f7a059f7fa199207b657896956",
+      "gitBlob": "6f8ef81e3966e98c0c85890ba9b9b9ef82f706ad",
+      "textLines": null,
+      "execution": {
+        "runId": 43893025800,
+        "source": "1583ee1c5f30310b37c02d30d53fb9226f776f19",
+        "checkout": "af29ece67e20e06b0cce453434b482cc5215d4f6",
+        "tree": "8a5843db4feba7ba619159731f62d4d824369520",
+        "parents": [
+          "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+          "1583ee1c5f30310b37c02d30d53fb9226f776f19"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/judge-run-43893025800/github-metadata.json",
+      "bytes": 32219,
+      "sha256": "69ff53142b614850e98746c861f1239a2f5c396ab36eb535ee2ed094907a2a39",
+      "gitBlob": "f8a15f02a01142bbc6983fcfba535dd0ee7963c6",
+      "textLines": 1072,
+      "execution": {
+        "runId": 43893025800,
+        "source": "1583ee1c5f30310b37c02d30d53fb9226f776f19",
+        "checkout": "af29ece67e20e06b0cce453434b482cc5215d4f6",
+        "tree": "8a5843db4feba7ba619159731f62d4d824369520",
+        "parents": [
+          "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+          "1583ee1c5f30310b37c02d30d53fb9226f776f19"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/judge-run-43893025800/phase5-verdict-matrix.json",
+      "bytes": 54267,
+      "sha256": "f3749ed4d30109ec60cab0e77dd349ce5395484bb471c86a840025054088aaba",
+      "gitBlob": "c26b44ee33182f22ca1ed51a682458233687e1d1",
+      "textLines": 1983,
+      "execution": {
+        "runId": 43893025800,
+        "source": "1583ee1c5f30310b37c02d30d53fb9226f776f19",
+        "checkout": "af29ece67e20e06b0cce453434b482cc5215d4f6",
+        "tree": "8a5843db4feba7ba619159731f62d4d824369520",
+        "parents": [
+          "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+          "1583ee1c5f30310b37c02d30d53fb9226f776f19"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/judge-run-43893025800/phase5-vibe-browser.png",
+      "bytes": 59638,
+      "sha256": "85aea1cd4d83657eaa9ffa09dacb024c87a8e76ba53f7b4d7c21d9b418765cf1",
+      "gitBlob": "1c1328bde352e558e885db97fbf8ffe5026d48e8",
+      "textLines": null,
+      "execution": {
+        "runId": 43893025800,
+        "source": "1583ee1c5f30310b37c02d30d53fb9226f776f19",
+        "checkout": "af29ece67e20e06b0cce453434b482cc5215d4f6",
+        "tree": "8a5843db4feba7ba619159731f62d4d824369520",
+        "parents": [
+          "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+          "1583ee1c5f30310b37c02d30d53fb9226f776f19"
+        ]
+      }
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/judge-run-43893025800/runtime.zip",
+      "bytes": 1086327,
+      "sha256": "05870c8b6d40dc8fe7afc803779a8eadca473a42716db76735fff41b9051305b",
+      "gitBlob": "656234a79f68a051c64258d5b66a72f12f9dceb7",
+      "textLines": null,
+      "execution": {
+        "runId": 43893025800,
+        "source": "1583ee1c5f30310b37c02d30d53fb9226f776f19",
+        "checkout": "af29ece67e20e06b0cce453434b482cc5215d4f6",
+        "tree": "8a5843db4feba7ba619159731f62d4d824369520",
+        "parents": [
+          "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+          "1583ee1c5f30310b37c02d30d53fb9226f776f19"
+        ]
+      }
+    }
+  ]
+}

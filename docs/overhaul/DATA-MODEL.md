@@ -3,7 +3,7 @@
 Baseline: `6176015b63a1615cc2269172f246725ef08abab3`.
 This document describes that schema and the reviewed database, backend and security changes. It does not assert that a feature branch has been merged or deployed; [PROGRESS.md](PROGRESS.md) and [TESTING.md](TESTING.md) record integration status.
 
-The structural inventory is [INVENTORY.json](INVENTORY.json), the service map is [ARCHITECTURE.md](ARCHITECTURE.md), and measurements are in [DATABASE.md](DATABASE.md). Schema facts below were checked against the migration sources and the actual PostgreSQL constraint catalog in [community-indexes.json](../../Back/benchmarks/community-indexes.json).
+The structural inventory is [INVENTORY.json](INVENTORY.json), the service map is [ARCHITECTURE.md](ARCHITECTURE.md), and measurements are in [DATABASE.md](DATABASE.md). Schema facts below were checked against the migration sources and the actual PostgreSQL constraint catalog in [community-indexes.json](https://github.com/yakisoba0728/UnsolvableOJ/blob/e1bbab81bcc4666e92ffaf47bc6408c2d373e6f5/Back/benchmarks/community-indexes.json).
 
 ## What changed
 
