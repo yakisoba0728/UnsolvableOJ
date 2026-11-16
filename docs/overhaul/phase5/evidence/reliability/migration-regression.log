@@ -1,0 +1,2 @@
+Migration "BackendHardening1790554000000" failed, error: Usernames differ only by case; rename them before migrating: Legacy, legacy
+Migrations: legacy upgrade, snapshots, solve/XP idempotency, acceptance and learning evidence backfill/refusal, username case refusal, partial rollback, foundations version/token refusal (signed revoked JWT remains rejected), fresh install/rollback/reapply, vibe history backfill and enterprise rollback refusal passed.

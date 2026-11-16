@@ -256,6 +256,7 @@ jobs:
           npm run test:operations --prefix Back
           node --test Back/scripts/benchmark-enterprise-results.test.mjs
           node --test Back/scripts/phase4-restore-rehearsal.test.mjs
+          node --test Back/scripts/phase5-db-qualification.test.mjs
           node --test Back/scripts/starter-problems.test.mjs Back/scripts/seed-starter.test.mjs
       - name: Production Compose configuration
         run: node scripts/check-production-compose.mjs
@@ -284,6 +285,33 @@ jobs:
           name: phase4-restore-${{ github.sha }}-${{ github.run_attempt }}
           path: Back/reports/phase4-restore.json
           if-no-files-found: ${{ steps.database_validation.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 30
+      - name: Bounded disposable database qualification
+        id: phase5_database
+        working-directory: Back
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://unsolvable:ci_disposable_password@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/unsolvable_ci
+          PHASE5_DB_QUALIFICATION: disposable
+        run: |
+          node scripts/phase5-db-qualification.mjs
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+          const report = JSON.parse(readFileSync('reports/phase5-database.json', 'utf8'));
+          assert.equal(report.status, 'PASS');
+          assert.equal(report.source.head, process.env.GITHUB_SHA);
+          assert.equal(report.measurements.length, 7);
+          assert.equal(report.cleanup.created, true);
+          assert.equal(report.cleanup.dropped, true);
+          NODE
+      - name: Preserve Phase V database qualification evidence
+        if: ${{ always() && (steps.phase5_database.outcome == 'success' || steps.phase5_database.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-database-${{ github.sha }}-${{ github.run_attempt }}
+          path: Back/reports/phase5-database.json
+          if-no-files-found: ${{ steps.phase5_database.outcome == 'success' && 'error' || 'warn' }}
           retention-days: 30
 
   judge:
@@ -528,6 +556,14 @@ jobs:
         with:
           name: phase5-vibe-pipeline-${{ github.sha }}-${{ github.run_attempt }}
           path: Back/reports/phase5-vibe-dedicated.json
+          if-no-files-found: ${{ steps.phase2_pipeline.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 30
+      - name: Preserve Phase V bounded multi-API evidence
+        if: ${{ always() && (steps.phase2_pipeline.outcome == 'success' || steps.phase2_pipeline.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-multi-api-${{ github.sha }}-${{ github.run_attempt }}
+          path: Back/reports/phase5-multi-api.json
           if-no-files-found: ${{ steps.phase2_pipeline.outcome == 'success' && 'error' || 'warn' }}
           retention-days: 30
       - name: Full Compose browser flow

@@ -33,7 +33,7 @@ describe('dedicated Vibe through real mTLS forwarding and native execution', () 
       limitations: [
         'The gateway is an owned Node HTTPS forwarding test fixture, not the production nginx configuration or a deployed dedicated host.',
         'The existing CI native sandbox is reused sequentially with unchanged upstream bearer forwarding; the application algorithm secret is an independent synthetic value.',
-        'The browser is not part of this test. Existing Compose browser flows exercise embedded mode separately.',
+        'This API pipeline has no browser; the separate phase5-vibe-browser/compose artifacts exercise nginx/browser when present.',
         'Production network isolation, gateway software approval, certificate operations and provider quality remain UNVERIFIED.',
       ],
     };
