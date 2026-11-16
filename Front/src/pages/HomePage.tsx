@@ -70,6 +70,7 @@ export function HomePage() {
       <PageHeader
         title={name ? `${name}님, 오늘도 한 걸음.` : "오늘도 한 걸음."}
         description="어제의 고민을 오늘의 실력으로 이어가세요."
+        aside={session ? <Link className="button button-small button-outline" to="/learning">학습 대시보드 →</Link> : undefined}
       />
 
       {error || profileError || rankError || history.error ? (
