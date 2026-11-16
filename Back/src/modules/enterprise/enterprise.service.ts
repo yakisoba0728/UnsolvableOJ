@@ -1,7 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { VibeService } from '../vibe/vibe.service.js';
 import { challenge } from '../vibe/vibe.catalog.js';
-import type { VibeReport } from '../vibe/vibe.types.js';
 import { canJoinEnterprise as canJoin } from './enterprise-access.js';
 import { buildEnterpriseVibeScores, type EnterpriseVibeRow } from './enterprise-vibe-scores.js';
 import {
