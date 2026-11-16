@@ -1,0 +1,18 @@
+{
+  "purpose": "Explain compression-implementation differences for unchanged lazy CSS; not a CSS optimization claim",
+  "cssSha256": "e54a416d243ec7d900c06de2e74006b75711cf50960d7c396833a4d2208e8f64",
+  "rawBytes": 5891,
+  "node": {
+    "version": "v24.22.1",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "gzipLevel": 9,
+    "gzipBytes": 1470
+  },
+  "python": {
+    "version": "3.12.14",
+    "zlib": "1.3.2",
+    "gzipLevel": 9,
+    "mtime": 0,
+    "gzipBytes": 1478
+  }
+}

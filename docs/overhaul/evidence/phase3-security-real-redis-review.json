@@ -1,0 +1,1 @@
+{"result":"PASS","transport":"actual Redis TLS with mutual authentication","rejected":["untrusted CA","wrong hostname","missing client certificate","wrong Redis password"],"bullmqJobs":1,"ownedResourcesOnly":true,"cleanup":"completed"}

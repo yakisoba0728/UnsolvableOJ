@@ -1,0 +1,76 @@
+{
+  "reviewer": "independent_recovery",
+  "reviewedHead": "e12d3a30faca6c816c8acb2ef16392d8d65bdab2",
+  "tree": "0e90a39685e1246c8f9a3ab1637fc0c89b4d85e7",
+  "incomingProductHead": "e3aa50c4cdcadaa0dd965a29086c0148b79261a8",
+  "productSubtreeHashesIdentical": {
+    "Back": "372e53cae05de145b933972cd8d423578c3ebf34",
+    "Judge": "38f41d95e451898ddce78c0f3af783aecd334ada",
+    "Front/src": "f79ece933b56f84cc8c80cc5999aad3437249dc1"
+  },
+  "onlyNonDocumentDifferences": [
+    ".github/workflows/ci.yml",
+    "Front/tests-live/judge-flow.spec.ts",
+    "Front/tests-live/learning-performance.ts"
+  ],
+  "browserProbeAndCallSiteMatchApproved5f7cd7f": true,
+  "workflowDeltaMatchesApprovedArtifactStep": true,
+  "all19EvidencePathsPresentAndHashesMatch": true,
+  "existingNativeBrowserPolicyAndConfigUnchanged": true,
+  "performanceCrosscheck": {
+    "fourClientPooledUpdatesPerSecond": {
+      "recount": 30.58123624359382,
+      "incremental": 1188.3779716726276
+    },
+    "postgresEndpointRssKiBRange": [
+      20592,
+      57324
+    ],
+    "fiftyThousandRowIncrementalUpgradeMs": [
+      47.84636899999896
+    ],
+    "fiftyThousandRowEndpointRssKiBRange": [
+      35252,
+      57324
+    ]
+  },
+  "reviewBoundary": "No rebuild, browser, Docker, database write or parent-worktree edit. Source and evidence review only. Full final exact-head CI and observed browser measurements remain required.",
+  "checkpointMetadataVerification": {
+    "evidence": "final-checkpoint-github-receipts.json",
+    "prs73To75": "merged with documented source/merge SHAs; each cited accepted run has 12 successful jobs",
+    "pr76": "open/unmerged on e3aa50c; candidate run had 8 successful and 3 running jobs at independent observation",
+    "pr63": "open/unmerged; main6176015 and integration87cc1e7 match checkpoint"
+  },
+  "documentationFindings": [
+    {
+      "id": "review-role-scope",
+      "severity": "documentation precision",
+      "status": "resolved by documentCorrectionFollowup",
+      "detail": "Review ledger should attribute core worker TLS/configuration review and real transport checks to coordinator; independent_recovery source receipts cover CI/preflight corrections, adversarial allowlist probe and compositions."
+    },
+    {
+      "id": "rss-transcription",
+      "severity": "documentation numeric transcription",
+      "status": "resolved by documentCorrectionFollowup",
+      "detail": "Raw 50,000-row endpoint RSS range is 35,252\u201357,324 KiB, not 35,324\u201357,324. Both DATABASE and PERFORMANCE need the lower bound corrected; PERFORMANCE should label the 50,000-row fixture. All fixture sizes together span 20,592\u201357,324 KiB."
+    }
+  ],
+  "disposition": "Product/gate composition and corrected documentation accepted. Raw browser execution/results, refresh to accepted DB integration, and final exact-head full CI remain separate gates.",
+  "documentCorrectionFollowup": {
+    "reviewedHead": "d2239a0a6ef97c019eb1e514a42a768e72b47396",
+    "tree": "dc7cf8c9fb0ed512aaf800e0b6de541ad6573f7f",
+    "changedPaths": [
+      "docs/overhaul/PHASE3-DATABASE.md",
+      "docs/overhaul/PHASE3-FINAL-BUNDLES.md",
+      "docs/overhaul/PHASE3-PERFORMANCE.md",
+      "docs/overhaul/PHASE3-REVIEW.md"
+    ],
+    "allProductTestCiScriptSubtreesUnchanged": true,
+    "rawMeasurementsAndEvidenceSubtreesUnchanged": true,
+    "findingsResolved": [
+      "review-role-scope",
+      "rss-transcription"
+    ],
+    "exploratoryFrontendReceipt": "Earlier exploratory bundle files are explicitly not retained; claims rely on separately retained final four-build evidence."
+  }
+}

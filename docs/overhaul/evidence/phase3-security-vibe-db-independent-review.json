@@ -1,0 +1,83 @@
+{
+  "reviewer": "independent_recovery",
+  "authorSeparated": true,
+  "humanApprovalClaim": false,
+  "security": {
+    "reviewedHead": "d35f297a291f05de2a248148b1019d376d39109f",
+    "remoteEquivalentHeadReportedByCoordinator": "a52d3adb2536c717b11498fdcd3bc76276cd3de7",
+    "tree": "e7bcef511890633e31f63dfe4d57008d4746deaf",
+    "finding": "P2 decoded-plan allowlist accepted Object.prototype inherited property names through secretSettings[source]. This is a configuration preflight bypass, not a default-template exploit or a remote application vulnerability.",
+    "beforeHead": "a0ad96f9fc19899a3570d27f77bbc64db10cca74",
+    "before": "Independent unchanged adversarial probe accepted constructor, toString and __proto__.",
+    "fix": "Require string source and Object.hasOwn(secretSettings, source); existing three named identities and relative/exact absolute target constraints remain enforced.",
+    "independentExecution": {
+      "prototypeProbe": "All three formerly accepted inputs rejected",
+      "policyTestsPassed": 63,
+      "failed": 0,
+      "skipped": 0
+    },
+    "evidence": [
+      "security-a0ad96f-prototype-before.log",
+      "security-d35f297-prototype-after.log",
+      "security-d35f297-policy.log",
+      "security-secret-prototype-probe.mjs"
+    ],
+    "disposition": "Finding resolved; source/local policy review accepted. Actual Docker Compose, TLS and complete exact-head CI remain separate gates."
+  },
+  "vibeNativeApiFollowup": {
+    "reviewedHead": "2b5610b1e552699a13a0d495ba2a4d23258853a4",
+    "tree": "9a7308ee585731079d2f15b532561e806694e7b9",
+    "productSource": "Identical to previously independently reviewed 830f5a735c21139fa585f11f62fb95b10b94c714",
+    "scope": "New fifth pipeline case connects actual Nest API, PostgreSQL, VibeRunner and go-judge. Only paid AI evaluation is replaced with unavailable mock. Public run, final hidden scoring, revision persistence and version binding are asserted.",
+    "independentExecution": "npm run typecheck passed in own detached worktree.",
+    "nativeExecutionClaim": false,
+    "evidence": [
+      "vibe-2b5610b-typecheck.log"
+    ],
+    "disposition": "Static pipeline test and typecheck accepted. Native runtime execution requires fresh CI; local full-API author timeout reports are not represented as green."
+  },
+  "database": {
+    "reviewedHead": "0db44816f533a69ef0297ba427e4ca28451a17f2",
+    "tree": "674ba65f59e4056fb9776ffdc74e6dfb593aa2bc",
+    "scope": "Statement deltas, distinct-solver multiplicities, ordered problem-stat locking, FK lock edges, all verdict/test/key transitions, migration reconciliation and transaction rollback, finite benchmark safety and same-work definitions.",
+    "independentExecution": {
+      "build": "passed",
+      "repositoryPostgresTestsPassed": 11,
+      "additionalReviewerPostgresProbesPassed": 2,
+      "totalPassed": 13,
+      "testFiles": 2,
+      "durationSeconds": 4.27,
+      "database": "Owned fresh loopback PostgreSQL 17.11 / Redis 8.10.3"
+    },
+    "extraProbes": [
+      "First-ever statistics row contention with initial writer commit and rollback",
+      "Atomic verdict-write failure and full rollback when multiplicity is deliberately corrupted"
+    ],
+    "reviewerFixtureCorrection": "First additional-probe setup failed because reviewer-generated UUID username exceeded existing varchar(30); fixture shortened only. Repository 11 tests already passed in that run. Original failure log retained.",
+    "sourceDisposition": "No blocking source finding at reviewed HEAD. New FK points at already locked problem_stats; legacy stats repair precedes counter backfill. No API contract change.",
+    "limitations": [
+      "Not an online production migration: submission/stat writers are locked during rebuild.",
+      "Ordered targets apply within one statement; this does not prove arbitrary multi-statement transactions cannot deadlock.",
+      "Large source-code transition-table memory/spill and long sustained workloads remain unmeasured.",
+      "Benchmark numbers were not yet available at this review; final exact-head CI and final matching-source benchmark are required."
+    ],
+    "evidence": [
+      "db-0db4481-build.log",
+      "db-0db4481-api.log",
+      "db-0db4481-reviewer-fixture-error.log"
+    ],
+    "reviewerProbePath": "/workspace/scratch/86de5f814139/oj-dbperf-review/Back/test/independent-problem-stats.e2e-spec.ts",
+    "benchmarkFollowup": {
+      "rawArtifact": "oj-dbperf/docs/overhaul/measurements/phase3-problem-stats.json",
+      "audit": "db-0db4481-benchmark-audit.json",
+      "sourceHashesMatch": true,
+      "rawQuantilesAndArithmeticMatch": true,
+      "crossoverRounds": 12,
+      "verdict": "Same-source bounded SQL write-path benchmark is internally consistent. Fresh final CI remains required.",
+      "reportedTradeoffs": "At 50,000 historical rows, four-client completion p95 343.766ms to 5.715ms. Heartbeat p95 increased 0.740ms to 1.213ms; at 1,000 history rows serial completion p95 increased 1.418ms to 1.509ms.",
+      "tailCaution": "Bulk has only fourteen samples per mode; nearest-rank p95 and p99 are both the observed maximum, not a stable production tail estimate.",
+      "executionBoundary": "Reviewer recomputed the author raw artifact and compared source hashes to git objects; reviewer did not run a second benchmark."
+    }
+  },
+  "resourceBoundary": "No production resources, repository-author files, remote GitHub state or paid provider calls changed. Only own detached review worktrees and disposable local services were used."
+}

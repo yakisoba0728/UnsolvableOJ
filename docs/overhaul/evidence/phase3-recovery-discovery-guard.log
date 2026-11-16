@@ -1,0 +1,16 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @unsolvable-oj/front@0.1.0 test:live
+> playwright test --config playwright.live.config.ts --list
+
+Error: Run live tests through node scripts/check-compose.mjs, never against a development or production database.
+    at file:///workspace/scratch/c187c40af034/UnsolvableOJ/Front/playwright.live.config.ts:7:9
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at node:internal/modules/esm/loader:647:26
+    at requireOrImport (/workspace/scratch/c187c40af034/UnsolvableOJ/Front/node_modules/playwright/lib/common/index.js:1081:12)
+    at loadUserConfig (/workspace/scratch/c187c40af034/UnsolvableOJ/Front/node_modules/playwright/lib/common/index.js:1268:46)
+    at loadConfig (/workspace/scratch/c187c40af034/UnsolvableOJ/Front/node_modules/playwright/lib/common/index.js:1275:22)
+    at Object.loadConfigFromFile (/workspace/scratch/c187c40af034/UnsolvableOJ/Front/node_modules/playwright/lib/common/index.js:1490:10)
+    at runTests (/workspace/scratch/c187c40af034/UnsolvableOJ/Front/node_modules/playwright/lib/cli/testActions.js:46:18)
+    at _Command.<anonymous> (/workspace/scratch/c187c40af034/UnsolvableOJ/Front/node_modules/playwright/lib/program.js:55:7)
