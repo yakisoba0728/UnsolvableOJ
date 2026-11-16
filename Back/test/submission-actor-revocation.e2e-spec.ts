@@ -122,7 +122,7 @@ describe('submission actor revocation after authentication (real PostgreSQL)', (
     const original = EntityManager.prototype.query;
     const spy = vi.spyOn(EntityManager.prototype, 'query').mockImplementation(async function (this: EntityManager, sql, params) {
       const result = await original.call(this, sql, params);
-      if (sql.includes('INSERT INTO refresh_tokens') && params?.[0] === actor.id) {
+      if (sql.includes('INSERT INTO refresh_tokens') && Array.isArray(params) && params[0] === actor.id) {
         entered();
         await paused;
       }
