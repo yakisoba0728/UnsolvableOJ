@@ -89,7 +89,7 @@ jobs:
           # PR은 merge 커밋과 base를, push는 이전 tip을 비교한다. 야간·수동 실행은 base가 없어 항상 빌드한다.
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
           CONTEXT: ${{ matrix.context }}
-          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main') || github.base_ref == 'overhaul4/integration' || github.head_ref == 'overhaul4/integration' || github.base_ref == 'overhaul5/integration' || github.head_ref == 'overhaul5/integration')) }}
+          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main') || github.base_ref == 'overhaul4/integration' || github.head_ref == 'overhaul4/integration' || github.base_ref == 'overhaul5/integration' || github.head_ref == 'overhaul5/integration' || (github.head_ref == 'consolidation/unsolvableoj-final-overhaul' && github.base_ref == 'main'))) }}
         run: |
           # Full validation includes all four actual image builds, independent of changed paths.
           if [ "$FULL" = true ]; then
@@ -168,7 +168,7 @@ jobs:
           EVENT: ${{ github.event_name }}
           BASE: ${{ github.event.pull_request.base.sha }}
           # The opt-in label also survives later pushes; it only adds full validation.
-          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main') || github.base_ref == 'overhaul4/integration' || github.head_ref == 'overhaul4/integration' || github.base_ref == 'overhaul5/integration' || github.head_ref == 'overhaul5/integration')) }}
+          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main') || github.base_ref == 'overhaul4/integration' || github.head_ref == 'overhaul4/integration' || github.base_ref == 'overhaul5/integration' || github.head_ref == 'overhaul5/integration' || (github.head_ref == 'consolidation/unsolvableoj-final-overhaul' && github.base_ref == 'main'))) }}
         run: |
           all() { for name in back front judge; do echo "$name=true" >> "$GITHUB_OUTPUT"; done; }
           # 전체 요청은 경로와 무관하게 브라우저·API·워커까지 모두 실행한다.

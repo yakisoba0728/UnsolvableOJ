@@ -111,6 +111,8 @@ check-compose.mjs는 임의 프로젝트명, RAM 기반 DB/Redis, localhost 임�
 
 ## 자율 개편 통합 게이트
 
+최종 `consolidation/unsolvableoj-final-overhaul → main` PR도 변경 경로와 관계없이 네 이미지의 실제 빌드·스캔과 전체 검사를 선택합니다. 문서만 바뀐 후속 커밋에도 동일하게 적용되며, 기존 필수 작업과 실패 차단 조건을 유지합니다. 현재 통합 진행 상황은 [canonical checkpoint](../docs/consolidation/PROGRESS.md)를 따릅니다.
+
 기능 PR은 `overhaul/integration`을 대상으로 동일한 경로별 검사를 실행합니다. 통합 브랜치는 push마다 중복 실행하지 않으며 최종 `overhaul/integration → main` PR에서 WebKit·Firefox 핵심 흐름·실제 샌드박스·파이프라인·Compose 검사를 자동으로 포함합니다. 이 PR은 자동 병합하지 않습니다.
 
 `node --test scripts/ci-policy.test.mjs`는 필수 게이트의 모든 검사 의존성, 실패·취소 처리, 통합 PR 검사 조건, 대규모 diff에서 이미지 검사를 잘못 생략하지 않는지를 검사합니다. 이미지 변경 판정은 diff를 먼저 저장해 `pipefail`과 조기 종료하는 `grep -q`의 SIGPIPE 경합을 피합니다.

@@ -93,7 +93,7 @@ test('adding a PR label triggers CI without replacing its original activity type
   assert.doesNotMatch(workflow, /^  pull_request_target:/m, 'Label opt-in must not change the workflow trust context');
 });
 
-test('Phase IV and V feature and final PRs always request full validation in both selectors', () => {
+test('Phase IV, V and final consolidation PRs request full validation in both selectors', () => {
   const expressions = [...workflow.matchAll(/^\s+FULL: \$\{\{ (.+) \}\}$/gm)].map(match => match[1]);
   assert.equal(expressions.length, 2);
   assert.equal(expressions[0], expressions[1], 'Image and suite selection must use the same policy');
@@ -111,6 +111,9 @@ test('Phase IV and V feature and final PRs always request full validation in bot
     ['overhaul5/feature', 'overhaul5/integration', 'pull_request', '', false, true],
     ['overhaul5/integration', 'overhaul4/integration', 'pull_request', '', false, true],
     ['overhaul5/integration', 'main', 'pull_request', '', false, true],
+    ['consolidation/unsolvableoj-final-overhaul', 'main', 'pull_request', '', false, true],
+    ['consolidation/unsolvableoj-final-overhaul', 'unrelated', 'pull_request', '', false, false],
+    ['consolidation/unrelated', 'main', 'pull_request', '', false, false],
     ['feature', 'main', 'pull_request', 'full-validation', false, true],
     ['main', 'main', 'schedule', '', false, true],
     ['main', 'main', 'workflow_dispatch', '', true, true],
