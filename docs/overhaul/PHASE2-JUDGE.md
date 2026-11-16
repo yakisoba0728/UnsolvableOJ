@@ -57,7 +57,7 @@ named disposable PostgreSQL database and test Redis DB. It creates only syntheti
 users/problems/jobs, owned workers and loopback TCP proxies. It adds:
 
 1. Eight-language accepted mix with 1, 2, 2, 1 worker processes, one active job
-   per worker, one Python warmup/job per worker and eight measured jobs/trial.
+   per worker, a shared batch of one Python warmup job per configured worker and eight measured jobs/trial (no fairness assumption).
 2. Worker Redis-link interruption/reconnection while one result commits and a
    second job remains queued; an additional distinct BullMQ job delivers the same
    submission/generation after the terminal result and must not duplicate execution/XP/notification.
@@ -72,7 +72,17 @@ users/problems/jobs, owned workers and loopback TCP proxies. It adds:
    no existing test timeout or assertion is weakened.
 
 The TCP proxies affect only owned worker connections. They **do not restart the
-Redis daemon or API process**; such process restart/persistent Redis recovery and
+Redis daemon or API process**. A separate `judge-api-restart.pipeline-spec.ts`
+adds an actual API child-process SIGKILL and replacement on the same loopback
+port. Its fixture Nest app is closed before the scenario; there are no other API
+instances or recovery timers. One submission is JUDGING and another QUEUED when
+the API is killed. A request during downtime must fail without creating a row;
+its retry after replacement must succeed. All three submissions must finish in
+generation 1 without lease recovery, each with one notification and consistent
+learning, and one shared solve/10 XP. The Judge process remains alive. Raw restart
+timing and evidence are in `Back/reports/phase2-api-restart.json`.
+
+Actual Redis daemon restart/persistence recovery, rejudge interruption and
 sustained mixed-load failures remain distinct follow-ups.
 
 ## Measurement methodology and limits
@@ -105,7 +115,8 @@ this new instrumentation. Old comparator microbenchmarks are not substituted.
 - New readiness regression on baseline worker transpiled from the immutable Git
   commit: FAIL (`3 !== 1` API readiness renewals), reproducing J2-001.
 - Changed Judge build/protocol suite: 98/98 pass; Python health: 1/1 pass.
-- Backend lint and full TypeScript check including the new pipeline test: pass.
+- Backend lint and full TypeScript check including both new pipeline files: pass.
+- Dedicated executor YAML parse and CPU/PID/capability/internal-network invariants: pass; this is not native Compose enforcement.
 - `git diff --check`: pass.
 - Native matrix, capacity/recovery pipeline and Compose enforcement: **not run
   locally** (Docker/go-judge unavailable); exact candidate Actions must pass

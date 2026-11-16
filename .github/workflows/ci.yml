@@ -29,7 +29,7 @@ defaults:
 
 jobs:
   audit:
-    # 운영 의존성의 high/critical 취약점만 실패로 본다. low/moderate는 보고만 한다.
+    # 운영 의존성의 moderate/high/critical 취약점은 실패로 본다. low는 보고한다.
     name: Dependency audit
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -45,10 +45,23 @@ jobs:
           status=0
           for package in Back Front Judge; do
             echo "::group::$package"
-            npm audit --prefix "$package" --omit=dev --audit-level=high || status=1
+            npm audit --prefix "$package" --omit=dev --audit-level=moderate || status=1
             echo "::endgroup::"
           done
           exit "$status"
+      - name: Validate and generate complete npm lockfile SBOMs
+        if: ${{ !cancelled() }}
+        run: |
+          node --test scripts/collect-sboms.test.mjs
+          node scripts/collect-sboms.mjs
+      - name: Dependency inventory (runtime and build metadata)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: npm-sbom-${{ github.sha }}-${{ github.run_attempt }}
+          path: reports/sbom/
+          if-no-files-found: error
+          retention-days: 30
 
   images:
     # 운영 이미지가 빌드되는지만 확인한다. 이미지는 내보내거나 푸시하지 않고 GHA 캐시에만 남긴다.
@@ -373,6 +386,7 @@ jobs:
           docker compose up -d --no-build --wait --wait-timeout 180 go-judge
           npm run test:runtime --prefix Judge
       - name: Native judging pipeline
+        id: phase2_pipeline
         working-directory: Back
         env:
           NODE_ENV: test
@@ -384,6 +398,18 @@ jobs:
           JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: node scripts/run-integration.mjs pipeline
+      - name: Preserve Phase II Judge measurements and recovery evidence
+        if: ${{ always() && (steps.phase2_pipeline.outcome == 'success' || steps.phase2_pipeline.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase2-judge-evidence-${{ github.run_attempt }}
+          path: |
+            Back/reports/phase2-*.json
+            Back/reports/phase2-*.log
+          # A pipeline setup failure can precede report creation. Its test failure
+          # remains the gate; a missing artifact must not obscure that root cause.
+          if-no-files-found: warn
+          retention-days: 7
       - name: Full Compose browser flow
         run: node scripts/check-compose.mjs --production
       - name: Failed Compose browser artifacts (disposable test data only)
