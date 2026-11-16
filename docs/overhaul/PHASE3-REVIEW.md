@@ -1,10 +1,16 @@
 # Phase III independent review ledger
 
-The coordinator used five distinct specialist agents over the iteration:
+The earlier implementation coordinator used five distinct specialist agents:
 `independent_recovery`, `frontend_engineer`, `vibe_engineer`,
 `runtime_security_engineer` and `database_performance`. The actual concurrency
 limit was three specialists plus the coordinator. Assignments were queued; seven
 simultaneous reviewers were not created or claimed.
+
+The PR77 recovery uses three additional, separate automated reviewers:
+`/root/browser_evidence`, `/root/ci_audit` and `/root/composition_review`.
+Their review scopes are bounded respectively to retained browser evidence,
+historical CI/security receipts, and source/measurement composition. They do not
+modify other owners' branches or grant human GitHub approvals.
 
 These are source/evidence reviews by separate AI agents, **not human GitHub
 approvals**. A review acceptance is conditional on the applicable exact-source CI
@@ -88,6 +94,15 @@ confirmed successful Compose3(37.7s) and overall Runtime/required-gate failure.
 [Independent raw-result review](evidence/phase3-browser-performance-independent-review.json)
 
 ## Evidence access and limits
+
+The new [browser recovery review](evidence/phase3-browser-recovery-review.json)
+rechecks the unchanged original ZIP/JSON and source bindings; the
+[CI recovery audit](evidence/phase3-validation-recovery-ci-audit.json) separates
+the failed PR77 run from accepted PR78. The
+[initial composition review](evidence/phase3-validation-recovery-composition.json)
+records DB source equality, migration order, raw measurement recalculation and
+the exact Runtime files/selectors to retain. These are additional dated reviews,
+not replacements for historical reviewer decisions or final exact-HEAD CI.
 
 [The evidence-name map](evidence/phase3-review-evidence-map.json) resolves preserved
 original reviewer filenames to durable repository paths with SHA-256. Historical

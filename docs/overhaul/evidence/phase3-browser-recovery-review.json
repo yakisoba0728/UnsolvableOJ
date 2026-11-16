@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/browser_evidence",
+  "reviewedAtUTC": "2026-11-16T08:32:04.840341+00:00",
+  "status": "PASS_FOR_BOUNDED_OBSERVATION_EVIDENCE",
+  "independence": "Automated independent reviewer /root/browser_evidence did not author the browser probe or historical evidence. This was a read-only source/data/arithmetic audit; no browser rerun, no additional application test cases and no whole-run CI acceptance are claimed.",
+  "measuredSourceHead": "e23729640b0ce18b6bb5ab82c578dc1eb35c7392",
+  "reviewedCheckpointHead": "0cc65a2702f5b1e44c2c678dd5b4f2340adcbda3",
+  "checkout": {
+    "sha": "9e4ce9df2aa4338a99a8deb7f32e161458a39a04",
+    "tree": "0e90a39685e1246c8f9a3ab1637fc0c89b4d85e7",
+    "workflowRunId": "43823181757",
+    "workflowAttempt": "1"
+  },
+  "artifacts": {
+    "rawPath": "docs/overhaul/measurements/phase3-browser-performance.json",
+    "zipPath": "docs/overhaul/measurements/phase3-browser-performance.zip",
+    "rawSha256": "94919ac0010e0339f349e679b61178ab91364f36e9ecc7c8537da5cf5bfbf681",
+    "zipSha256": "140148586cce0cd4ca2f129ff5e735bbd1b48559e457131ba5e68349a8f80bc7",
+    "rawBytes": 49465,
+    "zipBytes": 4523,
+    "archiveMemberBytesEqualRaw": true
+  },
+  "sourceBindings": [
+    {
+      "path": "Front/tests-live/learning-performance.ts",
+      "sha256": "a8e184761cc09cb1fa532834076e2034ac19a0a0526798da50ebe6607d4453c7",
+      "checkpointMatchesSource": true
+    },
+    {
+      "path": "Front/tests-live/judge-flow.spec.ts",
+      "sha256": "c6596d099851a16ef43b6c0bf62c28524b1846a57745ac22b975f823d9067cf6",
+      "checkpointMatchesSource": true
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "ecec2dee7042ec48b7ca6238ab1cd479c670cd4d0132de4c11b59f62a6724c15",
+      "checkpointMatchesSource": true
+    },
+    {
+      "path": "Front/playwright.live.config.ts",
+      "sha256": "d9806506e67e2d1df59ed49ea2a4bdda301d390ef8124caa6dcf3526cab95a4c",
+      "checkpointMatchesSource": true
+    },
+    {
+      "path": "Front/src/pages/LearningPage.tsx",
+      "sha256": "7c410b8a67ebfb2a2cf208ee0c5a43182aac83b645caee8cceee3916bdb65e0e",
+      "checkpointMatchesSource": true
+    }
+  ],
+  "checks": [
+    "Original ZIP has exactly one member, byte-identical to the versioned raw JSON; both SHA256 digests match provenance.",
+    "Four recorded source-file hashes match immutable measured source and checkpoint; LearningPage preserves keyed period ownership.",
+    "Measured source tree equals raw checkout tree. Historical Actions checkout identity is retained without relabeling.",
+    "Three navigation and fifteen period API projections are HTTP200 with five nonnegative integer fixture summary fields; no full response, source, token, title or user identifier is exported.",
+    "All fifteen period latency values equal frame timestamp minus click timestamp and fit inside their monotonically ordered visit window.",
+    "All six CLS snapshots recompute from eligible raw shifts; latest LCP candidates match raw LCP entries.",
+    "All snapshots are visible, observer streams untruncated, event durations respect recorded granularity, and no timing sample is missing.",
+    "The helper and workflow use matching Front/reports/phase3-browser-performance.json paths; success requires the artifact, failure allows missing setup output while retaining the failed test.",
+    "The period ownership key prevents a stale response from relabeling a new period; existing API/UI assertions and whole-flow assertions remain in place.",
+    "INP is explicitly null. LCP, heap and click timing are bounded observations with no field, leak-freedom, population-tail or speedup claim."
+  ],
+  "observations": {
+    "apiCount": 18,
+    "navigations": 3,
+    "periodChanges": 15,
+    "lcpCandidatesMs": [
+      384,
+      380,
+      388
+    ],
+    "clickToSecondFrameMs": {
+      "min": 42.699999999953434,
+      "median": 47.300000000046566,
+      "max": 52.59999999997672
+    },
+    "inp": null,
+    "observedCls": [
+      0.029426997502644856,
+      0.029426997502644856,
+      0.029426997502644856
+    ]
+  },
+  "documentationFollowup": [
+    {
+      "severity": "documentation-currentness",
+      "paths": [
+        "docs/overhaul/PHASE3-PROGRESS.md",
+        "docs/overhaul/PHASE3-VALIDATION.md"
+      ],
+      "detail": "Checkpoint statements that Runtime revalidation is still in progress are historical after PR78 merged. Preserve them as dated history and add an authoritative current-state section; do not overwrite original raw or provenance."
+    }
+  ],
+  "blockingSourceOrDataFindings": [],
+  "limits": [
+    "Original run43823181757 failed Runtime and aggregate gates despite successful Compose/browser execution.",
+    "No claim of current-head CI acceptance or permission to merge before PR76.",
+    "No production, large-history browser, all-site visual/accessibility, mobile, long-run or memory-leak validation."
+  ],
+  "reviewerKind": "automated-independent-reviewer"
+}

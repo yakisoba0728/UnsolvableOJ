@@ -5,6 +5,49 @@ preserve their implementation checkpoints. Later accepted PR receipts supersede
 their pending-CI paragraphs. The newest final PR63 receipt supplies the final
 integration commit and CI after this document itself is merged.
 
+## PR77 recovery — dependency state observed at 2026-11-16 08:31 UTC
+
+The observations below distinguish the original failed run from the accepted
+Runtime response and the refreshed database candidate. They do not certify a
+new PR77 source.
+
+| Scope | Source / actual checkout | Observed result |
+| --- | --- | --- |
+| Original PR77 | `e23729640b0ce18b6bb5ab82c578dc1eb35c7392` / `9e4ce9df2aa4338a99a8deb7f32e161458a39a04` | [43823181757](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43823181757): 10 successful jobs, Runtime and aggregate failed. Compose and the browser artifact succeeded. |
+| Accepted Runtime PR78 | `031275ebcc949514c9721c1d531a5edd90f2ec50` / `a63642e623982cf7d3a10527708c5217634bf10f` | [43828449988](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43828449988): all 12 successful; merged as `f52c7d0aecfb6ae98329d219110eac526bb0dbcb`. |
+| Refreshed database PR76 | `6143d7ccd982d42e035db01edee0f1353ad55a21` / `dcd1f30c6028020ddeb320fc1023088a62164386` | [43830226504](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43830226504): all 12 successful; still OPEN / UNMERGED at this observation. |
+
+Original PR77 logs show 327 Back units, 243 real PostgreSQL/API cases, 137 Judge
+units, 74 native assertions, 33 pipeline cases and 3 Compose flows (37.7s).
+Browser shard totals are 359+359 and 66+65 Firefox entries, including the
+85 browser-free units; they are not 849 unique browser stories. The Runtime
+failure did not prevent these jobs from running. The accepted PR78 security
+run belongs to its own source and does not substitute for PR77's final CI.
+
+Checkpoint `0cc65a2702f5b1e44c2c678dd5b4f2340adcbda3` is now included in PR77's
+recovery work. Its original raw browser bytes and reviews remain unchanged.
+The separate [browser recovery review](evidence/phase3-browser-recovery-review.json)
+and [CI history audit](evidence/phase3-validation-recovery-ci-audit.json) record
+what was rechecked. The original browser report is still bound to the original
+failed workflow, not relabelled as a fresh or accepted measurement.
+
+Local recovery checks on checkpoint `0cc65a2` passed all 63 existing CI/Compose
+policy tests and Front E2E TypeScript. Playwright discovery lists the original
+three live tests; it is not a browser run. An initial discovery invocation was
+correctly rejected because disposable-stack configuration was absent. A second,
+discovery-only invocation used an inert loopback URL and a disposable project
+name; no test body, database or browser was started. The
+[policy log](evidence/phase3-recovery-policy.log),
+[typecheck log](evidence/phase3-recovery-e2e-types.log),
+[initial discovery guard](evidence/phase3-recovery-discovery-guard.log) and
+[configured discovery](evidence/phase3-recovery-discovery.log) retain those results.
+
+**BLOCKED_ON_PR76:** final PR77 acceptance requires the actual PR76 merge SHA,
+current integration ancestry, preservation of both ordered migrations and PR78,
+an author-separated composition review, and all required jobs on the resulting
+exact HEAD. A pending or successful pre-dependency run does not satisfy this
+condition. Final PR63 verification remains the separate C owner's responsibility.
+
 ## Recovery and accepted feature gates
 
 Recovery confirmed Phase II's final run43809685401 on source45b6c9c6/tree141e2df9,
@@ -31,7 +74,7 @@ persistence, replacing only paid AI evaluation. Four other new native cases cove
 selected fixtures, structural hidden-diagnostic suppression and compile/runtime
 errors. This is distinct from a full browser-native Vibe E2E.
 
-## Current database candidate and final evidence work
+## Historical database candidate and first final-evidence execution
 
 PR76 source`e3aa50c4cdcadaa0dd965a29086c0148b79261a8`, tree
 `483d4e29db0274b07fc46decf62e4bc1f8a412b0`, includes integration87cc1e7.
@@ -67,17 +110,18 @@ does not make the overall candidate accepted. The final evidence PR must
 incorporate accepted security/DB integration and run fresh full CI before its own
 merge, followed by the final PR63 integration-head run.
 
-## Fresh Runtime advisory block
+## Historical Runtime advisory block — resolved separately in PR78
 
 Run43823181757 correctly rejected reuse of the prior exact applicability approval:
 `EXACT_CVE_COHORT_REVALIDATION_REQUIRED`. Its newer Trivy DB, updated07:10:39UTC
 (accepted prior DB01:11:02UTC), changed16 HIGH/CRITICAL advisory fingerprints.
 Raw HIGH177/CRITICAL5 and the990-file payload match remained the same. Initial
 comparison isolated References plus three AlmaLinux vendor-severity fields; these
-facts do not authorize bypassing the exact gate. A separate source-bound primary
-advisory revalidation is being authored and independently reviewed. Historical
+facts did not authorize bypassing the exact gate. A separate source-bound primary
+advisory revalidation was subsequently reviewed and accepted in PR78. Historical
 Phase II evidence, strict fingerprinting and the existing November30 expiry must
-be retained. Both pending merges are held until that work passes fresh full CI.
+be retained. Both pending merges were held until that work passed fresh full CI;
+the current dependency gate is recorded above.
 
 ## Regression and failure evidence
 

@@ -5,7 +5,36 @@ document. [Issue #72](https://github.com/yakisoba0728/UnsolvableOJ/issues/72) an
 [final PR #63](https://github.com/yakisoba0728/UnsolvableOJ/pull/63) retain later
 source/tree/run/merge receipts without requiring a self-referential source commit.
 
-## Verified recovery
+## PR77 recovery — dependency state observed at 2026-11-16 08:31 UTC
+
+The earlier 07:43 UTC checkpoint below is retained as history. Its Runtime hold
+was resolved by PR78; it is not the current dependency state.
+
+- PR78 is merged as `f52c7d0aecfb6ae98329d219110eac526bb0dbcb`, the observed
+  integration HEAD. Source `031275ebcc949514c9721c1d531a5edd90f2ec50` passed all
+  12 jobs in [run43828449988](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43828449988).
+- PR76 is OPEN / UNMERGED at source `6143d7ccd982d42e035db01edee0f1353ad55a21`.
+  Its refreshed [run43830226504](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43830226504)
+  completed all 12 jobs successfully. A successful run is not a merge receipt.
+- PR77 has recovered the complete browser checkpoint
+  `0cc65a2702f5b1e44c2c678dd5b4f2340adcbda3`, tree
+  `3a4d56447e51b72dd383ee70217a2a249431f1fd`, without replacing the original
+  JSON, ZIP, provenance or earlier independent reviews. A new author-separated
+  [recovery review](evidence/phase3-browser-recovery-review.json) verified the
+  retained bytes, source bindings, all 18 API projections and 15 time differences.
+- Current disposition: **BLOCKED_ON_PR76** for final integration and final CI
+  acceptance. Only PR77 is owned by this recovery task. Its final source must
+  incorporate the actual PR76 integration commit, preserve PR78's exact Runtime
+  evidence and selectors, receive a separate composition review, and pass fresh
+  full CI before merge. PR63 belongs to the separate final-integration reviewer.
+- Main remains `6176015b63a1615cc2269172f246725ef08abab3`; PR63 remains OPEN /
+  UNMERGED. Current GitHub state and later PR77/issue72 receipts supersede this
+  timestamped observation. No background continuation is implied by this record.
+
+Runtime raw HIGH177/CRITICAL5, all 182 exact component decisions and the
+2026-11-30 00:00 UTC expiry remain unchanged. Host/kernel isolation is unverified.
+
+## Historical implementation recovery
 
 Phase II was already complete: integration45b6c9c6f879b8966b8f0c14eecdd06fb5a588e4,
 tree141e2df98ff4739c1c574bd2a3165858c2a9ebc9, allPR64–71 merged and final
@@ -13,7 +42,7 @@ run43809685401 all12 green. Older pending document sections were superseded by
 later execution receipts. [PHASE3-BASELINE.md](PHASE3-BASELINE.md) records the
 independent recovery and the preserved pre-existing Dependabot PRs51/52/53.
 
-## Observed GitHub state at this checkpoint
+## Historical GitHub state at the 07:43 UTC checkpoint
 
 - Main: `6176015b63a1615cc2269172f246725ef08abab3`, unchanged.
 - Integration: `87cc1e724f3c5bba8ee4a1d3e138c16a18202f02` after PR75.
@@ -37,7 +66,7 @@ The exact source trees, Actions merge checkouts and actual counts are in
 [PHASE3-VALIDATION.md](PHASE3-VALIDATION.md). Earlier green runs on older bases
 were retained as history and never substituted for a refreshed source gate.
 
-## Current local verification and remaining gate
+## Historical local verification and remaining gate
 
 Combined DB/Vibe/executor tree483d4e29db0274b07fc46decf62e4bc1f8a412b0 passed
 lint/types/build,327 units,243 actual PostgreSQL/API cases in40files (95.73s),
