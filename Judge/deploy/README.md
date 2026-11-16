@@ -28,3 +28,13 @@ docker compose --env-file .env -p unsolvable-executor -f compose.yaml ps
 ```
 
 미설정 필수 값은 Compose가 거절합니다. 상태 확인은 API `/admin/ops`의 워커·실패 작업과 실행 노드 healthcheck를 함께 보세요. API 토큰이 맞지 않으면 워커가 종료 코드 1로 끝나 재시작을 반복하므로 `ps`에 드러납니다. 실제 문제로 8개 언어·실패 판정·예제 출력 차단을 검증하고, 장애 시 새 워커를 중지한 뒤 이전 검증 버전으로 되돌립니다. DB 볼륨 삭제나 `down -v`를 운영 복구 절차로 사용하지 마세요.
+
+## Phase II resource and network parity
+
+The dedicated worker now uses the same default CPU ceiling (`JUDGE_CPUS=1.0`),
+128-process ceiling, dropped capabilities and `no-new-privileges` as the main
+production template. Only the worker joins the outbound `application` network;
+the privileged execution service joins an internal-only `sandbox` network.
+These controls reduce outer-service exposure but do not turn a privileged
+container into a host/VM security boundary. Native enforcement and production
+network reachability still require verification on the intended dedicated host.

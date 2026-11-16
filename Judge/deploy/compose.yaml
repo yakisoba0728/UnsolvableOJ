@@ -16,6 +16,7 @@ services:
     memswap_limit: ${SANDBOX_MEMORY_LIMIT:-10g}
     cgroup: private
     cpus: ${SANDBOX_CPUS:-2.0}
+    networks: [sandbox]
     environment:
       ES_AUTH_TOKEN: ${GO_JUDGE_TOKEN:?Set a private GO_JUDGE_TOKEN}
     command:
@@ -32,6 +33,11 @@ services:
     # healthcheck가 멈춘 워커를 종료하려면 node가 PID 1이 아니어야 합니다.
     init: true
     mem_limit: ${JUDGE_MEMORY_LIMIT:-512m}
+    cpus: ${JUDGE_CPUS:-1.0}
+    pids_limit: 128
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [application, sandbox]
     restart: unless-stopped
     # 종료 시 진행 중인 채점을 마치도록 기다립니다(기본 10초면 채점 중 SIGKILL).
     stop_grace_period: 2m
@@ -50,3 +56,10 @@ services:
       go-judge:
         condition: service_healthy
     logging: *logging
+
+# Only the worker reaches the private API/Redis network. The outer execution
+# service has no default outbound network; submission isolation remains inside it.
+networks:
+  application: {}
+  sandbox:
+    internal: true
