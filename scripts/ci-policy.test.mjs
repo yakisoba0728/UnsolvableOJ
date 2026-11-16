@@ -8,6 +8,18 @@ import test from 'node:test';
 const workflow = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8');
 const required = workflow.slice(workflow.indexOf('\n  required:'));
 
+test('artifact with-inputs do not use status functions restricted to if expressions', () => {
+  // GitHub's context availability table permits status functions in steps.if,
+  // but not steps.with. A forbidden function prevents every job from starting.
+  const invalid = source => [...source.matchAll(/^\s+if-no-files-found:\s*(.+)$/gm)]
+    .filter(([, expression]) => /\b(?:always|cancelled|failure|success)\s*\(/.test(expression));
+  assert.equal(invalid(workflow).length, 0);
+  for (const name of ['always', 'cancelled', 'failure', 'success']) {
+    assert.equal(invalid("          if-no-files-found: ${{ " + name + "() && 'error' || 'warn' }}\n").length, 1);
+  }
+  assert.equal(invalid("          if-no-files-found: ${{ steps.example.outcome == 'success' && 'error' || 'warn' }}\n").length, 0);
+});
+
 function runBlock(section) {
   const block = section.match(/        run: \|\n((?:          .*\n|\n)+)/);
   assert.ok(block, 'Expected a workflow shell block');

@@ -338,13 +338,46 @@ jobs:
         if: ${{ matrix.shard == 1 }}
         run: npm run check --prefix Front
       - name: Browser regression tests
+        id: phase5_browser
         working-directory: Front
         env:
           # 컨테이너는 root로 돈다. HOME이 /github/home이면 일부 브라우저가 프로필을 만들지 못한다.
           HOME: /root
           PROJECTS: --project=unit --project=chromium --project=chromium-slow ${{ needs.changes.outputs.full == 'true' && '--project=webkit' || '' }}
-        run: npx --no-install playwright test $PROJECTS --workers=4 --shard=${{ matrix.shard }}/2
+        run: |
+          npx --no-install playwright test $PROJECTS --workers=4 --list --reporter=json > "$RUNNER_TEMP/phase5-browser-all.json"
+          npx --no-install playwright test $PROJECTS --workers=4 --shard=${{ matrix.shard }}/2 --list --reporter=json > "$RUNNER_TEMP/phase5-browser-shard.json"
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+          const collect = suite => [
+            ...(suite.specs ?? []).filter(spec => spec.file.endsWith('phase5-editor-observation.spec.ts')).flatMap(spec => spec.tests),
+            ...(suite.suites ?? []).flatMap(collect),
+          ];
+          const all = collect(JSON.parse(readFileSync(process.env.RUNNER_TEMP + '/phase5-browser-all.json', 'utf8')));
+          const selected = collect(JSON.parse(readFileSync(process.env.RUNNER_TEMP + '/phase5-browser-shard.json', 'utf8')));
+          assert.equal(all.length, 1, 'Exactly one editor observation must be selected across projects');
+          assert.equal(all[0].projectName, 'chromium');
+          assert.ok(selected.length === 0 || selected.length === 1);
+          mkdirSync('reports', { recursive: true });
+          writeFileSync('reports/phase5-browser-selection.json', JSON.stringify({ checkout: process.env.GITHUB_SHA, all: all.length, selected: selected.length }) + '\n');
+          NODE
+          npx --no-install playwright test $PROJECTS --workers=4 --shard=${{ matrix.shard }}/2
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+          const selection = JSON.parse(readFileSync('reports/phase5-browser-selection.json', 'utf8'));
+          if (selection.selected === 1) {
+            const report = JSON.parse(readFileSync('reports/phase5-editor-observation.json', 'utf8'));
+            assert.equal(report.status, 'PASS');
+            assert.equal(report.source.checkout, process.env.GITHUB_SHA);
+            assert.equal(report.actual.heapSamples, 13);
+            assert.equal(report.actual.actions, 20);
+            assert.equal(report.actual.autosaveWrites, 10);
+          }
+          NODE
       - name: Firefox core-flow regression tests
+        id: phase5_firefox
         if: ${{ needs.changes.outputs.full == 'true' }}
         working-directory: Front
         env:
@@ -357,9 +390,21 @@ jobs:
           npx --no-install playwright test \
             enterprise-results.spec.ts \
             auth.spec.ts editor-focus.spec.ts enterprise-ownership.spec.ts enterprise-pinned-summary.spec.ts enterprise-refresh.spec.ts enterprise-vibe-versioning.spec.ts layout.spec.ts \
-            learning-dashboard.spec.ts learning-goals.spec.ts navigation-accessibility.spec.ts live-qa-followups.spec.ts problem-bookmarks.spec.ts session-refresh.spec.ts ui-harmony.spec.ts \
+            learning-dashboard.spec.ts learning-goals.spec.ts navigation-accessibility.spec.ts live-qa-followups.spec.ts problem-bookmarks.spec.ts session-refresh.spec.ts ui-harmony.spec.ts phase5-ux.spec.ts \
             --project=firefox --workers=4 --shard=${{ matrix.shard }}/2 \
             --output=test-results/firefox
+      - name: Preserve Phase V responsive UX and editor observations
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-frontend-${{ matrix.shard }}-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            Front/reports/phase5-ux/
+            Front/reports/phase5-browser-selection.json
+            Front/reports/phase5-editor-observation.json
+          # One shard owns the editor observation; its selected-run check requires that report.
+          if-no-files-found: ${{ steps.phase5_browser.outcome == 'success' && (needs.changes.outputs.full != 'true' || steps.phase5_firefox.outcome == 'success') && 'error' || 'warn' }}
+          retention-days: 30
       - name: Failed browser test artifacts (disposable test data only)
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
