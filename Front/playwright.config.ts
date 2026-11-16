@@ -24,6 +24,7 @@ const slowSpecs = [
 const webkitSpecs = [
   "navigation-accessibility.spec.ts",
   "learning-dashboard.spec.ts",
+  "learning-goals.spec.ts",
   "enterprise-pinned-summary.spec.ts",
   "enterprise-vibe-versioning.spec.ts",
   "enterprise-refresh.spec.ts",

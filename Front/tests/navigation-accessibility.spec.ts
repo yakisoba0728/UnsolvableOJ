@@ -130,3 +130,19 @@ test("an account replacement on the same route closes the mobile menu and remove
   await toggle.click();
   await expect(nav.getByRole("link", { name: "관리", exact: true })).toHaveCount(0);
 });
+
+test("responsive focus recovery does not steal focus after the user has moved to a search field", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 760 });
+  await page.goto("/problems");
+  const toggle = page.getByRole("button", { name: "메뉴", exact: true });
+  const search = page.getByRole("searchbox", { name: "문제 검색" });
+  await toggle.focus();
+  await search.fill("두 수");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await expect(toggle).toBeHidden();
+  await expect(search).toBeFocused();
+  await page.setViewportSize({ width: 390, height: 760 });
+  await expect(toggle).toBeVisible();
+  await expect(search).toBeFocused();
+  await expect(search).toHaveValue("두 수");
+});

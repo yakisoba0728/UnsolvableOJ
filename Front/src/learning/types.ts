@@ -2,6 +2,22 @@ import type { Difficulty } from "../types";
 
 export type LearningDays = 7 | 30 | 90;
 
+export interface LearningGoalResponse {
+  timeZone: "Asia/Seoul";
+  generatedAt: string;
+  goal: null | {
+    targetProblems: number;
+    days: LearningDays;
+    startDate: string;
+    endDate: string;
+    startsAt: string;
+    endsAt: string;
+    solvedProblems: number;
+    status: "ACTIVE" | "COMPLETED" | "EXPIRED";
+    updatedAt: string;
+  };
+}
+
 export interface LearningActivity {
   date: string;
   submissions: number;

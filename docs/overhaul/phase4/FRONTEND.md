@@ -89,3 +89,21 @@ configuration, using Vite's rounded decimal kB output:
 The accessibility behavior adds a small payload cost. No browser speedup, LCP,
 INP, CLS, retained heap reduction or sustained editor-memory claim is made.
 No additional runtime dependency or whole-site rewrite is introduced.
+
+## Responsive focus follow-up
+
+PR80 run `43845660754`, job `133225404266` exposed a real Chromium focus
+failure: after the first mobile-to-desktop resize, the active route link remained
+unfocused. This is consistent with CSS hiding/blurring the toggle before the
+media-query callback reads `document.activeElement`; the log itself does not
+trace the browser event order. The source fix records navigation focus
+ownership before the CSS transition and retains it only when the previous
+element became hidden. An actual focus move or outside pointer action clears
+that ownership; an unrelated focused control is never replaced by the fallback.
+Listeners now register in a layout effect before the first painted interaction.
+The original resize assertions remain, with one extra search-input preservation
+case. Fresh exact-head browser CI is required for this correction; the earlier
+build-size numbers describe the initial implementation only.
+The independent source reviewer found no blocking issue in this correction.
+Local full-check and bounded-heap TypeScript attempts exited 137 before
+diagnostics under workspace memory pressure; they are not passing validation.

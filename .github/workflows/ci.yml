@@ -251,6 +251,7 @@ jobs:
         run: |
           node --test scripts/ci-policy.test.mjs scripts/check-executor-compose.test.mjs
           npm run check --prefix Back
+          node --test Back/scripts/check-vibe-tls.mjs
           npm run test:boj-import --prefix Back
           npm run test:operations --prefix Back
           node --test Back/scripts/benchmark-enterprise-results.test.mjs
@@ -343,7 +344,7 @@ jobs:
           npx --no-install playwright test \
             enterprise-results.spec.ts \
             auth.spec.ts editor-focus.spec.ts enterprise-ownership.spec.ts enterprise-pinned-summary.spec.ts enterprise-refresh.spec.ts enterprise-vibe-versioning.spec.ts layout.spec.ts \
-            learning-dashboard.spec.ts navigation-accessibility.spec.ts live-qa-followups.spec.ts problem-bookmarks.spec.ts session-refresh.spec.ts ui-harmony.spec.ts \
+            learning-dashboard.spec.ts learning-goals.spec.ts navigation-accessibility.spec.ts live-qa-followups.spec.ts problem-bookmarks.spec.ts session-refresh.spec.ts ui-harmony.spec.ts \
             --project=firefox --workers=4 --shard=${{ matrix.shard }}/2 \
             --output=test-results/firefox
       - name: Failed browser test artifacts (disposable test data only)
@@ -449,6 +450,7 @@ jobs:
           path: |
             Back/reports/phase2-*.json
             Back/reports/phase2-*.log
+            Back/reports/phase4-mixed-capacity.json
           # A pipeline setup failure can precede report creation. Its test failure
           # remains the gate; a missing artifact must not obscure that root cause.
           if-no-files-found: warn

@@ -64,21 +64,51 @@ export function SiteHeader({
     setMenuOpen(false);
   }, [sessionIdentity, role]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const collapsed = window.matchMedia("(max-width: 1100px)");
+    const belongsToMenu = (element: EventTarget | null): element is HTMLElement =>
+      element instanceof HTMLElement &&
+      (element === menuButtonRef.current || Boolean(navRef.current?.contains(element)));
+    // CSS can hide and blur the toggle/navigation before matchMedia delivers
+    // its change event. Retain that focus owner only across a hidden-element
+    // blur; an actual focus move or outside pointer action clears ownership.
+    let lastMenuFocus = belongsToMenu(document.activeElement) ? document.activeElement : null;
+    const rememberFocus = (event: FocusEvent) => {
+      if ((event.target === document.body || event.target === document.documentElement) &&
+          lastMenuFocus && !lastMenuFocus.getClientRects().length)
+        return;
+      lastMenuFocus = belongsToMenu(event.target) ? event.target : null;
+    };
+    const forgetVisibleBlur = (event: FocusEvent) => {
+      if (event.target === lastMenuFocus && lastMenuFocus?.getClientRects().length)
+        lastMenuFocus = null;
+    };
+    const forgetOutsidePointer = (event: PointerEvent) => {
+      if (!belongsToMenu(event.target)) lastMenuFocus = null;
+    };
     const resized = () => {
       const focused = document.activeElement;
       const nav = navRef.current;
+      const owner = belongsToMenu(focused) ? focused :
+        focused === document.body || focused === document.documentElement ? lastMenuFocus : null;
       setMenuOpen(false);
-      if (collapsed.matches && focused && nav?.contains(focused)) {
+      if (collapsed.matches && owner && nav?.contains(owner)) {
         menuButtonRef.current?.focus({ preventScroll: true });
-      } else if (!collapsed.matches && focused === menuButtonRef.current) {
+      } else if (!collapsed.matches && owner === menuButtonRef.current) {
         (nav?.querySelector<HTMLAnchorElement>('a[aria-current="page"]') ??
           nav?.querySelector<HTMLAnchorElement>("a"))?.focus({ preventScroll: true });
       }
     };
+    document.addEventListener("focusin", rememberFocus, true);
+    document.addEventListener("focusout", forgetVisibleBlur, true);
+    document.addEventListener("pointerdown", forgetOutsidePointer, true);
     collapsed.addEventListener("change", resized);
-    return () => collapsed.removeEventListener("change", resized);
+    return () => {
+      document.removeEventListener("focusin", rememberFocus, true);
+      document.removeEventListener("focusout", forgetVisibleBlur, true);
+      document.removeEventListener("pointerdown", forgetOutsidePointer, true);
+      collapsed.removeEventListener("change", resized);
+    };
   }, []);
 
   // 열려 있는 동안: Esc로 닫고(버튼으로 포커스 복귀), 바깥을 누르면 닫는다.
