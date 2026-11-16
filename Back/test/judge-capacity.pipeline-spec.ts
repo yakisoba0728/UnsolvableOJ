@@ -21,6 +21,15 @@ interface Measurement {
 interface OwnedWorker {
   child: ChildProcess; closed: Promise<void>; log: string; measurements: Measurement[];
 }
+interface MixedWave {
+  wave: number; submissions: number; activeBatchMs: number; admissionWaitMs: number;
+  jobsPerActiveSecond: number; queueWaitMs: ReturnType<typeof percentiles>;
+  apiSubmissionMs: ReturnType<typeof percentiles>; acknowledgedWorkerMs: ReturnType<typeof percentiles>;
+  workerCpuMs: number; workerPeakRssKiB: number[];
+  workerCpuSamples: { before: Awaited<ReturnType<typeof resources>>[]; after: Awaited<ReturnType<typeof resources>>[] };
+  failedJobs: number; recoveredJobs: number; recoveryCount: number; retryCount: number;
+  queueAttemptsMade: number[]; workerPids: number[]; measurements: Measurement[];
+}
 
 // Only owned worker links are interrupted; this does not restart Redis/API services.
 async function loopbackProxy(host: string, port: number) {
@@ -95,14 +104,14 @@ describe('bounded mixed-language capacity and worker link recovery', () => {
   // All synthetic users share the same loopback IP and the real 20/minute
   // endpoint budget. Reserve a complete scenario before starting its timer;
   // never clear counters, rotate IPs, or retry 429s inside a measured batch.
-  async function waitForSubmissionBudget(requiredRequests: number) {
+  async function waitForSubmissionBudget(requiredRequests: number, pauses = admissionPauses) {
     expect(requiredRequests).toBeLessThanOrEqual(20);
     if (remainingSubmissions >= requiredRequests) return;
     const started = performance.now();
     expect(submissionWindowEndsAt - started).toBeLessThanOrEqual(61_000);
     while (performance.now() < submissionWindowEndsAt)
       await delay(Math.min(1000, submissionWindowEndsAt - performance.now()));
-    admissionPauses.push({ requiredRequests, elapsedMs: performance.now() - started });
+    pauses.push({ requiredRequests, elapsedMs: performance.now() - started });
     remainingSubmissions = 20;
     submissionWindowEndsAt = 0;
   }
@@ -235,6 +244,162 @@ describe('bounded mixed-language capacity and worker link recovery', () => {
       await consistency(ids);
     } finally { await Promise.all(group.map((worker) => stopWorker(worker))); }
   });
+
+  it('keeps two workers alive across three admission-respecting eight-language waves', async () => {
+    const campaignStarted = performance.now();
+    const group: OwnedWorker[] = [];
+    const ids: string[] = [];
+    const waves: MixedWave[] = [];
+    const pauses: { requiredRequests: number; elapsedMs: number }[] = [];
+    const git = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+    const checkoutSha = git('rev-parse', 'HEAD');
+    const treeSha = git('rev-parse', 'HEAD^{tree}');
+    const event = process.env.GITHUB_EVENT_PATH
+      ? JSON.parse(await readFile(process.env.GITHUB_EVENT_PATH, 'utf8')) as { pull_request?: { head?: { sha?: string }; base?: { sha?: string } } }
+      : undefined;
+    const report: Record<string, unknown> = {
+      schemaVersion: 1, status: 'RUNNING', timestamp: new Date().toISOString(),
+      provenance: { checkoutSha, treeSha, sourceHeadSha: event?.pull_request?.head?.sha ?? checkoutSha,
+        baseSha: event?.pull_request?.base?.sha ?? null,
+        trackedTreeClean: git('status', '--porcelain', '--untracked-files=no') === '',
+        runId: process.env.GITHUB_RUN_ID ?? null, runAttempt: process.env.GITHUB_RUN_ATTEMPT ?? null,
+        workflow: process.env.GITHUB_WORKFLOW ?? null, job: process.env.GITHUB_JOB ?? null },
+      environment: { node: process.version, platform: platform(), kernel: release(), logicalCpus: cpus().length, cpu: cpus()[0]?.model, clockTicks },
+      limits: { workers: 2, concurrencyPerWorker: 1, waves: 3, submissionsPerWave: 8, totalSubmissions: 24,
+        testTimeoutMs: 240_000, admissionRequestsPerMinute: 20, faultInjection: false, restartsBetweenWaves: 0 },
+      scope: 'Finite repeated AC mix through real API, PostgreSQL, Redis/BullMQ and native go-judge; same two owned worker processes for all three waves.',
+      limitations: [
+        'Three eight-job waves are a finite regression campaign, not sustained saturation or a production capacity bound.',
+        'No campaign warmup submissions. Earlier tests may have warmed the shared executor; wave drift is descriptive, not causal.',
+        'Nearest-rank percentiles: per-wave p95/p99 are maxima; aggregate n=24 p99 is the maximum. No population-tail estimate.',
+        'Active throughput includes admission HTTP and completion observation, but excludes quota waits and consistency queries. Wall throughput includes startup, all waits, verification and worker shutdown.',
+        'Worker CPU and lifetime peak RSS cover the two owned Node PIDs only; API/DB/Redis and compiler/executor resources are not included.',
+        'All cases expect AC. This is not a full eight-language verdict/memory matrix or a before/after optimization comparison.',
+      ],
+      admissionPauses: pauses, waves,
+    };
+    let stage = 'start workers';
+    try {
+      expect(checkoutSha).toMatch(/^[a-f0-9]{40}$/);
+      expect(treeSha).toMatch(/^[a-f0-9]{40}$/);
+      expect(Object.keys(sources).sort()).toEqual(['C', 'CPP', 'GO', 'JAVA', 'JAVASCRIPT', 'PYTHON', 'RUST', 'TYPESCRIPT']);
+      for (let index = 0; index < 2; index++) group.push(await startWorker());
+      const pids = group.map(worker => worker.child.pid!);
+      expect(new Set(pids).size).toBe(2);
+      const campaignCpuBefore = await Promise.all(group.map(resources));
+      report.workerStartupMs = performance.now() - campaignStarted;
+      report.workerPids = pids;
+      for (let wave = 1; wave <= 3; wave++) {
+        stage = `wave ${wave}: admission budget`;
+        const waitStarted = performance.now();
+        await waitForSubmissionBudget(8, pauses);
+        const admissionWaitMs = performance.now() - waitStarted;
+        for (const worker of group) {
+          expect(worker.child.exitCode).toBeNull();
+          expect(worker.child.signalCode).toBeNull();
+        }
+        expect(group.map(worker => worker.child.pid)).toEqual(pids);
+        const before = await Promise.all(group.map(resources));
+        const activeStarted = performance.now();
+        stage = `wave ${wave}: submissions`;
+        const submitted = await Promise.all(Object.entries(sources).map(async ([language, source], index) => {
+          const job = await submit(language, source, solvers[index % solvers.length]);
+          ids.push(job.id);
+          return job;
+        }));
+        const waveIds = submitted.map(job => job.id);
+        stage = `wave ${wave}: verdicts and acknowledgements`;
+        await accepted(waveIds);
+        await expect.poll(() => group.flatMap(worker => worker.measurements).filter(metric => waveIds.includes(metric.submissionId)).length, { timeout: 5000 }).toBe(8);
+        const activeBatchMs = performance.now() - activeStarted;
+        const after = await Promise.all(group.map(resources));
+        const metrics = group.flatMap(worker => worker.measurements).filter(metric => waveIds.includes(metric.submissionId));
+        expect(new Set(metrics.map(metric => metric.submissionId)).size).toBe(8);
+        expect(metrics.map(metric => metric.language).sort()).toEqual(Object.keys(sources).sort());
+        for (const metric of metrics) {
+          expect(metric).toMatchObject({ status: 'ACCEPTED', generation: 1 });
+          for (const value of [metric.queueWaitMs, metric.totalMs, metric.processRssBytes])
+            expect(Number.isFinite(value) && value >= 0).toBe(true);
+        }
+        stage = `wave ${wave}: persisted and queue consistency`;
+        const outcomes = await db.query<{ status: string; generation: number; recoveries: number; acceptedForXp: boolean; learned: boolean; notifications: number; solves: number; awardedXp: number }[]>(
+          `SELECT s.status, s.judge_generation AS generation, s.recovery_count AS recoveries,
+            s.accepted_for_xp AS "acceptedForXp", s.completed_for_learning AS learned,
+            (SELECT count(*)::int FROM notifications n WHERE n.submission_id=s.id AND n.type='JUDGED') AS notifications,
+            (SELECT count(*)::int FROM user_problem_solves x WHERE x.user_id=s.user_id AND x.problem_id=s.problem_id) AS solves,
+            (SELECT sum(x.awarded_xp)::int FROM user_problem_solves x WHERE x.user_id=s.user_id AND x.problem_id=s.problem_id) AS "awardedXp"
+          FROM submissions s WHERE s.id=ANY($1::uuid[])`, [waveIds],
+        );
+        expect(outcomes).toHaveLength(8);
+        for (const outcome of outcomes) expect(outcome).toEqual({ status: 'ACCEPTED', generation: 1, recoveries: 0, acceptedForXp: true, learned: true, notifications: 1, solves: 1, awardedXp: 10 });
+        await expect.poll(async () => Promise.all(waveIds.map(async id => (await queue.getJob(`${id}-1`))?.getState())), { timeout: 5000 }).toEqual(waveIds.map(() => 'completed'));
+        const attempts = await Promise.all(waveIds.map(async id => (await queue.getJob(`${id}-1`))!.attemptsMade));
+        expect(attempts).toEqual(waveIds.map(() => 1));
+        await consistency(waveIds);
+        const cpuMs = after.reduce((total, sample, index) => total + (sample.cpuTicks - before[index].cpuTicks) * 1000 / clockTicks, 0);
+        expect(Number.isFinite(cpuMs) && cpuMs >= 0).toBe(true);
+        for (const sample of after) expect(Number.isFinite(sample.peakRssKiB) && sample.peakRssKiB > 0).toBe(true);
+        waves.push({ wave, submissions: 8, activeBatchMs, admissionWaitMs, jobsPerActiveSecond: 8000 / activeBatchMs,
+          queueWaitMs: percentiles(metrics.map(metric => metric.queueWaitMs)), apiSubmissionMs: percentiles(submitted.map(job => job.apiMs)),
+          acknowledgedWorkerMs: percentiles(metrics.map(metric => metric.totalMs)), workerCpuMs: cpuMs,
+          workerPeakRssKiB: after.map(sample => sample.peakRssKiB), workerCpuSamples: { before, after },
+          failedJobs: outcomes.filter(outcome => outcome.status !== 'ACCEPTED').length,
+          recoveredJobs: outcomes.filter(outcome => outcome.recoveries > 0).length,
+          recoveryCount: outcomes.reduce((total, outcome) => total + outcome.recoveries, 0),
+          retryCount: attempts.reduce((total, count) => total + Math.max(0, count - 1), 0), queueAttemptsMade: attempts,
+          workerPids: pids, measurements: metrics });
+      }
+      stage = 'aggregate campaign';
+      expect(ids).toHaveLength(24);
+      expect(new Set(ids).size).toBe(24);
+      expect(group.map(worker => worker.child.pid)).toEqual(pids);
+      const metrics = waves.flatMap(wave => wave.measurements);
+      expect(new Set(metrics.map(metric => metric.workerId)).size).toBe(2);
+      const campaignCpuAfter = await Promise.all(group.map(resources));
+      const activeMs = waves.reduce((total, wave) => total + wave.activeBatchMs, 0);
+      const failedJobs = waves.reduce((total, wave) => total + wave.failedJobs, 0);
+      const recoveredJobs = waves.reduce((total, wave) => total + wave.recoveredJobs, 0);
+      report.summary = {
+        submissions: ids.length, acknowledgedJobs: metrics.length, activeBatchMs: activeMs,
+        jobsPerActiveSecond: ids.length * 1000 / activeMs,
+        admissionWaitMs: waves.reduce((total, wave) => total + wave.admissionWaitMs, 0),
+        queueWaitMs: percentiles(metrics.map(metric => metric.queueWaitMs)),
+        acknowledgedWorkerMs: percentiles(metrics.map(metric => metric.totalMs)),
+        failedJobs, failureRate: failedJobs / ids.length,
+        recoveredJobs, recoveredJobRate: recoveredJobs / ids.length,
+        recoveryCount: waves.reduce((total, wave) => total + wave.recoveryCount, 0),
+        retryCount: waves.reduce((total, wave) => total + wave.retryCount, 0),
+        activeWorkerCpuMs: waves.reduce((total, wave) => total + wave.workerCpuMs, 0),
+        workerCpuIncludingWaitsMs: campaignCpuAfter.reduce((total, sample, index) => total + (sample.cpuTicks - campaignCpuBefore[index].cpuTicks) * 1000 / clockTicks, 0),
+        workerPeakRssKiB: campaignCpuAfter.map(sample => sample.peakRssKiB),
+        workerCpuSamples: { before: campaignCpuBefore, after: campaignCpuAfter },
+      };
+      report.waveDriftFromFirst = waves.map(wave => ({ wave: wave.wave,
+        throughputRatio: wave.jobsPerActiveSecond / waves[0].jobsPerActiveSecond,
+        queueP95DeltaMs: wave.queueWaitMs.p95! - waves[0].queueWaitMs.p95!,
+        workerCpuDeltaMs: wave.workerCpuMs - waves[0].workerCpuMs,
+        workerPeakRssDeltaKiB: wave.workerPeakRssKiB.map((rss, index) => rss - waves[0].workerPeakRssKiB[index]),
+      }));
+      report.status = 'PASSED';
+    } catch (error) {
+      report.status = 'FAILED';
+      report.failureStage = stage;
+      throw error;
+    } finally {
+      const shutdownStarted = performance.now();
+      await Promise.all(group.map(worker => stopWorker(worker)));
+      report.shutdownMs = performance.now() - shutdownStarted;
+      const totalWallMs = performance.now() - campaignStarted;
+      const acknowledged = group.flatMap(worker => worker.measurements).filter(metric => ids.includes(metric.submissionId));
+      report.totalWallMs = totalWallMs;
+      report.jobsPerWallSecond = new Set(acknowledged.filter(metric => metric.status === 'ACCEPTED').map(metric => metric.submissionId)).size * 1000 / totalWallMs;
+      report.admittedJobs = ids.length;
+      report.observedAcknowledgements = acknowledged.length;
+      report.finishedAt = new Date().toISOString();
+      await mkdir('reports', { recursive: true });
+      await writeFile('reports/phase4-mixed-capacity.json', JSON.stringify(report, null, 2) + '\n');
+    }
+  }, 240_000);
 
   it('reconnects the worker Redis link, retains queued work and applies duplicate deliveries once', async () => {
     await waitForSubmissionBudget(2);

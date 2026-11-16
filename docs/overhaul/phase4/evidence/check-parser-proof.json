@@ -1,0 +1,59 @@
+{
+  "kind": "actual-canonicalCheckDefinition-postgres-proof",
+  "checkedAt": "2026-11-16T10:16:54.464Z",
+  "source": "Back/scripts/phase4-restore-rehearsal.mjs",
+  "sourceSha256": "a349a7e61e28f102f94332ebbb0b6bd6af32240937d820f2939beb3bacade981",
+  "version": "PostgreSQL 17.11 on x86_64-pc-linux-gnu",
+  "cases": [
+    {
+      "name": "community_posts_category_check",
+      "rawDifferent": true,
+      "canonicalEqual": true,
+      "idempotent": true,
+      "residualProbeTables": 0
+    },
+    {
+      "name": "email_outbox_kind_check",
+      "rawDifferent": true,
+      "canonicalEqual": true,
+      "idempotent": true,
+      "residualProbeTables": 0
+    },
+    {
+      "name": "email_outbox_state_check",
+      "rawDifferent": true,
+      "canonicalEqual": true,
+      "idempotent": true,
+      "residualProbeTables": 0
+    },
+    {
+      "name": "email_tokens_purpose_check",
+      "rawDifferent": true,
+      "canonicalEqual": true,
+      "idempotent": true,
+      "residualProbeTables": 0
+    },
+    {
+      "name": "mission_states_mission_key_check",
+      "rawDifferent": true,
+      "canonicalEqual": true,
+      "idempotent": true,
+      "residualProbeTables": 0
+    },
+    {
+      "name": "notifications_type_check",
+      "rawDifferent": true,
+      "canonicalEqual": true,
+      "idempotent": true,
+      "residualProbeTables": 0
+    }
+  ],
+  "changedLiteralRejected": true,
+  "changedOperatorRejected": true,
+  "singleTransactionConnection": true,
+  "residualProbeTablesInsideTransaction": 0,
+  "residualProbeTablesAfterCommit": 0,
+  "residualProbeTablesAfterFailureRollback": 0,
+  "result": "PASS",
+  "scope": "Actual exported helper on an owned temporary local cluster; not a full pg_dump/restore CI result."
+}

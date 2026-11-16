@@ -1,4 +1,20 @@
 .learning-page { display: grid; gap: 20px; }
+.learning-goal-progress { display: grid; gap: 10px; margin: 20px 0; }
+.learning-goal-progress p, .learning-goal-notice { margin: 0; font-size: 13px; }
+.learning-goal-count { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.learning-goal-count strong { font-size: 24px; overflow-wrap: anywhere; }
+.learning-goal progress { width: 100%; height: 12px; accent-color: var(--color-primary); }
+.learning-goal-scope { line-height: 1.7; }
+.learning-goal-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.learning-goal-form { margin-top: 20px; }
+.learning-goal-fields { display: flex; gap: 14px; flex-wrap: wrap; }
+.learning-goal-fields label { display: grid; gap: 8px; flex: 1 1 130px; min-width: 0; font-size: 13px; font-weight: 600; }
+.learning-goal-fields input, .learning-goal-fields select { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-ink-900); }
+.learning-goal-fields input:focus-visible, .learning-goal-fields select:focus-visible { outline: var(--focus-outline); outline-offset: 3px; }
+.learning-goal-form > p { font-size: 12px; line-height: 1.7; }
+.learning-goal-error { color: var(--color-danger); margin: 16px 0; }
+.learning-goal-notice:not(:empty) { margin-top: 16px; }
+.learning-goal-empty { margin: 20px 0; }
 .learning-page .page-header { margin-bottom: 0; }
 .learning-toolbar, .learning-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .learning-toolbar p, .learning-heading p, .learning-scope { margin: 0; font-size: 13px; }

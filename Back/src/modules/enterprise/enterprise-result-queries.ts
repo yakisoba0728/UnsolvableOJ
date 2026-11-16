@@ -25,9 +25,10 @@ export const enterpriseResultPageSql = `
  * missing Vibe tasks score zero, started unevaluated tasks remain pending.
  * Only scalar report scores are read; workspace files/history never leave SQL.
  */
-export const enterpriseResultSummarySql = `
+const enterpriseResultScoresCte = `
   WITH attempts AS MATERIALIZED (
-    SELECT id FROM enterprise_attempts WHERE test_id=$1
+    SELECT id, user_id, started_at, deadline_at, finished_at
+    FROM enterprise_attempts WHERE test_id=$1
   ), solved AS (
     SELECT s.attempt_id, count(DISTINCT s.problem_id)::int AS count
     FROM submissions s JOIN attempts a ON a.id=s.attempt_id
@@ -42,13 +43,37 @@ export const enterpriseResultSummarySql = `
     FROM vibe_attempts v JOIN attempts a ON a.id=v.enterprise_attempt_id
     WHERE v.challenge_id=ANY($2::text[]) GROUP BY v.enterprise_attempt_id
   ), scores AS (
-    SELECT CASE WHEN coalesce(v.pending, false) THEN NULL ELSE
+    SELECT a.*, coalesce(s.count,0)::int AS solved,
+      CASE WHEN coalesce(v.pending, false) THEN NULL ELSE
       round((coalesce(s.count,0)*100 + coalesce(v.score,0)) / $3::numeric)::int END AS score
     FROM attempts a LEFT JOIN solved s ON s.attempt_id=a.id
       LEFT JOIN vibe v ON v.attempt_id=a.id
-  )
+  )`;
+
+/** Fixed-size aggregate projection: no candidate arrays or source/workspace data. */
+export const enterpriseResultSummarySql = `${enterpriseResultScoresCte}
   SELECT count(*)::int AS candidates,
     count(*) FILTER (WHERE score IS NULL)::int AS pending,
     round(avg(score))::int AS "averageScore",
-    count(*) FILTER (WHERE score=100)::int AS perfect
+    count(*) FILTER (WHERE score=100)::int AS perfect,
+    json_build_object(
+      'finished', count(*) FILTER (WHERE finished_at IS NOT NULL)::int,
+      'active', count(*) FILTER (WHERE finished_at IS NULL AND deadline_at > now())::int,
+      'expired', count(*) FILTER (WHERE finished_at IS NULL AND deadline_at <= now())::int,
+      'scoreBands', json_build_array(
+        count(*) FILTER (WHERE score BETWEEN 0 AND 19)::int,
+        count(*) FILTER (WHERE score BETWEEN 20 AND 39)::int,
+        count(*) FILTER (WHERE score BETWEEN 40 AND 59)::int,
+        count(*) FILTER (WHERE score BETWEEN 60 AND 79)::int,
+        count(*) FILTER (WHERE score BETWEEN 80 AND 100)::int
+      )
+    ) AS analytics
   FROM scores`;
+
+/** Caller verifies the row cap in the SAME repeatable-read transaction first. */
+export const enterpriseResultExportSql = `${enterpriseResultScoresCte}
+  SELECT u.username, s.started_at, s.deadline_at, s.finished_at, s.solved, s.score,
+    CASE WHEN s.finished_at IS NOT NULL THEN 'FINISHED'
+      WHEN s.deadline_at <= now() THEN 'EXPIRED' ELSE 'ACTIVE' END AS status
+  FROM scores s JOIN users u ON u.id=s.user_id
+  ORDER BY s.started_at, s.id LIMIT $4`;
