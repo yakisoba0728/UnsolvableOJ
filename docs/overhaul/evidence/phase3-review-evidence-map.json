@@ -1,0 +1,133 @@
+{
+  "purpose": "Resolve original reviewer filenames to byte-identical durable repository paths. DB paths arrive with PR76; historical review JSON is preserved unchanged.",
+  "entries": [
+    {
+      "originalReference": "/workspace/scratch/86de5f814139/oj-dbperf-review/Back/test/independent-problem-stats.e2e-spec.ts",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-security-vibe-db-independent-review.json"
+      ],
+      "repositoryPath": "Back/test/incremental-problem-stats-races.e2e-spec.ts",
+      "sha256": "9932607ab3a817199df46e55d27aae559c3a72d5539cc800197742475e35a542"
+    },
+    {
+      "originalReference": "db-0db4481-api.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-security-vibe-db-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-database-independent.log",
+      "sha256": "cec58e18a8df413e4af5c398c002164dce255f5b3ad51d4dfd2330ca3c10eaf6"
+    },
+    {
+      "originalReference": "db-0db4481-benchmark-audit.json",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-security-vibe-db-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-database-benchmark-review.json",
+      "sha256": "37285dc4e31e2d2c93cae82db1f697c9f90587f31d3bde0947851bd1f401c6c2"
+    },
+    {
+      "originalReference": "db-0db4481-build.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-security-vibe-db-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-db-0db4481-build.log",
+      "sha256": "b80b81ecb89523f89402c9f049875462d1651744fb08bf654d0ec4b205c85bfd"
+    },
+    {
+      "originalReference": "db-0db4481-reviewer-fixture-error.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-security-vibe-db-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-db-0db4481-reviewer-fixture-error.log",
+      "sha256": "8bcec4c3bce32946f00e5ee196c890b1832a0056bdd7b1087381d71bce530ae8"
+    },
+    {
+      "originalReference": "learning-02aee85-dom.json",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-ci-followup-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-learning-strict-after.json",
+      "sha256": "930953702cbdca81d4802c143202e40c6df6f1feeffad41a1ac03fe67fb7585a"
+    },
+    {
+      "originalReference": "oj-dbperf/docs/overhaul/measurements/phase3-problem-stats.json",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-security-vibe-db-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/measurements/phase3-problem-stats.json",
+      "sha256": "a099d704403e9b2a4f94abc6c97c99848185ef69ba61462df2987a1912cd4333"
+    },
+    {
+      "originalReference": "security-a0ad96f-prototype-before.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-security-vibe-db-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-security-secret-before.log",
+      "sha256": "c8cfe7c775d606963f6380c6b70f65de6f9d7aa9c3a2202b548ced15a1e58c2e"
+    },
+    {
+      "originalReference": "security-d35f297-policy.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-security-vibe-db-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-security-d35f297-policy.log",
+      "sha256": "122daae1b0abd97c701c9f1337fd983e2032187004655effc04ed22b0848a375"
+    },
+    {
+      "originalReference": "security-d35f297-prototype-after.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-security-vibe-db-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-security-secret-after.log",
+      "sha256": "e79fd79cd31a8fa09ad04b20f450a92c9cb4d1569fe9b48d58f5b704ee8f7671"
+    },
+    {
+      "originalReference": "security-d9cf765-policy.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-ci-followup-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-security-d9cf765-policy.log",
+      "sha256": "a589b403aa5d1a161e63a3dad8ac670f6f55f134b48aad1ac1935cbe6deb8989"
+    },
+    {
+      "originalReference": "security-e008263-merge-policy.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-integration-refresh-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-security-e008263-merge-policy.log",
+      "sha256": "d162d10c346e83d7c4313e9b9e1f1fffbe0d0f4c813ce18d1dafb72344fdc469"
+    },
+    {
+      "originalReference": "security-secret-prototype-probe.mjs",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-security-vibe-db-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/repro/phase3-secret-allowlist-probe.mjs",
+      "sha256": "0c2910d2df6386d9b83c24d07a78b2d7d040a232fc6b97d0ae925747052eb116"
+    },
+    {
+      "originalReference": "vibe-2b5610b-typecheck.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-security-vibe-db-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-vibe-2b5610b-typecheck.log",
+      "sha256": "d149f1bea4366cdafc44082f0f155c4f1ef6c90f022d8d2a49a2a00c36c7366f"
+    },
+    {
+      "originalReference": "vibe-508545d-merge-policy.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-integration-refresh-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-vibe-508545d-merge-policy.log",
+      "sha256": "d31155bea395fe6a2292c8fed5f200f526b2db3f39b16a897b2575ae53d432bc"
+    },
+    {
+      "originalReference": "vibe-53e015b-policy.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-ci-followup-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-vibe-53e015b-policy.log",
+      "sha256": "50bec74a9a01e0630e3be5256073f641d7917ac9e8271249485910f43ef1dcc1"
+    }
+  ]
+}

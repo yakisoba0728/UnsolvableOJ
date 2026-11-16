@@ -2,8 +2,9 @@ import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { promisify } from "node:util";
 import { expect, test } from "@playwright/test";
+import { measureLearningPerformance } from "./learning-performance";
 
-test("real signup, publication, bookmarks, judging, private learning, XP and logout through nginx", async ({ page }) => {
+test("real signup, publication, bookmarks, judging, private learning, XP and logout through nginx", async ({ page }, testInfo) => {
   const suffix = randomUUID().replaceAll("-", "").slice(0, 12);
   const email = `browser-${suffix}@example.com`;
   const password = `browser-${randomUUID()}`;
@@ -106,6 +107,7 @@ test("real signup, publication, bookmarks, judging, private learning, XP and log
   await expect(page.getByRole("definition").last()).toContainText("50%");
   await expect(page.getByText("이 기간에 다시 도전할 문제가 없어요.")).toBeVisible();
   await expect(page.locator(".learning-review-list")).toHaveCount(0);
+  await measureLearningPerformance(page, testInfo);
   await page.goto(`/problems?q=${slug}`);
   const row = page.getByRole("link").filter({ hasText: title });
   await expect(row).toContainText("1명");

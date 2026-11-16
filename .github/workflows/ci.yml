@@ -452,7 +452,17 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
       - name: Full Compose browser flow
+        id: compose_live
         run: node scripts/check-compose.mjs --production
+      - name: Preserve bounded browser performance observations
+        if: ${{ always() && (steps.compose_live.outcome == 'success' || steps.compose_live.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase3-browser-performance-${{ github.run_attempt }}
+          path: Front/reports/phase3-browser-performance.json
+          # A failed setup may precede the probe. Successful Compose must emit its evidence.
+          if-no-files-found: ${{ steps.compose_live.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 7
       - name: Failed Compose browser artifacts (disposable test data only)
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

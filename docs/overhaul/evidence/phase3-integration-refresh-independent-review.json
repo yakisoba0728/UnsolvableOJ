@@ -1,0 +1,59 @@
+{
+  "reviewer": "independent_recovery",
+  "authorSeparated": true,
+  "humanApprovalClaim": false,
+  "results": [
+    {
+      "scope": "security",
+      "reviewedHead": "e008263b5701fbdae1437d1f8b52a5edc1f44800",
+      "tree": "54394f9af541764214155e9b44d1122965933bac",
+      "parents": [
+        "d35f297a291f05de2a248148b1019d376d39109f",
+        "b6114fc4bd10bafa889097997aee70b7b284a38c"
+      ],
+      "approvedFeatureFiles": 18,
+      "incomingBaseFiles": 21,
+      "overlappingFiles": [
+        ".github/workflows/ci.yml"
+      ],
+      "featureFileSetUnchanged": true,
+      "uniqueFeatureBlobsUnchanged": true,
+      "incomingBaseBlobsPreserved": true,
+      "overlapResolution": "Only verified learning-dashboard browser-list addition; existing feature/browser gates preserved byte-for-byte otherwise.",
+      "independentPolicyExecution": {
+        "passed": 63,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "evidence": "security-e008263-merge-policy.log"
+      }
+    },
+    {
+      "scope": "vibe",
+      "reviewedHead": "508545d40e2a08b00673e2c63396169243187434",
+      "tree": "bad7cf2336617126d9a05b5a69cd8a10dfc7c216",
+      "parents": [
+        "2b5610b1e552699a13a0d495ba2a4d23258853a4",
+        "b6114fc4bd10bafa889097997aee70b7b284a38c"
+      ],
+      "approvedFeatureFiles": 44,
+      "incomingBaseFiles": 21,
+      "overlappingFiles": [
+        ".github/workflows/ci.yml",
+        "Front/playwright.config.ts"
+      ],
+      "featureFileSetUnchanged": true,
+      "uniqueFeatureBlobsUnchanged": true,
+      "incomingBaseBlobsPreserved": true,
+      "overlapResolution": "Only verified learning-dashboard browser-list addition; existing feature/browser gates preserved byte-for-byte otherwise.",
+      "independentPolicyExecution": {
+        "passed": 17,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "evidence": "vibe-508545d-merge-policy.log"
+      }
+    }
+  ],
+  "remainingGate": "Fresh exact-head full remote CI; these checks establish source preservation and local policy behavior only."
+}
