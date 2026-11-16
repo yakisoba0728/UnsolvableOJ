@@ -128,6 +128,30 @@
       ],
       "repositoryPath": "docs/overhaul/evidence/phase3-vibe-53e015b-policy.log",
       "sha256": "50bec74a9a01e0630e3be5256073f641d7917ac9e8271249485910f43ef1dcc1"
+    },
+    {
+      "originalReference": "validation-20e5a99-policy.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-validation-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-validation-policy.log",
+      "sha256": "7dd581849d0ac38f6494ef934c157334ac6133c9370b98e5666e6cb3b145ff86"
+    },
+    {
+      "originalReference": "validation-5f7cd7f-e2e-types.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-validation-independent-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-validation-e2e-types.log",
+      "sha256": "6168005adb0e4333fc9fe474f7a04e58af817547090bbd6147ca72516dc69fcb"
+    },
+    {
+      "originalReference": "vibe-102d1c2-composition-policy.log",
+      "usedBy": [
+        "docs/overhaul/evidence/phase3-vibe-security-composition-review.json"
+      ],
+      "repositoryPath": "docs/overhaul/evidence/phase3-vibe-security-composition-policy.log",
+      "sha256": "fa44b24418672ab18d22fab7c81ed502e219f4a7dd83ca12c8d99556c0b0adac"
     }
   ]
 }

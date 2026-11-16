@@ -194,9 +194,13 @@ services:
   judge:
     build:
       context: ../Judge
+    user: "1000:1000"
     init: true
     restart: unless-stopped
     <<: *hardening
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,uid=1000,gid=1000,mode=0700
     mem_limit: ${JUDGE_MEMORY_LIMIT:-512m}
     cpus: ${JUDGE_CPUS:-1.0}
     pids_limit: 128

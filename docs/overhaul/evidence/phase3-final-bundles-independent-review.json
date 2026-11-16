@@ -1,0 +1,65 @@
+{
+  "reviewer": "coordinator/root",
+  "authorSeparated": true,
+  "humanApprovalClaim": false,
+  "rawArtifactSha256": "8e38205dcf2b855abd064c764e4a21bd56cf23e14ced0817885a67c2786da98c",
+  "sourceInputFilesVerifiedAgainstImmutableGit": 374,
+  "gitTreesVerified": true,
+  "outputInventoryHashesVerified": true,
+  "dependencyInventoryHashVerified": true,
+  "builds": [
+    {
+      "source": "baseline",
+      "condition": "default",
+      "initialRaw": 381551,
+      "initialGzip": 122690,
+      "totalJavaScript": {
+        "count": 53,
+        "bytes": 1470378,
+        "gzip": 485346,
+        "brotli": 412793
+      },
+      "logHashVerified": true
+    },
+    {
+      "source": "final",
+      "condition": "default",
+      "initialRaw": 381916,
+      "initialGzip": 122789,
+      "totalJavaScript": {
+        "count": 54,
+        "bytes": 1481734,
+        "gzip": 488919,
+        "brotli": 415653
+      },
+      "logHashVerified": true
+    },
+    {
+      "source": "baseline",
+      "condition": "monitoring-enabled",
+      "initialRaw": 381582,
+      "initialGzip": 122710,
+      "totalJavaScript": {
+        "count": 53,
+        "bytes": 1470409,
+        "gzip": 485378,
+        "brotli": 412890
+      },
+      "logHashVerified": true
+    },
+    {
+      "source": "final",
+      "condition": "monitoring-enabled",
+      "initialRaw": 381947,
+      "initialGzip": 122807,
+      "totalJavaScript": {
+        "count": 54,
+        "bytes": 1481765,
+        "gzip": 488965,
+        "brotli": 415706
+      },
+      "logHashVerified": true
+    }
+  ],
+  "scope": "Read reproduction script and definitions; independently checked original Git input hashes, arithmetic, inventory and retained log hashes. No second build, browser or transfer measurement is claimed."
+}
