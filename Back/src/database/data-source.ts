@@ -1,6 +1,7 @@
 import { EnterpriseProblemVersions1795800000000 } from './migrations/1795800000000-enterprise-problem-versions.js';
 import { CommunityProfileIndexes1795700000000 } from './migrations/1795700000000-community-profile-indexes.js';
 import { ProblemBookmarks1795900000000 } from './migrations/1795900000000-problem-bookmarks.js';
+import { IncrementalProblemStats1796100000000 } from './migrations/1796100000000-incremental-problem-stats.js';
 import { CommunityEmail1795600001000 } from './migrations/1795600001000-community-email.js';
 import { AccountWithdrawal1795600000000 } from './migrations/1795600000000-account-withdrawal.js';
 import 'dotenv/config';
@@ -75,6 +76,7 @@ export default new DataSource({
     CommunityProfileIndexes1795700000000,
     EnterpriseProblemVersions1795800000000,
     ProblemBookmarks1795900000000,
+    IncrementalProblemStats1796100000000,
   ],
   synchronize: false,
 });
