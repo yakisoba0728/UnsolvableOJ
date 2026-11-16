@@ -5,7 +5,33 @@ document. [Issue #72](https://github.com/yakisoba0728/UnsolvableOJ/issues/72) an
 [final PR #63](https://github.com/yakisoba0728/UnsolvableOJ/pull/63) retain later
 source/tree/run/merge receipts without requiring a self-referential source commit.
 
-## PR77 recovery — dependency state observed at 2026-11-16 08:31 UTC
+## Accepted-base composition — 2026-11-16 08:35 UTC
+
+PR76 is now actually merged: GitHub reports `merged=true`, merge
+`d6f8bb9c963800093fb24f293652bab2ca42883f`, at `2026-11-16T08:34:50Z`.
+The integration ref points to that merge, which contains the CI-verified
+`6143d7ccd982d42e035db01edee0f1353ad55a21` source. Its complete tree is
+`3397e0574f888c4f4c4221cbc7e057d70513171d`. This supersedes the earlier
+`BLOCKED_ON_PR76` observation below.
+
+PR77 incorporated that exact integration commit without conflicts in local merge
+`870659515f312406a190c32700e6e22e9ed99c0e`, tree
+`363246089112d44080e26ad93ae3bb9a75ff1612`. Back, Judge, Front/src and scripts
+match the accepted integration bytes. The workflow retains both PR78's Runtime
+evidence selectors and PR77's mandatory browser artifact. Both migrations remain
+registered once in order `1796000000000` then `1796100000000`.
+
+The browser checkpoint is preserved as an ancestor with unchanged raw bytes and
+historical review receipts. The DB report also retains the independently checked
+50,000-row RSS correction to 35,252–57,324 KiB. The final composition review and
+local merge checks are recorded in [validation](PHASE3-VALIDATION.md).
+
+This is the pre-acceptance source record: fresh full CI on the published PR77
+HEAD and final author-separated composition review are still required. The
+latest PR77 and issue72 receipts record those subsequent results and any actual
+merge. C can begin final PR63 acceptance only after PR77's verified integration.
+
+## Historical recovery — dependency state observed at 2026-11-16 08:31 UTC
 
 The earlier 07:43 UTC checkpoint below is retained as history. Its Runtime hold
 was resolved by PR78; it is not the current dependency state.
@@ -22,7 +48,7 @@ was resolved by PR78; it is not the current dependency state.
   JSON, ZIP, provenance or earlier independent reviews. A new author-separated
   [recovery review](evidence/phase3-browser-recovery-review.json) verified the
   retained bytes, source bindings, all 18 API projections and 15 time differences.
-- Current disposition: **BLOCKED_ON_PR76** for final integration and final CI
+- Disposition at 08:31 UTC: **BLOCKED_ON_PR76** for final integration and final CI
   acceptance. Only PR77 is owned by this recovery task. Its final source must
   incorporate the actual PR76 integration commit, preserve PR78's exact Runtime
   evidence and selectors, receive a separate composition review, and pass fresh

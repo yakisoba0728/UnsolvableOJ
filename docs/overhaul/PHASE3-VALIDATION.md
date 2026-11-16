@@ -5,7 +5,34 @@ preserve their implementation checkpoints. Later accepted PR receipts supersede
 their pending-CI paragraphs. The newest final PR63 receipt supplies the final
 integration commit and CI after this document itself is merged.
 
-## PR77 recovery — dependency state observed at 2026-11-16 08:31 UTC
+## Accepted-base source composition — 2026-11-16 08:35 UTC
+
+GitHub confirmed PR76 merged at `2026-11-16T08:34:50Z` as
+`d6f8bb9c963800093fb24f293652bab2ca42883f`. Its current integration tree
+`3397e0574f888c4f4c4221cbc7e057d70513171d` matches the source tested by all 12
+successful jobs in run43830226504. PR77's merge
+`870659515f312406a190c32700e6e22e9ed99c0e` includes that integration as a parent;
+its tree is `363246089112d44080e26ad93ae3bb9a75ff1612`.
+
+The separate [accepted-base composition review](evidence/phase3-validation-accepted-base-composition.json)
+checks product/DB equality, ordered migrations, unchanged raw browser evidence,
+and all Runtime bindings/selectors. The earlier
+[preparation review](evidence/phase3-validation-recovery-preparation.json)
+binds recovered documentation/evidence to commit `d76ce50fe50d8d143a4bea94355dbddcd37f8352`.
+Neither review is a substitute for final current-HEAD CI. The final PR77/issue72
+receipt supplies the published source, tree, actual Actions checkout, run, full
+job results and integration merge if all gates are satisfied.
+
+After composing the accepted base, all 63 existing CI/executor policy tests and
+all 92 image audit/gate/payload/applicability unit tests passed with zero skips.
+These checks exercise the restored selectors and exact-evidence rules; they are
+not fresh image scans or a native/browser execution. The
+[policy output](evidence/phase3-validation-composed-policy.log) and
+[image-policy output](evidence/phase3-validation-composed-image-tests.log) are
+retained. Actual four-image, API/native/pipeline/Compose and browser execution
+must come from the final full Actions run.
+
+## Historical recovery — dependency state observed at 2026-11-16 08:31 UTC
 
 The observations below distinguish the original failed run from the accepted
 Runtime response and the refreshed database candidate. They do not certify a
@@ -42,7 +69,7 @@ name; no test body, database or browser was started. The
 [initial discovery guard](evidence/phase3-recovery-discovery-guard.log) and
 [configured discovery](evidence/phase3-recovery-discovery.log) retain those results.
 
-**BLOCKED_ON_PR76:** final PR77 acceptance requires the actual PR76 merge SHA,
+**BLOCKED_ON_PR76 at 08:31 UTC (resolved above):** final PR77 acceptance requires the actual PR76 merge SHA,
 current integration ancestry, preservation of both ordered migrations and PR78,
 an author-separated composition review, and all required jobs on the resulting
 exact HEAD. A pending or successful pre-dependency run does not satisfy this
