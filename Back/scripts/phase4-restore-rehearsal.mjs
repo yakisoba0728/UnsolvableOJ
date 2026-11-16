@@ -37,16 +37,56 @@ async function fingerprints(db) {
   return result;
 }
 
+const quotedIdentifier = value => `"${value.replaceAll('"', '""')}"`;
+
+/** Reparse with PostgreSQL itself: varchar-array coercions change on dump/restore. */
+export async function canonicalCheckDefinition(manager, table, definition) {
+  const temporary = `oj4_check_${randomUUID().replaceAll('-', '')}`;
+  const identifier = quotedIdentifier(temporary);
+  await manager.query(`CREATE TEMP TABLE ${identifier} (LIKE public.${quotedIdentifier(table)}) ON COMMIT DROP`);
+  const read = async () => {
+    const [row] = await manager.query(`SELECT pg_get_constraintdef(oid) AS definition
+      FROM pg_constraint WHERE conrelid=$1::regclass AND conname='oj4_probe'`, [`pg_temp.${identifier}`]);
+    assert.ok(row?.definition, 'The parser probe must have its CHECK constraint');
+    return row.definition;
+  };
+  // Both definitions are trusted catalog output from this invocation's generated database.
+  await manager.query(`ALTER TABLE pg_temp.${identifier} ADD CONSTRAINT oj4_probe ${definition}`);
+  const canonical = await read();
+  await manager.query(`ALTER TABLE pg_temp.${identifier} DROP CONSTRAINT oj4_probe`);
+  await manager.query(`ALTER TABLE pg_temp.${identifier} ADD CONSTRAINT oj4_probe ${canonical}`);
+  assert.equal(await read(), canonical, 'CHECK deparse must reach a stable parser representation');
+  await manager.query(`DROP TABLE pg_temp.${identifier}`);
+  return canonical;
+}
+
 async function schema(db) {
-  return {
+  const result = {
+    columns: await db.query(`SELECT c.relname,a.attnum,a.attname,format_type(a.atttypid,a.atttypmod) AS type,
+      a.attnotnull,a.attidentity,a.attgenerated,cn.nspname AS collation_schema,co.collname AS collation,
+      pg_get_expr(d.adbin,d.adrelid) AS default_expression
+      FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace
+      LEFT JOIN pg_collation co ON co.oid=a.attcollation LEFT JOIN pg_namespace cn ON cn.oid=co.collnamespace
+      LEFT JOIN pg_attrdef d ON d.adrelid=a.attrelid AND d.adnum=a.attnum
+      WHERE n.nspname='public' AND c.relkind IN ('r','p') AND a.attnum>0 AND NOT a.attisdropped
+      ORDER BY c.relname,a.attnum`),
     indexes: await db.query("SELECT tablename,indexname,indexdef FROM pg_indexes WHERE schemaname='public' ORDER BY tablename,indexname"),
     triggers: await db.query(`SELECT c.relname, t.tgname, pg_get_triggerdef(t.oid) AS definition
       FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace
       WHERE n.nspname='public' AND NOT t.tgisinternal ORDER BY c.relname,t.tgname`),
-    constraints: await db.query(`SELECT c.relname, k.conname, pg_get_constraintdef(k.oid) AS definition
+    constraints: await db.query(`SELECT c.relname,k.conname,k.contype,k.convalidated,k.condeferrable,k.condeferred,k.connoinherit,
+      pg_get_constraintdef(k.oid) AS definition
       FROM pg_constraint k JOIN pg_class c ON c.oid=k.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace
       WHERE n.nspname='public' ORDER BY c.relname,k.conname`),
   };
+  await db.transaction(async manager => {
+    for (const constraint of result.constraints) {
+      if (constraint.contype === 'c') {
+        constraint.definition = await canonicalCheckDefinition(manager, constraint.relname, constraint.definition);
+      }
+    }
+  });
+  return result;
 }
 
 async function semantics(db) {
@@ -142,14 +182,14 @@ export async function rehearse(env = process.env) {
     });
     await timed('restored schema equality', async () => {
       const actual = await schema(restored);
-      for (const kind of ['indexes', 'triggers', 'constraints']) {
+      for (const kind of ['columns', 'indexes', 'triggers', 'constraints']) {
         if (JSON.stringify(actual[kind]) !== JSON.stringify(sourceSchema[kind]))
           console.error(JSON.stringify({ kind: `safe ${kind} mismatch`,
             expectedCount: sourceSchema[kind].length, actualCount: actual[kind].length,
             expectedHash: createHash('sha256').update(JSON.stringify(sourceSchema[kind])).digest('hex'),
             actualHash: createHash('sha256').update(JSON.stringify(actual[kind])).digest('hex'),
             changedNames: sourceSchema[kind].filter((item, index) => JSON.stringify(item) !== JSON.stringify(actual[kind][index]))
-              .map(item => item.indexname ?? item.tgname ?? item.conname),
+              .map(item => item.indexname ?? item.tgname ?? item.conname ?? `${item.relname}.${item.attname}`),
           }));
       }
       assert.deepEqual(actual, sourceSchema);
@@ -183,7 +223,8 @@ export async function rehearse(env = process.env) {
       workflowRunId: env.GITHUB_RUN_ID ?? null, result: 'PASS', migrations: migrations.length,
       fixture: { users: 128, problems: 24, submissions: 2048, largeSourceBytes: 16384, workMem: '64kB' },
       archive: { bytes: archive.length, sha256: createHash('sha256').update(archive).digest('hex') },
-      tables: before, stages, elapsedMs: performance.now() - started,
+      tables: before, schemaComparison: 'Exact columns/indexes/triggers/non-CHECK definitions and flags; stable PostgreSQL-parser-normalized CHECK definitions',
+      stages, elapsedMs: performance.now() - started,
       limits: ['One finite synthetic fixture, not production RTO/RPO or capacity.',
         'No production connection or existing database is modified.',
         'work_mem pressure does not establish measured spill volume or peak PostgreSQL RSS.',

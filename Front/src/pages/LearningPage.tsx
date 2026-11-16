@@ -7,6 +7,7 @@ import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import { difficultyLabel } from "../difficulty";
 import { useDocumentTitle, useRequest } from "../hooks";
 import type { LearningActivity, LearningDashboard, LearningDays } from "../learning/types";
+import { LearningGoalPanel } from "../learning/LearningGoalPanel";
 import { problemPath } from "../paths";
 import { verdictLabel } from "../verdict";
 import "../learning/learning.css";
@@ -38,6 +39,7 @@ export function LearningPage() {
           <Link className="button button-small button-outline" to="/profile">내 학습 기록</Link>
         </div>}
       />
+      <LearningGoalPanel />
       <div className="learning-toolbar">
         <div className="learning-periods" role="group" aria-label="학습 기간">
           {periods.map(period => <button type="button" key={period} aria-pressed={days === period}

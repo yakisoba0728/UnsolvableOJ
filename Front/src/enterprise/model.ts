@@ -99,6 +99,9 @@ export interface EnterpriseVibeTask {
 
 export interface TestResults {
   test: EnterpriseTest;
+  /** Global bounded aggregates, independent of the currently displayed page. */
+  analytics?: { finished: number; active: number; expired: number; scoreBands: number[] };
+  exportLimit?: number;
   /** Bounded candidate details; summary always describes the entire assessment. */
   pagination: { page: number; limit: number; total: number; totalPages: number };
   summary: {

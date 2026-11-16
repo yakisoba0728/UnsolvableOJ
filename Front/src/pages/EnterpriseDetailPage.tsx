@@ -25,6 +25,8 @@ import { problemPath } from "../paths";
 import { difficultyLabel } from "../difficulty";
 import { invalidResourceIdMessage } from "../resourceErrors";
 import { useRequestOwner } from "../community/useRequestOwner";
+import { downloadResultCsv, fetchResultCsv } from "../enterprise/result-export";
+import "../enterprise/results.css";
 
 function Missing({ children }: { children: React.ReactNode }) {
   return (
@@ -47,6 +49,13 @@ export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVe
   const deletingRef = useRef(false);
   const begin = useRequestOwner(getNavigationVersion, true);
   const resultsKey = `${id}:${getSessionIdentityVersion()}`;
+  const [exportState, setExportState] = useState({ key: resultsKey, busy: false, error: "", done: false });
+  const exportRequest = useRef<AbortController | null>(null);
+  const currentExport = exportState.key === resultsKey ? exportState : { busy: false, error: "", done: false };
+  useEffect(() => () => {
+    exportRequest.current?.abort();
+    exportRequest.current = null;
+  }, [resultsKey]);
   const [pageSelection, setPageSelection] = useState({ key: resultsKey, page: 1 });
   const resultsPage = pageSelection.key === resultsKey ? pageSelection.page : 1;
   const resultsHeading = useRef<HTMLHeadingElement>(null);
@@ -179,6 +188,29 @@ export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVe
   const summary = resultData?.summary;
   // 테스트 정보는 처음 연 때의 값이라, 자동 갱신되는 결과의 응시자 수를 우선한다.
   const attemptCount = summary?.candidates ?? test.attemptCount;
+  const analytics = resultData?.analytics;
+  const scoredCount = summary ? summary.candidates - (summary.pending ?? 0) : 0;
+  const exportLimit = resultData?.exportLimit ?? 5_000;
+
+  async function exportResults() {
+    if (exportRequest.current || !session || !test) return;
+    const controller = new AbortController();
+    exportRequest.current = controller;
+    const current = begin();
+    setExportState({ key: resultsKey, busy: true, error: "", done: false });
+    try {
+      const csv = await fetchResultCsv(session.accessToken, test.id, controller.signal);
+      if (!current() || controller.signal.aborted) return;
+      downloadResultCsv(csv);
+      setExportState({ key: resultsKey, busy: false, error: "", done: true });
+    } catch (cause) {
+      if (current() && !controller.signal.aborted)
+        setExportState({ key: resultsKey, busy: false, done: false,
+          error: cause instanceof Error ? cause.message : "결과를 내려받지 못했어요. 다시 시도해 주세요." });
+    } finally {
+      if (exportRequest.current === controller) exportRequest.current = null;
+    }
+  }
 
   return (
     <div className="page-width enterprise-page">
@@ -320,6 +352,24 @@ export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVe
                 <dd>{summary ? `${summary.perfect}명` : "—"}</dd>
               </div>
             </dl>
+            {analytics ? (
+              <div className="ent-analytics">
+                <h3>전체 결과 분석</h3>
+                <p className="muted ent-note">
+                  제출 종료 {analytics.finished}명 · 시간 만료 {analytics.expired}명 · 응시 중 {analytics.active}명
+                </p>
+                <dl className="ent-score-bands" aria-label="전체 응시자 점수 분포">
+                  {analytics.scoreBands.map((count, index) => (
+                    <div key={index}>
+                      <dt>{index * 20}–{index === 4 ? 100 : index * 20 + 19}점</dt>
+                      <dd className="ent-score-bar" aria-hidden="true"><span style={{ width: `${scoredCount ? count / scoredCount * 100 : 0}%` }} /></dd>
+                      <dd className="ent-score-count">{count}명</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="muted ent-note">점수가 나온 {scoredCount}명 기준 · 평가 대기 {summary?.pending ?? 0}명 별도. 응시 중 점수는 바뀔 수 있어요.</p>
+              </div>
+            ) : null}
           </section>
           <section
             className="form-card ent-card"
@@ -371,15 +421,32 @@ export function EnterpriseDetailPage({ getNavigationVersion }: { getNavigationVe
         <div className="ent-pick-head">
           <h2 id="ent-results-title" ref={resultsHeading} tabIndex={-1}>응시 결과</h2>
           {resultData ? (
-            <button
-              className="button button-outline button-small"
-              onClick={results.retry}
-              disabled={results.loading}
-            >
-              새로고침
-            </button>
+            <div className="ent-report-actions">
+              <button type="button" className="button button-outline button-small"
+                disabled={currentExport.busy || attemptCount > exportLimit}
+                aria-describedby="ent-export-note"
+                onClick={() => void exportResults()}>
+                {currentExport.busy ? "CSV 준비 중…" : "전체 결과 CSV"}
+              </button>
+              <button
+                className="button button-outline button-small"
+                onClick={results.retry}
+                disabled={results.loading}
+              >
+                새로고침
+              </button>
+            </div>
           ) : null}
         </div>
+        {resultData ? (
+          <p className="muted ent-note" id="ent-export-note">
+            CSV는 현재 페이지와 관계없이 전체 응시 결과를 내려받습니다. 최대 {exportLimit.toLocaleString()}명 · 사용자 이름·응시 시각·상태·점수 포함.
+            {attemptCount > exportLimit ? " 한도를 초과해 내보낼 수 없어요. 일부만 잘라서 내보내지 않습니다." : ""}
+          </p>
+        ) : null}
+        {currentExport.busy ? <p role="status" className="muted ent-note">전체 결과 CSV를 준비하고 있어요.</p> : null}
+        {currentExport.error ? <p role="alert" className="error-message">{currentExport.error} <button type="button" className="text-button" onClick={() => void exportResults()}>CSV 다시 시도</button></p> : null}
+        {currentExport.done ? <p role="status" className="muted ent-note">전체 결과 CSV 다운로드를 시작했어요. 내려받은 결과는 생성 시점의 기록입니다.</p> : null}
         {test.vibeChallengeIds?.length ? (
           <p className="muted ent-note">
             각 문항은 동일한 비중으로 합산합니다. 바이브코딩은 결과물

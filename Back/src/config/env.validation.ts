@@ -17,11 +17,53 @@ const secret = Joi.string()
 export const envValidationSchema = Joi.object({
   OPENAI_API_KEY: Joi.string().allow('').optional(),
   VIBE_AI_MODEL: Joi.string().valid('gpt-6-luna').default('gpt-6-luna'),
-  VIBE_SANDBOX_URL: Joi.string()
-    .uri({ scheme: ['http', 'https'] })
-    .allow('')
-    .default(''),
-  VIBE_SANDBOX_TOKEN: Joi.string().allow('').default(''),
+  VIBE_EXECUTION_MODE: Joi.string()
+    .valid('embedded', 'dedicated')
+    .default('embedded'),
+  VIBE_SANDBOX_URL: Joi.string().when('VIBE_EXECUTION_MODE', {
+    is: 'dedicated',
+    then: Joi.string()
+      .uri({ scheme: ['https'] })
+      .pattern(/^https:\/\/[^/?#@\s\\]+\/?$/)
+      .required()
+      .messages({
+        'string.pattern.base':
+          '{#label} must be an HTTPS origin without credentials, path, query or fragment',
+      }),
+    otherwise: Joi.string()
+      .uri({ scheme: ['http', 'https'] })
+      .allow('')
+      .default(''),
+  }),
+  VIBE_SANDBOX_TOKEN: Joi.string().when('VIBE_EXECUTION_MODE', {
+    is: 'dedicated',
+    then: Joi.string()
+      .pattern(/^[A-Za-z0-9._~-]{32,512}$/)
+      .pattern(/^(replace-this|local-dev-only)/i, { invert: true })
+      .required()
+      .messages({
+        'string.pattern.base':
+          '{#label} must contain 32 to 512 safe secret characters',
+        'string.pattern.invert.base':
+          '{#label} must not use example or development credentials',
+      }),
+    otherwise: Joi.string().allow('').default(''),
+  }),
+  ...Object.fromEntries(
+    ['CA', 'CERT', 'KEY'].map((kind) => [
+      `VIBE_SANDBOX_TLS_${kind}_FILE`,
+      Joi.string().when('VIBE_EXECUTION_MODE', {
+        is: 'dedicated',
+        then: Joi.required(),
+        otherwise: Joi.valid('').default(''),
+      }),
+    ]),
+  ),
+  VIBE_SANDBOX_TLS_SERVERNAME: Joi.string().when('VIBE_EXECUTION_MODE', {
+    is: 'dedicated',
+    then: Joi.string().hostname().allow('').optional(),
+    otherwise: Joi.valid('').default(''),
+  }),
   NODE_ENV: Joi.string()
     .valid('development', 'test', 'production')
     .default('development'),

@@ -4,18 +4,39 @@ import { isDeepStrictEqual } from 'node:util';
 import { validateFiles } from './vibe.catalog.js';
 import type { VibeChallengeSnapshot } from './vibe.snapshot.js';
 import type { ProjectFiles, VibeCheck } from './vibe.types.js';
+import {
+  createVibeTransport,
+  loadVibeTransportSettings,
+  vibeSettingNames,
+  type VibeTransportSettings,
+} from './vibe.transport.js';
 
 const diagnostic = (value: string) =>
   value.slice(0, 2000).replace(/[\0\p{Cs}]/gu, '\uFFFD');
 
 @Injectable()
 export class VibeRunner {
-  constructor(private readonly config: ConfigService) {}
+  private readonly dedicated?: VibeTransportSettings;
+  constructor(private readonly config: ConfigService) {
+    // Fail startup before serving requests if a dedicated identity is invalid.
+    // Embedded tests/operators can still enable their local runner dynamically.
+    if (config.get<string>('VIBE_EXECUTION_MODE') === 'dedicated')
+      this.dedicated = this.settings();
+  }
+
+  private settings() {
+    return loadVibeTransportSettings(
+      Object.fromEntries(
+        vibeSettingNames.map((name) => [name, this.config.get<string>(name)]),
+      ),
+    );
+  }
 
   get available() {
     return Boolean(
-      this.config.get<string>('VIBE_SANDBOX_URL') &&
-      this.config.get<string>('VIBE_SANDBOX_TOKEN'),
+      this.dedicated ||
+      (this.config.get<string>('VIBE_SANDBOX_URL') &&
+        this.config.get<string>('VIBE_SANDBOX_TOKEN')),
     );
   }
 
@@ -29,24 +50,20 @@ export class VibeRunner {
       throw new ServiceUnavailableException(
         '프로젝트 실행기가 아직 설정되지 않았습니다.',
       );
-    const url = this.config.getOrThrow<string>('VIBE_SANDBOX_URL');
-    const token = this.config.getOrThrow<string>('VIBE_SANDBOX_TOKEN');
     const signal = AbortSignal.timeout(45_000);
     const cached = new Set<string>();
+    let transport: ReturnType<typeof createVibeTransport> | undefined;
     const request = async (
       path: string,
       options: {
-        method?: string;
-        headers?: Record<string, string>;
+        method?: 'GET' | 'POST' | 'DELETE';
         body?: string;
       } = {},
-      cleanup = false,
+      cleanupSignal?: AbortSignal,
     ) => {
-      const response = await fetch(new URL(path, url), {
+      const response = await transport!.request(path, {
         ...options,
-        redirect: 'error',
-        signal: cleanup ? AbortSignal.timeout(5_000) : signal,
-        headers: { Authorization: `Bearer ${token}`, ...options.headers },
+        signal: cleanupSignal ?? signal,
       });
       if (!response.ok) {
         await response.body?.cancel();
@@ -63,7 +80,6 @@ export class VibeRunner {
       const payload: unknown = await (
         await request('/run', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             cmd: [
               {
@@ -100,8 +116,15 @@ export class VibeRunner {
         files?: Record<string, string>;
         fileIds?: Record<string, string>;
       };
-      for (const id of Object.values(result.fileIds ?? {}))
-        if (typeof id === 'string') cached.add(id);
+      const ids = Object.values(result.fileIds ?? {});
+      if (ids.length > 16) throw new Error('Too many cached artifacts');
+      for (const id of ids) {
+        if (typeof id !== 'string' || !/^[A-Za-z0-9_-]{1,200}$/.test(id))
+          throw new Error('Invalid cached artifact');
+        if (!cached.has(id) && cached.size === 16)
+          throw new Error('Too many cached artifacts');
+        cached.add(id);
+      }
       if (
         ![
           'Accepted',
@@ -117,6 +140,7 @@ export class VibeRunner {
       return result;
     };
     try {
+      transport = createVibeTransport(this.dedicated ?? this.settings());
       const version = await (await request('/version')).json();
       const settings = await (await request('/config')).json();
       const runner = settings?.runnerConfig;
@@ -131,8 +155,8 @@ export class VibeRunner {
       )
         throw new Error('Sandbox isolation is unavailable');
       await (await request('/file')).body?.cancel();
-      const anonymous = await fetch(new URL('/file', url), {
-        redirect: 'error',
+      const anonymous = await transport.request('/file', {
+        anonymous: true,
         signal,
       });
       await anonymous.body?.cancel();
@@ -222,17 +246,19 @@ export class VibeRunner {
         '격리 실행기에 연결하지 못했습니다. 코드는 저장되어 있습니다. 잠시 뒤 다시 시도해 주세요.',
       );
     } finally {
+      const cleanupSignal = AbortSignal.timeout(5_000);
       await Promise.allSettled(
         [...cached].map(async (id) => {
           await (
             await request(
               `/file/${encodeURIComponent(id)}`,
               { method: 'DELETE' },
-              true,
+              cleanupSignal,
             )
           ).body?.cancel();
         }),
       );
+      transport?.close();
     }
   }
 }

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { expect, test, type APIRequestContext, type Browser } from "@playwright/test";
 import type { Session } from "../src/types";
 
@@ -158,6 +159,29 @@ test("real assessment selection, explicit refresh, frozen candidate content, Jud
     await owner.page.reload();
     await expect(row).toContainText("100점");
     await expect(selectedProblems).toContainText(secondTitle);
+    // Real authenticated browser → API → PostgreSQL → CSV download. Reuse the
+    // same two accounts so the real registration admission budget is unchanged.
+    expect((await request.get(`/api/v1/enterprise/tests/${assessment.id}/results/export`, {
+      headers: candidate.headers,
+    })).status()).toBe(404);
+    await expect(owner.page.getByText('제출 종료 1명 · 시간 만료 0명 · 응시 중 0명')).toBeVisible();
+    const exportedResponse = owner.page.waitForResponse(response =>
+      new URL(response.url()).pathname === `/api/v1/enterprise/tests/${assessment.id}/results/export`);
+    const downloaded = owner.page.waitForEvent('download');
+    await owner.page.getByRole('button', { name: '전체 결과 CSV', exact: true }).focus();
+    await owner.page.keyboard.press('Enter');
+    const response = await exportedResponse;
+    expect(response.status()).toBe(200);
+    expect(response.headers()['cache-control']).toBe('private, no-store');
+    expect(response.headers()['content-disposition']).toBe('attachment; filename="enterprise-results.csv"');
+    const download = await downloaded;
+    expect(download.suggestedFilename()).toBe('enterprise-results.csv');
+    const csv = await readFile((await download.path())!, 'utf8');
+    expect(csv.split('\r\n')).toHaveLength(3);
+    expect(csv).toContain(`"${candidate.session.user.username}"`);
+    expect(csv).toContain('"FINISHED","1","1","100","SCORED"');
+    for (const withheld of [hidden, editorial, 'print(43)', candidate.session.user.email, owner.session.accessToken])
+      expect(csv).not.toContain(withheld);
     expect([...owner.errors, ...candidate.errors]).toEqual([]);
   } finally {
     await owner.context.close();

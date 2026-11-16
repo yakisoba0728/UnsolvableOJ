@@ -4,7 +4,8 @@ import { challenge } from '../vibe/vibe.catalog.js';
 import { registerVibeSnapshot } from '../vibe/vibe.snapshot.js';
 import { canJoinEnterprise as canJoin } from './enterprise-access.js';
 import { buildEnterpriseVibeScores, type EnterpriseVibeRow } from './enterprise-vibe-scores.js';
-import { enterpriseResultPageSql, enterpriseResultSummarySql } from './enterprise-result-queries.js';
+import { enterpriseResultExportSql, enterpriseResultPageSql, enterpriseResultSummarySql } from './enterprise-result-queries.js';
+import { ENTERPRISE_EXPORT_LIMIT, enterpriseResultsCsv, type EnterpriseExportRow } from './enterprise-result-export.js';
 import { EnterpriseResultsQuery } from './dto/enterprise-results.query.js';
 import {
   BadRequestException,
@@ -263,11 +264,13 @@ export class EnterpriseService {
     // candidates join and judging finishes. No row locks or mutable cache.
     return this.dataSource.transaction('REPEATABLE READ', async (manager) => {
       const test = await this.owned(manager, id, user);
-      const [summary]: {
+      const [totals]: {
         candidates: number; pending: number; averageScore: number | null; perfect: number;
+        analytics: { finished: number; active: number; expired: number; scoreBands: number[] };
       }[] = await manager.query(enterpriseResultSummarySql, [
         id, test.vibe_challenge_ids, test.problem_ids.length + test.vibe_challenge_ids.length,
       ]);
+      const { analytics, ...summary } = totals;
       const rows: (AttemptRow & {
         username: string;
         problems: {
@@ -294,12 +297,30 @@ export class EnterpriseService {
         };
       });
       return {
-        test: toTest(test), summary, candidates,
+        test: toTest(test), summary, analytics, candidates,
+        exportLimit: ENTERPRISE_EXPORT_LIMIT,
         pagination: {
           page: query.page, limit: query.limit, total: summary.candidates,
           totalPages: Math.ceil(summary.candidates / query.limit),
         },
       };
+    });
+  }
+
+  /** Scalar-only export, authorized and bounded before score aggregation. */
+  async exportResults(id: string, user: AuthenticatedUser) {
+    return this.dataSource.transaction('REPEATABLE READ', async (manager) => {
+      const test = await this.owned(manager, id, user);
+      if ((test.attempt_count ?? 0) > ENTERPRISE_EXPORT_LIMIT)
+        throw new ConflictException(`전체 CSV는 응시자 ${ENTERPRISE_EXPORT_LIMIT.toLocaleString('en-US')}명까지 내려받을 수 있어요. 일부 결과로 잘라서 내보내지 않습니다.`);
+      const rows: EnterpriseExportRow[] = await manager.query(enterpriseResultExportSql, [
+        id, test.vibe_challenge_ids, test.problem_ids.length + test.vibe_challenge_ids.length,
+        ENTERPRISE_EXPORT_LIMIT + 1,
+      ]);
+      // Defense in depth: a future query change must not silently truncate.
+      if (rows.length > ENTERPRISE_EXPORT_LIMIT)
+        throw new ConflictException('전체 결과가 CSV 내보내기 한도를 초과했어요.');
+      return enterpriseResultsCsv(rows, test.problem_ids.length);
     });
   }
 
