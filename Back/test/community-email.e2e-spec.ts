@@ -149,7 +149,11 @@ describe('email consent and durable delivery (PostgreSQL + HTTP, simulated provi
       const runner = create(mode);
       const query = runner.query.bind(runner) as typeof runner.query;
       vi.spyOn(runner, 'query').mockImplementation(
-        (sql: string, parameters?: unknown[], structured?: boolean) => {
+        (
+          sql: string,
+          parameters?: unknown[] | Record<string, unknown>,
+          structured?: boolean,
+        ) => {
           const timed = sql.replaceAll(
             'clock_timestamp()',
             `'${at.toISOString()}'::timestamptz`,
