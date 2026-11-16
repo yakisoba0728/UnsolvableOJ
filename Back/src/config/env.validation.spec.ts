@@ -48,6 +48,50 @@ describe('environment validation', () => {
     expect(validate({}).value.JWT_ACCESS_EXPIRES_IN).toBe('15m');
   });
 
+  it('defaults Vibe to embedded and requires complete dedicated TLS configuration', () => {
+    expect(validate({}).value.VIBE_EXECUTION_MODE).toBe('embedded');
+    const dedicated = {
+      VIBE_EXECUTION_MODE: 'dedicated',
+      VIBE_SANDBOX_URL: 'https://sandbox.test',
+      VIBE_SANDBOX_TOKEN: 'dedicated-vibe-fixture-token-0123456789',
+      VIBE_SANDBOX_TLS_CA_FILE: '/secrets/ca.pem',
+      VIBE_SANDBOX_TLS_CERT_FILE: '/secrets/client.pem',
+      VIBE_SANDBOX_TLS_KEY_FILE: '/secrets/client.key',
+    };
+    expect(validate(dedicated).error).toBeUndefined();
+    for (const key of [
+      'VIBE_SANDBOX_URL',
+      'VIBE_SANDBOX_TOKEN',
+      'VIBE_SANDBOX_TLS_CA_FILE',
+      'VIBE_SANDBOX_TLS_CERT_FILE',
+      'VIBE_SANDBOX_TLS_KEY_FILE',
+    ])
+      expect(validate({ ...dedicated, [key]: '' }).error?.message).toContain(
+        key,
+      );
+    expect(
+      validate({ ...dedicated, VIBE_EXECUTION_MODE: 'embedded' }).error
+        ?.message,
+    ).toContain('VIBE_SANDBOX_TLS');
+    expect(
+      validate({ ...dedicated, VIBE_SANDBOX_URL: 'http://sandbox.test' }).error
+        ?.message,
+    ).toContain('VIBE_SANDBOX_URL');
+    for (const value of [
+      'private short secret',
+      'replace-this-with-a-private-long-secret',
+    ]) {
+      const error = validate({ ...dedicated, VIBE_SANDBOX_TOKEN: value }).error
+        ?.message;
+      expect(error).toContain('VIBE_SANDBOX_TOKEN');
+      expect(error).not.toContain(value);
+    }
+    const url = 'https://user:private@sandbox.test/run';
+    expect(
+      validate({ ...dedicated, VIBE_SANDBOX_URL: url }).error?.message,
+    ).not.toContain(url);
+  });
+
   it('defaults email to disabled and fails closed when enabled without delivery configuration', () => {
     expect(validate({}).value.EMAIL_ENABLED).toBe(false);
     expect(validate({ EMAIL_ENABLED: 'true' }).error?.message).toContain(
