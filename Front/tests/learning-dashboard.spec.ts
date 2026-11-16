@@ -234,6 +234,11 @@ for (const width of [320, 375, 1440]) {
     await expect(page.getByRole("link", { name: `${data.review[0].title} 이어 풀기`, exact: true })).toBeVisible();
     const first = page.getByRole("button", { name: "최근 7일", exact: true });
     await first.focus();
+    // The details above was opened with a pointer. Enter keyboard navigation
+    // before checking :focus-visible, which intentionally follows input mode.
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await expect(first).toBeFocused();
     expect(await first.evaluate(el => getComputedStyle(el).outlineStyle)).not.toBe("none");
   });
 }

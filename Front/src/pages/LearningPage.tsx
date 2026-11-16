@@ -54,7 +54,13 @@ export function LearningPage() {
 function DashboardContent({ days }: { days: LearningDays }) {
   const { session } = useAuth();
   const { data, loading, error, retry } = useRequest<LearningDashboard | null>(
-    session ? signal => api(`/users/me/learning?days=${days}`, { signal }, session.accessToken) : null,
+    session ? async signal => {
+      // Let cleanup cancel a replaced effect before it starts network traffic,
+      // including React's development StrictMode setup/cleanup replay.
+      await Promise.resolve();
+      signal.throwIfAborted();
+      return api(`/users/me/learning?days=${days}`, { signal }, session.accessToken);
+    } : null,
     null,
     "학습 현황을 불러오지 못했습니다.",
     [days, session?.accessToken],
