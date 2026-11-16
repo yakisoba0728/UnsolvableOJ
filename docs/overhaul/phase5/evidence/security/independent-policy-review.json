@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "independent_qa",
+  "role": "independent-reviewer",
+  "reviewedAt": "2026-11-16T14:49:08.299106+00:00",
+  "decision": "APPROVE_EXACT_COMPONENT_POLICY_CONTENT",
+  "reviewedCommit": "5021547e8214cd6404bc2e7728c70634dbca0c63",
+  "localReviewedCommit": "4c7d24dd12b300df2312e35d4d81a43fe625844c",
+  "completeTree": "61650d4c296150f540468aa6fd5e049df13bce7b",
+  "policyContentSha256": "d938665f24995ea53bf0984047459de0aa9ba366dc5ebbe37055f304c68903fb",
+  "policyFileSha256": "2c623c47ab87f13e1741fafdcca1083a02d6cf5fe40bdae69d2ec5208640bfe8",
+  "policyId": "ubuntu-noble-linux-libc-dev-6.8.0-149.149-amd64-2026-11-16-db1303",
+  "expiresAt": "2026-11-30T00:00:00Z",
+  "author": "/root/security",
+  "authorshipBoundary": "Reviewer did not author or edit the active policy, evidence proposal, evaluator, gate or test implementation. Reviewer independently fetched primary sources, calculated comparisons and ran read-only checks; all review outputs are separate scratch receipts.",
+  "scope": "Approval covers only the exact content hash above: Ubuntu24.04 linux/amd64 linux-libc-dev6.8.0-149.149, the182 enumerated advisory records,990 exact file payloads, bound evidence and unchanged strict evaluator. It does not approve merge, deployment, unknown proof or expiry extension.",
+  "remoteEvidence": {
+    "reviewer": "independent_qa",
+    "method": "Independent connected GitHub GET of immutable Git commit",
+    "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/commits/5021547e8214cd6404bc2e7728c70634dbca0c63",
+    "commit": "5021547e8214cd6404bc2e7728c70634dbca0c63",
+    "tree": "61650d4c296150f540468aa6fd5e049df13bce7b",
+    "parents": [
+      "ce26659b816c1dc1450cdc48f0c58d6e41ecea1e"
+    ],
+    "remoteDate": "2026-11-16T14:47:16Z",
+    "localCommit": "4c7d24dd12b300df2312e35d4d81a43fe625844c",
+    "expectedTree": "61650d4c296150f540468aa6fd5e049df13bce7b",
+    "treeMatches": true
+  },
+  "sourceChecks": {
+    "path": "runtime-proposed-4c7d24d-source-checks.json",
+    "sha256": "4901d4d45e4e5796a6bc49fd2bb4506cde38e30c72e32f5942fd35ef23c92128"
+  },
+  "priorIndependentEvidence": {
+    "path": "runtime-evidence-independent-review.json",
+    "sha256": "9d1999f9c36e778f5fc56a6a638213c96907c87ab63c37311ad2b4fc45d807e1",
+    "statusAtThatTime": "CURRENT_EVIDENCE_REVALIDATED_PROPOSED_POLICY_PENDING",
+    "relationship": "This exact-content decision follows the prior evidence review and is the first approval of this proposal."
+  },
+  "boundFiles": {
+    "docs/overhaul/phase5/evidence/security/kernel-header-applicability.json": "e9b1637730a77cc002f61039aff36a2e852a94341890aa04906f14a3f8ea5f81",
+    "docs/overhaul/phase5/evidence/security/kernel-header-review.json": "57403747bd3f525a2cfdcb88a3f8acd8c625ad6f82171b9c5388d3a3559cd103",
+    "docs/overhaul/evidence/linux-libc-dev-6.8.0-149.149-amd64-files.json": "010441a3487f836ca8d56b32d3264cd286c2d11b569f44b54d2ba3e949911172",
+    "docs/overhaul/phase5/evidence/security/blocked-runtime.zip": "d373738b4b069fb081ea29563f28bd495ee9b32bbaeb9dfc4fd067267e0778c2",
+    "docs/overhaul/evidence/phase2-trivy-fingerprint-binding.json": "98472239faff13ffe141181af911cf0841931df59028b985b5cf7466ec939eed",
+    "scripts/image_audit.py": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72",
+    "scripts/image-audit-tool.json": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c",
+    "scripts/verify_image_payload.py": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0",
+    "docs/overhaul/phase5/evidence/security/inherited-policy.json": "3b9582cbfaedcbad0b562bdd566896b77c195834a7bfaeb5143025c6d72abf79",
+    "docs/overhaul/evidence/phase3-kernel-header-applicability.json": "9d317229d78b224757dddbc9c03db68b5d6f1d5d2b191f02de857d3c46dd3796",
+    "docs/overhaul/evidence/phase3-kernel-header-review.json": "a6d7cca70204e26b1bb76533f2b2103b1286316f6eecc92573218257b36a3a24",
+    "docs/overhaul/phase5/evidence/security/advisory-delta.json": "ff22b4bf6613c46b7fa6f9779a973ea8931a7b6e5d6f62d4579da5504d08ced3",
+    "docs/overhaul/phase5/evidence/security/vendor-advisory-review.json": "e51726085308f5bb0f7defa748d5af758d5520f394f6860d360c7336b38f4952",
+    "docs/overhaul/phase5/evidence/security/vendor-retrieval.json": "fa7833bf04b97fc7dfb9d8d712bb3e60d22bb2424a4082ca1bca9cad5879b60b",
+    "docs/overhaul/phase5/evidence/security/primary-vendor-records.zip": "795aaf4acc30481356a00f8682e98ff20e936f47f16815f647e0619ea1323153",
+    "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/current-cna-records.zip": "54c6826a9e0b1453dbf8e99ddf68f644edd519af3829d8106fc719bc3aa7e89c",
+    "docs/overhaul/phase5/evidence/security/current-cna-refetch-receipt.json": "76ebf654b4f045e80c8c63baaec0558f36e3df3c75673ffe60b10d54d390d876",
+    "docs/overhaul/phase5/evidence/security/cna-revalidation.json": "9b6632f8e4dafdc36747f75c4ba3c49e05507741e92a9bfb688fdef449202cf2",
+    "docs/overhaul/repro/kernel-header-applicability.py": "96609e11c379ec67a89d9f7d774bc0da14d04a6bd790b57c6320387ca88115e6",
+    "docs/overhaul/repro/phase3-refetch-cna-independent.py": "b6741499e32cbb0951f93247dcea3f4470bcc3a259337c1ba547a08dc021eaa0",
+    "scripts/image_applicability.py": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f",
+    "scripts/image_gate.py": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b"
+  },
+  "diff": {
+    "changedExistingFiles": [
+      "scripts/image-applicability-policy.json"
+    ],
+    "additiveFiles": 15,
+    "allHistoricalFilesPreserved": true,
+    "evaluatorGateScannerVerifierTestsUnchanged": true,
+    "fingerprintSchemaUnchanged": true,
+    "scopeUnchanged": true,
+    "expiryUnchanged": true,
+    "policyRecordChangedFields": {
+      "originalScannerFingerprint": 182,
+      "advisorySha256": 15
+    },
+    "inventoryRecordChangedFields": {
+      "cnaUrl": 182
+    }
+  },
+  "independentChecks": {
+    "freshOwnCnaRetrieval": 182,
+    "cnaRawHashMismatches": 0,
+    "sourceProgramFileMismatches": 0,
+    "packagedCnaArchiveMatchesIndependentRetrieval": true,
+    "freshOwnRockyPublisherRetrieval": 12,
+    "packagedVendorBodiesByteIdenticalToIndependentRetrieval": 12,
+    "vendorCveMembershipChecked": 15,
+    "vendorPackageScope": "Rocky Linux:10/kernel",
+    "rawReviewedCohort": 182,
+    "rawChangedReviewedAdvisories": 15,
+    "rawUnchangedReviewedAdvisories": 167,
+    "rawHigh": 177,
+    "rawCritical": 5,
+    "normalizedPackageIdentitiesEqual": 225,
+    "payloadFilesHashSizeLayerBindingsVerified": 990,
+    "inheritedComponentAssessmentsUnchanged": 182,
+    "inheritedCriticalPatchReviewsUnchanged": 5,
+    "inheritedSpecialUapiReviewUnchanged": 1,
+    "directAndTransitiveBoundFilesChecked": 22
+  },
+  "actualCurrentClockProposalEvaluation": {
+    "code": 2,
+    "gate": "BLOCKED_REVIEW",
+    "proposed": 182,
+    "reviewed": 0,
+    "remaining": 182,
+    "unresolved": 0,
+    "blockingReasons": [
+      "INDEPENDENT_POLICY_REVIEW_REQUIRED"
+    ],
+    "observedAt": "2026-11-16T14:46:31.918737+00:00",
+    "receiptSha256": "6b99e2231694c49d2ba5218d26e454a9b06531dc426131112f842f022601c9f2"
+  },
+  "actualEvaluationReceipt": {
+    "path": "runtime-proposed-4c7d24d-evaluation.json",
+    "sha256": "6b99e2231694c49d2ba5218d26e454a9b06531dc426131112f842f022601c9f2"
+  },
+  "tests": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts -p image_applicability_test.py",
+      "sourceCommit": "4c7d24dd12b300df2312e35d4d81a43fe625844c",
+      "sourceTree": "61650d4c296150f540468aa6fd5e049df13bce7b",
+      "passed": 35,
+      "failed": 0,
+      "seconds": 35.723,
+      "logPath": "runtime-proposed-4c7d24d-tests.log",
+      "logSha256": "fc4b11111597c77a771147188a024ed2377cb226da3f53851653dc82f9c76a62"
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p '*_test.py'",
+      "sourceCommit": "ce26659b816c1dc1450cdc48f0c58d6e41ecea1e",
+      "passed": 92,
+      "failed": 0,
+      "seconds": 46.287,
+      "scope": "Independent preceding baseline test run; test/evaluator/gate sources are unchanged in proposal. Included expiry/new/changed/missing/downgraded/unknown/tampered negatives."
+    }
+  ],
+  "findingCount": 0,
+  "findings": [],
+  "approvalMetadataRecord": {
+    "role": "independent-reviewer",
+    "reviewer": "independent_qa",
+    "reviewedCommit": "5021547e8214cd6404bc2e7728c70634dbca0c63"
+  },
+  "requiredNextSteps": [
+    "Coordinator must perform and record a separate review bound to the same immutable proposal commit and exact policy content.",
+    "After coordinator approval, only active policy review metadata may change to authorize this content. Preserve this immutable PROPOSED commit and original failed artifact.",
+    "Additive Runtime CI selector coverage and independent/coordinator receipt publication must remain separately reviewable; no suppression or evaluator bypass may accompany activation.",
+    "Require actual exact-source feature CI and final combined integration CI with checkout/tree/artifact binding before merge readiness.",
+    "Any further changed advisory, new HIGH/CRITICAL, missing/regraded reviewed record, unknown/tampered proof or expired policy remains blocking. No extension beyond2026-11-30T00:00:00Z."
+  ],
+  "limits": [
+    "Original scanner exit2 and HIGH177/CRITICAL5 remain visible; code-not-present in an exact header payload is not a patch or zero-vulnerability claim.",
+    "Host kernel, operational network isolation, production secret/certificate rotation and deployment readiness remain unverified.",
+    "No local OCI build/extraction, exploit, sandbox escape, production action or paid provider call was performed.",
+    "Existing critical/UAPI patch assessments are explicitly inherited from byte-identical primary records; this is not182 newly repeated manual patch reviews.",
+    "The independent Judge review in the authored bundle is attributable to Security, not this reviewer; native/Judge/frontend composition still requires actual CI and later combined review."
+  ]
+}

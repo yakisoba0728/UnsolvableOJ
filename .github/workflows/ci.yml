@@ -102,7 +102,7 @@ jobs:
           else
             files=$(git diff --name-only FETCH_HEAD HEAD)
             if grep -qE "^($CONTEXT/|\.github/workflows/ci\.yml$|scripts/image[-_](audit|gate|applicability))" <<<"$files" || {
-              [ "$CONTEXT" = 'Judge/runtime' ] && grep -qE '^(scripts/verify_image_payload|docs/overhaul/(evidence/|repro/(kernel-header-applicability|phase3-refetch-cna-independent)\.py$|measurements/(phase2-image-remediation/before-runtime\.zip$|phase3-runtime-advisory-revalidation/)))' <<<"$files";
+              [ "$CONTEXT" = 'Judge/runtime' ] && grep -qE '^(scripts/verify_image_payload|docs/overhaul/(evidence/|phase5/evidence/security/|repro/(kernel-header-applicability|phase3-refetch-cna-independent)\.py$|measurements/(phase2-image-remediation/before-runtime\.zip$|phase3-runtime-advisory-revalidation/)))' <<<"$files";
             }; then
               echo "build=true" >> "$GITHUB_OUTPUT"
             else

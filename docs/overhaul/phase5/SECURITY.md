@@ -2,16 +2,27 @@
 
 ## Decision at this checkpoint
 
-**Runtime remains blocked pending independent review of the new evidence.** The
+**The exact component policy is independently reviewed; fresh full CI is still required.** The
 fresh foundation run [43884655462](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43884655462)
 failed its Runtime image job because the current Trivy database changed reviewed
 advisories. The failure is retained; it is not converted into a successful run.
-The policy in this authored commit is **PROPOSED**, with no review signatures or
-approval metadata. Its expiry remains **2026-11-30 00:00 UTC**.
+The immutable author proposal is commit `5021547e8214cd6404bc2e7728c70634dbca0c63`,
+tree `61650d4c296150f540468aa6fd5e049df13bce7b`. It was **PROPOSED**, with no
+approval metadata, and remains archived in [proposed-policy.json](evidence/security/proposed-policy.json).
+The independent reviewer and coordinator subsequently approved the exact content
+SHA256 `d938665f24995ea53bf0984047459de0aa9ba366dc5ebbe37055f304c68903fb`.
+Only review metadata changed in the active policy. Its expiry remains
+**2026-11-30 00:00 UTC**. These are separate AI source reviews, not human GitHub approvals.
+
+The [independent receipt](evidence/security/independent-policy-review.json),
+[coordinator receipt](evidence/security/coordinator-review.json), and
+[activation replay](evidence/security/activation-replay.json) preserve their limits.
+The replay returns `PASS_WITH_REVIEWED_COMPONENT_FINDINGS` for the retained scan;
+it does not substitute for a fresh image build, scan, payload verification and full CI.
 
 Raw findings remain **HIGH 177 / CRITICAL 5**, with scanner exit **2**. The full
 raw totals are UNKNOWN 1, LOW 363, MEDIUM 560, HIGH 177, CRITICAL 5. A separately
-approved exact-component decision may later permit
+approved exact-component decision permits a retained-scan replay of
 `PASS_WITH_REVIEWED_COMPONENT_FINDINGS`; that state does not mean patched,
 zero vulnerabilities, a safe host kernel, or production deployment approval.
 
