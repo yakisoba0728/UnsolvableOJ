@@ -74,8 +74,12 @@ SELECT jsonb_build_object(
     LEFT JOIN daily d ON d.day = b.today - offsets.n
   ),
   'difficulties', COALESCE((SELECT jsonb_agg(jsonb_build_object(
-    'difficulty', difficulty, 'attempted', attempted, 'solved', solved
-  ) ORDER BY difficulty) FROM difficulty_counts), '[]'::jsonb),
+    'difficulty', kinds.difficulty, 'attempted', COALESCE(counts.attempted, 0),
+    'solved', COALESCE(counts.solved, 0)
+  ) ORDER BY kinds.difficulty)
+    FROM unnest(enum_range(NULL::problem_difficulty)) kinds(difficulty)
+    LEFT JOIN difficulty_counts counts ON counts.difficulty = kinds.difficulty
+  ), '[]'::jsonb),
   'tags', COALESCE((SELECT jsonb_agg(jsonb_build_object(
     'tag', tag, 'attempted', attempted, 'solved', solved
   ) ORDER BY attempted DESC, tag COLLATE "C")

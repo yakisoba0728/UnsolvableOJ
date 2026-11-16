@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
+import { ProblemDifficulty } from '../src/modules/problems/problem.enums.js';
 import { base, bearer, closeApp, createApp, register } from './helpers.js';
 
 describe('Private bounded learning dashboard (real PostgreSQL/API)', () => {
@@ -106,7 +107,11 @@ describe('Private bounded learning dashboard (real PostgreSQL/API)', () => {
         attemptedProblems: 0,
         activeDays: 0,
       },
-      difficulties: [],
+      difficulties: Object.values(ProblemDifficulty).map((difficulty) => ({
+        difficulty,
+        attempted: 0,
+        solved: 0,
+      })),
       tags: [],
       tagsTruncated: false,
       review: [],
@@ -119,7 +124,9 @@ describe('Private bounded learning dashboard (real PostgreSQL/API)', () => {
       ),
     ).toBe(true);
     expect(body.activity.map((d: { date: string }) => d.date)).toEqual(
-      body.activity.map((d: { date: string }) => d.date).sort((a: string, b: string) => a.localeCompare(b)),
+      body.activity
+        .map((d: { date: string }) => d.date)
+        .sort((a: string, b: string) => a.localeCompare(b)),
     );
     const [{ today }] = await db.query(
       "SELECT to_char(statement_timestamp() AT TIME ZONE 'Asia/Seoul','YYYY-MM-DD') AS today",
@@ -150,9 +157,13 @@ describe('Private bounded learning dashboard (real PostgreSQL/API)', () => {
       attemptedProblems: 2,
       activeDays: 1,
     });
-    expect(body.difficulties).toEqual([
-      { difficulty: 'BEGINNER', attempted: 2, solved: 1 },
-    ]);
+    expect(body.difficulties).toEqual(
+      Object.values(ProblemDifficulty).map((difficulty) => ({
+        difficulty,
+        attempted: difficulty === 'BEGINNER' ? 2 : 0,
+        solved: difficulty === 'BEGINNER' ? 1 : 0,
+      })),
+    );
     expect(body.tags.find((t: { tag: string }) => t.tag === '구현')).toEqual({
       tag: '구현',
       attempted: 2,
@@ -174,6 +185,28 @@ describe('Private bounded learning dashboard (real PostgreSQL/API)', () => {
       solvedProblems: 1,
     });
     expect(theirs.body.review).toEqual([]);
+  });
+
+  it('independently excludes enterprise submissions even with a non-test flag', async () => {
+    const [exam] = await db.query(
+      `INSERT INTO enterprise_tests(owner_id,title,starts_at,ends_at,duration_min,problem_ids,invite_code)
+      VALUES($1,'Learning isolation',now()-interval '1 hour',now()+interval '1 hour',60,$2,$3) RETURNING id`,
+      [mine.user.id, [problems[0]], `learn-${suffix}`],
+    );
+    const [attempt] = await db.query(
+      `INSERT INTO enterprise_attempts(test_id,user_id,deadline_at)
+      VALUES($1,$2,now()+interval '30 minutes') RETURNING id`,
+      [exam.id, mine.user.id],
+    );
+    const id = await submission(problems[0], 'ACCEPTED');
+    await db.query('UPDATE submissions SET attempt_id=$1 WHERE id=$2', [
+      attempt.id,
+      id,
+    ]);
+    const { body } = await dashboard().expect(200);
+    expect(body.summary.submissions).toBe(0);
+    expect(body.tags).toEqual([]);
+    expect(body.review).toEqual([]);
   });
 
   it('includes the exact KST window boundary and excludes prior and future submissions', async () => {
@@ -244,7 +277,9 @@ describe('Private bounded learning dashboard (real PostgreSQL/API)', () => {
     expect(body.tags).toHaveLength(20);
     expect(body.tagsTruncated).toBe(true);
     expect(body.tags[0]).toEqual({ tag: '구현', attempted: 25, solved: 0 });
-    const expected = [...problems].sort((a, b) => a.localeCompare(b)).slice(0, 10);
+    const expected = [...problems]
+      .sort((a, b) => a.localeCompare(b))
+      .slice(0, 10);
     expect(body.review.map((p: { id: string }) => p.id)).toEqual(expected);
     // A separate narrow window is unnecessary: remove the other fixtures to inspect the tied verdict.
     await db.query(

@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { promisify } from "node:util";
 import { expect, test } from "@playwright/test";
 
-test("real signup, publication, private bookmarks, judging, XP and logout through nginx", async ({ page }) => {
+test("real signup, publication, bookmarks, judging, private learning, XP and logout through nginx", async ({ page }) => {
   const suffix = randomUUID().replaceAll("-", "").slice(0, 12);
   const email = `browser-${suffix}@example.com`;
   const password = `browser-${randomUUID()}`;
@@ -78,6 +78,12 @@ test("real signup, publication, private bookmarks, judging, XP and logout throug
   await page.goto("/profile");
   await expect(page.getByText("10 / 100 XP", { exact: false })).toBeVisible();
   await expect(page.locator(".profile-stats")).toContainText("해결한 문제");
+  const learningResponse = page.waitForResponse(response => new URL(response.url()).pathname === "/api/v1/users/me/learning");
+  await page.getByRole("link", { name: "학습 대시보드", exact: true }).click();
+  expect((await learningResponse).status()).toBe(200);
+  await expect(page.getByRole("definition").first()).toContainText("1건");
+  await expect(page.getByRole("definition").nth(1)).toContainText("1 / 시도 1문제");
+  await expect(page.getByRole("definition").last()).toContainText("100%");
   await page.goto(`/problems/view/${slug}`);
   await page.getByLabel("소스 코드").fill("print(0)");
   const wrongRequest = page.waitForRequest((request) =>
@@ -92,6 +98,14 @@ test("real signup, publication, private bookmarks, judging, XP and logout throug
     console.error("Actual judging details:", await panel.innerText());
     throw error;
   }
+  // The real learning API keeps an already solved problem out of the review queue
+  // even when its newest ordinary submission is wrong.
+  await page.goto("/learning?days=7");
+  await expect(page.getByRole("definition").first()).toContainText("2건");
+  await expect(page.getByRole("definition").nth(1)).toContainText("1 / 시도 1문제");
+  await expect(page.getByRole("definition").last()).toContainText("50%");
+  await expect(page.getByText("이 기간에 다시 도전할 문제가 없어요.")).toBeVisible();
+  await expect(page.locator(".learning-review-list")).toHaveCount(0);
   await page.goto(`/problems?q=${slug}`);
   const row = page.getByRole("link").filter({ hasText: title });
   await expect(row).toContainText("1명");
