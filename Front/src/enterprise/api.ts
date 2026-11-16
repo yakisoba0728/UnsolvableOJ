@@ -15,7 +15,11 @@ export function useEnterpriseTests(session: Session | null) {
   );
 }
 
-export function useEnterpriseTest(session: Session | null, id: string | undefined) {
+export function useEnterpriseTest(
+  session: Session | null,
+  id: string | undefined,
+  options?: { retainWhileRefreshing?: boolean },
+) {
   const token = session?.accessToken;
   return useRequest<EnterpriseTest | null>(
     token && id
@@ -31,6 +35,9 @@ export function useEnterpriseTest(session: Session | null, id: string | undefine
     null,
     "테스트를 불러오지 못했어요.",
     [token, id],
+    // Editing opts in only inside a component keyed by login identity and id.
+    // A token rotation may refresh its record without destroying the draft.
+    { keepPrevious: options?.retainWhileRefreshing },
   );
 }
 
@@ -49,7 +56,7 @@ export function useTestResults(session: Session | null, id: string | undefined, 
 export const enterpriseApi = {
   create: (token: string, input: TestInput) =>
     api<EnterpriseTest>("/enterprise/tests", { method: "POST", body: JSON.stringify(input) }, token),
-  update: (token: string, id: string, input: TestInput) =>
+  update: (token: string, id: string, input: TestInput & { refreshProblemVersions?: boolean }) =>
     api<EnterpriseTest>(`/enterprise/tests/${id}`, { method: "PATCH", body: JSON.stringify(input) }, token),
   remove: (token: string, id: string) =>
     api<{ id: string }>(`/enterprise/tests/${id}`, { method: "DELETE" }, token),

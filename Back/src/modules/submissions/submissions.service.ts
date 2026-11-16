@@ -231,10 +231,10 @@ export class SubmissionsService {
         );
         const [row]: { open: boolean; version: number }[] = await manager.query(
           `SELECT a.finished_at IS NULL AND LEAST(a.deadline_at, t.ends_at) > clock_timestamp() AS open,
-                  p.current_version AS version
+                  p.version
              FROM enterprise_attempts a
              JOIN enterprise_tests t ON t.id = a.test_id
-             JOIN problems p ON p.id = $2
+             JOIN enterprise_problem_versions p ON p.test_id=t.id AND p.problem_id=$2
             WHERE a.id = $1 AND a.user_id = $3 AND $2 = ANY(t.problem_ids)
               AND ${canJoinEnterprise('$3')}`,
           [attemptId, problemId, user.id],

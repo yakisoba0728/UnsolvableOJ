@@ -21,6 +21,7 @@ import {
 import { enterpriseApi, useEnterpriseTest } from "../enterprise/api";
 import { useDocumentTitle, useEnterpriseProblems, useRequest } from "../hooks";
 import { difficultyLabel } from "../difficulty";
+import { useMountedRef } from "../hooks";
 
 const fieldIds: Record<keyof TestErrors, string> = {
   title: "ent-title",
@@ -90,9 +91,9 @@ function Notice({
   );
 }
 
-export function EnterpriseFormPage() {
+export function EnterpriseFormPage({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { id } = useParams();
-  const { session } = useAuth();
+  const { session, getSessionIdentityVersion } = useAuth();
   useDocumentTitle(id ? "테스트 편집" : "새 테스트 만들기");
 
   if (!session)
@@ -108,24 +109,25 @@ export function EnterpriseFormPage() {
         </Link>
       </Notice>
     );
-  // 계정이나 주소가 바뀔 때만 새 폼을 연다. 다른 탭의 변경으로 작성 중인 입력을 버리지 않는다.
+  // 일반 토큰 갱신에는 입력을 유지하고, 새 로그인(같은 계정 포함)이나 시험이 바뀌면 비운다.
   return (
     <EnterpriseForm
-      key={`${session.user.id}:${id ?? "new"}`}
+      key={`${session.user.id}:${getSessionIdentityVersion()}:${id ?? "new"}`}
       token={session.accessToken}
       id={id}
+      getNavigationVersion={getNavigationVersion}
     />
   );
 }
 
-function EnterpriseForm({ token, id }: { token: string; id?: string }) {
+function EnterpriseForm({ token, id, getNavigationVersion }: { token: string; id?: string; getNavigationVersion: () => number }) {
   const { session } = useAuth();
   const {
     data: existing,
     loading,
     error,
     retry,
-  } = useEnterpriseTest(session, id);
+  } = useEnterpriseTest(session, id, { retainWhileRefreshing: true });
   const editable = !existing || testStatus(existing) === "scheduled";
   if (id && loading && !existing)
     return (
@@ -171,18 +173,21 @@ function EnterpriseForm({ token, id }: { token: string; id?: string }) {
         </Link>
       </Notice>
     );
-  return <TestForm token={token} existing={existing ?? undefined} />;
+  return <TestForm token={token} existing={existing ?? undefined} getNavigationVersion={getNavigationVersion} />;
 }
 
 function TestForm({
   token,
   existing,
+  getNavigationVersion,
 }: {
   token: string;
   existing?: EnterpriseTest;
+  getNavigationVersion: () => number;
 }) {
   const navigate = useNavigate();
-  const { session } = useAuth();
+  const { session, getSessionIdentityVersion } = useAuth();
+  const mounted = useMountedRef();
   const { problems, loading, error, privateError } =
     useEnterpriseProblems(session);
   const catalog = useRequest<VibeCatalog | null>(
@@ -196,6 +201,7 @@ function TestForm({
   const [showErrors, setShowErrors] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [refreshProblemVersions, setRefreshProblemVersions] = useState(false);
   const errors = showErrors ? validateDraft(draft) : {};
   const patch = (next: Partial<TestDraft>) =>
     setDraft((prev) => ({ ...prev, ...next }));
@@ -230,19 +236,23 @@ function TestForm({
       return;
     }
     const input = draftToInput(draft);
+    const identity = getSessionIdentityVersion();
+    const navigation = getNavigationVersion();
+    const ownsRequest = () => mounted.current && getSessionIdentityVersion() === identity && getNavigationVersion() === navigation;
     setSaving(true);
     try {
       const saved = existing
-        ? await enterpriseApi.update(token, existing.id, input)
+        ? await enterpriseApi.update(token, existing.id, { ...input, refreshProblemVersions })
         : await enterpriseApi.create(token, input);
-      navigate(`/enterprise/${saved.id}`);
+      if (ownsRequest()) navigate(`/enterprise/${saved.id}`);
     } catch (cause) {
+      if (!ownsRequest()) return;
       // 입력은 그대로 두고 서버가 알려 준 이유를 보여 준다.
       setSaveError(
         `${cause instanceof Error ? cause.message : "테스트를 저장하지 못했어요."} 입력한 내용은 유지했어요.`,
       );
     } finally {
-      setSaving(false);
+      if (ownsRequest()) setSaving(false);
     }
   }
 
@@ -499,6 +509,23 @@ function TestForm({
               <Link to="/problems/new?private=1">기업 전용 문제로 만들어</Link>{" "}
               함께 고를 수 있어요.
             </span>
+            <p className="field-help">
+              일반 문제의 본문·예제·채점 기준은 시험에 추가할 때 고정됩니다.
+              원본을 수정해도 응시자마다 다른 버전이 출제되지 않습니다.
+            </p>
+            {existing && draft.problemIds.length > 0 && (
+              <label className="field-help">
+                <input
+                  type="checkbox"
+                  checked={refreshProblemVersions}
+                  onChange={(event) => setRefreshProblemVersions(event.target.checked)}
+                />{" "}
+                저장할 때 선택한 일반 문제를 모두 최신 버전으로 갱신
+                <span className="field-help">
+                  선택하지 않으면 기존 버전을 유지합니다. 시험 시작 후에는 갱신할 수 없습니다.
+                </span>
+              </label>
+            )}
           </section>
         </div>
 

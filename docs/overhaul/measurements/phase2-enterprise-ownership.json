@@ -1,0 +1,47 @@
+{
+  "before": {
+    "label": "before",
+    "node": "v24.22.1",
+    "dom": "jsdom 31.0.1",
+    "scenarios": [
+      {
+        "name": "late-delete-navigation",
+        "mutations": 1,
+        "expected": "/problems",
+        "actual": "/enterprise",
+        "passed": false
+      },
+      {
+        "name": "late-start-account",
+        "mutations": 1,
+        "expected": "/enterprise/join/abc",
+        "actual": "/enterprise/attempts/a1",
+        "passed": false
+      }
+    ]
+  },
+  "after": {
+    "label": "after",
+    "node": "v24.22.1",
+    "dom": "jsdom 31.0.1",
+    "scenarios": [
+      {
+        "name": "late-delete-navigation",
+        "mutations": 1,
+        "expected": "/problems",
+        "actual": "/problems",
+        "passed": true
+      },
+      {
+        "name": "late-start-account",
+        "mutations": 1,
+        "expected": "/enterprise/join/abc",
+        "actual": "/enterprise/join/abc",
+        "passed": true
+      }
+    ]
+  },
+  "baselineCommit": "c8ba9712d1a29ac633519511e50428ef647edf66",
+  "candidateScope": "Enterprise ownership follow-up source in this report commit",
+  "limitation": "Actual React DOM source with jsdom and synthetic API; not a browser execution or backend authorization test"
+}
