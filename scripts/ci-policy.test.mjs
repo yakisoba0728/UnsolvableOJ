@@ -65,8 +65,8 @@ test('required gate fails for every failure/cancellation and accepts only succes
   assert.equal(run.status, 0);
 });
 
-test('integration PRs trigger CI, and the final main PR requests full validation', () => {
-  assert.match(workflow, /pull_request:\n    branches: \[main, 'overhaul\/integration'\]/);
+test('both integration generations trigger CI and preserve final full validation', () => {
+  assert.match(workflow, /pull_request:\n    branches: \[main, 'overhaul\/integration', 'overhaul4\/integration'\]/);
   assert.match(workflow, /FULL:.*github\.head_ref == 'overhaul\/integration'.*github\.base_ref == 'main'/);
   assert.match(workflow, /FULL:.*inputs\.full.*github\.event_name == 'schedule'/);
 });
@@ -81,12 +81,32 @@ test('adding a PR label triggers CI without replacing its original activity type
   assert.doesNotMatch(workflow, /^  pull_request_target:/m, 'Label opt-in must not change the workflow trust context');
 });
 
-test('the full-validation PR label only escalates the existing full-mode input', () => {
-  const expression = workflow.match(/^\s+FULL: \$\{\{ (.+) \}\}$/m)?.[1];
-  // Assert the event wiring; the existing FULL=true/false tests execute the
-  // real selection shell and cover the downstream full and bounded modes.
-  assert.equal(expression,
-    "inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main')))");
+test('Phase IV feature and final PRs always request full validation in both selectors', () => {
+  const expressions = [...workflow.matchAll(/^\s+FULL: \$\{\{ (.+) \}\}$/gm)].map(match => match[1]);
+  assert.equal(expressions.length, 2);
+  assert.equal(expressions[0], expressions[1], 'Image and suite selection must use the same policy');
+  // Evaluate the actual workflow expression against event fixtures. Downstream
+  // tests execute the real selection shell and verify every full-mode job/build.
+  const evaluate = new Function('inputs', 'github', 'contains',
+    `return ${expressions[0].replace('github.event.pull_request.labels.*.name', 'github.event.pull_request.labels.map(label => label.name)')};`);
+  for (const [head, base, event, label, manual, expected] of [
+    ['feature', 'main', 'pull_request', '', false, false],
+    ['feature', 'overhaul/integration', 'pull_request', '', false, false],
+    ['overhaul/integration', 'main', 'pull_request', '', false, true],
+    ['overhaul4/feature', 'overhaul4/integration', 'pull_request', '', false, true],
+    ['overhaul4/integration', 'overhaul/integration', 'pull_request', '', false, true],
+    ['overhaul4/integration', 'main', 'pull_request', '', false, true],
+    ['feature', 'main', 'pull_request', 'full-validation', false, true],
+    ['main', 'main', 'schedule', '', false, true],
+    ['main', 'main', 'workflow_dispatch', '', true, true],
+    ['main', 'main', 'workflow_dispatch', '', false, false],
+    ['feature', 'main', 'push', 'full-validation', false, false],
+  ]) {
+    const github = { event_name: event, head_ref: head, base_ref: base,
+      event: { pull_request: { labels: label ? [{ name: label }] : [] } } };
+    assert.equal(Boolean(evaluate({ full: manual }, github, (values, value) => values.includes(value))),
+      expected, `${event}: ${head} -> ${base}, label=${label}, manual=${manual}`);
+  }
 });
 
 test('large image diffs cannot be skipped by a pipefail/SIGPIPE race', () => {
