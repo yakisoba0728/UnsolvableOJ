@@ -95,7 +95,13 @@ completed jobs/s, worker CPU interval/core-equivalent and per-worker peak RSS.
 
 Timing begins before the batch's real HTTP submissions and ends after all eight
 DB final states and worker acknowledgement records. Polling adds up to roughly
-100 ms to batch duration. CPU is owned-worker Linux procfs user+system tick change
+100 ms to batch duration. All test users share the real per-IP 20 submissions/minute
+limit. Before each scenario, the harness reserves enough capacity using the
+previous responses' `X-RateLimit-Remaining`/`Reset` values, waiting at most 61 seconds
+for a new window when needed. This pacing is recorded separately in `admissionPauses`,
+outside warmup and the measured interval; it neither clears throttle counters nor
+rotates identities/IPs. Reported jobs/s describes an admitted eight-job burst, not
+sustained ingress above this endpoint limit. CPU is owned-worker Linux procfs user+system tick change
 from the end of a shared warmup batch to final acknowledgement, not sandbox CPU
 or per-job attribution. The report records CLK_TCK, raw before/after samples and
 their resolution. No scheduler-fairness assumption assigns one warmup to each
@@ -138,3 +144,24 @@ Queue wait is job enqueue age at claim, including retries/outage waiting; on
 separate hosts it assumes synchronized clocks. The CI workload uses first-attempt
 jobs on one host. The added two-worker active-lease duplicate scenario is separate
 from the terminal duplicate after Redis-link recovery.
+
+## First exact-head CI execution and correction
+
+[Run 43791604980](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43791604980),
+PR #65 head `3d5a16876722f143e2b4a9579ab969b2e33609f2`:
+
+- Native runtime verdict suite: **74/74 passed**, including all 48 added cases.
+- Full pipeline: **20/26 passed, 6 failed**. The first two mixed-language trials
+  and actual API-process restart passed. The later trials and link/natural-lease
+  scenarios failed at submission admission with HTTP 429, before their intended
+  assertions. They are not counted as validated recovery scenarios.
+- Cause: the harness respected three pending jobs per user but reused one IP for
+  more than 20 submissions within the real minute window. Existing request limits
+  correctly rejected that workload. The correction adds the bounded, header-driven
+  pacing above; all HTTP 202, verdict, notification, XP and lease assertions remain.
+- [Raw metrics and process logs](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43791604980/artifacts/14193126493)
+  were retained even though the test step failed. These contain only two completed
+  capacity trials and no new link/lease recovery result; they are incomplete evidence.
+
+The corrected immutable candidate must pass another complete exact-head run.
+This failed run does not establish integration readiness or production capacity.

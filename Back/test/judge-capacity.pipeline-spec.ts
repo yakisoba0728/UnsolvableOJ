@@ -88,6 +88,24 @@ describe('bounded mixed-language capacity and worker link recovery', () => {
   const jobs: string[] = [];
   const trials: unknown[] = [];
   const recovery: unknown[] = [];
+  const admissionPauses: { requiredRequests: number; elapsedMs: number }[] = [];
+  let remainingSubmissions = 20;
+  let submissionWindowEndsAt = 0;
+
+  // All synthetic users share the same loopback IP and the real 20/minute
+  // endpoint budget. Reserve a complete scenario before starting its timer;
+  // never clear counters, rotate IPs, or retry 429s inside a measured batch.
+  async function waitForSubmissionBudget(requiredRequests: number) {
+    expect(requiredRequests).toBeLessThanOrEqual(20);
+    if (remainingSubmissions >= requiredRequests) return;
+    const started = performance.now();
+    expect(submissionWindowEndsAt - started).toBeLessThanOrEqual(61_000);
+    while (performance.now() < submissionWindowEndsAt)
+      await delay(Math.min(1000, submissionWindowEndsAt - performance.now()));
+    admissionPauses.push({ requiredRequests, elapsedMs: performance.now() - started });
+    remainingSubmissions = 20;
+    submissionWindowEndsAt = 0;
+  }
 
   async function startWorker(overrides: NodeJS.ProcessEnv = {}) {
     const child = spawn(process.execPath, ['../Judge/dist/worker.js'], {
@@ -123,9 +141,20 @@ describe('bounded mixed-language capacity and worker link recovery', () => {
     const started = performance.now();
     const response = await request(app.getHttpServer()).post(`${base}/problems/${problem}/submissions`)
       .set(bearer(solver.token)).send({ language, sourceCode }).expect(202);
+    const apiMs = performance.now() - started;
+    const limit = Number(response.headers['x-ratelimit-limit']);
+    const remaining = Number(response.headers['x-ratelimit-remaining']);
+    const resetsInSeconds = Number(response.headers['x-ratelimit-reset']);
+    expect(limit).toBe(20);
+    expect(Number.isInteger(remaining) && remaining >= 0 && remaining < limit).toBe(true);
+    expect(Number.isInteger(resetsInSeconds) && resetsInSeconds >= 0 && resetsInSeconds <= 60).toBe(true);
+    // Parallel HTTP responses may arrive out of order. Keep the smallest
+    // remaining budget and latest expiry, conservatively across window rollover.
+    remainingSubmissions = Math.min(remainingSubmissions, remaining);
+    submissionWindowEndsAt = Math.max(submissionWindowEndsAt, performance.now() + resetsInSeconds * 1000 + 100);
     const id = response.body.id as string;
     jobs.push(`${id}-1`);
-    return { id, apiMs: performance.now() - started };
+    return { id, apiMs };
   }
   async function state(id: string) {
     const [row] = await db.query(`SELECT status, judge_generation AS generation, judge_attempt_id AS attempt,
@@ -179,6 +208,7 @@ describe('bounded mixed-language capacity and worker link recovery', () => {
 
   // Alternating order and two samples/configuration expose shared-runner variance.
   it.each([1, 2, 2, 1])('measures the eight-language mix with %i worker processes', async (count) => {
+    await waitForSubmissionBudget(count + 8);
     const group: OwnedWorker[] = [];
     try {
       for (let i = 0; i < count; i++) group.push(await startWorker());
@@ -207,6 +237,7 @@ describe('bounded mixed-language capacity and worker link recovery', () => {
   });
 
   it('reconnects the worker Redis link, retains queued work and applies duplicate deliveries once', async () => {
+    await waitForSubmissionBudget(2);
     const proxy = await loopbackProxy(process.env.REDIS_HOST ?? '127.0.0.1', Number(process.env.REDIS_PORT ?? 6379));
     let worker: OwnedWorker | undefined;
     try {
@@ -234,6 +265,7 @@ describe('bounded mixed-language capacity and worker link recovery', () => {
   });
 
   it('replays the same result after an API link interruption without re-executing or duplicating XP', async () => {
+    await waitForSubmissionBudget(1);
     const apiUrl = new URL(await app.getUrl());
     const proxy = await loopbackProxy(apiUrl.hostname, Number(apiUrl.port));
     let worker: OwnedWorker | undefined;
@@ -256,6 +288,7 @@ describe('bounded mixed-language capacity and worker link recovery', () => {
   });
 
   it('fences a competing duplicate delivery while another real worker owns the active lease', async () => {
+    await waitForSubmissionBudget(1);
     const group = [await startWorker(), await startWorker()];
     try {
       const submitted = await submit('PYTHON', 'import time\ntime.sleep(3)\nprint(3)', solvers[1], slowProblemId);
@@ -274,6 +307,7 @@ describe('bounded mixed-language capacity and worker link recovery', () => {
   });
 
   it('recovers a killed worker after the actual 60-second lease expires and fences its callback', async () => {
+    await waitForSubmissionBudget(1);
     const originalWorker = await startWorker();
     let replacement: OwnedWorker | undefined;
     try {
@@ -308,8 +342,8 @@ describe('bounded mixed-language capacity and worker link recovery', () => {
       schemaVersion: 1, timestamp: new Date().toISOString(),
       environment: { node: process.version, platform: platform(), kernel: release(), logicalCpus: cpus().length, cpu: cpus()[0]?.model },
       scope: 'Disposable API/PostgreSQL/Redis, real workers and go-judge; eight accepted languages, one sample/job, alternating 1/2/2/1 worker trials after Python warmup.',
-      limitations: ['Eight jobs/trial: p95/p99 are sample maxima, not steady-state tail estimates.', 'Shared CI runner; no production capacity or before/after optimization claim.', 'Worker CPU uses owned-PID procfs tick deltas; peak RSS includes warmup. API also hosts the test harness: isolated API CPU/RSS is not reported.', 'Proxy faults interrupt worker TCP links, not Redis/API services. Natural lease expiry uses real time.'],
-      trials, recovery,
+      limitations: ['Eight jobs/trial: p95/p99 are sample maxima, not steady-state tail estimates.', 'Jobs/s measures admitted bursts; per-IP 20/minute admission pauses are recorded outside the timed interval.', 'Shared CI runner; no production capacity or before/after optimization claim.', 'Worker CPU uses owned-PID procfs tick deltas; peak RSS includes warmup. API also hosts the test harness: isolated API CPU/RSS is not reported.', 'Proxy faults interrupt worker TCP links, not Redis/API services. Natural lease expiry uses real time.'],
+      admissionPauses, trials, recovery,
     }, null, 2) + '\n');
     await writeFile('reports/phase2-judge-workers.log', workers.map((worker, index) => `Worker ${index}\n${worker.log}`).join('\n'));
     await closeApp(app, jobs);
