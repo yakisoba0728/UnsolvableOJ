@@ -81,4 +81,14 @@ export class CreateEnterpriseTestDto {
 
 export class UpdateEnterpriseTestDto extends PartialType(
   CreateEnterpriseTestDto,
-) {}
+) {
+  /** Deliberate pre-start refresh. Ordinary metadata edits retain selected versions. */
+  @IsOptional()
+  @IsBoolean()
+  refreshProblemVersions?: boolean;
+
+  /** Explicit refresh of Vibe content, fixtures and runner/review contract before start. */
+  @IsOptional()
+  @IsBoolean()
+  refreshVibeVersions?: boolean;
+}

@@ -69,3 +69,91 @@ test("unsubscribe paths and query-style token leaks are redacted without breakin
   });
   assert.deepEqual(clean.values, [null, 42, true, "ordinary breadcrumb"]);
 });
+
+// The optional SDK lifecycle must preserve the same privacy boundary while its chunk loads.
+import { createMonitoringClient } from "../src/monitoringClient.ts";
+const flush = () => new Promise((resolve) => setImmediate(resolve));
+const fakeSdk = () => {
+  const calls = { initialized: [], captured: [] };
+  return {
+    calls,
+    init(options) { calls.initialized.push(options); },
+    captureException(error) { calls.captured.push(error); return "event-id"; },
+  };
+};
+
+test("disabled monitoring and mail action pages never download the optional SDK", async () => {
+  let loads = 0;
+  const load = async () => { loads += 1; return fakeSdk(); };
+  for (const options of [
+    { dsn: undefined, getPath: () => "/" },
+    { dsn: "test-dsn", getPath: () => "/email/verify" },
+    { dsn: "test-dsn", getPath: () => "/email/unsubscribe" },
+  ]) {
+    const client = createMonitoringClient({ environment: "test", load, ...options });
+    client.init();
+    client.report(new Error("local error"));
+  }
+  await flush();
+  assert.equal(loads, 0);
+});
+
+test("initialization and early errors share one SDK download and redact telemetry", async () => {
+  let loads = 0;
+  const sdk = fakeSdk();
+  const client = createMonitoringClient({
+    dsn: "test-dsn", environment: "test", getPath: () => "/problems",
+    load: async () => { loads += 1; return sdk; },
+  });
+  const error = new Error("visible error");
+  client.init();
+  client.report(error);
+  client.init();
+  await flush();
+  assert.equal(loads, 1);
+  assert.equal(sdk.calls.initialized.length, 1);
+  assert.deepEqual(sdk.calls.captured, [error]);
+  assert.equal(sdk.calls.initialized[0].tracesSampleRate, 0);
+  assert.equal(sdk.calls.initialized[0].beforeSend({ extra: { token: "secret" } }).extra.token, "[redacted]");
+});
+
+test("entering a mail action while the SDK downloads suppresses initialization and queued errors", async () => {
+  let pathname = "/problems";
+  let release;
+  const sdk = fakeSdk();
+  const client = createMonitoringClient({
+    dsn: "test-dsn", environment: "test", getPath: () => pathname,
+    load: () => new Promise(resolve => { release = resolve; }),
+  });
+  client.init();
+  client.report(new Error("pending error"));
+  pathname = "/email/verify";
+  release(sdk);
+  await flush();
+  assert.equal(sdk.calls.initialized.length, 0);
+  assert.equal(sdk.calls.captured.length, 0);
+  pathname = "/problems";
+  client.init();
+  release(sdk);
+  await flush();
+  assert.equal(sdk.calls.initialized.length, 1);
+  pathname = "/email/unsubscribe";
+  assert.equal(sdk.calls.initialized[0].beforeSend({ message: "secret" }), null);
+  assert.equal(sdk.calls.initialized[0].beforeBreadcrumb({ message: "secret" }), null);
+});
+
+test("an unavailable telemetry chunk is recoverable without an unhandled rejection", async () => {
+  const sdk = fakeSdk();
+  let loads = 0;
+  const client = createMonitoringClient({
+    dsn: "test-dsn", environment: "test", getPath: () => "/",
+    load: async () => { if (++loads === 1) throw new Error("offline"); return sdk; },
+  });
+  client.init();
+  await flush();
+  client.report(new Error("later error"));
+  await flush();
+  assert.equal(loads, 2);
+  assert.equal(sdk.calls.initialized.length, 1);
+  assert.equal(sdk.calls.captured.length, 1);
+});

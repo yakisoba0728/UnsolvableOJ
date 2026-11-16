@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "author-local-runtime-revalidation-validation",
+  "recordedAt": "2026-11-16T07:50:42.540616+00:00",
+  "author": "runtime_security_engineer",
+  "integrationBase": "87cc1e724f3c5bba8ee4a1d3e138c16a18202f02",
+  "policyReviewState": "PROPOSED",
+  "policyContentSha256": "99ec18c22bc108759734494755fe4241a36c447949309881f15c01bec5d632db",
+  "policyFileSha256": "74200feeaf7764a447dc740dac42f09b7a2e2c3c9cdb03c95f5994fb4083c7b4",
+  "testSourceSha256": {
+    "scripts/image_applicability_test.py": "9b5460e4fb664f2613f18e2a9fbdfd02ccb6b76d9c4d3cac8004a65a372dbc92"
+  },
+  "executed": [
+    {
+      "command": "python3 -m unittest discover -s scripts -p '*_test.py'",
+      "result": "PASS",
+      "tests": 92,
+      "elapsedSeconds": 46.425
+    },
+    {
+      "check": "Evaluate retained blocked scan/manifest/payload with proposed active policy at actual current UTC",
+      "result": "EXPECTED_BLOCKED_REVIEW",
+      "observedAt": "2026-11-16T07:48:07.724865+00:00",
+      "exitCode": 2,
+      "proposedCount": 182,
+      "reviewedCount": 0,
+      "remainingBlockingCount": 182,
+      "unresolvedCount": 0
+    }
+  ],
+  "unchangedSourceSha256": {
+    "scripts/image_applicability.py": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f",
+    "scripts/image_audit.py": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72",
+    "scripts/image_gate.py": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b",
+    "scripts/verify_image_payload.py": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0",
+    "scripts/image-audit-tool.json": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c",
+    "Judge/runtime/Dockerfile": "23970df1a5b1b6cdfbf5e9c28ac59f51e7cb8c864327e7368aff31165ca4ce67"
+  },
+  "historicalPhaseIIEvidence": "All five original inventory/manual/package-files/scanner-identity/baseline files compared byte for byte with integration base and unchanged. Original active policy bytes separately archived unchanged.",
+  "notExecuted": [
+    "New Docker build or current scanner run locally",
+    "New OCI payload verification locally",
+    "Host kernel inspection or exploit/escape testing",
+    "GitHub CI for this proposed source tree",
+    "Deployment or runtime environment change"
+  ],
+  "approval": "No independent-reviewer or coordinator policy approval is supplied by this author receipt."
+}

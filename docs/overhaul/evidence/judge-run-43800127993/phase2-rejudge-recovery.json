@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "timestamp": "2026-11-16T03:55:54.163Z",
+  "evidence": [
+    {
+      "scenario": "accepted generation 1, interrupted rejudge generation 2, natural recovery generation 3",
+      "recoveredMs": 86520.616654,
+      "completedMs": 89844.93400200001,
+      "finalStatus": "ACCEPTED",
+      "generation": 3,
+      "recoveries": 1,
+      "xp": 10,
+      "solveRows": 1,
+      "learningRows": 1,
+      "notifications": 1,
+      "staleCallback": 409,
+      "duplicateFinalCallback": 200,
+      "leaseClockChanged": false
+    }
+  ]
+}

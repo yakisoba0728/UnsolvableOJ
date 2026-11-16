@@ -1,0 +1,1919 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-16T04:00:29.706966+00:00",
+  "scannerVersion": "0.76.2",
+  "scannerCommit": "3f6334d223b52188324af3b9923b4249cd206652",
+  "algorithm": "sha256(UTF8(ArtifactID + ':' + Target + ':' + PkgID + ':' + VulnerabilityID))",
+  "artifactIdRule": "ImageID only when image reference, RepoTags and RepoDigests are empty",
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/aquasecurity/trivy/3f6334d223b52188324af3b9923b4249cd206652/pkg/fingerprint/fingerprint.go",
+      "sha256": "5306e10ab866fe2bd7b4e1f62e916af0d8bcb47ea611f621a3cfd1349cfe5ff3"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/aquasecurity/trivy/3f6334d223b52188324af3b9923b4249cd206652/pkg/scan/service.go",
+      "sha256": "538036f0a228d4725ba1884b01d40752b29597286c1bfe92bfe056f07a09cf98"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/aquasecurity/trivy/3f6334d223b52188324af3b9923b4249cd206652/pkg/types/vulnerability.go",
+      "sha256": "a079ce919978a12ef0919ce7be69497eaf2b4cca1d3b7af76ce65443ccde94a6"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/aquasecurity/trivy/3f6334d223b52188324af3b9923b4249cd206652/pkg/digest/digest.go",
+      "sha256": "ea2f31049869cbcbb2b96e80c11ae600ec2e614019da67e4e901ec89ddbfe5a5"
+    }
+  ],
+  "reports": [
+    {
+      "label": "original",
+      "rawReportSha256": "406d2627e4b48c8d248552e1f9d1d7daf8d8dd8c09d9cd33125fd1f9167a8926",
+      "image": {
+        "manifestDigest": "sha256:5c441685db9ee2b1af03cbf01d5c1aca2c0729fe522f42fb04934823c91bb303",
+        "configDigest": "sha256:00b0bf5c0eb5e5eab8bee4a458985d1f8b81ec2c298156eb0c1843ee14e8bf85",
+        "indexDigest": "sha256:be560dc8d16df9b2cede89762fdef3dbbda27643e2cc5760c7c0be777a95acf6",
+        "buildDigest": "sha256:a6c9b7cf6c769c5a41e63fc40f612e223bc710380731431e9c5b1c09c3f98f24",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+          "sha256:9af353f9a1d274b5c5913927a09db410af6281580de1040fb51eb1fa443a3442",
+          "sha256:e323104e3710920655c3de21d47f6f343742dcf25a1a33dec55466719fd2b8af",
+          "sha256:6940956208c28fcaea7957623bc1d4564d4dcc0e77d273c0ff676c615ec11fd6",
+          "sha256:b146a1ec317d1e4501099a930293489c7d9a4308a506ba37f8ce09ca56dc17aa",
+          "sha256:f0de8c349487c1dd979c643606726a144b3946ed6410466198a0cb5664b76161",
+          "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+          "sha256:19e8ebdf26b4d6f0c8476eb50a9774115abb2877c6d2549129a9f3d88b319943",
+          "sha256:1f95828c7b08addfe40e75c6ce357674bc59751338311b442511b1a42b8f8404",
+          "sha256:0829222e44f47fd58aa524848a30f65323aa100311f927e771e65fb34a99872c",
+          "sha256:d059b20f4bcf7e8363620354deadf52d3c5c2e278b47e8a2b0c474a05a9254c9",
+          "sha256:f81ad4194698bd12e9b2422f07981da72dee0c0f7ca65d99bc4cb0d829f42da3"
+        ],
+        "compressedLayerBytes": 563678557
+      },
+      "sourceCommit": "c167a1e17e7b915fc313c52357e7505f8cf56b6f",
+      "actionRun": "43796045174",
+      "artifactId": "sha256:00b0bf5c0eb5e5eab8bee4a458985d1f8b81ec2c298156eb0c1843ee14e8bf85",
+      "referenceMode": "UNTAGGED_LOCAL_OCI",
+      "selectedRecords": 182,
+      "recomputedMatches": 182,
+      "entries": [
+        {
+          "id": "CVE-2026-63825",
+          "rawFingerprint": "sha256:393be456ea76167c8f6ace20f71f7db21da6f6542442bf99629221ced5227968",
+          "advisorySha256": "8734440de41b64f8be4c2fb655b9aee97788e77afe01784847c7192ded019a2c"
+        },
+        {
+          "id": "CVE-2026-64523",
+          "rawFingerprint": "sha256:c202bc9820b39431080ebfcc6088f33fd96dd52a0f33d545e061f967053298aa",
+          "advisorySha256": "5d6ab2f453521454832665d25efaed3d90ecdfd5860ac0237ddee44f8876acb7"
+        },
+        {
+          "id": "CVE-2026-68426",
+          "rawFingerprint": "sha256:f94a15a9b1678ab60510ead4220204fa80bdb00723525290d33980ce748ae40f",
+          "advisorySha256": "60f629ad5bf72a1211b865ecb2e7136067aa35ec3212eca98f34a5806dee92bd"
+        },
+        {
+          "id": "CVE-2026-90162",
+          "rawFingerprint": "sha256:be10964862d45e6800531b40336b6ba686f377ccb1abd16503c5faa3de6b4df9",
+          "advisorySha256": "8df8ae1797d32607e5f99d95eab8f03be1a15b775f63b2c9fefdfe19876930f8"
+        },
+        {
+          "id": "CVE-2026-93221",
+          "rawFingerprint": "sha256:60d332225b9326f1de9627ea2ae9ad8814382ebbd4eb2c74290ab971554d6495",
+          "advisorySha256": "e0d45d4322e8f4a3a43c9f71f879c7bc8394a0956cd6f8ee80d79447b2bfc41d"
+        },
+        {
+          "id": "CVE-2022-50240",
+          "rawFingerprint": "sha256:d2bb2936b25a137e3dde2cf9136fe6c140fd762fda79bc5257e59d4162110fd3",
+          "advisorySha256": "f9a27c7826b3f28caefdc3b079d0a7061dab0621e39f3a0df6c4c89fc6752bfb"
+        },
+        {
+          "id": "CVE-2024-35948",
+          "rawFingerprint": "sha256:ecbe4f969e917ecb6d7506225f0be53f7ef83c0dbdac7b7dfa5b753d8b055dea",
+          "advisorySha256": "5cd53efe94de69b9e8bc550ad92c34461f7979323611bf16ce5a533c24ddc6f2"
+        },
+        {
+          "id": "CVE-2024-38581",
+          "rawFingerprint": "sha256:8b6d95f4a6d4162a214706d8712ac6f9f1d58a18d68d66b19894d6d4bb3c319a",
+          "advisorySha256": "896f0b09ebc29d0d024c72ca30c7d30a36e2a9e209357f3b6809366ec7aa5653"
+        },
+        {
+          "id": "CVE-2024-40954",
+          "rawFingerprint": "sha256:bb91bac2013da657e9f4891058ac2b1fe0bf9c33b06d66f5acb6817c12a82508",
+          "advisorySha256": "49a4743a3e06f2e6c6d662c3ed8b9ec80df8c82099edceb4b06c2274d7fa56d5"
+        },
+        {
+          "id": "CVE-2024-44964",
+          "rawFingerprint": "sha256:60da2698ee8f27b22c7513afba5d5048a2030a8a4b294e26f83c4c70d3bfa688",
+          "advisorySha256": "4c3d73531866f30330a6942163a6185f65329a5a8acc5a59a387a1f7e8046234"
+        },
+        {
+          "id": "CVE-2024-46742",
+          "rawFingerprint": "sha256:2836b3e37a4fdf0764a0939ff9c6737bbd46d9ae71be6d3beba4faaae915444a",
+          "advisorySha256": "62cb61fa3a2eb95b9c2c1bcabe407d8b3e04c3f0827eb84b3fe162ef66e82db3"
+        },
+        {
+          "id": "CVE-2024-56591",
+          "rawFingerprint": "sha256:7a7dc178dcb4f0072329f063e13f7b8060e80ada4e7b2b4fff8dcc3318af4ffc",
+          "advisorySha256": "fe4c4325c572a01d7f007d7bf78dacb1f3690597dc74e32062c6590c2138cecf"
+        },
+        {
+          "id": "CVE-2024-57857",
+          "rawFingerprint": "sha256:aa5884c066f4fabc0b8ad4422d0d11afcda2884cb4fb47acc5f4d195e0613523",
+          "advisorySha256": "c7081b4f5cae04411119a40354fa2643adf2023a1f39141308ba03dea7a456a8"
+        },
+        {
+          "id": "CVE-2024-58098",
+          "rawFingerprint": "sha256:01b3a7ded925986eb71aa6a085e974b06e0872fd34d06980aae3c3001eebc748",
+          "advisorySha256": "eb2ff7f5421b68023530a50c1cb9636fc8f7204a6e784f80f5b96f67a00a5d59"
+        },
+        {
+          "id": "CVE-2024-58100",
+          "rawFingerprint": "sha256:b0adfbc998ff5bbdfc83d72ee4de7f2a8c2a45715824fb87f0694ad6fa6fa930",
+          "advisorySha256": "84f7299c5f16de05d28fc63450bef2139f1d2a4fb5a68c7344ead344f178631c"
+        },
+        {
+          "id": "CVE-2025-22043",
+          "rawFingerprint": "sha256:600ade396f4576869221b0c84b52752671d2d7da1c506c4ac0ca94b4f56766dd",
+          "advisorySha256": "5b1ea45c032a8a045ace40388e3c12663bd513299b9d5a57b8f4d33be02ce114"
+        },
+        {
+          "id": "CVE-2025-37743",
+          "rawFingerprint": "sha256:abb0b4e54e93e6be8987e9c0cfe219e400a4096b586731d149b0ee83bdb0801c",
+          "advisorySha256": "0616a355c2d48243e8cdc444bc446bcd79d665f90ec829ede19e9135a7d14796"
+        },
+        {
+          "id": "CVE-2025-37776",
+          "rawFingerprint": "sha256:ce5b487fc857ffd3d6e62f16b522b825295a5cc04115217a761e547c458d55fd",
+          "advisorySha256": "8fd3873bb35f63e2590c0ba4b51a2e623293e688dec7f516b394b8ccc7af36cd"
+        },
+        {
+          "id": "CVE-2025-37906",
+          "rawFingerprint": "sha256:3b67367a00df76b474d28fa85ffc6012164cf03ec4e10a1bf8ad426b10be7175",
+          "advisorySha256": "08a761f5f20c4be863c2534a09e059e7c154b71668ee843c36baecf9c9f1b687"
+        },
+        {
+          "id": "CVE-2025-38717",
+          "rawFingerprint": "sha256:faf29f9d06404a85e10898122fa49953bbcc25d7a6da7264d85d6d3fa87da72a",
+          "advisorySha256": "22d94f4f64ee78d03ce430c44802eb7afd64bc61b3da4cadf306fe6cdc4db9f1"
+        },
+        {
+          "id": "CVE-2025-39933",
+          "rawFingerprint": "sha256:00b94678dd8b305067c8e2b36ee9054dcb7231fe08abff6e54799f14ebc819eb",
+          "advisorySha256": "39a2c18496bfa2ba67e4ad32e480e3e9bd950af43fc7617a15f79096cad9e6fb"
+        },
+        {
+          "id": "CVE-2025-40025",
+          "rawFingerprint": "sha256:47210e2010552105d41d71ead0e3e7468607a07c9ad74bdce7aef4fd0b21b7c9",
+          "advisorySha256": "7908f0154074ee3cd8ba6b006ff87a67bfc9b0c2a20aa03a8cbae5b33981debe"
+        },
+        {
+          "id": "CVE-2025-40075",
+          "rawFingerprint": "sha256:b386a1289a824ef84b626f9e9bc9ca016b9d1beb322155e7942784508046146a",
+          "advisorySha256": "6632e7da89915665085c6f80c0b3689d55d44e9ac3779425dba731c4bb06acac"
+        },
+        {
+          "id": "CVE-2025-40170",
+          "rawFingerprint": "sha256:30a3c541ce4bef48b3fea2a7465cad47ed5f55b0d96683e086e980757b815731",
+          "advisorySha256": "0a13ab92a0aae6a07cdfe0f30ddb4071e325ea84d753e6de0bcfa67d3856fc9f"
+        },
+        {
+          "id": "CVE-2025-40190",
+          "rawFingerprint": "sha256:b542dadf6eb0357ea15e46c2823bfb4cacbe170dfb50c54a5f3da462b5e096d5",
+          "advisorySha256": "d4db8da71e91d6cfb10c62b7b99db84981b0512ec77d6159a5f97176085af410"
+        },
+        {
+          "id": "CVE-2025-40274",
+          "rawFingerprint": "sha256:905f96da45b85b70d18645b017424798e6d1a04914683d037a586c48f251c32a",
+          "advisorySha256": "edd8fdb33943f4c3ff95d623ad65aa6a429f10dcc4a37e9afacd2ef1a27976fc"
+        },
+        {
+          "id": "CVE-2025-40344",
+          "rawFingerprint": "sha256:0af55ad3d567a7ff6ab23f52816797916fe8d96a683998379835416bfd441533",
+          "advisorySha256": "9b2ea0d8439bd0a388de6f8d9448c45771b66fd3950f72002fdeb34284266e5b"
+        },
+        {
+          "id": "CVE-2025-68251",
+          "rawFingerprint": "sha256:9f901d40c41d8db0ab5069d46c55eac26e6f1bbd589b5329c4307514749f42e2",
+          "advisorySha256": "68f910e0418ba40df37b7311c34532fd5b9531d1c4064be3588a9982b5251e87"
+        },
+        {
+          "id": "CVE-2025-68304",
+          "rawFingerprint": "sha256:0358857cdb255b3df74805f4bd02906b1d473f547af12c92b25b7963f01953ae",
+          "advisorySha256": "9167d7806d292faeb29544778f462f361b6482ee8fe99f119fd227acd44c44cd"
+        },
+        {
+          "id": "CVE-2025-68360",
+          "rawFingerprint": "sha256:6b5d2048708ca0b54021600d22760788dd1c9e25a838a80f216ad2004393bea8",
+          "advisorySha256": "e1e080320e1795eae082cc00c22897485d23b443b01c36af0cd5e1a17e03844a"
+        },
+        {
+          "id": "CVE-2025-68729",
+          "rawFingerprint": "sha256:b4950bda2677be7629cbf5f831ed88fb1acfbdad7ccdbecd18f7eb8e80d3b53a",
+          "advisorySha256": "e682b060f7f5c8700e800ddde84c448cb91635d4538e81752b5f79cfc754805c"
+        },
+        {
+          "id": "CVE-2025-68730",
+          "rawFingerprint": "sha256:2e9b0938f3ee84d70f8497dcbd959a8b772d6ee43395e5cceb956979764729f3",
+          "advisorySha256": "3c58c51444958a7fb6c057a5fc8a6ae075cae6ddcb69b44ed067e0a7c8f4c7e4"
+        },
+        {
+          "id": "CVE-2025-68745",
+          "rawFingerprint": "sha256:ec286c294f5d84c4d70f2b96007c8b786749c1435bdfde4f642d8e2f49347f37",
+          "advisorySha256": "24fe5031f683e25f112b923ee64dee36d4fd5ae1cf64d54666f754f97f677d25"
+        },
+        {
+          "id": "CVE-2025-71073",
+          "rawFingerprint": "sha256:1a03d07b584817cd77a25db8e29964c808ae1461626b0b70c9ccbd8b0a37217a",
+          "advisorySha256": "0a5c27ed0f1ccd7bbb1a748557dfbfb32dacffa59e3303daae6deed3b5cc79da"
+        },
+        {
+          "id": "CVE-2025-71074",
+          "rawFingerprint": "sha256:10252017cf98b118dcfe47ef0a6ec553c38a1b5c2d91dabe7b8e05047d6a58fd",
+          "advisorySha256": "67f4ec02f5b7de70b579a165c025e406e13db51e30a99bd619ec73a1418f4cbc"
+        },
+        {
+          "id": "CVE-2025-71202",
+          "rawFingerprint": "sha256:d8cc03e55261b5671d36320eaf7290aea37a114a7b4626fbc53cbd4919cd91b5",
+          "advisorySha256": "c158d6082d125e3a7ca0e45b9b32666a1ae1d2da1d5ee29e9e8dd506ea744ed6"
+        },
+        {
+          "id": "CVE-2025-71315",
+          "rawFingerprint": "sha256:28592ee631712f015d3e1fdd768c818638453c8b31b1710074987ff463703ee8",
+          "advisorySha256": "4ce25f74bfd3d6892cca9b4efe7288caa688b0053efe005abb647fa8d3f28167"
+        },
+        {
+          "id": "CVE-2026-100074",
+          "rawFingerprint": "sha256:f2dff7b8cb9d217fb853cb7d05f32125ce3d2c308453cfd3e3e6b72a2a413a6b",
+          "advisorySha256": "504af54861b77acfe990f022f4f6cea179d9968c33b68442557bcc742f132431"
+        },
+        {
+          "id": "CVE-2026-23208",
+          "rawFingerprint": "sha256:0de01f7358a294c1be68797cc6f981dddd0ff3c959b107608112adaf0aaabb5e",
+          "advisorySha256": "be4475c6d71d635aaf1e67684c3afbc9614235db51cf6c6d5bb3f5036375470b"
+        },
+        {
+          "id": "CVE-2026-23239",
+          "rawFingerprint": "sha256:53c23cd87cd533dca3fb8785208a2f55b6344a6014a2af3d83893885489b6721",
+          "advisorySha256": "dc52b81befb935fa89caaa9136f4c101996eeb9da733c76612d36c0100da8d42"
+        },
+        {
+          "id": "CVE-2026-23240",
+          "rawFingerprint": "sha256:99b753cafc1002198d3b5127b559042076053352f7f0aca1fa568d91931d4d3c",
+          "advisorySha256": "d8460df43e2ceb1fb419be3377a783bfd2bef05d50aaae195cd7ef1855ce8662"
+        },
+        {
+          "id": "CVE-2026-23265",
+          "rawFingerprint": "sha256:7fc668f04e333409054c9637158242c9209547ed1ce84f4f571145e0228f65cf",
+          "advisorySha256": "292df3496e487a3c55114a52c71969c97f42a1a223c1af2b696f7aa1b542a511"
+        },
+        {
+          "id": "CVE-2026-23377",
+          "rawFingerprint": "sha256:2741ad47a25211cbdfcc234bc60f09f6b35ffcc6f89412748569153818b219ef",
+          "advisorySha256": "bc13221a6f73be8cd92bdd7062c56b9656637fed614f3dcf1bd73bfcc5f20b43"
+        },
+        {
+          "id": "CVE-2026-23393",
+          "rawFingerprint": "sha256:10bd48bbfa5ecaf406bdaab2b150a16642031e5269e1c57fd0b65f5aadc82e72",
+          "advisorySha256": "0388fb2c7d1a14fb9a240b81459ed479aa4162f8cedbf95292150b750c7b279d"
+        },
+        {
+          "id": "CVE-2026-31410",
+          "rawFingerprint": "sha256:d5579b8f31c34a1576ff6c874ea77492d60b6baabc70c7729ca7332250fb367d",
+          "advisorySha256": "8b15bc42db829a2c4f7efcd647dcc5a5682f016d0454da17b65bebf5ffcb886a"
+        },
+        {
+          "id": "CVE-2026-31536",
+          "rawFingerprint": "sha256:c18852df12e2014c15d11671294d8a36ba8cef11c67a7852c78ba5771ee83e81",
+          "advisorySha256": "58730d7c88138af9a698ca378d5f33f1d79ba9eeb0854ee601380fb99eadd031"
+        },
+        {
+          "id": "CVE-2026-31692",
+          "rawFingerprint": "sha256:208b5798089b9ce21343324af181ce2e4c64222ed2d60726fdf34d1583549a4c",
+          "advisorySha256": "ecd90c9709d49ec281269d8649fd3cd52e344ed5e3fb760fedba799a8572c3cc"
+        },
+        {
+          "id": "CVE-2026-43009",
+          "rawFingerprint": "sha256:f41a44b038c1806d3846750703c627fce8ee26f1ba88fe9b3909d61f5c6b52a6",
+          "advisorySha256": "902bbac41f7bd1cae27f7060a00c729f847bc1f2b6fa901b8db963027805dc7d"
+        },
+        {
+          "id": "CVE-2026-43034",
+          "rawFingerprint": "sha256:980d3a4cc4c181a1c7ba869fe1eddd582c99fdd463aade8be68227f33ac531c3",
+          "advisorySha256": "b4fe8ff6e36020775bf567d631a5446fb81cc99ae1f22b4d950d03107e82d2fc"
+        },
+        {
+          "id": "CVE-2026-43042",
+          "rawFingerprint": "sha256:a202a57b54f6c83cb34fc28326fdb1fbfa76e13d8e9b5303177221323465f549",
+          "advisorySha256": "389948e74cd573e46a32d507c50cc1198ede559498820eeea9187813b06fdabe"
+        },
+        {
+          "id": "CVE-2026-43048",
+          "rawFingerprint": "sha256:80d259a0a450390f57b4b742f7044daa690191b958f406cdd9019192ce70cd26",
+          "advisorySha256": "2f2d2d990eb7f5117a17ea144514018550c443dba229e9b0bfeaaf92bcfacb8c"
+        },
+        {
+          "id": "CVE-2026-43213",
+          "rawFingerprint": "sha256:a708d81ad32501779b334eb463b033b22a2318f7ddea584dd9271055f497ce6b",
+          "advisorySha256": "9c6d0ea68551b8448dc6e63358e1e3bc13b9a21717ff72b5fd81a09f152466e3"
+        },
+        {
+          "id": "CVE-2026-43263",
+          "rawFingerprint": "sha256:ad436e249ed2ba227ddbb37ec8ddcea5dc48038cb9728e239ee82a4b77689375",
+          "advisorySha256": "24324b0172d448861bbdd9183173311a141406c26f9edec21e3aaaf5d8550a4f"
+        },
+        {
+          "id": "CVE-2026-43379",
+          "rawFingerprint": "sha256:54037ee7b7c4dae809b83426feec818be16dbbf7b2719aa92d4be71b3cb32915",
+          "advisorySha256": "1b22256da3d1e7d775556697f80a876b7dc0f2d9630a4bfa3ec21cfd29845600"
+        },
+        {
+          "id": "CVE-2026-43464",
+          "rawFingerprint": "sha256:b06450044468dccea980024b7458edbb9c4d9a9b53e8dbd1927b0bec2437372f",
+          "advisorySha256": "469fd9f45526a832aec310a9a000288bf071563d328904dff2662d69f7baf5d2"
+        },
+        {
+          "id": "CVE-2026-45940",
+          "rawFingerprint": "sha256:2bbda929fc4d47894a24b27ed8c81a5b92f0b4ea71dfdc69eb4695e3ec43322d",
+          "advisorySha256": "2cedf7c8744c81099b12e4a211aa73251a51e9d6312790cf9760eff7f29f11a1"
+        },
+        {
+          "id": "CVE-2026-46181",
+          "rawFingerprint": "sha256:c94f76614d1d56ac43c0136b6d8f3541d8dadb479224880880da2f972d417c58",
+          "advisorySha256": "ee7b84bd65c588e399f9362ed33a72e66ab1490f45f5bdccb97361301bdd2b16"
+        },
+        {
+          "id": "CVE-2026-46330",
+          "rawFingerprint": "sha256:b835b99381b43d65df82a22889f2351293fb4ebae63e9bc9c9b92d7cbaebf480",
+          "advisorySha256": "b1b62ede3836ddf09b7b05b7d0bce17d606eca59625331d9b6a0b2f8977fdfab"
+        },
+        {
+          "id": "CVE-2026-52946",
+          "rawFingerprint": "sha256:8bcbe0ba94fcde794474ad025dda721febf7de2cf8da3d95e7c7118e1d881466",
+          "advisorySha256": "38aad01f6418a2afdff487088e5c7d7a22ff9970af7a4b920d65290a2f49885c"
+        },
+        {
+          "id": "CVE-2026-52991",
+          "rawFingerprint": "sha256:b582c7e3eec3f214ef565789e10e60d366198e5dadda3f779caf626010a8a2f6",
+          "advisorySha256": "c6b16549648e377bfc5ec0705084fb5824b8552412800277c17cbdc8456a18d9"
+        },
+        {
+          "id": "CVE-2026-53024",
+          "rawFingerprint": "sha256:08fbbba854cfa37e2c5454b568cf67d50e109ad1d1594ad4d01359b3e9806c77",
+          "advisorySha256": "68e4dab4a25ad9ebaf11460b47a04d72163fc13cb8532681237259c743e052a5"
+        },
+        {
+          "id": "CVE-2026-53178",
+          "rawFingerprint": "sha256:1b5d64f36f3781105f8ccd3a9b8aceea069497c456315d6194aff1721ff0f4b7",
+          "advisorySha256": "3f9db9a403fdd8a92a4daeb9bd12afd5cc5a7662c68bfdb123e780de507a9c40"
+        },
+        {
+          "id": "CVE-2026-53281",
+          "rawFingerprint": "sha256:ddbd98e986955488b5d1c12b468513fe9ce70c0e81407cb342ca1aa370acdb0b",
+          "advisorySha256": "c3a2e510cd7ad90aab197826f65a7189871e053c9a9b5bc85891a70d41e831f3"
+        },
+        {
+          "id": "CVE-2026-53377",
+          "rawFingerprint": "sha256:d29447a6577724cd0f333d41f826e09e29013694366ef989924493abf13ba867",
+          "advisorySha256": "c977f69fa18dafdf2bc02e019396707b02e527a08cb3ec12e3ae13bcdd311eff"
+        },
+        {
+          "id": "CVE-2026-53401",
+          "rawFingerprint": "sha256:0b3d499c1bbd8ec3dceb5aed02e79dc975f21e1048a28281f5c5ff298f00b84f",
+          "advisorySha256": "fdb94c0009855c5f667aacb484e6bd392403afa8fcf35efb50876ee42f711f96"
+        },
+        {
+          "id": "CVE-2026-63819",
+          "rawFingerprint": "sha256:f2bbf1d24ca16964811201749d055b9a0569e0be890b6a29996471bbef0dfe0c",
+          "advisorySha256": "09d3ffbe92bed824cb5f88aaee45b08a103ade82ec32493451a6a7bd3d6bfaab"
+        },
+        {
+          "id": "CVE-2026-63879",
+          "rawFingerprint": "sha256:101ac20fed1b4bd80ef8120c3005da502845e7d0480c9baeaf3dc56fc8262fb9",
+          "advisorySha256": "bf905a728fd750f8f8fceb351e95e27df3be5e9f68fc5aa902893a9629723690"
+        },
+        {
+          "id": "CVE-2026-64036",
+          "rawFingerprint": "sha256:738452722df0836b8151ee9a3ebb2e14a0a0ef53b3d4d220c572f0294a8cc094",
+          "advisorySha256": "525117af25cf29fe71532c7ba5eb4533f176510022e5f842d7821470ca44797c"
+        },
+        {
+          "id": "CVE-2026-64052",
+          "rawFingerprint": "sha256:e6b3227cbdffe4fcb65e59125dc6d0266aa76af5f8e1a057a92087b6aea04a8c",
+          "advisorySha256": "3a2f6b26ed8e0dfde61b2824c939c1c6e30c4be166bc9d504af4fdbc1fee4daf"
+        },
+        {
+          "id": "CVE-2026-64077",
+          "rawFingerprint": "sha256:6a305b748493ddf5b4086aa3c0b32c73a47c49af2a8837452cd719a9b0559f5e",
+          "advisorySha256": "6f8b3e51f76fb4fc3ea2f437834e3fa66b82fc0f410efddea87da46781043289"
+        },
+        {
+          "id": "CVE-2026-64078",
+          "rawFingerprint": "sha256:15e548c3704a0157e043ae4a970c0bcfcfdd69cd350b8ef8c06c67ca381dccef",
+          "advisorySha256": "bf2d7639f21ba5d0ffd65177233a7026db80d1bb1935776287d268f2f7e1a90b"
+        },
+        {
+          "id": "CVE-2026-68081",
+          "rawFingerprint": "sha256:f5727c3a237f1914e0156548317f170035d57f600c2861c1a99b999625fe72b9",
+          "advisorySha256": "f3bf41352c8226366d7f4e35d88f27a733dd6223209e3b4119474f6f4e1eabff"
+        },
+        {
+          "id": "CVE-2026-68103",
+          "rawFingerprint": "sha256:2c90a84551482ee182f2970d2619960e25408959012c8a94fdef6c1627d0a26f",
+          "advisorySha256": "fee1ebf08cba41fbf19a18ee221b4cb926a978438dfa640efd64cc2a06317ab7"
+        },
+        {
+          "id": "CVE-2026-68152",
+          "rawFingerprint": "sha256:fea2e421982cc0506618cd721e98324e96cc5e6a3d21c2e6d6ffd0389c7545d4",
+          "advisorySha256": "411c24165de645de1a61b7a8752a4d47592f8bafd5cd3af7aa0bfd8fd5d0a0a3"
+        },
+        {
+          "id": "CVE-2026-68245",
+          "rawFingerprint": "sha256:a2dfe9de9ac7d454123093312d520284a8ee786f130ee89f23336be8c73d5c6e",
+          "advisorySha256": "bf006352e0c21f6abbebd2339176de2cf6e2cffefd3997324626e7a37d5e45e1"
+        },
+        {
+          "id": "CVE-2026-68257",
+          "rawFingerprint": "sha256:91774dc1a83c77f4745da785bca04cdd3f8025d52cc27281c023d25f026687fd",
+          "advisorySha256": "3a1460d770b7bf7030599584edb7671e030d498a5814132c38f30290f6b186a1"
+        },
+        {
+          "id": "CVE-2026-68323",
+          "rawFingerprint": "sha256:872aef630bbe79061cbc189c133fd53bb8b2a44cedf253e7c37b8e5758bb4b16",
+          "advisorySha256": "da39fb1bccb76819bb23f7eecae2acaef6cfd4d25478400caa1cae9498c1f4b6"
+        },
+        {
+          "id": "CVE-2026-68401",
+          "rawFingerprint": "sha256:0e4bca204e9979be3d3653c837e146273019eb877681d27e817f6e71d9c200c9",
+          "advisorySha256": "8711f36cdaf45599634c2c060490a3283bf453b1569b8d0f9d95d109dd3c5bf1"
+        },
+        {
+          "id": "CVE-2026-68404",
+          "rawFingerprint": "sha256:cfeac5ea94cccf0f8942bb97c5c4bdf9d9d6fd32988ffa031b8ce499b18e3ddd",
+          "advisorySha256": "186c26171eb5beae610c0a07b5dc5a5db5563516ec76aef2e55206b8ff2110b5"
+        },
+        {
+          "id": "CVE-2026-68409",
+          "rawFingerprint": "sha256:9cf2198026010f40ef4cf4df3f812a7086df4ace60d490418ad94cf8a93da8f1",
+          "advisorySha256": "8b5da9f27c286be4421f9f5ecc1593feebcc1409259bded9019f952f98a3bae9"
+        },
+        {
+          "id": "CVE-2026-68447",
+          "rawFingerprint": "sha256:ba669c29fbea71e35c4befacbccb8e7b02c7d6fbd29491765ce4e97d9d40d2e7",
+          "advisorySha256": "622b5aabbed7c9142ed2f94d7f63e6c05c70e31b0ee555d1d64b160f7e59ce52"
+        },
+        {
+          "id": "CVE-2026-68470",
+          "rawFingerprint": "sha256:ce8934cb38d4bfd606e47b27bd44fdb486947db549428dc1adbd19f64c3003b1",
+          "advisorySha256": "492d675439b00d759c2ff8999ef7ad6541cf0cd5e5d831e4b6c167fb0829fe4f"
+        },
+        {
+          "id": "CVE-2026-68471",
+          "rawFingerprint": "sha256:09179ec0467b76e5bb839e6fc3daf11e119296d623a142dcc08ce17a102e5c45",
+          "advisorySha256": "69e8c38959d98192082e5f819aadc1e048affc3e913f976f157192d3440c5e63"
+        },
+        {
+          "id": "CVE-2026-72162",
+          "rawFingerprint": "sha256:1bf0ee84d668b3ec4bef40387c3154e480740c1949cef87d6523987e94907812",
+          "advisorySha256": "0887a849388acdcb9d41ce9794322c468422c6944fc7df348fd3ca0a8c4ba9b6"
+        },
+        {
+          "id": "CVE-2026-72198",
+          "rawFingerprint": "sha256:4dc929d99319862fcc02f9b55af942be184a914c1cf81e026006368066cd0e40",
+          "advisorySha256": "48c08655d5fb574a66c9ca790433b32ffd9cda15b663bcc3edb3aa80165d99f4"
+        },
+        {
+          "id": "CVE-2026-72288",
+          "rawFingerprint": "sha256:7c92af6bee7c9727dd3d57d3178ff2b55051a76cdd16e3095723d5b123ea1820",
+          "advisorySha256": "5cb24c950d1771f6172918640229ae54ae0521865d1aa375c32e9570c7179cab"
+        },
+        {
+          "id": "CVE-2026-72375",
+          "rawFingerprint": "sha256:8c0bacf8699bbbf3208b9a54e9678edd4590bbf25232499a04689a9d50e0b4b3",
+          "advisorySha256": "0ee6dbd5f60c5838b4c1418cce9a4918da83a0035a15a348e0009574bfbdb872"
+        },
+        {
+          "id": "CVE-2026-72380",
+          "rawFingerprint": "sha256:73c7e886ac6af347a7a5339c977445b186c818effaf2a9ed20933e92ef6b459c",
+          "advisorySha256": "ec213d4262d4e22cc52d9ee4ea6681abaf78bb2caabc10a996717e86c1f91309"
+        },
+        {
+          "id": "CVE-2026-72383",
+          "rawFingerprint": "sha256:3fba84577cc31e394ac8ca25f90a582f480e74912567221d8d235bf3e2e54f83",
+          "advisorySha256": "adbae41dba5be5285c6dd446eeb8534aa625d90093f7c181c2036817310916bc"
+        },
+        {
+          "id": "CVE-2026-72423",
+          "rawFingerprint": "sha256:19d6d9ac31567cf2366ab4378c9d8047ba6dc80d1c7bf2f6958079502a18d8f9",
+          "advisorySha256": "81decb5c6956e761bbd01c1a77ba5eb084515cf972a02cdae1b3d36137e06943"
+        },
+        {
+          "id": "CVE-2026-72472",
+          "rawFingerprint": "sha256:319457b5f18d1385dd52e2441d017deb4a8ed3ca807a3dcc8e304a8c4f84ad16",
+          "advisorySha256": "7e903c15d603008ccc41531c98492abb97a77563f87e211a95d8fc947f5cffdb"
+        },
+        {
+          "id": "CVE-2026-72493",
+          "rawFingerprint": "sha256:646e2695fd16652586e17c194c5a874399ef9229dc93fef3352b8718577b79e2",
+          "advisorySha256": "79d6421d0d5e6ed6afa35ce0c0a4c8b902ac78fae73637a67f58e89d5e2498e1"
+        },
+        {
+          "id": "CVE-2026-72494",
+          "rawFingerprint": "sha256:9be63cbb3c2fdb2461d71979ae526c4859ea5703e3c18850b3d1a4f6d01bbf48",
+          "advisorySha256": "f33898dcc483240c862393f9050c623bd061f2f35268cc4d54d73de7f6b45f75"
+        },
+        {
+          "id": "CVE-2026-74257",
+          "rawFingerprint": "sha256:555760e1cfc7913f91027936e33a79c0f55da684c4e5aa472ef177ead61ccb7b",
+          "advisorySha256": "796cbd65378c7948b6926dde98d18132ee0181ab3b02b16f33ccc5879fa22a22"
+        },
+        {
+          "id": "CVE-2026-74269",
+          "rawFingerprint": "sha256:cb8636c14a72b44a2e4236b5e52a457dd093b8c4deb01f57f73962ee8e111c98",
+          "advisorySha256": "1b187cd311ae844f061332bb4a210bc7996a61c0a992dfd6ec7720cb8e38764a"
+        },
+        {
+          "id": "CVE-2026-74314",
+          "rawFingerprint": "sha256:7d462de943adedd267519100a1e17072cbe45e1758c9616fe5ac576ff4d224b5",
+          "advisorySha256": "0387011660c8435526bf571ee3f349a97ec1a52e0eb9be63e3209d6126a4a872"
+        },
+        {
+          "id": "CVE-2026-74317",
+          "rawFingerprint": "sha256:e319bb3c4da3996697e673fb94fd0e1ab49dfd067918cf22c019f81c364a49a1",
+          "advisorySha256": "d67db016ab8e413be13038492e0d26f2408768b8a3b39f901a8400c257a08fda"
+        },
+        {
+          "id": "CVE-2026-74344",
+          "rawFingerprint": "sha256:4a428145d73406a7de94b31644f15ea25d58dd4474d174180ad46a41b4b43d26",
+          "advisorySha256": "8a7a60e2ebbb55ca11a2492d56c55554c54081d06a93c22df577dc2b56531efb"
+        },
+        {
+          "id": "CVE-2026-74385",
+          "rawFingerprint": "sha256:bf7e74cbd4311cfae7313216fad1a221bd76d4fb93f0f850b53becfc992acd85",
+          "advisorySha256": "1281f7322ec4c318a9ebefaeff573af4620103ba4812873d1ae64064867ec360"
+        },
+        {
+          "id": "CVE-2026-74388",
+          "rawFingerprint": "sha256:66e90779cff64ce7c85672735ea8da59a6c81c8215dee1bcd37f4ae0295a6a72",
+          "advisorySha256": "d9bfa3ecc0dc164f97dee2fa9f0c0eba100e3d56449d22e32db59c82ab53326a"
+        },
+        {
+          "id": "CVE-2026-74506",
+          "rawFingerprint": "sha256:7d321e682d97e7bc073426c8c8f6c361a837ebd416e8233b8f6706cbacf7fb1c",
+          "advisorySha256": "c84b9918b0e5d199a0566d0d042832851b33c97f2da39546c371adc78d8e6f55"
+        },
+        {
+          "id": "CVE-2026-74530",
+          "rawFingerprint": "sha256:05a03af8c4d9a8d9949ecf5eb54cb921c4d18cc9e81bc3b5a27a99c57b10cf74",
+          "advisorySha256": "6c030e15021c89d926951796ce017a7b84efb70f03585b855dbad0af54b24c78"
+        },
+        {
+          "id": "CVE-2026-74533",
+          "rawFingerprint": "sha256:dddf61d7b126e85e60a5258c9493430eb5c1e4543c407e85442e3d90b7e7327c",
+          "advisorySha256": "d63fed624c1a41327746c1805f8aff0d1af778ab8c07a1db5a9f030f42d9c9bf"
+        },
+        {
+          "id": "CVE-2026-74534",
+          "rawFingerprint": "sha256:b8ffa0e8b9c3f4728f6cff406d44437c60c24d7499c3a1467c88e5b69b98c7ad",
+          "advisorySha256": "53369d9c55c8429ff9d327ad8f7e7bf79228c50eb093795083a2a8f437f69a80"
+        },
+        {
+          "id": "CVE-2026-74537",
+          "rawFingerprint": "sha256:a79d6e9a75e114ef75210e1dd4b64824ffcc7dce1c529c30c51a7bdad03515d7",
+          "advisorySha256": "6c2e85fe4ba84f3a7fd565988d594104acab4e48d6283f83bbbd011393840cad"
+        },
+        {
+          "id": "CVE-2026-74578",
+          "rawFingerprint": "sha256:f234e4d4b70acb771766a9bcf846fea5d8270ec10a2a706c7c5b7a092f8b125d",
+          "advisorySha256": "0b0a2b452b3888ccc062884006dff294ebec0c5fc8a16fc88958d877e565f3b4"
+        },
+        {
+          "id": "CVE-2026-74715",
+          "rawFingerprint": "sha256:10f8127cb6a2e3baac7827c960ea385f74417600e87fa7ef1003764def967c6e",
+          "advisorySha256": "bf8e96dcb1d32a1e1fa041f1488634124d1f5a5e18e9a1e477ffe4dd32c83a40"
+        },
+        {
+          "id": "CVE-2026-74723",
+          "rawFingerprint": "sha256:8891545800666c50274ccbae1fbb8b4f78e45d9999679fc35fc1d9c4a85f1b04",
+          "advisorySha256": "1b7abdb447d038d14352ad690f65a227daa76dcfafa1a62284060d3305fb384b"
+        },
+        {
+          "id": "CVE-2026-74752",
+          "rawFingerprint": "sha256:2f4505fe4a48f4f0cfafcddc5294a48e7387c5fa179600ab6858c3097c3c483f",
+          "advisorySha256": "2b84a6621ec615821b0ac60ac86024adfc7c0deec21d7937e4d534b966853a29"
+        },
+        {
+          "id": "CVE-2026-80631",
+          "rawFingerprint": "sha256:bd8121781924ca6984577389f29acda986f2563307ec3b2265f80c18f4b437c4",
+          "advisorySha256": "fb85d3b7ff84160f8df5b7c50b3aefe1e008e63c35f770991e736146790471d0"
+        },
+        {
+          "id": "CVE-2026-80634",
+          "rawFingerprint": "sha256:7a17faead8bb767cc0c82366e91684d8f3285189ae781ea3c4c19021eb4db1ab",
+          "advisorySha256": "1fce77817902168de523d0a0d65d815effcaec7c867a3c8c7ce0f00b3f71d505"
+        },
+        {
+          "id": "CVE-2026-80668",
+          "rawFingerprint": "sha256:4289b64b8005d16811a9770b2c20e5b89b33c662bb57edaf846927739abed106",
+          "advisorySha256": "4198f1d81cb49452a12ec167c717b82bf3f358ca139c4cafe93d896831710a92"
+        },
+        {
+          "id": "CVE-2026-80692",
+          "rawFingerprint": "sha256:19036415ab7e0a878a117212842cf5efa3ef9e0cd89788532b59d9bb97622dc5",
+          "advisorySha256": "a4c161118c85af8881475d98f63eb91baf6d3d8be52772c6f05606ed21b06608"
+        },
+        {
+          "id": "CVE-2026-80693",
+          "rawFingerprint": "sha256:9e93c0123eec8f609b012d38abb825961c748571fec8fb8d8ed96dba9f9c6346",
+          "advisorySha256": "a3f3e102bc91d4b9251bcf9e89256cdb00285e5cad20577c305e9977e783f3e2"
+        },
+        {
+          "id": "CVE-2026-80721",
+          "rawFingerprint": "sha256:7f2416620b27131920753c8302563c1ac743c1a9d24821b672621f3703d7ffaf",
+          "advisorySha256": "4c91b35659a47c868b24d7088ab7d005b2dad9558975b35b2613b269643644ce"
+        },
+        {
+          "id": "CVE-2026-80725",
+          "rawFingerprint": "sha256:2b6a284743818fe28736ec2fd0d8551d1457d34993ce14b372a226c57bde4c13",
+          "advisorySha256": "0e203e2c64a727ecb1e03d153b1e6d1dff06c06073a6c1af5bb1a9564ece0492"
+        },
+        {
+          "id": "CVE-2026-80905",
+          "rawFingerprint": "sha256:c0dd64414113191e69f88787104aa9eaad0aad625f85738adbae5bfa21581cdb",
+          "advisorySha256": "7c2ef38712d836078c9fe799b88e54739aad73b7818e9dda7a77f4d4a3abf31d"
+        },
+        {
+          "id": "CVE-2026-89528",
+          "rawFingerprint": "sha256:5aacfe10b8cb46c61daf976c82e7cc8b0e9c73054f82587bded3adeff50e9966",
+          "advisorySha256": "303b4e773b024fa8d828b7562b30d05184167fc3a5917ecaec980a47367dae15"
+        },
+        {
+          "id": "CVE-2026-89537",
+          "rawFingerprint": "sha256:e11592ecf174812413cd4188fd232ff7c612f4002fad1cfded2e0dd72920227c",
+          "advisorySha256": "8346ba231930671a210c67aa06b9d4de887e76cd4f52d340434f89dff84a062c"
+        },
+        {
+          "id": "CVE-2026-89631",
+          "rawFingerprint": "sha256:7cabea8193ec4a4aa92c6d320fd23cd3250ad479874d5bf88b2cea9d69988c3b",
+          "advisorySha256": "f7a0dd0747a504c776fe01879bbc209192dc0c6844746a2a99e757126b4cc3d4"
+        },
+        {
+          "id": "CVE-2026-89637",
+          "rawFingerprint": "sha256:431edd2b46e9c727b6e16ccac43c823c41e48176c77f7ba22b1cfce10002262c",
+          "advisorySha256": "aecc13a5ca9d993835784205debe9f04a2e3fa58ed7ff0519aaba3f4841a2157"
+        },
+        {
+          "id": "CVE-2026-89675",
+          "rawFingerprint": "sha256:44bc4a41de2c0391d87068bf3db434ae27a10178c1781cb65f139cfe5aa8aecc",
+          "advisorySha256": "f9ab9ba1ddf8df0edc3f9de19085d8b4decd18d9273b5575631b2478c289f392"
+        },
+        {
+          "id": "CVE-2026-89788",
+          "rawFingerprint": "sha256:207638ee6f8b0cb39ef88b8507079080bcd0fa70f61921309263533868a0e3d6",
+          "advisorySha256": "eb8276b6e9b19af2a5f873f3298a2f36eaf1dee38ed4e2b6fc7bf2f54c620375"
+        },
+        {
+          "id": "CVE-2026-89810",
+          "rawFingerprint": "sha256:69678402c3e5c809b3ad433de8d6091649c228d36a0597b0112a86c442ce03ec",
+          "advisorySha256": "131159c981a7c075fc0ffe2b12c6a9961414907bb4f81fcca83c8145a30c9c93"
+        },
+        {
+          "id": "CVE-2026-89913",
+          "rawFingerprint": "sha256:cacb0f120c9327dff2c854f39a900c38e9bccdd340e8d3dec94f4314bae7a478",
+          "advisorySha256": "d788e3377147ffff6e00218adca786c328afb4755ba9eae05b6fee01c2ca68f5"
+        },
+        {
+          "id": "CVE-2026-90093",
+          "rawFingerprint": "sha256:68da22bc7c25e3c88afcd7f60e260c08ecc2cb16981d91fb72868fc8507adde2",
+          "advisorySha256": "fba88c6c9a9549fd7ee0051446f39936d710153d6ab25bbe012cb471066b0b46"
+        },
+        {
+          "id": "CVE-2026-90104",
+          "rawFingerprint": "sha256:9935071014d32a3955bd6e1a47de39a1a665e3ac1da66a08e9ff860a12ccd03d",
+          "advisorySha256": "4b60424f3bf3cbfcd972d8470f26b82f0bcd85f03c4c370e27c5c642febda934"
+        },
+        {
+          "id": "CVE-2026-90111",
+          "rawFingerprint": "sha256:004b7db1babb1a26357de2f593872d0bb612e9c9e212c832ec1c8f211b459b38",
+          "advisorySha256": "8f31bdf55efff61ed93a6b36a9fa69219ae421f5165e1589fdfb198affdd701f"
+        },
+        {
+          "id": "CVE-2026-90149",
+          "rawFingerprint": "sha256:f15ab58c885208786b094734ca1bdd4ea6da915af67a2b1e0f5a7d5be64e9d89",
+          "advisorySha256": "e6dad7731c7e63d54a422df6e0f5df607c72bec68aa4a4bd6f37cc2e41e134ce"
+        },
+        {
+          "id": "CVE-2026-90155",
+          "rawFingerprint": "sha256:b5098725549f59d16167ee26a1cc18b374dd97f6da57b96efeb0a3452b84f52d",
+          "advisorySha256": "62004249344938cf59514d50f2591f84ca058e8999835e38ddb67d17e23efacb"
+        },
+        {
+          "id": "CVE-2026-90161",
+          "rawFingerprint": "sha256:e292e22bad6221fdc40ce167b0c10b4b667cf03514dd64ff1edbdf18efc8417a",
+          "advisorySha256": "91db64243d587459e721446b9a79d0b81824be46d3c9ac3a27858c8782c76157"
+        },
+        {
+          "id": "CVE-2026-90167",
+          "rawFingerprint": "sha256:853d5220f69d6d0aa9bc461d6082c6a19bb39a163988fcde1da01fa33278da4f",
+          "advisorySha256": "4d9c6b203fb4a8cf05e0b6618365027a6ca6bb872160d34e59baa7085b01ff6e"
+        },
+        {
+          "id": "CVE-2026-90204",
+          "rawFingerprint": "sha256:1c0a71ca4304cb57fa0fc7482b368c309c3ff74bb627e959d71f2dac0de0b7be",
+          "advisorySha256": "4bb5bff7d070d1b5767fd82e05011f81709dbd0438a478f87dbcdfa10230dda6"
+        },
+        {
+          "id": "CVE-2026-90205",
+          "rawFingerprint": "sha256:73ce451e741f3a539dcbef6500379f9334db49e11ad3741c985cfbf87868cb55",
+          "advisorySha256": "581b05daef676563bcf5b73c9f2d2ad5fa74d9d89dd0b8441a2d7173c8a65bc2"
+        },
+        {
+          "id": "CVE-2026-90217",
+          "rawFingerprint": "sha256:5fb192497cfd1ac7f736d193b1906c4fc56a0a70856c64a2580fb20edded2268",
+          "advisorySha256": "767a944fa5d737998e2c7bfa80cb93cc050a2a322bf4b7ef087f68b8bd549769"
+        },
+        {
+          "id": "CVE-2026-90237",
+          "rawFingerprint": "sha256:0736db555c6f2dd94dd5a371a54a3cc3f8939b7be469ac216b5ddac68dd31d18",
+          "advisorySha256": "072d371cc29d3b09026a1014c6fda443479b7702367a7c7bc600dda1584761d0"
+        },
+        {
+          "id": "CVE-2026-90256",
+          "rawFingerprint": "sha256:fb7d93b8daa5bea49ecf403953dc67389c0b733d20ad4d1bb908b3e500110a38",
+          "advisorySha256": "769e2c9612a106561271bae385b6a11547cf1e78efab53b708f35507c18f4325"
+        },
+        {
+          "id": "CVE-2026-90317",
+          "rawFingerprint": "sha256:0e099d130a1717b3bd08a7c6efa318ff225382490cf6f231829eb350d22e47f9",
+          "advisorySha256": "918be90c83e02def8ccc38ba9a580e1557169bab4d8a703245a903cde2ac4f8d"
+        },
+        {
+          "id": "CVE-2026-90320",
+          "rawFingerprint": "sha256:d8a3a3a50c0b1fbb02c974348fe47622c0984d869823c861725255e6facaa970",
+          "advisorySha256": "84868ffd1792b6bd143637acbdc891093a10297af9b17f39d8c5161c149540a6"
+        },
+        {
+          "id": "CVE-2026-90321",
+          "rawFingerprint": "sha256:c2df29967dd69d7f8e24725aa59517f47137ddfcb02d538ee05fd1f3e79cecfb",
+          "advisorySha256": "31f6c861bfcbea72357ee6d2e2a32e05be77e70be5f0adefe971de9c827b3af4"
+        },
+        {
+          "id": "CVE-2026-90324",
+          "rawFingerprint": "sha256:47128735bbf218c348317f21bf73adbf55c493a477dd79919b61394dfa263b4d",
+          "advisorySha256": "69e6e8b5244ac7dd7e1728cde49b8122d45bf65f858b4f5c3fd6d9cfc2c2748f"
+        },
+        {
+          "id": "CVE-2026-90343",
+          "rawFingerprint": "sha256:9de07c2261d37600aae65aeb9e94e5d7ab5864f6d73ce7fda2c46d227abbb201",
+          "advisorySha256": "573420b2f468d846feb19efcd3d7eed12bb3fe7a4f8d3d119595101326f00cbd"
+        },
+        {
+          "id": "CVE-2026-90380",
+          "rawFingerprint": "sha256:5142e45fd2767f5a549583e0c800ef9f5ab49079729ab45c562c239861278747",
+          "advisorySha256": "7b499c7b0da43d032e48f896580a5968ae694c09b3b77785cd06c4c43ea7bca9"
+        },
+        {
+          "id": "CVE-2026-90417",
+          "rawFingerprint": "sha256:c0a2e0c1f37d85528928e6ff1b16ef1a1ab93425a383ebc52bb10ad17a7deb79",
+          "advisorySha256": "70e9da0008e56679b2ef4c3db4300bbda78512ab9ba7801f4dee2635570f12a2"
+        },
+        {
+          "id": "CVE-2026-92499",
+          "rawFingerprint": "sha256:ea4e23c57e8ff26178639049583d75f339d6003d3e5d0785e8ff66bdfd841e21",
+          "advisorySha256": "3b0e19ad5ee17b8c72c21e0441dd1869d96e09744b06593e92bf9deea0d13a93"
+        },
+        {
+          "id": "CVE-2026-93125",
+          "rawFingerprint": "sha256:24a9b936ad66254fd8c98673e24a5e9cd7db0815e1e29e369f36d7b6a9c17014",
+          "advisorySha256": "40d237f915397488b611626d01fc00c39e03411bef590a44bbf9adf672f3fcdf"
+        },
+        {
+          "id": "CVE-2026-93144",
+          "rawFingerprint": "sha256:1574e5c878fc8525ebd0b7cbfe4ae51fa7b46e4d2fa2d3b8512ff821df170345",
+          "advisorySha256": "39456db862de832dfa447b3ea9e1bf56d27dcafd2b2ab8a71ce7324d51830c31"
+        },
+        {
+          "id": "CVE-2026-93148",
+          "rawFingerprint": "sha256:14cf1f19f7ea54fbaedbc0b3eb8e2475861aec4a71f60b4e582ce73aec61ffdd",
+          "advisorySha256": "25cebfe7ab926d72f764b410091177ef70177723de863d40424a6d7eed5018c4"
+        },
+        {
+          "id": "CVE-2026-93154",
+          "rawFingerprint": "sha256:1a436f4a08392ffe077120a4c6ccee1449a1e00c6d7beb360e2af44473bdb4dd",
+          "advisorySha256": "ff6ad635bc0d92264e1a62afee01c2cbc1a3261f2616d89426c6cda3c3a6d839"
+        },
+        {
+          "id": "CVE-2026-93175",
+          "rawFingerprint": "sha256:00eee5d12b090acac232b280f61571a983d0dc6591326085f029c1a46882559a",
+          "advisorySha256": "fa1f8841f0249e85373db87f2124ef4bb70e7c05c729123c251305bee5a84efb"
+        },
+        {
+          "id": "CVE-2026-93176",
+          "rawFingerprint": "sha256:ed9e28cc37cdc19cb30a0a941d830ad8accce3518506612cd021140a113754e5",
+          "advisorySha256": "7f141da3e8223aceb8ef7291c159bb84e22745061089f8ab476a7b2cd76d961f"
+        },
+        {
+          "id": "CVE-2026-93282",
+          "rawFingerprint": "sha256:f0d093e5c03e04e4bede282f9671d2e1bdc745bdf5d5b295ce01a41641e51ffe",
+          "advisorySha256": "913ea7693ec65999402ca4bc9d995c91aad6a55bd634eeac2a9b89bb4cf2e6b0"
+        },
+        {
+          "id": "CVE-2026-97493",
+          "rawFingerprint": "sha256:c1d1ba7e994027ad76f13f9cd3210b0f100b4e4e36ce93c8e0daddb450942e66",
+          "advisorySha256": "309472cd763d8ad6242aa8c9541709e7d07290795a299309d45eb0e600948d8e"
+        },
+        {
+          "id": "CVE-2026-97513",
+          "rawFingerprint": "sha256:fa42e0919056456ac847208dde657151c5c472d6be46fdb453b6d6319b274dde",
+          "advisorySha256": "110d4f9729079ce46f1d3e42b780d6f27a421de60cc110f1c0ae83dd0bdce5fe"
+        },
+        {
+          "id": "CVE-2026-97565",
+          "rawFingerprint": "sha256:4f843157ee819bda40efa19ee53dc37ecfb7a6065e5eea18f5a6d86a379c72f0",
+          "advisorySha256": "cd857e38c596c5f1f8c64aadd4284c70b0c64623b5025beaa8f3f624fa5bcd76"
+        },
+        {
+          "id": "CVE-2026-97603",
+          "rawFingerprint": "sha256:d38ee2a36aa5802732e05c434040bf8736a28c66ae4c5989237e66aa62a506b1",
+          "advisorySha256": "5a04256533c7e3cd1bc7782a082a8e1e547751485de9e46e937eeafa79787f1f"
+        },
+        {
+          "id": "CVE-2026-97960",
+          "rawFingerprint": "sha256:fd8c7614a5448163c600704565ebcda584a29da523a8fc61597fef176e967c11",
+          "advisorySha256": "95abd461e9e55a479e8a0069fb412c9a747dcddd6765f2c11c5c4e4d3e5ad8d7"
+        },
+        {
+          "id": "CVE-2026-97988",
+          "rawFingerprint": "sha256:6bf68ba7ee76044845f2c241a1c2a2aea1a921321c28097e3b52e30059dfd520",
+          "advisorySha256": "674397071241c7150d0099dfa4a5c816255e42aff51e8e71a33356742b34220d"
+        },
+        {
+          "id": "CVE-2026-98019",
+          "rawFingerprint": "sha256:e01b6c2afe3f3183375a269ba99967e8a6b20adc6c970871a43f2b1901db9b46",
+          "advisorySha256": "c9d05bd6067c854284a582b0f3e4fac27e3e39b3151ed02807cad1f10d0d52c7"
+        },
+        {
+          "id": "CVE-2026-98033",
+          "rawFingerprint": "sha256:8e0a80132bc8bfb3089c0343f4ec0580aa1ce2c895bed45c13cf3bf9608a1624",
+          "advisorySha256": "7703f3e3df2f9a6bebfc2acc305dd382bc9657cb05ee72e58807bdb5c8705ceb"
+        },
+        {
+          "id": "CVE-2026-98034",
+          "rawFingerprint": "sha256:c6717b78b269d5e32389d1a6663c4622cd3c6f2336aa9445abb8c445ed302753",
+          "advisorySha256": "604a1b3a28a0665d6042a9891b1dd9961740e14c2c21c1a762eb01d8e9afacb9"
+        },
+        {
+          "id": "CVE-2026-98084",
+          "rawFingerprint": "sha256:2b603ef2bb782a2a2c80b5c2de121dce0824a4de868727963e8826fa1c7a1743",
+          "advisorySha256": "cb81b86bd9901994d96699b94d1d988e3056c24166385eee0a48fa27aee76675"
+        },
+        {
+          "id": "CVE-2026-98085",
+          "rawFingerprint": "sha256:29efa6c41fd72a989f25774e0e4874773e5744a79b933fa9998f761f7fa05549",
+          "advisorySha256": "a17d5e43edff3c7e74c16d030cb9e934c6cad62a09877b0b22180b00b910b757"
+        },
+        {
+          "id": "CVE-2026-98115",
+          "rawFingerprint": "sha256:4942f6922d6041aa0a4bd80a4b636d62f1a86353d3e00ad03f0a5f69a31512ff",
+          "advisorySha256": "d160faba1c5a39c0a104001c1f5442ffdfe32a339c0598d25ec15f376d67ea66"
+        },
+        {
+          "id": "CVE-2026-98134",
+          "rawFingerprint": "sha256:c654175412a4ff9a04afd815101efa6cf04e42ae56fe236249db35c155c5adea",
+          "advisorySha256": "f766a3f033f8e5bab1f4e359691efe738cae06eab416a7a59436e8e26190b321"
+        },
+        {
+          "id": "CVE-2026-98332",
+          "rawFingerprint": "sha256:37304b4a051c8cb9ed273b9545abcd957a19b336755dc1f5c1827c8560545b64",
+          "advisorySha256": "194cae2ea919a24be5e976b79775cd80fedd893477930c1640800bf11171d76c"
+        },
+        {
+          "id": "CVE-2026-98333",
+          "rawFingerprint": "sha256:0a34f6bcc05eec5e368caf552379c4d6af225f0382c9da1e2c410cb914319b9d",
+          "advisorySha256": "9ec6e3099c2da64cc3587e5bcf1d220f7f48c571a6d0751ebdd9a7b227af7302"
+        },
+        {
+          "id": "CVE-2026-98341",
+          "rawFingerprint": "sha256:f07d9ae0ecf0fe70ea501ef2abda3bb96401f70ee6db3918617cba431ae975f1",
+          "advisorySha256": "96b709b432284aed804b84b8a6e0ce424731d337eb95643b74fe2c2d0e08549f"
+        },
+        {
+          "id": "CVE-2026-98364",
+          "rawFingerprint": "sha256:cbc1b381cbf849a67f699dfbfb48bb3b73a3e5ced8ecbd769ece23f504ea264e",
+          "advisorySha256": "be7b8a61ae49e1b7d79318a7369b7d2275b34e69d07faf9e793889b6d6a71b55"
+        },
+        {
+          "id": "CVE-2026-98420",
+          "rawFingerprint": "sha256:200fb9ed6cc5bb7a4fa90a5c998b4463dd44696d1adcb093deeebee1cba172e6",
+          "advisorySha256": "1d767e538b00e4e105897c7dfd85f129380238a77443a83a8145240854e2e1d7"
+        },
+        {
+          "id": "CVE-2026-98439",
+          "rawFingerprint": "sha256:898aa29e8964d6035f92269f973e233e406ab62eb9e26f56ac9738613be0c02c",
+          "advisorySha256": "ad14a369513fd775efa1fdb2720458316a683f2a15f25bfc003831252dfc3a3e"
+        },
+        {
+          "id": "CVE-2026-98570",
+          "rawFingerprint": "sha256:f22dff4c6e450ce550dc85318f722e991497aad41378f4e0e2de9a1f0462d2be",
+          "advisorySha256": "bc34d5ddeb724ff8b662eb3ced73a81915f42ae33e3754f816af49bf5605b9fe"
+        },
+        {
+          "id": "CVE-2026-98589",
+          "rawFingerprint": "sha256:835ceb905826d3d48dd84c360071a5fc7c679917a7951067c15392981ce67e22",
+          "advisorySha256": "85baff1b267e2e869a0572ad09a0307f0609ab1c2b9187c794d7549f08e171d1"
+        },
+        {
+          "id": "CVE-2026-98599",
+          "rawFingerprint": "sha256:cdae9fe07e460093fa162f6353cb3c45eb7991206d8bdadabcac147409ad9a26",
+          "advisorySha256": "060d58f8a8815a50a21bfa078c628369a6ce7614bc9b5d6535897670171f6f44"
+        },
+        {
+          "id": "CVE-2026-98652",
+          "rawFingerprint": "sha256:ddf9d4a9a4e45a0dd8d37d75a7a48316883619411b5d5d9ba5144124486ac9c0",
+          "advisorySha256": "e172f54761f035b18bb43d6d5f46e6f45cea0d0360de060fd92df3fc636d627f"
+        },
+        {
+          "id": "CVE-2026-98799",
+          "rawFingerprint": "sha256:c85f1e9b1d31a8164eb791cfecfbff3f78f1a2b93fa19ed746e6a7df9a882757",
+          "advisorySha256": "be7dbcef06152bf6e385e9b0faab034f09bad2afccb42aa23be76fbe85d52fce"
+        },
+        {
+          "id": "CVE-2026-98800",
+          "rawFingerprint": "sha256:70568046b3c04f4333f4ca801bf356c0a4be9477ee295fa4378c2ff9259b602f",
+          "advisorySha256": "a661ae745acb509e7bcf678f070532a4b58f5d1ed0651d39f7efe44aac4f6b35"
+        },
+        {
+          "id": "CVE-2026-98803",
+          "rawFingerprint": "sha256:ee58c87b6bd8d36326701821c9d1cb7ec052fd7736a6da47299aca770a6a92af",
+          "advisorySha256": "789ff2a32748e41726457f6acd8d91ebe9d4f857d47a630371cf49d98c89730b"
+        },
+        {
+          "id": "CVE-2026-98813",
+          "rawFingerprint": "sha256:9e0b69cf6e8ca009783df9573d67aba3ed439ce61b9a2b4ddf45833be63c4c38",
+          "advisorySha256": "0ee9a913bd9b2656875b3ee64de92ca975b527a5f61e1320e8e71fea430eafc2"
+        },
+        {
+          "id": "CVE-2026-98824",
+          "rawFingerprint": "sha256:4c1c68434b589d10fe9ee24190f7a77019517ab75f6e57a4beb5d3b71eab69a7",
+          "advisorySha256": "c7a9c5ba1e726466088ea2815c451e6c13c826117d2652867e354e2de8ffff9c"
+        },
+        {
+          "id": "CVE-2026-98829",
+          "rawFingerprint": "sha256:5433d216554a79886fd9589657a4d6857b12571e00225312e0ab39986a6d4213",
+          "advisorySha256": "f289d5dda94a488d504193a68c46b5bb4033e5181fb3ad73cc15b367e1f13ee3"
+        },
+        {
+          "id": "CVE-2026-98863",
+          "rawFingerprint": "sha256:a5d3085cff17386be866c0b0df133ba04a4f8c142140179791782d263150e664",
+          "advisorySha256": "bb6af84dab6e898aee98696883962760029214c6c3ad8d93f2815d7387f5abe9"
+        }
+      ]
+    },
+    {
+      "label": "rebuilt",
+      "rawReportSha256": "da3daec985ffce4acb44860bd976c7cae266d29b2af677a27d476a419175fb74",
+      "image": {
+        "manifestDigest": "sha256:97d003ecba3f1b48725f261ea1083679aa407c47935f5b31115876675575b2f7",
+        "configDigest": "sha256:9cbd26448f93493937135000d145100815d413add2188adb534bc4c2729afb9c",
+        "indexDigest": "sha256:3052c6a3f92b18f20aeb91c80d0af243d5a0612be13595f3399188f79c48a9df",
+        "buildDigest": "sha256:874619effb11d868f605ee4f17dda88cd07cc8180b00ab33c8b2a2d7265f9d64",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+          "sha256:c5c2dd5485cb1de339e2ae2db2648d57b1a2999aa86bc03f9f447da9896ea8be",
+          "sha256:8bff48980d6c98fe07a9f3916dbf98e90f71c53f66599f1af456802bfc4421a1",
+          "sha256:e6a2f6f966a389c0a01ab25394785b3cc8f5cec79bc41a3d527793dbe8c5d51c",
+          "sha256:135cc4047692d033243b528fada13f8778f9b21a146cb7afbdafe9a3367e6d57",
+          "sha256:6403cbed03096765cfe2b31036e3bfabc11e7055ce2042f7ba9e55fc987898f9",
+          "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+          "sha256:00d204c2ee3990132ab6ccb647aeb6032d507a6cc46a1ae61a35fe8542b5e731",
+          "sha256:630c361a84ff44942d1b46e0be3eec7a59b46058761805b67bfc09e61775643e",
+          "sha256:5238f69727b77eaaef2beb2b608aaeb1f79b668fc8ccddffe268c68ddb6200f4",
+          "sha256:222e24c999a622b3d90889cb0d34d69efaeb3235e168f0aad4e6ccdc6d2b9792",
+          "sha256:363e6bd3754ba4d236c6a91f2ef3a3c7e2a269c884fdc38b542f746e6314fc84",
+          "sha256:9e4451dbbc524711fcb0efe2fc6da7d60c5da1b23793c9d7d27ff4c60e4b6cb9",
+          "sha256:562117f502d91372503fbf5dd055d90567ac27bb062dd8f39aeafd3a0fdd134b"
+        ],
+        "compressedLayerBytes": 571454685
+      },
+      "sourceCommit": "c1c09ab95f6e0cc073a13e602625cc01c99d6aec",
+      "actionRun": "43800123825",
+      "artifactId": "sha256:9cbd26448f93493937135000d145100815d413add2188adb534bc4c2729afb9c",
+      "referenceMode": "UNTAGGED_LOCAL_OCI",
+      "selectedRecords": 182,
+      "recomputedMatches": 182,
+      "entries": [
+        {
+          "id": "CVE-2026-63825",
+          "rawFingerprint": "sha256:494a6e636413361184c59b550b7d4958367222e22aa39a4309373b372346efb0",
+          "advisorySha256": "8734440de41b64f8be4c2fb655b9aee97788e77afe01784847c7192ded019a2c"
+        },
+        {
+          "id": "CVE-2026-64523",
+          "rawFingerprint": "sha256:cc3e287ae0fcace7169ebaf15e6457d44f172f220a0d258a768af819a6b3a735",
+          "advisorySha256": "5d6ab2f453521454832665d25efaed3d90ecdfd5860ac0237ddee44f8876acb7"
+        },
+        {
+          "id": "CVE-2026-68426",
+          "rawFingerprint": "sha256:8102679b1d27db1c8c4cd3091afc3df2397bf1b8f5091a561a91fb5084fb4dab",
+          "advisorySha256": "60f629ad5bf72a1211b865ecb2e7136067aa35ec3212eca98f34a5806dee92bd"
+        },
+        {
+          "id": "CVE-2026-90162",
+          "rawFingerprint": "sha256:56dd6e450d36b727cd28c8c58c6aaff38f489f963f7a1fc549279cc08074b8de",
+          "advisorySha256": "8df8ae1797d32607e5f99d95eab8f03be1a15b775f63b2c9fefdfe19876930f8"
+        },
+        {
+          "id": "CVE-2026-93221",
+          "rawFingerprint": "sha256:044dacc1081ece1aef17161a660432a66711021262567af8031a3866e1260711",
+          "advisorySha256": "e0d45d4322e8f4a3a43c9f71f879c7bc8394a0956cd6f8ee80d79447b2bfc41d"
+        },
+        {
+          "id": "CVE-2022-50240",
+          "rawFingerprint": "sha256:0b8fa6f53fb198b4727e545ec5bb3374b9316463de2dee81cbccac4c00b51b7d",
+          "advisorySha256": "f9a27c7826b3f28caefdc3b079d0a7061dab0621e39f3a0df6c4c89fc6752bfb"
+        },
+        {
+          "id": "CVE-2024-35948",
+          "rawFingerprint": "sha256:8b5144ce741a02448058f8c875c864d92ec6509ff7708b580073a6835d6fd543",
+          "advisorySha256": "5cd53efe94de69b9e8bc550ad92c34461f7979323611bf16ce5a533c24ddc6f2"
+        },
+        {
+          "id": "CVE-2024-38581",
+          "rawFingerprint": "sha256:1784f6ee77f99f7009ef16c10ed1d44e2eb177c9dfb63a56472aaa893c9cff8f",
+          "advisorySha256": "896f0b09ebc29d0d024c72ca30c7d30a36e2a9e209357f3b6809366ec7aa5653"
+        },
+        {
+          "id": "CVE-2024-40954",
+          "rawFingerprint": "sha256:2bd2b3ef0e72da64428924e2e5c3e65a8604e16120f29ea985528007150f8021",
+          "advisorySha256": "49a4743a3e06f2e6c6d662c3ed8b9ec80df8c82099edceb4b06c2274d7fa56d5"
+        },
+        {
+          "id": "CVE-2024-44964",
+          "rawFingerprint": "sha256:12b63f20982b78c4b364a117421d767e24afbdf19638cd66bee45058f0e30e20",
+          "advisorySha256": "4c3d73531866f30330a6942163a6185f65329a5a8acc5a59a387a1f7e8046234"
+        },
+        {
+          "id": "CVE-2024-46742",
+          "rawFingerprint": "sha256:5a1fa49ae5e3299479792f154bed5b1d8b517a8491fa72199f7cbe68031aa4c6",
+          "advisorySha256": "62cb61fa3a2eb95b9c2c1bcabe407d8b3e04c3f0827eb84b3fe162ef66e82db3"
+        },
+        {
+          "id": "CVE-2024-56591",
+          "rawFingerprint": "sha256:61e9500e2cd7b096e1241d34725a6efdbd492f6d29f443973a60b43f0c24d1bf",
+          "advisorySha256": "fe4c4325c572a01d7f007d7bf78dacb1f3690597dc74e32062c6590c2138cecf"
+        },
+        {
+          "id": "CVE-2024-57857",
+          "rawFingerprint": "sha256:5b362cbc06cc34e3ba76e535d125c9137d4af6a0837042f5d22ea51fd8b30041",
+          "advisorySha256": "c7081b4f5cae04411119a40354fa2643adf2023a1f39141308ba03dea7a456a8"
+        },
+        {
+          "id": "CVE-2024-58098",
+          "rawFingerprint": "sha256:dd16932f8ea8f20d9c1e8e069832b61421248f4fc0a2223efacad06bbc0e1417",
+          "advisorySha256": "eb2ff7f5421b68023530a50c1cb9636fc8f7204a6e784f80f5b96f67a00a5d59"
+        },
+        {
+          "id": "CVE-2024-58100",
+          "rawFingerprint": "sha256:d96e07e7c2986221e83f1915655fbf38a29f98ba964f06d62eb1e9b1cd0d354d",
+          "advisorySha256": "84f7299c5f16de05d28fc63450bef2139f1d2a4fb5a68c7344ead344f178631c"
+        },
+        {
+          "id": "CVE-2025-22043",
+          "rawFingerprint": "sha256:7e5eaa1e41f39ac63637d7470f73465995cf876d27471487d24ff122d219c088",
+          "advisorySha256": "5b1ea45c032a8a045ace40388e3c12663bd513299b9d5a57b8f4d33be02ce114"
+        },
+        {
+          "id": "CVE-2025-37743",
+          "rawFingerprint": "sha256:7aa76aedc28b22f0355330c9d155970a0510e8641ce9c0c9dfc849c0ecfef25d",
+          "advisorySha256": "0616a355c2d48243e8cdc444bc446bcd79d665f90ec829ede19e9135a7d14796"
+        },
+        {
+          "id": "CVE-2025-37776",
+          "rawFingerprint": "sha256:fc50ccc612c502e1b0c17fb433593e991ca4882bc40f3ffd94d2f3c779e59418",
+          "advisorySha256": "8fd3873bb35f63e2590c0ba4b51a2e623293e688dec7f516b394b8ccc7af36cd"
+        },
+        {
+          "id": "CVE-2025-37906",
+          "rawFingerprint": "sha256:4944d3a7cf10c60cc00c07c42038b74f4e3140b5f77f3bcce5611e1ac38960ef",
+          "advisorySha256": "08a761f5f20c4be863c2534a09e059e7c154b71668ee843c36baecf9c9f1b687"
+        },
+        {
+          "id": "CVE-2025-38717",
+          "rawFingerprint": "sha256:1c8d2a3b925ba23bd1f1c5930bb83e9b9ac2e4dd8bb91bf13b1c729c8c8d2aaf",
+          "advisorySha256": "22d94f4f64ee78d03ce430c44802eb7afd64bc61b3da4cadf306fe6cdc4db9f1"
+        },
+        {
+          "id": "CVE-2025-39933",
+          "rawFingerprint": "sha256:848d98789c35025a817b7767f3f243da0d74915e6fe4b997721af090fd4c9d55",
+          "advisorySha256": "39a2c18496bfa2ba67e4ad32e480e3e9bd950af43fc7617a15f79096cad9e6fb"
+        },
+        {
+          "id": "CVE-2025-40025",
+          "rawFingerprint": "sha256:e782771f40314cdfcd4ebca407b6b9fc48a56c90420438832e93c641a0fbc53f",
+          "advisorySha256": "7908f0154074ee3cd8ba6b006ff87a67bfc9b0c2a20aa03a8cbae5b33981debe"
+        },
+        {
+          "id": "CVE-2025-40075",
+          "rawFingerprint": "sha256:a543886bea35e0119035cbfcc19451fc38e8a9b2c440f98f54b12e523e3292d6",
+          "advisorySha256": "6632e7da89915665085c6f80c0b3689d55d44e9ac3779425dba731c4bb06acac"
+        },
+        {
+          "id": "CVE-2025-40170",
+          "rawFingerprint": "sha256:f5bcd00bee55f6ee38c51aa7d08b51faf042ed5a48b52afe43227dc752854399",
+          "advisorySha256": "0a13ab92a0aae6a07cdfe0f30ddb4071e325ea84d753e6de0bcfa67d3856fc9f"
+        },
+        {
+          "id": "CVE-2025-40190",
+          "rawFingerprint": "sha256:0e4b1a2c6bb221d55a3b7b3bb62f4a8c99d9e74b06f6120b21d168d3d44e29f2",
+          "advisorySha256": "d4db8da71e91d6cfb10c62b7b99db84981b0512ec77d6159a5f97176085af410"
+        },
+        {
+          "id": "CVE-2025-40274",
+          "rawFingerprint": "sha256:8a144492ab1c685ab447214714d41be568d6d05f9ce6e5bc676595e42b6ffe05",
+          "advisorySha256": "edd8fdb33943f4c3ff95d623ad65aa6a429f10dcc4a37e9afacd2ef1a27976fc"
+        },
+        {
+          "id": "CVE-2025-40344",
+          "rawFingerprint": "sha256:25ab0b53a8bbd1c73c4ecea14063e755b56e6e3e0e6c363ca87bc9afeb782854",
+          "advisorySha256": "9b2ea0d8439bd0a388de6f8d9448c45771b66fd3950f72002fdeb34284266e5b"
+        },
+        {
+          "id": "CVE-2025-68251",
+          "rawFingerprint": "sha256:2fca44cbc231e5cc1c2ff492912941e8ff8f2694498809faa3224f58004bc02d",
+          "advisorySha256": "68f910e0418ba40df37b7311c34532fd5b9531d1c4064be3588a9982b5251e87"
+        },
+        {
+          "id": "CVE-2025-68304",
+          "rawFingerprint": "sha256:a42d1275df38c0abc8b28cce12c9515f7ce0a10effb59be543f47d7cf6583b84",
+          "advisorySha256": "9167d7806d292faeb29544778f462f361b6482ee8fe99f119fd227acd44c44cd"
+        },
+        {
+          "id": "CVE-2025-68360",
+          "rawFingerprint": "sha256:3ffeedd61d96261d221f427d083512ad84bf9ef71ce14fd2ee47fad66cbce2d0",
+          "advisorySha256": "e1e080320e1795eae082cc00c22897485d23b443b01c36af0cd5e1a17e03844a"
+        },
+        {
+          "id": "CVE-2025-68729",
+          "rawFingerprint": "sha256:580f8a80a38e21487620cc79ccff7971ecbb9419b3eeb7dc1ab0ca4648d290a7",
+          "advisorySha256": "e682b060f7f5c8700e800ddde84c448cb91635d4538e81752b5f79cfc754805c"
+        },
+        {
+          "id": "CVE-2025-68730",
+          "rawFingerprint": "sha256:4b81add2b0bdcfece5be9124e6616c0595000abc025acdba556675d6efe1586d",
+          "advisorySha256": "3c58c51444958a7fb6c057a5fc8a6ae075cae6ddcb69b44ed067e0a7c8f4c7e4"
+        },
+        {
+          "id": "CVE-2025-68745",
+          "rawFingerprint": "sha256:4073fb7509a32a1196dd7ef792df10c24881d6c3aa3afdb710925eac0e51a28c",
+          "advisorySha256": "24fe5031f683e25f112b923ee64dee36d4fd5ae1cf64d54666f754f97f677d25"
+        },
+        {
+          "id": "CVE-2025-71073",
+          "rawFingerprint": "sha256:6da14e5c62e81169dbe41ae810251d6782a2f5491b12cb650189569dc803c2f7",
+          "advisorySha256": "0a5c27ed0f1ccd7bbb1a748557dfbfb32dacffa59e3303daae6deed3b5cc79da"
+        },
+        {
+          "id": "CVE-2025-71074",
+          "rawFingerprint": "sha256:b4767bf010bd68d4f91425ab1765b989074eb50293ca8527542854330267f74f",
+          "advisorySha256": "67f4ec02f5b7de70b579a165c025e406e13db51e30a99bd619ec73a1418f4cbc"
+        },
+        {
+          "id": "CVE-2025-71202",
+          "rawFingerprint": "sha256:2b06c2ab017cfad260e503d83a92122e81785ac07166d621442da51bc6fe381e",
+          "advisorySha256": "c158d6082d125e3a7ca0e45b9b32666a1ae1d2da1d5ee29e9e8dd506ea744ed6"
+        },
+        {
+          "id": "CVE-2025-71315",
+          "rawFingerprint": "sha256:767758a2019aac5ca2a29c2b34826c40e6b52f2bbf6544d999b1bc5fc6f1d793",
+          "advisorySha256": "4ce25f74bfd3d6892cca9b4efe7288caa688b0053efe005abb647fa8d3f28167"
+        },
+        {
+          "id": "CVE-2026-100074",
+          "rawFingerprint": "sha256:a6ea8cae89bf2ea44d1bd1c446aaf98a5c24a1f56712185a5790c725b33ad225",
+          "advisorySha256": "504af54861b77acfe990f022f4f6cea179d9968c33b68442557bcc742f132431"
+        },
+        {
+          "id": "CVE-2026-23208",
+          "rawFingerprint": "sha256:fdef7d52c4e420598e2c92b29e593f89bbd51bbdc01d56ffbbbc7ee778fc2bf2",
+          "advisorySha256": "be4475c6d71d635aaf1e67684c3afbc9614235db51cf6c6d5bb3f5036375470b"
+        },
+        {
+          "id": "CVE-2026-23239",
+          "rawFingerprint": "sha256:178f424f80d3b22720990519cf599981ce47acc675454ab2fa248f3260c2847a",
+          "advisorySha256": "dc52b81befb935fa89caaa9136f4c101996eeb9da733c76612d36c0100da8d42"
+        },
+        {
+          "id": "CVE-2026-23240",
+          "rawFingerprint": "sha256:618a361564b8f993ff2b83d31e70686d89aa88cb218fd0de97bf78ce4332bb48",
+          "advisorySha256": "d8460df43e2ceb1fb419be3377a783bfd2bef05d50aaae195cd7ef1855ce8662"
+        },
+        {
+          "id": "CVE-2026-23265",
+          "rawFingerprint": "sha256:60ffc071c9b35f47a596d6c5ddeafa419d42053dad93147e9eb795beafcf8d95",
+          "advisorySha256": "292df3496e487a3c55114a52c71969c97f42a1a223c1af2b696f7aa1b542a511"
+        },
+        {
+          "id": "CVE-2026-23377",
+          "rawFingerprint": "sha256:1c9c0db9e4f9dd938e0fc95cc296845e1914bab6244b3f9b379b07627d9a2531",
+          "advisorySha256": "bc13221a6f73be8cd92bdd7062c56b9656637fed614f3dcf1bd73bfcc5f20b43"
+        },
+        {
+          "id": "CVE-2026-23393",
+          "rawFingerprint": "sha256:ed1227b565d6427e9db049a130b273ed3f1f6567f0d73f6325109b9889ecf115",
+          "advisorySha256": "0388fb2c7d1a14fb9a240b81459ed479aa4162f8cedbf95292150b750c7b279d"
+        },
+        {
+          "id": "CVE-2026-31410",
+          "rawFingerprint": "sha256:654214b7a1256e394969089960d32f4345436fbb3b8d8286e04d28dba127dd15",
+          "advisorySha256": "8b15bc42db829a2c4f7efcd647dcc5a5682f016d0454da17b65bebf5ffcb886a"
+        },
+        {
+          "id": "CVE-2026-31536",
+          "rawFingerprint": "sha256:6d5407ed7bc0a45e00ef4b632d0a5d975ff1b4f1e4dce2f990e171f646b830f6",
+          "advisorySha256": "58730d7c88138af9a698ca378d5f33f1d79ba9eeb0854ee601380fb99eadd031"
+        },
+        {
+          "id": "CVE-2026-31692",
+          "rawFingerprint": "sha256:e11b6909e2c20a17609c21c326918d1b56075953381269d01e63677cc2f63215",
+          "advisorySha256": "ecd90c9709d49ec281269d8649fd3cd52e344ed5e3fb760fedba799a8572c3cc"
+        },
+        {
+          "id": "CVE-2026-43009",
+          "rawFingerprint": "sha256:81dbd49a0f0c7c9e57b5d9476441360242b87499a9dba56ddd627aab4d8c57d5",
+          "advisorySha256": "902bbac41f7bd1cae27f7060a00c729f847bc1f2b6fa901b8db963027805dc7d"
+        },
+        {
+          "id": "CVE-2026-43034",
+          "rawFingerprint": "sha256:f4c6b1d618900bb0ca1392dc7a8bba5d4b9feffcd1050a8bc9424517a0bb7ea0",
+          "advisorySha256": "b4fe8ff6e36020775bf567d631a5446fb81cc99ae1f22b4d950d03107e82d2fc"
+        },
+        {
+          "id": "CVE-2026-43042",
+          "rawFingerprint": "sha256:7088d66aada787a0a0168a5d17004ff036bb02af9e34db8b357740f209a16fd5",
+          "advisorySha256": "389948e74cd573e46a32d507c50cc1198ede559498820eeea9187813b06fdabe"
+        },
+        {
+          "id": "CVE-2026-43048",
+          "rawFingerprint": "sha256:bf6a27dd3d0c7cbf306757b70fd8dc9d977c4380240492a7276b3d3598e47f4e",
+          "advisorySha256": "2f2d2d990eb7f5117a17ea144514018550c443dba229e9b0bfeaaf92bcfacb8c"
+        },
+        {
+          "id": "CVE-2026-43213",
+          "rawFingerprint": "sha256:c57183d397e9073b35df642680730c033c17234b376068ef36df7d968fb20c61",
+          "advisorySha256": "9c6d0ea68551b8448dc6e63358e1e3bc13b9a21717ff72b5fd81a09f152466e3"
+        },
+        {
+          "id": "CVE-2026-43263",
+          "rawFingerprint": "sha256:cb7480c71b228ad7c494e421e9938d761d2a5ed50d6fca377acd2fbbc4cef832",
+          "advisorySha256": "24324b0172d448861bbdd9183173311a141406c26f9edec21e3aaaf5d8550a4f"
+        },
+        {
+          "id": "CVE-2026-43379",
+          "rawFingerprint": "sha256:f39363141a0d6ed35d389fcf13c79ac4519022908fd5f9fdd7465f2654c0a5c5",
+          "advisorySha256": "1b22256da3d1e7d775556697f80a876b7dc0f2d9630a4bfa3ec21cfd29845600"
+        },
+        {
+          "id": "CVE-2026-43464",
+          "rawFingerprint": "sha256:4af347d47307cf22a3083ba07e82b6ade11b9b6ee394cb05e2effd777c969fd7",
+          "advisorySha256": "469fd9f45526a832aec310a9a000288bf071563d328904dff2662d69f7baf5d2"
+        },
+        {
+          "id": "CVE-2026-45940",
+          "rawFingerprint": "sha256:7c1e2f80743f284ffe4e205c15cdb3e6e1e42e7963fbb630f9ed38d50aee5ccc",
+          "advisorySha256": "2cedf7c8744c81099b12e4a211aa73251a51e9d6312790cf9760eff7f29f11a1"
+        },
+        {
+          "id": "CVE-2026-46181",
+          "rawFingerprint": "sha256:f6834c16258da2eac60d10412048ead6e07b1f4d6716f9a0c153f719ca526813",
+          "advisorySha256": "ee7b84bd65c588e399f9362ed33a72e66ab1490f45f5bdccb97361301bdd2b16"
+        },
+        {
+          "id": "CVE-2026-46330",
+          "rawFingerprint": "sha256:1c943ba183ade658bfad070d5196e37ef25e542ee6ef50e5330c4de42a9c000a",
+          "advisorySha256": "b1b62ede3836ddf09b7b05b7d0bce17d606eca59625331d9b6a0b2f8977fdfab"
+        },
+        {
+          "id": "CVE-2026-52946",
+          "rawFingerprint": "sha256:df70a1cb4085ac204fdf2b39bd8c8035824c67f2b0e411d018852067409b76bc",
+          "advisorySha256": "38aad01f6418a2afdff487088e5c7d7a22ff9970af7a4b920d65290a2f49885c"
+        },
+        {
+          "id": "CVE-2026-52991",
+          "rawFingerprint": "sha256:302f05aee1bc37706b5546f3bff6ac75fbc347f485d5bfa41e4f84a87bf8c531",
+          "advisorySha256": "c6b16549648e377bfc5ec0705084fb5824b8552412800277c17cbdc8456a18d9"
+        },
+        {
+          "id": "CVE-2026-53024",
+          "rawFingerprint": "sha256:1703df6a7a4040e3b3e59f332c62248310179fe05ada7cede2024600033cdd67",
+          "advisorySha256": "68e4dab4a25ad9ebaf11460b47a04d72163fc13cb8532681237259c743e052a5"
+        },
+        {
+          "id": "CVE-2026-53178",
+          "rawFingerprint": "sha256:f483bb983b78cb33ba3e27e7c53f6872e06e24674d05a5bd56eb8e9791b81a25",
+          "advisorySha256": "3f9db9a403fdd8a92a4daeb9bd12afd5cc5a7662c68bfdb123e780de507a9c40"
+        },
+        {
+          "id": "CVE-2026-53281",
+          "rawFingerprint": "sha256:5d1d19e8302b7b154f17133933df8cfc41e37cfc043da73e2270c30d912393b0",
+          "advisorySha256": "c3a2e510cd7ad90aab197826f65a7189871e053c9a9b5bc85891a70d41e831f3"
+        },
+        {
+          "id": "CVE-2026-53377",
+          "rawFingerprint": "sha256:64e78086aed8d14d03f799a6d472d71a7572bac2a75c01a328fb9fd6131a6886",
+          "advisorySha256": "c977f69fa18dafdf2bc02e019396707b02e527a08cb3ec12e3ae13bcdd311eff"
+        },
+        {
+          "id": "CVE-2026-53401",
+          "rawFingerprint": "sha256:b3793d31692221e49693df4987c43f2b99ee0ecb9d17632e4b5da636ca12e39b",
+          "advisorySha256": "fdb94c0009855c5f667aacb484e6bd392403afa8fcf35efb50876ee42f711f96"
+        },
+        {
+          "id": "CVE-2026-63819",
+          "rawFingerprint": "sha256:af0b78bbf5388afd26bde59f9df04a3e4ec42ff76537e1ae82377846a2f3e209",
+          "advisorySha256": "09d3ffbe92bed824cb5f88aaee45b08a103ade82ec32493451a6a7bd3d6bfaab"
+        },
+        {
+          "id": "CVE-2026-63879",
+          "rawFingerprint": "sha256:79e8c340cc80e575d9909a782aef31783266fcd89ca0643ac58f0bc0b7bb9630",
+          "advisorySha256": "bf905a728fd750f8f8fceb351e95e27df3be5e9f68fc5aa902893a9629723690"
+        },
+        {
+          "id": "CVE-2026-64036",
+          "rawFingerprint": "sha256:a600f7ca46ad110c084eae8b9c2deb9d35412647fb653d9857de5f2ea9c2fb66",
+          "advisorySha256": "525117af25cf29fe71532c7ba5eb4533f176510022e5f842d7821470ca44797c"
+        },
+        {
+          "id": "CVE-2026-64052",
+          "rawFingerprint": "sha256:69896d8f0ecf7d6dd5598bf0203c649f1cde4141a7004daf669cf733a825f582",
+          "advisorySha256": "3a2f6b26ed8e0dfde61b2824c939c1c6e30c4be166bc9d504af4fdbc1fee4daf"
+        },
+        {
+          "id": "CVE-2026-64077",
+          "rawFingerprint": "sha256:a8981316e8ff7ec539f9f6c6d217ebc8a02b6bcf9e10bc75ec909b0e3738e4f5",
+          "advisorySha256": "6f8b3e51f76fb4fc3ea2f437834e3fa66b82fc0f410efddea87da46781043289"
+        },
+        {
+          "id": "CVE-2026-64078",
+          "rawFingerprint": "sha256:b56dd17ae181516120315854ef81ab6707a04b7f446b0dda0ab20f6c610afca7",
+          "advisorySha256": "bf2d7639f21ba5d0ffd65177233a7026db80d1bb1935776287d268f2f7e1a90b"
+        },
+        {
+          "id": "CVE-2026-68081",
+          "rawFingerprint": "sha256:ba42ffec4a158c95e3942681ca7d679db6100cade09f5e4fe3b2d3954bf21145",
+          "advisorySha256": "f3bf41352c8226366d7f4e35d88f27a733dd6223209e3b4119474f6f4e1eabff"
+        },
+        {
+          "id": "CVE-2026-68103",
+          "rawFingerprint": "sha256:b72aef624c0aab16f1d02108ea1a3602233328ff81a0952eeb4e96b8539e5e91",
+          "advisorySha256": "fee1ebf08cba41fbf19a18ee221b4cb926a978438dfa640efd64cc2a06317ab7"
+        },
+        {
+          "id": "CVE-2026-68152",
+          "rawFingerprint": "sha256:7bc52b43ed88eaa7d45ed7235b52548e459ead3f8ed1a24899e284012c2a36eb",
+          "advisorySha256": "411c24165de645de1a61b7a8752a4d47592f8bafd5cd3af7aa0bfd8fd5d0a0a3"
+        },
+        {
+          "id": "CVE-2026-68245",
+          "rawFingerprint": "sha256:64e3f77a89038cbbf449eecab6a6f67d8befa707390393432034465031f20ab5",
+          "advisorySha256": "bf006352e0c21f6abbebd2339176de2cf6e2cffefd3997324626e7a37d5e45e1"
+        },
+        {
+          "id": "CVE-2026-68257",
+          "rawFingerprint": "sha256:ce365c236f98b86e9dbe3f91c15d15205be012decd6c720d865ea16c56a16b7d",
+          "advisorySha256": "3a1460d770b7bf7030599584edb7671e030d498a5814132c38f30290f6b186a1"
+        },
+        {
+          "id": "CVE-2026-68323",
+          "rawFingerprint": "sha256:27ad1d65832203b842e3402ae8532508c0ae56054645515b73e87171ddf6a8ca",
+          "advisorySha256": "da39fb1bccb76819bb23f7eecae2acaef6cfd4d25478400caa1cae9498c1f4b6"
+        },
+        {
+          "id": "CVE-2026-68401",
+          "rawFingerprint": "sha256:9b139156b2e42668ce9ba6f9bdf06839180f10c5b84cfb3068db3c14c496c458",
+          "advisorySha256": "8711f36cdaf45599634c2c060490a3283bf453b1569b8d0f9d95d109dd3c5bf1"
+        },
+        {
+          "id": "CVE-2026-68404",
+          "rawFingerprint": "sha256:3d21e072bcf362f8e2cbaf9c1c90bbfda7ff6bb0aac90698d4e910169c0f7ed3",
+          "advisorySha256": "186c26171eb5beae610c0a07b5dc5a5db5563516ec76aef2e55206b8ff2110b5"
+        },
+        {
+          "id": "CVE-2026-68409",
+          "rawFingerprint": "sha256:f763c05f83a8b7c9f125cdff4cc00785df8eb71c945492bd859d0207fedf3266",
+          "advisorySha256": "8b5da9f27c286be4421f9f5ecc1593feebcc1409259bded9019f952f98a3bae9"
+        },
+        {
+          "id": "CVE-2026-68447",
+          "rawFingerprint": "sha256:5623129e2930985867b284edb0de2896b6e81ef25ee2d0defe4db0615247e536",
+          "advisorySha256": "622b5aabbed7c9142ed2f94d7f63e6c05c70e31b0ee555d1d64b160f7e59ce52"
+        },
+        {
+          "id": "CVE-2026-68470",
+          "rawFingerprint": "sha256:ee0df0582c525e2dbe5df639cff069827e654703d4c459c73a62a96ff766ea5a",
+          "advisorySha256": "492d675439b00d759c2ff8999ef7ad6541cf0cd5e5d831e4b6c167fb0829fe4f"
+        },
+        {
+          "id": "CVE-2026-68471",
+          "rawFingerprint": "sha256:04942d3948976bfb5103c3365b6369e909623cd7d23200746220d08db5587634",
+          "advisorySha256": "69e8c38959d98192082e5f819aadc1e048affc3e913f976f157192d3440c5e63"
+        },
+        {
+          "id": "CVE-2026-72162",
+          "rawFingerprint": "sha256:129322ef67c747ad8b3cf377c9f013d8dd7feb938b68a7d0b8dabb5c469bd937",
+          "advisorySha256": "0887a849388acdcb9d41ce9794322c468422c6944fc7df348fd3ca0a8c4ba9b6"
+        },
+        {
+          "id": "CVE-2026-72198",
+          "rawFingerprint": "sha256:c0277f0306952e7c25e511add78e6563f0153b9697582521a479760e3cd194b9",
+          "advisorySha256": "48c08655d5fb574a66c9ca790433b32ffd9cda15b663bcc3edb3aa80165d99f4"
+        },
+        {
+          "id": "CVE-2026-72288",
+          "rawFingerprint": "sha256:122e5d7d9c968ef488d8333d1a10f971af92bf94758e2ab51e66fa74e7ffc4fb",
+          "advisorySha256": "5cb24c950d1771f6172918640229ae54ae0521865d1aa375c32e9570c7179cab"
+        },
+        {
+          "id": "CVE-2026-72375",
+          "rawFingerprint": "sha256:0d514313cadb25f4a1bd405a4c937fda8db91d4ca214b9e00c970e327474034a",
+          "advisorySha256": "0ee6dbd5f60c5838b4c1418cce9a4918da83a0035a15a348e0009574bfbdb872"
+        },
+        {
+          "id": "CVE-2026-72380",
+          "rawFingerprint": "sha256:1d02e7f36834f654bde3e7fbdf46684dbc74a6ff707c70dfbfdfe8a9f53a9503",
+          "advisorySha256": "ec213d4262d4e22cc52d9ee4ea6681abaf78bb2caabc10a996717e86c1f91309"
+        },
+        {
+          "id": "CVE-2026-72383",
+          "rawFingerprint": "sha256:379d791b7f138fc65749aeda5ccbfdb729977232b0f062833e9e141c73c10da6",
+          "advisorySha256": "adbae41dba5be5285c6dd446eeb8534aa625d90093f7c181c2036817310916bc"
+        },
+        {
+          "id": "CVE-2026-72423",
+          "rawFingerprint": "sha256:3cd244eaa9317cdc54b93e5bdcece7387a4148ac4231217f57fc70049ebd7081",
+          "advisorySha256": "81decb5c6956e761bbd01c1a77ba5eb084515cf972a02cdae1b3d36137e06943"
+        },
+        {
+          "id": "CVE-2026-72472",
+          "rawFingerprint": "sha256:c329f351cfdbe5216aa1f609ad7493e0b425c967567d189c8bcdf6b246376e9b",
+          "advisorySha256": "7e903c15d603008ccc41531c98492abb97a77563f87e211a95d8fc947f5cffdb"
+        },
+        {
+          "id": "CVE-2026-72493",
+          "rawFingerprint": "sha256:0f151038f90ec19e222a95ca6e23cc5bd0a54c1134f24301eaad9eb5f499c4b2",
+          "advisorySha256": "79d6421d0d5e6ed6afa35ce0c0a4c8b902ac78fae73637a67f58e89d5e2498e1"
+        },
+        {
+          "id": "CVE-2026-72494",
+          "rawFingerprint": "sha256:dadba1f6387bea7cab34d518388fa08e9bea70c77a2f6b3f324019aa32c9508c",
+          "advisorySha256": "f33898dcc483240c862393f9050c623bd061f2f35268cc4d54d73de7f6b45f75"
+        },
+        {
+          "id": "CVE-2026-74257",
+          "rawFingerprint": "sha256:d004943b34f10c26f64ae138dc00c647eabe64dd3e1c00f30deafa3dc1f2702c",
+          "advisorySha256": "796cbd65378c7948b6926dde98d18132ee0181ab3b02b16f33ccc5879fa22a22"
+        },
+        {
+          "id": "CVE-2026-74269",
+          "rawFingerprint": "sha256:7be9f2898af83bf4b79ccd5cb254a866bb895dc7446fd1dd3603fbd4a70b7fd7",
+          "advisorySha256": "1b187cd311ae844f061332bb4a210bc7996a61c0a992dfd6ec7720cb8e38764a"
+        },
+        {
+          "id": "CVE-2026-74314",
+          "rawFingerprint": "sha256:d8032d0162eff808188ff055a44597c9a8ec577a4fa0f90b7da0acdd8e88940a",
+          "advisorySha256": "0387011660c8435526bf571ee3f349a97ec1a52e0eb9be63e3209d6126a4a872"
+        },
+        {
+          "id": "CVE-2026-74317",
+          "rawFingerprint": "sha256:5947631de75c51b988090ba5addb37889797c6af2e86c53d72cf5254eaea7c9d",
+          "advisorySha256": "d67db016ab8e413be13038492e0d26f2408768b8a3b39f901a8400c257a08fda"
+        },
+        {
+          "id": "CVE-2026-74344",
+          "rawFingerprint": "sha256:eeb14a4aeb6074a8a539b85defcbab4c95adebb97ee3868865d4c52cbc05c963",
+          "advisorySha256": "8a7a60e2ebbb55ca11a2492d56c55554c54081d06a93c22df577dc2b56531efb"
+        },
+        {
+          "id": "CVE-2026-74385",
+          "rawFingerprint": "sha256:0c0b25558dbcefa6deb806f4fa8337d42145dde38307189dc0ea8cf7d7c23f99",
+          "advisorySha256": "1281f7322ec4c318a9ebefaeff573af4620103ba4812873d1ae64064867ec360"
+        },
+        {
+          "id": "CVE-2026-74388",
+          "rawFingerprint": "sha256:1a89cf81e1c2704bf3b99294580904cc6045991de2bebd85ed192e0febf1ce64",
+          "advisorySha256": "d9bfa3ecc0dc164f97dee2fa9f0c0eba100e3d56449d22e32db59c82ab53326a"
+        },
+        {
+          "id": "CVE-2026-74506",
+          "rawFingerprint": "sha256:8e69c6d3839f8af4d414b761d78dfa24ba4e32154c558fff7de70c8225a34c25",
+          "advisorySha256": "c84b9918b0e5d199a0566d0d042832851b33c97f2da39546c371adc78d8e6f55"
+        },
+        {
+          "id": "CVE-2026-74530",
+          "rawFingerprint": "sha256:72939f58d5a9461558c527ae589efde861039f71acd67204eefe214be59af14a",
+          "advisorySha256": "6c030e15021c89d926951796ce017a7b84efb70f03585b855dbad0af54b24c78"
+        },
+        {
+          "id": "CVE-2026-74533",
+          "rawFingerprint": "sha256:8ce07f167ae2ded06f84196097fed6e8abe806baf9f7bad1af4eff970c566c2a",
+          "advisorySha256": "d63fed624c1a41327746c1805f8aff0d1af778ab8c07a1db5a9f030f42d9c9bf"
+        },
+        {
+          "id": "CVE-2026-74534",
+          "rawFingerprint": "sha256:8f05cf18e92a81df28e066c02754d7b6a6cc969dca3f4b47191ec1e028f636dc",
+          "advisorySha256": "53369d9c55c8429ff9d327ad8f7e7bf79228c50eb093795083a2a8f437f69a80"
+        },
+        {
+          "id": "CVE-2026-74537",
+          "rawFingerprint": "sha256:ee9d98cd310ad5e7031fadff81cbea0265e3ac0ebbe76a1ece5d698b7ea651f3",
+          "advisorySha256": "6c2e85fe4ba84f3a7fd565988d594104acab4e48d6283f83bbbd011393840cad"
+        },
+        {
+          "id": "CVE-2026-74578",
+          "rawFingerprint": "sha256:3347568a6a743541ecf0d37f93ccc845625871a3e88df35382aebb4f33f668bb",
+          "advisorySha256": "0b0a2b452b3888ccc062884006dff294ebec0c5fc8a16fc88958d877e565f3b4"
+        },
+        {
+          "id": "CVE-2026-74715",
+          "rawFingerprint": "sha256:b5712648a7bd41a05a028195dcfbb138a30ba6dea81d61d4cdf13392ecd8a167",
+          "advisorySha256": "bf8e96dcb1d32a1e1fa041f1488634124d1f5a5e18e9a1e477ffe4dd32c83a40"
+        },
+        {
+          "id": "CVE-2026-74723",
+          "rawFingerprint": "sha256:acfbcb1d8b6d5b11512b708326dc6e2ccf7cf84879d963d2611736891dc05329",
+          "advisorySha256": "1b7abdb447d038d14352ad690f65a227daa76dcfafa1a62284060d3305fb384b"
+        },
+        {
+          "id": "CVE-2026-74752",
+          "rawFingerprint": "sha256:f706c87a3745343777e50d3d0ba014f1ff8f0d2060678117b77f0150518b5430",
+          "advisorySha256": "2b84a6621ec615821b0ac60ac86024adfc7c0deec21d7937e4d534b966853a29"
+        },
+        {
+          "id": "CVE-2026-80631",
+          "rawFingerprint": "sha256:82ec741c3c7f31f0f3d24ec16d13d75edc064466cc3b1b8c1a48884c47a27e8b",
+          "advisorySha256": "fb85d3b7ff84160f8df5b7c50b3aefe1e008e63c35f770991e736146790471d0"
+        },
+        {
+          "id": "CVE-2026-80634",
+          "rawFingerprint": "sha256:cffac1391cf7ee60d346427de03b8765e01adc812895ad49b3e94795d36af3a5",
+          "advisorySha256": "1fce77817902168de523d0a0d65d815effcaec7c867a3c8c7ce0f00b3f71d505"
+        },
+        {
+          "id": "CVE-2026-80668",
+          "rawFingerprint": "sha256:4c8c71bd59d800024c42481a941924e84bba4aae57605f645cc159a84863f276",
+          "advisorySha256": "4198f1d81cb49452a12ec167c717b82bf3f358ca139c4cafe93d896831710a92"
+        },
+        {
+          "id": "CVE-2026-80692",
+          "rawFingerprint": "sha256:27b0393df0a5b3591f079ab653089d59fa0541f43f8a1397f63cbc822c251b75",
+          "advisorySha256": "a4c161118c85af8881475d98f63eb91baf6d3d8be52772c6f05606ed21b06608"
+        },
+        {
+          "id": "CVE-2026-80693",
+          "rawFingerprint": "sha256:cb571deed68606a55a15fb5d2b75e09d9d64a7fe7badf9641adbea7e2ffcdff4",
+          "advisorySha256": "a3f3e102bc91d4b9251bcf9e89256cdb00285e5cad20577c305e9977e783f3e2"
+        },
+        {
+          "id": "CVE-2026-80721",
+          "rawFingerprint": "sha256:578d3e81dfe32570284a037266f9b34f027f4386c7447fe7d1626637c0e11076",
+          "advisorySha256": "4c91b35659a47c868b24d7088ab7d005b2dad9558975b35b2613b269643644ce"
+        },
+        {
+          "id": "CVE-2026-80725",
+          "rawFingerprint": "sha256:f666d51ed571f34104bdc83ce14aca1f40c88646b89cbac2fad09e515807fe8e",
+          "advisorySha256": "0e203e2c64a727ecb1e03d153b1e6d1dff06c06073a6c1af5bb1a9564ece0492"
+        },
+        {
+          "id": "CVE-2026-80905",
+          "rawFingerprint": "sha256:2009e12c5ff4010bad49395bdf0f1087d37100b3394b114836d22e4ca54ae50d",
+          "advisorySha256": "7c2ef38712d836078c9fe799b88e54739aad73b7818e9dda7a77f4d4a3abf31d"
+        },
+        {
+          "id": "CVE-2026-89528",
+          "rawFingerprint": "sha256:36bb9b9d0788c2443d41a03b798d4705032af003015c1f8cfb608b4bc1e5f359",
+          "advisorySha256": "303b4e773b024fa8d828b7562b30d05184167fc3a5917ecaec980a47367dae15"
+        },
+        {
+          "id": "CVE-2026-89537",
+          "rawFingerprint": "sha256:545936fe77a4247024fa128143602cbf3c7656b62d2c528326bf14592aec89a3",
+          "advisorySha256": "8346ba231930671a210c67aa06b9d4de887e76cd4f52d340434f89dff84a062c"
+        },
+        {
+          "id": "CVE-2026-89631",
+          "rawFingerprint": "sha256:6849e1435f682b77a872ffae61b43b142cff98f6435433b7290ac956ca7a8d16",
+          "advisorySha256": "f7a0dd0747a504c776fe01879bbc209192dc0c6844746a2a99e757126b4cc3d4"
+        },
+        {
+          "id": "CVE-2026-89637",
+          "rawFingerprint": "sha256:7b052d8c75373416416c73416c687ef9178e149b8de966d4fb842bd00873da00",
+          "advisorySha256": "aecc13a5ca9d993835784205debe9f04a2e3fa58ed7ff0519aaba3f4841a2157"
+        },
+        {
+          "id": "CVE-2026-89675",
+          "rawFingerprint": "sha256:566bc704223927a2eabf78b99a2a831e6f743ad65360c2ff6e1ce2934bbd3bdb",
+          "advisorySha256": "f9ab9ba1ddf8df0edc3f9de19085d8b4decd18d9273b5575631b2478c289f392"
+        },
+        {
+          "id": "CVE-2026-89788",
+          "rawFingerprint": "sha256:f10940b8e638939703874cc5b309b89f48269b1eab2b269ebab461dc324a74b9",
+          "advisorySha256": "eb8276b6e9b19af2a5f873f3298a2f36eaf1dee38ed4e2b6fc7bf2f54c620375"
+        },
+        {
+          "id": "CVE-2026-89810",
+          "rawFingerprint": "sha256:cac8e1e8dc06a12a1829d36ba1e92fa6fa7c2e1faffd303963ced69a98854e83",
+          "advisorySha256": "131159c981a7c075fc0ffe2b12c6a9961414907bb4f81fcca83c8145a30c9c93"
+        },
+        {
+          "id": "CVE-2026-89913",
+          "rawFingerprint": "sha256:d73c8bbbbbed6fbbaa382850ea7245ce16ba96100ca9e5398bdea6c68edaf7b0",
+          "advisorySha256": "d788e3377147ffff6e00218adca786c328afb4755ba9eae05b6fee01c2ca68f5"
+        },
+        {
+          "id": "CVE-2026-90093",
+          "rawFingerprint": "sha256:76b88bea60bf120ad20d6514842781f887e3c309b0ccdf90800887904adf138c",
+          "advisorySha256": "fba88c6c9a9549fd7ee0051446f39936d710153d6ab25bbe012cb471066b0b46"
+        },
+        {
+          "id": "CVE-2026-90104",
+          "rawFingerprint": "sha256:a2ecc3e2ecfb7f326f996df96601224e7bd2db3b1b22ca8be8d79980083f620f",
+          "advisorySha256": "4b60424f3bf3cbfcd972d8470f26b82f0bcd85f03c4c370e27c5c642febda934"
+        },
+        {
+          "id": "CVE-2026-90111",
+          "rawFingerprint": "sha256:717973ccb75317c8200e587400ec760e606ae12cf0178c82d644e5a07f9e6a04",
+          "advisorySha256": "8f31bdf55efff61ed93a6b36a9fa69219ae421f5165e1589fdfb198affdd701f"
+        },
+        {
+          "id": "CVE-2026-90149",
+          "rawFingerprint": "sha256:0dd29db28f07d9e662088e989c5f6aca12846471350829784b002bfb38662286",
+          "advisorySha256": "e6dad7731c7e63d54a422df6e0f5df607c72bec68aa4a4bd6f37cc2e41e134ce"
+        },
+        {
+          "id": "CVE-2026-90155",
+          "rawFingerprint": "sha256:0aaf2eef67311bebcbf0104f4c051f5587bc1581fe6bdbbccc0af505ac38d4e9",
+          "advisorySha256": "62004249344938cf59514d50f2591f84ca058e8999835e38ddb67d17e23efacb"
+        },
+        {
+          "id": "CVE-2026-90161",
+          "rawFingerprint": "sha256:52f3a9564fda174e7315c49a1baeb2eacf3df656038d9f8ec230817b86308aa1",
+          "advisorySha256": "91db64243d587459e721446b9a79d0b81824be46d3c9ac3a27858c8782c76157"
+        },
+        {
+          "id": "CVE-2026-90167",
+          "rawFingerprint": "sha256:5a5aca06d96bca090380c9503394b6eb51c3922075262a9a5ca190222dbe2664",
+          "advisorySha256": "4d9c6b203fb4a8cf05e0b6618365027a6ca6bb872160d34e59baa7085b01ff6e"
+        },
+        {
+          "id": "CVE-2026-90204",
+          "rawFingerprint": "sha256:4844121d22a7d66872af90ccf89843698615512722d024d576e9e7f720b5af2b",
+          "advisorySha256": "4bb5bff7d070d1b5767fd82e05011f81709dbd0438a478f87dbcdfa10230dda6"
+        },
+        {
+          "id": "CVE-2026-90205",
+          "rawFingerprint": "sha256:787ba47a8986c8bdf6a3848d293caed56f99fcaa5ade4fcca64529206c0f8a5e",
+          "advisorySha256": "581b05daef676563bcf5b73c9f2d2ad5fa74d9d89dd0b8441a2d7173c8a65bc2"
+        },
+        {
+          "id": "CVE-2026-90217",
+          "rawFingerprint": "sha256:19e7a423210d1fbb6ab8d6f1e72a770416377d03e516ea6ea55d0709c39edd06",
+          "advisorySha256": "767a944fa5d737998e2c7bfa80cb93cc050a2a322bf4b7ef087f68b8bd549769"
+        },
+        {
+          "id": "CVE-2026-90237",
+          "rawFingerprint": "sha256:98448f691115af8401f81f4fd7dfaba1e8abec9844def23a8fab8c2586ff13a5",
+          "advisorySha256": "072d371cc29d3b09026a1014c6fda443479b7702367a7c7bc600dda1584761d0"
+        },
+        {
+          "id": "CVE-2026-90256",
+          "rawFingerprint": "sha256:9e7bcb5c6a4248d2ce16e5a3384004ea078c4cd38d843190cba205737c4ce24b",
+          "advisorySha256": "769e2c9612a106561271bae385b6a11547cf1e78efab53b708f35507c18f4325"
+        },
+        {
+          "id": "CVE-2026-90317",
+          "rawFingerprint": "sha256:c35687f9e2b46d99546049f7bf9e5036f922880d87506d2269b3cc9ca42e3fae",
+          "advisorySha256": "918be90c83e02def8ccc38ba9a580e1557169bab4d8a703245a903cde2ac4f8d"
+        },
+        {
+          "id": "CVE-2026-90320",
+          "rawFingerprint": "sha256:b13db392e339e2b3efefe8a526c2ae5b9b20221cd1d6959eca929015c3b85692",
+          "advisorySha256": "84868ffd1792b6bd143637acbdc891093a10297af9b17f39d8c5161c149540a6"
+        },
+        {
+          "id": "CVE-2026-90321",
+          "rawFingerprint": "sha256:5be98b9ae39f443d29b2ceb82036768df3f15b92a22c4c3e766198a119b9272c",
+          "advisorySha256": "31f6c861bfcbea72357ee6d2e2a32e05be77e70be5f0adefe971de9c827b3af4"
+        },
+        {
+          "id": "CVE-2026-90324",
+          "rawFingerprint": "sha256:6c0acef3ec336e88dd0af501ba90b205cc160f7db178445511ed2a051fc4cf2b",
+          "advisorySha256": "69e6e8b5244ac7dd7e1728cde49b8122d45bf65f858b4f5c3fd6d9cfc2c2748f"
+        },
+        {
+          "id": "CVE-2026-90343",
+          "rawFingerprint": "sha256:8877db37428219b2e3080d862e1f82fe773163326f9708aabc0c8fa3597f49a6",
+          "advisorySha256": "573420b2f468d846feb19efcd3d7eed12bb3fe7a4f8d3d119595101326f00cbd"
+        },
+        {
+          "id": "CVE-2026-90380",
+          "rawFingerprint": "sha256:d19dbcfdf980c1f240a3326ad40adf1e05c72ad94c7d8f442c4655a5d54f1bec",
+          "advisorySha256": "7b499c7b0da43d032e48f896580a5968ae694c09b3b77785cd06c4c43ea7bca9"
+        },
+        {
+          "id": "CVE-2026-90417",
+          "rawFingerprint": "sha256:179f3ea4890ccccfe8d267bbfaba3c4f183cdd3b2805cbd245002d30b527c3db",
+          "advisorySha256": "70e9da0008e56679b2ef4c3db4300bbda78512ab9ba7801f4dee2635570f12a2"
+        },
+        {
+          "id": "CVE-2026-92499",
+          "rawFingerprint": "sha256:700e76f4f2958c7796ed17a6e5fa6b00f47a3c85df8c333ecb30958364e37a99",
+          "advisorySha256": "3b0e19ad5ee17b8c72c21e0441dd1869d96e09744b06593e92bf9deea0d13a93"
+        },
+        {
+          "id": "CVE-2026-93125",
+          "rawFingerprint": "sha256:eb94a1a828d5494ba6a77baeeba8a032df5e8a3da4577c9f5eac15b2aaeb72bb",
+          "advisorySha256": "40d237f915397488b611626d01fc00c39e03411bef590a44bbf9adf672f3fcdf"
+        },
+        {
+          "id": "CVE-2026-93144",
+          "rawFingerprint": "sha256:02aab55b7cedab76085cb78f93ecf524a4c44766ec95a5af46e5dcd5ec6b3b76",
+          "advisorySha256": "39456db862de832dfa447b3ea9e1bf56d27dcafd2b2ab8a71ce7324d51830c31"
+        },
+        {
+          "id": "CVE-2026-93148",
+          "rawFingerprint": "sha256:4aea9a4ce6aea9bb208ec3de8ec3cf8a40f7c031674316683bee92c5dcab9ff3",
+          "advisorySha256": "25cebfe7ab926d72f764b410091177ef70177723de863d40424a6d7eed5018c4"
+        },
+        {
+          "id": "CVE-2026-93154",
+          "rawFingerprint": "sha256:a3d1ac83de52e8aa7bd8a92fd961c6d7c0d5cbd55b89186a7e0a9e834c04ea09",
+          "advisorySha256": "ff6ad635bc0d92264e1a62afee01c2cbc1a3261f2616d89426c6cda3c3a6d839"
+        },
+        {
+          "id": "CVE-2026-93175",
+          "rawFingerprint": "sha256:f82d9cf9db1e110ba8819237cd4dfcd3ef2120e4b9f3eb564ad1dc31f074a1ec",
+          "advisorySha256": "fa1f8841f0249e85373db87f2124ef4bb70e7c05c729123c251305bee5a84efb"
+        },
+        {
+          "id": "CVE-2026-93176",
+          "rawFingerprint": "sha256:26a81cbdb684c9ceabbc740a4c70aa9aa53a704a4cd8e75fd7bf29b0ef27a3f2",
+          "advisorySha256": "7f141da3e8223aceb8ef7291c159bb84e22745061089f8ab476a7b2cd76d961f"
+        },
+        {
+          "id": "CVE-2026-93282",
+          "rawFingerprint": "sha256:7f12263149d8b9fc1eb80a3bac7f4d3d12ccbded31dd0733d04a121b6281d503",
+          "advisorySha256": "913ea7693ec65999402ca4bc9d995c91aad6a55bd634eeac2a9b89bb4cf2e6b0"
+        },
+        {
+          "id": "CVE-2026-97493",
+          "rawFingerprint": "sha256:ac50e6960e9c53f793b3a225852b5ea74132437c2fb88176f76d2fd151009503",
+          "advisorySha256": "309472cd763d8ad6242aa8c9541709e7d07290795a299309d45eb0e600948d8e"
+        },
+        {
+          "id": "CVE-2026-97513",
+          "rawFingerprint": "sha256:247ebc6dd23842d24c3e1fbf5c9433701d6eb1f306f636ae1d4622318a68efea",
+          "advisorySha256": "110d4f9729079ce46f1d3e42b780d6f27a421de60cc110f1c0ae83dd0bdce5fe"
+        },
+        {
+          "id": "CVE-2026-97565",
+          "rawFingerprint": "sha256:dbfb655b2f84bf6f04c83370d9ed796c237c6c621cf9389846451deecdfb0527",
+          "advisorySha256": "cd857e38c596c5f1f8c64aadd4284c70b0c64623b5025beaa8f3f624fa5bcd76"
+        },
+        {
+          "id": "CVE-2026-97603",
+          "rawFingerprint": "sha256:fed9ee9e28b5f7de3f12e95b1c46e0a5f1516f8f9320812db06ee6e768ac40ac",
+          "advisorySha256": "5a04256533c7e3cd1bc7782a082a8e1e547751485de9e46e937eeafa79787f1f"
+        },
+        {
+          "id": "CVE-2026-97960",
+          "rawFingerprint": "sha256:033e6ed1e97fa4515295466b3dfa1c401b79a4c8faeb77a74a9b105c2f8fb635",
+          "advisorySha256": "95abd461e9e55a479e8a0069fb412c9a747dcddd6765f2c11c5c4e4d3e5ad8d7"
+        },
+        {
+          "id": "CVE-2026-97988",
+          "rawFingerprint": "sha256:9e04f9b1da60211b33931125a81b7cf4bda8a76b3b3ad22bc438ab585856cbb4",
+          "advisorySha256": "674397071241c7150d0099dfa4a5c816255e42aff51e8e71a33356742b34220d"
+        },
+        {
+          "id": "CVE-2026-98019",
+          "rawFingerprint": "sha256:261fb259e0a4dc35a1d7c0e8838afd9c555a73e94ab4b07e21f5085eeb549352",
+          "advisorySha256": "c9d05bd6067c854284a582b0f3e4fac27e3e39b3151ed02807cad1f10d0d52c7"
+        },
+        {
+          "id": "CVE-2026-98033",
+          "rawFingerprint": "sha256:292189517179194ddcbcf23dd8c7a1b1da852723e444d8077f82a1380ca9566b",
+          "advisorySha256": "7703f3e3df2f9a6bebfc2acc305dd382bc9657cb05ee72e58807bdb5c8705ceb"
+        },
+        {
+          "id": "CVE-2026-98034",
+          "rawFingerprint": "sha256:194878b7c96bfc42ed890d12d6a6258232eb5d77ffb3c686f98ecd672b25d06b",
+          "advisorySha256": "604a1b3a28a0665d6042a9891b1dd9961740e14c2c21c1a762eb01d8e9afacb9"
+        },
+        {
+          "id": "CVE-2026-98084",
+          "rawFingerprint": "sha256:86d205c8ab2e9aa0ea10e0405fbb9ce52fd4cd5213d96cac302fb007cb642dcc",
+          "advisorySha256": "cb81b86bd9901994d96699b94d1d988e3056c24166385eee0a48fa27aee76675"
+        },
+        {
+          "id": "CVE-2026-98085",
+          "rawFingerprint": "sha256:ef823a5edda7d1340268bd156a26f5c1ec39e8e59346e147518aa826723773cd",
+          "advisorySha256": "a17d5e43edff3c7e74c16d030cb9e934c6cad62a09877b0b22180b00b910b757"
+        },
+        {
+          "id": "CVE-2026-98115",
+          "rawFingerprint": "sha256:0d1e83597bd30941ece1f156e6fdb235dbff05b6359362756786aae82228cde2",
+          "advisorySha256": "d160faba1c5a39c0a104001c1f5442ffdfe32a339c0598d25ec15f376d67ea66"
+        },
+        {
+          "id": "CVE-2026-98134",
+          "rawFingerprint": "sha256:a3be6ad2ed2da576250b6e727ba633e213c842b05e83622adbdad0ad5c6c74fe",
+          "advisorySha256": "f766a3f033f8e5bab1f4e359691efe738cae06eab416a7a59436e8e26190b321"
+        },
+        {
+          "id": "CVE-2026-98332",
+          "rawFingerprint": "sha256:36e715b96cb15ef4a01a3a40bd8541d2ae60ddc3e38bddc4344dd348b47d4db7",
+          "advisorySha256": "194cae2ea919a24be5e976b79775cd80fedd893477930c1640800bf11171d76c"
+        },
+        {
+          "id": "CVE-2026-98333",
+          "rawFingerprint": "sha256:c1c0c16bf2e5b1bb10d643831230123083ceaf862d221d41dba3ee175b680dcb",
+          "advisorySha256": "9ec6e3099c2da64cc3587e5bcf1d220f7f48c571a6d0751ebdd9a7b227af7302"
+        },
+        {
+          "id": "CVE-2026-98341",
+          "rawFingerprint": "sha256:54fc6d1e3de9ca4e860fa3d3f5940ae721fb1d178399a7936bd8f30a108198c0",
+          "advisorySha256": "96b709b432284aed804b84b8a6e0ce424731d337eb95643b74fe2c2d0e08549f"
+        },
+        {
+          "id": "CVE-2026-98364",
+          "rawFingerprint": "sha256:d74f291e68a2a93fb8ddb6a6d05d958d0d0b5eae97110566bd11b6648de25589",
+          "advisorySha256": "be7b8a61ae49e1b7d79318a7369b7d2275b34e69d07faf9e793889b6d6a71b55"
+        },
+        {
+          "id": "CVE-2026-98420",
+          "rawFingerprint": "sha256:ceacf3a1a5403f974cba77d512ed1122ac97a849bc6b7b31c0e39d97373b4df1",
+          "advisorySha256": "1d767e538b00e4e105897c7dfd85f129380238a77443a83a8145240854e2e1d7"
+        },
+        {
+          "id": "CVE-2026-98439",
+          "rawFingerprint": "sha256:013f3979886f8b7b110fd7e2beed7cc2ad402837bdfafc3c0ecff0461c28751e",
+          "advisorySha256": "ad14a369513fd775efa1fdb2720458316a683f2a15f25bfc003831252dfc3a3e"
+        },
+        {
+          "id": "CVE-2026-98570",
+          "rawFingerprint": "sha256:84409221b8f10897f1577b53347ffbed6cba31f6399b713d76073173e852875e",
+          "advisorySha256": "bc34d5ddeb724ff8b662eb3ced73a81915f42ae33e3754f816af49bf5605b9fe"
+        },
+        {
+          "id": "CVE-2026-98589",
+          "rawFingerprint": "sha256:2463135153019d54abd830419bb6f244ad08549e5f55a4ec5f1ddf5a51cbc2e6",
+          "advisorySha256": "85baff1b267e2e869a0572ad09a0307f0609ab1c2b9187c794d7549f08e171d1"
+        },
+        {
+          "id": "CVE-2026-98599",
+          "rawFingerprint": "sha256:61b9073bcd15b2bc7837a73f099db50b9483a47fc0946a7e32d24b7c4e282b0f",
+          "advisorySha256": "060d58f8a8815a50a21bfa078c628369a6ce7614bc9b5d6535897670171f6f44"
+        },
+        {
+          "id": "CVE-2026-98652",
+          "rawFingerprint": "sha256:f54ede76c9e054d12cdf4d68b6b7442699287b5d4f0f781bc77665ff63be8c92",
+          "advisorySha256": "e172f54761f035b18bb43d6d5f46e6f45cea0d0360de060fd92df3fc636d627f"
+        },
+        {
+          "id": "CVE-2026-98799",
+          "rawFingerprint": "sha256:54329a9d9e129430d8937b7e9e7b4e795a20e30caef5d91373dba3d4e63f5423",
+          "advisorySha256": "be7dbcef06152bf6e385e9b0faab034f09bad2afccb42aa23be76fbe85d52fce"
+        },
+        {
+          "id": "CVE-2026-98800",
+          "rawFingerprint": "sha256:acf00cdc2543ece391ef73754767de374525ab8ac3c2c4137910363a55db6a99",
+          "advisorySha256": "a661ae745acb509e7bcf678f070532a4b58f5d1ed0651d39f7efe44aac4f6b35"
+        },
+        {
+          "id": "CVE-2026-98803",
+          "rawFingerprint": "sha256:48f6ea21e8886c8f9f43f94ca3e754b7442e38fbcd097a73acc97ec45440bf7e",
+          "advisorySha256": "789ff2a32748e41726457f6acd8d91ebe9d4f857d47a630371cf49d98c89730b"
+        },
+        {
+          "id": "CVE-2026-98813",
+          "rawFingerprint": "sha256:9ff47beb78f1672cb8f09103139b338e7f266358e6a7420746baf889e88a9c91",
+          "advisorySha256": "0ee9a913bd9b2656875b3ee64de92ca975b527a5f61e1320e8e71fea430eafc2"
+        },
+        {
+          "id": "CVE-2026-98824",
+          "rawFingerprint": "sha256:3bfc986a9bb80de1c90441d68b918fea6bdf63f7e1c5ec1b92f41251f0cb5a18",
+          "advisorySha256": "c7a9c5ba1e726466088ea2815c451e6c13c826117d2652867e354e2de8ffff9c"
+        },
+        {
+          "id": "CVE-2026-98829",
+          "rawFingerprint": "sha256:cbddfe32660b1b3381471d00abbed8e20a121ed345a039bc0fe2e9a468b3ed96",
+          "advisorySha256": "f289d5dda94a488d504193a68c46b5bb4033e5181fb3ad73cc15b367e1f13ee3"
+        },
+        {
+          "id": "CVE-2026-98863",
+          "rawFingerprint": "sha256:426e144d950491528033e8d1f4afe6341d52d319cbd4ea3fb7fae5333423f492",
+          "advisorySha256": "bb6af84dab6e898aee98696883962760029214c6c3ad8d93f2815d7387f5abe9"
+        }
+      ]
+    }
+  ],
+  "conclusion": "All182 raw fingerprints changed solely because exact image identity changed; all364 fingerprints reproduce the immutable scanner algorithm. All182 advisory-content digests are identical. Current proof must recompute Fingerprint and bind actual OCI; this evidence does not authorize an exception."
+}

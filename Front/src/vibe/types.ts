@@ -61,6 +61,7 @@ export interface VibeSummary {
 }
 export interface VibeAttempt {
   id: string;
+  challengeVersion?: string;
   challenge: Challenge;
   enterprise?: {
     testId: string;

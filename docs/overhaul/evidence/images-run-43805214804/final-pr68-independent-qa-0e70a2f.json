@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-final-pr-qa",
+  "reviewer": "/root/product_engineering",
+  "observedAt": "2026-11-16T04:52:12.167Z",
+  "decision": "APPROVED_FOR_INTEGRATION",
+  "pullRequest": 68,
+  "sourceHead": "0e70a2fe6d725362bcb248836c3697d310e16742",
+  "integrationBase": "e7caa9b3aa23ac051e3a786780bc3b8c0780affa",
+  "actualCheckout": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+  "reviewedLocalCommit": "dde0f7fd9eb1c0bdbe91478ca0db97a603e1cccb",
+  "verifiedTree": "f302cef7d2459736d3810ee930f1c9e63662ed65",
+  "treeVerification": "Independently retrieved official Git commit and merge objects. Both trees equal reviewed local source; merge parents are the exact recorded head/base.",
+  "run": {
+    "id": 43805214804,
+    "name": "CI",
+    "status": "completed",
+    "conclusion": "success",
+    "run_number": 261,
+    "jobs_url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/runs/43805214804/jobs",
+    "logs_url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/runs/43805214804/logs",
+    "workflow_id": 369031438
+  },
+  "jobs": [
+    {
+      "id": 133094309456,
+      "name": "Detect changes",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309702,
+      "name": "Docker image (runtime)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309704,
+      "name": "Docker image (back)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309774,
+      "name": "Docker image (judge)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309797,
+      "name": "Docker image (front)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309862,
+      "name": "Dependency audit",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349727,
+      "name": "Sandbox, pipeline and Compose",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349764,
+      "name": "Backend and API",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349828,
+      "name": "Judge worker",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349839,
+      "name": "Browser tests (2/2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349864,
+      "name": "Browser tests (1/2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133098126260,
+      "name": "CI required",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "criticalSteps": [
+    {
+      "job": "Docker image (runtime)",
+      "name": "Scan image and enforce the explicit evidence gate",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job": "Docker image (back)",
+      "name": "Scan image and enforce the explicit evidence gate",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job": "Docker image (judge)",
+      "name": "Scan image and enforce the explicit evidence gate",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job": "Docker image (front)",
+      "name": "Scan image and enforce the explicit evidence gate",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job": "Sandbox, pipeline and Compose",
+      "name": "go-judge language and isolation regression tests",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job": "Sandbox, pipeline and Compose",
+      "name": "Native judging pipeline",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job": "Sandbox, pipeline and Compose",
+      "name": "Full Compose browser flow",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job": "Backend and API",
+      "name": "Database migrations and API tests",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job": "Browser tests (2/2)",
+      "name": "Browser regression tests",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job": "Browser tests (2/2)",
+      "name": "Firefox core-flow regression tests",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job": "Browser tests (1/2)",
+      "name": "Browser regression tests",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job": "Browser tests (1/2)",
+      "name": "Firefox core-flow regression tests",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "freshImageArtifacts": [
+    {
+      "id": 14198550238,
+      "name": "image-audit-judge-71370b28d8a30d3ac79cf18de5facd291b6447d2-1",
+      "bytes": 14323,
+      "digest": "sha256:478e7c1c6e1da96420f6e1e03c0fe107f9fcc8806112311b7e08aa7d31660af2",
+      "sourceHead": "0e70a2fe6d725362bcb248836c3697d310e16742",
+      "expired": false
+    },
+    {
+      "id": 14198236257,
+      "name": "image-audit-front-71370b28d8a30d3ac79cf18de5facd291b6447d2-1",
+      "bytes": 28942,
+      "digest": "sha256:61015f76315a7f05aa18cff8f242b2ad422fc1aa9198fe3671c0df4de82f2bf7",
+      "sourceHead": "0e70a2fe6d725362bcb248836c3697d310e16742",
+      "expired": false
+    },
+    {
+      "id": 14197833311,
+      "name": "image-audit-back-71370b28d8a30d3ac79cf18de5facd291b6447d2-1",
+      "bytes": 26970,
+      "digest": "sha256:e4e59aae772e1f3fb2c3feaa62232f773bfe4e6f0f00898df21935d99fb28a3d",
+      "sourceHead": "0e70a2fe6d725362bcb248836c3697d310e16742",
+      "expired": false
+    },
+    {
+      "id": 14197584045,
+      "name": "image-audit-runtime-71370b28d8a30d3ac79cf18de5facd291b6447d2-1",
+      "bytes": 1089724,
+      "digest": "sha256:32e8275ee86fd50823275a5b23dc842ff4c3b75c3471b47fe15895a0ef3bd2c9",
+      "sourceHead": "0e70a2fe6d725362bcb248836c3697d310e16742",
+      "expired": false
+    }
+  ],
+  "independentlyCountedFinalLogs": {
+    "backendUnits": 320,
+    "postgresApi": 209,
+    "judgeWorkerUnits": 107,
+    "chromium": 372,
+    "chromiumSlow": 111,
+    "webkit": 112,
+    "firefox": 112,
+    "browserFreeUnits": 85,
+    "browserInstances": 707,
+    "npmAuditZeroFindingScopes": 6,
+    "flakyOrRetryOnlyPassObserved": false
+  },
+  "actualImageReview": {
+    "all4ArchivesMatchedGithubDigests": true,
+    "allRetainedFilesByteEqualOriginalZip": true,
+    "backFrontJudge": "PASS_RAW_SCAN; every reported severity zero; no applicability rule used",
+    "runtime": "Original raw exit2/BLOCKED_FINDINGS preserved; actual990file MATCH;182 separate reviewed decisions;0remaining applicability blockers",
+    "rawRuntimeCounts": {
+      "UNKNOWN": 1,
+      "LOW": 363,
+      "MEDIUM": 561,
+      "HIGH": 177,
+      "CRITICAL": 5
+    },
+    "rawCurrentAdvisoriesAndFingerprintsIndependentlyRecomputed": 182,
+    "finalEvaluatorRerunMatchesRetained": true,
+    "policyContentSha256": "ebc01bdbbd31f6adf2e0761bdb7c278b92c72ebeca1a175523e4f2a0b74083aa",
+    "policyExpiresAt": "2026-11-30T00:00:00Z",
+    "hostKernelReadiness": "UNVERIFIED"
+  },
+  "evidence": [
+    {
+      "path": "final-pr68-three-image-independent.json",
+      "sha256": "6a05cd0c7e860258e986f718024d32ba212802a84df94c1887338f422c7ec4f4"
+    },
+    {
+      "path": "independent-runtime-final-review-43805214804.json",
+      "sha256": "f0876cecfbab2eda38a49c656a44ee31208416e92e1dea12b36ef076774765ea"
+    },
+    {
+      "path": "image-before-after-independent-counts.json",
+      "sha256": "1051c8c8e7f8606af72b6952fe07828b189ed52f459e2edfa607d0e6ce097f89"
+    },
+    {
+      "path": "final-pr68-public-git-commit-0e70a2f.json",
+      "sha256": "03b64e9266c2109f7ba13c1dc4c53b5b067b1dc6c7805c0f647ff3f0743cc853"
+    },
+    {
+      "path": "final-pr68-public-git-merge-71370b2.json",
+      "sha256": "47375d7ad13045e0812a474e8bd6b76e9003d655f6216b8b0aff7108e233aa54"
+    }
+  ],
+  "noRemoteMutationByReviewer": true,
+  "mainUnchangedAtObservation": "6176015b63a1615cc2269172f246725ef08abab3",
+  "mainTargetPr63OpenUnmerged": true,
+  "separateGates": [
+    "Judge specialist independently reviews actual native/Go graph artifacts; this record independently verifies those required job steps succeeded.",
+    "Final documentary/combined integration HEAD requires a new full CI and PR63 handoff check after integration.",
+    "This approval does not authorize main merge or production deployment."
+  ],
+  "limitations": [
+    "No local browser, Docker scan, or actual OCI verifier re-execution was claimed; original Actions evidence was independently checked.",
+    "Raw kernel-header findings remain visible. The approved classification is absent vulnerable code in the exact component, not a host-kernel patch.",
+    "Existing lower-severity/runtime analysis limits and the fixed review expiry remain.",
+    "The gate and current head/base must be rechecked if either changes before merge."
+  ]
+}

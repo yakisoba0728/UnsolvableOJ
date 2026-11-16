@@ -1,12 +1,8 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { isDeepStrictEqual } from 'node:util';
-import {
-  harness,
-  hiddenChecks,
-  publicChecks,
-  validateFiles,
-} from './vibe.catalog.js';
+import { validateFiles } from './vibe.catalog.js';
+import type { VibeChallengeSnapshot } from './vibe.snapshot.js';
 import type { ProjectFiles, VibeCheck } from './vibe.types.js';
 
 const diagnostic = (value: string) =>
@@ -23,8 +19,12 @@ export class VibeRunner {
     );
   }
 
-  async run(files: ProjectFiles, final: boolean): Promise<VibeCheck[]> {
-    validateFiles(files);
+  async run(
+    files: ProjectFiles,
+    final: boolean,
+    content: VibeChallengeSnapshot,
+  ): Promise<VibeCheck[]> {
+    validateFiles(files, false, content.editablePaths);
     if (!this.available)
       throw new ServiceUnavailableException(
         '프로젝트 실행기가 아직 설정되지 않았습니다.',
@@ -131,6 +131,13 @@ export class VibeRunner {
       )
         throw new Error('Sandbox isolation is unavailable');
       await (await request('/file')).body?.cancel();
+      const anonymous = await fetch(new URL('/file', url), {
+        redirect: 'error',
+        signal,
+      });
+      await anonymous.body?.cancel();
+      if (anonymous.status !== 401 && anonymous.status !== 403)
+        throw new Error('Sandbox file access must require authentication');
       const compile = await execute(
         [
           '/bin/sh',
@@ -138,9 +145,11 @@ export class VibeRunner {
           '/usr/local/bin/esbuild harness.ts --bundle --platform=node --format=cjs --outfile=main.cjs && /usr/local/bin/esbuild tests/search.test.ts --bundle --platform=node --format=cjs --outfile=checks.cjs',
         ],
         Object.fromEntries(
-          Object.entries({ ...files, 'harness.ts': harness }).map(
-            ([path, content]) => [path, { content }],
-          ),
+          Object.entries({
+            ...content.initialFiles,
+            ...files,
+            'harness.ts': content.harness,
+          }).map(([path, content]) => [path, { content }]),
         ),
         '',
         ['main.cjs', 'checks.cjs'],
@@ -161,7 +170,12 @@ export class VibeRunner {
       if (!artifact || !checksArtifact)
         throw new Error('Compiled files missing');
       const checks: VibeCheck[] = [];
-      for (const test of [...publicChecks, ...(final ? hiddenChecks : [])]) {
+      for (const { test, hidden } of [
+        ...content.publicChecks.map((test) => ({ test, hidden: false })),
+        ...(final
+          ? content.hiddenChecks.map((test) => ({ test, hidden: true }))
+          : []),
+      ]) {
         const execution = await execute(
           ['/usr/bin/node', '/w/main.cjs'],
           { 'main.cjs': { fileId: artifact } },
@@ -180,7 +194,7 @@ export class VibeRunner {
         checks.push({
           name: test.name,
           passed,
-          ...(!passed && !test.name.startsWith('숨김')
+          ...(!passed && !hidden
             ? {
                 detail: diagnostic(
                   execution.files?.stderr ||

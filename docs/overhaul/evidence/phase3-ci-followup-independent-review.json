@@ -1,0 +1,35 @@
+{
+  "reviewer": "independent_recovery",
+  "authorSeparated": true,
+  "humanApprovalClaim": false,
+  "changes": [
+    {
+      "head": "02aee851df36a92bc9ff19d4735f861f7b34d425",
+      "tree": "b3def644fea449bb8518290db72132071d23420f",
+      "scope": "Learning StrictMode request cancellation and keyboard-focus fixture correction",
+      "sourceAssessment": "Microtask scheduling permits effect cleanup to abort the obsolete request before network traffic. Existing useRequest abort/error/finally guards remain intact. Request-count assertions are unchanged. The focus test now enters real keyboard navigation with Tab and Shift+Tab and retains focus plus visible-outline assertions.",
+      "independentlyExecuted": "Actual application source under StrictMode with JSDOM: render-contract, late-period, account-clear, late-account and failure-retry all passed (5/5).",
+      "evidence": "learning-02aee85-dom.json",
+      "disposition": "Accepted source/local DOM correction; actual browser outcomes require fresh exact-head CI. No browser execution is claimed for this DOM probe."
+    },
+    {
+      "head": "d9cf76578502e36d28a074b3349447bab33b8378",
+      "tree": "010f7ceef2d362ea7fc121661639f97bdbed8ec3",
+      "scope": "Rendered Compose decimal-byte memory values",
+      "sourceAssessment": "Accepts positive safe-integer numbers or pure positive decimal strings. Empty/zero/negative/fractional/unit/Infinity/unsafe-integer/boolean values remain rejected. Existing sandbox headroom and equal swap/memory requirements remain enforced; no security gate was disabled.",
+      "independentlyExecuted": "node --test scripts/ci-policy.test.mjs scripts/check-executor-compose.test.mjs: 55 passed, zero failed/skipped/cancelled.",
+      "evidence": "security-d9cf765-policy.log",
+      "disposition": "Accepted source and policy regression result; actual rendered Docker Compose and TLS execution require fresh exact-head CI."
+    },
+    {
+      "head": "53e015ba03a55c30ab7d97fa4d0d5f41a79cf298",
+      "tree": "3f741dde98b00db77beea9515317cbbab170d330",
+      "scope": "Vibe native selector and Firefox versioning flow",
+      "sourceAssessment": "Adds vibe.snapshot.ts, vibe.prompts.ts and vibe.ai.ts to required native selection and regression paths. Adds the new Vibe versioning spec to Firefox while preserving the existing WebKit/Firefox parity checks and all existing checks.",
+      "independentlyExecuted": "node --test scripts/ci-policy.test.mjs: 17 passed, zero failed/skipped/cancelled.",
+      "evidence": "vibe-53e015b-policy.log",
+      "disposition": "Accepted CI-only change; final exact-head native and browser execution still required."
+    }
+  ],
+  "resourceBoundary": "Read-only application/GitHub review; own temporary DOM output and local policy runs. No production resource or paid provider call."
+}

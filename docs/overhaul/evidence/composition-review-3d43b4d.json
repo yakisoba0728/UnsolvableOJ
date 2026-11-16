@@ -1,0 +1,195 @@
+{
+  "head": "3d43b4dde170266a22e2a49043ba66c3919ce936",
+  "base": "1b2ada7c3ebb097936c94bd19e09c5401a204f73",
+  "review": "APPROVED, subject to exact-head full CI",
+  "scope": "Independent composition review of enterprise owner detail, pagination, submission title, ownership/refresh guards and CI union; no source edits",
+  "sourceIdentity": {
+    "submission_fix": {
+      "approvedCommit": "b479145c2d717a90f80c8cf2030e0c5fc5b263ae",
+      "files": [
+        "Back/src/modules/submissions/submissions.service.ts",
+        "Back/src/modules/submissions/submissions.service.spec.ts",
+        "Back/test/enterprise-submission-version.e2e-spec.ts"
+      ],
+      "identical": true
+    },
+    "recovery_fix": {
+      "approvedCommit": "dada9b51270f2ad991ec610d045c42a8e0a3d9cc",
+      "files": [
+        "Back/test/process.pipeline-helpers.ts",
+        "Back/test/process-pipeline-safety.spec.ts",
+        "Back/test/judge-redis-restart.pipeline-spec.ts",
+        "Back/test/judge-rejudge-recovery.pipeline-spec.ts",
+        "Back/test/owned-redis.pipeline-helpers.ts"
+      ],
+      "identical": true
+    },
+    "development_audit": {
+      "approvedCommit": "b8b8a6d04d8bf133cfe8ddd0b921c46672eac889",
+      "files": [
+        "Back/package.json",
+        "Back/package-lock.json"
+      ],
+      "identical": true
+    },
+    "approved_live_and_pinned_specs": {
+      "approvedCommit": "c1353035a4fd99e0c3f245bd50a779ffbf0f6866",
+      "files": [
+        "Front/tests-live/enterprise-flow.spec.ts",
+        "Front/tests/enterprise-pinned-summary.spec.ts",
+        "Back/test/enterprise-detail.e2e-spec.ts"
+      ],
+      "identical": true
+    },
+    "preserved_results_query": {
+      "approvedCommit": "57d56a866c5c755a9ae0d8300649763676c73526",
+      "files": [
+        "Back/src/modules/enterprise/enterprise-result-queries.ts",
+        "Back/src/modules/enterprise/dto/enterprise-results.query.ts",
+        "Back/src/modules/enterprise/enterprise.controller.ts"
+      ],
+      "identical": true
+    }
+  },
+  "ciPolicy": {
+    "passed": 13,
+    "failed": 0
+  },
+  "dom": {
+    "ownership": {
+      "label": "ownership-3d43b4d",
+      "root": "/workspace/scratch/231e81830e94/product-final-review",
+      "node": "v24.22.1",
+      "dom": "jsdom 31.0.1",
+      "scenarios": [
+        {
+          "name": "late-delete-navigation",
+          "mutations": 1,
+          "expected": "/problems",
+          "actual": "/problems",
+          "passed": true
+        },
+        {
+          "name": "late-start-account",
+          "mutations": 1,
+          "expected": "/enterprise/join/abc",
+          "actual": "/enterprise/join/abc",
+          "passed": true
+        }
+      ]
+    },
+    "refresh": {
+      "label": "refresh-3d43b4d",
+      "root": "/workspace/scratch/231e81830e94/product-final-review",
+      "node": "v24.22.1",
+      "dom": "jsdom 31.0.1",
+      "scenarios": [
+        {
+          "name": "edit-draft-refresh",
+          "before": "unsaved title",
+          "pending": "unsaved title",
+          "after": "unsaved title",
+          "passed": true
+        }
+      ]
+    },
+    "results": {
+      "passed": true,
+      "environment": "Actual React DOM in jsdom; native browser/layout metrics not measured",
+      "checks": [
+        "50/50/3 bounded rows",
+        "heading focus and busy state during loading",
+        "no stale rows relabelled",
+        "failed page retry/first-page recovery control",
+        "route identity resets page",
+        "out-of-range page recovers after shrink to one/zero candidates"
+      ],
+      "requests": [
+        {
+          "id": "results",
+          "page": 1
+        },
+        {
+          "id": "results",
+          "page": 2
+        },
+        {
+          "id": "results",
+          "page": 3
+        },
+        {
+          "id": "results",
+          "page": 3
+        },
+        {
+          "id": "another",
+          "page": 1
+        },
+        {
+          "id": "another",
+          "page": 1
+        },
+        {
+          "id": "shrunk-1",
+          "page": 1
+        },
+        {
+          "id": "shrunk-1",
+          "page": 1
+        },
+        {
+          "id": "shrunk-1",
+          "page": 2
+        },
+        {
+          "id": "shrunk-1",
+          "page": 2
+        },
+        {
+          "id": "shrunk-1",
+          "page": 1
+        },
+        {
+          "id": "shrunk-0",
+          "page": 1
+        },
+        {
+          "id": "shrunk-0",
+          "page": 1
+        },
+        {
+          "id": "shrunk-0",
+          "page": 2
+        },
+        {
+          "id": "shrunk-0",
+          "page": 2
+        },
+        {
+          "id": "shrunk-0",
+          "page": 1
+        }
+      ]
+    }
+  },
+  "browserDiscovery": {
+    "files": 4,
+    "projects": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "selectedInstances": 69,
+    "executed": false
+  },
+  "nonBlockingWhitespace": {
+    "gitDiffCheckExit": 2,
+    "output": "docs/overhaul/evidence/enterprise-submission-metadata-after.log:10: new blank line at EOF.\ndocs/overhaul/evidence/enterprise-submission-metadata-before.log:43: new blank line at EOF.\n",
+    "scope": "Only trailing blank lines in the two raw submission API evidence logs; all non-log paths pass"
+  },
+  "limitations": [
+    "No actual browser/layout run",
+    "No independent combined API rerun; coordinator owns 209-test execution and final Actions",
+    "Local DOM uses synthetic API fixtures"
+  ]
+}

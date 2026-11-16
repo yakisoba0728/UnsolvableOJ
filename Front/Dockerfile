@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:24.22.2-alpine AS build
+FROM node:24.22.2-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8 AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -10,7 +10,9 @@ ARG VITE_SENTRY_DSN=
 ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN
 RUN npm run build
 
-FROM nginx:1.31.8-alpine AS runtime
+FROM nginx:1.31.8-alpine@sha256:fed7e14be83cbd2661a75cdc5b872d936cf155d46c327084d30b8df19ae88d72 AS runtime
+# Keep nginx's XSLT support and install the Alpine security update.
+RUN apk add --no-cache --upgrade 'libxslt>=1.1.43-r4'
 ENV TRUSTED_PROXY_CIDR=127.0.0.1/32
 ENV TRUSTED_PROXY_HOP_CIDR=127.0.0.1/32
 COPY --from=build /app/dist /usr/share/nginx/html

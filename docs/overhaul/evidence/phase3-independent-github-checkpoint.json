@@ -1,0 +1,367 @@
+{
+  "reviewer": "independent_recovery",
+  "retrievedAt": "2026-11-16T07:22:26.547Z",
+  "scope": "Read-only GitHub PR and accepted/candidate workflow job metadata for final checkpoint review.",
+  "receipts": [
+    {
+      "kind": "pr",
+      "id": 74,
+      "state": "closed",
+      "merged": true,
+      "head": "dfcf742963f7dde8d6a5ba72edc3dec1f0b7d96b",
+      "merge": "a30b0b358f88de506efe910c491d2f12ed980238",
+      "base": "b6114fc4bd10bafa889097997aee70b7b284a38c",
+      "url": "https://github.com/yakisoba0728/UnsolvableOJ/pull/74"
+    },
+    {
+      "kind": "pr",
+      "id": 75,
+      "state": "closed",
+      "merged": true,
+      "head": "8e640b90709d37f979f4208c186c25440b96514f",
+      "merge": "87cc1e724f3c5bba8ee4a1d3e138c16a18202f02",
+      "base": "a30b0b358f88de506efe910c491d2f12ed980238",
+      "url": "https://github.com/yakisoba0728/UnsolvableOJ/pull/75"
+    },
+    {
+      "kind": "pr",
+      "id": 76,
+      "state": "open",
+      "merged": false,
+      "head": "e3aa50c4cdcadaa0dd965a29086c0148b79261a8",
+      "merge": "257e795ca89f1c1a425ed54d8150db009c65a65b",
+      "base": "87cc1e724f3c5bba8ee4a1d3e138c16a18202f02",
+      "url": "https://github.com/yakisoba0728/UnsolvableOJ/pull/76"
+    },
+    {
+      "kind": "pr",
+      "id": 63,
+      "state": "open",
+      "merged": false,
+      "head": "87cc1e724f3c5bba8ee4a1d3e138c16a18202f02",
+      "merge": "1cf6bd1bf184550418c9313541fe7065440e1e0f",
+      "base": "6176015b63a1615cc2269172f246725ef08abab3",
+      "url": "https://github.com/yakisoba0728/UnsolvableOJ/pull/63"
+    },
+    {
+      "kind": "run",
+      "id": 43816883930,
+      "jobs": [
+        {
+          "id": 133131066786,
+          "name": "Dependency audit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133131067132,
+          "name": "Docker image (judge)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133131067194,
+          "name": "Detect changes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133131067265,
+          "name": "Docker image (runtime)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133131067281,
+          "name": "Docker image (back)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133131067298,
+          "name": "Docker image (front)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133131113409,
+          "name": "Backend and API",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133131113443,
+          "name": "Sandbox, pipeline and Compose",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133131113469,
+          "name": "Browser tests (2/2)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133131113499,
+          "name": "Browser tests (1/2)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133131113514,
+          "name": "Judge worker",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133134994690,
+          "name": "CI required",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "total": 12
+    },
+    {
+      "kind": "run",
+      "id": 43818814392,
+      "jobs": [
+        {
+          "id": 133137060050,
+          "name": "Dependency audit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133137060248,
+          "name": "Docker image (front)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133137060284,
+          "name": "Detect changes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133137060356,
+          "name": "Docker image (judge)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133137060410,
+          "name": "Docker image (runtime)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133137060556,
+          "name": "Docker image (back)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133137140535,
+          "name": "Backend and API",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133137140548,
+          "name": "Sandbox, pipeline and Compose",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133137140591,
+          "name": "Judge worker",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133137140598,
+          "name": "Browser tests (1/2)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133137140628,
+          "name": "Browser tests (2/2)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133141435718,
+          "name": "CI required",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "total": 12
+    },
+    {
+      "kind": "run",
+      "id": 43822819719,
+      "jobs": [
+        {
+          "id": 133149593534,
+          "name": "Dependency audit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133149593785,
+          "name": "Docker image (judge)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133149593817,
+          "name": "Detect changes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133149593820,
+          "name": "Docker image (back)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133149593960,
+          "name": "Docker image (runtime)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133149594086,
+          "name": "Docker image (front)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133149648743,
+          "name": "Judge worker",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133149648744,
+          "name": "Sandbox, pipeline and Compose",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 133149648787,
+          "name": "Backend and API",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133149648875,
+          "name": "Browser tests (1/2)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 133149648897,
+          "name": "Browser tests (2/2)",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ],
+      "total": 11
+    },
+    {
+      "kind": "pr",
+      "id": 73,
+      "state": "closed",
+      "merged": true,
+      "head": "b09d2289e2645334070f0d067e6f8dfdef5aac49",
+      "merge": "b6114fc4bd10bafa889097997aee70b7b284a38c",
+      "base": "45b6c9c6f879b8966b8f0c14eecdd06fb5a588e4",
+      "url": "https://github.com/yakisoba0728/UnsolvableOJ/pull/73"
+    },
+    {
+      "kind": "run",
+      "id": 43821157776,
+      "jobs": [
+        {
+          "id": 133144300248,
+          "name": "Detect changes",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133144300595,
+          "name": "Docker image (runtime)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133144300651,
+          "name": "Docker image (back)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133144300674,
+          "name": "Docker image (judge)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133144300683,
+          "name": "Dependency audit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133144300687,
+          "name": "Docker image (front)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133144375442,
+          "name": "Judge worker",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133144375461,
+          "name": "Backend and API",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133144375533,
+          "name": "Browser tests (2/2)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133144375604,
+          "name": "Browser tests (1/2)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133144375605,
+          "name": "Sandbox, pipeline and Compose",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 133149056340,
+          "name": "CI required",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "total": 12
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @unsolvable-oj/front@0.1.0 test:live
+> playwright test --config playwright.live.config.ts --list
+
+Listing tests:
+  [chromium] › community-flow.spec.ts:26:1 › two real accounts write, answer, vote, follow, accept, edit and delete a community post
+  [chromium] › enterprise-flow.spec.ts:22:1 › real assessment selection, explicit refresh, frozen candidate content, Judge and owner results
+  [chromium] › judge-flow.spec.ts:7:1 › real signup, publication, bookmarks, judging, private learning, XP and logout through nginx
+Total: 3 tests in 3 files

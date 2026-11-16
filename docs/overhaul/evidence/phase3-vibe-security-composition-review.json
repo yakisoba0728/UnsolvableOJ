@@ -1,0 +1,24 @@
+{
+  "reviewer": "independent_recovery",
+  "head": "102d1c218fab24571a62618dee33d3d451cfa5f9",
+  "tree": "fe0ab0e3ccac59f3583cb493845403c5d1578d39",
+  "parents": [
+    "508545d40e2a08b00673e2c63396169243187434",
+    "a30b0b358f88de506efe910c491d2f12ed980238"
+  ],
+  "vibeFeatureFileCount": 44,
+  "incomingSecurityFileCount": 18,
+  "featureFilesUnchanged": true,
+  "nonOverlappingFeatureBlobsUnchanged": true,
+  "nonOverlappingSecurityBlobsPreserved": true,
+  "overlapResolution": "ci.yml retains union of Redis TLS/executor security selection, Vibe snapshot/prompts/AI selection and both feature browser lists; ci-policy adds the matching Vibe paths to current security policy.",
+  "vibeMigrationRegisteredOnceInOrder": true,
+  "fullRemoteCi": "Separate exact-source gate; not asserted by this composition review.",
+  "independentPolicyExecution": {
+    "passed": 63,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "evidence": "vibe-102d1c2-composition-policy.log"
+  }
+}

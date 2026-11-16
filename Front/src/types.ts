@@ -63,6 +63,8 @@ export interface ProblemSummary {
   acceptanceRate?: number | null;
   /** 기업 테스트 전용 문제(내 문제 목록에서만 옴) */
   isPrivate?: boolean;
+  /** 현재 로그인한 사용자만 볼 수 있는 문제 저장 상태 */
+  bookmarked?: boolean;
 }
 
 export interface Problem extends ProblemSummary {

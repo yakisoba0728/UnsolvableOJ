@@ -1,0 +1,27 @@
+{
+  "reviewer": "independent_recovery",
+  "authorSeparated": true,
+  "humanApprovalClaim": false,
+  "reviewedHead": "183212757aba612c7ec3e3e94bfc44ca5fee03ee",
+  "tree": "483d4e29db0274b07fc46decf62e4bc1f8a412b0",
+  "parents": [
+    "d254ad183fc348165e0b07847863d1c19273a51e",
+    "8e640b90709d37f979f4208c186c25440b96514f"
+  ],
+  "incomingTreeMatchesReviewedVibeSecurity": "fe0ab0e3ccac59f3583cb493845403c5d1578d39",
+  "dbFeatureFiles": 13,
+  "incomingFeatureFiles": 60,
+  "onlyOverlap": "Back/src/database/data-source.ts",
+  "allNonOverlappingBlobsPreserved": true,
+  "dataSourceResolution": "Only the existing DB import and registration added to reviewed incoming source; Vibe 1796000000000 then Stats 1796100000000, each once, entire migration array chronological.",
+  "nativeAndBrowserSelectorsPreserved": true,
+  "benchmarkSourceHead": "0db44816f533a69ef0297ba427e4ca28451a17f2",
+  "benchmarkHashes": {
+    "baselineMigrationSha256": "7fd6fbb7c768cefcb1b1e43b70db5431b2fbbad3a8a86563cf4bc1528e591e8c",
+    "candidateMigrationSha256": "de6b2cdab05abefe6ed37f3c1e33f251a206517800f39e4d47ec1f6f7dc50e82",
+    "benchmarkSha256": "7ead06a242ae8b7f73e4cf26455124c7a6f88b4e2fe38f17fe3b176b61125396"
+  },
+  "benchmarkInterpretation": "Measured at 0db4481, not rerun on this composition. Baseline/candidate migration and benchmark bytes are unchanged; no new performance execution is claimed.",
+  "executionBoundary": "Read-only Git/blob/hash/source review; no author worktree mutation, rebuild, database or browser execution. Parent is independently running combined backend gates.",
+  "disposition": "Composition source review accepted; actual integration merge/tree comparison and fresh exact-head full CI remain required."
+}

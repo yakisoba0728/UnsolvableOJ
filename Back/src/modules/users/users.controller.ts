@@ -6,6 +6,8 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { UsersService } from './users.service.js';
+import { LearningService } from './learning.service.js';
+import { LearningQuery } from './dto/learning.query.js';
 
 // 기본값이 없어야 "생략"과 page=1을 구분한다. 둘 다 생략하면 예전처럼 상위 100명 배열을 준다.
 class RankingsQuery {
@@ -27,13 +29,26 @@ class RankingsQuery {
 @ApiTags('users')
 @Controller()
 export class UsersController {
-  constructor(private readonly users: UsersService) {}
+  constructor(
+    private readonly users: UsersService,
+    private readonly learning: LearningService,
+  ) {}
 
   @Get('users/me')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: AuthenticatedUser) {
     return this.users.me(user.id);
+  }
+
+  @Get('users/me/learning')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  learningDashboard(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: LearningQuery,
+  ) {
+    return this.learning.dashboard(user.id, query.days);
   }
 
   // users/me보다 뒤에 둔다. 사용자 이름은 3자 이상이라 'me'와 겹치지 않는다.

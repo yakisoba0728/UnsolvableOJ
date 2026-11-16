@@ -1,0 +1,332 @@
+{
+  "scope": "Enterprise result assembly only; excludes SQL, HTTP and serialization time. Five fresh-process samples per mode, alternating order; identical output digests.",
+  "baseline": "6176015b63a1615cc2269172f246725ef08abab3",
+  "environment": {
+    "node": "v24.22.1",
+    "os": "linux 6.18.57",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "logicalCpus": 9
+  },
+  "results": [
+    {
+      "candidates": 100,
+      "projects": 85,
+      "before": {
+        "elapsedMs": 0.34839600000000814,
+        "cpuMs": 0.618,
+        "peakRssKiB": 59884
+      },
+      "after": {
+        "elapsedMs": 0.2769399999999962,
+        "cpuMs": 0.405,
+        "peakRssKiB": 59848
+      },
+      "samples": {
+        "before": [
+          {
+            "elapsedMs": 0.4128409999999576,
+            "cpuMs": 0.796,
+            "peakRssKiB": 60304,
+            "digest": "d75e9b45e22494152a98a50a54aedc9cf61357e1b2f7948e8c1a501dd40fd02c"
+          },
+          {
+            "elapsedMs": 0.32180600000000936,
+            "cpuMs": 0.364,
+            "peakRssKiB": 59884,
+            "digest": "d75e9b45e22494152a98a50a54aedc9cf61357e1b2f7948e8c1a501dd40fd02c"
+          },
+          {
+            "elapsedMs": 0.34189600000001974,
+            "cpuMs": 0.554,
+            "peakRssKiB": 59900,
+            "digest": "d75e9b45e22494152a98a50a54aedc9cf61357e1b2f7948e8c1a501dd40fd02c"
+          },
+          {
+            "elapsedMs": 0.36360799999999927,
+            "cpuMs": 0.653,
+            "peakRssKiB": 59652,
+            "digest": "d75e9b45e22494152a98a50a54aedc9cf61357e1b2f7948e8c1a501dd40fd02c"
+          },
+          {
+            "elapsedMs": 0.34839600000000814,
+            "cpuMs": 0.618,
+            "peakRssKiB": 59452,
+            "digest": "d75e9b45e22494152a98a50a54aedc9cf61357e1b2f7948e8c1a501dd40fd02c"
+          }
+        ],
+        "after": [
+          {
+            "elapsedMs": 0.30144599999999855,
+            "cpuMs": 0.424,
+            "peakRssKiB": 59848,
+            "digest": "d75e9b45e22494152a98a50a54aedc9cf61357e1b2f7948e8c1a501dd40fd02c"
+          },
+          {
+            "elapsedMs": 0.2930240000000026,
+            "cpuMs": 0.405,
+            "peakRssKiB": 60072,
+            "digest": "d75e9b45e22494152a98a50a54aedc9cf61357e1b2f7948e8c1a501dd40fd02c"
+          },
+          {
+            "elapsedMs": 0.2769399999999962,
+            "cpuMs": 0.45,
+            "peakRssKiB": 59492,
+            "digest": "d75e9b45e22494152a98a50a54aedc9cf61357e1b2f7948e8c1a501dd40fd02c"
+          },
+          {
+            "elapsedMs": 0.25940400000001773,
+            "cpuMs": 0.383,
+            "peakRssKiB": 59584,
+            "digest": "d75e9b45e22494152a98a50a54aedc9cf61357e1b2f7948e8c1a501dd40fd02c"
+          },
+          {
+            "elapsedMs": 0.2709209999999871,
+            "cpuMs": 0.382,
+            "peakRssKiB": 60200,
+            "digest": "d75e9b45e22494152a98a50a54aedc9cf61357e1b2f7948e8c1a501dd40fd02c"
+          }
+        ]
+      }
+    },
+    {
+      "candidates": 1000,
+      "projects": 857,
+      "before": {
+        "elapsedMs": 5.335117999999994,
+        "cpuMs": 7.028,
+        "peakRssKiB": 61312
+      },
+      "after": {
+        "elapsedMs": 0.7973310000000424,
+        "cpuMs": 1.393,
+        "peakRssKiB": 61576
+      },
+      "samples": {
+        "before": [
+          {
+            "elapsedMs": 5.2767109999999775,
+            "cpuMs": 6.745,
+            "peakRssKiB": 61312,
+            "digest": "737799064c1c5fcf9d4dcde51033a5953fa24b4039a95c51443493599a5eb655"
+          },
+          {
+            "elapsedMs": 5.335117999999994,
+            "cpuMs": 7.24,
+            "peakRssKiB": 61796,
+            "digest": "737799064c1c5fcf9d4dcde51033a5953fa24b4039a95c51443493599a5eb655"
+          },
+          {
+            "elapsedMs": 5.319243999999998,
+            "cpuMs": 6.895,
+            "peakRssKiB": 61784,
+            "digest": "737799064c1c5fcf9d4dcde51033a5953fa24b4039a95c51443493599a5eb655"
+          },
+          {
+            "elapsedMs": 5.416017000000011,
+            "cpuMs": 7.028,
+            "peakRssKiB": 61292,
+            "digest": "737799064c1c5fcf9d4dcde51033a5953fa24b4039a95c51443493599a5eb655"
+          },
+          {
+            "elapsedMs": 7.173909000000009,
+            "cpuMs": 9.272,
+            "peakRssKiB": 61244,
+            "digest": "737799064c1c5fcf9d4dcde51033a5953fa24b4039a95c51443493599a5eb655"
+          }
+        ],
+        "after": [
+          {
+            "elapsedMs": 1.1803480000000093,
+            "cpuMs": 1.858,
+            "peakRssKiB": 61576,
+            "digest": "737799064c1c5fcf9d4dcde51033a5953fa24b4039a95c51443493599a5eb655"
+          },
+          {
+            "elapsedMs": 0.7973310000000424,
+            "cpuMs": 1.393,
+            "peakRssKiB": 61584,
+            "digest": "737799064c1c5fcf9d4dcde51033a5953fa24b4039a95c51443493599a5eb655"
+          },
+          {
+            "elapsedMs": 0.7272869999999898,
+            "cpuMs": 1.231,
+            "peakRssKiB": 61660,
+            "digest": "737799064c1c5fcf9d4dcde51033a5953fa24b4039a95c51443493599a5eb655"
+          },
+          {
+            "elapsedMs": 1.2757980000000089,
+            "cpuMs": 1.793,
+            "peakRssKiB": 61116,
+            "digest": "737799064c1c5fcf9d4dcde51033a5953fa24b4039a95c51443493599a5eb655"
+          },
+          {
+            "elapsedMs": 0.688699999999983,
+            "cpuMs": 1.174,
+            "peakRssKiB": 61564,
+            "digest": "737799064c1c5fcf9d4dcde51033a5953fa24b4039a95c51443493599a5eb655"
+          }
+        ]
+      }
+    },
+    {
+      "candidates": 5000,
+      "projects": 4285,
+      "before": {
+        "elapsedMs": 139.004969,
+        "cpuMs": 145.552,
+        "peakRssKiB": 65020
+      },
+      "after": {
+        "elapsedMs": 4.318815000000001,
+        "cpuMs": 8.819,
+        "peakRssKiB": 66336
+      },
+      "samples": {
+        "before": [
+          {
+            "elapsedMs": 139.004969,
+            "cpuMs": 145.552,
+            "peakRssKiB": 64740,
+            "digest": "aa3b3ab0dbca80f507ca549b2bf280457b65bb4593f444327679d4f306d730a8"
+          },
+          {
+            "elapsedMs": 153.19897200000003,
+            "cpuMs": 159.379,
+            "peakRssKiB": 65560,
+            "digest": "aa3b3ab0dbca80f507ca549b2bf280457b65bb4593f444327679d4f306d730a8"
+          },
+          {
+            "elapsedMs": 135.753051,
+            "cpuMs": 140.276,
+            "peakRssKiB": 65408,
+            "digest": "aa3b3ab0dbca80f507ca549b2bf280457b65bb4593f444327679d4f306d730a8"
+          },
+          {
+            "elapsedMs": 126.91281000000001,
+            "cpuMs": 130.475,
+            "peakRssKiB": 64848,
+            "digest": "aa3b3ab0dbca80f507ca549b2bf280457b65bb4593f444327679d4f306d730a8"
+          },
+          {
+            "elapsedMs": 161.342686,
+            "cpuMs": 165.024,
+            "peakRssKiB": 65020,
+            "digest": "aa3b3ab0dbca80f507ca549b2bf280457b65bb4593f444327679d4f306d730a8"
+          }
+        ],
+        "after": [
+          {
+            "elapsedMs": 4.318815000000001,
+            "cpuMs": 8.171,
+            "peakRssKiB": 66260,
+            "digest": "aa3b3ab0dbca80f507ca549b2bf280457b65bb4593f444327679d4f306d730a8"
+          },
+          {
+            "elapsedMs": 120.39640000000003,
+            "cpuMs": 188.491,
+            "peakRssKiB": 66512,
+            "digest": "aa3b3ab0dbca80f507ca549b2bf280457b65bb4593f444327679d4f306d730a8"
+          },
+          {
+            "elapsedMs": 4.271955999999989,
+            "cpuMs": 8.819,
+            "peakRssKiB": 66560,
+            "digest": "aa3b3ab0dbca80f507ca549b2bf280457b65bb4593f444327679d4f306d730a8"
+          },
+          {
+            "elapsedMs": 4.28755000000001,
+            "cpuMs": 8.34,
+            "peakRssKiB": 66088,
+            "digest": "aa3b3ab0dbca80f507ca549b2bf280457b65bb4593f444327679d4f306d730a8"
+          },
+          {
+            "elapsedMs": 15.348389000000054,
+            "cpuMs": 22.837,
+            "peakRssKiB": 66336,
+            "digest": "aa3b3ab0dbca80f507ca549b2bf280457b65bb4593f444327679d4f306d730a8"
+          }
+        ]
+      }
+    },
+    {
+      "candidates": 10000,
+      "projects": 8571,
+      "before": {
+        "elapsedMs": 541.403503,
+        "cpuMs": 543.068,
+        "peakRssKiB": 75356
+      },
+      "after": {
+        "elapsedMs": 7.006376000000017,
+        "cpuMs": 10.061,
+        "peakRssKiB": 76996
+      },
+      "samples": {
+        "before": [
+          {
+            "elapsedMs": 541.403503,
+            "cpuMs": 543.068,
+            "peakRssKiB": 75356,
+            "digest": "326d4a75dc084604d2139bc93c1de37fc405e8a31c3806d0ed496b6d3dc78f8b"
+          },
+          {
+            "elapsedMs": 563.6345289999999,
+            "cpuMs": 565.39,
+            "peakRssKiB": 75132,
+            "digest": "326d4a75dc084604d2139bc93c1de37fc405e8a31c3806d0ed496b6d3dc78f8b"
+          },
+          {
+            "elapsedMs": 519.9853909999999,
+            "cpuMs": 522.039,
+            "peakRssKiB": 75272,
+            "digest": "326d4a75dc084604d2139bc93c1de37fc405e8a31c3806d0ed496b6d3dc78f8b"
+          },
+          {
+            "elapsedMs": 528.630658,
+            "cpuMs": 529.72,
+            "peakRssKiB": 75844,
+            "digest": "326d4a75dc084604d2139bc93c1de37fc405e8a31c3806d0ed496b6d3dc78f8b"
+          },
+          {
+            "elapsedMs": 731.92066,
+            "cpuMs": 733.74,
+            "peakRssKiB": 75420,
+            "digest": "326d4a75dc084604d2139bc93c1de37fc405e8a31c3806d0ed496b6d3dc78f8b"
+          }
+        ],
+        "after": [
+          {
+            "elapsedMs": 5.988628000000006,
+            "cpuMs": 9.529,
+            "peakRssKiB": 76888,
+            "digest": "326d4a75dc084604d2139bc93c1de37fc405e8a31c3806d0ed496b6d3dc78f8b"
+          },
+          {
+            "elapsedMs": 7.006376000000017,
+            "cpuMs": 10.023,
+            "peakRssKiB": 77192,
+            "digest": "326d4a75dc084604d2139bc93c1de37fc405e8a31c3806d0ed496b6d3dc78f8b"
+          },
+          {
+            "elapsedMs": 6.513346000000013,
+            "cpuMs": 10.061,
+            "peakRssKiB": 77336,
+            "digest": "326d4a75dc084604d2139bc93c1de37fc405e8a31c3806d0ed496b6d3dc78f8b"
+          },
+          {
+            "elapsedMs": 7.42634799999999,
+            "cpuMs": 10.673,
+            "peakRssKiB": 76580,
+            "digest": "326d4a75dc084604d2139bc93c1de37fc405e8a31c3806d0ed496b6d3dc78f8b"
+          },
+          {
+            "elapsedMs": 10.25181999999998,
+            "cpuMs": 16.24,
+            "peakRssKiB": 76996,
+            "digest": "326d4a75dc084604d2139bc93c1de37fc405e8a31c3806d0ed496b6d3dc78f8b"
+          }
+        ]
+      }
+    }
+  ]
+}

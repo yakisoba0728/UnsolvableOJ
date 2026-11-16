@@ -1,0 +1,27 @@
+compiler copyIn keys: [
+  'src/search.ts',
+  'src/tags.ts',
+  'tests/search.test.ts',
+  'harness.ts'
+]
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Archived immutable source dependency must reach compiler
++ actual - expected
+
++ undefined
+- 'export const preserved = 123;'
+
+    at file:///workspace/scratch/86de5f814139/oj-vibe-review/Back/[eval1]:21:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: undefined,
+  expected: 'export const preserved = 123;',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

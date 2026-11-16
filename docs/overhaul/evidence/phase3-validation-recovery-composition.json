@@ -1,0 +1,874 @@
+{
+  "reviewer": "composition_review (author-separated AI agent)",
+  "scope": "Read-only exact Git object composition, source binding and document arithmetic review; no new database, browser, native, image scan or production execution.",
+  "refs": {
+    "pr77": "e23729640b0ce18b6bb5ab82c578dc1eb35c7392",
+    "pr76": "6143d7ccd982d42e035db01edee0f1353ad55a21",
+    "integration": "f52c7d0aecfb6ae98329d219110eac526bb0dbcb",
+    "checkpoint": "0cc65a2702f5b1e44c2c678dd5b4f2340adcbda3",
+    "oldbase": "87cc1e724f3c5bba8ee4a1d3e138c16a18202f02"
+  },
+  "trees": {
+    "pr77": "0e90a39685e1246c8f9a3ab1637fc0c89b4d85e7",
+    "pr76": "3397e0574f888c4f4c4221cbc7e057d70513171d",
+    "integration": "2a710d2bf0d6b6c884cea8be548a26196c90a840",
+    "checkpoint": "3a4d56447e51b72dd383ee70217a2a249431f1fd",
+    "oldbase": "fe0ab0e3ccac59f3583cb493845403c5d1578d39"
+  },
+  "findings": [],
+  "overlap": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "pr76Blob": "84cc3f56d836505c942780bb3482f972c9b35396",
+      "pr77Blob": "141395650fe690ca8e3cb4610c84add505eb1c5d",
+      "checkpointBlob": "141395650fe690ca8e3cb4610c84add505eb1c5d"
+    },
+    {
+      "path": "Back/scripts/benchmark-problem-stats.mjs",
+      "pr76Blob": "c2c2b6a7daa13226bf8188d653df86ecef269650",
+      "pr77Blob": "c2c2b6a7daa13226bf8188d653df86ecef269650",
+      "checkpointBlob": "c2c2b6a7daa13226bf8188d653df86ecef269650"
+    },
+    {
+      "path": "Back/src/database/data-source.ts",
+      "pr76Blob": "ff4e561677eca8e4f18f5ef1d1f3e99adba9fc67",
+      "pr77Blob": "ff4e561677eca8e4f18f5ef1d1f3e99adba9fc67",
+      "checkpointBlob": "ff4e561677eca8e4f18f5ef1d1f3e99adba9fc67"
+    },
+    {
+      "path": "Back/src/database/migrations/1796100000000-incremental-problem-stats.ts",
+      "pr76Blob": "b3b4af793b713fdc324805ce1ebd975d9dc70ebf",
+      "pr77Blob": "b3b4af793b713fdc324805ce1ebd975d9dc70ebf",
+      "checkpointBlob": "b3b4af793b713fdc324805ce1ebd975d9dc70ebf"
+    },
+    {
+      "path": "Back/test/incremental-problem-stats-races.e2e-spec.ts",
+      "pr76Blob": "70b29afbc26065f8499eab4b61543a50b1ea8bac",
+      "pr77Blob": "70b29afbc26065f8499eab4b61543a50b1ea8bac",
+      "checkpointBlob": "70b29afbc26065f8499eab4b61543a50b1ea8bac"
+    },
+    {
+      "path": "Back/test/incremental-problem-stats.e2e-spec.ts",
+      "pr76Blob": "af366bbc5f100b9d85589d0373ce2d441f7f4a4c",
+      "pr77Blob": "af366bbc5f100b9d85589d0373ce2d441f7f4a4c",
+      "checkpointBlob": "af366bbc5f100b9d85589d0373ce2d441f7f4a4c"
+    },
+    {
+      "path": "docs/overhaul/PHASE3-DATABASE.md",
+      "pr76Blob": "85982b8c724b2a41a094b73ccca643981f459dd1",
+      "pr77Blob": "85982b8c724b2a41a094b73ccca643981f459dd1",
+      "checkpointBlob": "1d995adede5e0fb3844cc2300e4a7eb97dabe606"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-database-api.log",
+      "pr76Blob": "1a1eda205addf6bbe7dbc00da1fb83c59ca49f66",
+      "pr77Blob": "1a1eda205addf6bbe7dbc00da1fb83c59ca49f66",
+      "checkpointBlob": "1a1eda205addf6bbe7dbc00da1fb83c59ca49f66"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-database-benchmark-review.json",
+      "pr76Blob": "72cf43f4b0174147ad3db75247c7fa5949ba8306",
+      "pr77Blob": "72cf43f4b0174147ad3db75247c7fa5949ba8306",
+      "checkpointBlob": "72cf43f4b0174147ad3db75247c7fa5949ba8306"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-database-check.log",
+      "pr76Blob": "dfcf09210ef5465ca2eb997da81b9f8d4d44d83b",
+      "pr77Blob": "dfcf09210ef5465ca2eb997da81b9f8d4d44d83b",
+      "checkpointBlob": "dfcf09210ef5465ca2eb997da81b9f8d4d44d83b"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-database-focused.log",
+      "pr76Blob": "0ed9698f4b144b65bba0d414f8a21e7e41d4d899",
+      "pr77Blob": "0ed9698f4b144b65bba0d414f8a21e7e41d4d899",
+      "checkpointBlob": "0ed9698f4b144b65bba0d414f8a21e7e41d4d899"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-database-independent.log",
+      "pr76Blob": "32ff4a38b56fd58d798229dfd636b6277d88bf12",
+      "pr77Blob": "32ff4a38b56fd58d798229dfd636b6277d88bf12",
+      "checkpointBlob": "32ff4a38b56fd58d798229dfd636b6277d88bf12"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-database-migrations.log",
+      "pr76Blob": "1a77cd17271e88bd65f616595ff9b6fd857701ca",
+      "pr77Blob": "1a77cd17271e88bd65f616595ff9b6fd857701ca",
+      "checkpointBlob": "1a77cd17271e88bd65f616595ff9b6fd857701ca"
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-problem-stats.json",
+      "pr76Blob": "08093c42cfbd9ea24177b3f580e76a25e5c19b6c",
+      "pr77Blob": "08093c42cfbd9ea24177b3f580e76a25e5c19b6c",
+      "checkpointBlob": "08093c42cfbd9ea24177b3f580e76a25e5c19b6c"
+    }
+  ],
+  "subtreeEquality": {
+    "Back": {
+      "pr76": "372e53cae05de145b933972cd8d423578c3ebf34",
+      "pr77": "372e53cae05de145b933972cd8d423578c3ebf34",
+      "checkpoint": "372e53cae05de145b933972cd8d423578c3ebf34"
+    },
+    "Judge": {
+      "pr76": "38f41d95e451898ddce78c0f3af783aecd334ada",
+      "pr77": "38f41d95e451898ddce78c0f3af783aecd334ada",
+      "checkpoint": "38f41d95e451898ddce78c0f3af783aecd334ada"
+    },
+    "Front/src": {
+      "pr76": "f79ece933b56f84cc8c80cc5999aad3437249dc1",
+      "pr77": "f79ece933b56f84cc8c80cc5999aad3437249dc1",
+      "checkpoint": "f79ece933b56f84cc8c80cc5999aad3437249dc1"
+    }
+  },
+  "orderedMigrations": {
+    "tail": [
+      "VibeChallengeVersions1796000000000",
+      "IncrementalProblemStats1796100000000"
+    ],
+    "datasourceBlob": "ff4e561677eca8e4f18f5ef1d1f3e99adba9fc67",
+    "migrationBlobs": {
+      "Back/src/database/migrations/1796000000000-vibe-challenge-versions.ts": "c1b0058b4813206755fc39d1d8ade9997b58e966",
+      "Back/src/database/migrations/1796100000000-incremental-problem-stats.ts": "b3b4af793b713fdc324805ce1ebd975d9dc70ebf"
+    }
+  },
+  "dbSourceBindings": {
+    "baselineMigrationSha256": {
+      "path": "Back/src/database/migrations/1795200000000-problem-stats.ts",
+      "recordedSha256": "7fd6fbb7c768cefcb1b1e43b70db5431b2fbbad3a8a86563cf4bc1528e591e8c",
+      "pr76Sha256": "7fd6fbb7c768cefcb1b1e43b70db5431b2fbbad3a8a86563cf4bc1528e591e8c",
+      "checkpointSha256": "7fd6fbb7c768cefcb1b1e43b70db5431b2fbbad3a8a86563cf4bc1528e591e8c"
+    },
+    "candidateMigrationSha256": {
+      "path": "Back/src/database/migrations/1796100000000-incremental-problem-stats.ts",
+      "recordedSha256": "de6b2cdab05abefe6ed37f3c1e33f251a206517800f39e4d47ec1f6f7dc50e82",
+      "pr76Sha256": "de6b2cdab05abefe6ed37f3c1e33f251a206517800f39e4d47ec1f6f7dc50e82",
+      "checkpointSha256": "de6b2cdab05abefe6ed37f3c1e33f251a206517800f39e4d47ec1f6f7dc50e82"
+    },
+    "benchmarkSha256": {
+      "path": "Back/scripts/benchmark-problem-stats.mjs",
+      "recordedSha256": "7ead06a242ae8b7f73e4cf26455124c7a6f88b4e2fe38f17fe3b176b61125396",
+      "pr76Sha256": "7ead06a242ae8b7f73e4cf26455124c7a6f88b4e2fe38f17fe3b176b61125396",
+      "checkpointSha256": "7ead06a242ae8b7f73e4cf26455124c7a6f88b4e2fe38f17fe3b176b61125396"
+    }
+  },
+  "dbDefinitions": {
+    "users": 200,
+    "targetRows": 64,
+    "modes": [
+      "recount",
+      "incremental",
+      "incremental",
+      "recount"
+    ],
+    "serialSamplesPerRound": 64,
+    "concurrentClients": 4,
+    "concurrentSamplesPerRound": 64,
+    "bulkCyclesPerRound": 7,
+    "warmupCyclesPerClient": 3
+  },
+  "fiftyThousandEndpointRssKiB": [
+    35252,
+    57324
+  ],
+  "dbRecomputation": {
+    "rounds": 12,
+    "pooledWorkloadPairs": 12,
+    "allQuantilesCpuWalSummariesMatch": true,
+    "allFixtureEndpointRssKiB": [
+      20592,
+      57324
+    ],
+    "rows": [
+      {
+        "history": 1000,
+        "label": "serial_completion",
+        "recount": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 1.0135420000000295,
+            "p95": 1.4184419999999136,
+            "p99": 2.3911229999999932
+          },
+          "walBytes": 101656,
+          "postgresCpuMs": 90,
+          "totalElapsedMs": 138.0600320000002,
+          "changedRowsPerSecond": 927.1329156290491
+        },
+        "incremental": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 1.0384189999999762,
+            "p95": 1.5093859999999495,
+            "p99": 1.9031009999998787
+          },
+          "walBytes": 103176,
+          "postgresCpuMs": 90,
+          "totalElapsedMs": 141.69177900000022,
+          "changedRowsPerSecond": 903.3692773382414
+        }
+      },
+      {
+        "history": 1000,
+        "label": "concurrent_completion",
+        "recount": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 2.697501999999986,
+            "p95": 7.787784999999985,
+            "p99": 10.532709000000068
+          },
+          "walBytes": 103424,
+          "postgresCpuMs": 110,
+          "totalElapsedMs": 121.51476899999977,
+          "changedRowsPerSecond": 1053.3698994235033
+        },
+        "incremental": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 2.259121999999934,
+            "p95": 7.0510390000001735,
+            "p99": 10.24318900000003
+          },
+          "walBytes": 100848,
+          "postgresCpuMs": 120,
+          "totalElapsedMs": 97.02827599999978,
+          "changedRowsPerSecond": 1319.2030743697878
+        }
+      },
+      {
+        "history": 1000,
+        "label": "bulk_rejudge_cycle",
+        "recount": {
+          "samples": 14,
+          "latencyMs": {
+            "p50": 57.01145100000031,
+            "p95": 196.64593100000002,
+            "p99": 196.64593100000002
+          },
+          "walBytes": 1243272,
+          "postgresCpuMs": 900,
+          "totalElapsedMs": 1033.4917099999998,
+          "changedRowsPerSecond": 1733.9277931895558
+        },
+        "incremental": {
+          "samples": 14,
+          "latencyMs": {
+            "p50": 7.343281999999817,
+            "p95": 10.06364799999983,
+            "p99": 10.06364799999983
+          },
+          "walBytes": 1090304,
+          "postgresCpuMs": 90,
+          "totalElapsedMs": 108.59995600000002,
+          "changedRowsPerSecond": 16500.927495771724
+        }
+      },
+      {
+        "history": 1000,
+        "label": "heartbeat_only",
+        "recount": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 0.5148330000001806,
+            "p95": 0.9321720000000369,
+            "p99": 1.7066699999998036
+          },
+          "walBytes": 70744,
+          "postgresCpuMs": 30,
+          "totalElapsedMs": 72.46734100000026,
+          "changedRowsPerSecond": 1766.31291052889
+        },
+        "incremental": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 0.7138979999999719,
+            "p95": 1.0775620000001709,
+            "p99": 2.1269320000001244
+          },
+          "walBytes": 70640,
+          "postgresCpuMs": 50,
+          "totalElapsedMs": 98.34662999999955,
+          "changedRowsPerSecond": 1301.518923424225
+        }
+      },
+      {
+        "history": 10000,
+        "label": "serial_completion",
+        "recount": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 4.552128999999695,
+            "p95": 6.290055999999822,
+            "p99": 8.263731000000007
+          },
+          "walBytes": 106576,
+          "postgresCpuMs": 550,
+          "totalElapsedMs": 613.392022999999,
+          "changedRowsPerSecond": 208.67568406575157
+        },
+        "incremental": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 0.9013569999988249,
+            "p95": 1.1303059999991092,
+            "p99": 1.2438640000000305
+          },
+          "walBytes": 102672,
+          "postgresCpuMs": 80,
+          "totalElapsedMs": 118.56095400000049,
+          "changedRowsPerSecond": 1079.6134450807426
+        }
+      },
+      {
+        "history": 10000,
+        "label": "concurrent_completion",
+        "recount": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 13.752759999999398,
+            "p95": 45.800623999999516,
+            "p99": 73.53628599999956
+          },
+          "walBytes": 102336,
+          "postgresCpuMs": 620,
+          "totalElapsedMs": 640.3127230000009,
+          "changedRowsPerSecond": 199.90232179097248
+        },
+        "incremental": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 2.3916660000013508,
+            "p95": 9.218487999998615,
+            "p99": 13.502524000001358
+          },
+          "walBytes": 100224,
+          "postgresCpuMs": 170,
+          "totalElapsedMs": 125.99815500000113,
+          "changedRowsPerSecond": 1015.8878913742733
+        }
+      },
+      {
+        "history": 10000,
+        "label": "bulk_rejudge_cycle",
+        "recount": {
+          "samples": 14,
+          "latencyMs": {
+            "p50": 460.81061200000113,
+            "p95": 703.903918,
+            "p99": 703.903918
+          },
+          "walBytes": 1262240,
+          "postgresCpuMs": 7050,
+          "totalElapsedMs": 7172.257575,
+          "changedRowsPerSecond": 249.85159571601136
+        },
+        "incremental": {
+          "samples": 14,
+          "latencyMs": {
+            "p50": 8.299023999999918,
+            "p95": 11.006266999998843,
+            "p99": 11.006266999998843
+          },
+          "walBytes": 1076280,
+          "postgresCpuMs": 110,
+          "totalElapsedMs": 120.25134399999843,
+          "changedRowsPerSecond": 14902.120345532467
+        }
+      },
+      {
+        "history": 10000,
+        "label": "heartbeat_only",
+        "recount": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 0.43404800000098476,
+            "p95": 0.5838409999996657,
+            "p99": 0.7573300000003655
+          },
+          "walBytes": 70216,
+          "postgresCpuMs": 20,
+          "totalElapsedMs": 57.36681300000055,
+          "changedRowsPerSecond": 2231.255203247891
+        },
+        "incremental": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 0.6935579999990296,
+            "p95": 0.9662819999994099,
+            "p99": 1.244129000000612
+          },
+          "walBytes": 70016,
+          "postgresCpuMs": 60,
+          "totalElapsedMs": 99.43938399999934,
+          "changedRowsPerSecond": 1287.2163407609287
+        }
+      },
+      {
+        "history": 50000,
+        "label": "serial_completion",
+        "recount": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 30.952186999998958,
+            "p95": 55.38885100000334,
+            "p99": 174.6453360000014
+          },
+          "walBytes": 112864,
+          "postgresCpuMs": 4660,
+          "totalElapsedMs": 4906.367703,
+          "changedRowsPerSecond": 26.08854609933421
+        },
+        "incremental": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 1.13743400000385,
+            "p95": 2.268530000001192,
+            "p99": 4.348339999996824
+          },
+          "walBytes": 101800,
+          "postgresCpuMs": 90,
+          "totalElapsedMs": 163.69279399999505,
+          "changedRowsPerSecond": 781.9525641428289
+        }
+      },
+      {
+        "history": 50000,
+        "label": "concurrent_completion",
+        "recount": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 85.03916799999934,
+            "p95": 343.7661789999984,
+            "p99": 576.1072719999938
+          },
+          "walBytes": 97640,
+          "postgresCpuMs": 4150,
+          "totalElapsedMs": 4185.573107,
+          "changedRowsPerSecond": 30.581236243593825
+        },
+        "incremental": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 2.7819319999980507,
+            "p95": 5.715100000001257,
+            "p99": 7.625217000000703
+          },
+          "walBytes": 99456,
+          "postgresCpuMs": 120,
+          "totalElapsedMs": 107.70983899999555,
+          "changedRowsPerSecond": 1188.3779716726276
+        }
+      },
+      {
+        "history": 50000,
+        "label": "bulk_rejudge_cycle",
+        "recount": {
+          "samples": 14,
+          "latencyMs": {
+            "p50": 3831.9659299999985,
+            "p95": 4998.534339999998,
+            "p99": 4998.534339999998
+          },
+          "walBytes": 1372208,
+          "postgresCpuMs": 55040,
+          "totalElapsedMs": 55374.545973,
+          "changedRowsPerSecond": 32.361439150648
+        },
+        "incremental": {
+          "samples": 14,
+          "latencyMs": {
+            "p50": 10.222686000000976,
+            "p95": 121.22781499999837,
+            "p99": 121.22781499999837
+          },
+          "walBytes": 1054848,
+          "postgresCpuMs": 220,
+          "totalElapsedMs": 260.3440599999958,
+          "changedRowsPerSecond": 6883.199101988456
+        }
+      },
+      {
+        "history": 50000,
+        "label": "heartbeat_only",
+        "recount": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 0.45227999999769963,
+            "p95": 0.7402890000012121,
+            "p99": 1.182249999998021
+          },
+          "walBytes": 69536,
+          "postgresCpuMs": 40,
+          "totalElapsedMs": 63.46929999999702,
+          "changedRowsPerSecond": 2016.723045630029
+        },
+        "incremental": {
+          "samples": 128,
+          "latencyMs": {
+            "p50": 0.8840929999932996,
+            "p95": 1.2128319999974337,
+            "p99": 2.1946099999986473
+          },
+          "walBytes": 69496,
+          "postgresCpuMs": 70,
+          "totalElapsedMs": 114.85986999999295,
+          "changedRowsPerSecond": 1114.4014005936785
+        }
+      }
+    ]
+  },
+  "runtimePolicy": {
+    "path": "scripts/image-applicability-policy.json",
+    "sha256": "3b9582cbfaedcbad0b562bdd566896b77c195834a7bfaeb5143025c6d72abf79",
+    "blob": "822d1d0a20336c465a123e5a599aa33bd749388d",
+    "state": "REVIEWED",
+    "reviewedRecords": 182,
+    "expiresAt": "2026-11-30T00:00:00Z",
+    "unchangedScopeFingerprintImplementationExpiry": true,
+    "verifiedHashBindings": [
+      {
+        "key": "policy.cnaInventory",
+        "path": "docs/overhaul/evidence/phase3-kernel-header-applicability.json",
+        "sha256": "9d317229d78b224757dddbc9c03db68b5d6f1d5d2b191f02de857d3c46dd3796",
+        "blob": "8a24e42e2ce9de7527fa8ff03115402e5ad4920b"
+      },
+      {
+        "key": "policy.manualReview",
+        "path": "docs/overhaul/evidence/phase3-kernel-header-review.json",
+        "sha256": "a6d7cca70204e26b1bb76533f2b2103b1286316f6eecc92573218257b36a3a24",
+        "blob": "8092809214018294baf5ce64a527a254b89228a4"
+      },
+      {
+        "key": "policy.packageFiles",
+        "path": "docs/overhaul/evidence/linux-libc-dev-6.8.0-149.149-amd64-files.json",
+        "sha256": "010441a3487f836ca8d56b32d3264cd286c2d11b569f44b54d2ba3e949911172",
+        "blob": "820207c40476fe07cf83d353a07e3dbdfdfa28d6"
+      },
+      {
+        "key": "policy.baselineArtifact",
+        "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/blocked-runtime.zip",
+        "sha256": "cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55",
+        "blob": "5a2d9eba9751396e9f17f10f877c35f9aad2a9a5"
+      },
+      {
+        "key": "policy.scannerIdentity",
+        "path": "docs/overhaul/evidence/phase2-trivy-fingerprint-binding.json",
+        "sha256": "98472239faff13ffe141181af911cf0841931df59028b985b5cf7466ec939eed",
+        "blob": "d07108583c5827451e508758ecd4f89311b618c8"
+      },
+      {
+        "key": "implementation.imageAudit",
+        "path": "scripts/image_audit.py",
+        "sha256": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72",
+        "blob": "a32bf8b8e659cd0aebb313e0351d4bfe82143bec"
+      },
+      {
+        "key": "implementation.scannerPin",
+        "path": "scripts/image-audit-tool.json",
+        "sha256": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c",
+        "blob": "573ca0024a75dbc5ad558592da509d3507985945"
+      },
+      {
+        "key": "implementation.payloadVerifier",
+        "path": "scripts/verify_image_payload.py",
+        "sha256": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0",
+        "blob": "5c901c4aea3d8043864d58ed4270f0524fa84386"
+      },
+      {
+        "key": "manual.inheritedPolicy",
+        "path": "docs/overhaul/evidence/phase3-runtime-advisory-revalidation-original-policy.json",
+        "sha256": "77fcae5ce3d800b1b6289de7a7e84a2ee6364867ec13b321346520075ddd3b73",
+        "blob": "3782895372b4378c8c3f476270b7969ecdf5f644"
+      },
+      {
+        "key": "manual.inheritedInventory",
+        "path": "docs/overhaul/evidence/phase2-kernel-header-applicability.json",
+        "sha256": "6e9c99fc4fa7b4d6b91cb88b0c5970dce12528b3d8193e1bd496cffd3a5f7050",
+        "blob": "27d4b9197e25a87de46ebce480d55442ea4a3913"
+      },
+      {
+        "key": "manual.inheritedManualReview",
+        "path": "docs/overhaul/evidence/phase2-kernel-header-review.json",
+        "sha256": "989a6d39b698dda950072c852bdf9b6f0675cbcbf5b72aca5c44619062020647",
+        "blob": "036ae01464cd2451aabe4c2e591a428900a5d37c"
+      },
+      {
+        "key": "manual.advisoryDelta",
+        "path": "docs/overhaul/evidence/phase3-runtime-advisory-delta.json",
+        "sha256": "799cb41e570135fb6c0b223f5bd22d401162bbd4f35005844b299c26524a966d",
+        "blob": "63e49c0f0c4548db3a2588159af985af5319d29f"
+      },
+      {
+        "key": "manual.primaryVendorReview",
+        "path": "docs/overhaul/evidence/phase3-runtime-vendor-advisory-review.json",
+        "sha256": "60285c0506ad1ceb2dfc5f107784855043ed9b145fb31bfb800f051c930870cd",
+        "blob": "e046af533d87beb49a734961a2e625a16ec2f5ce"
+      },
+      {
+        "key": "manual.independentVendorCollection",
+        "path": "docs/overhaul/evidence/phase3-runtime-vendor-independent-review.json",
+        "sha256": "b2c0fc2fde6f0dd3696ed7db55d122cec8aa8e10d68ee143de7c602d4f05cb43",
+        "blob": "1eee0076a6f165602c98b33c98f1f02474dc3314"
+      },
+      {
+        "key": "manual.acceptedScanArtifact",
+        "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/accepted-runtime.zip",
+        "sha256": "128ea68ac07435b95731ffe00ac6f6171f0fa18915ded6133c1ce077e06e53a0",
+        "blob": "4051975155993993b9b66b65edbf04b3302cf3fa"
+      },
+      {
+        "key": "manual.blockedScanArtifact",
+        "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/blocked-runtime.zip",
+        "sha256": "cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55",
+        "blob": "5a2d9eba9751396e9f17f10f877c35f9aad2a9a5"
+      },
+      {
+        "key": "manual.currentCnaArchive",
+        "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/current-cna-records.zip",
+        "sha256": "54c6826a9e0b1453dbf8e99ddf68f644edd519af3829d8106fc719bc3aa7e89c",
+        "blob": "bd0fd7e3840fcccd818dbe7fe2a3a2f8e882c64f"
+      },
+      {
+        "key": "manual.currentCnaArchiveManifest",
+        "path": "docs/overhaul/evidence/phase3-current-cna-independent-receipt.json",
+        "sha256": "850c53a6bad6779cce05e821c0757dd7c377c9ed26dec907a9ab57fb70eb0bf1",
+        "blob": "221b2eeccda3838c2041724bb90e4a63d59db3fc"
+      },
+      {
+        "key": "manual.independentCnaContentComparison",
+        "path": "docs/overhaul/evidence/phase3-current-cna-independent-content-comparison.json",
+        "sha256": "9bb7a8c5a527fcfb8a5336e98eb4d3dd5431305ef00af5baf93140413093ad30",
+        "blob": "5377dfb1e4e8c7915643dfd40e7459a70f3de643"
+      },
+      {
+        "key": "manual.inventoryCollector",
+        "path": "docs/overhaul/repro/kernel-header-applicability.py",
+        "sha256": "96609e11c379ec67a89d9f7d774bc0da14d04a6bd790b57c6320387ca88115e6",
+        "blob": "1a41a74e30080d944083e7b5df2e22b834703262"
+      },
+      {
+        "key": "manual.independentCollector",
+        "path": "docs/overhaul/repro/phase3-refetch-cna-independent.py",
+        "sha256": "b6741499e32cbb0951f93247dcea3f4470bcc3a259337c1ba547a08dc021eaa0",
+        "blob": "56d2895edcbe0f8326cf9c3931669939f0410322"
+      },
+      {
+        "key": "manual.unchangedEvaluator",
+        "path": "scripts/image_applicability.py",
+        "sha256": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f",
+        "blob": "25793642fcc45a837630a54b25bb2870f7821c52"
+      },
+      {
+        "key": "manual.unchangedImageGate",
+        "path": "scripts/image_gate.py",
+        "sha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b",
+        "blob": "9430d1d322392faea4883c187e3e2e0d707c6421"
+      }
+    ]
+  },
+  "pr78PreservationFingerprints": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "blob": "84cc3f56d836505c942780bb3482f972c9b35396",
+      "sha256": "5d1ad0587df4f86ac9af40be524025dbfeedd9754847c8c35f03f9e5c294d7d3",
+      "compositionRule": "union with the unchanged PR77 browser artifact step"
+    },
+    {
+      "path": "docs/overhaul/PHASE3-RUNTIME-REVALIDATION.md",
+      "blob": "4a12923bcea0a674c2a96f70a15567bd762871f7",
+      "sha256": "e80997cd6335d5dad415d7bd8e2a8c35c5947d94448be9773e2dc2c084b62a2a",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-current-cna-independent-content-comparison.json",
+      "blob": "5377dfb1e4e8c7915643dfd40e7459a70f3de643",
+      "sha256": "9bb7a8c5a527fcfb8a5336e98eb4d3dd5431305ef00af5baf93140413093ad30",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-current-cna-independent-receipt.json",
+      "blob": "221b2eeccda3838c2041724bb90e4a63d59db3fc",
+      "sha256": "850c53a6bad6779cce05e821c0757dd7c377c9ed26dec907a9ab57fb70eb0bf1",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-kernel-header-applicability.json",
+      "blob": "8a24e42e2ce9de7527fa8ff03115402e5ad4920b",
+      "sha256": "9d317229d78b224757dddbc9c03db68b5d6f1d5d2b191f02de857d3c46dd3796",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-kernel-header-review.json",
+      "blob": "8092809214018294baf5ce64a527a254b89228a4",
+      "sha256": "a6d7cca70204e26b1bb76533f2b2103b1286316f6eecc92573218257b36a3a24",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-advisory-delta.json",
+      "blob": "63e49c0f0c4548db3a2588159af985af5319d29f",
+      "sha256": "799cb41e570135fb6c0b223f5bd22d401162bbd4f35005844b299c26524a966d",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-advisory-revalidation-original-policy.json",
+      "blob": "3782895372b4378c8c3f476270b7969ecdf5f644",
+      "sha256": "77fcae5ce3d800b1b6289de7a7e84a2ee6364867ec13b321346520075ddd3b73",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-advisory-revalidation-proposed-policy.json",
+      "blob": "80ff0b182f07d9d40ecca085062502dd956ffd00",
+      "sha256": "74200feeaf7764a447dc740dac42f09b7a2e2c3c9cdb03c95f5994fb4083c7b4",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-coordinator-review.json",
+      "blob": "a3e0b1a44d06c176b34fe2d3d3efb60b11e58181",
+      "sha256": "908ada4cdf0aeb0aadc529538ecca394571fa72d9cdb16a50f343762de376462",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-independent-policy-review.json",
+      "blob": "45fd21ae85872a6cb42e11f24aff5b7e683a0e23",
+      "sha256": "2a92b8caea02c1033953c67b721f726ab7fb93eae9a64c7f76fa43ba9b676122",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-revalidation-author-validation.json",
+      "blob": "6e69013a84de1c4430120c53402c27b0da384599",
+      "sha256": "9d9fbe94dd2447c5a7e61239933def96ea069c0c4099e70f976f4f5c446b9579",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-vendor-advisory-review.json",
+      "blob": "e046af533d87beb49a734961a2e625a16ec2f5ce",
+      "sha256": "60285c0506ad1ceb2dfc5f107784855043ed9b145fb31bfb800f051c930870cd",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-vendor-independent-review.json",
+      "blob": "1eee0076a6f165602c98b33c98f1f02474dc3314",
+      "sha256": "b2c0fc2fde6f0dd3696ed7db55d122cec8aa8e10d68ee143de7c602d4f05cb43",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/runtime-efa2bab-python-tests.log",
+      "blob": "e26d60ae613be454e21037947900819f51f03c95",
+      "sha256": "d6f04fa76c5ee0a86d52f66547d6de0292dd9917e94f88142a50108b009289cf",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/runtime-new-evidence-selector-after.log",
+      "blob": "e95a32cedd3b1ee0303fea866faf707e9c2abe71",
+      "sha256": "99fb5e2d32598322604d882f4548d134be3cf0aeb9d965c47d910599a2cc0183",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/runtime-new-evidence-selector-before.log",
+      "blob": "5294eac1d128cf009584b128b4897687a12622aa",
+      "sha256": "d4e473b2567eae2403fd3b7caa8aff95e60ccd0d389e2a51fde2cd1aa078c816",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/accepted-runtime.zip",
+      "blob": "4051975155993993b9b66b65edbf04b3302cf3fa",
+      "sha256": "128ea68ac07435b95731ffe00ac6f6171f0fa18915ded6133c1ce077e06e53a0",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/blocked-runtime.zip",
+      "blob": "5a2d9eba9751396e9f17f10f877c35f9aad2a9a5",
+      "sha256": "cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/current-cna-records.zip",
+      "blob": "bd0fd7e3840fcccd818dbe7fe2a3a2f8e882c64f",
+      "sha256": "54c6826a9e0b1453dbf8e99ddf68f644edd519af3829d8106fc719bc3aa7e89c",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/proposed-evaluation.json",
+      "blob": "ee85c7330907c582dcb39219cc97530ff9636cc5",
+      "sha256": "fc9913906bf054cff3145999c61f01fb15bd27bab134a3af4703b0ccc44a7354",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/reviewed-retained-evaluation.json",
+      "blob": "576dba3c98b255ddee79da862791c39c1d49f85e",
+      "sha256": "3ae27d56bc8ccfc8f0033ce69c9bc85c1c153e545163e3ceefd3006106cd6a2c",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/repro/phase3-refetch-cna-independent.py",
+      "blob": "56d2895edcbe0f8326cf9c3931669939f0410322",
+      "sha256": "b6741499e32cbb0951f93247dcea3f4470bcc3a259337c1ba547a08dc021eaa0",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "scripts/ci-policy.test.mjs",
+      "blob": "11253121ba1998dc073f28c59cf2f76a2942ae5b",
+      "sha256": "b8d5e070529ff830851ae0b11e32bf6c1ee425f69a6ae3f219f8f28c2c4c140f",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "scripts/image-applicability-policy.json",
+      "blob": "822d1d0a20336c465a123e5a599aa33bd749388d",
+      "sha256": "3b9582cbfaedcbad0b562bdd566896b77c195834a7bfaeb5143025c6d72abf79",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "scripts/image_applicability_test.py",
+      "blob": "bb9eac7fc3544a5f899bd0be0257ff845319037e",
+      "sha256": "9b5460e4fb664f2613f18e2a9fbdfd02ccb6b76d9c4d3cac8004a65a372dbc92",
+      "compositionRule": "byte-identical"
+    }
+  ],
+  "pr78UnchangedImplementationFingerprints": [
+    {
+      "path": "scripts/image_applicability.py",
+      "blob": "25793642fcc45a837630a54b25bb2870f7821c52",
+      "sha256": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f"
+    },
+    {
+      "path": "scripts/image_gate.py",
+      "blob": "9430d1d322392faea4883c187e3e2e0d707c6421",
+      "sha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b"
+    },
+    {
+      "path": "scripts/image_audit.py",
+      "blob": "a32bf8b8e659cd0aebb313e0351d4bfe82143bec",
+      "sha256": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72"
+    },
+    {
+      "path": "scripts/image-audit-tool.json",
+      "blob": "573ca0024a75dbc5ad558592da509d3507985945",
+      "sha256": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c"
+    },
+    {
+      "path": "scripts/verify_image_payload.py",
+      "blob": "5c901c4aea3d8043864d58ed4270f0524fa84386",
+      "sha256": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0"
+    }
+  ],
+  "reviewedDocuments": [
+    "PHASE3-PROGRESS.md",
+    "PHASE3-VALIDATION.md",
+    "PHASE3-REVIEW.md",
+    "PHASE3-DATABASE.md",
+    "PHASE3-PERFORMANCE.md",
+    "PHASE3-FINAL-BUNDLES.md",
+    "PHASE3-ROADMAP.md"
+  ],
+  "missingRelativeDocLinks": [],
+  "documentUpdatesNeeded": [
+    {
+      "priority": "required finalization update",
+      "detail": "PHASE3-PROGRESS and PHASE3-VALIDATION explicitly describe a historical checkpoint before PR78. Add a clearly dated/source-bound current receipt for PR78 merged state, actual PR76 prerequisite, new final composition and new exact-head CI rather than silently rewriting immutable failure evidence."
+    },
+    {
+      "priority": "preserve existing correction",
+      "detail": "Checkpoint corrects DATABASE endpoint RSS lower bound 35324 to 35252 KiB; recomputation confirms 35252\u201357324 KiB at 50000 rows. Preserve correction while merging overlapping PR76 document."
+    }
+  ],
+  "disposition": "No blocking source/evidence discrepancy found in the bounded initial review. Final composition on accepted PR76 integration and fresh full exact-head CI remain required."
+}

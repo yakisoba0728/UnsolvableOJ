@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "root",
+  "role": "coordinator",
+  "observedAt": "2026-11-16T04:33:06.012854+00:00",
+  "reviewedCommits": [
+    "4bdd58b32a18e1950717e932d8910b2f6a78c644",
+    "6e89fb963cd32f516498bf74ea997bd43ccab5a6"
+  ],
+  "compositionParent": "664a06891d690f7fb730daa0f187ce87e7e658cf",
+  "review": "APPROVED_SOURCE_CONDITIONAL_ON_INDEPENDENT_REVIEW_AND_EXACT_CI",
+  "checks": {
+    "fullWrapperWorkflowAndTestsRead": true,
+    "rawScannerBytesUnchanged": true,
+    "rawScannerAndSummaryAgreementRequired": true,
+    "executionAndCoverageErrorsBlock": true,
+    "eoslBlocksBeforeApplicability": true,
+    "ordinaryRawPassUsesNoExemption": true,
+    "onlyRuntimeRawExit2CanUseReviewedComponentDecision": true,
+    "allRawBytesAndCountsRetained": true,
+    "sourceDependencySelectorGapFoundAndCorrected": true,
+    "fullValidationForcesAllFourActualImages": true,
+    "composedReviewedPolicyTests": {
+      "wrapperPassed": 15,
+      "wrapperSeconds": 10.115,
+      "ciPolicyPassed": 17,
+      "sbomPassed": 4,
+      "nodeSeconds": 3.827
+    }
+  },
+  "limits": [
+    "Actual new workflow/image/native CI still required",
+    "Host kernel remains unverified",
+    "No automatic review extension or scanner suppression"
+  ]
+}

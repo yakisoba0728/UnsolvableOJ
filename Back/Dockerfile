@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:24.22.2-alpine AS deps
+FROM node:24.22.2-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8 AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -8,11 +8,16 @@ FROM deps AS build
 COPY . .
 RUN npm run build
 
-FROM node:24.22.2-alpine AS runtime
+FROM node:24.22.2-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8 AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+# Apply the supported Alpine zlib security package. Migrations and maintenance
+# use Node directly; keep npm in builders, not in the final runtime image.
+RUN apk add --no-cache --upgrade 'zlib>=1.4-r0' \
+    && npm ci --omit=dev \
+    && rm -rf /root/.npm /usr/local/lib/node_modules/npm \
+    && rm -f /usr/local/bin/npm /usr/local/bin/npx
 COPY --from=build /app/dist ./dist
 COPY scripts/bootstrap-admin.mjs ./scripts/bootstrap-admin.mjs
 COPY scripts/seed-starter.mjs scripts/starter-problems.mjs ./scripts/

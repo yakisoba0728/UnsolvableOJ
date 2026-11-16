@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "kind": "pr77-recovery-preparation-independent-review",
+  "reviewer": "/root/composition_review",
+  "observedAt": "2026-11-16T08:36:06.230371+00:00",
+  "reviewedSource": "d76ce50fe50d8d143a4bea94355dbddcd37f8352",
+  "reviewedTree": "0abf3050b8cd08a5d5579ba7e27adf6434f7cd06",
+  "parentCheckpoint": "0cc65a2702f5b1e44c2c678dd5b4f2340adcbda3",
+  "scope": "Read-only review of documentation and evidence recovery preparation, not final PR77 composition/CI approval. Reviewer did not edit the repository or rerun application suites.",
+  "changedPaths": [
+    {
+      "status": "M",
+      "path": "docs/overhaul/PHASE3-PROGRESS.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/overhaul/PHASE3-REVIEW.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/overhaul/PHASE3-VALIDATION.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/overhaul/evidence/phase3-browser-recovery-review.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/overhaul/evidence/phase3-recovery-discovery-guard.log"
+    },
+    {
+      "status": "A",
+      "path": "docs/overhaul/evidence/phase3-recovery-discovery.log"
+    },
+    {
+      "status": "A",
+      "path": "docs/overhaul/evidence/phase3-recovery-e2e-types.log"
+    },
+    {
+      "status": "A",
+      "path": "docs/overhaul/evidence/phase3-recovery-policy.log"
+    },
+    {
+      "status": "A",
+      "path": "docs/overhaul/evidence/phase3-validation-recovery-ci-audit.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/overhaul/evidence/phase3-validation-recovery-composition.json"
+    }
+  ],
+  "unchangedProductTestPolicyWorkflowSubtrees": {
+    "Back": "372e53cae05de145b933972cd8d423578c3ebf34",
+    "Front": "b8840e7234bfcda3d4c5358392c3dba2436838c9",
+    "Judge": "38f41d95e451898ddce78c0f3af783aecd334ada",
+    "scripts": "83af776bc51ee3737495039a4a4dd10903336ddc",
+    ".github": "bf6a426e48fd219b0b4af83aaa748cfc46678544"
+  },
+  "originalEvidenceMeasurementsReproFilesPreserved": 164,
+  "copiedReviewerReceipts": [
+    {
+      "committedPath": "docs/overhaul/evidence/phase3-browser-recovery-review.json",
+      "reviewerOriginal": "/workspace/scratch/c187c40af034/browser-audit/recovery-review.json",
+      "sha256": "3fe3bac292cab2c97cbd8f5ada3d094df489fe3fe1030b746c99054aac6895b1",
+      "byteIdentical": true
+    },
+    {
+      "committedPath": "docs/overhaul/evidence/phase3-validation-recovery-ci-audit.json",
+      "reviewerOriginal": "/workspace/scratch/c187c40af034/ci-audit/recovery-ci-audit.json",
+      "sha256": "ea10598ae6d2b9f2712fdc1b9b14e19c82210e702ec4afb7efb946c8e56541a9",
+      "byteIdentical": true
+    },
+    {
+      "committedPath": "docs/overhaul/evidence/phase3-validation-recovery-composition.json",
+      "reviewerOriginal": "/workspace/scratch/c187c40af034/composition-audit/initial-composition-review.json",
+      "sha256": "e46b9fe8f5a341eb0de06e84e876e20d40defa3d164f06b692732874963c5e6a",
+      "byteIdentical": true
+    }
+  ],
+  "missingRelativeLinks": [],
+  "documentChecks": [
+    "Current and historical PR76/77/78 observations are explicitly separated and timestamped.",
+    "Original failed PR77 run remains failed; successful Compose is not represented as whole-run acceptance.",
+    "Local 63-policy/typecheck/three-test discovery logs are represented as local checks; listing is explicitly not browser execution.",
+    "The preparation retains the recovered RSS correction and all bounded performance/operational limits.",
+    "PR77-only ownership, PR76 merge dependency and C-owned PR63 responsibility are explicit.",
+    "No product/source/evaluator/scanner/expiry/CI-selector/assertion change occurs in this preparation."
+  ],
+  "githubObservationsDuringReview": {
+    "pr76InitialQuery": {
+      "state": "open",
+      "merged": false,
+      "head": "6143d7ccd982d42e035db01edee0f1353ad55a21",
+      "base": "f52c7d0aecfb6ae98329d219110eac526bb0dbcb",
+      "updatedAt": "2026-11-16T08:34:28Z"
+    },
+    "pr76SubsequentQuery": {
+      "state": "closed",
+      "merged": true,
+      "head": "6143d7ccd982d42e035db01edee0f1353ad55a21",
+      "mergeSha": "d6f8bb9c963800093fb24f293652bab2ca42883f",
+      "mergedAt": "2026-11-16T08:34:50Z"
+    },
+    "integrationRefObserved": "d6f8bb9c963800093fb24f293652bab2ca42883f",
+    "pr76CiRun": 43830226504,
+    "pr76CiJobs": 12,
+    "pr76CiSuccessJobs": 12,
+    "urls": [
+      "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/pulls/76",
+      "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/ref/heads/overhaul/integration",
+      "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/runs/43830226504/jobs?per_page=100"
+    ]
+  },
+  "findings": [],
+  "disposition": "ACCEPTED_AS_RECOVERY_PREPARATION_ONLY",
+  "remainingGates": [
+    "The 08:31 UTC BLOCKED_ON_PR76 statement is a valid historical observation. PR76 merged during this review; finalization must add a later receipt instead of treating the preparation as final acceptance.",
+    "Incorporate actual integration d6f8bb9c963800093fb24f293652bab2ca42883f without force-push, preserve PR78 and obtain a separate final composition review.",
+    "Require all full-validation jobs on the resulting exact PR77 head before its authorized integration merge."
+  ]
+}

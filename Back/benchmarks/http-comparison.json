@@ -1,0 +1,1216 @@
+{
+  "method": "Three fresh processes per source. Order baseline1,integrated1,integrated2,baseline2,baseline3,integrated3. Three80-request samples per concurrency per process;9samples per cell. Same localhost PostgreSQL17.11/Redis8.10.3 settings and2000problem dataset. Shared-host measurements; no causal speed/capacity claim. CPU is one-core-equivalent API-child usage; can exceed100percent. Peak RSS is child lifetime HWM.",
+  "baselineApplicationSourceTree": "ad83476d58b07fcff666a1330b5ff1dce517495a",
+  "integratedApplicationSourceTree": "2be5615a912a710c33b3feea3d6040143dd714dd",
+  "summary": [
+    {
+      "concurrency": 1,
+      "baseline": {
+        "p50Ms": 5.069864999999936,
+        "p95Ms": 7.153794000000289,
+        "p99Ms": 11.376128999999764,
+        "requestsPerSecond": 190.8992327208616,
+        "apiCpuPercent": 43.02654348103524,
+        "apiPeakRssKiB": 181080,
+        "p95SampleRangeMs": [
+          5.8070809999999256,
+          8.179180999999971
+        ]
+      },
+      "integrated": {
+        "p50Ms": 4.77928699999984,
+        "p95Ms": 7.249203000000307,
+        "p99Ms": 10.861186000000089,
+        "requestsPerSecond": 196.1666823395671,
+        "apiCpuPercent": 45.610951721912656,
+        "apiPeakRssKiB": 172740,
+        "p95SampleRangeMs": [
+          5.428719999999885,
+          10.68064800000002
+        ]
+      }
+    },
+    {
+      "concurrency": 8,
+      "baseline": {
+        "p50Ms": 13.103794999999991,
+        "p95Ms": 21.25769799999989,
+        "p99Ms": 24.978336000000127,
+        "requestsPerSecond": 568.1351286109854,
+        "apiCpuPercent": 104.62656992004659,
+        "apiPeakRssKiB": 211804,
+        "p95SampleRangeMs": [
+          15.06328399999984,
+          32.89373599999999
+        ]
+      },
+      "integrated": {
+        "p50Ms": 11.88338900000008,
+        "p95Ms": 17.758769999999913,
+        "p99Ms": 19.831186000000343,
+        "requestsPerSecond": 649.0194703082758,
+        "apiCpuPercent": 92.26238987741343,
+        "apiPeakRssKiB": 198168,
+        "p95SampleRangeMs": [
+          14.367856999999276,
+          26.481908000000658
+        ]
+      }
+    },
+    {
+      "concurrency": 32,
+      "baseline": {
+        "p50Ms": 38.50262900000007,
+        "p95Ms": 72.15841999999975,
+        "p99Ms": 79.4294759999998,
+        "requestsPerSecond": 627.1154318284332,
+        "apiCpuPercent": 101.9062576721204,
+        "apiPeakRssKiB": 243572,
+        "p95SampleRangeMs": [
+          39.195450000000164,
+          136.60666800000035
+        ]
+      },
+      "integrated": {
+        "p50Ms": 39.351764,
+        "p95Ms": 62.20322400000077,
+        "p99Ms": 64.03256299999975,
+        "requestsPerSecond": 664.8427315765061,
+        "apiCpuPercent": 108.5655623088166,
+        "apiPeakRssKiB": 241744,
+        "p95SampleRangeMs": [
+          33.89376900000025,
+          290.15895699999965
+        ]
+      }
+    }
+  ],
+  "raw": {
+    "baseline": [
+      {
+        "scope": "Synthetic local public problem listing; 2000 problems; three warm samples per concurrency. Client and server are separate processes on one shared host. No end-to-end judge or production capacity claim.",
+        "revision": "410da6b067142c78c8479c11b8cda2a3e95e79bb",
+        "applicationSourceTree": "ad83476d58b07fcff666a1330b5ff1dce517495a",
+        "environment": {
+          "node": "v24.22.1",
+          "kernel": "6.18.57",
+          "cpu": "AMD EPYC 9V74 80-Core Processor",
+          "logicalCpus": 9,
+          "cpuMeasurement": "API child /proc CPU ticks; excludes load client, PostgreSQL and Redis",
+          "peakRssMeasurement": "API process lifetime high-water mark, not per-round incremental allocation"
+        },
+        "dataset": {
+          "problems": 2000,
+          "pageSize": 20,
+          "repeats": 3,
+          "warmupRequests": 20
+        },
+        "results": [
+          {
+            "concurrency": 1,
+            "samples": [
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 518.663227,
+                "requestsPerSecond": 154.242668142733,
+                "p50Ms": 6.276155000000017,
+                "p95Ms": 8.179180999999971,
+                "p99Ms": 10.705612000000201,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 250,
+                "apiCpuPercent": 48.200833794604065,
+                "apiPeakRssKiB": 170416
+              },
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 427.56985699999996,
+                "requestsPerSecond": 187.1039286101967,
+                "p50Ms": 4.664522000000034,
+                "p95Ms": 7.1946240000002035,
+                "p99Ms": 25.15979500000003,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 230,
+                "apiCpuPercent": 53.79237947543155,
+                "apiPeakRssKiB": 181080
+              },
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 377.0409920000002,
+                "requestsPerSecond": 212.17852089674102,
+                "p50Ms": 4.363435000000209,
+                "p95Ms": 7.153794000000289,
+                "p99Ms": 9.815938000000187,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 150,
+                "apiCpuPercent": 39.78347266813894,
+                "apiPeakRssKiB": 183524
+              }
+            ]
+          },
+          {
+            "concurrency": 8,
+            "samples": [
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 210.616763,
+                "requestsPerSecond": 379.83681289413795,
+                "p50Ms": 19.50328599999966,
+                "p95Ms": 30.48687099999961,
+                "p99Ms": 45.77512000000024,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 240,
+                "apiCpuPercent": 113.9510438682414,
+                "apiPeakRssKiB": 205400
+              },
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 122.2879780000003,
+                "requestsPerSecond": 654.1934972544874,
+                "p50Ms": 11.845365000000129,
+                "p95Ms": 16.000452999999652,
+                "p99Ms": 17.375093000000106,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 120,
+                "apiCpuPercent": 98.1290245881731,
+                "apiPeakRssKiB": 205804
+              },
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 152.9248260000004,
+                "requestsPerSecond": 523.1328496002329,
+                "p50Ms": 14.107138000000305,
+                "p95Ms": 22.25339399999939,
+                "p99Ms": 24.978336000000127,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 160,
+                "apiCpuPercent": 104.62656992004659,
+                "apiPeakRssKiB": 223480
+              }
+            ]
+          },
+          {
+            "concurrency": 32,
+            "samples": [
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 147.86543099999926,
+                "requestsPerSecond": 541.0324743178168,
+                "p50Ms": 54.62471899999946,
+                "p95Ms": 98.20579799999996,
+                "p99Ms": 106.91407299999992,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 200,
+                "apiCpuPercent": 135.2581185794542,
+                "apiPeakRssKiB": 242904
+              },
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 98.41004000000066,
+                "requestsPerSecond": 812.9251852758058,
+                "p50Ms": 35.6234859999995,
+                "p95Ms": 44.39280999999937,
+                "p99Ms": 49.206482000000506,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 80,
+                "apiCpuPercent": 81.29251852758058,
+                "apiPeakRssKiB": 243344
+              },
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 88.18331399999988,
+                "requestsPerSecond": 907.2011060958778,
+                "p50Ms": 32.578089999999975,
+                "p95Ms": 39.195450000000164,
+                "p99Ms": 40.47917999999936,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 70,
+                "apiCpuPercent": 79.3800967833893,
+                "apiPeakRssKiB": 243572
+              }
+            ]
+          }
+        ],
+        "overload": {
+          "concurrency": 32,
+          "requests": 160,
+          "elapsedMs": 147.16896500000075,
+          "requestsPerSecond": 1087.185739194396,
+          "p50Ms": 26.507767999999487,
+          "p95Ms": 50.2593539999998,
+          "p99Ms": 55.16443199999958,
+          "statuses": {
+            "200": 100,
+            "429": 60
+          },
+          "apiCpuMs": 140,
+          "apiCpuPercent": 95.12875217950965,
+          "apiPeakRssKiB": 250860
+        }
+      },
+      {
+        "scope": "Synthetic local public problem listing; 2000 problems; three warm samples per concurrency. Client and server are separate processes on one shared host. No end-to-end judge or production capacity claim.",
+        "revision": "410da6b067142c78c8479c11b8cda2a3e95e79bb",
+        "applicationSourceTree": "ad83476d58b07fcff666a1330b5ff1dce517495a",
+        "environment": {
+          "node": "v24.22.1",
+          "kernel": "6.18.57",
+          "cpu": "AMD EPYC 9V74 80-Core Processor",
+          "logicalCpus": 9,
+          "cpuMeasurement": "API child /proc CPU ticks; excludes load client, PostgreSQL and Redis",
+          "peakRssMeasurement": "API process lifetime high-water mark, not per-round incremental allocation"
+        },
+        "dataset": {
+          "problems": 2000,
+          "pageSize": 20,
+          "repeats": 3,
+          "warmupRequests": 20
+        },
+        "results": [
+          {
+            "concurrency": 1,
+            "samples": [
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 454.61601599999995,
+                "requestsPerSecond": 175.97268284538399,
+                "p50Ms": 5.330886000000191,
+                "p95Ms": 7.47116399999959,
+                "p99Ms": 11.477419999999938,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 220,
+                "apiCpuPercent": 48.3924877824806,
+                "apiPeakRssKiB": 166456
+              },
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 446.41868399999976,
+                "requestsPerSecond": 179.20396898083246,
+                "p50Ms": 5.245930999999928,
+                "p95Ms": 6.657319000000371,
+                "p99Ms": 26.271686000000045,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 220,
+                "apiCpuPercent": 49.28109146972892,
+                "apiPeakRssKiB": 178308
+              },
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 407.41237,
+                "requestsPerSecond": 196.36124450516806,
+                "p50Ms": 4.6617559999999685,
+                "p95Ms": 7.510004000000208,
+                "p99Ms": 11.113616000000093,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 150,
+                "apiCpuPercent": 36.81773334471901,
+                "apiPeakRssKiB": 178724
+              }
+            ]
+          },
+          {
+            "concurrency": 8,
+            "samples": [
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 212.1174860000001,
+                "requestsPerSecond": 377.1494821506604,
+                "p50Ms": 19.477269999999862,
+                "p95Ms": 32.89373599999999,
+                "p99Ms": 38.816644,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 170,
+                "apiCpuPercent": 80.14426495701534,
+                "apiPeakRssKiB": 190292
+              },
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 147.4986060000001,
+                "requestsPerSecond": 542.3780072877431,
+                "p50Ms": 14.494168000000172,
+                "p95Ms": 21.191209999999955,
+                "p99Ms": 23.54747499999985,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 170,
+                "apiCpuPercent": 115.25532654864541,
+                "apiPeakRssKiB": 203456
+              },
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 140.81157100000019,
+                "requestsPerSecond": 568.1351286109854,
+                "p50Ms": 12.35997499999985,
+                "p95Ms": 21.25769799999989,
+                "p99Ms": 30.080540999999812,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 150,
+                "apiCpuPercent": 106.52533661455976,
+                "apiPeakRssKiB": 211804
+              }
+            ]
+          },
+          {
+            "concurrency": 32,
+            "samples": [
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 202.71172100000013,
+                "requestsPerSecond": 394.6491086225841,
+                "p50Ms": 65.52802100000008,
+                "p95Ms": 136.60666800000035,
+                "p99Ms": 151.89380299999993,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 230,
+                "apiCpuPercent": 113.46161872899292,
+                "apiPeakRssKiB": 234732
+              },
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 103.53251300000011,
+                "requestsPerSecond": 772.7041262873618,
+                "p50Ms": 32.57031400000005,
+                "p95Ms": 57.975187000000005,
+                "p99Ms": 58.34106799999972,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 120,
+                "apiCpuPercent": 115.90561894310424,
+                "apiPeakRssKiB": 244928
+              },
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 108.17399000000023,
+                "requestsPerSecond": 739.5493131019742,
+                "p50Ms": 38.50262900000007,
+                "p95Ms": 51.970834000000195,
+                "p99Ms": 53.56064600000036,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 100,
+                "apiCpuPercent": 92.44366413774678,
+                "apiPeakRssKiB": 245232
+              }
+            ]
+          }
+        ],
+        "overload": {
+          "concurrency": 32,
+          "requests": 160,
+          "elapsedMs": 180.70234600000003,
+          "requestsPerSecond": 885.4339943101788,
+          "p50Ms": 34.487791000000016,
+          "p95Ms": 62.913932999999815,
+          "p99Ms": 73.1039580000006,
+          "statuses": {
+            "200": 100,
+            "429": 60
+          },
+          "apiCpuMs": 150,
+          "apiCpuPercent": 83.00943696657926,
+          "apiPeakRssKiB": 252616
+        }
+      },
+      {
+        "scope": "Synthetic local public problem listing; 2000 problems; three warm samples per concurrency. Client and server are separate processes on one shared host. No end-to-end judge or production capacity claim.",
+        "revision": "410da6b067142c78c8479c11b8cda2a3e95e79bb",
+        "applicationSourceTree": "ad83476d58b07fcff666a1330b5ff1dce517495a",
+        "environment": {
+          "node": "v24.22.1",
+          "kernel": "6.18.57",
+          "cpu": "AMD EPYC 9V74 80-Core Processor",
+          "logicalCpus": 9,
+          "cpuMeasurement": "API child /proc CPU ticks; excludes load client, PostgreSQL and Redis",
+          "peakRssMeasurement": "API process lifetime high-water mark, not per-round incremental allocation"
+        },
+        "dataset": {
+          "problems": 2000,
+          "pageSize": 20,
+          "repeats": 3,
+          "warmupRequests": 20
+        },
+        "results": [
+          {
+            "concurrency": 1,
+            "samples": [
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 418.3464100000001,
+                "requestsPerSecond": 191.2290821379344,
+                "p50Ms": 5.069864999999936,
+                "p95Ms": 6.598226999999952,
+                "p99Ms": 7.125451000000112,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 180,
+                "apiCpuPercent": 43.02654348103524,
+                "apiPeakRssKiB": 183972
+              },
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 419.0692589999999,
+                "requestsPerSecond": 190.8992327208616,
+                "p50Ms": 5.1365639999999075,
+                "p95Ms": 6.878536000000167,
+                "p99Ms": 13.265705000000253,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 170,
+                "apiCpuPercent": 40.56608695318309,
+                "apiPeakRssKiB": 199148
+              },
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 364.48051099999975,
+                "requestsPerSecond": 219.49047366211593,
+                "p50Ms": 4.415201999999681,
+                "p95Ms": 5.8070809999999256,
+                "p99Ms": 11.376128999999764,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 150,
+                "apiCpuPercent": 41.154463811646735,
+                "apiPeakRssKiB": 206812
+              }
+            ]
+          },
+          {
+            "concurrency": 8,
+            "samples": [
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 135.629637,
+                "requestsPerSecond": 589.8415845498429,
+                "p50Ms": 13.103794999999991,
+                "p95Ms": 18.871427999999923,
+                "p99Ms": 21.27498400000013,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 100,
+                "apiCpuPercent": 73.73019806873036,
+                "apiPeakRssKiB": 214296
+              },
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 113.69888300000002,
+                "requestsPerSecond": 703.6128930132056,
+                "p50Ms": 9.2853869999999,
+                "p95Ms": 24.417922999999973,
+                "p99Ms": 31.21083200000021,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 140,
+                "apiCpuPercent": 123.13225627731099,
+                "apiPeakRssKiB": 231012
+              },
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 98.35683700000027,
+                "requestsPerSecond": 813.3649112770858,
+                "p50Ms": 8.992013000000043,
+                "p95Ms": 15.06328399999984,
+                "p99Ms": 19.056761999999708,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 90,
+                "apiCpuPercent": 91.50355251867214,
+                "apiPeakRssKiB": 231504
+              }
+            ]
+          },
+          {
+            "concurrency": 32,
+            "samples": [
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 127.568221,
+                "requestsPerSecond": 627.1154318284332,
+                "p50Ms": 39.76184200000034,
+                "p95Ms": 72.15841999999975,
+                "p99Ms": 79.4294759999998,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 130,
+                "apiCpuPercent": 101.9062576721204,
+                "apiPeakRssKiB": 242240
+              },
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 174.6730520000001,
+                "requestsPerSecond": 457.99852400815644,
+                "p50Ms": 44.27396799999997,
+                "p95Ms": 114.83006599999999,
+                "p99Ms": 118.97205299999996,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 190,
+                "apiCpuPercent": 108.77464945193715,
+                "apiPeakRssKiB": 249900
+              },
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 155.04428899999994,
+                "requestsPerSecond": 515.9815980064898,
+                "p50Ms": 31.638805000000048,
+                "p95Ms": 103.15065900000036,
+                "p99Ms": 106.12649999999985,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 130,
+                "apiCpuPercent": 83.8470096760546,
+                "apiPeakRssKiB": 250212
+              }
+            ]
+          }
+        ],
+        "overload": {
+          "concurrency": 32,
+          "requests": 160,
+          "elapsedMs": 151.03263199999992,
+          "requestsPerSecond": 1059.3737120333046,
+          "p50Ms": 29.73100599999998,
+          "p95Ms": 55.03086399999984,
+          "p99Ms": 58.28522699999985,
+          "statuses": {
+            "200": 100,
+            "429": 60
+          },
+          "apiCpuMs": 140,
+          "apiCpuPercent": 92.69519980291416,
+          "apiPeakRssKiB": 257572
+        }
+      }
+    ],
+    "integrated": [
+      {
+        "scope": "Synthetic local public problem listing; 2000 problems; three warm samples per concurrency. Client and server are separate processes on one shared host. No end-to-end judge or production capacity claim.",
+        "revision": "de0cb1c42ea517c4678d7de5d27a709af288dc18",
+        "applicationSourceTree": "2be5615a912a710c33b3feea3d6040143dd714dd",
+        "environment": {
+          "node": "v24.22.1",
+          "kernel": "6.18.57",
+          "cpu": "AMD EPYC 9V74 80-Core Processor",
+          "logicalCpus": 9,
+          "cpuMeasurement": "API child /proc CPU ticks; excludes load client, PostgreSQL and Redis",
+          "peakRssMeasurement": "API process lifetime high-water mark, not per-round incremental allocation"
+        },
+        "dataset": {
+          "problems": 2000,
+          "pageSize": 20,
+          "repeats": 3,
+          "warmupRequests": 20
+        },
+        "results": [
+          {
+            "concurrency": 1,
+            "samples": [
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 456.82494399999996,
+                "requestsPerSecond": 175.12178581912113,
+                "p50Ms": 5.026726000000053,
+                "p95Ms": 9.353219000000081,
+                "p99Ms": 17.97237999999993,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 230,
+                "apiCpuPercent": 50.347513422997324,
+                "apiPeakRssKiB": 169204
+              },
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 401.0010729999999,
+                "requestsPerSecond": 199.50071305669553,
+                "p50Ms": 4.665983999999753,
+                "p95Ms": 6.82752199999959,
+                "p99Ms": 14.27617199999986,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 150,
+                "apiCpuPercent": 37.40638369813041,
+                "apiPeakRssKiB": 169888
+              },
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 407.81645000000026,
+                "requestsPerSecond": 196.1666823395671,
+                "p50Ms": 4.77928699999984,
+                "p95Ms": 7.249203000000307,
+                "p99Ms": 8.732620000000225,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 150,
+                "apiCpuPercent": 36.78125293866883,
+                "apiPeakRssKiB": 172740
+              }
+            ]
+          },
+          {
+            "concurrency": 8,
+            "samples": [
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 147.125677,
+                "requestsPerSecond": 543.7528080159658,
+                "p50Ms": 12.618654000000333,
+                "p95Ms": 26.268602999999985,
+                "p99Ms": 31.16542299999992,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 220,
+                "apiCpuPercent": 149.5320222043906,
+                "apiPeakRssKiB": 177632
+              },
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 120.88125100000025,
+                "requestsPerSecond": 661.8065195238576,
+                "p50Ms": 11.391881999999896,
+                "p95Ms": 15.550744000000122,
+                "p99Ms": 19.1135290000002,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 100,
+                "apiCpuPercent": 82.7258149404822,
+                "apiPeakRssKiB": 178688
+              },
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 135.60260199999993,
+                "requestsPerSecond": 589.9591808717656,
+                "p50Ms": 12.19057900000007,
+                "p95Ms": 18.63059000000021,
+                "p99Ms": 24.0779050000001,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 120,
+                "apiCpuPercent": 88.49387713076483,
+                "apiPeakRssKiB": 198168
+              }
+            ]
+          },
+          {
+            "concurrency": 32,
+            "samples": [
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 123.71098499999971,
+                "requestsPerSecond": 646.668523413666,
+                "p50Ms": 39.351764,
+                "p95Ms": 86.97134899999992,
+                "p99Ms": 92.85199600000033,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 160,
+                "apiCpuPercent": 129.33370468273318,
+                "apiPeakRssKiB": 217188
+              },
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 98.23815000000013,
+                "requestsPerSecond": 814.3475828891311,
+                "p50Ms": 34.89344300000039,
+                "p95Ms": 55.17313899999999,
+                "p99Ms": 58.08514100000002,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 90,
+                "apiCpuPercent": 91.61410307502724,
+                "apiPeakRssKiB": 226548
+              },
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 110.60138099999995,
+                "requestsPerSecond": 723.3182739372851,
+                "p50Ms": 36.769664999999804,
+                "p95Ms": 46.474635000000035,
+                "p99Ms": 49.760089000000335,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 100,
+                "apiCpuPercent": 90.41478424216064,
+                "apiPeakRssKiB": 243432
+              }
+            ]
+          }
+        ],
+        "overload": {
+          "concurrency": 32,
+          "requests": 160,
+          "elapsedMs": 168.40744700000005,
+          "requestsPerSecond": 950.0767504657912,
+          "p50Ms": 38.38924900000029,
+          "p95Ms": 60.79744699999992,
+          "p99Ms": 65.51568199999974,
+          "statuses": {
+            "200": 100,
+            "429": 60
+          },
+          "apiCpuMs": 190,
+          "apiCpuPercent": 112.82161411781271,
+          "apiPeakRssKiB": 248680
+        }
+      },
+      {
+        "scope": "Synthetic local public problem listing; 2000 problems; three warm samples per concurrency. Client and server are separate processes on one shared host. No end-to-end judge or production capacity claim.",
+        "revision": "de0cb1c42ea517c4678d7de5d27a709af288dc18",
+        "applicationSourceTree": "2be5615a912a710c33b3feea3d6040143dd714dd",
+        "environment": {
+          "node": "v24.22.1",
+          "kernel": "6.18.57",
+          "cpu": "AMD EPYC 9V74 80-Core Processor",
+          "logicalCpus": 9,
+          "cpuMeasurement": "API child /proc CPU ticks; excludes load client, PostgreSQL and Redis",
+          "peakRssMeasurement": "API process lifetime high-water mark, not per-round incremental allocation"
+        },
+        "dataset": {
+          "problems": 2000,
+          "pageSize": 20,
+          "repeats": 3,
+          "warmupRequests": 20
+        },
+        "results": [
+          {
+            "concurrency": 1,
+            "samples": [
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 482.34029699999974,
+                "requestsPerSecond": 165.85800626150058,
+                "p50Ms": 5.724664000000303,
+                "p95Ms": 8.907915999999659,
+                "p99Ms": 10.861186000000089,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 220,
+                "apiCpuPercent": 45.610951721912656,
+                "apiPeakRssKiB": 165716
+              },
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 552.5716630000002,
+                "requestsPerSecond": 144.77760145293584,
+                "p50Ms": 6.023827000000438,
+                "p95Ms": 10.68064800000002,
+                "p99Ms": 24.219858999999815,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 270,
+                "apiCpuPercent": 48.86244049036585,
+                "apiPeakRssKiB": 178476
+              },
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 417.51593600000024,
+                "requestsPerSecond": 191.6094527227817,
+                "p50Ms": 4.9290249999999105,
+                "p95Ms": 6.517256999999972,
+                "p99Ms": 10.360875999999735,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 140,
+                "apiCpuPercent": 33.5316542264868,
+                "apiPeakRssKiB": 179288
+              }
+            ]
+          },
+          {
+            "concurrency": 8,
+            "samples": [
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 173.41844300000002,
+                "requestsPerSecond": 461.31194938706716,
+                "p50Ms": 16.22186099999999,
+                "p95Ms": 23.58663999999999,
+                "p99Ms": 34.660121999999774,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 160,
+                "apiCpuPercent": 92.26238987741343,
+                "apiPeakRssKiB": 191068
+              },
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 150.16853100000026,
+                "requestsPerSecond": 532.7347844935625,
+                "p50Ms": 13.159759000000122,
+                "p95Ms": 26.481908000000658,
+                "p99Ms": 28.811985999999706,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 150,
+                "apiCpuPercent": 99.88777209254297,
+                "apiPeakRssKiB": 204528
+              },
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 103.0115109999997,
+                "requestsPerSecond": 776.6122370537815,
+                "p50Ms": 9.719075999999404,
+                "p95Ms": 14.367856999999276,
+                "p99Ms": 17.238604000000123,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 80,
+                "apiCpuPercent": 77.66122370537816,
+                "apiPeakRssKiB": 212452
+              }
+            ]
+          },
+          {
+            "concurrency": 32,
+            "samples": [
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 199.74084399999992,
+                "requestsPerSecond": 400.51898448972224,
+                "p50Ms": 74.82380000000012,
+                "p95Ms": 106.04834600000049,
+                "p99Ms": 142.956905,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 230,
+                "apiCpuPercent": 115.14920804079513,
+                "apiPeakRssKiB": 234184
+              },
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 120.32920899999954,
+                "requestsPerSecond": 664.8427315765061,
+                "p50Ms": 39.924183999999514,
+                "p95Ms": 62.20322400000077,
+                "p99Ms": 63.96979900000042,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 160,
+                "apiCpuPercent": 132.96854631530124,
+                "apiPeakRssKiB": 244976
+              },
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 79.52110200000061,
+                "requestsPerSecond": 1006.0222756973285,
+                "p50Ms": 29.36257999999998,
+                "p95Ms": 33.89376900000025,
+                "p99Ms": 36.016920999999456,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 80,
+                "apiCpuPercent": 100.60222756973285,
+                "apiPeakRssKiB": 245292
+              }
+            ]
+          }
+        ],
+        "overload": {
+          "concurrency": 32,
+          "requests": 160,
+          "elapsedMs": 143.83951799999977,
+          "requestsPerSecond": 1112.3507797071472,
+          "p50Ms": 31.047513999999865,
+          "p95Ms": 49.45801500000016,
+          "p99Ms": 58.197991,
+          "statuses": {
+            "200": 100,
+            "429": 60
+          },
+          "apiCpuMs": 150,
+          "apiCpuPercent": 104.28288559754506,
+          "apiPeakRssKiB": 252672
+        }
+      },
+      {
+        "scope": "Synthetic local public problem listing; 2000 problems; three warm samples per concurrency. Client and server are separate processes on one shared host. No end-to-end judge or production capacity claim.",
+        "revision": "de0cb1c42ea517c4678d7de5d27a709af288dc18",
+        "applicationSourceTree": "2be5615a912a710c33b3feea3d6040143dd714dd",
+        "environment": {
+          "node": "v24.22.1",
+          "kernel": "6.18.57",
+          "cpu": "AMD EPYC 9V74 80-Core Processor",
+          "logicalCpus": 9,
+          "cpuMeasurement": "API child /proc CPU ticks; excludes load client, PostgreSQL and Redis",
+          "peakRssMeasurement": "API process lifetime high-water mark, not per-round incremental allocation"
+        },
+        "dataset": {
+          "problems": 2000,
+          "pageSize": 20,
+          "repeats": 3,
+          "warmupRequests": 20
+        },
+        "results": [
+          {
+            "concurrency": 1,
+            "samples": [
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 364.3513680000001,
+                "requestsPerSecond": 219.5682712518318,
+                "p50Ms": 4.371145999999953,
+                "p95Ms": 5.428719999999885,
+                "p99Ms": 9.108863999999812,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 190,
+                "apiCpuPercent": 52.147464422310044,
+                "apiPeakRssKiB": 168188
+              },
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 382.79999399999997,
+                "requestsPerSecond": 208.98641915861683,
+                "p50Ms": 4.301191999999901,
+                "p95Ms": 6.561126000000058,
+                "p99Ms": 18.053957000000082,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 270,
+                "apiCpuPercent": 70.53291646603319,
+                "apiPeakRssKiB": 178548
+              },
+              {
+                "concurrency": 1,
+                "requests": 80,
+                "elapsedMs": 405.8832000000002,
+                "requestsPerSecond": 197.10103793406566,
+                "p50Ms": 4.65869100000009,
+                "p95Ms": 8.087994000000435,
+                "p99Ms": 10.543561999999838,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 140,
+                "apiCpuPercent": 34.49268163846149,
+                "apiPeakRssKiB": 178764
+              }
+            ]
+          },
+          {
+            "concurrency": 8,
+            "samples": [
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 113.60648600000013,
+                "requestsPerSecond": 704.185146612139,
+                "p50Ms": 10.382639000000381,
+                "p95Ms": 17.758769999999913,
+                "p99Ms": 19.831186000000343,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 110,
+                "apiCpuPercent": 96.8254576591691,
+                "apiPeakRssKiB": 193160
+              },
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 112.37928600000032,
+                "requestsPerSecond": 711.8749624374706,
+                "p50Ms": 10.188951999999972,
+                "p95Ms": 16.583611999999903,
+                "p99Ms": 19.762228999999934,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 120,
+                "apiCpuPercent": 106.7812443656206,
+                "apiPeakRssKiB": 206744
+              },
+              {
+                "concurrency": 8,
+                "requests": 80,
+                "elapsedMs": 123.26286600000003,
+                "requestsPerSecond": 649.0194703082758,
+                "p50Ms": 11.88338900000008,
+                "p95Ms": 15.578689999999824,
+                "p99Ms": 18.657149000000118,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 110,
+                "apiCpuPercent": 89.24017716738793,
+                "apiPeakRssKiB": 207016
+              }
+            ]
+          },
+          {
+            "concurrency": 32,
+            "samples": [
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 156.73071900000014,
+                "requestsPerSecond": 510.4296114407536,
+                "p50Ms": 51.46280800000022,
+                "p95Ms": 100.78130399999964,
+                "p99Ms": 118.64612099999977,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 180,
+                "apiCpuPercent": 114.84666257416956,
+                "apiPeakRssKiB": 233004
+              },
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 110.53228799999943,
+                "requestsPerSecond": 723.7704153921107,
+                "p50Ms": 37.4204850000001,
+                "p95Ms": 59.30594999999994,
+                "p99Ms": 64.03256299999975,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 120,
+                "apiCpuPercent": 108.5655623088166,
+                "apiPeakRssKiB": 241744
+              },
+              {
+                "concurrency": 32,
+                "requests": 80,
+                "elapsedMs": 360.68789899999956,
+                "requestsPerSecond": 221.79840305648872,
+                "p50Ms": 116.11276299999918,
+                "p95Ms": 290.15895699999965,
+                "p99Ms": 294.78738299999986,
+                "statuses": {
+                  "200": 80
+                },
+                "apiCpuMs": 320,
+                "apiCpuPercent": 88.7193612225955,
+                "apiPeakRssKiB": 242008
+              }
+            ]
+          }
+        ],
+        "overload": {
+          "concurrency": 32,
+          "requests": 160,
+          "elapsedMs": 137.92868499999986,
+          "requestsPerSecond": 1160.0197594865792,
+          "p50Ms": 34.64394900000025,
+          "p95Ms": 46.21428500000002,
+          "p99Ms": 48.05937300000005,
+          "statuses": {
+            "200": 100,
+            "429": 60
+          },
+          "apiCpuMs": 160,
+          "apiCpuPercent": 116.00197594865793,
+          "apiPeakRssKiB": 249604
+        }
+      }
+    ]
+  }
+}

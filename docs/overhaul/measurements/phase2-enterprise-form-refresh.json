@@ -1,0 +1,36 @@
+{
+  "baselineCommit": "1011e35e1fbad2327794e5a615bba9bc3115ece0",
+  "scope": "Scheduled-test editor refresh correction; synthetic React DOM, not a browser or backend test",
+  "before": {
+    "label": "form_before",
+    "node": "v24.22.1",
+    "dom": "jsdom 31.0.1",
+    "scenarios": [
+      {
+        "name": "edit-draft-refresh",
+        "before": "unsaved title",
+        "pending": null,
+        "after": "Private first exam",
+        "passed": false
+      }
+    ]
+  },
+  "after": {
+    "label": "form_after",
+    "node": "v24.22.1",
+    "dom": "jsdom 31.0.1",
+    "scenarios": [
+      {
+        "name": "edit-draft-refresh",
+        "before": "unsaved title",
+        "pending": "unsaved title",
+        "after": "unsaved title",
+        "passed": true
+      }
+    ]
+  },
+  "correctedSourceBlobs": {
+    "Front/src/pages/EnterpriseFormPage.tsx": "0e387740dbf52d3a1f5596bfc31da18c9afb2847",
+    "Front/src/enterprise/api.ts": "52d097985a857d43cb7d614418b2b188a6ea39a3"
+  }
+}

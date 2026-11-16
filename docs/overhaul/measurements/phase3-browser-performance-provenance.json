@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "observed-browser-artifact-provenance",
+  "sourceHead": "e23729640b0ce18b6bb5ab82c578dc1eb35c7392",
+  "checkout": {
+    "sha": "9e4ce9df2aa4338a99a8deb7f32e161458a39a04",
+    "tree": "0e90a39685e1246c8f9a3ab1637fc0c89b4d85e7",
+    "workflowRunId": "43823181757",
+    "workflowAttempt": "1"
+  },
+  "workflowRunUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43823181757",
+  "workflowConclusion": "failure",
+  "failureReason": "Runtime advisory metadata drift plus dependent required gate; browser/Compose job succeeded. This artifact is measurement evidence, not whole-run acceptance.",
+  "job": {
+    "id": 133150846420,
+    "name": "Sandbox, pipeline and Compose",
+    "conclusion": "success",
+    "composeTests": 3,
+    "composeDurationSeconds": 37.7
+  },
+  "artifact": {
+    "id": 14206046513,
+    "name": "phase3-browser-performance-1",
+    "createdAt": "2026-11-16T07:35:24Z",
+    "originalExpiresAt": "2026-11-23T07:35:23Z",
+    "zipPath": "phase3-browser-performance.zip",
+    "zipSha256": "140148586cce0cd4ca2f129ff5e735bbd1b48559e457131ba5e68349a8f80bc7",
+    "rawPath": "phase3-browser-performance.json",
+    "rawSha256": "94919ac0010e0339f349e679b61178ab91364f36e9ecc7c8537da5cf5bfbf681",
+    "digestMatchedGitHubMetadata": true
+  },
+  "executedSourceFiles": [
+    {
+      "path": "Front/tests-live/learning-performance.ts",
+      "sha256": "a8e184761cc09cb1fa532834076e2034ac19a0a0526798da50ebe6607d4453c7"
+    },
+    {
+      "path": "Front/tests-live/judge-flow.spec.ts",
+      "sha256": "c6596d099851a16ef43b6c0bf62c28524b1846a57745ac22b975f823d9067cf6"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "ecec2dee7042ec48b7ca6238ab1cd479c670cd4d0132de4c11b59f62a6724c15"
+    },
+    {
+      "path": "Front/playwright.live.config.ts",
+      "sha256": "d9806506e67e2d1df59ed49ea2a4bdda301d390ef8124caa6dcf3526cab95a4c"
+    }
+  ],
+  "retention": "Original GitHub ZIP and JSON copied byte-for-byte into versioned project evidence before artifact expiry."
+}
