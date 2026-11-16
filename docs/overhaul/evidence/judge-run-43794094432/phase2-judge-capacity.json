@@ -1,0 +1,825 @@
+{
+  "schemaVersion": 1,
+  "timestamp": "2026-11-16T02:52:31.115Z",
+  "environment": {
+    "node": "v24.22.2",
+    "platform": "linux",
+    "kernel": "7.0.0-1017-azure",
+    "logicalCpus": 4,
+    "cpu": "AMD EPYC 7763 64-Core Processor"
+  },
+  "scope": "Disposable API/PostgreSQL/Redis, real workers and go-judge; eight accepted languages, one sample/job, alternating 1/2/2/1 worker trials after Python warmup.",
+  "limitations": [
+    "Eight jobs/trial: p95/p99 are sample maxima, not steady-state tail estimates.",
+    "Jobs/s measures admitted bursts; per-IP 20/minute admission pauses are recorded outside the timed interval.",
+    "Shared CI runner; no production capacity or before/after optimization claim.",
+    "Worker CPU uses owned-PID procfs tick deltas; peak RSS includes warmup. API also hosts the test harness: isolated API CPU/RSS is not reported.",
+    "Proxy faults interrupt worker TCP links, not Redis/API services. Natural lease expiry uses real time."
+  ],
+  "admissionPauses": [
+    {
+      "requiredRequests": 10,
+      "elapsedMs": 36644.689935
+    },
+    {
+      "requiredRequests": 2,
+      "elapsedMs": 36926.217695
+    }
+  ],
+  "trials": [
+    {
+      "workers": 1,
+      "concurrencyPerWorker": 1,
+      "submissions": 8,
+      "elapsedMs": 12050.114391000001,
+      "jobsPerSecond": 0.6638941125716654,
+      "apiSubmissionMs": {
+        "p50": 58.59176699999989,
+        "p95": 65.73157600000013,
+        "p99": 65.73157600000013,
+        "min": 27.166901000000053,
+        "max": 65.73157600000013
+      },
+      "queueWaitMs": {
+        "p50": 1795,
+        "p95": 11577,
+        "p99": 11577,
+        "min": 2,
+        "max": 11577
+      },
+      "workerCpuMs": 150,
+      "workerCpuCores": 0.012448014610718726,
+      "workerPeakRssKiB": [
+        110372
+      ],
+      "workerCpuSamples": {
+        "clockTicks": 100,
+        "before": [
+          {
+            "cpuTicks": 35,
+            "peakRssKiB": 110372
+          }
+        ],
+        "after": [
+          {
+            "cpuTicks": 50,
+            "peakRssKiB": 110372
+          }
+        ]
+      },
+      "acknowledgedWorkerMs": {
+        "p50": 86.12778100000003,
+        "p95": 9645.737679,
+        "p99": 9645.737679,
+        "min": 34.27951800000119,
+        "max": 9645.737679
+      },
+      "measurements": [
+        {
+          "event": "judge_completed",
+          "workerId": "bf04925e-2931-4564-857c-75e0be4a8465",
+          "submissionId": "01cdb88b-c3d5-4c3c-9410-9ee06a606dca",
+          "generation": 1,
+          "language": "C",
+          "status": "ACCEPTED",
+          "queueWaitMs": 2,
+          "claimMs": 17.775296000000026,
+          "judgeMs": 58.4758129999999,
+          "reportMs": 9.841724999999997,
+          "totalMs": 86.12778100000003,
+          "processCpuUserUs": 317123,
+          "processCpuSystemUs": 55547,
+          "processRssBytes": 101646336,
+          "processPeakRssKiB": 110372
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "bf04925e-2931-4564-857c-75e0be4a8465",
+          "submissionId": "fa19f677-db45-4ea1-a3de-f333c8a38608",
+          "generation": 1,
+          "language": "CPP",
+          "status": "ACCEPTED",
+          "queueWaitMs": 88,
+          "claimMs": 4.357189999999946,
+          "judgeMs": 402.652703,
+          "reportMs": 9.920262999999977,
+          "totalMs": 416.95314900000005,
+          "processCpuUserUs": 327722,
+          "processCpuSystemUs": 56818,
+          "processRssBytes": 102301696,
+          "processPeakRssKiB": 110372
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "bf04925e-2931-4564-857c-75e0be4a8465",
+          "submissionId": "a6227f97-ea27-4894-a9ba-390bfe23d486",
+          "generation": 1,
+          "language": "JAVA",
+          "status": "ACCEPTED",
+          "queueWaitMs": 480,
+          "claimMs": 4.88421500000004,
+          "judgeMs": 1303.6761740000002,
+          "reportMs": 9.533132999999907,
+          "totalMs": 1318.1214740000003,
+          "processCpuUserUs": 345802,
+          "processCpuSystemUs": 56825,
+          "processRssBytes": 103612416,
+          "processPeakRssKiB": 110372
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "bf04925e-2931-4564-857c-75e0be4a8465",
+          "submissionId": "9cdcb810-3eb7-4720-b29f-b12ad27cb64a",
+          "generation": 1,
+          "language": "JAVASCRIPT",
+          "status": "ACCEPTED",
+          "queueWaitMs": 1795,
+          "claimMs": 5.561322000000018,
+          "judgeMs": 35.5995939999998,
+          "reportMs": 9.17993000000024,
+          "totalMs": 50.371803,
+          "processCpuUserUs": 355338,
+          "processCpuSystemUs": 57377,
+          "processRssBytes": 104267776,
+          "processPeakRssKiB": 110372
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "bf04925e-2931-4564-857c-75e0be4a8465",
+          "submissionId": "5ce9df30-3f53-4b78-98be-11d2c5e2d4b4",
+          "generation": 1,
+          "language": "GO",
+          "status": "ACCEPTED",
+          "queueWaitMs": 1843,
+          "claimMs": 4.46866799999998,
+          "judgeMs": 9632.438297,
+          "reportMs": 8.793804999999338,
+          "totalMs": 9645.737679,
+          "processCpuUserUs": 381303,
+          "processCpuSystemUs": 61209,
+          "processRssBytes": 105447424,
+          "processPeakRssKiB": 110372
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "bf04925e-2931-4564-857c-75e0be4a8465",
+          "submissionId": "27779d0c-2c27-4076-bd11-4b6c297a6647",
+          "generation": 1,
+          "language": "TYPESCRIPT",
+          "status": "ACCEPTED",
+          "queueWaitMs": 11487,
+          "claimMs": 4.420892000000094,
+          "judgeMs": 46.05467300000055,
+          "reportMs": 6.98657699999967,
+          "totalMs": 57.50111499999912,
+          "processCpuUserUs": 393539,
+          "processCpuSystemUs": 62926,
+          "processRssBytes": 105709568,
+          "processPeakRssKiB": 110372
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "bf04925e-2931-4564-857c-75e0be4a8465",
+          "submissionId": "a9d920ac-0746-4113-b4b5-08228ce570ed",
+          "generation": 1,
+          "language": "PYTHON",
+          "status": "ACCEPTED",
+          "queueWaitMs": 11542,
+          "claimMs": 3.9272889999992913,
+          "judgeMs": 17.960345999999845,
+          "reportMs": 12.354122000000643,
+          "totalMs": 34.27951800000119,
+          "processCpuUserUs": 428146,
+          "processCpuSystemUs": 64171,
+          "processRssBytes": 105840640,
+          "processPeakRssKiB": 110372
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "bf04925e-2931-4564-857c-75e0be4a8465",
+          "submissionId": "4afdbacb-b95d-42a2-b872-499e99a9b208",
+          "generation": 1,
+          "language": "RUST",
+          "status": "ACCEPTED",
+          "queueWaitMs": 11577,
+          "claimMs": 4.620173999999679,
+          "judgeMs": 374.9203070000003,
+          "reportMs": 7.385301999998774,
+          "totalMs": 386.95015799999965,
+          "processCpuUserUs": 440542,
+          "processCpuSystemUs": 64371,
+          "processRssBytes": 105840640,
+          "processPeakRssKiB": 110372
+        }
+      ]
+    },
+    {
+      "workers": 2,
+      "concurrencyPerWorker": 1,
+      "submissions": 8,
+      "elapsedMs": 11128.180138,
+      "jobsPerSecond": 0.71889562361432,
+      "apiSubmissionMs": {
+        "p50": 54.85642299999927,
+        "p95": 63.98985400000129,
+        "p99": 63.98985400000129,
+        "min": 25.482605000001058,
+        "max": 63.98985400000129
+      },
+      "queueWaitMs": {
+        "p50": 636,
+        "p95": 1258,
+        "p99": 1258,
+        "min": 2,
+        "max": 1258
+      },
+      "workerCpuMs": 150,
+      "workerCpuCores": 0.0134792929427685,
+      "workerPeakRssKiB": [
+        110292,
+        110252
+      ],
+      "workerCpuSamples": {
+        "clockTicks": 100,
+        "before": [
+          {
+            "cpuTicks": 35,
+            "peakRssKiB": 110292
+          },
+          {
+            "cpuTicks": 34,
+            "peakRssKiB": 110252
+          }
+        ],
+        "after": [
+          {
+            "cpuTicks": 37,
+            "peakRssKiB": 110292
+          },
+          {
+            "cpuTicks": 47,
+            "peakRssKiB": 110252
+          }
+        ]
+      },
+      "acknowledgedWorkerMs": {
+        "p50": 133.110414,
+        "p95": 9793.624844,
+        "p99": 9793.624844,
+        "min": 39.58242899999982,
+        "max": 9793.624844
+      },
+      "measurements": [
+        {
+          "event": "judge_completed",
+          "workerId": "cd7f54c7-79d9-4ce9-827d-980c2893ef3d",
+          "submissionId": "b5f629ae-0d71-40d0-b48c-346389b073f5",
+          "generation": 1,
+          "language": "JAVA",
+          "status": "ACCEPTED",
+          "queueWaitMs": 2,
+          "claimMs": 20.68411500000002,
+          "judgeMs": 1565.662204,
+          "reportMs": 7.229460999999901,
+          "totalMs": 1593.612458,
+          "processCpuUserUs": 307740,
+          "processCpuSystemUs": 62743,
+          "processRssBytes": 101892096,
+          "processPeakRssKiB": 110292
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "4746c2da-764d-467e-81e6-af78f3a30dbd",
+          "submissionId": "f4ffa0a0-5711-428d-a15e-604fccf1e351",
+          "generation": 1,
+          "language": "CPP",
+          "status": "ACCEPTED",
+          "queueWaitMs": 2,
+          "claimMs": 12.434883000000013,
+          "judgeMs": 504.40456500000005,
+          "reportMs": 9.870327000000088,
+          "totalMs": 526.7511309999999,
+          "processCpuUserUs": 310320,
+          "processCpuSystemUs": 59108,
+          "processRssBytes": 101818368,
+          "processPeakRssKiB": 110252
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "4746c2da-764d-467e-81e6-af78f3a30dbd",
+          "submissionId": "e0474106-e459-46f4-a2e8-476419915d03",
+          "generation": 1,
+          "language": "C",
+          "status": "ACCEPTED",
+          "queueWaitMs": 528,
+          "claimMs": 6.1319200000000365,
+          "judgeMs": 111.50364300000001,
+          "reportMs": 15.442982000000029,
+          "totalMs": 133.110414,
+          "processCpuUserUs": 324622,
+          "processCpuSystemUs": 61549,
+          "processRssBytes": 102473728,
+          "processPeakRssKiB": 110252
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "4746c2da-764d-467e-81e6-af78f3a30dbd",
+          "submissionId": "6701d8f8-fb6e-417d-9a78-323eee9e9108",
+          "generation": 1,
+          "language": "RUST",
+          "status": "ACCEPTED",
+          "queueWaitMs": 636,
+          "claimMs": 6.9629019999999855,
+          "judgeMs": 439.45891800000004,
+          "reportMs": 7.973361000000068,
+          "totalMs": 454.43450400000006,
+          "processCpuUserUs": 339097,
+          "processCpuSystemUs": 65211,
+          "processRssBytes": 103260160,
+          "processPeakRssKiB": 110252
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "4746c2da-764d-467e-81e6-af78f3a30dbd",
+          "submissionId": "da777d30-b40b-427d-a2a6-d5b5e203c759",
+          "generation": 1,
+          "language": "PYTHON",
+          "status": "ACCEPTED",
+          "queueWaitMs": 1086,
+          "claimMs": 4.325053000000025,
+          "judgeMs": 26.06418500000018,
+          "reportMs": 9.159697999999935,
+          "totalMs": 39.58242899999982,
+          "processCpuUserUs": 348935,
+          "processCpuSystemUs": 67408,
+          "processRssBytes": 104046592,
+          "processPeakRssKiB": 110252
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "4746c2da-764d-467e-81e6-af78f3a30dbd",
+          "submissionId": "d49e1332-d555-4100-a159-ce5fa941caf1",
+          "generation": 1,
+          "language": "TYPESCRIPT",
+          "status": "ACCEPTED",
+          "queueWaitMs": 1125,
+          "claimMs": 6.123434000000088,
+          "judgeMs": 55.19964700000014,
+          "reportMs": 8.090419999999995,
+          "totalMs": 69.44118200000003,
+          "processCpuUserUs": 362201,
+          "processCpuSystemUs": 67850,
+          "processRssBytes": 104701952,
+          "processPeakRssKiB": 110252
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "4746c2da-764d-467e-81e6-af78f3a30dbd",
+          "submissionId": "d354024d-dd93-467c-8a5d-d55c5e80c55a",
+          "generation": 1,
+          "language": "JAVASCRIPT",
+          "status": "ACCEPTED",
+          "queueWaitMs": 1195,
+          "claimMs": 5.839129999999841,
+          "judgeMs": 47.809171000000106,
+          "reportMs": 10.509231,
+          "totalMs": 64.22492899999997,
+          "processCpuUserUs": 377855,
+          "processCpuSystemUs": 67974,
+          "processRssBytes": 105095168,
+          "processPeakRssKiB": 110252
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "4746c2da-764d-467e-81e6-af78f3a30dbd",
+          "submissionId": "f9170130-7949-42c8-91ac-631b47e73130",
+          "generation": 1,
+          "language": "GO",
+          "status": "ACCEPTED",
+          "queueWaitMs": 1258,
+          "claimMs": 5.531719000000066,
+          "judgeMs": 9779.40315,
+          "reportMs": 8.644027999998798,
+          "totalMs": 9793.624844,
+          "processCpuUserUs": 398965,
+          "processCpuSystemUs": 71172,
+          "processRssBytes": 105488384,
+          "processPeakRssKiB": 110252
+        }
+      ]
+    },
+    {
+      "workers": 2,
+      "concurrencyPerWorker": 1,
+      "submissions": 8,
+      "elapsedMs": 10426.262055000007,
+      "jobsPerSecond": 0.767293202280824,
+      "apiSubmissionMs": {
+        "p50": 54.902751000001444,
+        "p95": 70.19965299999603,
+        "p99": 70.19965299999603,
+        "min": 24.35640499999863,
+        "max": 70.19965299999603
+      },
+      "queueWaitMs": {
+        "p50": 440,
+        "p95": 2015,
+        "p99": 2015,
+        "min": 2,
+        "max": 2015
+      },
+      "workerCpuMs": 140,
+      "workerCpuCores": 0.01342763103991442,
+      "workerPeakRssKiB": [
+        110552,
+        110376
+      ],
+      "workerCpuSamples": {
+        "clockTicks": 100,
+        "before": [
+          {
+            "cpuTicks": 34,
+            "peakRssKiB": 110552
+          },
+          {
+            "cpuTicks": 35,
+            "peakRssKiB": 110376
+          }
+        ],
+        "after": [
+          {
+            "cpuTicks": 43,
+            "peakRssKiB": 110552
+          },
+          {
+            "cpuTicks": 40,
+            "peakRssKiB": 110376
+          }
+        ]
+      },
+      "acknowledgedWorkerMs": {
+        "p50": 97.47153000000003,
+        "p95": 9852.374056999999,
+        "p99": 9852.374056999999,
+        "min": 29.818362999999863,
+        "max": 9852.374056999999
+      },
+      "measurements": [
+        {
+          "event": "judge_completed",
+          "workerId": "efaad78e-6d1a-40dd-b842-a831c1f7f8c6",
+          "submissionId": "dece4e4f-b300-4507-bb66-ffbcbda99523",
+          "generation": 1,
+          "language": "C",
+          "status": "ACCEPTED",
+          "queueWaitMs": 2,
+          "claimMs": 16.193206000000032,
+          "judgeMs": 71.45555200000001,
+          "reportMs": 9.784280999999964,
+          "totalMs": 97.47153000000003,
+          "processCpuUserUs": 287972,
+          "processCpuSystemUs": 76257,
+          "processRssBytes": 101990400,
+          "processPeakRssKiB": 110552
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "efaad78e-6d1a-40dd-b842-a831c1f7f8c6",
+          "submissionId": "91e11a93-cc1e-4a27-8ee7-890a1ac24f44",
+          "generation": 1,
+          "language": "RUST",
+          "status": "ACCEPTED",
+          "queueWaitMs": 71,
+          "claimMs": 4.67200200000002,
+          "judgeMs": 398.69117300000005,
+          "reportMs": 9.42763500000001,
+          "totalMs": 412.81652900000006,
+          "processCpuUserUs": 299032,
+          "processCpuSystemUs": 79540,
+          "processRssBytes": 102776832,
+          "processPeakRssKiB": 110552
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "efaad78e-6d1a-40dd-b842-a831c1f7f8c6",
+          "submissionId": "932d35d4-37f9-4f19-b223-45135aa36257",
+          "generation": 1,
+          "language": "JAVASCRIPT",
+          "status": "ACCEPTED",
+          "queueWaitMs": 478,
+          "claimMs": 4.777145000000019,
+          "judgeMs": 39.69735800000012,
+          "reportMs": 14.59583100000009,
+          "totalMs": 59.10140300000012,
+          "processCpuUserUs": 309193,
+          "processCpuSystemUs": 80049,
+          "processRssBytes": 103301120,
+          "processPeakRssKiB": 110552
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "efaad78e-6d1a-40dd-b842-a831c1f7f8c6",
+          "submissionId": "36ebf740-2673-4f90-9606-3c60aac32141",
+          "generation": 1,
+          "language": "JAVA",
+          "status": "ACCEPTED",
+          "queueWaitMs": 533,
+          "claimMs": 11.184129999999868,
+          "judgeMs": 1458.499708,
+          "reportMs": 14.67901699999993,
+          "totalMs": 1484.4008460000002,
+          "processCpuUserUs": 323229,
+          "processCpuSystemUs": 86720,
+          "processRssBytes": 104087552,
+          "processPeakRssKiB": 110552
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "efaad78e-6d1a-40dd-b842-a831c1f7f8c6",
+          "submissionId": "7939d180-3283-4f69-bef2-12be24a2c8be",
+          "generation": 1,
+          "language": "PYTHON",
+          "status": "ACCEPTED",
+          "queueWaitMs": 2015,
+          "claimMs": 4.766857000000073,
+          "judgeMs": 18.23817599999984,
+          "reportMs": 6.786349999999857,
+          "totalMs": 29.818362999999863,
+          "processCpuUserUs": 329649,
+          "processCpuSystemUs": 88562,
+          "processRssBytes": 104873984,
+          "processPeakRssKiB": 110552
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "2a4ca1ac-9cbd-4119-8858-8ae6f33b12fc",
+          "submissionId": "d1a5a40c-3196-4cbc-8a90-1ba7ddb62cf8",
+          "generation": 1,
+          "language": "CPP",
+          "status": "ACCEPTED",
+          "queueWaitMs": 2,
+          "claimMs": 9.761767000000077,
+          "judgeMs": 450.6764640000001,
+          "reportMs": 7.58783799999992,
+          "totalMs": 468.0573160000001,
+          "processCpuUserUs": 301219,
+          "processCpuSystemUs": 70816,
+          "processRssBytes": 101834752,
+          "processPeakRssKiB": 110376
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "2a4ca1ac-9cbd-4119-8858-8ae6f33b12fc",
+          "submissionId": "23b73fa5-7e64-4eeb-ad83-7371f4cf7a13",
+          "generation": 1,
+          "language": "TYPESCRIPT",
+          "status": "ACCEPTED",
+          "queueWaitMs": 440,
+          "claimMs": 5.198362999999972,
+          "judgeMs": 60.11699700000008,
+          "reportMs": 8.270733000000064,
+          "totalMs": 73.61871399999995,
+          "processCpuUserUs": 310285,
+          "processCpuSystemUs": 75340,
+          "processRssBytes": 102490112,
+          "processPeakRssKiB": 110376
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "2a4ca1ac-9cbd-4119-8858-8ae6f33b12fc",
+          "submissionId": "06a6ea48-1a97-4567-bc1a-95d6d9a7c3ea",
+          "generation": 1,
+          "language": "GO",
+          "status": "ACCEPTED",
+          "queueWaitMs": 505,
+          "claimMs": 5.298119000000042,
+          "judgeMs": 9839.540904000001,
+          "reportMs": 7.506310000000667,
+          "totalMs": 9852.374056999999,
+          "processCpuUserUs": 335926,
+          "processCpuSystemUs": 79274,
+          "processRssBytes": 103800832,
+          "processPeakRssKiB": 110376
+        }
+      ]
+    },
+    {
+      "workers": 1,
+      "concurrencyPerWorker": 1,
+      "submissions": 8,
+      "elapsedMs": 12219.02339300001,
+      "jobsPerSecond": 0.6547168085939675,
+      "apiSubmissionMs": {
+        "p50": 53.224173999988125,
+        "p95": 60.57833699999901,
+        "p99": 60.57833699999901,
+        "min": 23.84217400000489,
+        "max": 60.57833699999901
+      },
+      "queueWaitMs": {
+        "p50": 500,
+        "p95": 11693,
+        "p99": 11693,
+        "min": 2,
+        "max": 11693
+      },
+      "workerCpuMs": 150,
+      "workerCpuCores": 0.012275940161136891,
+      "workerPeakRssKiB": [
+        110784
+      ],
+      "workerCpuSamples": {
+        "clockTicks": 100,
+        "before": [
+          {
+            "cpuTicks": 36,
+            "peakRssKiB": 110784
+          }
+        ],
+        "after": [
+          {
+            "cpuTicks": 51,
+            "peakRssKiB": 110784
+          }
+        ]
+      },
+      "acknowledgedWorkerMs": {
+        "p50": 87.07739400000003,
+        "p95": 9706.872738,
+        "p99": 9706.872738,
+        "min": 29.406428000000005,
+        "max": 9706.872738
+      },
+      "measurements": [
+        {
+          "event": "judge_completed",
+          "workerId": "7514fdd2-57cb-4c36-813a-8382c400156d",
+          "submissionId": "f4ceb7dc-0da4-47c5-880d-f74aa86c8664",
+          "generation": 1,
+          "language": "C",
+          "status": "ACCEPTED",
+          "queueWaitMs": 2,
+          "claimMs": 19.391880000000015,
+          "judgeMs": 59.27107699999999,
+          "reportMs": 8.377306999999973,
+          "totalMs": 87.07739400000003,
+          "processCpuUserUs": 319045,
+          "processCpuSystemUs": 64616,
+          "processRssBytes": 102096896,
+          "processPeakRssKiB": 110784
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "7514fdd2-57cb-4c36-813a-8382c400156d",
+          "submissionId": "38eb50a5-793c-4e7e-911e-51a6dc06cc7d",
+          "generation": 1,
+          "language": "PYTHON",
+          "status": "ACCEPTED",
+          "queueWaitMs": 68,
+          "claimMs": 3.667320000000018,
+          "judgeMs": 19.138156000000095,
+          "reportMs": 6.572298000000046,
+          "totalMs": 29.406428000000005,
+          "processCpuUserUs": 322366,
+          "processCpuSystemUs": 68933,
+          "processRssBytes": 102490112,
+          "processPeakRssKiB": 110784
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "7514fdd2-57cb-4c36-813a-8382c400156d",
+          "submissionId": "5829ae2c-62e5-4d84-9a5d-fac6601fe9a6",
+          "generation": 1,
+          "language": "CPP",
+          "status": "ACCEPTED",
+          "queueWaitMs": 96,
+          "claimMs": 3.8448119999999335,
+          "judgeMs": 397.2189790000001,
+          "reportMs": 7.498034999999845,
+          "totalMs": 408.587984,
+          "processCpuUserUs": 331176,
+          "processCpuSystemUs": 73932,
+          "processRssBytes": 103276544,
+          "processPeakRssKiB": 110784
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "7514fdd2-57cb-4c36-813a-8382c400156d",
+          "submissionId": "cc3ae594-6d18-4858-b831-2020e170839e",
+          "generation": 1,
+          "language": "JAVA",
+          "status": "ACCEPTED",
+          "queueWaitMs": 500,
+          "claimMs": 4.9722170000000006,
+          "judgeMs": 1374.419817,
+          "reportMs": 8.349235000000135,
+          "totalMs": 1387.7706729999998,
+          "processCpuUserUs": 346594,
+          "processCpuSystemUs": 76230,
+          "processRssBytes": 104325120,
+          "processPeakRssKiB": 110784
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "7514fdd2-57cb-4c36-813a-8382c400156d",
+          "submissionId": "e8e0e420-11f7-45c5-996b-fe4377701e57",
+          "generation": 1,
+          "language": "GO",
+          "status": "ACCEPTED",
+          "queueWaitMs": 1888,
+          "claimMs": 4.561199000000215,
+          "judgeMs": 9694.718840000001,
+          "reportMs": 7.561051000000589,
+          "totalMs": 9706.872738,
+          "processCpuUserUs": 374965,
+          "processCpuSystemUs": 78886,
+          "processRssBytes": 105504768,
+          "processPeakRssKiB": 110784
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "7514fdd2-57cb-4c36-813a-8382c400156d",
+          "submissionId": "23adc2bf-f37f-483f-809a-846f4b1a9b41",
+          "generation": 1,
+          "language": "JAVASCRIPT",
+          "status": "ACCEPTED",
+          "queueWaitMs": 11595,
+          "claimMs": 4.519938999999795,
+          "judgeMs": 36.68472699999984,
+          "reportMs": 6.5207530000006955,
+          "totalMs": 47.77300800000012,
+          "processCpuUserUs": 382686,
+          "processCpuSystemUs": 81269,
+          "processRssBytes": 105635840,
+          "processPeakRssKiB": 110784
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "7514fdd2-57cb-4c36-813a-8382c400156d",
+          "submissionId": "eb7a66ca-2a81-49d1-956a-b2c98c35a339",
+          "generation": 1,
+          "language": "TYPESCRIPT",
+          "status": "ACCEPTED",
+          "queueWaitMs": 11639,
+          "claimMs": 3.6850259999991977,
+          "judgeMs": 46.68736400000125,
+          "reportMs": 6.036315999999715,
+          "totalMs": 56.444202999999106,
+          "processCpuUserUs": 392202,
+          "processCpuSystemUs": 81277,
+          "processRssBytes": 105635840,
+          "processPeakRssKiB": 110784
+        },
+        {
+          "event": "judge_completed",
+          "workerId": "7514fdd2-57cb-4c36-813a-8382c400156d",
+          "submissionId": "5afeb090-d4df-4a04-98b1-675171e37473",
+          "generation": 1,
+          "language": "RUST",
+          "status": "ACCEPTED",
+          "queueWaitMs": 11693,
+          "claimMs": 5.0282420000003185,
+          "judgeMs": 379.9277689999999,
+          "reportMs": 6.449248999999327,
+          "totalMs": 391.444234999999,
+          "processCpuUserUs": 432407,
+          "processCpuSystemUs": 83854,
+          "processRssBytes": 106029056,
+          "processPeakRssKiB": 110784
+        }
+      ]
+    }
+  ],
+  "recovery": [
+    {
+      "scenario": "worker Redis TCP interruption/reconnect and duplicate delivery",
+      "elapsedMs": 2438.473966999998,
+      "rejectedConnections": 16,
+      "result": "ACCEPTED",
+      "generation": 1
+    },
+    {
+      "scenario": "worker API TCP interruption and result retry",
+      "elapsedMs": 3025.487156000003,
+      "rejectedConnections": 1,
+      "result": "ACCEPTED",
+      "generation": 1,
+      "reportMs": 1011.6861359999998
+    },
+    {
+      "scenario": "two-worker duplicate delivery during active lease",
+      "result": "ACCEPTED",
+      "generation": 1,
+      "executions": 1
+    },
+    {
+      "scenario": "SIGKILL and natural database lease expiry",
+      "recoveredMs": 77424.17723099998,
+      "completedMs": 79718.72374399999,
+      "result": "ACCEPTED",
+      "generation": 2,
+      "recoveries": 1,
+      "staleCallback": 409
+    }
+  ]
+}

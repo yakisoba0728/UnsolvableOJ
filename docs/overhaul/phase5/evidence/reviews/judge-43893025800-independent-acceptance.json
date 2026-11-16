@@ -1,0 +1,787 @@
+{
+  "schemaVersion": 1,
+  "kind": "phase5-independent-actual-ci-acceptance",
+  "reviewer": "/root/security",
+  "observedAt": "2026-11-16T15:29:52.117459+00:00",
+  "verdict": "ACCEPT_SCOPED_PR90_ACTUAL_CI",
+  "repository": "yakisoba0728/UnsolvableOJ",
+  "pullRequest": 90,
+  "source": {
+    "head": "1583ee1c5f30310b37c02d30d53fb9226f776f19",
+    "base": "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+    "checkout": "af29ece67e20e06b0cce453434b482cc5215d4f6",
+    "tree": "8a5843db4feba7ba619159731f62d4d824369520",
+    "checkoutParents": [
+      "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+      "1583ee1c5f30310b37c02d30d53fb9226f776f19"
+    ],
+    "runId": 43893025800,
+    "runAttempt": 1,
+    "sourceAndCheckoutTreesEqual": true
+  },
+  "authority": "Independent evidence acceptance for the specified immutable source and run. Coordinator retains merge authority. No source changes, reruns, benchmarks, additional native executions or production actions were performed.",
+  "requiredJobs": [
+    {
+      "id": 133389000820,
+      "name": "Detect changes",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133389001403,
+      "name": "Dependency audit",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133389001408,
+      "name": "Docker image (judge)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133389001464,
+      "name": "Docker image (runtime)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133389001573,
+      "name": "Docker image (back)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133389001629,
+      "name": "Docker image (front)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133389104520,
+      "name": "Backend and API",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133389104547,
+      "name": "Browser tests (2/2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133389104616,
+      "name": "Sandbox, pipeline and Compose",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133389104704,
+      "name": "Browser tests (1/2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133389105221,
+      "name": "Judge worker",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133400012095,
+      "name": "CI required",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "artifactBindings": [
+    {
+      "id": 14239165466,
+      "name": "phase5-verdict-matrix-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+      "zipPath": "native.zip",
+      "zipSha256": "ee20097c8e16054d020c001c90e2d90687020310aaf0755876d248f04375d123",
+      "expiresAt": "2026-12-16T15:13:32Z",
+      "files": {
+        "phase5-verdict-matrix.json": "f3749ed4d30109ec60cab0e77dd349ce5395484bb471c86a840025054088aaba"
+      }
+    },
+    {
+      "id": 14239281138,
+      "name": "phase5-vibe-pipeline-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+      "zipPath": "vibe.zip",
+      "zipSha256": "372e71e189a2856a9736b202bb54d158b5667ec3bea0b6b32568d8e24f5c3424",
+      "expiresAt": "2026-12-16T15:21:15Z",
+      "files": {
+        "phase5-vibe-dedicated.json": "f84fae1c0d507be6f04fa4e5410b486773b39e9f90cf64873aed77f606ef16da"
+      }
+    },
+    {
+      "id": 14238019102,
+      "name": "phase5-vibe-browser-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+      "zipPath": "browser.zip",
+      "zipSha256": "fc661ef4110307d4f904c4cee2225aa930dc35fcd8397db73340db1933159748",
+      "expiresAt": "2026-12-16T15:24:47Z",
+      "files": {
+        "phase5-vibe-browser.json": "5be590125d64c1ffac9a8a1f9e8801b3e0a6891344af033082da92ca4b104ef3",
+        "phase5-vibe-browser.png": "85aea1cd4d83657eaa9ffa09dacb024c87a8e76ba53f7b4d7c21d9b418765cf1",
+        "phase5-vibe-compose.json": "ca4969e982354d710b558f65f4db97e96da33eaf26d69037c8bac541657be34c"
+      }
+    },
+    {
+      "id": 14237537622,
+      "name": "image-audit-runtime-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+      "zipPath": "runtime.zip",
+      "zipSha256": "05870c8b6d40dc8fe7afc803779a8eadca473a42716db76735fff41b9051305b",
+      "expiresAt": "2026-12-16T15:12:39Z",
+      "files": {
+        "runtime/trivy.json": "06d63d68546652155110b3b0b6bb472aa0643264d484ce53b8ca30dd20b2ab4b",
+        "runtime/manifest.json": "c5bce15d63640e9061a99c5082df12c918dca9caf350a446a04e25e4215fe359",
+        "runtime/gate.json": "f58d3c6380932854b04ddcac2154320715479260c8d16b4ef02d1324ee0c00d3",
+        "runtime/payload-verification.json": "6d516650f555a64962ff1d56d6b08646c9b6bb6807e20ed8c176eec6e547ba39",
+        "runtime/applicability-evaluation.json": "c6f4fce8157c2a2a723c7f4b268fe45c868448f8799d54a95786e5ba59c479ee"
+      }
+    },
+    {
+      "id": 14238306046,
+      "name": "image-audit-front-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+      "zipPath": "front.zip",
+      "zipSha256": "2d1b256495b276512d54cd2fe0d3fb4eb2e152f7a059f7fa199207b657896956",
+      "expiresAt": "2026-12-16T15:09:07Z",
+      "files": {
+        "front/trivy.json": "9d07fe211882eba607a2b6748816a86b44e657f76ec5686325ccfe2e5b90501a",
+        "front/manifest.json": "07573a168e9704dddb8a22e87f7d9ff387668413579021054558677529d0689d",
+        "front/gate.json": "24d659061fc409035c0b60d7ef3faf05fe06497101109566814d6d16d337cfb2"
+      }
+    },
+    {
+      "id": 14237841672,
+      "name": "image-audit-judge-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+      "zipPath": "judge.zip",
+      "zipSha256": "51a094741578ecedf9f19887cae06c4d95be296baf5b3850204bdd638e04dd7f",
+      "expiresAt": "2026-12-16T15:08:29Z",
+      "files": {
+        "judge/trivy.json": "1c5157f15005408723b7753400487257461bd74fddda1faa8845c25867e3e937",
+        "judge/manifest.json": "94a7596d653ddea1db67c1a7237e60da2a757594c377f9a59663a8f7f03b4f6c",
+        "judge/gate.json": "9e01450f507a0d5138ebafdafb3b3d34615afaadb439af03e7123a7a1fcc376c"
+      }
+    },
+    {
+      "id": 14236974421,
+      "name": "image-audit-back-af29ece67e20e06b0cce453434b482cc5215d4f6-1",
+      "zipPath": "back.zip",
+      "zipSha256": "d95609fadf504c9578bed91296a66ef5009420f2b454fd7a5645e007d1480b4e",
+      "expiresAt": "2026-12-16T15:09:03Z",
+      "files": {
+        "back/trivy.json": "ea662f1e36445d8e16b8e15584f47618b26177cea3e4c20fb6d8f2d258a0546a",
+        "back/manifest.json": "b579bd29c6cf8d28da8b063df95b58df3bf0fb07debdd9aef369f78fa431f7f4",
+        "back/gate.json": "091f394b6d3cc35558707c438204721d7f2531bbffc2853913948524ac481133"
+      }
+    }
+  ],
+  "priorIndependentSourceReviewsCarriedForward": [
+    {
+      "priorReviewedCommit": "4fbb5156e2d94a2148b49cdb42ae10ea54ffedf3",
+      "unchangedFiles": {
+        "Judge/src/runtime.test.ts": "480a7afe1b2b63bd6e6214e8b8b797216c8fd575b2d385a647c566b79781ed46",
+        "Judge/runtime/memory-sources.json": "cd37a24f944921615a673473d574d0d9cc2b312df895fca79fe12d6fa01edd09",
+        "Back/test/vibe-dedicated.pipeline-spec.ts": "8448398ac962bdf0ef2ceb6736a83fc394bf4689c670a0ca7134ee3fa032f0f8",
+        "Back/test/phase5-vibe-gateway.pipeline-helpers.ts": "45b4f2a6bc16f2939bac45a8c1ee6ec375dad9ba4f77cdd8d5967813a64ce5fa"
+      }
+    },
+    {
+      "priorReviewedCommit": "9535fbc36456929382f9f12a729e15a6ae2b82ac",
+      "unchangedFiles": {
+        "Front/tests-live/vibe-flow.spec.ts": "fb330fe8a6546d74b99d7cffeebb421cfed25f55b07f6f9d40d788e490d8f890",
+        "scripts/check-compose.mjs": "6f1490c84491296d312ea04270c11a20604db9e0667fa2e18eb59f4f67f8dd17",
+        "scripts/compose-vibe-gateway.mjs": "9e274ac77ad10b390d6dc99b20a3bf4bca112b0f3bf7bb47ed7498ff54067e60",
+        "scripts/compose-vibe-gateway.test.mjs": "b9a9a92ae8f0df440afbfbd13408ccd072dcbb50d710723db8288e2e88ddbcf0"
+      }
+    },
+    {
+      "priorReviewedCommit": "b0c5b59e10fe1e8f290d141894cce987facec491",
+      "unchangedFiles": {
+        ".github/workflows/ci.yml": "199dd1bc58b20b95dc7a90b9a5d92eba310d14209637e45b2320914a5536787b",
+        "scripts/ci-policy.test.mjs": "8521f96a4d5680742ecf59ebd1e1cf6b3094ca69491677f2d89ef306a2c23ed3"
+      }
+    }
+  ],
+  "nativeMatrix": {
+    "status": "PASS",
+    "testsInActualJob": 90,
+    "passedInActualJob": 90,
+    "failed": 0,
+    "skipped": 0,
+    "distinctRows": 72,
+    "languages": [
+      "C",
+      "CPP",
+      "JAVA",
+      "PYTHON",
+      "JAVASCRIPT",
+      "TYPESCRIPT",
+      "GO",
+      "RUST"
+    ],
+    "scenarios": [
+      "AC",
+      "WA",
+      "RE",
+      "TLE",
+      "OLE",
+      "syntax",
+      "UTF8",
+      "memory-under",
+      "memory-over"
+    ],
+    "allRowSourceHashesRecomputed": true,
+    "allLimitsHeapFlagsStatusesChecked": true,
+    "limits": {
+      "suiteTimeoutMs": 600000,
+      "sequential": true,
+      "matrixCases": 72,
+      "memoryProbeLimitMiB": 128,
+      "memoryAllocationsMiB": [
+        8,
+        192
+      ],
+      "memoryProbeTimeLimitMs": 5000,
+      "compileLimitMiB": 1024,
+      "compileTimeLimitMs": 30000,
+      "stdoutAndStderrLimitBytes": 1000000
+    },
+    "elapsedMs": 104271.980268,
+    "statusCounts": {
+      "ACCEPTED": 24,
+      "WRONG_ANSWER": 8,
+      "RUNTIME_ERROR": 11,
+      "TIME_LIMIT_EXCEEDED": 8,
+      "OUTPUT_LIMIT_EXCEEDED": 8,
+      "COMPILE_ERROR": 6,
+      "MEMORY_LIMIT_EXCEEDED": 7
+    },
+    "memoryOver": [
+      {
+        "language": "C",
+        "scenario": "memory-over",
+        "memoryLimitMiB": 128,
+        "configuredHeapFlag": null,
+        "result": {
+          "status": "MEMORY_LIMIT_EXCEEDED",
+          "runtimeMs": 77,
+          "memoryKb": 131088,
+          "passedTestCases": 0,
+          "totalTestCases": 1,
+          "testResults": [
+            {
+              "testCase": 1,
+              "isSample": true,
+              "status": "MEMORY_LIMIT_EXCEEDED",
+              "runtimeMs": 77,
+              "memoryKb": 131088
+            }
+          ]
+        }
+      },
+      {
+        "language": "CPP",
+        "scenario": "memory-over",
+        "memoryLimitMiB": 128,
+        "configuredHeapFlag": null,
+        "result": {
+          "status": "MEMORY_LIMIT_EXCEEDED",
+          "runtimeMs": 88,
+          "memoryKb": 131088,
+          "passedTestCases": 0,
+          "totalTestCases": 1,
+          "testResults": [
+            {
+              "testCase": 1,
+              "isSample": true,
+              "status": "MEMORY_LIMIT_EXCEEDED",
+              "runtimeMs": 88,
+              "memoryKb": 131088
+            }
+          ]
+        }
+      },
+      {
+        "language": "JAVA",
+        "scenario": "memory-over",
+        "memoryLimitMiB": 128,
+        "configuredHeapFlag": "-Xmx128m",
+        "result": {
+          "status": "RUNTIME_ERROR",
+          "runtimeMs": 76,
+          "memoryKb": 20596,
+          "passedTestCases": 0,
+          "totalTestCases": 1,
+          "testResults": [
+            {
+              "testCase": 1,
+              "isSample": true,
+              "status": "RUNTIME_ERROR",
+              "runtimeMs": 76,
+              "memoryKb": 20596
+            }
+          ]
+        }
+      },
+      {
+        "language": "PYTHON",
+        "scenario": "memory-over",
+        "memoryLimitMiB": 128,
+        "configuredHeapFlag": null,
+        "result": {
+          "status": "MEMORY_LIMIT_EXCEEDED",
+          "runtimeMs": 96,
+          "memoryKb": 131088,
+          "passedTestCases": 0,
+          "totalTestCases": 1,
+          "testResults": [
+            {
+              "testCase": 1,
+              "isSample": true,
+              "status": "MEMORY_LIMIT_EXCEEDED",
+              "runtimeMs": 96,
+              "memoryKb": 131088
+            }
+          ]
+        }
+      },
+      {
+        "language": "JAVASCRIPT",
+        "scenario": "memory-over",
+        "memoryLimitMiB": 128,
+        "configuredHeapFlag": "--max-old-space-size=128",
+        "result": {
+          "status": "MEMORY_LIMIT_EXCEEDED",
+          "runtimeMs": 89,
+          "memoryKb": 131088,
+          "passedTestCases": 0,
+          "totalTestCases": 1,
+          "testResults": [
+            {
+              "testCase": 1,
+              "isSample": true,
+              "status": "MEMORY_LIMIT_EXCEEDED",
+              "runtimeMs": 89,
+              "memoryKb": 131088
+            }
+          ]
+        }
+      },
+      {
+        "language": "TYPESCRIPT",
+        "scenario": "memory-over",
+        "memoryLimitMiB": 128,
+        "configuredHeapFlag": "--max-old-space-size=128",
+        "result": {
+          "status": "MEMORY_LIMIT_EXCEEDED",
+          "runtimeMs": 94,
+          "memoryKb": 131088,
+          "passedTestCases": 0,
+          "totalTestCases": 1,
+          "testResults": [
+            {
+              "testCase": 1,
+              "isSample": true,
+              "status": "MEMORY_LIMIT_EXCEEDED",
+              "runtimeMs": 94,
+              "memoryKb": 131088
+            }
+          ]
+        }
+      },
+      {
+        "language": "GO",
+        "scenario": "memory-over",
+        "memoryLimitMiB": 128,
+        "configuredHeapFlag": null,
+        "result": {
+          "status": "MEMORY_LIMIT_EXCEEDED",
+          "runtimeMs": 78,
+          "memoryKb": 131088,
+          "passedTestCases": 0,
+          "totalTestCases": 1,
+          "testResults": [
+            {
+              "testCase": 1,
+              "isSample": true,
+              "status": "MEMORY_LIMIT_EXCEEDED",
+              "runtimeMs": 78,
+              "memoryKb": 131088
+            }
+          ]
+        }
+      },
+      {
+        "language": "RUST",
+        "scenario": "memory-over",
+        "memoryLimitMiB": 128,
+        "configuredHeapFlag": null,
+        "result": {
+          "status": "MEMORY_LIMIT_EXCEEDED",
+          "runtimeMs": 71,
+          "memoryKb": 131088,
+          "passedTestCases": 0,
+          "totalTestCases": 1,
+          "testResults": [
+            {
+              "testCase": 1,
+              "isSample": true,
+              "status": "MEMORY_LIMIT_EXCEEDED",
+              "runtimeMs": 71,
+              "memoryKb": 131088
+            }
+          ]
+        }
+      }
+    ],
+    "javaInterpretation": "The actual Java over-allocation result is RUNTIME_ERROR. The immutable passing test requires java.lang.OutOfMemoryError: Java heap space in stderr for this branch. The retained row omits stderr; it is not independently relabeled MLE.",
+    "limitations": [
+      "One finite observation per language/scenario; not a threshold search, saturation test or population latency estimate.",
+      "These are actual normalized JudgeResult measurements, not raw go-judge status/signal/cgroup OOM events.",
+      "Python/JavaScript syntax errors are runtime errors; compiled languages reject syntax before execution.",
+      "Memory pressure is MLE only when the engine reports MLE. A proven Java heap allocation failure may remain RE; no RE/signal is relabeled MLE.",
+      "Reported memory is executor-reported peak for a case. Compiler, worker, API, Redis and PostgreSQL resources are separate.",
+      "Dedicated production host/kernel isolation and unobserved memory thresholds remain UNVERIFIED."
+    ]
+  },
+  "dedicatedPipeline": {
+    "status": "PASS",
+    "testFilesInNativePipelineStep": 8,
+    "testsPassedInStep": 35,
+    "assessment": {
+      "publicChecks": 6,
+      "finalPassed": 11,
+      "finalTotal": 11,
+      "evaluationStatus": "unavailable",
+      "persisted": true,
+      "ownershipDenied": true,
+      "artifactDelta": 0
+    },
+    "limits": {
+      "testTimeoutMs": 90000,
+      "gatewayRequests": 128,
+      "gatewayBytesPerDirection": 1048576,
+      "gatewayRequestTimeoutMs": 15000,
+      "providerCalls": 0
+    },
+    "requests": 32,
+    "runPosts": 19,
+    "fileDeletes": 4,
+    "anonymousDenials": 2,
+    "wrongBearerDenials": 1,
+    "allObservedRequestsMutuallyAuthenticated": true,
+    "maxRequestBytes": 3087,
+    "maxResponseBytes": 2088,
+    "gatewayClosed": true,
+    "upstreamFailures": 0,
+    "cleanupFailures": 0,
+    "scope": "Real HTTP API, PostgreSQL persistence, VibeRunner, ephemeral mTLS forwarding gateway and native go-judge. Only the paid evaluator is replaced by an unavailable-provider double.",
+    "elapsedMs": 1783.6699939999999
+  },
+  "browserAndCompose": {
+    "status": "PASS",
+    "actualComposeBrowserTestsPassed": 4,
+    "environment": {
+      "browser": "chromium",
+      "version": "153.0.8010.12"
+    },
+    "protocol": {
+      "admissionWaitMs": 61000.661825,
+      "mainTestTimeoutMs": 90000,
+      "publicRuns": 1,
+      "finalSubmissions": 1,
+      "registrations": 2,
+      "paidProviderCalls": 0,
+      "browserApiMocks": 0
+    },
+    "assessment": {
+      "publicChecks": 6,
+      "passed": 11,
+      "total": 11,
+      "outcome": 40,
+      "evaluationStatus": "unavailable",
+      "challengeVersion": "2e1df0949b196347b2820c72e2c72749011e8406ef658e45009d01f2c8324e18",
+      "persistedReloadEqual": true,
+      "outsiderDenied": true,
+      "sourceRestoredInReadOnlyEditor": true
+    },
+    "fixture": {
+      "mode": "dedicated",
+      "servername": "vibe-executor.internal",
+      "templateSha256": "83293d5f157fefc7f5cbf6a408f3cf89cf73fb1eb247083c76bec30d5b37026b",
+      "serverCertificateFingerprint": "69:00:3D:DA:26:53:7D:E5:A7:3D:6A:C7:92:5C:28:CD:05:F2:19:DE:17:23:A9:8C:49:C3:BC:D8:94:8A:FA:45",
+      "clientCertificateFingerprint": "F3:44:03:8E:73:DD:A3:6C:AA:51:69:12:F5:1F:56:A6:53:9A:FD:38:03:4C:F0:5D:55:5C:C3:CE:DD:AE:3D:96",
+      "certificateLifetimeDays": 1,
+      "serverAndClientCertificateRequired": true,
+      "applicationSandboxNetwork": false,
+      "newPrivilegedExecutors": 0,
+      "providerConfigured": false,
+      "testOnlySharedNativeExecutor": true
+    },
+    "imageId": "sha256:9bc70712e5c819120751103dfa8305a4e42277a6f5464888c52903586be1bef5",
+    "probes": {
+      "positive": {
+        "status": 200,
+        "elapsedMs": 33.992405000000005
+      },
+      "noClient": {
+        "status": 400,
+        "elapsedMs": 6.640796999999992
+      },
+      "wrongBearer": {
+        "status": 401,
+        "elapsedMs": 2.3290310000000005
+      },
+      "anonymous": {
+        "status": 401,
+        "elapsedMs": 0.9755789999999962
+      },
+      "wrongHostname": {
+        "errorCode": "ERR_TLS_CERT_ALTNAME_INVALID",
+        "elapsedMs": 6.592196999999999
+      },
+      "disallowed": {
+        "status": 404,
+        "elapsedMs": 1.0162849999999963
+      },
+      "query": {
+        "status": 400,
+        "elapsedMs": 0.6901770000000056
+      },
+      "requests": 7,
+      "perRequestTimeoutMs": 4000
+    },
+    "publicRunElapsedMs": 405.35356299999694,
+    "finalSubmitElapsedMs": 831.0853870000064,
+    "elapsedMainTestMs": 4606.638216000007,
+    "pageErrorCount": 0,
+    "finalCleanup": true,
+    "screenshotInspected": true,
+    "screenshotObservation": "Shows final 11/11 functional checks, 40/40 outcome, and both process-evaluation fields unavailable. The navigation includes an owned synthetic display username; no account database identifier, password, bearer token, key or submitted source is visible.",
+    "nestedPreflightExplanation": "The browser report embeds the earlier PREFLIGHT_PASS snapshot with cleanup false. Final phase5-vibe-compose.json and successful teardown logs independently record cleanup true.",
+    "sameTemplateBytesAsSource": true,
+    "limitations": [
+      "Owned same-host disposable Compose fixture; no production host, firewall, certificate rotation or provider-quality certification.",
+      "Existing algorithm native sandbox is reused sequentially; its token is a synthetic shared fixture capability, not a recommended production credential arrangement.",
+      "No long-duration editor-memory or field INP result is collected; the finite deadline is reserved for the real end-to-end chain."
+    ]
+  },
+  "imageGates": [
+    {
+      "component": "back",
+      "gate": "PASS_RAW_SCAN",
+      "rawScannerExitCode": 0,
+      "rawCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "installedOsPackages": 19,
+      "installedLibraryPackages": 230,
+      "image": {
+        "manifestDigest": "sha256:3d276e1fcaddb20cbbd254d89785f02e819ba4083d4ab9bc7a0dcfe8111354b4",
+        "configDigest": "sha256:79fa2c99e5d19a596af707848b55355d8b2b51efa1bb16eb99031f7438c457ca",
+        "indexDigest": "sha256:054a18664778e783919a55e6a02ae61b3d203ca85427d243e7c624a53c468cfb",
+        "buildDigest": "sha256:c3516236d9a009aae9d9e6deba887afe7ebc769542588703818cab63239f050d",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17",
+          "sha256:b72829bc75b7701104d057fde78fe0aef6dc0c3eaf2423e7249e8a14c37ead57",
+          "sha256:89a151fddb377af33d0dda6a24f40061bbde4b159f82c349fe01208baba8a84f",
+          "sha256:60ef5f57e09d3f24d91cfd5547a102a028a7bd629f03e79409f53a202cf9df54",
+          "sha256:97b64ceb74b7cc85b28a10c95e9e759a83a761e4cf25f4ede602b07328349f72",
+          "sha256:707488958c80689d23e22a27c3ccba57d1e6d94a3d34f038df7b6156631dd422",
+          "sha256:bee181346b3a36d985180cb9fa20d5c4a92a76f1bae7dbe55878f91566ac6db3",
+          "sha256:761f4b4b04213f8bc664b0e28d6df146624f7948d8dbddac07813f621cfad50f",
+          "sha256:857f39bcac4f014d3b1f9cd72f4a0cce3489202ad24c946f2b863a1890748926",
+          "sha256:12458be8f6ccf9828a7b70be06fa7ade745b1ac862c90d0019b74ebc7be66872",
+          "sha256:8825f570effe94148ef385c91143d4a84e0e67d637567e996e55ab3b72a00cbd",
+          "sha256:dceb5d321d5e8f16a5cfec06d95d5ab73453cc8d603b9b93346891703e4aef6e"
+        ],
+        "compressedLayerBytes": 119958308
+      },
+      "rawReportSha256": "ea662f1e36445d8e16b8e15584f47618b26177cea3e4c20fb6d8f2d258a0546a",
+      "manifestSha256": "b579bd29c6cf8d28da8b063df95b58df3bf0fb07debdd9aef369f78fa431f7f4",
+      "databaseSha256": "e7587cc3528c2d401dfae2bb327d6d7e2943cb04d714ae7d413c6dbe64a38db3",
+      "databaseUpdatedAt": "2026-11-16T13:03:44.830426244Z"
+    },
+    {
+      "component": "front",
+      "gate": "PASS_RAW_SCAN",
+      "rawScannerExitCode": 0,
+      "rawCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "installedOsPackages": 72,
+      "installedLibraryPackages": 0,
+      "image": {
+        "manifestDigest": "sha256:db60d4fb4236c0be814f38cc6fe7cf104c27143616263004d8da6d0bb576af39",
+        "configDigest": "sha256:966d312a5fc4fb7dc0b486a547936aad9eae314073262d6ca4685ccbf53e8f23",
+        "indexDigest": "sha256:d1629f3ab1fc8f6755cad3e97181881513e028c826ed8e61bfd41ad92e14fe31",
+        "buildDigest": "sha256:e683944adfc619e23f8b45f3162907ab83ec27bbc79cd3ed266f0e01fb677b32",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17",
+          "sha256:1abafee971b93c1ae05f03c35c6fb6e3376e75e6f16b590092a822b61ebf10b6",
+          "sha256:c7dfd64eeb02740cc41e9f32ad7f75781882d4c167b77427aa9615d1419c4515",
+          "sha256:e011f124249bf1c4be27b3311c3b40cb90dd7737381af1c62b508020790b7bd5",
+          "sha256:a746bd1dc828f61bf43b775dcfecb9ded8a3d3b41789915fe135fa6b9fa85965",
+          "sha256:b9c6ee6a30f8811636d7273be348906cf0e4e9725378dd54b7d4a3725538cad4",
+          "sha256:69d81d5522572d5b7abcc8f594ecbc4cf9bea72402675a419e8d7b516e4c3f14",
+          "sha256:da90db506dd5f2d604467c4dc38442534f74c9e76c1982df0c262e144bad7bc9",
+          "sha256:dfe7c47ce36b80df8964a6d9bc0e53c3e45ef9eb6fd23872c37a4c90b4861cfc",
+          "sha256:1562fed431306f6c51d0d30c4389e179534f05c4f75647fd05b668b91cf37cdd",
+          "sha256:f3319cad1383fcea56e45cd8f6f9fb484e84f70cd0d05384a732a791139abfda",
+          "sha256:df04107b448af297642e2f33854b18e65c8182190dfea82c55a147ff51e500ec"
+        ],
+        "compressedLayerBytes": 28210700
+      },
+      "rawReportSha256": "9d07fe211882eba607a2b6748816a86b44e657f76ec5686325ccfe2e5b90501a",
+      "manifestSha256": "07573a168e9704dddb8a22e87f7d9ff387668413579021054558677529d0689d",
+      "databaseSha256": "e7587cc3528c2d401dfae2bb327d6d7e2943cb04d714ae7d413c6dbe64a38db3",
+      "databaseUpdatedAt": "2026-11-16T13:03:44.830426244Z"
+    },
+    {
+      "component": "judge",
+      "gate": "PASS_RAW_SCAN",
+      "rawScannerExitCode": 0,
+      "rawCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "installedOsPackages": 19,
+      "installedLibraryPackages": 24,
+      "image": {
+        "manifestDigest": "sha256:df7806764833768b709a022e41f5fb87101b655502328ffdd2c0b34ccb9653e6",
+        "configDigest": "sha256:6ec6863697dc9ff2ee31a8b4858d872dd9caa647bfe8e3c6d4137b59f6403dd6",
+        "indexDigest": "sha256:b03ea7e011ac8f1aec5592983442eb7a6c46b039ab4b4cc73dde05645cdaf084",
+        "buildDigest": "sha256:9217ce586cbc9329f61303b821916aabbafc87afdd2c2baa33636f8aa9d00d40",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17",
+          "sha256:b72829bc75b7701104d057fde78fe0aef6dc0c3eaf2423e7249e8a14c37ead57",
+          "sha256:89a151fddb377af33d0dda6a24f40061bbde4b159f82c349fe01208baba8a84f",
+          "sha256:60ef5f57e09d3f24d91cfd5547a102a028a7bd629f03e79409f53a202cf9df54",
+          "sha256:aae7c25cc34ab5491c6c47d3d7467cb3a99208a2094f7be7e419e57a1cfd7496",
+          "sha256:4da96ecbd07c48944b5739e88ad3a72a4ecd431cde9c4ac25702eb681c470b3d",
+          "sha256:b3df184bfe4bbb3d9ccab3ed767257ea2fe73d4539a958aa32da7d1a2caf4ed1",
+          "sha256:a5c192f8ec601f8128e3bf711072eb909d05f60e8c317b7cc04b8f6cc3ea01ba"
+        ],
+        "compressedLayerBytes": 65796788
+      },
+      "rawReportSha256": "1c5157f15005408723b7753400487257461bd74fddda1faa8845c25867e3e937",
+      "manifestSha256": "94a7596d653ddea1db67c1a7237e60da2a757594c377f9a59663a8f7f03b4f6c",
+      "databaseSha256": "e7587cc3528c2d401dfae2bb327d6d7e2943cb04d714ae7d413c6dbe64a38db3",
+      "databaseUpdatedAt": "2026-11-16T13:03:44.830426244Z"
+    },
+    {
+      "component": "runtime",
+      "gate": "PASS_WITH_REVIEWED_COMPONENT_FINDINGS",
+      "rawScannerExitCode": 2,
+      "rawCounts": {
+        "UNKNOWN": 1,
+        "LOW": 363,
+        "MEDIUM": 560,
+        "HIGH": 177,
+        "CRITICAL": 5
+      },
+      "installedOsPackages": 172,
+      "installedLibraryPackages": 53,
+      "image": {
+        "manifestDigest": "sha256:4895af0b7261fb765c9a70ad0006b5764e6b61242857dc7308ccf40e741fa20b",
+        "configDigest": "sha256:7310a9aa7c9121660b511e5a13884881d56be3be2ab26e95fba412aeb4ea80b6",
+        "indexDigest": "sha256:c40f659511b057a6ebfe206ed13959e4e0abf75ca91f5189061ccf380646fd3e",
+        "buildDigest": "sha256:5950db17265ab29e031209e86db7e7adcd4c91285135438493f0c001ac8649b3",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+          "sha256:eda1e5cddfa23fa7b16563888167ee1975c505c1175b3b849beb5208f0ae2245",
+          "sha256:dc78b7732dda9855d7fa10efed27697bc8a75c1493f045e3b7e0aa9545eec0d0",
+          "sha256:ababc931824cd1a82f9bd38ec54c288480158737cd4a63818b1de103d9147bc5",
+          "sha256:084be4140f53bfe6988e3d1c79392f240b629f426ef430bcba27a1b3b2fe932c",
+          "sha256:1e42629484df5945df1fda8976f051e9700d20235192feb7d87a5319ce8819e7",
+          "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+          "sha256:c6c115c05f18d5fa0417e9557c116c1677ca577c46bdbe3118dc31991152a0a8",
+          "sha256:dbec284e765419c6ca0eaed5790f89a7abbd767a01f0cc7700b8e1210519a0a0",
+          "sha256:084a8ef3ee236e4b12b8789e9a9a9947159c6fd6cfb1ed1a96a0f10c83dd8dd1",
+          "sha256:8200bfc20e3c5af30e8914e58a5fd1ec82f17bb56273636973ee29cde93e3959",
+          "sha256:e8b86949d86eaa764f65976d0b3498c91b40b8a94223316a5ffad4c9ccde30e8",
+          "sha256:826ddf78f0bd2690aab594b8cf8450665b4294c0d3be7cd170053f538bee11e3",
+          "sha256:5bce16b3cc71f76ad4bef1fb1bc58bc2eb6dd037400d3571d3fe5edf927bc4ff"
+        ],
+        "compressedLayerBytes": 574140805
+      },
+      "rawReportSha256": "06d63d68546652155110b3b0b6bb472aa0643264d484ce53b8ca30dd20b2ab4b",
+      "manifestSha256": "c5bce15d63640e9061a99c5082df12c918dca9caf350a446a04e25e4215fe359",
+      "databaseSha256": "e7587cc3528c2d401dfae2bb327d6d7e2943cb04d714ae7d413c6dbe64a38db3",
+      "databaseUpdatedAt": "2026-11-16T13:03:44.830426244Z"
+    }
+  ],
+  "runtimeApplicability": {
+    "reviewedFindings": 182,
+    "remainingBlocking": 0,
+    "unresolved": 0,
+    "payloadFilesIndependentlyCompared": 990,
+    "payloadMismatch": 0,
+    "payloadProofSha256": "6d516650f555a64962ff1d56d6b08646c9b6bb6807e20ed8c176eec6e547ba39",
+    "policySha256": "81f0bf685f2ffc22cdb0933c2c55f6f5fff05f8f252765c0af8fe56189084603",
+    "policyContentSha256": "d938665f24995ea53bf0984047459de0aa9ba366dc5ebbe37055f304c68903fb",
+    "expiresAt": "2026-11-30T00:00:00Z",
+    "hostKernelReadiness": "UNVERIFIED",
+    "rawSeverityInterpretation": "HIGH 177, CRITICAL 5 and scanner exit 2 are retained. This is reviewed absence of vulnerable kernel implementation from this header package payload, not patched findings, a zero-vulnerability image or a production host approval.",
+    "independenceBoundary": "The reviewer authored the earlier proposed evidence refresh; its policy approval belongs to independent_qa and coordinator as recorded in the immutable approved policy. This receipt checks the fresh artifact and source binding; it does not independently approve its own proposal."
+  },
+  "credentialRetention": {
+    "sourceControls": "The exact previously reviewed spec has tracing off and generates passwords/consumes bearer tokens inside the browser callback; Playwright arguments and return values contain no credentials. Only sanitized JSON and a result-region PNG are retained in the successful browser artifact.",
+    "reportPatternChecks": "No private-key marker, JWT-like bearer or generated owned-password value in all four evidence JSON files.",
+    "jobLogChecks": {
+      "privateKeyMarkerMatches": 0,
+      "jwtLikeMatches": 0,
+      "ownedPasswordValueMatches": 0,
+      "authorizationHeaderMatches": 1,
+      "authorizationHeaderExplanation": "Only one matched line: GitHub checkout's masked AUTHORIZATION: basic *** value. No dynamic browser bearer or password values were found by these patterns.",
+      "limitation": "Pattern checks plus source/report inspection; not a proof that every arbitrary secret can be recognized. Static synthetic CI fixture capability values are part of the existing public test setup."
+    }
+  },
+  "cleanupEvidence": {
+    "dedicatedGatewayClosed": true,
+    "pipelineCleanupFailures": 0,
+    "nativeArtifactCacheDelta": 0,
+    "composeFinalCleanup": true,
+    "composeContainersNetworksOwnedVolumeRemovedInLogs": true,
+    "stopSandboxJobStep": "success",
+    "stopContainersJobStep": "success"
+  },
+  "nonBlockingNotes": [
+    "The dedicated Node-gateway pipeline artifact retains a stale limitation sentence saying existing Compose browser flows exercise embedded mode separately. The separately bound new actual browser/Compose artifact explicitly proves dedicated mode; the stale sentence is not used as evidence of browser mode."
+  ],
+  "remainingLimits": [
+    "One finite CI observation per native language/scenario and one real Chromium Vibe flow; no threshold search, saturation study or long-duration editor-memory/INP claim.",
+    "The native and browser fixtures share the existing owned CI sandbox sequentially; production host/kernel, network segmentation, certificate rotation and provider quality remain unverified.",
+    "The source assertion proves the Java heap-error condition during CI, but the sanitized native JSON does not retain raw stderr or cgroup OOM counters.",
+    "No paid provider requests occurred. AI process evaluation remains explicitly unavailable."
+  ],
+  "blockers": [],
+  "supportingEvidence": {
+    "githubMetadata": {
+      "path": "github-metadata.json",
+      "sha256": "69ff53142b614850e98746c861f1239a2f5c396ab36eb535ee2ed094907a2a39"
+    },
+    "jobLogExcerpts": {
+      "path": "job-log-excerpts.json",
+      "sha256": "f812f9cb85ce49f08fdf5ddf64bc6f189f93307189735a52d6ab34bb887fdd35"
+    }
+  }
+}

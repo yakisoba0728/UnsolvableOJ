@@ -9,14 +9,17 @@ import {
 import { InjectDataSource } from '@nestjs/typeorm';
 import { randomUUID } from 'node:crypto';
 import { DataSource, type EntityManager } from 'typeorm';
-import {
-  challenge,
-  editableFiles,
-  initialFiles,
-  VIBE_LIMITS,
-  validateFiles,
-} from './vibe.catalog.js';
+import { challenge, VIBE_LIMITS, validateFiles } from './vibe.catalog.js';
 import { VibeAi } from './vibe.ai.js';
+import {
+  attemptSnapshot,
+  currentVibeSnapshot,
+  readVibeSnapshot,
+  registerVibeSnapshot,
+  snapshotEditableFiles,
+  vibeVersion,
+  type VibeChallengeSnapshot,
+} from './vibe.snapshot.js';
 import { canJoinEnterprise } from '../enterprise/enterprise-access.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import { VibeRunner } from './vibe.runner.js';
@@ -36,27 +39,33 @@ export class VibeService {
     private readonly runner: VibeRunner,
   ) {}
 
+  get assessmentModel() {
+    return this.ai.model;
+  }
+
   catalog() {
     return {
-      items: [challenge],
+      items: [{ ...challenge, version: vibeVersion(currentVibeSnapshot()) }],
       limits: VIBE_LIMITS,
       availability: { ai: this.ai.available, runner: this.runner.available },
     };
   }
   async list(userId: string) {
     return this.db.query(
-      `SELECT id, challenge_id AS "challengeId", started_at AS "startedAt", deadline_at AS "deadlineAt", submitted_at AS "submittedAt", CASE WHEN jsonb_typeof(state->'report')='object' THEN (state->'report')-'model' END AS report FROM vibe_attempts WHERE user_id=$1 AND enterprise_attempt_id IS NULL ORDER BY started_at DESC LIMIT 20`,
+      `SELECT id, challenge_id AS "challengeId", challenge_version AS "challengeVersion", started_at AS "startedAt", deadline_at AS "deadlineAt", submitted_at AS "submittedAt", CASE WHEN jsonb_typeof(state->'report')='object' THEN (state->'report')-'model' END AS report FROM vibe_attempts WHERE user_id=$1 AND enterprise_attempt_id IS NULL ORDER BY started_at DESC LIMIT 20`,
       [userId],
     );
   }
   private view(row: VibeAttemptRow, reviewer = false) {
+    const content = attemptSnapshot(row);
     const report =
       !row.enterprise_attempt_id || row.score_visible || reviewer
         ? row.state.report
         : null;
     return {
       id: row.id,
-      challenge,
+      challenge: content.challenge,
+      challengeVersion: row.challenge_version,
       enterprise: row.enterprise_attempt_id
         ? {
             testId: row.enterprise_test_id,
@@ -70,8 +79,8 @@ export class VibeService {
       deadlineAt: row.deadline_at,
       submittedAt: row.submitted_at,
       busyUntil: row.busy_until,
-      files: { ...initialFiles, ...row.state.files },
-      editablePaths: Object.keys(editableFiles()),
+      files: { ...content.initialFiles, ...row.state.files },
+      editablePaths: content.editablePaths,
       messages: row.state.messages,
       events: row.state.events,
       runs: row.state.runs,
@@ -105,19 +114,20 @@ export class VibeService {
         [id, userId],
       );
     const [row]: VibeAttemptRow[] = await manager.query(
-      `SELECT v.*, LEAST(v.deadline_at,a.deadline_at,t.ends_at) AS deadline_at, t.id AS enterprise_test_id,
+      `SELECT v.*, c.snapshot AS challenge_snapshot, LEAST(v.deadline_at,a.deadline_at,t.ends_at) AS deadline_at, t.id AS enterprise_test_id,
         coalesce(a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now(),false) AS enterprise_closed,
         coalesce(t.show_score_to_candidates AND (a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now()),false) AS score_visible
-       FROM vibe_attempts v LEFT JOIN enterprise_attempts a ON a.id=v.enterprise_attempt_id LEFT JOIN enterprise_tests t ON t.id=a.test_id
+       FROM vibe_attempts v LEFT JOIN vibe_challenge_versions c ON c.version=v.challenge_version AND c.challenge_id=v.challenge_id
+       LEFT JOIN enterprise_attempts a ON a.id=v.enterprise_attempt_id LEFT JOIN enterprise_tests t ON t.id=a.test_id
        WHERE v.id=$1 AND v.user_id=$2 AND (v.enterprise_attempt_id IS NULL OR ${canJoinEnterprise('$2')})${lock ? ' FOR UPDATE OF v' : ''}`,
       [id, userId],
     );
     if (!row) throw new NotFoundException('연습 기록을 찾을 수 없습니다.');
     return row;
   }
-  private initialState(): VibeState {
+  private initialState(content: VibeChallengeSnapshot): VibeState {
     return {
-      files: editableFiles(),
+      files: snapshotEditableFiles(content),
       messages: [],
       events: [],
       runs: [],
@@ -148,21 +158,34 @@ export class VibeService {
   }
   async startEnterprise(examId: string, challengeId: string, userId: string) {
     return this.db.transaction(async (manager) => {
+      // Acquire the parent lock before deriving eligibility. A candidate can
+      // spend the remaining exam time waiting behind another workspace/finish
+      // transaction; PostgreSQL now() remains fixed at transaction start.
+      await manager.query(
+        'SELECT id FROM enterprise_attempts WHERE id=$1 AND user_id=$2 FOR UPDATE',
+        [examId, userId],
+      );
       const [exam]: {
         deadline_at: Date;
         closed: boolean;
         vibe_challenge_ids: string[];
+        challenge_version: string;
+        ai_model: string;
+        challenge_snapshot: VibeChallengeSnapshot;
       }[] = await manager.query(
-        `SELECT LEAST(a.deadline_at,t.ends_at) AS deadline_at, (a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now()) AS closed, t.vibe_challenge_ids
-         FROM enterprise_attempts a JOIN enterprise_tests t ON t.id=a.test_id WHERE a.id=$1 AND a.user_id=$2 AND ${canJoinEnterprise('$2')} FOR UPDATE OF a`,
-        [examId, userId],
+        `SELECT LEAST(a.deadline_at,t.ends_at) AS deadline_at, (a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=clock_timestamp()) AS closed, t.vibe_challenge_ids, b.version AS challenge_version, b.ai_model, c.snapshot AS challenge_snapshot
+         FROM enterprise_attempts a JOIN enterprise_tests t ON t.id=a.test_id
+         LEFT JOIN enterprise_vibe_versions b ON b.test_id=t.id AND b.challenge_id=$3
+         LEFT JOIN vibe_challenge_versions c ON c.version=b.version AND c.challenge_id=b.challenge_id WHERE a.id=$1 AND a.user_id=$2 AND ${canJoinEnterprise('$2')}`,
+        [examId, userId, challengeId],
       );
-      if (
-        !exam ||
-        !exam.vibe_challenge_ids.includes(challengeId) ||
-        challengeId !== challenge.id
-      )
+      if (!exam || !exam.vibe_challenge_ids.includes(challengeId))
         throw new NotFoundException('응시 과제를 찾을 수 없습니다.');
+      const content = readVibeSnapshot(
+        exam.challenge_version,
+        exam.challenge_snapshot,
+        challengeId,
+      );
       const [existing]: VibeAttemptRow[] = await manager.query(
         'SELECT * FROM vibe_attempts WHERE enterprise_attempt_id=$1 AND challenge_id=$2',
         [examId, challengeId],
@@ -174,14 +197,15 @@ export class VibeService {
           '응시가 끝나 새 과제를 시작할 수 없습니다.',
         );
       const [row]: VibeAttemptRow[] = await manager.query(
-        'INSERT INTO vibe_attempts(user_id,challenge_id,state,model,enterprise_attempt_id,deadline_at) VALUES($1,$2,$3,$4,$5,$6) RETURNING *',
+        'INSERT INTO vibe_attempts(user_id,challenge_id,state,model,enterprise_attempt_id,deadline_at,challenge_version) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *',
         [
           userId,
           challengeId,
-          JSON.stringify(this.initialState()),
-          this.ai.model,
+          JSON.stringify(this.initialState(content)),
+          exam.ai_model,
           examId,
           exam.deadline_at,
+          exam.challenge_version,
         ],
       );
       await this.snapshot(manager, row, 'initial');
@@ -197,10 +221,11 @@ export class VibeService {
     staff: AuthenticatedUser,
   ) {
     const [row]: VibeAttemptRow[] = await this.db.query(
-      `SELECT v.*, LEAST(v.deadline_at,a.deadline_at,t.ends_at) AS deadline_at, t.id AS enterprise_test_id,
+      `SELECT v.*, c.snapshot AS challenge_snapshot, LEAST(v.deadline_at,a.deadline_at,t.ends_at) AS deadline_at, t.id AS enterprise_test_id,
         (a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now()) AS enterprise_closed,
         (t.show_score_to_candidates AND (a.finished_at IS NOT NULL OR LEAST(a.deadline_at,t.ends_at)<=now())) AS score_visible
-       FROM vibe_attempts v JOIN enterprise_attempts a ON a.id=v.enterprise_attempt_id JOIN enterprise_tests t ON t.id=a.test_id
+       FROM vibe_attempts v LEFT JOIN vibe_challenge_versions c ON c.version=v.challenge_version AND c.challenge_id=v.challenge_id
+       JOIN enterprise_attempts a ON a.id=v.enterprise_attempt_id JOIN enterprise_tests t ON t.id=a.test_id
        JOIN users reviewer ON reviewer.id=$3
        WHERE v.id=$1 AND v.user_id=$2 AND (t.owner_id=reviewer.id OR reviewer.role='ADMIN')
          AND reviewer.deleted_at IS NULL AND reviewer.suspended_at IS NULL
@@ -224,7 +249,8 @@ export class VibeService {
     revision: number,
     staff: AuthenticatedUser,
   ) {
-    await this.staffOwned(id, userId, staff);
+    const row = await this.staffOwned(id, userId, staff);
+    attemptSnapshot(row);
     const rows: { revision: number; files: ProjectFiles }[] =
       await this.db.query(
         'SELECT revision,files FROM vibe_revisions WHERE attempt_id=$1 AND revision<=$2 ORDER BY revision DESC LIMIT 2',
@@ -234,6 +260,7 @@ export class VibeService {
       throw new NotFoundException('수정 기록을 찾을 수 없습니다.');
     return {
       revision,
+      challengeVersion: row.challenge_version,
       files: rows[0].files,
       previousFiles: rows[1]?.files ?? rows[0].files,
     };
@@ -269,7 +296,8 @@ export class VibeService {
         'SELECT * FROM vibe_attempts WHERE user_id=$1 AND challenge_id=$2 AND enterprise_attempt_id IS NULL AND submitted_at IS NULL AND deadline_at>now() ORDER BY started_at DESC LIMIT 1',
         [userId, challengeId],
       );
-      if (active) return this.view(active);
+      if (active)
+        return this.view(await this.owned(active.id, userId, manager));
       const [{ count }]: { count: number }[] = await manager.query(
         "SELECT count(*)::int AS count FROM vibe_attempts WHERE user_id=$1 AND enterprise_attempt_id IS NULL AND started_at>now()-interval '1 day'",
         [userId],
@@ -279,13 +307,22 @@ export class VibeService {
           '새 연습은 24시간에 5회까지 시작할 수 있습니다.',
           HttpStatus.TOO_MANY_REQUESTS,
         );
-      const state = this.initialState();
+      const { snapshot: content, version } =
+        await registerVibeSnapshot(manager);
+      const state = this.initialState(content);
       const [row]: VibeAttemptRow[] = await manager.query(
-        'INSERT INTO vibe_attempts(user_id,challenge_id,state,model) VALUES($1,$2,$3,$4) RETURNING *',
-        [userId, challengeId, JSON.stringify(state), this.ai.model],
+        "INSERT INTO vibe_attempts(user_id,challenge_id,state,model,challenge_version,deadline_at) VALUES($1,$2,$3,$4,$5,now()+$6*interval '1 minute') RETURNING *",
+        [
+          userId,
+          challengeId,
+          JSON.stringify(state),
+          this.ai.model,
+          version,
+          content.challenge.durationMin,
+        ],
       );
       await this.snapshot(manager, row, 'initial');
-      return this.view(row);
+      return this.view(await this.owned(row.id, userId, manager));
     });
   }
 
@@ -358,8 +395,10 @@ export class VibeService {
     return this.db.transaction(async (manager) => {
       const row = await this.owned(id, userId, manager, true);
       this.assertRevision(row, revision);
+      const content = attemptSnapshot(row);
       let next: ProjectFiles;
-      if (action === 'save') next = validateFiles(files);
+      if (action === 'save')
+        next = validateFiles(files, false, content.editablePaths);
       else if (action === 'undo') {
         if (!row.state.undo)
           throw new ConflictException('되돌릴 변경이 없습니다.');
@@ -374,7 +413,10 @@ export class VibeService {
           throw new ConflictException(
             '답변을 받은 뒤 코드가 바뀌었습니다. 최신 코드로 다시 질문해 주세요.',
           );
-        next = { ...row.state.files, ...validateFiles(proposal.files, true) };
+        next = {
+          ...row.state.files,
+          ...validateFiles(proposal.files, true, content.editablePaths),
+        };
       }
       const paths = Object.keys(next).filter(
         (path) => next[path] !== row.state.files[path],
@@ -500,10 +542,11 @@ export class VibeService {
       final ? 'submit' : 'run',
     );
     try {
-      const checks = await this.runner.run(row.state.files, final);
+      const content = attemptSnapshot(row);
+      const checks = await this.runner.run(row.state.files, final, content);
       if (row.enterprise_attempt_id && row.enterprise_closed) reflection = '';
       if (final) {
-        const total = 11;
+        const total = content.publicChecks.length + content.hiddenChecks.length;
         const passed = checks.filter((c) => c.passed).length;
         const report: VibeReport = {
           outcome: Math.round((passed / total) * 40),

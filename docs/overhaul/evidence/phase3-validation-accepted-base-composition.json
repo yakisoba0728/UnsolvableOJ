@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 1,
+  "kind": "pr77-accepted-base-composition-independent-review",
+  "reviewer": "/root/composition_review",
+  "reviewedAt": "2026-11-16T08:37:12.686284+00:00",
+  "reviewedSource": "870659515f312406a190c32700e6e22e9ed99c0e",
+  "reviewedTree": "363246089112d44080e26ad93ae3bb9a75ff1612",
+  "parents": [
+    "d76ce50fe50d8d143a4bea94355dbddcd37f8352",
+    "d6f8bb9c963800093fb24f293652bab2ca42883f"
+  ],
+  "acceptedDatabase": {
+    "source": "6143d7ccd982d42e035db01edee0f1353ad55a21",
+    "merge": "d6f8bb9c963800093fb24f293652bab2ca42883f",
+    "tree": "3397e0574f888c4f4c4221cbc7e057d70513171d",
+    "mergeTreeEqualsAcceptedSourceTree": true,
+    "allAncestorChecksPass": true,
+    "ciRun": 43830226504,
+    "ciJobsIndependentlyObservedSuccessful": 12
+  },
+  "acceptedRuntimeIntegration": "f52c7d0aecfb6ae98329d219110eac526bb0dbcb",
+  "scope": "Read-only exact Git object composition review. No product changes, browser rerun, database write, image scan or new CI execution by this reviewer. Latest-status documentation is still being authored and is not approved here.",
+  "productSubtrees": {
+    "Back": {
+      "acceptedBase": "372e53cae05de145b933972cd8d423578c3ebf34",
+      "preparation": "372e53cae05de145b933972cd8d423578c3ebf34",
+      "composition": "372e53cae05de145b933972cd8d423578c3ebf34"
+    },
+    "Judge": {
+      "acceptedBase": "38f41d95e451898ddce78c0f3af783aecd334ada",
+      "preparation": "38f41d95e451898ddce78c0f3af783aecd334ada",
+      "composition": "38f41d95e451898ddce78c0f3af783aecd334ada"
+    },
+    "Front/src": {
+      "acceptedBase": "f79ece933b56f84cc8c80cc5999aad3437249dc1",
+      "preparation": "f79ece933b56f84cc8c80cc5999aad3437249dc1",
+      "composition": "f79ece933b56f84cc8c80cc5999aad3437249dc1"
+    }
+  },
+  "additionalPreservation": {
+    "FrontWholeSubtreeEqualsPreparation": "b8840e7234bfcda3d4c5358392c3dba2436838c9",
+    "ScriptsWholeSubtreeEqualsAcceptedBase": "cfa438b325059c8be06607ab8c1b589fc28dbc73",
+    "originalPreparedEvidenceMeasurementReproFilesByteIdentical": 171,
+    "pr78FilesByteIdenticalExceptExplicitWorkflowUnion": 25,
+    "unchangedRuntimeImplementationFiles": 5,
+    "runtimeHashBindingsChecked": 23
+  },
+  "runtimePreservationFiles": [
+    {
+      "path": "docs/overhaul/PHASE3-RUNTIME-REVALIDATION.md",
+      "blob": "4a12923bcea0a674c2a96f70a15567bd762871f7",
+      "sha256": "e80997cd6335d5dad415d7bd8e2a8c35c5947d94448be9773e2dc2c084b62a2a",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-current-cna-independent-content-comparison.json",
+      "blob": "5377dfb1e4e8c7915643dfd40e7459a70f3de643",
+      "sha256": "9bb7a8c5a527fcfb8a5336e98eb4d3dd5431305ef00af5baf93140413093ad30",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-current-cna-independent-receipt.json",
+      "blob": "221b2eeccda3838c2041724bb90e4a63d59db3fc",
+      "sha256": "850c53a6bad6779cce05e821c0757dd7c377c9ed26dec907a9ab57fb70eb0bf1",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-kernel-header-applicability.json",
+      "blob": "8a24e42e2ce9de7527fa8ff03115402e5ad4920b",
+      "sha256": "9d317229d78b224757dddbc9c03db68b5d6f1d5d2b191f02de857d3c46dd3796",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-kernel-header-review.json",
+      "blob": "8092809214018294baf5ce64a527a254b89228a4",
+      "sha256": "a6d7cca70204e26b1bb76533f2b2103b1286316f6eecc92573218257b36a3a24",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-advisory-delta.json",
+      "blob": "63e49c0f0c4548db3a2588159af985af5319d29f",
+      "sha256": "799cb41e570135fb6c0b223f5bd22d401162bbd4f35005844b299c26524a966d",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-advisory-revalidation-original-policy.json",
+      "blob": "3782895372b4378c8c3f476270b7969ecdf5f644",
+      "sha256": "77fcae5ce3d800b1b6289de7a7e84a2ee6364867ec13b321346520075ddd3b73",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-advisory-revalidation-proposed-policy.json",
+      "blob": "80ff0b182f07d9d40ecca085062502dd956ffd00",
+      "sha256": "74200feeaf7764a447dc740dac42f09b7a2e2c3c9cdb03c95f5994fb4083c7b4",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-coordinator-review.json",
+      "blob": "a3e0b1a44d06c176b34fe2d3d3efb60b11e58181",
+      "sha256": "908ada4cdf0aeb0aadc529538ecca394571fa72d9cdb16a50f343762de376462",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-independent-policy-review.json",
+      "blob": "45fd21ae85872a6cb42e11f24aff5b7e683a0e23",
+      "sha256": "2a92b8caea02c1033953c67b721f726ab7fb93eae9a64c7f76fa43ba9b676122",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-revalidation-author-validation.json",
+      "blob": "6e69013a84de1c4430120c53402c27b0da384599",
+      "sha256": "9d9fbe94dd2447c5a7e61239933def96ea069c0c4099e70f976f4f5c446b9579",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-vendor-advisory-review.json",
+      "blob": "e046af533d87beb49a734961a2e625a16ec2f5ce",
+      "sha256": "60285c0506ad1ceb2dfc5f107784855043ed9b145fb31bfb800f051c930870cd",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase3-runtime-vendor-independent-review.json",
+      "blob": "1eee0076a6f165602c98b33c98f1f02474dc3314",
+      "sha256": "b2c0fc2fde6f0dd3696ed7db55d122cec8aa8e10d68ee143de7c602d4f05cb43",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/runtime-efa2bab-python-tests.log",
+      "blob": "e26d60ae613be454e21037947900819f51f03c95",
+      "sha256": "d6f04fa76c5ee0a86d52f66547d6de0292dd9917e94f88142a50108b009289cf",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/runtime-new-evidence-selector-after.log",
+      "blob": "e95a32cedd3b1ee0303fea866faf707e9c2abe71",
+      "sha256": "99fb5e2d32598322604d882f4548d134be3cf0aeb9d965c47d910599a2cc0183",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/evidence/runtime-new-evidence-selector-before.log",
+      "blob": "5294eac1d128cf009584b128b4897687a12622aa",
+      "sha256": "d4e473b2567eae2403fd3b7caa8aff95e60ccd0d389e2a51fde2cd1aa078c816",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/accepted-runtime.zip",
+      "blob": "4051975155993993b9b66b65edbf04b3302cf3fa",
+      "sha256": "128ea68ac07435b95731ffe00ac6f6171f0fa18915ded6133c1ce077e06e53a0",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/blocked-runtime.zip",
+      "blob": "5a2d9eba9751396e9f17f10f877c35f9aad2a9a5",
+      "sha256": "cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/current-cna-records.zip",
+      "blob": "bd0fd7e3840fcccd818dbe7fe2a3a2f8e882c64f",
+      "sha256": "54c6826a9e0b1453dbf8e99ddf68f644edd519af3829d8106fc719bc3aa7e89c",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/proposed-evaluation.json",
+      "blob": "ee85c7330907c582dcb39219cc97530ff9636cc5",
+      "sha256": "fc9913906bf054cff3145999c61f01fb15bd27bab134a3af4703b0ccc44a7354",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/reviewed-retained-evaluation.json",
+      "blob": "576dba3c98b255ddee79da862791c39c1d49f85e",
+      "sha256": "3ae27d56bc8ccfc8f0033ce69c9bc85c1c153e545163e3ceefd3006106cd6a2c",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "docs/overhaul/repro/phase3-refetch-cna-independent.py",
+      "blob": "56d2895edcbe0f8326cf9c3931669939f0410322",
+      "sha256": "b6741499e32cbb0951f93247dcea3f4470bcc3a259337c1ba547a08dc021eaa0",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "scripts/ci-policy.test.mjs",
+      "blob": "11253121ba1998dc073f28c59cf2f76a2942ae5b",
+      "sha256": "b8d5e070529ff830851ae0b11e32bf6c1ee425f69a6ae3f219f8f28c2c4c140f",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "scripts/image-applicability-policy.json",
+      "blob": "822d1d0a20336c465a123e5a599aa33bd749388d",
+      "sha256": "3b9582cbfaedcbad0b562bdd566896b77c195834a7bfaeb5143025c6d72abf79",
+      "compositionRule": "byte-identical"
+    },
+    {
+      "path": "scripts/image_applicability_test.py",
+      "blob": "bb9eac7fc3544a5f899bd0be0257ff845319037e",
+      "sha256": "9b5460e4fb664f2613f18e2a9fbdfd02ccb6b76d9c4d3cac8004a65a372dbc92",
+      "compositionRule": "byte-identical"
+    }
+  ],
+  "workflowUnion": {
+    "blob": "71f1cee91c2ed02cc2629399becf3d24573b61bb",
+    "sha256": "dbf06abd17b8eb2d2a4d40deea6aaf2bb407edf80a05dd381a05703b7b94439d",
+    "equalsPreparedWorkflowWithOnlyAcceptedRuntimeSelectorReplacement": true,
+    "acceptedSelector": "[ \"$CONTEXT\" = 'Judge/runtime' ] && grep -qE '^(scripts/verify_image_payload|docs/overhaul/(evidence/|repro/(kernel-header-applicability|phase3-refetch-cna-independent)\\.py$|measurements/(phase2-image-remediation/before-runtime\\.zip$|phase3-runtime-advisory-revalidation/)))' <<<\"$files\";",
+    "browserArtifactSuccessRequiresFile": true,
+    "allRequiredJobDependenciesUnchanged": true,
+    "noAssertionSkipTimeoutScannerOrFailurePolicyWeakening": true
+  },
+  "databaseSourceBindings": {
+    "baselineMigrationSha256": {
+      "path": "Back/src/database/migrations/1795200000000-problem-stats.ts",
+      "recordedSha256": "7fd6fbb7c768cefcb1b1e43b70db5431b2fbbad3a8a86563cf4bc1528e591e8c",
+      "pr76Sha256": "7fd6fbb7c768cefcb1b1e43b70db5431b2fbbad3a8a86563cf4bc1528e591e8c",
+      "checkpointSha256": "7fd6fbb7c768cefcb1b1e43b70db5431b2fbbad3a8a86563cf4bc1528e591e8c"
+    },
+    "candidateMigrationSha256": {
+      "path": "Back/src/database/migrations/1796100000000-incremental-problem-stats.ts",
+      "recordedSha256": "de6b2cdab05abefe6ed37f3c1e33f251a206517800f39e4d47ec1f6f7dc50e82",
+      "pr76Sha256": "de6b2cdab05abefe6ed37f3c1e33f251a206517800f39e4d47ec1f6f7dc50e82",
+      "checkpointSha256": "de6b2cdab05abefe6ed37f3c1e33f251a206517800f39e4d47ec1f6f7dc50e82"
+    },
+    "benchmarkSha256": {
+      "path": "Back/scripts/benchmark-problem-stats.mjs",
+      "recordedSha256": "7ead06a242ae8b7f73e4cf26455124c7a6f88b4e2fe38f17fe3b176b61125396",
+      "pr76Sha256": "7ead06a242ae8b7f73e4cf26455124c7a6f88b4e2fe38f17fe3b176b61125396",
+      "checkpointSha256": "7ead06a242ae8b7f73e4cf26455124c7a6f88b4e2fe38f17fe3b176b61125396"
+    }
+  },
+  "migrations": {
+    "eachRegisteredOnce": true,
+    "orderedTail": [
+      "VibeChallengeVersions1796000000000",
+      "IncrementalProblemStats1796100000000"
+    ],
+    "rssCorrectionRetainedKiB": [
+      35252,
+      57324
+    ]
+  },
+  "runtimeBoundary": {
+    "reviewedRecords": 182,
+    "rawHigh": 177,
+    "rawCritical": 5,
+    "expiry": "2026-11-30T00:00:00Z",
+    "hostKernelReadiness": "UNVERIFIED",
+    "policySha256": "3b9582cbfaedcbad0b562bdd566896b77c195834a7bfaeb5143025c6d72abf79",
+    "policyByteIdenticalToAcceptedRuntime": true
+  },
+  "evidenceBoundary": "Historical browser and Runtime artifacts retain their original source/run identities; byte preservation does not reclassify them as new-composition execution. Incoming historical selector-before log whitespace is preserved as original evidence.",
+  "findings": [],
+  "disposition": "ACCEPTED_PRODUCT_AND_GATE_COMPOSITION_PENDING_FINAL_DOCS_AND_EXACT_HEAD_CI",
+  "remainingGates": [
+    "Independently review the forthcoming current-state documentation and its accurate prerequisite/run/source claims.",
+    "Run all required full-validation jobs on the final published PR77 source incorporating this accepted integration base.",
+    "Only after fresh all-job success and final state recheck may PR77 merge to integration; PR63/main/other owners remain outside scope."
+  ]
+}

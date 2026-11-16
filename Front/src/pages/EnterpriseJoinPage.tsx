@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useConfirm } from "../components/ConfirmDialog";
 import { api } from "../api";
@@ -14,6 +14,7 @@ import {
   type PublicTest,
 } from "../enterprise/model";
 import { useDocumentTitle, useNow, useRequest } from "../hooks";
+import { useRequestOwner } from "../community/useRequestOwner";
 
 interface JoinInfo {
   test: PublicTest;
@@ -22,7 +23,7 @@ interface JoinInfo {
 }
 
 /** 응시 링크로 들어온 사람이 시험 안내를 보고 응시를 시작하는 화면. */
-export function EnterpriseJoinPage() {
+export function EnterpriseJoinPage({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { code = "" } = useParams();
   const { session } = useAuth();
   const navigate = useNavigate();
@@ -30,6 +31,8 @@ export function EnterpriseJoinPage() {
   const [confirm, confirmDialog] = useConfirm();
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState("");
+  const startingRef = useRef(false);
+  const begin = useRequestOwner(getNavigationVersion, true);
   const token = session?.accessToken;
   const { data, loading, error, retry } = useRequest<JoinInfo | null>(
     token ? (signal) => api(`/enterprise/join/${encodeURIComponent(code)}`, { signal }, token) : null,
@@ -74,27 +77,28 @@ export function EnterpriseJoinPage() {
   const status = testStatus(test, now);
 
   async function start() {
-    if (starting) return;
-    if (
-      !(await confirm({
+    if (startingRef.current) return;
+    startingRef.current = true;
+    const current = begin();
+    setStarting(true);
+    try {
+      if (!(await confirm({
         title: "응시를 시작할까요?",
         message: `시작하면 ${test.durationMin}분 타이머가 바로 시작되고 멈출 수 없어요.`,
         confirmLabel: "응시 시작",
-      }))
-    )
-      return;
-    setStarting(true);
-    setStartError("");
-    try {
+      })) || !current()) return;
+      setStartError("");
       const started = await api<Attempt>(
         `/enterprise/join/${encodeURIComponent(code)}/start`,
         { method: "POST" },
         token,
       );
-      navigate(`/enterprise/attempts/${started.id}`);
+      if (current()) navigate(`/enterprise/attempts/${started.id}`);
     } catch (cause) {
-      setStartError(cause instanceof Error ? cause.message : "응시를 시작하지 못했어요.");
-      setStarting(false);
+      if (current()) setStartError(cause instanceof Error ? cause.message : "응시를 시작하지 못했어요.");
+    } finally {
+      startingRef.current = false;
+      if (current()) setStarting(false);
     }
   }
 

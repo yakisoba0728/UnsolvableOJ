@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "independent_qa",
+  "reviewerAgent": "/root/independent_qa",
+  "reviewedAt": "2026-11-16T15:52:31.894472+00:00",
+  "decision": "SOURCE_ACCEPTABLE_FRESH_BROWSER_CI_PENDING",
+  "sourceCommit": "f872de5a344dfa1055fdd5864cf7ff92936fff61",
+  "sourceTree": "d2e61d7580793eef1e90ff532a69acd2b1e8bfe3",
+  "parentCommit": "4fe583c1bf418e9489bc3275c9871db8f62461f3",
+  "scope": "Independent narrow review of the provenance-only correction for the two new Phase V browser probes. Existing UX/editor behavior, evidence assertions and browser timing policy are unchanged.",
+  "sourceFileSha256": {
+    "Front/tests/checkout-provenance.ts": "2f0b3e009441a2b4833c33f4ab59223a14945b2aa593563b2ff41d82a42522ab",
+    "Front/tests/phase5-editor-observation.spec.ts": "ce4d326dd25558ea8901a6b9c5811662a72287074691568e98637afd6e2f8823",
+    "Front/tests/phase5-ux.spec.ts": "61f914d2a4f2d5ba6967acdbb2be6b73665e34dae033511f3ee0585505d12404"
+  },
+  "sourceFindings": [
+    "The 17-line shared helper resolves the physical checkout root from its own module URL, checks that the adjacent .git marker is a file or directory, and sets cwd to that root.",
+    "Each read subprocess receives an explicit argument-vector Git -c safe.directory=<resolved exact root>; there is no shell interpolation, wildcard trust, git config write or environment-derived provenance fallback.",
+    "The helper reads actual HEAD, HEAD^{tree} and tracked status. It retains trackedTreeClean=false for real tracked edits and excludes untracked observation output as before.",
+    "Editor evidence continues to keep actual checkout SHA/tree separate from PR sourceHead/base metadata. UX evidence now also includes trackedTreeClean.",
+    "The complete commit changes only the shared helper and its two consumers. Existing assertions, screenshots, font waiting, observation sample/action counts, deadlines and test selection are unchanged."
+  ],
+  "independentValidation": {
+    "ownershipAndProvenance": {
+      "result": "PASS",
+      "checks": 8,
+      "report": "provenance-f872de5-repro.json",
+      "sha256": "936b45598f26d6e5536ebd8515deb3aacffe9f5cf1646601fd3904b6e48b3a9b",
+      "mode": "Real Git and exact helper bytes with GIT_TEST_ASSUME_DIFFERENT_OWNER=1, empty reviewer-owned global config and no system config; no chmod/chown or browser execution.",
+      "cases": [
+        {
+          "case": "plain Git rejects forced ownership mismatch",
+          "result": "PASS",
+          "exitCode": 128
+        },
+        {
+          "case": "another exact safe directory does not trust checkout",
+          "result": "PASS",
+          "exitCode": 128
+        },
+        {
+          "case": "actual helper returns real HEAD/tree/clean state despite caller cwd, owner mismatch and false GITHUB_SHA",
+          "result": "PASS",
+          "provenance": {
+            "sha": "37a0fecc5c4f09ea21ae51c49c789fa1265aaae2",
+            "tree": "47fafe9f41bef762f006f68d20522b59f60df9ac",
+            "trackedTreeClean": true
+          }
+        },
+        {
+          "case": "untracked evidence does not falsely dirty tracked-tree status",
+          "result": "PASS"
+        },
+        {
+          "case": "tracked edits are truthfully reported without changing HEAD/tree",
+          "result": "PASS",
+          "provenance": {
+            "sha": "37a0fecc5c4f09ea21ae51c49c789fa1265aaae2",
+            "tree": "47fafe9f41bef762f006f68d20522b59f60df9ac",
+            "trackedTreeClean": false
+          }
+        },
+        {
+          "case": "ordinary Git remains blocked afterward; global and repository Git config unchanged",
+          "result": "PASS"
+        },
+        {
+          "case": "missing Git marker fails without environment provenance fallback",
+          "result": "PASS",
+          "exitCode": 1
+        },
+        {
+          "case": "actual linked worktree .git file stays bound to reviewed commit/tree",
+          "result": "PASS",
+          "provenance": {
+            "sha": "f872de5a344dfa1055fdd5864cf7ff92936fff61",
+            "tree": "d2e61d7580793eef1e90ff532a69acd2b1e8bfe3",
+            "trackedTreeClean": true
+          }
+        }
+      ]
+    },
+    "typescript": {
+      "command": "npm run test:e2e:types --prefix Front",
+      "exitCode": 0,
+      "result": "PASS",
+      "log": "provenance-f872de5-typecheck.log",
+      "logSha256": "6168005adb0e4333fc9fe474f7a04e58af817547090bbd6147ca72516dc69fcb",
+      "seconds": 4.182645713997772
+    },
+    "diffCheck": "PASS",
+    "trackedWorktreeCleanAfterChecks": true,
+    "checkedSourceMatchesCommitBytes": true,
+    "assertionWaitDeadlineLinesUnchanged": true,
+    "configWrites": "No author, system or real global Git config changes. The ownership test used only its own empty config and verified both that file and its synthetic repository config were unchanged by the helper.",
+    "cleanup": "Reviewer-owned synthetic repository/config directory removed; no ownership or permission changes performed."
+  },
+  "primarySource": {
+    "url": "https://git-scm.com/docs/git-config#Documentation/git-config.txt-safedirectory",
+    "independentlyOpened": true,
+    "supports": "safe.directory is an explicit exception for a directory with different ownership, honored in protected configuration including command scope. Wildcard * disables the broad check; this helper does not use it."
+  },
+  "findings": [],
+  "limitations": [
+    "The ownership boundary was exercised using real Git with GIT_TEST_ASSUME_DIFFERENT_OWNER=1; this is a controlled ownership-check reproduction, not a new hosted Playwright container run.",
+    "No browser success, screenshot, editor performance or fresh full CI claim is made.",
+    "Approval binds this exact commit/tree. A combined-source cherry-pick requires byte-equivalent correction files and a new full CI run."
+  ],
+  "requiredFollowup": [
+    "Verify the published combined-source mapping preserves the three reviewed files exactly.",
+    "Inspect fresh CI browser-shard results, Firefox execution, selected-shard ownership, editor observation and UX artifact source hashes/tree/cleanliness before acceptance. Preserve the failed prior run in evidence history."
+  ],
+  "reviewArtifactSha256": {
+    "provenance-f872de5-repro.py": "7cbe09e1ccefe51722d0857b8da2d50f0ea23dc0060b2b691f6bdfa369cd119a",
+    "provenance-f872de5-repro.json": "936b45598f26d6e5536ebd8515deb3aacffe9f5cf1646601fd3904b6e48b3a9b",
+    "provenance-f872de5-typecheck.log": "6168005adb0e4333fc9fe474f7a04e58af817547090bbd6147ca72516dc69fcb"
+  },
+  "authorshipBoundary": "No author or root source edits, remote writes, comments, pushes or merges. Only owned scratch review artifacts were written."
+}

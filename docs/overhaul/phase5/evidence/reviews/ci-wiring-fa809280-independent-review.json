@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "kind": "phase5-independent-ci-wiring-review",
+  "reviewer": "/root/security",
+  "observedAt": "2026-11-16T15:49:09.625814+00:00",
+  "verdict": "ACCEPT_SCOPED_CI_WIRING_ONLY",
+  "source": {
+    "commit": "fa809280d014d6896e9ddeb5dd95f4a5d90c8ee6",
+    "tree": "2091b4b06ec7ffe534b2a9f17dd0504930a48c17",
+    "parent": "1d798f60c45f289866530b4cecc9eb0482392c16"
+  },
+  "scope": "Only the 36 added lines in .github/workflows/ci.yml; supporting script/report generation, pipeline selection and artifact paths inspected to resolve wiring behavior.",
+  "workflowSha256": "7cb96ddfa94d001c60d777bb0c75ea9f56911ed594aefe3b299c2cf2c5999166",
+  "diffSha256": "881f403e79ace1a53e45ca631974465239dfdd3b388db9b9d09e8df0704a7974",
+  "supportingSourceBindings": {
+    ".github/workflows/ci.yml": "7cb96ddfa94d001c60d777bb0c75ea9f56911ed594aefe3b299c2cf2c5999166",
+    "Back/scripts/phase5-db-qualification.mjs": "7ee117df19f12c9946a8ba9e308508593d18352efa32f051e27861dbb325d357",
+    "Back/scripts/phase5-db-qualification.test.mjs": "0c81a988d0f5477cebd1f1c47b5c30c2b1925352bd6755ff8a449d0fc1ab438f",
+    "Back/vitest.config.pipeline.ts": "b02a171b8cfbd88d9d47822e66928b9a8800a15668b21281d74fe8f227bee7b2",
+    "Back/test/phase5-multi-api.pipeline-spec.ts": "ae048f9411072a206342484c18a8ee93109195d18fa4d35189eac9871c7c9175",
+    "scripts/ci-policy.test.mjs": "c54fc7fb5d4a1c3f20b96d3b7a6845049c7133a35dad31910d1ebfd03fdaedef"
+  },
+  "checks": [
+    {
+      "area": "Database guard tests",
+      "result": "Existing two pure guard tests are added to the Backend test step. They reject production mode, missing disposable opt-in, nonliteral/remote hosts, URL overrides and non-generated cleanup identifiers before any database action."
+    },
+    {
+      "area": "Disposable target and execution",
+      "result": "The new Back step uses NODE_ENV=test, PHASE5_DB_QUALIFICATION=disposable, the existing owned PostgreSQL service loopback port and synthetic CI credentials. It runs after the normal build/migration/API validation. The executable creates a random generated database, qualifies it and drops only that database; there is no production or remote target."
+    },
+    {
+      "area": "Database success gate",
+      "result": "The actual script must exit0; then parsed JSON must have statusPASS, source.head equal current GITHUB_SHA, exactly seven measurements, cleanup.created=true and cleanup.dropped=true. Script errors and cleanup errors exit nonzero. Invalid/missing JSON or false cleanup/provenance cannot satisfy the inline assertions."
+    },
+    {
+      "area": "Report freshness",
+      "result": "The script always writes its own current HEAD provenance in finally, and the successful workflow explicitly compares it to GITHUB_SHA. No Back/reports files are tracked in this immutable tree and report directories are not restored by npm dependency caching."
+    },
+    {
+      "area": "Artifact expressions",
+      "result": "Status functions occur in if expressions; with.if-no-files-found uses the supported steps outcome context with ordinary logical operators. Artifact upload uses the existing pinned approved action. Both success and failure attempt retention; success requires the single expected file, failure warns if setup prevented file creation."
+    },
+    {
+      "area": "Artifact identity and retention",
+      "result": "Database and multi-API artifact names bind github.sha and github.run_attempt. Exact single-file paths are Back/reports/phase5-database.json and Back/reports/phase5-multi-api.json, with30day retention."
+    },
+    {
+      "area": "Multi-API inclusion",
+      "result": "The existing test/*.pipeline-spec.ts glob includes the new spec and its path already selects full native validation. This delta adds retention to the existing real pipeline step rather than a separate mocked execution. Multi-API retention itself checks presence; PASS/assertion/provenance inspection remains coupled to the test and the required independent actual-artifact review."
+    },
+    {
+      "area": "No weakening",
+      "result": "Diff is strictly36 additions. Existing timeouts, resource classes, services, image/audit/native checks, existing artifact rules, permissions and CI-required dependencies are unchanged. Failure/cancellation remains blocking through the enclosing required jobs."
+    }
+  ],
+  "verification": {
+    "command": "node --test scripts/ci-policy.test.mjs Back/scripts/phase5-db-qualification.test.mjs",
+    "testedCheckout": "fa809280d014d6896e9ddeb5dd95f4a5d90c8ee6",
+    "tests": 20,
+    "pass": 20,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "durationMs": 4919.335993,
+    "diffCheck": "PASS",
+    "actualDatabaseQualification": "NOT_EXECUTED_BY_REVIEWER",
+    "nativePipeline": "NOT_EXECUTED_BY_REVIEWER",
+    "authorFilesModified": false,
+    "remoteActions": false
+  },
+  "conditions": [
+    "This acceptance is for root-authored CI wiring only and is not acceptance of the currently blocked multi-API lifecycle source.",
+    "Preserve and resolve PHASE5-MULTIAPI-001 in a separate immutable author correction; maintain full-native selection for any new helper paths.",
+    "Actual database/native qualification and final PASS/provenance/cleanup artifacts must be reviewed after CI before feature merge."
+  ],
+  "blockersInWiring": []
+}

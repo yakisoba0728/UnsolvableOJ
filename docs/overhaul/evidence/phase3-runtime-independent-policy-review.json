@@ -1,0 +1,282 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "independent_recovery",
+  "role": "independent-reviewer",
+  "reviewedAt": "2026-11-16T07:54:18.742129+00:00",
+  "decision": "APPROVE_EXACT_COMPONENT_POLICY_CONTENT",
+  "reviewedCommit": "08901f36ea19b7ffd4f459357e7b5763822a6bad",
+  "localReviewedCommit": "efa2bab6726be4225a08c6ec4ec02b9c08b9f7a8",
+  "completeTree": "9f35973a99fa8eedb51b51879d0d7bd42567cef8",
+  "policyContentSha256": "99ec18c22bc108759734494755fe4241a36c447949309881f15c01bec5d632db",
+  "policyFileSha256": "74200feeaf7764a447dc740dac42f09b7a2e2c3c9cdb03c95f5994fb4083c7b4",
+  "policyId": "ubuntu-noble-linux-libc-dev-6.8.0-149.149-amd64-2026-11-16-db0710",
+  "expiresAt": "2026-11-30T00:00:00Z",
+  "author": "runtime_security_engineer",
+  "authorshipBoundary": "Reviewer did not author or edit active policy/evaluator/gate/test implementation. Reviewer authored separate collection/comparison evidence and read-only probes; author incorporated those facts without treating them as approval.",
+  "scope": "Approval is limited to this unchanged evaluator, exact Ubuntu24.04 amd64 linux-libc-dev6.8.0-149.149 component, 182 explicitly listed advisories, 990 exact file payloads and bound evidence; not authorization to merge without full CI or deploy.",
+  "remoteEvidence": {
+    "reviewer": "independent_recovery",
+    "method": "Independent GitHub GET of immutable git commit",
+    "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/git/commits/08901f36ea19b7ffd4f459357e7b5763822a6bad",
+    "commit": "08901f36ea19b7ffd4f459357e7b5763822a6bad",
+    "tree": "9f35973a99fa8eedb51b51879d0d7bd42567cef8",
+    "parents": [
+      "87cc1e724f3c5bba8ee4a1d3e138c16a18202f02"
+    ],
+    "remoteDate": "2026-11-16T07:52:03Z",
+    "localCommit": "efa2bab6726be4225a08c6ec4ec02b9c08b9f7a8",
+    "expectedTree": "9f35973a99fa8eedb51b51879d0d7bd42567cef8",
+    "treeMatches": true
+  },
+  "diff": {
+    "changedFiles": [
+      [
+        "A",
+        "docs/overhaul/PHASE3-RUNTIME-REVALIDATION.md"
+      ],
+      [
+        "A",
+        "docs/overhaul/evidence/phase3-current-cna-independent-content-comparison.json"
+      ],
+      [
+        "A",
+        "docs/overhaul/evidence/phase3-current-cna-independent-receipt.json"
+      ],
+      [
+        "A",
+        "docs/overhaul/evidence/phase3-kernel-header-applicability.json"
+      ],
+      [
+        "A",
+        "docs/overhaul/evidence/phase3-kernel-header-review.json"
+      ],
+      [
+        "A",
+        "docs/overhaul/evidence/phase3-runtime-advisory-delta.json"
+      ],
+      [
+        "A",
+        "docs/overhaul/evidence/phase3-runtime-advisory-revalidation-original-policy.json"
+      ],
+      [
+        "A",
+        "docs/overhaul/evidence/phase3-runtime-advisory-revalidation-proposed-policy.json"
+      ],
+      [
+        "A",
+        "docs/overhaul/evidence/phase3-runtime-revalidation-author-validation.json"
+      ],
+      [
+        "A",
+        "docs/overhaul/evidence/phase3-runtime-vendor-advisory-review.json"
+      ],
+      [
+        "A",
+        "docs/overhaul/evidence/phase3-runtime-vendor-independent-review.json"
+      ],
+      [
+        "A",
+        "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/accepted-runtime.zip"
+      ],
+      [
+        "A",
+        "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/blocked-runtime.zip"
+      ],
+      [
+        "A",
+        "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/current-cna-records.zip"
+      ],
+      [
+        "A",
+        "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/proposed-evaluation.json"
+      ],
+      [
+        "A",
+        "docs/overhaul/repro/phase3-refetch-cna-independent.py"
+      ],
+      [
+        "M",
+        "scripts/image-applicability-policy.json"
+      ],
+      [
+        "M",
+        "scripts/image_applicability_test.py"
+      ]
+    ],
+    "onlyExistingFilesChanged": [
+      "scripts/image-applicability-policy.json",
+      "scripts/image_applicability_test.py"
+    ],
+    "allOtherPreviouslyTrackedFilesPreserved": true,
+    "allOriginalTestMethodsAndAssertionNodesPreserved": true,
+    "newHistoricalRegressionMethods": 4
+  },
+  "boundFiles": {
+    "evidence.cnaInventory": {
+      "path": "docs/overhaul/evidence/phase3-kernel-header-applicability.json",
+      "sha256": "9d317229d78b224757dddbc9c03db68b5d6f1d5d2b191f02de857d3c46dd3796"
+    },
+    "evidence.manualReview": {
+      "path": "docs/overhaul/evidence/phase3-kernel-header-review.json",
+      "sha256": "a6d7cca70204e26b1bb76533f2b2103b1286316f6eecc92573218257b36a3a24"
+    },
+    "evidence.packageFiles": {
+      "path": "docs/overhaul/evidence/linux-libc-dev-6.8.0-149.149-amd64-files.json",
+      "sha256": "010441a3487f836ca8d56b32d3264cd286c2d11b569f44b54d2ba3e949911172"
+    },
+    "evidence.baselineArtifact": {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/blocked-runtime.zip",
+      "sha256": "cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55"
+    },
+    "evidence.scannerIdentity": {
+      "path": "docs/overhaul/evidence/phase2-trivy-fingerprint-binding.json",
+      "sha256": "98472239faff13ffe141181af911cf0841931df59028b985b5cf7466ec939eed"
+    },
+    "implementations.imageAudit": {
+      "path": "scripts/image_audit.py",
+      "sha256": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72"
+    },
+    "implementations.scannerPin": {
+      "path": "scripts/image-audit-tool.json",
+      "sha256": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c"
+    },
+    "implementations.payloadVerifier": {
+      "path": "scripts/verify_image_payload.py",
+      "sha256": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0"
+    },
+    "revalidation.inheritedPolicy": {
+      "path": "docs/overhaul/evidence/phase3-runtime-advisory-revalidation-original-policy.json",
+      "sha256": "77fcae5ce3d800b1b6289de7a7e84a2ee6364867ec13b321346520075ddd3b73"
+    },
+    "revalidation.inheritedInventory": {
+      "path": "docs/overhaul/evidence/phase2-kernel-header-applicability.json",
+      "sha256": "6e9c99fc4fa7b4d6b91cb88b0c5970dce12528b3d8193e1bd496cffd3a5f7050"
+    },
+    "revalidation.inheritedManualReview": {
+      "path": "docs/overhaul/evidence/phase2-kernel-header-review.json",
+      "sha256": "989a6d39b698dda950072c852bdf9b6f0675cbcbf5b72aca5c44619062020647"
+    },
+    "revalidation.advisoryDelta": {
+      "path": "docs/overhaul/evidence/phase3-runtime-advisory-delta.json",
+      "sha256": "799cb41e570135fb6c0b223f5bd22d401162bbd4f35005844b299c26524a966d"
+    },
+    "revalidation.primaryVendorReview": {
+      "path": "docs/overhaul/evidence/phase3-runtime-vendor-advisory-review.json",
+      "sha256": "60285c0506ad1ceb2dfc5f107784855043ed9b145fb31bfb800f051c930870cd"
+    },
+    "revalidation.independentVendorCollection": {
+      "path": "docs/overhaul/evidence/phase3-runtime-vendor-independent-review.json",
+      "sha256": "b2c0fc2fde6f0dd3696ed7db55d122cec8aa8e10d68ee143de7c602d4f05cb43"
+    },
+    "revalidation.acceptedScanArtifact": {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/accepted-runtime.zip",
+      "sha256": "128ea68ac07435b95731ffe00ac6f6171f0fa18915ded6133c1ce077e06e53a0"
+    },
+    "revalidation.blockedScanArtifact": {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/blocked-runtime.zip",
+      "sha256": "cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55"
+    },
+    "revalidation.currentCnaArchive": {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/current-cna-records.zip",
+      "sha256": "54c6826a9e0b1453dbf8e99ddf68f644edd519af3829d8106fc719bc3aa7e89c"
+    },
+    "revalidation.currentCnaArchiveManifest": {
+      "path": "docs/overhaul/evidence/phase3-current-cna-independent-receipt.json",
+      "sha256": "850c53a6bad6779cce05e821c0757dd7c377c9ed26dec907a9ab57fb70eb0bf1"
+    },
+    "revalidation.independentCnaContentComparison": {
+      "path": "docs/overhaul/evidence/phase3-current-cna-independent-content-comparison.json",
+      "sha256": "9bb7a8c5a527fcfb8a5336e98eb4d3dd5431305ef00af5baf93140413093ad30"
+    },
+    "revalidation.inventoryCollector": {
+      "path": "docs/overhaul/repro/kernel-header-applicability.py",
+      "sha256": "96609e11c379ec67a89d9f7d774bc0da14d04a6bd790b57c6320387ca88115e6"
+    },
+    "revalidation.independentCollector": {
+      "path": "docs/overhaul/repro/phase3-refetch-cna-independent.py",
+      "sha256": "b6741499e32cbb0951f93247dcea3f4470bcc3a259337c1ba547a08dc021eaa0"
+    },
+    "revalidation.unchangedEvaluator": {
+      "path": "scripts/image_applicability.py",
+      "sha256": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f"
+    },
+    "revalidation.unchangedImageGate": {
+      "path": "scripts/image_gate.py",
+      "sha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b"
+    }
+  },
+  "policyRecordChangedFields": {
+    "originalScannerFingerprint": 182,
+    "advisorySha256": 16
+  },
+  "independentChecks": {
+    "fullRawFindingRecordsCompared": 1107,
+    "normalizedPackagesUnchanged": 225,
+    "rawChangedAdvisories": 55,
+    "rawChangedBySeverity": {
+      "HIGH": 14,
+      "CRITICAL": 2,
+      "MEDIUM": 30,
+      "LOW": 9
+    },
+    "reviewedCohortChanged": 16,
+    "reviewedCohortUnchanged": 166,
+    "rawHigh": 177,
+    "rawCritical": 5,
+    "payloadFilesUnchanged": 990,
+    "freshIndependentCnaRawBodies": 182,
+    "rawCnaHashMismatches": 0,
+    "independentlyParsedSourceMapMismatches": 0,
+    "primaryAlmaPagesRead": 14,
+    "primaryUbuntuCriticalPagesRead": 2,
+    "inheritedComponentAssessmentsUnchanged": 182,
+    "inheritedCriticalPatchReviewsUnchanged": 5,
+    "inheritedSpecialUapiReviewUnchanged": 1,
+    "unchangedFingerprintSchema": true,
+    "unchangedExpiry": true,
+    "unchangedEvaluatorAndGateAndScannerAndVerifier": true
+  },
+  "actualCurrentClockProposalEvaluation": {
+    "observedAt": "2026-11-16T07:54:18.576086+00:00",
+    "code": 2,
+    "gate": "BLOCKED_REVIEW",
+    "blockingReasons": [
+      "INDEPENDENT_POLICY_REVIEW_REQUIRED"
+    ],
+    "proposed": 182,
+    "reviewed": 0,
+    "remainingBlocking": 182,
+    "unresolved": []
+  },
+  "tests": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s scripts -p '*_test.py'",
+    "sourceCommit": "efa2bab6726be4225a08c6ec4ec02b9c08b9f7a8",
+    "sourceTree": "9f35973a99fa8eedb51b51879d0d7bd42567cef8",
+    "count": 92,
+    "passed": 92,
+    "failed": 0,
+    "seconds": 51.768,
+    "logFile": "runtime-efa2bab-python-tests.log",
+    "logSha256": "d6f04fa76c5ee0a86d52f66547d6de0292dd9917e94f88142a50108b009289cf"
+  },
+  "findings": [
+    {
+      "severity": "documentation clarification",
+      "blocking": false,
+      "status": "root accepted correction for following metadata commit",
+      "description": "Narrow new IDs/drift denial wording to new HIGH/CRITICAL findings and changes within reviewed cohort; new unrelated LOW/MEDIUM findings retain existing scanner policy. No policy-content change requested."
+    }
+  ],
+  "requiredNextSteps": [
+    "Coordinator must record its separate actual review and these independent review identifiers against this exact policy content.",
+    "Only active policy review metadata may change to authorize the reviewed content; preserve the archived original and PROPOSED policy.",
+    "Retain Nov30 expiry and full-fingerprint/all-cohort fail-closed behavior on any further drift.",
+    "Require fresh exact-source-HEAD full CI and updated integration HEAD CI before merge readiness; prior successful runs do not satisfy this gate."
+  ],
+  "limits": [
+    "No new local Docker build, scan, OCI extraction, paid AI call, sandbox escape trial, or host kernel review was executed by this reviewer.",
+    "Fresh independent source-byte equality supports explicitly inherited patch assessments; no 182 newly repeated manual patch reviews are claimed.",
+    "Current source review does not claim zero Runtime vulnerabilities: raw scanner HIGH177/CRITICAL5 remain.",
+    "No main merge or production deployment approval is supplied."
+  ]
+}

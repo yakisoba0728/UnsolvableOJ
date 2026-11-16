@@ -21,6 +21,7 @@ import { HomePage } from "./pages/HomePage";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { NotFoundPage } from "./components/NotFoundPage";
 import { SiteHeader } from "./components/SiteHeader";
+import { RouteFocus } from "./components/RouteFocus";
 
 // 화면 단위로 코드를 나눠, 처음 방문한 화면의 코드만 내려받는다.
 // import()는 호출하는 자리에 그대로 둬야 Vite가 화면마다 청크를 나눈다.
@@ -44,6 +45,7 @@ const EnterpriseAttemptPage = lazyPage(() => import("./pages/EnterpriseAttemptPa
 const EnterpriseFormPage = lazyPage(() => import("./pages/EnterpriseFormPage"), "EnterpriseFormPage");
 const EnterprisePage = lazyPage(() => import("./pages/EnterprisePage"), "EnterprisePage");
 const MissionsPage = lazyPage(() => import("./pages/MissionsPage"), "MissionsPage");
+const LearningPage = lazyPage(() => import("./pages/LearningPage"), "LearningPage");
 const MyProblemsPage = lazyPage(() => import("./pages/MyProblemsPage"), "MyProblemsPage");
 const ProblemPage = lazyPage(() => import("./pages/ProblemPage"), "ProblemPage");
 const ProblemsPage = lazyPage(() => import("./pages/ProblemsPage"), "ProblemsPage");
@@ -65,8 +67,15 @@ const menu = [
 ];
 
 export function App({ getNavigationVersion }: { getNavigationVersion: () => number }) {
-  const { session, setSession } = useAuth();
+  const { session, setSession, getSessionIdentityVersion } = useAuth();
   const { pathname, search, hash, key: locationKey } = useLocation();
+  const mainRef = useRef<HTMLElement>(null);
+  // Keep the previous committed route outside Suspense: a cold lazy page must
+  // not mistake its first mount for a user-requested in-app navigation.
+  const committedPath = useRef(pathname);
+  // A login identity and navigation entry own private exam data and editor state.
+  // Access-token refresh does not change this identity or reset in-progress code.
+  const enterpriseOwner = `${session?.user.id ?? "guest"}:${getSessionIdentityVersion()}:${pathname}:${locationKey}`;
   const navigationType = useNavigationType();
   // 다른 화면으로 이동하면 스크롤을 맨 위로 올린다(뒤로 가기는 브라우저 동작에 맡기고,
   // 같은 화면에서 필터·검색 주소만 바뀔 때는 위치를 유지한다).
@@ -115,11 +124,11 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
           navigate("/");
         }}
       />
-      <main className="main-content" id="main" tabIndex={-1}>
+      <main className="main-content" id="main" tabIndex={-1} ref={mainRef}>
         <ErrorBoundary resetKey={pathname}>
           <Suspense
             fallback={
-              <div className="page-width empty-state">불러오는 중입니다…</div>
+              <div className="page-width empty-state" role="status">화면을 불러오는 중입니다…</div>
             }
           >
             {/* 임시 비밀번호로 로그인했다면 비밀번호를 바꿀 때까지 계정 설정에 머문다(서버도 다른 API를 403으로 막는다). */}
@@ -154,6 +163,10 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               <Route
                 path="/profile"
                 element={session ? <ProfilePage key={session.user.id} /> : loginRedirect}
+              />
+              <Route
+                path="/learning"
+                element={session ? <LearningPage key={`${session.user.id}:${getSessionIdentityVersion()}`} /> : loginRedirect}
               />
               <Route
                 path="/settings"
@@ -192,13 +205,13 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               <Route path="/vibe/attempts/:id" element={session ? <VibeWorkspacePage key={`${session.user.id}:${pathname}`} /> : loginRedirect} />
               <Route path="/analysis/:id" element={<AnalysisQuestionPage />} />
               <Route path="/missions" element={<MissionsPage />} />
-              <Route path="/enterprise" element={<EnterprisePage />} />
-              <Route path="/enterprise/new" element={session ? <EnterpriseFormPage key={session.user.id} /> : loginRedirect} />
-              <Route path="/enterprise/:id" element={<EnterpriseDetailPage />} />
-              <Route path="/enterprise/join/:code" element={<EnterpriseJoinPage />} />
-              <Route path="/enterprise/attempts/:id" element={<EnterpriseAttemptPage />} />
-              <Route path="/enterprise/:testId/attempts/:attemptId/vibe/:id" element={session ? <EnterpriseVibeReviewPage key={`${session.user.id}:${pathname}`} /> : loginRedirect} />
-              <Route path="/enterprise/:id/edit" element={session ? <EnterpriseFormPage key={`${session.user.id}:${pathname}`} /> : loginRedirect} />
+              <Route path="/enterprise" element={<EnterprisePage key={enterpriseOwner} />} />
+              <Route path="/enterprise/new" element={session ? <EnterpriseFormPage key={enterpriseOwner} getNavigationVersion={getNavigationVersion} /> : loginRedirect} />
+              <Route path="/enterprise/:id" element={<EnterpriseDetailPage key={enterpriseOwner} getNavigationVersion={getNavigationVersion} />} />
+              <Route path="/enterprise/join/:code" element={<EnterpriseJoinPage key={enterpriseOwner} getNavigationVersion={getNavigationVersion} />} />
+              <Route path="/enterprise/attempts/:id" element={<EnterpriseAttemptPage key={enterpriseOwner} getNavigationVersion={getNavigationVersion} />} />
+              <Route path="/enterprise/:testId/attempts/:attemptId/vibe/:id" element={session ? <EnterpriseVibeReviewPage key={enterpriseOwner} /> : loginRedirect} />
+              <Route path="/enterprise/:id/edit" element={session ? <EnterpriseFormPage key={enterpriseOwner} getNavigationVersion={getNavigationVersion} /> : loginRedirect} />
               <Route
                 path="/submissions"
                 element={session ? <SubmissionsPage key={session.user.id} /> : loginRedirect}
@@ -222,6 +235,7 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
             )}
+            <RouteFocus pathname={pathname} hash={hash} target={mainRef} committedPath={committedPath} />
           </Suspense>
         </ErrorBoundary>
       </main>

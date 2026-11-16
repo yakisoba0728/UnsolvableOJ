@@ -1,0 +1,88 @@
+Owned PG17.11/Redis8.10.3 ready on loopback; fresh temporary cluster. Command: ['node', 'scripts/run-integration.mjs', 'e2e']
+
+ RUN  v4.1.12 /workspace/scratch/86de5f814139/oj-vibe/Back
+
+ ❯ test/boj-seed.e2e-spec.ts (8 tests | 4 failed) 12317ms
+     × repairs an interrupted legacy seed from explicitly loaded ordered saved cases 215ms
+     × rolls back author, problem and cases if the initial snapshot cannot be saved 216ms
+     × fails rather than inventing v1 from edited v2, preserving credentials and immutable versions 108ms
+     × refuses missing cases and legacy empty snapshots instead of silently enabling 0/0 judging 150ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/boj-seed.e2e-spec.ts > BOJ import and demo seed CLIs (isolated schema) > repairs an interrupted legacy seed from explicitly loaded ordered saved cases
+ FAIL  test/boj-seed.e2e-spec.ts > BOJ import and demo seed CLIs (isolated schema) > fails rather than inventing v1 from edited v2, preserving credentials and immutable versions
+ FAIL  test/boj-seed.e2e-spec.ts > BOJ import and demo seed CLIs (isolated schema) > refuses missing cases and legacy empty snapshots instead of silently enabling 0/0 judging
+Error: Command failed: /opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node /workspace/scratch/86de5f814139/oj-vibe/Back/scripts/seed-demo.mjs
+node:internal/modules/esm/resolve:272
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/workspace/scratch/86de5f814139/oj-vibe/Back/dist/database/data-source.js' imported from /workspace/scratch/86de5f814139/oj-vibe/Back/scripts/seed-demo.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:272:11)
+    at moduleResolve (node:internal/modules/esm/resolve:879:10)
+    at defaultResolve (node:internal/modules/esm/resolve:1006:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:705:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:725:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:763:56)
+    at #resolve (node:internal/modules/esm/loader:687:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:607:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:276:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:381:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///workspace/scratch/86de5f814139/oj-vibe/Back/dist/database/data-source.js'
+}
+
+Node.js v24.22.1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  test/boj-seed.e2e-spec.ts > BOJ import and demo seed CLIs (isolated schema) > rolls back author, problem and cases if the initial snapshot cannot be saved
+AssertionError: expected Error: Command failed: /opt/codex/runtime… { …(6) } to match object { stderr: StringContaining{…} }
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "stderr": StringContaining "reject_demo_snapshot",
++ Error {
++   "stderr": "node:internal/modules/esm/resolve:272
++     throw new ERR_MODULE_NOT_FOUND(
++           ^
++
++ Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/workspace/scratch/86de5f814139/oj-vibe/Back/dist/database/data-source.js' imported from /workspace/scratch/86de5f814139/oj-vibe/Back/scripts/seed-demo.mjs
++     at finalizeResolution (node:internal/modules/esm/resolve:272:11)
++     at moduleResolve (node:internal/modules/esm/resolve:879:10)
++     at defaultResolve (node:internal/modules/esm/resolve:1006:11)
++     at #cachedDefaultResolve (node:internal/modules/esm/loader:705:20)
++     at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:725:38)
++     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:763:56)
++     at #resolve (node:internal/modules/esm/loader:687:17)
++     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:607:35)
++     at ModuleJob.syncLink (node:internal/modules/esm/module_job:276:33)
++     at ModuleJob.link (node:internal/modules/esm/module_job:381:17) {
++   code: 'ERR_MODULE_NOT_FOUND',
++   url: 'file:///workspace/scratch/86de5f814139/oj-vibe/Back/dist/database/data-source.js'
++ }
++
++ Node.js v24.22.1
++ ",
+  }
+
+ ❯ test/boj-seed.e2e-spec.ts:193:27
+    191|     await db.query('ALTER TABLE problem_versions ADD CONSTRAINT reject…
+    192|     try {
+    193|       await expect(seed()).rejects.toMatchObject({ stderr: expect.stri…
+       |                           ^
+    194|       expect(await db.query('SELECT * FROM users')).toEqual([]);
+    195|       expect(await db.query('SELECT * FROM problems')).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+
+ Test Files  1 failed | 36 passed (37)
+      Tests  4 failed | 218 passed (222)
+   Start at  15:24:07
+   Duration  134.93s (transform 3.32s, setup 0ms, import 52.06s, tests 74.02s, environment 5ms)
+

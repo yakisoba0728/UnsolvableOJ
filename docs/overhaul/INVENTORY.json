@@ -1,0 +1,1703 @@
+{
+  "revision": "6176015b63a1615cc2269172f246725ef08abab3",
+  "scope": "Static inventory at an exact revision; counts are not test coverage or an assertion that all behavior is verified.",
+  "fileCount": 453,
+  "byTopLevel": {
+    ".claude": 1,
+    "(root)": 4,
+    ".github": 3,
+    "Back": 194,
+    "Front": 173,
+    "Judge": 22,
+    "deploy": 3,
+    "docs": 50,
+    "scripts": 3
+  },
+  "controllers": [
+    "Back/src/modules/admin/admin.controller.ts",
+    "Back/src/modules/community/community.controller.ts",
+    "Back/src/modules/auth/auth.controller.ts",
+    "Back/src/modules/email/email.controller.ts",
+    "Back/src/modules/submissions/submissions.controller.ts",
+    "Back/src/modules/enterprise/enterprise.controller.ts",
+    "Back/src/modules/health/health.controller.ts",
+    "Back/src/modules/submissions/judge-internal.controller.ts",
+    "Back/src/modules/missions/missions.controller.ts",
+    "Back/src/modules/notifications/notifications.controller.ts",
+    "Back/src/modules/problems/problems.controller.ts",
+    "Back/src/modules/users/users.controller.ts",
+    "Back/src/modules/vibe/vibe.controller.ts"
+  ],
+  "apiCount": 112,
+  "apis": [
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/audit",
+      "controller": "AdminController",
+      "handler": "audit",
+      "guards": [
+        "JwtAuthGuard",
+        "RolesGuard"
+      ],
+      "roles": [
+        "UserRole.ADMIN"
+      ],
+      "source": "Back/src/modules/admin/admin.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/admin/community/comments/:id/hidden",
+      "controller": "CommunityAdminController",
+      "handler": "unhideComment",
+      "guards": [
+        "JwtAuthGuard",
+        "RolesGuard"
+      ],
+      "roles": [
+        "UserRole.ADMIN"
+      ],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/admin/community/comments/:id/hidden",
+      "controller": "CommunityAdminController",
+      "handler": "hideComment",
+      "guards": [
+        "JwtAuthGuard",
+        "RolesGuard"
+      ],
+      "roles": [
+        "UserRole.ADMIN"
+      ],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/admin/community/posts/:id/hidden",
+      "controller": "CommunityAdminController",
+      "handler": "unhidePost",
+      "guards": [
+        "JwtAuthGuard",
+        "RolesGuard"
+      ],
+      "roles": [
+        "UserRole.ADMIN"
+      ],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/admin/community/posts/:id/hidden",
+      "controller": "CommunityAdminController",
+      "handler": "hidePost",
+      "guards": [
+        "JwtAuthGuard",
+        "RolesGuard"
+      ],
+      "roles": [
+        "UserRole.ADMIN"
+      ],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/community/reports",
+      "controller": "CommunityAdminController",
+      "handler": "reports",
+      "guards": [
+        "JwtAuthGuard",
+        "RolesGuard"
+      ],
+      "roles": [
+        "UserRole.ADMIN"
+      ],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/admin/community/reports/:id/resolved",
+      "controller": "CommunityAdminController",
+      "handler": "resolve",
+      "guards": [
+        "JwtAuthGuard",
+        "RolesGuard"
+      ],
+      "roles": [
+        "UserRole.ADMIN"
+      ],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/ops",
+      "controller": "AdminController",
+      "handler": "ops",
+      "guards": [
+        "JwtAuthGuard",
+        "RolesGuard"
+      ],
+      "roles": [
+        "UserRole.ADMIN"
+      ],
+      "source": "Back/src/modules/admin/admin.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/users",
+      "controller": "AdminController",
+      "handler": "users",
+      "guards": [
+        "JwtAuthGuard",
+        "RolesGuard"
+      ],
+      "roles": [
+        "UserRole.ADMIN"
+      ],
+      "source": "Back/src/modules/admin/admin.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/users/:id/role",
+      "controller": "AdminController",
+      "handler": "changeRole",
+      "guards": [
+        "JwtAuthGuard",
+        "RolesGuard"
+      ],
+      "roles": [
+        "UserRole.ADMIN"
+      ],
+      "source": "Back/src/modules/admin/admin.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/users/:id/suspension",
+      "controller": "AdminController",
+      "handler": "changeSuspension",
+      "guards": [
+        "JwtAuthGuard",
+        "RolesGuard"
+      ],
+      "roles": [
+        "UserRole.ADMIN"
+      ],
+      "source": "Back/src/modules/admin/admin.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/users/:id/temporary-password",
+      "controller": "AdminController",
+      "handler": "issueTemporaryPassword",
+      "guards": [
+        "JwtAuthGuard",
+        "RolesGuard"
+      ],
+      "roles": [
+        "UserRole.ADMIN"
+      ],
+      "source": "Back/src/modules/admin/admin.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/auth/account",
+      "controller": "AuthController",
+      "handler": "withdraw",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/auth/auth.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "controller": "AuthController",
+      "handler": "login",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/auth/auth.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "controller": "AuthController",
+      "handler": "logout",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/auth/auth.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/auth/password",
+      "controller": "AuthController",
+      "handler": "changePassword",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/auth/auth.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "controller": "AuthController",
+      "handler": "refresh",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/auth/auth.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "controller": "AuthController",
+      "handler": "register",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/auth/auth.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/auth/sessions",
+      "controller": "AuthController",
+      "handler": "revokeOtherSessions",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/auth/auth.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/sessions",
+      "controller": "AuthController",
+      "handler": "sessions",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/auth/auth.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/auth/sessions/:id",
+      "controller": "AuthController",
+      "handler": "revokeSession",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/auth/auth.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/auth/username",
+      "controller": "AuthController",
+      "handler": "changeUsername",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/auth/auth.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/posts",
+      "controller": "CommunityController",
+      "handler": "list",
+      "guards": [
+        "OptionalJwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/community/posts",
+      "controller": "CommunityController",
+      "handler": "create",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/community/posts/:id",
+      "controller": "CommunityController",
+      "handler": "remove",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/posts/:id",
+      "controller": "CommunityController",
+      "handler": "detail",
+      "guards": [
+        "OptionalJwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/community/posts/:id",
+      "controller": "CommunityController",
+      "handler": "update",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/community/posts/:id/accepted-answer",
+      "controller": "CommunityController",
+      "handler": "unaccept",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/community/posts/:id/accepted-answer/:commentId",
+      "controller": "CommunityController",
+      "handler": "accept",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/posts/:id/author-stats",
+      "controller": "CommunityController",
+      "handler": "stats",
+      "guards": [
+        "OptionalJwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/posts/:id/comments",
+      "controller": "CommunityController",
+      "handler": "comments",
+      "guards": [
+        "OptionalJwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/community/posts/:id/comments",
+      "controller": "CommunityController",
+      "handler": "comment",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/community/posts/:id/comments/:commentId",
+      "controller": "CommunityController",
+      "handler": "deleteComment",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/community/posts/:id/comments/:commentId",
+      "controller": "CommunityController",
+      "handler": "editComment",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/community/posts/:id/comments/:commentId/report",
+      "controller": "CommunityController",
+      "handler": "reportComment",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/community/posts/:id/comments/:commentId/vote",
+      "controller": "CommunityController",
+      "handler": "uncommentVote",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/community/posts/:id/comments/:commentId/vote",
+      "controller": "CommunityController",
+      "handler": "commentVote",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/community/posts/:id/follow",
+      "controller": "CommunityController",
+      "handler": "unfollow",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/community/posts/:id/follow",
+      "controller": "CommunityController",
+      "handler": "follow",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/posts/:id/interaction",
+      "controller": "CommunityController",
+      "handler": "interaction",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/community/posts/:id/report",
+      "controller": "CommunityController",
+      "handler": "report",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/community/posts/:id/saved",
+      "controller": "CommunityController",
+      "handler": "unsave",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/community/posts/:id/saved",
+      "controller": "CommunityController",
+      "handler": "save",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/community/posts/:id/view",
+      "controller": "CommunityController",
+      "handler": "view",
+      "guards": [
+        "OptionalJwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/community/posts/:id/vote",
+      "controller": "CommunityController",
+      "handler": "unvote",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/posts/:id/vote",
+      "controller": "CommunityController",
+      "handler": "voteState",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/community/posts/:id/vote",
+      "controller": "CommunityController",
+      "handler": "vote",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/community/posts/mine",
+      "controller": "CommunityController",
+      "handler": "mine",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/community/community.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/email/preferences",
+      "controller": "EmailController",
+      "handler": "preferences",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/email/email.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/email/preferences",
+      "controller": "EmailController",
+      "handler": "update",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/email/email.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/email/unsubscribe",
+      "controller": "EmailController",
+      "handler": "unsubscribe",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/email/email.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/email/verification/confirm",
+      "controller": "EmailController",
+      "handler": "confirm",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/email/email.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/email/verification/request",
+      "controller": "EmailController",
+      "handler": "request",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/email/email.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/enterprise/attempts/:attemptId/problems/:problemId/submissions",
+      "controller": "SubmissionsController",
+      "handler": "createForAttempt",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/submissions/submissions.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/enterprise/attempts/:id",
+      "controller": "EnterpriseController",
+      "handler": "attempt",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/enterprise/attempts/:id/finish",
+      "controller": "EnterpriseController",
+      "handler": "finish",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/enterprise/attempts/:id/vibe/:challengeId",
+      "controller": "EnterpriseController",
+      "handler": "startVibe",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/enterprise/join/:code",
+      "controller": "EnterpriseController",
+      "handler": "join",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/enterprise/join/:code/start",
+      "controller": "EnterpriseController",
+      "handler": "start",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/enterprise/tests",
+      "controller": "EnterpriseController",
+      "handler": "list",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/enterprise/tests",
+      "controller": "EnterpriseController",
+      "handler": "create",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/enterprise/tests/:id",
+      "controller": "EnterpriseController",
+      "handler": "remove",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/enterprise/tests/:id",
+      "controller": "EnterpriseController",
+      "handler": "findOne",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/enterprise/tests/:id",
+      "controller": "EnterpriseController",
+      "handler": "update",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/enterprise/tests/:id/results",
+      "controller": "EnterpriseController",
+      "handler": "results",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/enterprise/tests/:testId/attempts/:attemptId/vibe/:vibeId",
+      "controller": "EnterpriseController",
+      "handler": "reviewVibe",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/enterprise/tests/:testId/attempts/:attemptId/vibe/:vibeId/evaluation",
+      "controller": "EnterpriseController",
+      "handler": "grade",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/enterprise/tests/:testId/attempts/:attemptId/vibe/:vibeId/revisions/:revision",
+      "controller": "EnterpriseController",
+      "handler": "revision",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/enterprise/enterprise.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/health",
+      "controller": "HealthController",
+      "handler": "check",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/health/health.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/internal/judge/heartbeat",
+      "controller": "JudgeInternalController",
+      "handler": "heartbeat",
+      "guards": [
+        "JudgeTokenGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/submissions/judge-internal.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/internal/judge/submissions/:id",
+      "controller": "JudgeInternalController",
+      "handler": "claim",
+      "guards": [
+        "JudgeTokenGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/submissions/judge-internal.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/internal/judge/submissions/:id/heartbeat",
+      "controller": "JudgeInternalController",
+      "handler": "renewLease",
+      "guards": [
+        "JudgeTokenGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/submissions/judge-internal.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/internal/judge/submissions/:id/release",
+      "controller": "JudgeInternalController",
+      "handler": "releaseLease",
+      "guards": [
+        "JudgeTokenGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/submissions/judge-internal.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/internal/judge/submissions/:id/result",
+      "controller": "JudgeInternalController",
+      "handler": "recordResult",
+      "guards": [
+        "JudgeTokenGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/submissions/judge-internal.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/missions",
+      "controller": "MissionsController",
+      "handler": "list",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/missions/missions.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/missions/:id/claim",
+      "controller": "MissionsController",
+      "handler": "claim",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/missions/missions.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/missions/analysis/:id/attempts",
+      "controller": "MissionsController",
+      "handler": "answer",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/missions/missions.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/missions/analysis/:id/check",
+      "controller": "AnalysisQuestionsController",
+      "handler": "check",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/missions/missions.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/missions/analysis/attempts",
+      "controller": "MissionsController",
+      "handler": "attempts",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/missions/missions.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/missions/analysis/questions",
+      "controller": "AnalysisQuestionsController",
+      "handler": "questions",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/missions/missions.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications",
+      "controller": "NotificationsController",
+      "handler": "list",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/notifications/notifications.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/notifications/:id/read",
+      "controller": "NotificationsController",
+      "handler": "read",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/notifications/notifications.controller.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/notifications/read-all",
+      "controller": "NotificationsController",
+      "handler": "readAll",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/notifications/notifications.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread-count",
+      "controller": "NotificationsController",
+      "handler": "unread",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/notifications/notifications.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/problems",
+      "controller": "ProblemsController",
+      "handler": "findAll",
+      "guards": [
+        "OptionalJwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/problems/problems.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/problems",
+      "controller": "ProblemsController",
+      "handler": "create",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/problems/problems.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/problems/:id",
+      "controller": "ProblemsController",
+      "handler": "update",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/problems/problems.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/problems/:id/manage",
+      "controller": "ProblemsController",
+      "handler": "manage",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/problems/problems.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/problems/:id/status",
+      "controller": "ProblemsController",
+      "handler": "changeStatus",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/problems/problems.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/problems/:problemId/rejudge",
+      "controller": "SubmissionsController",
+      "handler": "rejudgeProblem",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/submissions/submissions.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/problems/:problemId/submissions",
+      "controller": "SubmissionsController",
+      "handler": "findForProblem",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/submissions/submissions.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/problems/:problemId/submissions",
+      "controller": "SubmissionsController",
+      "handler": "create",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/submissions/submissions.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/problems/:slug",
+      "controller": "ProblemsController",
+      "handler": "findOne",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/problems/problems.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/problems/by-slug/:slug",
+      "controller": "ProblemsController",
+      "handler": "findOne",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/problems/problems.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/problems/mine",
+      "controller": "ProblemsController",
+      "handler": "mine",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/problems/problems.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/rankings",
+      "controller": "UsersController",
+      "handler": "rankings",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/users/users.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/submissions",
+      "controller": "SubmissionsController",
+      "handler": "findMine",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/submissions/submissions.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/submissions/:id",
+      "controller": "SubmissionsController",
+      "handler": "findMineById",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/submissions/submissions.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/submissions/:id/rejudge",
+      "controller": "SubmissionsController",
+      "handler": "rejudge",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/submissions/submissions.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/:username",
+      "controller": "UsersController",
+      "handler": "publicProfile",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/users/users.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/me",
+      "controller": "UsersController",
+      "handler": "me",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/users/users.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/vibe/attempts",
+      "controller": "VibeController",
+      "handler": "list",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/vibe/vibe.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/vibe/attempts/:id",
+      "controller": "VibeController",
+      "handler": "get",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/vibe/vibe.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/vibe/attempts/:id/apply",
+      "controller": "VibeController",
+      "handler": "apply",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/vibe/vibe.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/vibe/attempts/:id/evaluation",
+      "controller": "VibeController",
+      "handler": "evaluate",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/vibe/vibe.controller.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/vibe/attempts/:id/files",
+      "controller": "VibeController",
+      "handler": "save",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/vibe/vibe.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/vibe/attempts/:id/messages",
+      "controller": "VibeController",
+      "handler": "chat",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/vibe/vibe.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/vibe/attempts/:id/runs",
+      "controller": "VibeController",
+      "handler": "run",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/vibe/vibe.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/vibe/attempts/:id/submit",
+      "controller": "VibeController",
+      "handler": "submit",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/vibe/vibe.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/vibe/attempts/:id/undo",
+      "controller": "VibeController",
+      "handler": "undo",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/vibe/vibe.controller.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/vibe/challenges",
+      "controller": "VibeController",
+      "handler": "catalog",
+      "guards": [],
+      "roles": [],
+      "source": "Back/src/modules/vibe/vibe.controller.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/vibe/challenges/:challengeId/attempts",
+      "controller": "VibeController",
+      "handler": "start",
+      "guards": [
+        "JwtAuthGuard"
+      ],
+      "roles": [],
+      "source": "Back/src/modules/vibe/vibe.controller.ts"
+    }
+  ],
+  "frontendRoutes": [
+    "/",
+    "/auth",
+    "/problems",
+    "/problems/new",
+    "/my-problems",
+    "/my-problems/:id/edit",
+    "/problems/view/:slug",
+    "/problems/:slug",
+    "/profile",
+    "/settings",
+    "/account/withdrawn",
+    "/email/verify",
+    "/email/unsubscribe",
+    "/rankings",
+    "/users/:username",
+    "/community",
+    "/community/new",
+    "/community/:id/edit",
+    "/community/:id",
+    "/analysis",
+    "/vibe",
+    "/vibe/attempts/:id",
+    "/analysis/:id",
+    "/missions",
+    "/enterprise",
+    "/enterprise/new",
+    "/enterprise/:id",
+    "/enterprise/join/:code",
+    "/enterprise/attempts/:id",
+    "/enterprise/:testId/attempts/:attemptId/vibe/:id",
+    "/enterprise/:id/edit",
+    "/submissions",
+    "/submissions/:id",
+    "/admin/*",
+    "*"
+  ],
+  "migrationCount": 25,
+  "migrations": [
+    "Back/src/database/migrations/1726916400000-initial-schema.ts",
+    "Back/src/database/migrations/1790550000000-backend-foundations.ts",
+    "Back/src/database/migrations/1790551000000-backfill-solves.ts",
+    "Back/src/database/migrations/1790552000000-debug-outputs.ts",
+    "Back/src/database/migrations/1790553000000-submission-xp-evidence.ts",
+    "Back/src/database/migrations/1790554000000-backend-hardening.ts",
+    "Back/src/database/migrations/1791200000000-community.ts",
+    "Back/src/database/migrations/1791200001000-community-ui.ts",
+    "Back/src/database/migrations/1793000000000-missions.ts",
+    "Back/src/database/migrations/1793001000000-learning-evidence.ts",
+    "Back/src/database/migrations/1794100000000-user-suspension.ts",
+    "Back/src/database/migrations/1794200000000-problem-tags-editorial.ts",
+    "Back/src/database/migrations/1794300000000-community-moderation-notifications.ts",
+    "Back/src/database/migrations/1794400000000-test-submissions.ts",
+    "Back/src/database/migrations/1794500000000-private-problems.ts",
+    "Back/src/database/migrations/1794600000000-enterprise-tests.ts",
+    "Back/src/database/migrations/1794700000000-refresh-tokens.ts",
+    "Back/src/database/migrations/1795000000000-account-security.ts",
+    "Back/src/database/migrations/1795100000000-enterprise-invites.ts",
+    "Back/src/database/migrations/1795200000000-problem-stats.ts",
+    "Back/src/database/migrations/1795300000000-test-results.ts",
+    "Back/src/database/migrations/1795400000000-vibe-coding.ts",
+    "Back/src/database/migrations/1795500000000-enterprise-vibe.ts",
+    "Back/src/database/migrations/1795600000000-account-withdrawal.ts",
+    "Back/src/database/migrations/1795600001000-community-email.ts"
+  ],
+  "tables": [
+    {
+      "name": "users",
+      "migration": "Back/src/database/migrations/1726916400000-initial-schema.ts"
+    },
+    {
+      "name": "problems",
+      "migration": "Back/src/database/migrations/1726916400000-initial-schema.ts"
+    },
+    {
+      "name": "test_cases",
+      "migration": "Back/src/database/migrations/1726916400000-initial-schema.ts"
+    },
+    {
+      "name": "submissions",
+      "migration": "Back/src/database/migrations/1726916400000-initial-schema.ts"
+    },
+    {
+      "name": "problem_versions",
+      "migration": "Back/src/database/migrations/1790550000000-backend-foundations.ts"
+    },
+    {
+      "name": "user_problem_solves",
+      "migration": "Back/src/database/migrations/1790550000000-backend-foundations.ts"
+    },
+    {
+      "name": "audit_events",
+      "migration": "Back/src/database/migrations/1790550000000-backend-foundations.ts"
+    },
+    {
+      "name": "community_posts",
+      "migration": "Back/src/database/migrations/1791200000000-community.ts"
+    },
+    {
+      "name": "community_comments",
+      "migration": "Back/src/database/migrations/1791200000000-community.ts"
+    },
+    {
+      "name": "community_votes",
+      "migration": "Back/src/database/migrations/1791200000000-community.ts"
+    },
+    {
+      "name": "community_comment_votes",
+      "migration": "Back/src/database/migrations/1791200001000-community-ui.ts"
+    },
+    {
+      "name": "community_saved",
+      "migration": "Back/src/database/migrations/1791200001000-community-ui.ts"
+    },
+    {
+      "name": "community_follows",
+      "migration": "Back/src/database/migrations/1791200001000-community-ui.ts"
+    },
+    {
+      "name": "mission_states",
+      "migration": "Back/src/database/migrations/1793000000000-missions.ts"
+    },
+    {
+      "name": "user_badges",
+      "migration": "Back/src/database/migrations/1793000000000-missions.ts"
+    },
+    {
+      "name": "analysis_attempts",
+      "migration": "Back/src/database/migrations/1793000000000-missions.ts"
+    },
+    {
+      "name": "community_reports",
+      "migration": "Back/src/database/migrations/1794300000000-community-moderation-notifications.ts"
+    },
+    {
+      "name": "community_post_views",
+      "migration": "Back/src/database/migrations/1794300000000-community-moderation-notifications.ts"
+    },
+    {
+      "name": "notifications",
+      "migration": "Back/src/database/migrations/1794300000000-community-moderation-notifications.ts"
+    },
+    {
+      "name": "enterprise_tests",
+      "migration": "Back/src/database/migrations/1794600000000-enterprise-tests.ts"
+    },
+    {
+      "name": "enterprise_attempts",
+      "migration": "Back/src/database/migrations/1794600000000-enterprise-tests.ts"
+    },
+    {
+      "name": "refresh_tokens",
+      "migration": "Back/src/database/migrations/1794700000000-refresh-tokens.ts"
+    },
+    {
+      "name": "problem_stats",
+      "migration": "Back/src/database/migrations/1795200000000-problem-stats.ts"
+    },
+    {
+      "name": "vibe_attempts",
+      "migration": "Back/src/database/migrations/1795400000000-vibe-coding.ts"
+    },
+    {
+      "name": "vibe_revisions",
+      "migration": "Back/src/database/migrations/1795500000000-enterprise-vibe.ts"
+    },
+    {
+      "name": "email_preferences",
+      "migration": "Back/src/database/migrations/1795600001000-community-email.ts"
+    },
+    {
+      "name": "email_tokens",
+      "migration": "Back/src/database/migrations/1795600001000-community-email.ts"
+    },
+    {
+      "name": "email_outbox",
+      "migration": "Back/src/database/migrations/1795600001000-community-email.ts"
+    },
+    {
+      "name": "email_request_limits",
+      "migration": "Back/src/database/migrations/1795600001000-community-email.ts"
+    },
+    {
+      "name": "email_delivery_clock",
+      "migration": "Back/src/database/migrations/1795600001000-community-email.ts"
+    }
+  ],
+  "testFileCount": 96,
+  "tests": [
+    "Back/scripts/boj-content.test.mjs",
+    "Back/scripts/integration-runner.test.mjs",
+    "Back/scripts/seed-starter.test.mjs",
+    "Back/scripts/starter-problems.test.mjs",
+    "Back/src/common/list-cursor.spec.ts",
+    "Back/src/common/list-query.spec.ts",
+    "Back/src/common/postgres-text.spec.ts",
+    "Back/src/config/database-ssl.spec.ts",
+    "Back/src/config/env.validation.spec.ts",
+    "Back/src/configure-http.spec.ts",
+    "Back/src/modules/admin/admin.service.spec.ts",
+    "Back/src/modules/auth/auth.service.spec.ts",
+    "Back/src/modules/auth/password-hasher.service.spec.ts",
+    "Back/src/modules/enterprise/enterprise-score.spec.ts",
+    "Back/src/modules/missions/mission-policy.spec.ts",
+    "Back/src/modules/problems/dto/expected-output.validator.spec.ts",
+    "Back/src/modules/problems/dto/update-problem.dto.spec.ts",
+    "Back/src/modules/problems/problems.service.spec.ts",
+    "Back/src/modules/submissions/dto/judge-result.dto.spec.ts",
+    "Back/src/modules/submissions/submissions.pagination.spec.ts",
+    "Back/src/modules/submissions/submissions.service.spec.ts",
+    "Back/src/modules/vibe/vibe.spec.ts",
+    "Back/test/account.e2e-spec.ts",
+    "Back/test/admin.e2e-spec.ts",
+    "Back/test/app.e2e-spec.ts",
+    "Back/test/auth.e2e-spec.ts",
+    "Back/test/boj-seed.e2e-spec.ts",
+    "Back/test/bootstrap-admin.e2e-spec.ts",
+    "Back/test/community-email.e2e-spec.ts",
+    "Back/test/community-moderation.e2e-spec.ts",
+    "Back/test/community.e2e-spec.ts",
+    "Back/test/enterprise-vibe.e2e-spec.ts",
+    "Back/test/enterprise.e2e-spec.ts",
+    "Back/test/features.e2e-spec.ts",
+    "Back/test/judge.pipeline-spec.ts",
+    "Back/test/judging-core.e2e-spec.ts",
+    "Back/test/missions.e2e-spec.ts",
+    "Back/test/private-problems.e2e-spec.ts",
+    "Back/test/problem-metadata.e2e-spec.ts",
+    "Back/test/problem-search.e2e-spec.ts",
+    "Back/test/refresh-tokens.e2e-spec.ts",
+    "Back/test/submissions.xp-policy.e2e-spec.ts",
+    "Back/test/throttler.e2e-spec.ts",
+    "Back/test/users.e2e-spec.ts",
+    "Back/test/vibe.e2e-spec.ts",
+    "Back/test/withdrawal-vibe.e2e-spec.ts",
+    "Back/test/withdrawal.e2e-spec.ts",
+    "Front/scripts/monitoring-privacy.test.mjs",
+    "Front/tests-live/community-flow.spec.ts",
+    "Front/tests-live/judge-flow.spec.ts",
+    "Front/tests/account.spec.ts",
+    "Front/tests/admin-moderation.spec.ts",
+    "Front/tests/admin.spec.ts",
+    "Front/tests/analysis-missions.spec.ts",
+    "Front/tests/auth.spec.ts",
+    "Front/tests/autocomplete.spec.ts",
+    "Front/tests/code-editing.spec.ts",
+    "Front/tests/community-moderation.spec.ts",
+    "Front/tests/community-regressions.spec.ts",
+    "Front/tests/community.spec.ts",
+    "Front/tests/data-regressions.spec.ts",
+    "Front/tests/editor-focus.spec.ts",
+    "Front/tests/editor-persistence.spec.ts",
+    "Front/tests/editor-recovery.spec.ts",
+    "Front/tests/enterprise-attempt.spec.ts",
+    "Front/tests/enterprise-vibe.spec.ts",
+    "Front/tests/enterprise.spec.ts",
+    "Front/tests/layout.spec.ts",
+    "Front/tests/learning-days.spec.ts",
+    "Front/tests/live-qa-followups.spec.ts",
+    "Front/tests/load-errors.spec.ts",
+    "Front/tests/mission-community-polish.spec.ts",
+    "Front/tests/page-range.spec.ts",
+    "Front/tests/pagination.spec.ts",
+    "Front/tests/privacy-email.spec.ts",
+    "Front/tests/privacy-refresh.spec.ts",
+    "Front/tests/problem-authoring.spec.ts",
+    "Front/tests/problem-content.spec.ts",
+    "Front/tests/problem-editor.spec.ts",
+    "Front/tests/problem-list.spec.ts",
+    "Front/tests/problem-metadata.spec.ts",
+    "Front/tests/qa-regressions.spec.ts",
+    "Front/tests/server-missions.spec.ts",
+    "Front/tests/session-refresh.spec.ts",
+    "Front/tests/solve-editor.spec.ts",
+    "Front/tests/solve-split.spec.ts",
+    "Front/tests/submission-samples.spec.ts",
+    "Front/tests/submissions.spec.ts",
+    "Front/tests/ui-harmony.spec.ts",
+    "Front/tests/vibe-layout.spec.ts",
+    "Front/tests/vibe.spec.ts",
+    "Judge/runtime/test_health.py",
+    "Judge/src/judge.test.ts",
+    "Judge/src/runtime.test.ts",
+    "Judge/src/start.test.ts",
+    "Judge/src/worker.test.ts"
+  ],
+  "packages": [
+    {
+      "path": "Back",
+      "name": "@unsolvable-oj/back",
+      "license": "UNLICENSED",
+      "scripts": {
+        "build": "nest build",
+        "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+        "start": "nest start",
+        "start:dev": "nest start --watch",
+        "start:debug": "nest start --debug --watch",
+        "start:prod": "node dist/main",
+        "db:migration:run": "npm run build && typeorm migration:run -d dist/database/data-source.js",
+        "db:migration:revert": "npm run build && typeorm migration:revert -d dist/database/data-source.js",
+        "db:seed:demo": "npm run build && node scripts/seed-demo.mjs",
+        "db:seed:starter": "npm run build && node scripts/seed-starter.mjs",
+        "test:starter": "npm run build && node --test scripts/starter-problems.test.mjs scripts/seed-starter.test.mjs",
+        "db:import:boj": "npm run build && node scripts/import-boj.mjs",
+        "test:boj-import": "node --test scripts/boj-content.test.mjs",
+        "db:bootstrap:admin": "npm run build && node scripts/bootstrap-admin.mjs",
+        "lint": "oxlint --type-aware src/ test/",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:cov": "vitest run --coverage",
+        "test:debug": "vitest --inspect-brk --no-file-parallelism",
+        "test:e2e": "npm run build && node scripts/run-integration.mjs e2e",
+        "check": "npm run lint && npm run typecheck && npm run test && npm run build",
+        "test:pipeline": "npm run build && node scripts/run-integration.mjs pipeline",
+        "test:migrations": "npm run build && node scripts/check-migrations.mjs",
+        "test:operations": "node --test scripts/integration-runner.test.mjs",
+        "typecheck": "tsc --noEmit --incremental false"
+      },
+      "dependencies": {
+        "@ai-sdk/openai": "^4.0.114",
+        "@nestjs/bullmq": "^12.0.1",
+        "@nestjs/common": "^12.4.0",
+        "@nestjs/config": "^12.1.1",
+        "@nestjs/core": "^12.4.0",
+        "@nestjs/jwt": "^12.0.4",
+        "@nestjs/passport": "^12.0.1",
+        "@nestjs/platform-express": "^12.0.1",
+        "@nestjs/swagger": "^12.1.1",
+        "@nestjs/throttler": "^6.7.1",
+        "@nestjs/typeorm": "^12.0.3",
+        "ai": "^7.0.169",
+        "bullmq": "^6.7.1",
+        "class-transformer": "^0.5.1",
+        "class-validator": "^0.15.1",
+        "dotenv": "^17.2.2",
+        "helmet": "^8.3.0",
+        "ioredis": "^5.8.2",
+        "joi": "^18.2.9",
+        "passport": "^0.7.0",
+        "passport-jwt": "^4.0.1",
+        "pg": "^8.23.1",
+        "reflect-metadata": "^0.2.2",
+        "rxjs": "^7.8.1",
+        "typeorm": "^0.3.31"
+      },
+      "devDependencies": {
+        "@mixmark-io/domino": "^2.2.0",
+        "@nestjs/cli": "^12.0.12",
+        "@nestjs/schematics": "^12.0.0",
+        "@nestjs/testing": "^12.4.0",
+        "@types/express": "^5.0.0",
+        "@types/node": "^24.0.0",
+        "@types/passport-jwt": "^4.0.1",
+        "@types/supertest": "^7.0.0",
+        "@vitest/coverage-v8": "^4.1.2",
+        "oxlint": "^1.92.0",
+        "oxlint-tsgolint": "^7.0.2001",
+        "prettier": "^3.9.10",
+        "supertest": "^7.3.1",
+        "turndown": "^7.2.5",
+        "turndown-plugin-gfm": "^1.0.2",
+        "typescript": "^6.0.2",
+        "vitest": "^4.1.2"
+      }
+    },
+    {
+      "path": "Front",
+      "name": "@unsolvable-oj/front",
+      "license": "not declared",
+      "scripts": {
+        "dev": "vite --host 127.0.0.1",
+        "build": "tsc -b && vite build",
+        "preview": "vite preview --host 127.0.0.1",
+        "check": "npm run build && npm run check:answers && npm run check:telemetry && npm run test:e2e:types",
+        "check:answers": "node scripts/check-bundle-answers.mjs",
+        "test:e2e": "playwright test --project=unit --project=chromium",
+        "test:e2e:full": "playwright test",
+        "test:live": "playwright test --config playwright.live.config.ts",
+        "test:e2e:types": "tsc -p tsconfig.e2e.json",
+        "check:telemetry": "node --test scripts/monitoring-privacy.test.mjs"
+      },
+      "dependencies": {
+        "@sentry/react": "^11.11.0",
+        "katex": "^0.19.1",
+        "lucide-react": "^1.70.0",
+        "react": "^19.3.1",
+        "react-dom": "^19.3.1",
+        "react-markdown": "^10.1.0",
+        "react-router-dom": "^7.18.5",
+        "rehype-katex": "^7.0.1",
+        "rehype-raw": "^7.0.0",
+        "rehype-sanitize": "^6.0.0",
+        "remark-gfm": "^4.0.1",
+        "remark-math": "^6.0.0"
+      },
+      "devDependencies": {
+        "@playwright/test": "1.63.0",
+        "@types/node": "24.19.0",
+        "@types/react": "^19.1.0",
+        "@types/react-dom": "^19.1.0",
+        "@vitejs/plugin-react": "^5.0.0",
+        "typescript": "^6.0.2",
+        "vite": "^7.1.0"
+      }
+    },
+    {
+      "path": "Judge",
+      "name": "@unsolvable-oj/judge",
+      "license": "not declared",
+      "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "start": "node dist/worker.js",
+        "start:dev": "npm run build && node dist/worker.js",
+        "check": "npm run build && node --test dist/judge.test.js dist/start.test.js dist/worker.test.js",
+        "test:runtime": "npm run build && node --test dist/runtime.test.js"
+      },
+      "dependencies": {
+        "bullmq": "^6.7.1",
+        "dotenv": "^17.2.2",
+        "ioredis": "^5.8.2"
+      },
+      "devDependencies": {
+        "@types/node": "^24.0.0",
+        "typescript": "^6.0.2"
+      }
+    }
+  ]
+}

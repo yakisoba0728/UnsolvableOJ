@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "kind": "compact-extract",
+  "status": "PASSED",
+  "timestamp": "2026-11-16T10:07:08.928Z",
+  "finishedAt": "2026-11-16T10:08:57.052Z",
+  "provenance": {
+    "runId": "43844858225",
+    "runAttempt": "1",
+    "job": "full",
+    "sourceHeadSha": "dd7523b48679a6e3fb68cfed65a4b1a606840e52",
+    "checkoutSha": "9c7114cf9912c6390c82bda98243c787a7604ffa",
+    "treeSha": "ce6c1fdd5ea92695b9fc9727abec1dc4ea87970f",
+    "baseSha": "ff43c2634098bf5ef6bc62112e75ef0b9005323b",
+    "trackedTreeClean": true,
+    "artifactId": 14214399509,
+    "archiveSha256": "9924b104210308f19fecaf498ade4c709df6fdede61db84e2c0ee46a5b030373",
+    "sourceJsonBytes": 23964,
+    "sourceJsonSha256": "dcbe4b7c0b2f59f2f7b4f1530f4da4622ec8cc23ba71897c4125359602c46e5c"
+  },
+  "environment": {
+    "node": "v24.22.2",
+    "platform": "linux",
+    "kernel": "7.0.0-1017-azure",
+    "logicalCpus": 4,
+    "cpu": "AMD EPYC 7763 64-Core Processor",
+    "clockTicks": 100
+  },
+  "limits": {
+    "workers": 2,
+    "concurrencyPerWorker": 1,
+    "waves": 3,
+    "submissionsPerWave": 8,
+    "totalSubmissions": 24,
+    "testTimeoutMs": 240000,
+    "admissionRequestsPerMinute": 20,
+    "faultInjection": false,
+    "restartsBetweenWaves": 0
+  },
+  "waves": [
+    {
+      "wave": 1,
+      "submissions": 8,
+      "activeBatchMs": 10193.059802000003,
+      "admissionWaitMs": 36500.419668,
+      "jobsPerActiveSecond": 0.7848477449754883,
+      "queueWaitMs": {
+        "p50": 536,
+        "p95": 2266,
+        "p99": 2266
+      },
+      "workerCpuMs": 160,
+      "workerPeakRssKiB": [
+        111336,
+        111196
+      ]
+    },
+    {
+      "wave": 2,
+      "submissions": 8,
+      "activeBatchMs": 10518.668835999997,
+      "admissionWaitMs": 0.029825000005075708,
+      "jobsPerActiveSecond": 0.7605525114185658,
+      "queueWaitMs": {
+        "p50": 131,
+        "p95": 2044,
+        "p99": 2044
+      },
+      "workerCpuMs": 120,
+      "workerPeakRssKiB": [
+        111336,
+        111196
+      ]
+    },
+    {
+      "wave": 3,
+      "submissions": 8,
+      "activeBatchMs": 10605.608474999986,
+      "admissionWaitMs": 39642.069781,
+      "jobsPerActiveSecond": 0.7543178704793748,
+      "queueWaitMs": {
+        "p50": 565,
+        "p95": 1454,
+        "p99": 1454
+      },
+      "workerCpuMs": 170,
+      "workerPeakRssKiB": [
+        111336,
+        111196
+      ]
+    }
+  ],
+  "summary": {
+    "submissions": 24,
+    "acknowledgedJobs": 24,
+    "activeBatchMs": 31317.337112999987,
+    "jobsPerActiveSecond": 0.7663486813518854,
+    "admissionWaitMs": 76142.519274,
+    "queueWaitMs": {
+      "p50": 536,
+      "p95": 2199,
+      "p99": 2266,
+      "min": 1,
+      "max": 2266
+    },
+    "failedJobs": 0,
+    "failureRate": 0,
+    "recoveredJobs": 0,
+    "recoveryCount": 0,
+    "retryCount": 0,
+    "activeWorkerCpuMs": 450,
+    "workerCpuIncludingWaitsMs": 570,
+    "workerPeakRssKiB": [
+      111336,
+      111196
+    ]
+  },
+  "waveDriftFromFirst": [
+    {
+      "wave": 1,
+      "throughputRatio": 1,
+      "queueP95DeltaMs": 0,
+      "workerCpuDeltaMs": 0
+    },
+    {
+      "wave": 2,
+      "throughputRatio": 0.9690446539313415,
+      "queueP95DeltaMs": -222,
+      "workerCpuDeltaMs": -40
+    },
+    {
+      "wave": 3,
+      "throughputRatio": 0.9611008954391951,
+      "queueP95DeltaMs": -812,
+      "workerCpuDeltaMs": 10
+    }
+  ],
+  "totalWallMs": 108137.555597,
+  "jobsPerWallSecond": 0.22193954604856833,
+  "limitations": [
+    "Finite AC-only regression, not saturation or production capacity.",
+    "Per-wave p95/p99 are maxima; n=24 p99 is maximum; no population-tail estimate.",
+    "Shared runner and prior warm state prevent causal optimization claims.",
+    "CPU/RSS cover only two owned Node worker PIDs; not API/DB/Redis/compiler/executor.",
+    "No fault injection or restart within this campaign; no long-run leak proof."
+  ]
+}

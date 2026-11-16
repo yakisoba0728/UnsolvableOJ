@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "role": "coordinator",
+  "reviewer": "/root",
+  "observedAt": "2026-11-16T14:48:23.900262+00:00",
+  "localProposal": "4c7d24dd12b300df2312e35d4d81a43fe625844c",
+  "remoteProposal": "5021547e8214cd6404bc2e7728c70634dbca0c63",
+  "completeTree": "61650d4c296150f540468aa6fd5e049df13bce7b",
+  "policyContentSha256": "d938665f24995ea53bf0984047459de0aa9ba366dc5ebbe37055f304c68903fb",
+  "policyFileSha256": "2c623c47ab87f13e1741fafdcca1083a02d6cf5fe40bdae69d2ec5208640bfe8",
+  "bindingCount": 23,
+  "bindings": {
+    "evidence.cnaInventory": {
+      "path": "docs/overhaul/phase5/evidence/security/kernel-header-applicability.json",
+      "sha256": "e9b1637730a77cc002f61039aff36a2e852a94341890aa04906f14a3f8ea5f81"
+    },
+    "evidence.manualReview": {
+      "path": "docs/overhaul/phase5/evidence/security/kernel-header-review.json",
+      "sha256": "57403747bd3f525a2cfdcb88a3f8acd8c625ad6f82171b9c5388d3a3559cd103"
+    },
+    "evidence.packageFiles": {
+      "path": "docs/overhaul/evidence/linux-libc-dev-6.8.0-149.149-amd64-files.json",
+      "sha256": "010441a3487f836ca8d56b32d3264cd286c2d11b569f44b54d2ba3e949911172"
+    },
+    "evidence.baselineArtifact": {
+      "path": "docs/overhaul/phase5/evidence/security/blocked-runtime.zip",
+      "sha256": "d373738b4b069fb081ea29563f28bd495ee9b32bbaeb9dfc4fd067267e0778c2"
+    },
+    "evidence.scannerIdentity": {
+      "path": "docs/overhaul/evidence/phase2-trivy-fingerprint-binding.json",
+      "sha256": "98472239faff13ffe141181af911cf0841931df59028b985b5cf7466ec939eed"
+    },
+    "implementations.imageAudit": {
+      "path": "scripts/image_audit.py",
+      "sha256": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72"
+    },
+    "implementations.scannerPin": {
+      "path": "scripts/image-audit-tool.json",
+      "sha256": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c"
+    },
+    "implementations.payloadVerifier": {
+      "path": "scripts/verify_image_payload.py",
+      "sha256": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0"
+    },
+    "revalidation.inheritedPolicy": {
+      "path": "docs/overhaul/phase5/evidence/security/inherited-policy.json",
+      "sha256": "3b9582cbfaedcbad0b562bdd566896b77c195834a7bfaeb5143025c6d72abf79"
+    },
+    "revalidation.inheritedInventory": {
+      "path": "docs/overhaul/evidence/phase3-kernel-header-applicability.json",
+      "sha256": "9d317229d78b224757dddbc9c03db68b5d6f1d5d2b191f02de857d3c46dd3796"
+    },
+    "revalidation.inheritedManualReview": {
+      "path": "docs/overhaul/evidence/phase3-kernel-header-review.json",
+      "sha256": "a6d7cca70204e26b1bb76533f2b2103b1286316f6eecc92573218257b36a3a24"
+    },
+    "revalidation.advisoryDelta": {
+      "path": "docs/overhaul/phase5/evidence/security/advisory-delta.json",
+      "sha256": "ff22b4bf6613c46b7fa6f9779a973ea8931a7b6e5d6f62d4579da5504d08ced3"
+    },
+    "revalidation.primaryVendorReview": {
+      "path": "docs/overhaul/phase5/evidence/security/vendor-advisory-review.json",
+      "sha256": "e51726085308f5bb0f7defa748d5af758d5520f394f6860d360c7336b38f4952"
+    },
+    "revalidation.primaryVendorRetrieval": {
+      "path": "docs/overhaul/phase5/evidence/security/vendor-retrieval.json",
+      "sha256": "fa7833bf04b97fc7dfb9d8d712bb3e60d22bb2424a4082ca1bca9cad5879b60b"
+    },
+    "revalidation.primaryVendorArchive": {
+      "path": "docs/overhaul/phase5/evidence/security/primary-vendor-records.zip",
+      "sha256": "795aaf4acc30481356a00f8682e98ff20e936f47f16815f647e0619ea1323153"
+    },
+    "revalidation.blockedScanArtifact": {
+      "path": "docs/overhaul/phase5/evidence/security/blocked-runtime.zip",
+      "sha256": "d373738b4b069fb081ea29563f28bd495ee9b32bbaeb9dfc4fd067267e0778c2"
+    },
+    "revalidation.currentCnaArchive": {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/current-cna-records.zip",
+      "sha256": "54c6826a9e0b1453dbf8e99ddf68f644edd519af3829d8106fc719bc3aa7e89c"
+    },
+    "revalidation.currentCnaArchiveManifest": {
+      "path": "docs/overhaul/phase5/evidence/security/current-cna-refetch-receipt.json",
+      "sha256": "76ebf654b4f045e80c8c63baaec0558f36e3df3c75673ffe60b10d54d390d876"
+    },
+    "revalidation.currentCnaContentComparison": {
+      "path": "docs/overhaul/phase5/evidence/security/cna-revalidation.json",
+      "sha256": "9b6632f8e4dafdc36747f75c4ba3c49e05507741e92a9bfb688fdef449202cf2"
+    },
+    "revalidation.inventoryCollector": {
+      "path": "docs/overhaul/repro/kernel-header-applicability.py",
+      "sha256": "96609e11c379ec67a89d9f7d774bc0da14d04a6bd790b57c6320387ca88115e6"
+    },
+    "revalidation.refetchCollector": {
+      "path": "docs/overhaul/repro/phase3-refetch-cna-independent.py",
+      "sha256": "b6741499e32cbb0951f93247dcea3f4470bcc3a259337c1ba547a08dc021eaa0"
+    },
+    "revalidation.unchangedEvaluator": {
+      "path": "scripts/image_applicability.py",
+      "sha256": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f"
+    },
+    "revalidation.unchangedImageGate": {
+      "path": "scripts/image_gate.py",
+      "sha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b"
+    }
+  },
+  "recordChangedFieldCounts": {
+    "id": 0,
+    "originalSeverity": 0,
+    "originalScannerFingerprint": 182,
+    "cnaRecordSha256": 0,
+    "advisorySha256": 15
+  },
+  "scopeUnchanged": true,
+  "expiryUnchanged": "2026-11-30T00:00:00Z",
+  "actualReplays": [
+    {
+      "label": "inherited-policy-current-scan",
+      "code": 2,
+      "gate": "BLOCKED_FINDINGS",
+      "reasons": [
+        "EXACT_CVE_COHORT_REVALIDATION_REQUIRED"
+      ],
+      "reviewed": 0,
+      "proposed": 0,
+      "blocking": 182,
+      "rawCounts": {
+        "UNKNOWN": 1,
+        "LOW": 363,
+        "MEDIUM": 560,
+        "HIGH": 177,
+        "CRITICAL": 5
+      }
+    },
+    {
+      "label": "proposed-policy-current-scan",
+      "code": 2,
+      "gate": "BLOCKED_REVIEW",
+      "reasons": [
+        "INDEPENDENT_POLICY_REVIEW_REQUIRED"
+      ],
+      "reviewed": 0,
+      "proposed": 182,
+      "blocking": 182,
+      "rawCounts": {
+        "UNKNOWN": 1,
+        "LOW": 363,
+        "MEDIUM": 560,
+        "HIGH": 177,
+        "CRITICAL": 5
+      }
+    }
+  ],
+  "primaryReview": "Read all15 changed-CVE summaries, exact source-file mappings and two Rocky severity changes in retained primary-source review; source implementations absent from exported header payload. Fresh independent CNA/vendor fetch performed by separate reviewer, not coordinator. Coordinator repeated23hash bindings and actual retained scan evaluation.",
+  "limits": [
+    "No new coordinator OCI extraction or native image build. Retained CI proof covers990files; fresh full source CI still mandatory.",
+    "No host/kernel/deployment authorization; raw177HIGH/5CRITICAL preserved.",
+    "CNA and historical patch evidence reused only with byte and source-map equality; not182new manual patch reviews."
+  ],
+  "decision": "APPROVE_EXACT_COMPONENT_POLICY_CONTENT_SUBJECT_TO_FRESH_FULL_CI",
+  "reviewedAt": "2026-11-16T14:49:54.789262+00:00",
+  "independentReceipt": {
+    "path": "docs/overhaul/phase5/evidence/security/independent-policy-review.json",
+    "sha256": "ab82aafc7d54ce990db775732eb96de7a56bc4abfbc2cfef3ed22e765a93da93"
+  },
+  "independence": "Coordinator did not author the policy/evidence proposal. Read-only exact evidence checks and evaluation performed before activating separately approved review metadata. AI review, not a human GitHub approval.",
+  "primaryUrlsPersonallyRead": [
+    "https://ubuntu.com/security/CVE-2026-64523",
+    "https://ubuntu.com/security/CVE-2026-68426"
+  ],
+  "conditions": [
+    "Fresh full CI at exact source and current integration base before merge.",
+    "Only approval metadata changes; policy content remains exact independently reviewed proposal.",
+    "Expiry remains2026-11-30T00:00:00Z; future cohort or evidence drift must fail closed."
+  ]
+}

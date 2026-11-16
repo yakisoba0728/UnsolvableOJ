@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -19,11 +21,15 @@ import { UpdateProblemDto } from './dto/update-problem.dto.js';
 import { ChangeProblemStatusDto } from './dto/change-problem-status.dto.js';
 import { ListProblemsQuery } from './dto/list-problems.query.js';
 import { ProblemsService } from './problems.service.js';
+import { ProblemBookmarksService } from './problem-bookmarks.service.js';
 
 @ApiTags('problems')
 @Controller('problems')
 export class ProblemsController {
-  constructor(private readonly problemsService: ProblemsService) {}
+  constructor(
+    private readonly problemsService: ProblemsService,
+    private readonly bookmarks: ProblemBookmarksService,
+  ) {}
 
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
@@ -39,6 +45,27 @@ export class ProblemsController {
   @UseGuards(JwtAuthGuard)
   mine(@CurrentUser() user: AuthenticatedUser) {
     return this.problemsService.findMine(user);
+  }
+
+  @Get(':id/bookmark')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  bookmark(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.bookmarks.get(id, user);
+  }
+
+  @Put(':id/bookmark')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  saveBookmark(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.bookmarks.save(id, user);
+  }
+
+  @Delete(':id/bookmark')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  removeBookmark(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.bookmarks.remove(id, user);
   }
 
   @Get(':id/manage')

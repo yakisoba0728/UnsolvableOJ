@@ -15,12 +15,14 @@ import {
   toLocalInput,
   validateDraft,
   type EnterpriseTest,
+  type EnterpriseTestDetail,
   type TestDraft,
   type TestErrors,
 } from "../enterprise/model";
 import { enterpriseApi, useEnterpriseTest } from "../enterprise/api";
 import { useDocumentTitle, useEnterpriseProblems, useRequest } from "../hooks";
 import { difficultyLabel } from "../difficulty";
+import { useMountedRef } from "../hooks";
 
 const fieldIds: Record<keyof TestErrors, string> = {
   title: "ent-title",
@@ -90,9 +92,9 @@ function Notice({
   );
 }
 
-export function EnterpriseFormPage() {
+export function EnterpriseFormPage({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { id } = useParams();
-  const { session } = useAuth();
+  const { session, getSessionIdentityVersion } = useAuth();
   useDocumentTitle(id ? "테스트 편집" : "새 테스트 만들기");
 
   if (!session)
@@ -108,24 +110,25 @@ export function EnterpriseFormPage() {
         </Link>
       </Notice>
     );
-  // 계정이나 주소가 바뀔 때만 새 폼을 연다. 다른 탭의 변경으로 작성 중인 입력을 버리지 않는다.
+  // 일반 토큰 갱신에는 입력을 유지하고, 새 로그인(같은 계정 포함)이나 시험이 바뀌면 비운다.
   return (
     <EnterpriseForm
-      key={`${session.user.id}:${id ?? "new"}`}
+      key={`${session.user.id}:${getSessionIdentityVersion()}:${id ?? "new"}`}
       token={session.accessToken}
       id={id}
+      getNavigationVersion={getNavigationVersion}
     />
   );
 }
 
-function EnterpriseForm({ token, id }: { token: string; id?: string }) {
+function EnterpriseForm({ token, id, getNavigationVersion }: { token: string; id?: string; getNavigationVersion: () => number }) {
   const { session } = useAuth();
   const {
     data: existing,
     loading,
     error,
     retry,
-  } = useEnterpriseTest(session, id);
+  } = useEnterpriseTest(session, id, { retainWhileRefreshing: true });
   const editable = !existing || testStatus(existing) === "scheduled";
   if (id && loading && !existing)
     return (
@@ -171,18 +174,21 @@ function EnterpriseForm({ token, id }: { token: string; id?: string }) {
         </Link>
       </Notice>
     );
-  return <TestForm token={token} existing={existing ?? undefined} />;
+  return <TestForm token={token} existing={existing ?? undefined} getNavigationVersion={getNavigationVersion} />;
 }
 
 function TestForm({
   token,
   existing,
+  getNavigationVersion,
 }: {
   token: string;
-  existing?: EnterpriseTest;
+  existing?: EnterpriseTestDetail;
+  getNavigationVersion: () => number;
 }) {
   const navigate = useNavigate();
-  const { session } = useAuth();
+  const { session, getSessionIdentityVersion } = useAuth();
+  const mounted = useMountedRef();
   const { problems, loading, error, privateError } =
     useEnterpriseProblems(session);
   const catalog = useRequest<VibeCatalog | null>(
@@ -196,6 +202,14 @@ function TestForm({
   const [showErrors, setShowErrors] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [refreshProblemVersions, setRefreshProblemVersions] = useState(false);
+  const [refreshVibeVersions, setRefreshVibeVersions] = useState(false);
+  const pinnedVibeById = new Map((existing?.selectedVibeChallenges ?? []).map(item => [item.id, item]));
+  const currentVibeById = new Map((catalog.data?.items ?? []).map(item => [item.id, item]));
+  const vibeChoices = [
+    ...(catalog.data?.items ?? []),
+    ...(existing?.selectedVibeChallenges ?? []).filter(item => !currentVibeById.has(item.id)),
+  ];
   const errors = showErrors ? validateDraft(draft) : {};
   const patch = (next: Partial<TestDraft>) =>
     setDraft((prev) => ({ ...prev, ...next }));
@@ -230,19 +244,23 @@ function TestForm({
       return;
     }
     const input = draftToInput(draft);
+    const identity = getSessionIdentityVersion();
+    const navigation = getNavigationVersion();
+    const ownsRequest = () => mounted.current && getSessionIdentityVersion() === identity && getNavigationVersion() === navigation;
     setSaving(true);
     try {
       const saved = existing
-        ? await enterpriseApi.update(token, existing.id, input)
+        ? await enterpriseApi.update(token, existing.id, { ...input, refreshProblemVersions, refreshVibeVersions })
         : await enterpriseApi.create(token, input);
-      navigate(`/enterprise/${saved.id}`);
+      if (ownsRequest()) navigate(`/enterprise/${saved.id}`);
     } catch (cause) {
+      if (!ownsRequest()) return;
       // 입력은 그대로 두고 서버가 알려 준 이유를 보여 준다.
       setSaveError(
         `${cause instanceof Error ? cause.message : "테스트를 저장하지 못했어요."} 입력한 내용은 유지했어요.`,
       );
     } finally {
-      setSaving(false);
+      if (ownsRequest()) setSaving(false);
     }
   }
 
@@ -450,7 +468,7 @@ function TestForm({
             <h3 className="ent-vibe-heading">바이브코딩 과제</h3>
             <p className="field-help">
               기존 프로젝트의 버그 수정·기능 추가와 프롬프트·검증 과정을
-              평가합니다.
+              평가합니다. 과제 내용과 실행·평가 기준은 시험에 추가할 때 고정됩니다.
             </p>
             {catalog.error ? (
               <p className="error-message" role="alert">
@@ -466,11 +484,17 @@ function TestForm({
             ) : catalog.loading ? (
               <p className="muted">과제를 불러오는 중…</p>
             ) : (
-              catalog.data?.items.map((item) => (
+              vibeChoices.map((item) => {
+                const selected = draft.vibeChallengeIds?.includes(item.id) ?? false;
+                const pinned = pinnedVibeById.get(item.id);
+                const unavailable = !currentVibeById.has(item.id);
+                const title = selected && pinned && !refreshVibeVersions ? pinned.title : item.title;
+                return (
                 <label className="ent-problem" key={item.id}>
                   <input
                     type="checkbox"
-                    checked={draft.vibeChallengeIds?.includes(item.id) ?? false}
+                    checked={selected}
+                    disabled={unavailable && !selected}
                     onChange={() =>
                       patch({
                         vibeChallengeIds: draft.vibeChallengeIds?.includes(
@@ -483,10 +507,11 @@ function TestForm({
                       })
                     }
                   />
-                  <span className="ent-problem-title">{item.title}</span>
-                  <span className="case-pill">바이브코딩</span>
+                  <span className="ent-problem-title">{title}</span>
+                  <span className="case-pill">{selected && pinned && !refreshVibeVersions ? "선택 시 고정" : "바이브코딩"}</span>
+                  {unavailable ? <span className="field-help">현재 목록에 없는 고정 과제</span> : null}
                 </label>
-              ))
+              ); })
             )}
             {err("problemIds")}
             {privateError ? (
@@ -499,6 +524,33 @@ function TestForm({
               <Link to="/problems/new?private=1">기업 전용 문제로 만들어</Link>{" "}
               함께 고를 수 있어요.
             </span>
+            <p className="field-help">
+              일반 문제의 본문·예제·채점 기준은 시험에 추가할 때 고정됩니다.
+              원본을 수정해도 응시자마다 다른 버전이 출제되지 않습니다.
+            </p>
+            {existing && draft.problemIds.length > 0 && (
+              <label className="field-help">
+                <input
+                  type="checkbox"
+                  checked={refreshProblemVersions}
+                  onChange={(event) => setRefreshProblemVersions(event.target.checked)}
+                />{" "}
+                저장할 때 선택한 일반 문제를 모두 최신 버전으로 갱신
+                <span className="field-help">
+                  선택하지 않으면 기존 버전을 유지합니다. 시험 시작 후에는 갱신할 수 없습니다.
+                </span>
+              </label>
+            )}
+            {existing && (draft.vibeChallengeIds?.length ?? 0) > 0 ? (
+              <label className="field-help">
+                <input type="checkbox" checked={refreshVibeVersions}
+                  onChange={(event) => setRefreshVibeVersions(event.target.checked)} />{" "}
+                저장할 때 선택한 바이브코딩 과제를 모두 최신 버전으로 갱신
+                <span className="field-help">
+                  선택하지 않으면 고정된 과제와 평가 기준을 유지합니다. 시험 시작 후에는 갱신할 수 없습니다.
+                </span>
+              </label>
+            ) : null}
           </section>
         </div>
 
@@ -551,8 +603,9 @@ function TestForm({
                   {...aria("invitees")}
                 />
                 <span className="field-help">
-                  줄바꿈이나 쉼표로 구분해요. 이메일로 초대하면 그 이메일로
-                  가입한 계정이 응시할 수 있어요.
+                  줄바꿈이나 쉼표로 구분해요. 이메일 초대는 해당 이메일의 인증을
+                  마친 계정만 응시할 수 있어요. 이메일 인증을 사용할 수 없다면
+                  사용자 이름으로 초대해 주세요.
                 </span>
                 {err("invitees")}
               </div>

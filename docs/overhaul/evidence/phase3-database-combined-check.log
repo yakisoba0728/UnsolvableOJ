@@ -1,0 +1,34 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @unsolvable-oj/back@0.0.1 check
+> npm run lint && npm run typecheck && npm run test && npm run build
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @unsolvable-oj/back@0.0.1 lint
+> oxlint --type-aware src/ test/
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @unsolvable-oj/back@0.0.1 typecheck
+> tsc --noEmit --incremental false
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @unsolvable-oj/back@0.0.1 test
+> vitest run
+
+
+ RUN  v4.1.12 /workspace/scratch/86de5f814139/oj-dbperf/Back
+
+
+ Test Files  26 passed (26)
+      Tests  327 passed (327)
+   Start at  16:14:39
+   Duration  3.79s (transform 2.55s, setup 0ms, import 17.15s, tests 2.52s, environment 4ms)
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> @unsolvable-oj/back@0.0.1 build
+> nest build
+

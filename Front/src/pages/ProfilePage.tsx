@@ -174,6 +174,9 @@ export function ProfilePage() {
         description="쌓아 온 실력과 꾸준함을 한눈에 확인하세요."
         aside={
           <div className="account-links">
+            <Link className="button button-small button-outline" to="/learning">
+              학습 대시보드
+            </Link>
             <Link className="button button-small button-outline" to={userPath(profile.username)}>
               공개 프로필
             </Link>

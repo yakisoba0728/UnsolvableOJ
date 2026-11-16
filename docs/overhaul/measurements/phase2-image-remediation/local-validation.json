@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-16T03:33:12.950825+00:00",
+  "checkoutHead": "fa9e6019c2bd784c50dfdeddd5ac44d527c18d50",
+  "workingTreeDirty": true,
+  "sourceArchiveCommit": "4ebd2ffe9474639c665fa21cfb438f68820fe77c",
+  "runtime": {
+    "node": "v24.22.1",
+    "os": "Linux 6.18.57",
+    "go": "go1.27.4",
+    "goToolchainArchiveSha256": "7226736c2339719cda28fbf3a54d71aa63bcefe376e98cef00034268dab24840"
+  },
+  "build": {
+    "command": "go build -mod=readonly -buildvcs=false -trimpath -tags=nomsgpack,grpcnotrace -ldflags=\"-s -w\" -o go-judge ./cmd/go-judge",
+    "environment": {
+      "CGO_ENABLED": "0",
+      "GOTOOLCHAIN": "local",
+      "GOMAXPROCS": "2",
+      "GOMEMLIMIT": "512MiB"
+    },
+    "binarySha256": "8a0d089d8631246dd638ebab714b0ac3dee1bf2d30f9173a87c2c13ac9646361",
+    "binaryBytes": 23113888,
+    "applicationVersion": "v1.13.3-unsolvable.1",
+    "mainModuleBuildInfo": "(devel)"
+  },
+  "moduleGraphDelta": {
+    "removed": [
+      "golang.org/x/net v0.61.0"
+    ],
+    "added": [
+      "golang.org/x/net v0.62.0"
+    ]
+  },
+  "verification": {
+    "goModVerify": "all modules verified",
+    "goCommandPackageTests": 6,
+    "goTestAndSubtestPasses": 53,
+    "judgeTestsPassed": 107,
+    "imageAuditAdapterTestsPassed": 15,
+    "ciPolicyAndSbomTestsPassed": 14,
+    "dockerExecuted": false,
+    "nativeSandboxExecuted": false,
+    "updatedImageAuditExecuted": false
+  },
+  "inputsSha256": {
+    "Judge/runtime/go-judge.go.mod": "8534d496bf9a2740227dee47c2c35574500e5e1f7b3c54e37ccf33b4aa17f55e",
+    "Judge/runtime/go-judge.go.sum": "68618e489aead517a346cffc44564342f53905c6503c6792628ab4a365750ca6",
+    "Judge/runtime/go-judge-auth-redaction.patch": "6028a08141401f6e3d04ee2ff6259a3e967fdd0f5f4b3e7a281d1883c6afc501",
+    "Judge/runtime/check-logs.mjs": "1272baf0f47a64e731978f4f70d1efc7a88bc16540f555bfe054f5e71c1d9b33",
+    "Judge/runtime/check-logs.test.mjs": "337286c8d6cd5e5bcecddacb1fb38b2ea241d181bc12489788ec78bf63d6e74a"
+  }
+}

@@ -83,13 +83,19 @@ describe('Account (e2e)', () => {
        FROM generate_series(1, 2) n`,
       [suffix],
     );
+    const [deleted] = await db.query(
+      `INSERT INTO users(email, username, password_hash, xp, deleted_at)
+       VALUES($1,$2,'x',2147483647,clock_timestamp()) RETURNING id`,
+      [`deleted-rank-${suffix}@example.com`, `deleted_rank_${suffix}`],
+    );
     const legacy = await http().get(`${base}/rankings`).expect(200);
     expect(Array.isArray(legacy.body)).toBe(true);
     expect(legacy.body.length).toBeLessThanOrEqual(100);
+    expect(legacy.body.some((row: { id: string }) => row.id === deleted.id)).toBe(false);
 
-    const [top] = await db.query('SELECT id FROM users ORDER BY xp DESC, created_at ASC, id LIMIT 1');
+    const [top] = await db.query('SELECT id FROM users WHERE deleted_at IS NULL ORDER BY xp DESC, created_at ASC, id LIMIT 1');
     const first = await http().get(`${base}/rankings?page=1&limit=2`).expect(200);
-    const [{ total }] = await db.query('SELECT count(*)::integer AS total FROM users');
+    const [{ total }] = await db.query('SELECT count(*)::integer AS total FROM users WHERE deleted_at IS NULL');
     expect(first.body).toMatchObject({ page: 1, limit: 2, total, totalPages: Math.ceil(total / 2) });
     expect(first.body.items[0]).toMatchObject({ id: top.id, rank: 1 });
     expect(first.body.items[0]).not.toHaveProperty('email');

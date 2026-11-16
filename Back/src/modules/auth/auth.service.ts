@@ -374,6 +374,12 @@ export class AuthService {
       await manager.query('DELETE FROM community_saved WHERE user_id=$1', [
         user.id,
       ]);
+      await manager.query('DELETE FROM problem_bookmarks WHERE user_id=$1', [
+        user.id,
+      ]);
+      await manager.query('DELETE FROM learning_goals WHERE user_id=$1', [
+        user.id,
+      ]);
       await manager.query(
         'DELETE FROM community_follows WHERE user_id=$1 OR author_id=$1',
         [user.id],

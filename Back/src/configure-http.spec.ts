@@ -10,6 +10,7 @@ import request from 'supertest';
 import { configureHttp, JSON_BODY_LIMIT } from './configure-http.js';
 import { ProblemsController } from './modules/problems/problems.controller.js';
 import { ProblemsService } from './modules/problems/problems.service.js';
+import { ProblemBookmarksService } from './modules/problems/problem-bookmarks.service.js';
 import { JwtAuthGuard } from './modules/auth/jwt-auth.guard.js';
 import { OptionalJwtAuthGuard } from './modules/auth/optional-jwt-auth.guard.js';
 import { RolesGuard } from './common/guards/roles.guard.js';
@@ -28,6 +29,7 @@ describe('Public problem routes and HTTP limits', () => {
           provide: ProblemsService,
           useValue: { findPublishedBySlug: (slug: string) => ({ slug }) },
         },
+        { provide: ProblemBookmarksService, useValue: {} },
       ],
     })
       .overrideGuard(JwtAuthGuard)

@@ -16,6 +16,7 @@ services:
     memswap_limit: ${SANDBOX_MEMORY_LIMIT:-10g}
     cgroup: private
     cpus: ${SANDBOX_CPUS:-2.0}
+    networks: [sandbox]
     environment:
       ES_AUTH_TOKEN: ${GO_JUDGE_TOKEN:?Set a private GO_JUDGE_TOKEN}
     command:
@@ -29,13 +30,23 @@ services:
     logging: *logging
   judge:
     build: ..
+    user: "1000:1000"
     # healthcheck가 멈춘 워커를 종료하려면 node가 PID 1이 아니어야 합니다.
     init: true
     mem_limit: ${JUDGE_MEMORY_LIMIT:-512m}
+    cpus: ${JUDGE_CPUS:-1.0}
+    pids_limit: 128
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,uid=1000,gid=1000,mode=0700
+    networks: [application, sandbox]
     restart: unless-stopped
     # 종료 시 진행 중인 채점을 마치도록 기다립니다(기본 10초면 채점 중 SIGKILL).
     stop_grace_period: 2m
     environment:
+      JUDGE_DEPLOYMENT_MODE: dedicated
       API_BASE_URL: ${API_BASE_URL:?Set the application API URL}
       JUDGE_SERVICE_TOKEN: ${JUDGE_SERVICE_TOKEN:?Match the application judge token}
       REDIS_HOST: ${REDIS_HOST:?Set the private Redis address}
@@ -43,6 +54,8 @@ services:
       REDIS_USERNAME: ${REDIS_USERNAME:-}
       REDIS_PASSWORD: ${REDIS_PASSWORD:?Redis authentication is required}
       REDIS_DB: ${REDIS_DB:-0}
+      REDIS_TLS: "true"
+      REDIS_TLS_SERVERNAME: ${REDIS_TLS_SERVERNAME:-}
       GO_JUDGE_URL: http://go-judge:5050
       GO_JUDGE_TOKEN: ${GO_JUDGE_TOKEN:?Set a private GO_JUDGE_TOKEN}
       JUDGE_CONCURRENCY: ${JUDGE_CONCURRENCY:-2}
@@ -50,3 +63,10 @@ services:
       go-judge:
         condition: service_healthy
     logging: *logging
+
+# Only the worker reaches the private API/Redis network. The outer execution
+# service has no default outbound network; submission isolation remains inside it.
+networks:
+  application: {}
+  sandbox:
+    internal: true

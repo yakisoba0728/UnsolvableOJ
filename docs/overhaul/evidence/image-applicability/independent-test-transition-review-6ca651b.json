@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-test-transition-review",
+  "reviewer": "/root/product_engineering",
+  "reviewedAt": "2026-11-16T04:24:27.275015+00:00",
+  "reviewedCommit": "6ca651bfbbc9dbe6de02980a1d9a58108c56fea1",
+  "baseCommit": "d5c3bd78a0fcb5f2fad02fec2679c6aa36345325",
+  "decision": "APPROVED",
+  "changedFiles": [
+    "scripts/image_applicability_test.py"
+  ],
+  "rationale": [
+    "Permanent proposed-state fixtures explicitly reset at class construction and documents(approved=False), regardless of a later reviewed committed policy.",
+    "Existing proposed denial, exact raw count retention and all negative cases remain; no tests are skipped or deleted.",
+    "Committed policy test accepts only PROPOSED with empty approval or REVIEWED with validated review metadata, exact canonical content hash, distinct independent/coordinator identities and neither equal the author.",
+    "No production code, policy content, approval metadata, severity threshold or CI gate is changed."
+  ],
+  "independentExecution": {
+    "tests": 4,
+    "passed": 4,
+    "seconds": 2.127,
+    "testNames": [
+      "test_committed_policy_has_an_explicit_valid_review_state_and_fixtures_stay_proposed",
+      "test_proposed_policy_preserves_every_blocker_even_with_matching_synthetic_proof",
+      "test_actual_pinned_verifier_output_is_consumed_without_schema_translation",
+      "test_review_records_cannot_be_self_approved_stale_or_incomplete"
+    ],
+    "diffCheckPassed": true
+  },
+  "policyContentSha256": "ebc01bdbbd31f6adf2e0761bdb7c278b92c72ebeca1a175523e4f2a0b74083aa",
+  "remainingConditions": [
+    "Independent wrapper/workflow review",
+    "Coordinator authors approval only after verifying independent review",
+    "Exact composed HEAD CI with fresh actual image proof"
+  ]
+}

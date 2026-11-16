@@ -1,40 +1,17 @@
-import { isEmailActionPath, redactTelemetry } from "./monitoringPrivacy";
-import * as Sentry from "@sentry/react";
+import { createMonitoringClient } from "./monitoringClient";
 
-/**
- * 버그 모니터링(Sentry). VITE_SENTRY_DSN이 없으면 아무것도 하지 않는다.
- * 오류만 수집하고, 세션 녹화·성능 추적은 켜지 않으며 사용자 식별 정보는 보내지 않는다.
- */
-const dsn = import.meta.env.VITE_SENTRY_DSN as string | undefined;
+/** Optional error monitoring: no session replay, performance traces or user identification. */
+const monitoring = createMonitoringClient({
+  dsn: import.meta.env.VITE_SENTRY_DSN as string | undefined,
+  environment: import.meta.env.MODE,
+  getPath: () => window.location.pathname,
+  load: () => import("./monitoringSdk"),
+});
 
 export function initMonitoring() {
-  if (!dsn || isEmailActionPath(window.location.pathname)) return;
-  Sentry.init({
-    dsn,
-    environment: import.meta.env.MODE,
-    tracesSampleRate: 0,
-    // A mail token must not leave the browser through errors, fetch breadcrumbs,
-    // or a navigation breadcrumb retained after returning to another page.
-    beforeBreadcrumb: (breadcrumb) =>
-      isEmailActionPath(window.location.pathname)
-        ? null
-        : redactTelemetry(breadcrumb),
-    beforeSend: (event) =>
-      isEmailActionPath(window.location.pathname)
-        ? null
-        : redactTelemetry(event),
-    // ResizeObserver 경고와 브라우저 확장 프로그램 오류처럼 우리 코드와 무관한 잡음 제외
-    ignoreErrors: [
-      "ResizeObserver loop limit exceeded",
-      "ResizeObserver loop completed with undelivered notifications.",
-    ],
-    denyUrls: [/^chrome-extension:\/\//, /^moz-extension:\/\//],
-  });
+  monitoring.init();
 }
 
 export function reportError(error: unknown, componentStack?: string | null) {
-  if (!dsn || isEmailActionPath(window.location.pathname)) return;
-  Sentry.captureException(error, {
-    contexts: componentStack ? { react: { componentStack } } : undefined,
-  });
+  monitoring.report(error, componentStack);
 }

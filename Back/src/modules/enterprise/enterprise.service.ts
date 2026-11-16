@@ -1,14 +1,20 @@
 import { randomBytes } from 'node:crypto';
 import { VibeService } from '../vibe/vibe.service.js';
 import { challenge } from '../vibe/vibe.catalog.js';
-import type { VibeReport } from '../vibe/vibe.types.js';
+import { registerVibeSnapshot } from '../vibe/vibe.snapshot.js';
 import { canJoinEnterprise as canJoin } from './enterprise-access.js';
+import { buildEnterpriseVibeScores, type EnterpriseVibeRow } from './enterprise-vibe-scores.js';
+import { enterpriseResultExportSql, enterpriseResultPageSql, enterpriseResultSummarySql } from './enterprise-result-queries.js';
+import { ENTERPRISE_EXPORT_LIMIT, enterpriseResultsCsv, type EnterpriseExportRow } from './enterprise-result-export.js';
+import { EnterpriseResultsQuery } from './dto/enterprise-results.query.js';
 import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
+  ServiceUnavailableException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import type { DataSource, EntityManager } from 'typeorm';
@@ -38,6 +44,8 @@ interface TestRow {
   updated_at: Date;
   attempt_count?: number;
   invite_usernames?: string[];
+  problem_versions?: { problemId: string; version: number }[];
+  vibe_versions?: { challengeId: string; version: string; model: string }[];
 }
 
 interface AttemptRow {
@@ -51,7 +59,11 @@ interface AttemptRow {
 
 const NOT_FOUND = '테스트를 찾을 수 없습니다.';
 const TEST_COLUMNS = `t.*, (SELECT count(*)::int FROM enterprise_attempts a WHERE a.test_id = t.id) AS attempt_count,
-  ARRAY(SELECT u.username FROM users u WHERE u.id = ANY(t.invite_user_ids) ORDER BY lower(u.username)) AS invite_usernames`;
+  ARRAY(SELECT u.username FROM users u WHERE u.id = ANY(t.invite_user_ids) ORDER BY lower(u.username)) AS invite_usernames,
+  coalesce((SELECT json_agg(json_build_object('problemId', v.problem_id, 'version', v.version) ORDER BY v.position)
+    FROM enterprise_problem_versions v WHERE v.test_id=t.id), '[]') AS problem_versions,
+  coalesce((SELECT json_agg(json_build_object('challengeId', v.challenge_id, 'version', v.version, 'model', v.ai_model) ORDER BY v.position)
+    FROM enterprise_vibe_versions v WHERE v.test_id=t.id), '[]') AS vibe_versions`;
 
 const toTest = (row: TestRow) => ({
   id: row.id,
@@ -61,7 +73,11 @@ const toTest = (row: TestRow) => ({
   endsAt: row.ends_at,
   durationMin: row.duration_min,
   problemIds: row.problem_ids,
+  problemVersions: row.problem_versions ?? [],
+  problemVersionPolicy: 'ON_SELECTION' as const,
   vibeChallengeIds: row.vibe_challenge_ids,
+  vibeChallengeVersions: (row.vibe_versions ?? []).map(({ challengeId, version }) => ({ challengeId, version })),
+  vibeVersionPolicy: 'ON_SELECTION' as const,
   inviteCode: row.invite_code,
   inviteOnly: row.invite_only,
   invitees: [...(row.invite_usernames ?? []), ...row.invite_emails],
@@ -107,7 +123,6 @@ export class EnterpriseService {
     this.assertSchedule(dto.startsAt, dto.endsAt, dto.durationMin, true);
     return this.dataSource.transaction(async (manager) => {
       this.assertTasks(dto.problemIds, dto.vibeChallengeIds ?? []);
-      await this.assertProblems(manager, dto.problemIds, user);
       const invite = await this.resolveInvitees(
         manager,
         dto.inviteOnly ?? false,
@@ -133,12 +148,34 @@ export class EnterpriseService {
           dto.vibeChallengeIds ?? [],
         ],
       );
+      await this.bindProblemVersions(manager, row.id, dto.problemIds, user);
+      await this.bindVibeVersions(manager, row.id, dto.vibeChallengeIds ?? []);
       return toTest(await this.owned(manager, row.id, user));
     });
   }
 
   async findOwned(id: string, user: AuthenticatedUser) {
-    return toTest(await this.owned(this.dataSource.manager, id, user));
+    // Keep the test header/bindings and their summaries on one snapshot while an
+    // owner may refresh a scheduled assessment. Only this authorized detail
+    // response gains metadata; invitation/list/result projections stay unchanged.
+    return this.dataSource.transaction('REPEATABLE READ', async (manager) => {
+      const test = await this.owned(manager, id, user);
+      const selectedProblems: {
+        id: string; version: number; title: string; difficulty: string;
+        timeLimitMs: number; memoryLimitMb: number;
+      }[] = await manager.query(
+        `SELECT b.problem_id AS id, b.version, v.snapshot->>'title' AS title,
+                v.snapshot->>'difficulty' AS difficulty,
+                (v.snapshot->>'timeLimitMs')::int AS "timeLimitMs",
+                (v.snapshot->>'memoryLimitMb')::int AS "memoryLimitMb"
+           FROM enterprise_problem_versions b
+           JOIN problem_versions v ON v.problem_id=b.problem_id AND v.version=b.version
+          WHERE b.test_id=$1 ORDER BY b.position`,
+        [id],
+      );
+      const selectedVibeChallenges = await this.vibeSummaries(test, manager);
+      return { ...toTest(test), selectedProblems, selectedVibeChallenges };
+    });
   }
 
   async update(
@@ -162,9 +199,7 @@ export class EnterpriseService {
         vibeChallengeIds: dto.vibeChallengeIds ?? current.vibe_challenge_ids,
       };
       this.assertSchedule(next.startsAt, next.endsAt, next.durationMin, true);
-      this.assertTasks(next.problemIds, next.vibeChallengeIds);
-      if (dto.problemIds)
-        await this.assertProblems(manager, dto.problemIds, user);
+      this.assertTasks(next.problemIds, next.vibeChallengeIds, dto.refreshVibeVersions ? [] : current.vibe_challenge_ids);
       const inviteOnly = dto.inviteOnly ?? current.invite_only;
       const invite =
         dto.invitees || dto.inviteOnly !== undefined
@@ -194,6 +229,13 @@ export class EnterpriseService {
           next.vibeChallengeIds,
         ],
       );
+      if (dto.problemIds || dto.refreshProblemVersions)
+        await this.bindProblemVersions(
+          manager, id, next.problemIds, user,
+          dto.refreshProblemVersions ? [] : current.problem_versions,
+        );
+      if (dto.vibeChallengeIds || dto.refreshVibeVersions)
+        await this.bindVibeVersions(manager, id, next.vibeChallengeIds, dto.refreshVibeVersions ? [] : current.vibe_versions);
       return toTest(await this.owned(manager, id, user));
     });
   }
@@ -217,70 +259,69 @@ export class EnterpriseService {
   }
 
   /** 일반 문제와 바이브코딩 과제를 동일 비중으로 합산한다. */
-  async results(id: string, user: AuthenticatedUser) {
-    const test = await this.owned(this.dataSource.manager, id, user);
-    const rows: (AttemptRow & {
-      username: string;
-      problems: {
-        problemId: string;
-        solved: boolean;
-        submissions: number;
-        submissionId: string;
-      }[];
-    })[] = await this.dataSource.query(
-      `SELECT a.*, u.username,
-              coalesce(json_agg(json_build_object(
-                'problemId', s.problem_id, 'solved', s.solved,
-                'submissions', s.count, 'submissionId', s.submission_id
-              )) FILTER (WHERE s.problem_id IS NOT NULL), '[]') AS problems
-         FROM enterprise_attempts a
-         JOIN users u ON u.id = a.user_id
-         LEFT JOIN LATERAL (
-           SELECT problem_id, bool_or(status = 'ACCEPTED') AS solved, count(*)::int AS count,
-                  (array_agg(id ORDER BY (status = 'ACCEPTED') DESC, created_at DESC))[1] AS submission_id
-             FROM submissions WHERE attempt_id = a.id GROUP BY problem_id
-         ) s ON true
-        WHERE a.test_id = $1
-        GROUP BY a.id, u.username
-        ORDER BY a.started_at`,
-      [id],
-    );
-    const scores = await this.vibeScores(
-      test,
-      rows.map((row) => row.id),
-    );
-    const candidates = rows.map((row) => {
-      const solved = row.problems.filter((problem) => problem.solved).length;
-      return {
-        ...toAttempt(row),
-        user: { id: row.user_id, username: row.username },
-        problems: row.problems,
-        solved,
-        vibeTasks: scores.get(row.id) ?? [],
-        score: assessmentScore(
+  async results(id: string, user: AuthenticatedUser, query = new EnterpriseResultsQuery()) {
+    // Counts, scores and details describe one committed snapshot even while
+    // candidates join and judging finishes. No row locks or mutable cache.
+    return this.dataSource.transaction('REPEATABLE READ', async (manager) => {
+      const test = await this.owned(manager, id, user);
+      const [totals]: {
+        candidates: number; pending: number; averageScore: number | null; perfect: number;
+        analytics: { finished: number; active: number; expired: number; scoreBands: number[] };
+      }[] = await manager.query(enterpriseResultSummarySql, [
+        id, test.vibe_challenge_ids, test.problem_ids.length + test.vibe_challenge_ids.length,
+      ]);
+      const { analytics, ...summary } = totals;
+      const rows: (AttemptRow & {
+        username: string;
+        problems: {
+          problemId: string;
+          solved: boolean;
+          submissions: number;
+          submissionId: string;
+        }[];
+      })[] = await manager.query(enterpriseResultPageSql, [id, query.limit, (query.page - 1) * query.limit]);
+      const scores = await this.vibeScores(test, rows.map((row) => row.id), manager);
+      const candidates = rows.map((row) => {
+        const solved = row.problems.filter((problem) => problem.solved).length;
+        return {
+          ...toAttempt(row),
+          user: { id: row.user_id, username: row.username },
+          problems: row.problems,
           solved,
-          test.problem_ids.length,
-          (scores.get(row.id) ?? []).map((task) => task.score),
-        ),
+          vibeTasks: scores.get(row.id) ?? [],
+          score: assessmentScore(
+            solved,
+            test.problem_ids.length,
+            (scores.get(row.id) ?? []).map((task) => task.score),
+          ),
+        };
+      });
+      return {
+        test: toTest(test), summary, analytics, candidates,
+        exportLimit: ENTERPRISE_EXPORT_LIMIT,
+        pagination: {
+          page: query.page, limit: query.limit, total: summary.candidates,
+          totalPages: Math.ceil(summary.candidates / query.limit),
+        },
       };
     });
-    const complete = candidates.filter((item) => item.score !== null);
-    return {
-      test: toTest(test),
-      summary: {
-        candidates: candidates.length,
-        pending: candidates.length - complete.length,
-        averageScore: complete.length
-          ? Math.round(
-              complete.reduce((sum, item) => sum + item.score!, 0) /
-                complete.length,
-            )
-          : null,
-        // 모든 문제를 맞힌 응시자 수.
-        perfect: candidates.filter((item) => item.score === 100).length,
-      },
-      candidates,
-    };
+  }
+
+  /** Scalar-only export, authorized and bounded before score aggregation. */
+  async exportResults(id: string, user: AuthenticatedUser) {
+    return this.dataSource.transaction('REPEATABLE READ', async (manager) => {
+      const test = await this.owned(manager, id, user);
+      if ((test.attempt_count ?? 0) > ENTERPRISE_EXPORT_LIMIT)
+        throw new ConflictException(`전체 CSV는 응시자 ${ENTERPRISE_EXPORT_LIMIT.toLocaleString('en-US')}명까지 내려받을 수 있어요. 일부 결과로 잘라서 내보내지 않습니다.`);
+      const rows: EnterpriseExportRow[] = await manager.query(enterpriseResultExportSql, [
+        id, test.vibe_challenge_ids, test.problem_ids.length + test.vibe_challenge_ids.length,
+        ENTERPRISE_EXPORT_LIMIT + 1,
+      ]);
+      // Defense in depth: a future query change must not silently truncate.
+      if (rows.length > ENTERPRISE_EXPORT_LIMIT)
+        throw new ConflictException('전체 결과가 CSV 내보내기 한도를 초과했어요.');
+      return enterpriseResultsCsv(rows, test.problem_ids.length);
+    });
   }
 
   async joinInfo(code: string, user: AuthenticatedUser) {
@@ -299,6 +340,21 @@ export class EnterpriseService {
   /** 응시를 시작한다. 이미 시작했으면 그 응시를 그대로 돌려준다. */
   async start(code: string, user: AuthenticatedUser) {
     return this.dataSource.transaction(async (manager) => {
+      // Withdrawal locks user before removing invitations from tests. Keep that
+      // order and reject a request authenticated before account revocation.
+      const [active]: { id: string }[] = await manager.query(
+        `SELECT id FROM users WHERE id=$1 AND deleted_at IS NULL
+           AND suspended_at IS NULL AND NOT must_change_password
+           AND ($2::integer IS NULL OR token_version=$2) FOR SHARE`,
+        [user.id, user.tokenVersion ?? null],
+      );
+      if (!active) throw new UnauthorizedException('다시 로그인해야 합니다.');
+      // SHARE allows concurrent candidates but conflicts with schedule/invite edits
+      // and deletion. Re-read eligibility after the wait in a fresh statement.
+      await manager.query(
+        'SELECT id FROM enterprise_tests WHERE invite_code=$1 FOR SHARE',
+        [code.slice(0, 32)],
+      );
       const test = await this.byCode(manager, code, user);
       const [existing]: AttemptRow[] = await manager.query(
         'SELECT * FROM enterprise_attempts WHERE test_id = $1 AND user_id = $2',
@@ -310,10 +366,12 @@ export class EnterpriseService {
           '테스트를 만든 계정으로는 응시할 수 없어요.',
         );
       const [inserted]: AttemptRow[] = await manager.query(
-        `INSERT INTO enterprise_attempts (test_id, user_id, deadline_at)
-         SELECT t.id, $2, LEAST(now() + make_interval(mins => t.duration_min), t.ends_at)
+        `WITH wall AS MATERIALIZED (SELECT clock_timestamp() AS current_time)
+         INSERT INTO enterprise_attempts (test_id, user_id, started_at, deadline_at)
+         SELECT t.id, $2, wall.current_time, LEAST(wall.current_time + make_interval(mins => t.duration_min), t.ends_at)
            FROM enterprise_tests t
-          WHERE t.id = $1 AND t.starts_at <= now() AND now() < t.ends_at
+           CROSS JOIN wall
+          WHERE t.id = $1 AND t.starts_at <= wall.current_time AND wall.current_time < t.ends_at
          ON CONFLICT (test_id, user_id) DO NOTHING
          RETURNING *`,
         [test.id, user.id],
@@ -348,18 +406,20 @@ export class EnterpriseService {
       outputDescriptionMarkdown: string;
       timeLimitMs: number;
       memoryLimitMb: number;
+      problemVersion: number;
       samples: { input: string; expectedOutput: string }[];
     }[] = await this.dataSource.query(
-      `SELECT p.id, p.title, p.difficulty, p.statement_md AS "statementMarkdown",
-              p.input_description_md AS "inputDescriptionMarkdown",
-              p.output_description_md AS "outputDescriptionMarkdown",
-              p.time_limit_ms AS "timeLimitMs", p.memory_limit_mb AS "memoryLimitMb",
-              coalesce((SELECT json_agg(json_build_object('input', c.input, 'expectedOutput', c.expected_output) ORDER BY c."order")
-                          FROM test_cases c WHERE c.problem_id = p.id AND c.is_sample), '[]') AS samples
-         FROM unnest($1::uuid[]) WITH ORDINALITY AS o(id, position)
-         JOIN problems p ON p.id = o.id
-        ORDER BY o.position`,
-      [test.problem_ids],
+      `SELECT b.problem_id AS id, b.version AS "problemVersion", v.snapshot->>'title' AS title,
+              v.snapshot->>'difficulty' AS difficulty, v.snapshot->>'statementMarkdown' AS "statementMarkdown",
+              v.snapshot->>'inputDescriptionMarkdown' AS "inputDescriptionMarkdown",
+              v.snapshot->>'outputDescriptionMarkdown' AS "outputDescriptionMarkdown",
+              (v.snapshot->>'timeLimitMs')::int AS "timeLimitMs", (v.snapshot->>'memoryLimitMb')::int AS "memoryLimitMb",
+              coalesce((SELECT json_agg(json_build_object('input', c->>'input', 'expectedOutput', c->>'expectedOutput') ORDER BY (c->>'order')::int)
+                        FROM jsonb_array_elements(v.snapshot->'testCases') c WHERE c->>'isSample'='true'), '[]') AS samples
+         FROM enterprise_problem_versions b
+         JOIN problem_versions v ON v.problem_id=b.problem_id AND v.version=b.version
+        WHERE b.test_id=$1 ORDER BY b.position`,
+      [test.id],
     );
     const statuses: {
       problemId: string;
@@ -500,61 +560,56 @@ export class EnterpriseService {
     await this.vibe.finalize(vibeId, row.user_id);
     return this.reviewVibe(testId, attemptId, vibeId, user);
   }
-  private assertTasks(problems: string[], vibeIds: string[]) {
+  private assertTasks(problems: string[], vibeIds: string[], retainedVibeIds: string[] = []) {
     if (
       problems.length + vibeIds.length < 1 ||
       problems.length + vibeIds.length > 20 ||
-      vibeIds.some((id) => id !== challenge.id)
+      vibeIds.some((id) => id !== challenge.id && !retainedVibeIds.includes(id))
     )
       throw new BadRequestException(
         '일반 문제와 바이브코딩 과제를 합해 1~20개 선택해 주세요.',
       );
   }
-  private async vibeScores(test: TestRow, attemptIds: string[]) {
-    const rows: {
-      id: string;
-      enterprise_attempt_id: string;
-      challenge_id: string;
-      submitted_at: Date | null;
-      report: VibeReport | null;
-    }[] =
+  private async vibeScores(test: TestRow, attemptIds: string[], manager = this.dataSource.manager) {
+    const rows: EnterpriseVibeRow[] =
       attemptIds.length && test.vibe_challenge_ids.length
-        ? await this.dataSource.query(
+        ? await manager.query(
             "SELECT id,enterprise_attempt_id,challenge_id,submitted_at,state->'report' AS report FROM vibe_attempts WHERE enterprise_attempt_id=ANY($1::uuid[])",
             [attemptIds],
           )
         : [];
-    return new Map(
-      attemptIds.map((id) => [
-        id,
-        test.vibe_challenge_ids.map((challengeId) => {
-          const row = rows.find(
-            (row) =>
-              row.enterprise_attempt_id === id &&
-              row.challenge_id === challengeId,
-          );
-          const report = row?.report;
-          const score = !row
-            ? 0
-            : report?.evaluationStatus === 'complete'
-              ? report.outcome + report.prompt!.score + report.process!.score
-              : null;
-          return {
-            challengeId,
-            title: challenge.title,
-            id: row?.id ?? null,
-            submittedAt: row?.submitted_at ?? null,
-            score,
-            status: !row
-              ? 'not_started'
-              : !row.submitted_at
-                ? 'working'
-                : score === null
-                  ? 'pending'
-                  : 'complete',
-          };
-        }),
-      ]),
+    const bindings = new Map((await this.vibeSummaries(test, manager)).map((item) => [item.id, item]));
+    return buildEnterpriseVibeScores(test.vibe_challenge_ids, attemptIds, rows, bindings);
+  }
+
+  private async vibeSummaries(test: TestRow, manager = this.dataSource.manager) {
+    const summaries: { id: string; version: string; title: string; difficulty: string; stack: string; durationMin: number }[] =
+      test.vibe_challenge_ids.length ? await manager.query(
+        `SELECT b.challenge_id AS id,b.version,v.snapshot->'challenge'->>'title' AS title,
+                v.snapshot->'challenge'->>'difficulty' AS difficulty,v.snapshot->'challenge'->>'stack' AS stack,
+                (v.snapshot->'challenge'->>'durationMin')::int AS "durationMin"
+           FROM enterprise_vibe_versions b JOIN vibe_challenge_versions v ON v.version=b.version AND v.challenge_id=b.challenge_id
+          WHERE b.test_id=$1 ORDER BY b.position`, [test.id],
+      ) : [];
+    if (summaries.length !== test.vibe_challenge_ids.length || summaries.some((row, i) => row.id !== test.vibe_challenge_ids[i] || !row.title))
+      throw new ServiceUnavailableException('고정된 과제 정보를 확인할 수 없습니다.');
+    return summaries;
+  }
+
+  private async bindVibeVersions(manager: EntityManager, testId: string, ids: string[], retained: { challengeId: string; version: string; model: string }[] = []) {
+    const versions = new Map(retained.map((row) => [row.challengeId, { version: row.version, model: row.model }]));
+    if (ids.some((id) => !versions.has(id))) {
+      const current = await registerVibeSnapshot(manager);
+      for (const id of ids) if (!versions.has(id)) {
+        if (id !== current.snapshot.challenge.id) throw new BadRequestException('출제할 수 없는 바이브코딩 과제입니다.');
+        versions.set(id, { version: current.version, model: this.vibe.assessmentModel });
+      }
+    }
+    await manager.query('DELETE FROM enterprise_vibe_versions WHERE test_id=$1', [testId]);
+    if (ids.length) await manager.query(
+      `INSERT INTO enterprise_vibe_versions(test_id,challenge_id,version,ai_model,position)
+       SELECT $1,id,version,model,position FROM unnest($2::text[],$3::text[],$4::text[]) WITH ORDINALITY b(id,version,model,position)`,
+      [testId, ids, ids.map((id) => versions.get(id)!.version), ids.map((id) => versions.get(id)!.model)],
     );
   }
 
@@ -564,8 +619,12 @@ export class EnterpriseService {
     user: AuthenticatedUser,
     lock = false,
   ) {
+    // Row locks recheck t.* after a wait, but correlated aggregates retain the
+    // statement snapshot. Lock first, then read bindings/counts in a new statement.
+    if (lock)
+      await manager.query('SELECT id FROM enterprise_tests WHERE id=$1 FOR UPDATE', [id]);
     const [row]: TestRow[] = await manager.query(
-      `SELECT ${TEST_COLUMNS} FROM enterprise_tests t WHERE t.id = $1 ${lock ? 'FOR UPDATE' : ''}`,
+      `SELECT ${TEST_COLUMNS} FROM enterprise_tests t WHERE t.id = $1`,
       [id],
     );
     // 남의 테스트는 존재 여부를 드러내지 않는다.
@@ -641,19 +700,36 @@ export class EnterpriseService {
   }
 
   /** 출제 화면에서 고를 수 있는 문제만 허용: 공개 문제, 내가 만든 문제(기업 전용 포함), 관리자는 전부. */
-  private async assertProblems(
+  private async bindProblemVersions(
     manager: EntityManager,
+    testId: string,
     ids: string[],
     user: AuthenticatedUser,
+    retained: { problemId: string; version: number }[] = [],
   ) {
-    const [{ count }]: { count: number }[] = await manager.query(
-      `SELECT count(*)::int AS count FROM problems
-        WHERE id = ANY($1::uuid[]) AND (status = 'PUBLISHED' OR author_id = $2 OR $3)`,
-      [ids, user.id, user.role === UserRole.ADMIN],
+    // One statement chooses an authorized, committed immutable version. A content
+    // edit publishes its new version atomically, so body/cases/limits cannot mix.
+    const rows: { id: string; version: number }[] = await manager.query(
+      `SELECT p.id, p.current_version AS version FROM problems p
+        JOIN problem_versions v ON v.problem_id=p.id AND v.version=p.current_version
+        WHERE p.id = ANY($1::uuid[]) AND ((p.status = 'PUBLISHED' AND NOT p.is_private) OR p.author_id = $2 OR $3
+          OR p.id=ANY($4::uuid[]))`,
+      [ids, user.id, user.role === UserRole.ADMIN, retained.map((row) => row.problemId)],
     );
-    if (count !== ids.length)
+    if (rows.length !== ids.length)
       throw new BadRequestException(
         '출제할 수 없는 문제가 포함되어 있어요. 문제 목록을 다시 확인해 주세요.',
+      );
+    const versions = new Map(rows.map((row) => [row.id, row.version]));
+    for (const row of retained) if (versions.has(row.problemId)) versions.set(row.problemId, row.version);
+    // At most 20 rows, under the assessment lock. Replace atomically so reorder
+    // cannot transiently conflict with the unique per-test position constraint.
+    await manager.query('DELETE FROM enterprise_problem_versions WHERE test_id=$1', [testId]);
+    if (ids.length)
+      await manager.query(
+        `INSERT INTO enterprise_problem_versions(test_id, problem_id, version, position)
+         SELECT $1, id, version, position FROM unnest($2::uuid[], $3::int[]) WITH ORDINALITY AS b(id, version, position)`,
+        [testId, ids, ids.map((id) => versions.get(id)!)],
       );
   }
 }

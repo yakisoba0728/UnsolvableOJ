@@ -1,0 +1,207 @@
+{
+  "combinedCommit": "38824a09566fd75811704a44d65f7577d5cba9c3",
+  "combinedTree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+  "streams": {
+    "database": {
+      "commit": "9978a3ec33d551c899c9bb50415dd4cb2d030bdf",
+      "base": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "files": [
+        {
+          "path": "Back/scripts/phase5-db-qualification.mjs",
+          "authorBlob": "5a33e65574a24b0bcd77fef4fbebc80d2c5c1ce4",
+          "combinedBlob": "5a33e65574a24b0bcd77fef4fbebc80d2c5c1ce4",
+          "equal": true
+        },
+        {
+          "path": "Back/scripts/phase5-db-qualification.test.mjs",
+          "authorBlob": "8ad80a6514c9ce8ba614ddcbb67447bde8953952",
+          "combinedBlob": "8ad80a6514c9ce8ba614ddcbb67447bde8953952",
+          "equal": true
+        },
+        {
+          "path": "Back/test/enterprise-export-revocation.e2e-spec.ts",
+          "authorBlob": "db2eb812a7c33f0d9e53042ceabb55b935132796",
+          "combinedBlob": "db2eb812a7c33f0d9e53042ceabb55b935132796",
+          "equal": true
+        },
+        {
+          "path": "Back/test/enterprise-export.e2e-spec.ts",
+          "authorBlob": "58bfebb92b824afd1cc764ce4495237564d6564a",
+          "combinedBlob": "58bfebb92b824afd1cc764ce4495237564d6564a",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/DATABASE.md",
+          "authorBlob": "ca0bcad2eaedf7ea4a097858812a339d796ddd0a",
+          "combinedBlob": "ca0bcad2eaedf7ea4a097858812a339d796ddd0a",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/database-auth-test-admission-failure.txt",
+          "authorBlob": "f0ab12acf4caf168b5ba6bacd360b24ad0e33109",
+          "combinedBlob": "f0ab12acf4caf168b5ba6bacd360b24ad0e33109",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/database-local-f037d5c.json",
+          "authorBlob": "718a0b8d48f756724260e7cb12d8d2582b14e492",
+          "combinedBlob": "718a0b8d48f756724260e7cb12d8d2582b14e492",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/database-targeted-api.txt",
+          "authorBlob": "20cbe47761619ff88a1e0b963dcd743991d8d9fb",
+          "combinedBlob": "20cbe47761619ff88a1e0b963dcd743991d8d9fb",
+          "equal": true
+        }
+      ],
+      "allEqual": true
+    },
+    "reliability": {
+      "commit": "e9bc90d8c7347960fe70f8503267f695805c93e0",
+      "base": "ce26659b816c1dc1450cdc48f0c58d6e41ecea1e",
+      "files": [
+        {
+          "path": "Back/scripts/phase4-restore-rehearsal.mjs",
+          "authorBlob": "9794e87857a2bc7ad221bcbb6ceac5c6bd1bc485",
+          "combinedBlob": "9794e87857a2bc7ad221bcbb6ceac5c6bd1bc485",
+          "equal": true
+        },
+        {
+          "path": "Back/src/database/migrations/1796200000000-learning-goals.ts",
+          "authorBlob": "f030525864a46690bf62da34a7a7774c47b91356",
+          "combinedBlob": "f030525864a46690bf62da34a7a7774c47b91356",
+          "equal": true
+        },
+        {
+          "path": "Back/test/learning-goal-migration.e2e-spec.ts",
+          "authorBlob": "ee86b61fc620d81fadad4e71fca182e53ab74348",
+          "combinedBlob": "ee86b61fc620d81fadad4e71fca182e53ab74348",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/RELEASE-RUNBOOK.md",
+          "authorBlob": "ab98566564e0d8bf1534109a55d14d0b815d0164",
+          "combinedBlob": "ab98566564e0d8bf1534109a55d14d0b815d0164",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/RELIABILITY.md",
+          "authorBlob": "9c1eb5187396f4d7dd8633a328f1dbdfeff79ce2",
+          "combinedBlob": "9c1eb5187396f4d7dd8633a328f1dbdfeff79ce2",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/FRONTEND-INDEPENDENT-REVIEW.md",
+          "authorBlob": "93f31488e6f47fb98442bcc3db205d3962342dc4",
+          "combinedBlob": "93f31488e6f47fb98442bcc3db205d3962342dc4",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/fixture-proof.json",
+          "authorBlob": "063acf101be1617c178b330b0dd9bd0915b57068",
+          "combinedBlob": "063acf101be1617c178b330b0dd9bd0915b57068",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/fixture-proof.log",
+          "authorBlob": "d13e45ab411d6cd1625929320c6dbb39fa4bc35a",
+          "combinedBlob": "d13e45ab411d6cd1625929320c6dbb39fa4bc35a",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/fixture-proof.mjs",
+          "authorBlob": "c06f18f0cdf1c60e605e88e07ab7d1d0255d53b9",
+          "combinedBlob": "c06f18f0cdf1c60e605e88e07ab7d1d0255d53b9",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/frontend-independent.json",
+          "authorBlob": "f11217ba4a79358d6a8b35ec281c7d64ac0d499f",
+          "combinedBlob": "f11217ba4a79358d6a8b35ec281c7d64ac0d499f",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/goal-isolation-independent-baseline.json",
+          "authorBlob": "47ff81bccf3630cc02458cd175b1e711c49e4ca3",
+          "combinedBlob": "47ff81bccf3630cc02458cd175b1e711c49e4ca3",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/goal-isolation-independent-baseline.mjs",
+          "authorBlob": "579ac4634be6a73125abf0ec93b68cb4b5c4b64c",
+          "combinedBlob": "579ac4634be6a73125abf0ec93b68cb4b5c4b64c",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/goal-isolation-tests.json",
+          "authorBlob": "0eb8f1dc9a184516856a63357eb168d9c00c6484",
+          "combinedBlob": "0eb8f1dc9a184516856a63357eb168d9c00c6484",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/goal-rollback-baseline.log",
+          "authorBlob": "7d1e68b8df259b776e009b5198f35d5c0532f387",
+          "combinedBlob": "7d1e68b8df259b776e009b5198f35d5c0532f387",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/goal-rollback-candidate.log",
+          "authorBlob": "da228b3774f8897d1e625d8ab40e6eb91aec3b0f",
+          "combinedBlob": "da228b3774f8897d1e625d8ab40e6eb91aec3b0f",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/goal-rollback-captures.json",
+          "authorBlob": "06590384feb329a8320991334d95b65706e0c323",
+          "combinedBlob": "06590384feb329a8320991334d95b65706e0c323",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/evidence/reliability/migration-regression.log",
+          "authorBlob": "6801b4e1c4c6fd32c39df588499fdfe756745627",
+          "combinedBlob": "6801b4e1c4c6fd32c39df588499fdfe756745627",
+          "equal": true
+        }
+      ],
+      "allEqual": true
+    },
+    "multiapi": {
+      "commit": "7c1731dbcef91b8e8828acdd428d7274d667007c",
+      "base": "e9f056bccf99e75938beadf02b652003f0c4ee23",
+      "files": [
+        {
+          "path": "Back/test/phase5-multi-api-deadline.spec.ts",
+          "authorBlob": "c81e5896146c3565d0d8e2625253495548aef4d6",
+          "combinedBlob": "c81e5896146c3565d0d8e2625253495548aef4d6",
+          "equal": true
+        },
+        {
+          "path": "Back/test/phase5-multi-api.pipeline-helpers.ts",
+          "authorBlob": "685c71d5a30c22255a3afc9f54a027c60498b984",
+          "combinedBlob": "685c71d5a30c22255a3afc9f54a027c60498b984",
+          "equal": true
+        },
+        {
+          "path": "Back/test/phase5-multi-api.pipeline-spec.ts",
+          "authorBlob": "5d806fed75941d17b07b8f67bb1ec37ca9c81fe2",
+          "combinedBlob": "5d806fed75941d17b07b8f67bb1ec37ca9c81fe2",
+          "equal": true
+        },
+        {
+          "path": "Back/test/vibe-dedicated.pipeline-spec.ts",
+          "authorBlob": "b5904419c99875eaffd8edd57ac6e9821a8971c0",
+          "combinedBlob": "b5904419c99875eaffd8edd57ac6e9821a8971c0",
+          "equal": true
+        },
+        {
+          "path": "docs/overhaul/phase5/MULTI-API.md",
+          "authorBlob": "90b2677bb5e4b0a92282a4432c7fce29c7d44303",
+          "combinedBlob": "90b2677bb5e4b0a92282a4432c7fce29c7d44303",
+          "equal": true
+        }
+      ],
+      "allEqual": true
+    }
+  }
+}

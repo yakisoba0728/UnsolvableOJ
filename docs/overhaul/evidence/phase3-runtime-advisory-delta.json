@@ -1,0 +1,2498 @@
+{
+  "schemaVersion": 1,
+  "kind": "exact-runtime-advisory-delta",
+  "authoredBy": "runtime_security_engineer",
+  "recordedAt": "2026-11-16T07:43:02.638469+00:00",
+  "inputs": {
+    "accepted": {
+      "runId": "43822819719",
+      "artifactId": "14205173095",
+      "artifactApiUrl": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14205173095",
+      "runUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43822819719",
+      "archive": {
+        "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/accepted-runtime.zip",
+        "sha256": "128ea68ac07435b95731ffe00ac6f6171f0fa18915ded6133c1ce077e06e53a0"
+      },
+      "githubArtifactDigest": "sha256:128ea68ac07435b95731ffe00ac6f6171f0fa18915ded6133c1ce077e06e53a0",
+      "githubDigestProvenance": "Coordinator read GitHub Actions artifact metadata; author independently verified downloaded ZIP bytes match that supplied API digest.",
+      "rawReportSha256": "fa638972ad300bec18a90d0008cfa78ac0e6366244372064802ac038e6fb6fa5",
+      "scanManifestSha256": "51224fbd8c544b13aa811e859ce50e34a444cfd1074e4e6fbaa87b7955fdcda3",
+      "sourceCommit": "257e795ca89f1c1a425ed54d8150db009c65a65b",
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-11-17T01:11:02.624122856Z",
+        "UpdatedAt": "2026-11-16T01:11:02.624123452Z",
+        "DownloadedAt": "2026-11-16T07:19:52.626843561Z"
+      },
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "scannerExecutableSha256": "6a972c69606c7b3ea4c6bdcc6fc9332ea9ad38381624310c1e85cc77345909f3",
+      "policySha256": "77fcae5ce3d800b1b6289de7a7e84a2ee6364867ec13b321346520075ddd3b73",
+      "evaluatorSourceSha256": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f",
+      "evaluationGate": "PASS_WITH_REVIEWED_COMPONENT_FINDINGS",
+      "packagePayloadState": "MATCH",
+      "normalizedInstalledPackageCount": 225,
+      "normalizedInstalledPackagesSha256": "fdf211143b75623d851f3a8d40bf2cd2f976aa8a170813a0e79bbac358ee5869",
+      "normalization": "Canonical JSON, original report package order; exclude package Layer and Identifier.UID only."
+    },
+    "blocked": {
+      "runId": "43823181757",
+      "artifactId": "14205174564",
+      "artifactApiUrl": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14205174564",
+      "runUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43823181757",
+      "archive": {
+        "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/blocked-runtime.zip",
+        "sha256": "cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55"
+      },
+      "githubArtifactDigest": "sha256:cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55",
+      "githubDigestProvenance": "Coordinator read GitHub Actions artifact metadata; author independently verified downloaded ZIP bytes match that supplied API digest.",
+      "rawReportSha256": "8d0227de43e60f4f44dc8ba59a5c0f1a6fddb1c3d236f69728fe15914864d7d0",
+      "scanManifestSha256": "de3f534d1d3468ec1fb4b6c9a89058084784108f50c0f47cbed5c78ad5fd8af0",
+      "sourceCommit": "9e4ce9df2aa4338a99a8deb7f32e161458a39a04",
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-11-17T07:10:39.763774549Z",
+        "UpdatedAt": "2026-11-16T07:10:39.763774809Z",
+        "DownloadedAt": "2026-11-16T07:27:07.399137162Z"
+      },
+      "databaseSha256": "7dd09bed2ea9b56f9f6dcf8176bfcaca32cb02319b401e0f453175c3664b4c30",
+      "scannerExecutableSha256": "6a972c69606c7b3ea4c6bdcc6fc9332ea9ad38381624310c1e85cc77345909f3",
+      "policySha256": "77fcae5ce3d800b1b6289de7a7e84a2ee6364867ec13b321346520075ddd3b73",
+      "evaluatorSourceSha256": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f",
+      "evaluationGate": "BLOCKED_FINDINGS",
+      "packagePayloadState": "MATCH",
+      "normalizedInstalledPackageCount": 225,
+      "normalizedInstalledPackagesSha256": "fdf211143b75623d851f3a8d40bf2cd2f976aa8a170813a0e79bbac358ee5869",
+      "normalization": "Canonical JSON, original report package order; exclude package Layer and Identifier.UID only."
+    }
+  },
+  "comparison": {
+    "findingKeysBefore": 1107,
+    "findingKeysAfter": 1107,
+    "addedFindingKeys": [],
+    "removedFindingKeys": [],
+    "allFindingChanges": 55,
+    "changedFindingSeverityCounts": {
+      "CRITICAL": 2,
+      "HIGH": 14,
+      "LOW": 9,
+      "MEDIUM": 30
+    },
+    "reviewedCohortCount": 182,
+    "unchangedReviewedAdvisoryCount": 166,
+    "changedReviewedAdvisoryCount": 16,
+    "changedReviewedIds": [
+      "CVE-2025-39933",
+      "CVE-2025-40170",
+      "CVE-2025-68745",
+      "CVE-2026-31692",
+      "CVE-2026-52991",
+      "CVE-2026-53281",
+      "CVE-2026-63879",
+      "CVE-2026-64523",
+      "CVE-2026-68245",
+      "CVE-2026-68257",
+      "CVE-2026-68409",
+      "CVE-2026-68426",
+      "CVE-2026-74752",
+      "CVE-2026-89631",
+      "CVE-2026-97493",
+      "CVE-2026-98364"
+    ],
+    "changedReferenceDomains": [
+      "access.redhat.com",
+      "bugzilla.redhat.com",
+      "errata.almalinux.org"
+    ],
+    "rawSeverityCountsBefore": {
+      "UNKNOWN": 1,
+      "LOW": 363,
+      "MEDIUM": 561,
+      "HIGH": 177,
+      "CRITICAL": 5
+    },
+    "rawSeverityCountsAfter": {
+      "UNKNOWN": 1,
+      "LOW": 363,
+      "MEDIUM": 561,
+      "HIGH": 177,
+      "CRITICAL": 5
+    },
+    "headerPayloadFilesBefore": 990,
+    "headerPayloadFilesAfter": 990,
+    "acceptedReviewedAdvisoriesMatchOriginalPolicy": true
+  },
+  "changes": [
+    {
+      "id": "CVE-2025-22871",
+      "package": "golang-1.22-go",
+      "packageId": "golang-1.22-go@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "3a6218eba6ea785613507f0ca3d7df16173e92b2a2bd5075974755415fe6bd71",
+      "afterAdvisorySha256": "de92924d418e2b5d1506577ad859a86587a984ecd00832ddd45887a31ba1c60c",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2025-9635.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2025:9146",
+            "https://errata.almalinux.org/10/ALSA-2025-9146.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-4674",
+      "package": "golang-1.22-go",
+      "packageId": "golang-1.22-go@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "9fa0f70148121feba2213f2294dff1a31dcba2e5af427dafc9f6548070539f5d",
+      "afterAdvisorySha256": "ccaa8481502224abd1ff1099d72e6a5fbea8123f2296f54a738516c5fe327364",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2025-13935.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2025:13941",
+            "https://errata.almalinux.org/10/ALSA-2025-13941.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-47907",
+      "package": "golang-1.22-go",
+      "packageId": "golang-1.22-go@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "9fcff29e6a2091f922d8513bab6db02514b490cddb88e121b7b092feb64f352c",
+      "afterAdvisorySha256": "7ce5e01e94febfe670e49d356fdabf67fb5d70f562587c88af4c33da263cdb28",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://access.redhat.com/errata/RHSA-2025:20909",
+            "https://bugzilla.redhat.com/2387083",
+            "https://bugzilla.redhat.com/2393152",
+            "https://errata.almalinux.org/9/ALSA-2025-20909.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2025:13941",
+            "https://bugzilla.redhat.com/2384329",
+            "https://errata.almalinux.org/10/ALSA-2025-13941.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-61731",
+      "package": "golang-1.22-go",
+      "packageId": "golang-1.22-go@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "8c2bd125583fcab8d759bb56057a8a6897fc675a31e8e93a9ff485a3789f2262",
+      "afterAdvisorySha256": "37f6090532d118cc0bca3d1e21aaa67f5a60db5e5c3bd99498b567c9716cf07e",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-5942.html"
+          ],
+          "removed": [
+            "https://errata.almalinux.org/10/ALSA-2026-5941.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-61732",
+      "package": "golang-1.22-go",
+      "packageId": "golang-1.22-go@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "429555650f1662df501a6cb8056c3d28ca32b07790b7cf289386e7a49c8f3ad2",
+      "afterAdvisorySha256": "c16daff133cd9dec299db17c47bf7ed46cc54a747e317dc7034b6848577a49b2",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-2709.html"
+          ],
+          "removed": [
+            "https://errata.almalinux.org/10/ALSA-2026-2706.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-68121",
+      "package": "golang-1.22-go",
+      "packageId": "golang-1.22-go@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "2b174d1905fe641c3f0b0a43793444aa600c7caaeeb75e5486017e37cb96a933",
+      "afterAdvisorySha256": "04846407bde75732c1742471da6574ae0387a8277345af1800ec89869ae1a96f",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-4177.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:3336",
+            "https://bugzilla.redhat.com/2418462",
+            "https://bugzilla.redhat.com/2434431",
+            "https://errata.almalinux.org/10/ALSA-2026-3336.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-32280",
+      "package": "golang-1.22-go",
+      "packageId": "golang-1.22-go@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "bd042d308386c8a3ee582b122911e28518e12c7e5e4c5249e7aa7ac499175e34",
+      "afterAdvisorySha256": "7b977cf588a08572d2407b252cd952916273acd027c84ab5096820074a4f4241",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-49838.html"
+          ],
+          "removed": [
+            "https://errata.almalinux.org/10/ALSA-2026-49526.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-32283",
+      "package": "golang-1.22-go",
+      "packageId": "golang-1.22-go@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "9fcda6038c5e5f53b6c85639018eb81fa93ab7bde76664eddab5a4c417190141",
+      "afterAdvisorySha256": "617dfcb6ac0ae96ffcc79790475fe9326f57f78b49fbf1d92bf6ff82f483613d",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-29703.html"
+          ],
+          "removed": [
+            "https://errata.almalinux.org/10/ALSA-2026-29195.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-22871",
+      "package": "golang-1.22-src",
+      "packageId": "golang-1.22-src@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "1951754f2939b883cab7c829e556fc8af2b43335528eccc96c6f0c6e1939bef5",
+      "afterAdvisorySha256": "79e89b602f7a35f550606d1e579984423dc06b9f4e8a8acd09a559c2459c7d59",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2025-9635.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2025:9146",
+            "https://errata.almalinux.org/10/ALSA-2025-9146.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-4674",
+      "package": "golang-1.22-src",
+      "packageId": "golang-1.22-src@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "7b83270a1085835f6297cb38734509d905b14bd32f9162e43468164c8dd2551d",
+      "afterAdvisorySha256": "d763dcd51c699cb1cf00d9adbedeb95ab2ede3cb095e395e3ca08f05110c93b8",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2025-13935.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2025:13941",
+            "https://errata.almalinux.org/10/ALSA-2025-13941.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-47907",
+      "package": "golang-1.22-src",
+      "packageId": "golang-1.22-src@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "40d80e231cac9caf18c0c7da336f27faeca120f2cf376738c17b7880fea19a59",
+      "afterAdvisorySha256": "03962fcbfa12fe4c498839a12cd643f34d3536a36fcecfc8eb8a6c8444312c69",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://access.redhat.com/errata/RHSA-2025:20909",
+            "https://bugzilla.redhat.com/2387083",
+            "https://bugzilla.redhat.com/2393152",
+            "https://errata.almalinux.org/9/ALSA-2025-20909.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2025:13941",
+            "https://bugzilla.redhat.com/2384329",
+            "https://errata.almalinux.org/10/ALSA-2025-13941.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-61731",
+      "package": "golang-1.22-src",
+      "packageId": "golang-1.22-src@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "e33a09ca46fcc95734048737e119aefb5bce342395ba9d804d0d8bd1d05a010f",
+      "afterAdvisorySha256": "bbd580242c3b9d6c20f0b95f3a3d3905c337db2d5ec49a62e7432d1689138994",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-5942.html"
+          ],
+          "removed": [
+            "https://errata.almalinux.org/10/ALSA-2026-5941.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-61732",
+      "package": "golang-1.22-src",
+      "packageId": "golang-1.22-src@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "711fb50268f1f7256d907581bc310afa3a239bf0bb4813be09ebde970a275134",
+      "afterAdvisorySha256": "6d981668cc81f0dc998054159f278fa24a311847c235343d16447543ad66adb6",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-2709.html"
+          ],
+          "removed": [
+            "https://errata.almalinux.org/10/ALSA-2026-2706.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-68121",
+      "package": "golang-1.22-src",
+      "packageId": "golang-1.22-src@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "0dd1a0191ea6797e17411649a6fdb5d853468b3d956d1a99f9b983eef0f436fe",
+      "afterAdvisorySha256": "890f8d8bba65c4ee097293dcf5ef1e5b9c02fba06286432dd237ec8b2ad10968",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-4177.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:3336",
+            "https://bugzilla.redhat.com/2418462",
+            "https://bugzilla.redhat.com/2434431",
+            "https://errata.almalinux.org/10/ALSA-2026-3336.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-32280",
+      "package": "golang-1.22-src",
+      "packageId": "golang-1.22-src@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "af994e1690e4c1a67721c2e32700702550369514cef8d548f718ec1ca25fe4d1",
+      "afterAdvisorySha256": "0441acbe098b8358b5de4040017a4684513bf8490a3efc96aa543d262325ba17",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-49838.html"
+          ],
+          "removed": [
+            "https://errata.almalinux.org/10/ALSA-2026-49526.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-32283",
+      "package": "golang-1.22-src",
+      "packageId": "golang-1.22-src@1.22.2-2ubuntu0.5",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "7a0d248a90cc5f4bf2429dca3d4793b6cb1460ced25bdd9eccb4d8a9d2097897",
+      "afterAdvisorySha256": "75bf27ff78d1ffcb01803d1a7a79fa6398cdaa3c2ac788488a2f6e5e4379aeb0",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-29703.html"
+          ],
+          "removed": [
+            "https://errata.almalinux.org/10/ALSA-2026-29195.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-102633",
+      "package": "libexpat1",
+      "packageId": "libexpat1@2.6.1-2ubuntu0.6",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "1ed675a8e6d7b54b9881991bb23bb732d354ed836b211a34e74be4e17485bcbb",
+      "afterAdvisorySha256": "4cd5f9539e3f2c66b02cd1e37e31039e540e2002e2dc562a143f636b2cbde915",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-88247.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:88248",
+            "https://errata.almalinux.org/10/ALSA-2026-88248.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-64523",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "CRITICAL",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "5d6ab2f453521454832665d25efaed3d90ecdfd5860ac0237ddee44f8876acb7",
+      "afterAdvisorySha256": "78528359a2c9a271a1d0e61254b681ef5934a82d268c65ad09711afd6a47ef5c",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2348512",
+            "https://bugzilla.redhat.com/2507098",
+            "https://bugzilla.redhat.com/2516251",
+            "https://bugzilla.redhat.com/2516417",
+            "https://bugzilla.redhat.com/2546385",
+            "https://bugzilla.redhat.com/2546494",
+            "https://errata.almalinux.org/9/ALSA-2026-90365.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:91565",
+            "https://bugzilla.redhat.com/2492709",
+            "https://bugzilla.redhat.com/2502341",
+            "https://bugzilla.redhat.com/2502615",
+            "https://bugzilla.redhat.com/2513163",
+            "https://bugzilla.redhat.com/2513264",
+            "https://bugzilla.redhat.com/2516579",
+            "https://bugzilla.redhat.com/2521413",
+            "https://errata.almalinux.org/10/ALSA-2026-91565.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-68426",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "CRITICAL",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "60f629ad5bf72a1211b865ecb2e7136067aa35ec3212eca98f34a5806dee92bd",
+      "afterAdvisorySha256": "b68e60bc69f04ff83d735dcaea3fab41d93e808ceba9a9588b729353c4e8e890",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2439924",
+            "https://bugzilla.redhat.com/2482098",
+            "https://bugzilla.redhat.com/2482127",
+            "https://bugzilla.redhat.com/2482550",
+            "https://bugzilla.redhat.com/2482618",
+            "https://bugzilla.redhat.com/2492436",
+            "https://bugzilla.redhat.com/2492741",
+            "https://bugzilla.redhat.com/2492742",
+            "https://bugzilla.redhat.com/2492750",
+            "https://bugzilla.redhat.com/2492792",
+            "https://bugzilla.redhat.com/2502295",
+            "https://bugzilla.redhat.com/2502347",
+            "https://bugzilla.redhat.com/2502438",
+            "https://bugzilla.redhat.com/2502575",
+            "https://bugzilla.redhat.com/2502580",
+            "https://bugzilla.redhat.com/2502596",
+            "https://bugzilla.redhat.com/2511448",
+            "https://bugzilla.redhat.com/2513165",
+            "https://bugzilla.redhat.com/2513171",
+            "https://bugzilla.redhat.com/2513271",
+            "https://bugzilla.redhat.com/2513286",
+            "https://bugzilla.redhat.com/2516490",
+            "https://bugzilla.redhat.com/2516599",
+            "https://bugzilla.redhat.com/2516679",
+            "https://bugzilla.redhat.com/2516684",
+            "https://errata.almalinux.org/9/ALSA-2026-68570.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:67471",
+            "https://bugzilla.redhat.com/2414466",
+            "https://bugzilla.redhat.com/2425039",
+            "https://bugzilla.redhat.com/2454867",
+            "https://bugzilla.redhat.com/2460699",
+            "https://bugzilla.redhat.com/2461451",
+            "https://bugzilla.redhat.com/2461525",
+            "https://bugzilla.redhat.com/2461575",
+            "https://bugzilla.redhat.com/2467084",
+            "https://bugzilla.redhat.com/2468192",
+            "https://bugzilla.redhat.com/2468244",
+            "https://bugzilla.redhat.com/2482566",
+            "https://bugzilla.redhat.com/2492095",
+            "https://bugzilla.redhat.com/2492747",
+            "https://bugzilla.redhat.com/2492771",
+            "https://bugzilla.redhat.com/2497035",
+            "https://bugzilla.redhat.com/2502320",
+            "https://bugzilla.redhat.com/2502490",
+            "https://bugzilla.redhat.com/2513452",
+            "https://bugzilla.redhat.com/2517010",
+            "https://errata.almalinux.org/10/ALSA-2026-67471.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-39933",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "39a2c18496bfa2ba67e4ad32e480e3e9bd950af43fc7617a15f79096cad9e6fb",
+      "afterAdvisorySha256": "695681b1adc533c8bfcf78e10457eedc585ffafcac43ac7ce5cd87bae4b1710a",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2393157",
+            "https://bugzilla.redhat.com/2419954",
+            "https://bugzilla.redhat.com/2422788",
+            "https://bugzilla.redhat.com/2422801",
+            "https://errata.almalinux.org/9/ALSA-2026-0793.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:2282",
+            "https://bugzilla.redhat.com/2383404",
+            "https://bugzilla.redhat.com/2383421",
+            "https://bugzilla.redhat.com/2393191",
+            "https://bugzilla.redhat.com/2414465",
+            "https://bugzilla.redhat.com/2419870",
+            "https://bugzilla.redhat.com/2419902",
+            "https://bugzilla.redhat.com/2429116",
+            "https://errata.almalinux.org/10/ALSA-2026-2282.html"
+          ],
+          "orderingOnly": false
+        },
+        "VendorSeverity": {
+          "before": {
+            "alma": 2,
+            "nvd": 2,
+            "oracle-oval": 2,
+            "photon": 2,
+            "redhat": 2,
+            "rocky": 3,
+            "ubuntu": 3
+          },
+          "after": {
+            "alma": 3,
+            "nvd": 2,
+            "oracle-oval": 2,
+            "photon": 2,
+            "redhat": 2,
+            "rocky": 3,
+            "ubuntu": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-40170",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "0a13ab92a0aae6a07cdfe0f30ddb4071e325ea84d753e6de0bcfa67d3856fc9f",
+      "afterAdvisorySha256": "705fd2b061ea5b6dcdf1815685b408520060db54ce0d72246c31e236b5784533",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2363315",
+            "https://bugzilla.redhat.com/2373354",
+            "https://bugzilla.redhat.com/2383404",
+            "https://bugzilla.redhat.com/2383421",
+            "https://bugzilla.redhat.com/2383487",
+            "https://bugzilla.redhat.com/2393191",
+            "https://bugzilla.redhat.com/2394601",
+            "https://bugzilla.redhat.com/2414522",
+            "https://bugzilla.redhat.com/2419919",
+            "https://errata.almalinux.org/9/ALSA-2026-2212.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:1690",
+            "https://bugzilla.redhat.com/2381870",
+            "https://bugzilla.redhat.com/2383516",
+            "https://bugzilla.redhat.com/2389507",
+            "https://bugzilla.redhat.com/2393488",
+            "https://bugzilla.redhat.com/2414494",
+            "https://bugzilla.redhat.com/2418872",
+            "https://bugzilla.redhat.com/2418876",
+            "https://bugzilla.redhat.com/2418892",
+            "https://bugzilla.redhat.com/2419891",
+            "https://bugzilla.redhat.com/2419896",
+            "https://bugzilla.redhat.com/2422836",
+            "https://bugzilla.redhat.com/2422840",
+            "https://errata.almalinux.org/10/ALSA-2026-1690.html"
+          ],
+          "orderingOnly": false
+        },
+        "VendorSeverity": {
+          "before": {
+            "alma": 3,
+            "amazon": 3,
+            "azure": 2,
+            "oracle-oval": 3,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 3
+          },
+          "after": {
+            "alma": 2,
+            "amazon": 3,
+            "azure": 2,
+            "oracle-oval": 3,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-68745",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "24fe5031f683e25f112b923ee64dee36d4fd5ae1cf64d54666f754f97f677d25",
+      "afterAdvisorySha256": "a4f7fe708069a7d8a10bf3d703eb98ffd981e3c9cf07f17921b04ddda0c03c42",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2464093",
+            "https://bugzilla.redhat.com/2468050",
+            "https://bugzilla.redhat.com/2492092",
+            "https://bugzilla.redhat.com/2492115",
+            "https://bugzilla.redhat.com/2492270",
+            "https://bugzilla.redhat.com/2492310",
+            "https://bugzilla.redhat.com/2492408",
+            "https://bugzilla.redhat.com/2492432",
+            "https://bugzilla.redhat.com/2492717",
+            "https://bugzilla.redhat.com/2492722",
+            "https://bugzilla.redhat.com/2492762",
+            "https://bugzilla.redhat.com/2492795",
+            "https://bugzilla.redhat.com/2502254",
+            "https://bugzilla.redhat.com/2502331",
+            "https://bugzilla.redhat.com/2502346",
+            "https://bugzilla.redhat.com/2502388",
+            "https://bugzilla.redhat.com/2502413",
+            "https://bugzilla.redhat.com/2502446",
+            "https://bugzilla.redhat.com/2502473",
+            "https://bugzilla.redhat.com/2502477",
+            "https://bugzilla.redhat.com/2502518",
+            "https://bugzilla.redhat.com/2502541",
+            "https://bugzilla.redhat.com/2506782",
+            "https://bugzilla.redhat.com/2507292",
+            "https://bugzilla.redhat.com/2513141",
+            "https://bugzilla.redhat.com/2513177",
+            "https://bugzilla.redhat.com/2513253",
+            "https://bugzilla.redhat.com/2513324",
+            "https://bugzilla.redhat.com/2513397",
+            "https://bugzilla.redhat.com/2513408",
+            "https://bugzilla.redhat.com/2513474",
+            "https://bugzilla.redhat.com/2516501",
+            "https://errata.almalinux.org/9/ALSA-2026-67150.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:67471",
+            "https://bugzilla.redhat.com/2414466",
+            "https://bugzilla.redhat.com/2461462",
+            "https://bugzilla.redhat.com/2461575",
+            "https://bugzilla.redhat.com/2467084",
+            "https://bugzilla.redhat.com/2482566",
+            "https://bugzilla.redhat.com/2492095",
+            "https://bugzilla.redhat.com/2492747",
+            "https://bugzilla.redhat.com/2492779",
+            "https://bugzilla.redhat.com/2497035",
+            "https://bugzilla.redhat.com/2502368",
+            "https://bugzilla.redhat.com/2502412",
+            "https://bugzilla.redhat.com/2502434",
+            "https://bugzilla.redhat.com/2502490",
+            "https://bugzilla.redhat.com/2513477",
+            "https://bugzilla.redhat.com/2517010",
+            "https://errata.almalinux.org/10/ALSA-2026-67471.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-31692",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "ecd90c9709d49ec281269d8649fd3cd52e344ed5e3fb760fedba799a8572c3cc",
+      "afterAdvisorySha256": "9f5fd980d3f1c284d47c2ca01d8fc845815afcf1f0f34a84481d2b2e1b991da3",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2425039",
+            "https://bugzilla.redhat.com/2454867",
+            "https://bugzilla.redhat.com/2460699",
+            "https://bugzilla.redhat.com/2461451",
+            "https://bugzilla.redhat.com/2461525",
+            "https://bugzilla.redhat.com/2468050",
+            "https://bugzilla.redhat.com/2468192",
+            "https://bugzilla.redhat.com/2468244",
+            "https://bugzilla.redhat.com/2492092",
+            "https://bugzilla.redhat.com/2492115",
+            "https://bugzilla.redhat.com/2492270",
+            "https://bugzilla.redhat.com/2492310",
+            "https://bugzilla.redhat.com/2492408",
+            "https://bugzilla.redhat.com/2492432",
+            "https://bugzilla.redhat.com/2492717",
+            "https://bugzilla.redhat.com/2492722",
+            "https://bugzilla.redhat.com/2492762",
+            "https://bugzilla.redhat.com/2492771",
+            "https://bugzilla.redhat.com/2492795",
+            "https://bugzilla.redhat.com/2502254",
+            "https://bugzilla.redhat.com/2502320",
+            "https://bugzilla.redhat.com/2502331",
+            "https://bugzilla.redhat.com/2502346",
+            "https://bugzilla.redhat.com/2502388",
+            "https://bugzilla.redhat.com/2502413",
+            "https://bugzilla.redhat.com/2502446",
+            "https://bugzilla.redhat.com/2502473",
+            "https://bugzilla.redhat.com/2502477",
+            "https://bugzilla.redhat.com/2502518",
+            "https://bugzilla.redhat.com/2502541",
+            "https://bugzilla.redhat.com/2506782",
+            "https://bugzilla.redhat.com/2507292",
+            "https://bugzilla.redhat.com/2513141",
+            "https://bugzilla.redhat.com/2513177",
+            "https://bugzilla.redhat.com/2513253",
+            "https://bugzilla.redhat.com/2513324",
+            "https://bugzilla.redhat.com/2513397",
+            "https://bugzilla.redhat.com/2513408",
+            "https://bugzilla.redhat.com/2513452",
+            "https://bugzilla.redhat.com/2513474",
+            "https://bugzilla.redhat.com/2516501",
+            "https://errata.almalinux.org/9/ALSA-2026-67150.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:45114",
+            "https://bugzilla.redhat.com/2418829",
+            "https://bugzilla.redhat.com/2436755",
+            "https://bugzilla.redhat.com/2481972",
+            "https://bugzilla.redhat.com/2492277",
+            "https://bugzilla.redhat.com/2492413",
+            "https://errata.almalinux.org/10/ALSA-2026-45114.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-52991",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "c6b16549648e377bfc5ec0705084fb5824b8552412800277c17cbdc8456a18d9",
+      "afterAdvisorySha256": "83df7245e06773ffd1a12a93e0210d344b7cb9bd69de3625f71fa788e05863a4",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2467135",
+            "https://bugzilla.redhat.com/2482614",
+            "https://bugzilla.redhat.com/2492788",
+            "https://bugzilla.redhat.com/2502361",
+            "https://bugzilla.redhat.com/2502589",
+            "https://bugzilla.redhat.com/2513373",
+            "https://errata.almalinux.org/9/ALSA-2026-57252.html"
+          ],
+          "removed": [
+            "https://bugzilla.redhat.com/2479812",
+            "https://bugzilla.redhat.com/2482558",
+            "https://bugzilla.redhat.com/2502329",
+            "https://bugzilla.redhat.com/2502449",
+            "https://errata.almalinux.org/10/ALSA-2026-57251.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-53281",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "c3a2e510cd7ad90aab197826f65a7189871e053c9a9b5bc85891a70d41e831f3",
+      "afterAdvisorySha256": "48a6e1e9a66b89c275680bdc1f0011fd6a0239826a9c350956c65d9fc91cf27c",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2400057",
+            "https://bugzilla.redhat.com/2432666",
+            "https://bugzilla.redhat.com/2492413",
+            "https://bugzilla.redhat.com/2502449",
+            "https://errata.almalinux.org/9/ALSA-2026-47040.html"
+          ],
+          "removed": [
+            "https://bugzilla.redhat.com/2481989",
+            "https://bugzilla.redhat.com/2492363",
+            "https://bugzilla.redhat.com/2492437",
+            "https://errata.almalinux.org/10/ALSA-2026-47017.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-63879",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "bf905a728fd750f8f8fceb351e95e27df3be5e9f68fc5aa902893a9629723690",
+      "afterAdvisorySha256": "2d6bfd6040024aec66e6304fc8aaa2f8c4158de8e8c375952492c0cc7bcd860b",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2467135",
+            "https://bugzilla.redhat.com/2482614",
+            "https://bugzilla.redhat.com/2492788",
+            "https://bugzilla.redhat.com/2502361",
+            "https://bugzilla.redhat.com/2502589",
+            "https://bugzilla.redhat.com/2513373",
+            "https://errata.almalinux.org/9/ALSA-2026-57252.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:57251",
+            "https://bugzilla.redhat.com/2479812",
+            "https://bugzilla.redhat.com/2482558",
+            "https://bugzilla.redhat.com/2502329",
+            "https://bugzilla.redhat.com/2502449",
+            "https://errata.almalinux.org/10/ALSA-2026-57251.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-68245",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "bf006352e0c21f6abbebd2339176de2cf6e2cffefd3997324626e7a37d5e45e1",
+      "afterAdvisorySha256": "027f07f469c23b063e3fbae675d110700f78f548833e1960967b5f3f3f6f8147",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2486468",
+            "https://bugzilla.redhat.com/2502397",
+            "https://bugzilla.redhat.com/2507153",
+            "https://bugzilla.redhat.com/2507218",
+            "https://bugzilla.redhat.com/2513451",
+            "https://bugzilla.redhat.com/2516396",
+            "https://bugzilla.redhat.com/2535265",
+            "https://bugzilla.redhat.com/2535338",
+            "https://errata.almalinux.org/9/ALSA-2026-81552.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:88477",
+            "https://bugzilla.redhat.com/2376106",
+            "https://bugzilla.redhat.com/2502486",
+            "https://bugzilla.redhat.com/2502589",
+            "https://bugzilla.redhat.com/2507038",
+            "https://bugzilla.redhat.com/2507098",
+            "https://bugzilla.redhat.com/2511413",
+            "https://bugzilla.redhat.com/2513245",
+            "https://bugzilla.redhat.com/2514462",
+            "https://bugzilla.redhat.com/2524501",
+            "https://bugzilla.redhat.com/2525413",
+            "https://bugzilla.redhat.com/2535070",
+            "https://bugzilla.redhat.com/2540391",
+            "https://bugzilla.redhat.com/2540475",
+            "https://errata.almalinux.org/10/ALSA-2026-88477.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-68257",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "3a1460d770b7bf7030599584edb7671e030d498a5814132c38f30290f6b186a1",
+      "afterAdvisorySha256": "32ca9643216ceef90db314ac6e5af1c5dd63c981bb0482192c2eebef88d669c9",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2461575",
+            "https://bugzilla.redhat.com/2492105",
+            "https://errata.almalinux.org/9/ALSA-2026-71700.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:71602",
+            "https://bugzilla.redhat.com/2422801",
+            "https://bugzilla.redhat.com/2429602",
+            "https://bugzilla.redhat.com/2432389",
+            "https://bugzilla.redhat.com/2432400",
+            "https://bugzilla.redhat.com/2439852",
+            "https://bugzilla.redhat.com/2492381",
+            "https://bugzilla.redhat.com/2532184",
+            "https://errata.almalinux.org/10/ALSA-2026-71602.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-68409",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "8b5da9f27c286be4421f9f5ecc1593feebcc1409259bded9019f952f98a3bae9",
+      "afterAdvisorySha256": "bca6152f4dba3553c9cd9d1292b518343bf382f6b256c45d72a5990f29235b2e",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2486979",
+            "https://bugzilla.redhat.com/2492286",
+            "https://bugzilla.redhat.com/2502460",
+            "https://bugzilla.redhat.com/2513234",
+            "https://bugzilla.redhat.com/2513277",
+            "https://bugzilla.redhat.com/2513293",
+            "https://bugzilla.redhat.com/2516526",
+            "https://bugzilla.redhat.com/2516575",
+            "https://bugzilla.redhat.com/2516606",
+            "https://bugzilla.redhat.com/2521436",
+            "https://bugzilla.redhat.com/2521498",
+            "https://bugzilla.redhat.com/2532279",
+            "https://bugzilla.redhat.com/2532309",
+            "https://bugzilla.redhat.com/2535158",
+            "https://bugzilla.redhat.com/2540182",
+            "https://bugzilla.redhat.com/2540230",
+            "https://errata.almalinux.org/9/ALSA-2026-83156.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:65334",
+            "https://bugzilla.redhat.com/2467065",
+            "https://bugzilla.redhat.com/2468050",
+            "https://bugzilla.redhat.com/2482554",
+            "https://bugzilla.redhat.com/2492092",
+            "https://bugzilla.redhat.com/2492270",
+            "https://bugzilla.redhat.com/2492408",
+            "https://bugzilla.redhat.com/2492432",
+            "https://bugzilla.redhat.com/2492717",
+            "https://bugzilla.redhat.com/2492722",
+            "https://bugzilla.redhat.com/2492762",
+            "https://bugzilla.redhat.com/2492795",
+            "https://bugzilla.redhat.com/2493709",
+            "https://bugzilla.redhat.com/2502346",
+            "https://bugzilla.redhat.com/2502380",
+            "https://bugzilla.redhat.com/2502388",
+            "https://bugzilla.redhat.com/2502413",
+            "https://bugzilla.redhat.com/2502446",
+            "https://bugzilla.redhat.com/2502477",
+            "https://bugzilla.redhat.com/2502518",
+            "https://bugzilla.redhat.com/2502541",
+            "https://bugzilla.redhat.com/2502547",
+            "https://bugzilla.redhat.com/2502613",
+            "https://bugzilla.redhat.com/2506782",
+            "https://bugzilla.redhat.com/2507292",
+            "https://bugzilla.redhat.com/2513342",
+            "https://bugzilla.redhat.com/2513386",
+            "https://bugzilla.redhat.com/2516501",
+            "https://bugzilla.redhat.com/2516731",
+            "https://errata.almalinux.org/10/ALSA-2026-65334.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-74752",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "2b84a6621ec615821b0ac60ac86024adfc7c0deec21d7937e4d534b966853a29",
+      "afterAdvisorySha256": "99497d3a8277089cff0e7384e230c35421b7e5e07006945d21a3d85132261fc3",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2507721",
+            "https://bugzilla.redhat.com/2515351",
+            "https://bugzilla.redhat.com/2515353",
+            "https://bugzilla.redhat.com/2516278",
+            "https://bugzilla.redhat.com/2516412",
+            "https://bugzilla.redhat.com/2516674",
+            "https://bugzilla.redhat.com/2521419",
+            "https://bugzilla.redhat.com/2524442",
+            "https://bugzilla.redhat.com/2524458",
+            "https://bugzilla.redhat.com/2524475",
+            "https://bugzilla.redhat.com/2532290",
+            "https://bugzilla.redhat.com/2532407",
+            "https://bugzilla.redhat.com/2552209",
+            "https://errata.almalinux.org/9/ALSA-2026-95370.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:85321",
+            "https://bugzilla.redhat.com/2461761",
+            "https://bugzilla.redhat.com/2492098",
+            "https://bugzilla.redhat.com/2492115",
+            "https://bugzilla.redhat.com/2502254",
+            "https://bugzilla.redhat.com/2502331",
+            "https://bugzilla.redhat.com/2502356",
+            "https://bugzilla.redhat.com/2513397",
+            "https://bugzilla.redhat.com/2513408",
+            "https://bugzilla.redhat.com/2513474",
+            "https://bugzilla.redhat.com/2516967",
+            "https://bugzilla.redhat.com/2532089",
+            "https://bugzilla.redhat.com/2532230",
+            "https://bugzilla.redhat.com/2546482",
+            "https://bugzilla.redhat.com/2546491",
+            "https://errata.almalinux.org/10/ALSA-2026-85321.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-89631",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "f7a0dd0747a504c776fe01879bbc209192dc0c6844746a2a99e757126b4cc3d4",
+      "afterAdvisorySha256": "1d5009e599d7e86c1d9104013cc0333a2b48431fcdff5ad91a0f0688088eee0c",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://access.redhat.com/errata/RHSA-2026:85774",
+            "https://bugzilla.redhat.com/2492750",
+            "https://bugzilla.redhat.com/2532290",
+            "https://bugzilla.redhat.com/2540391",
+            "https://bugzilla.redhat.com/2540500",
+            "https://bugzilla.redhat.com/2540872",
+            "https://bugzilla.redhat.com/2546494",
+            "https://errata.almalinux.org/8/ALSA-2026-85774.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:85321",
+            "https://bugzilla.redhat.com/2461761",
+            "https://bugzilla.redhat.com/2492115",
+            "https://bugzilla.redhat.com/2502254",
+            "https://bugzilla.redhat.com/2502331",
+            "https://bugzilla.redhat.com/2502356",
+            "https://bugzilla.redhat.com/2513314",
+            "https://bugzilla.redhat.com/2513397",
+            "https://bugzilla.redhat.com/2513408",
+            "https://bugzilla.redhat.com/2513474",
+            "https://bugzilla.redhat.com/2516967",
+            "https://bugzilla.redhat.com/2532230",
+            "https://bugzilla.redhat.com/2546482",
+            "https://bugzilla.redhat.com/2546491",
+            "https://errata.almalinux.org/10/ALSA-2026-85321.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-97493",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "309472cd763d8ad6242aa8c9541709e7d07290795a299309d45eb0e600948d8e",
+      "afterAdvisorySha256": "f2ba7baa58361f174c8c29898a864d24e9216f0526de60705bf3bf7a00404899",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://access.redhat.com/errata/RHSA-2026:99031",
+            "https://bugzilla.redhat.com/2516963",
+            "https://bugzilla.redhat.com/2540407",
+            "https://bugzilla.redhat.com/2540425",
+            "https://bugzilla.redhat.com/2540435",
+            "https://bugzilla.redhat.com/2540448",
+            "https://bugzilla.redhat.com/2540464",
+            "https://bugzilla.redhat.com/2540532",
+            "https://bugzilla.redhat.com/2559710",
+            "https://bugzilla.redhat.com/2562680",
+            "https://errata.almalinux.org/8/ALSA-2026-99031.html"
+          ],
+          "removed": [
+            "https://bugzilla.redhat.com/2376106",
+            "https://bugzilla.redhat.com/2502486",
+            "https://bugzilla.redhat.com/2502589",
+            "https://bugzilla.redhat.com/2507038",
+            "https://bugzilla.redhat.com/2507098",
+            "https://bugzilla.redhat.com/2511413",
+            "https://bugzilla.redhat.com/2513148",
+            "https://bugzilla.redhat.com/2513245",
+            "https://bugzilla.redhat.com/2513287",
+            "https://bugzilla.redhat.com/2513430",
+            "https://bugzilla.redhat.com/2514462",
+            "https://bugzilla.redhat.com/2524501",
+            "https://bugzilla.redhat.com/2525413",
+            "https://bugzilla.redhat.com/2528788",
+            "https://bugzilla.redhat.com/2535070",
+            "https://bugzilla.redhat.com/2535309",
+            "https://bugzilla.redhat.com/2540391",
+            "https://errata.almalinux.org/10/ALSA-2026-88477.html"
+          ],
+          "orderingOnly": false
+        },
+        "VendorSeverity": {
+          "before": {
+            "alma": 3,
+            "azure": 2,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 3,
+            "ubuntu": 3
+          },
+          "after": {
+            "alma": 2,
+            "azure": 2,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 3,
+            "ubuntu": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-98364",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "HIGH",
+      "withinReviewedCohort": true,
+      "beforeAdvisorySha256": "be7b8a61ae49e1b7d79318a7369b7d2275b34e69d07faf9e793889b6d6a71b55",
+      "afterAdvisorySha256": "460d0136333e896cfb664757104ea71230a550f421075c026393484f36c2d54a",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2492108",
+            "https://bugzilla.redhat.com/2492733",
+            "https://bugzilla.redhat.com/2492853",
+            "https://bugzilla.redhat.com/2507222",
+            "https://bugzilla.redhat.com/2516579",
+            "https://bugzilla.redhat.com/2516970",
+            "https://bugzilla.redhat.com/2519475",
+            "https://bugzilla.redhat.com/2554835",
+            "https://bugzilla.redhat.com/2559835",
+            "https://errata.almalinux.org/9/ALSA-2026-93412.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:93413",
+            "https://bugzilla.redhat.com/2431602",
+            "https://bugzilla.redhat.com/2482549",
+            "https://bugzilla.redhat.com/2502872",
+            "https://bugzilla.redhat.com/2513188",
+            "https://bugzilla.redhat.com/2535212",
+            "https://bugzilla.redhat.com/2546385",
+            "https://errata.almalinux.org/10/ALSA-2026-93413.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-38498",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "33896969d34384d93c2df1965ffe29c689f3a5e79ac768f973fcf5b99ad30985",
+      "afterAdvisorySha256": "2913461848c3ab6e71d49690ae8578fe3d11a40bfb37ebe8c086a92c14cae938",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://access.redhat.com/errata/RHSA-2025:16398",
+            "https://bugzilla.redhat.com/2363686",
+            "https://bugzilla.redhat.com/2365028",
+            "https://bugzilla.redhat.com/2393534",
+            "https://errata.almalinux.org/9/ALSA-2025-16398.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2025:15782",
+            "https://bugzilla.redhat.com/2360225",
+            "https://bugzilla.redhat.com/2379246",
+            "https://bugzilla.redhat.com/2383407",
+            "https://bugzilla.redhat.com/2383493",
+            "https://bugzilla.redhat.com/2387866",
+            "https://bugzilla.redhat.com/2388941",
+            "https://errata.almalinux.org/10/ALSA-2025-15782.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2025-68211",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "399dba0a56193597310f4a6139e71b2e1b8464d0f04dabdf4c4d28bf31b1e47e",
+      "afterAdvisorySha256": "2406d013ac2c53c8f11ea28e369131b15909460b34e00346b2ecb1283e85dfd8",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2432681",
+            "https://bugzilla.redhat.com/2466994",
+            "https://bugzilla.redhat.com/2492095",
+            "https://bugzilla.redhat.com/2492112",
+            "https://bugzilla.redhat.com/2492735",
+            "https://bugzilla.redhat.com/2492747",
+            "https://bugzilla.redhat.com/2492770",
+            "https://bugzilla.redhat.com/2502872",
+            "https://bugzilla.redhat.com/2502889",
+            "https://bugzilla.redhat.com/2507290",
+            "https://bugzilla.redhat.com/2507301",
+            "https://bugzilla.redhat.com/2520980",
+            "https://errata.almalinux.org/9/ALSA-2026-59723.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:49211",
+            "https://bugzilla.redhat.com/2486471",
+            "https://bugzilla.redhat.com/2504052",
+            "https://errata.almalinux.org/10/ALSA-2026-49211.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-31479",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "78863590f9ba021a1577c3176fb2362c881a00f6b84d0bbd4a0a63dbaeaf3413",
+      "afterAdvisorySha256": "0f1eea286786f93ce7234fef20c6f6d29be6cbd58117a2babec7cbaba21d40e9",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2464093",
+            "https://bugzilla.redhat.com/2468050",
+            "https://bugzilla.redhat.com/2492092",
+            "https://bugzilla.redhat.com/2492115",
+            "https://bugzilla.redhat.com/2492270",
+            "https://bugzilla.redhat.com/2492310",
+            "https://bugzilla.redhat.com/2492408",
+            "https://bugzilla.redhat.com/2492432",
+            "https://bugzilla.redhat.com/2492717",
+            "https://bugzilla.redhat.com/2492722",
+            "https://bugzilla.redhat.com/2492762",
+            "https://bugzilla.redhat.com/2492795",
+            "https://bugzilla.redhat.com/2502254",
+            "https://bugzilla.redhat.com/2502331",
+            "https://bugzilla.redhat.com/2502346",
+            "https://bugzilla.redhat.com/2502388",
+            "https://bugzilla.redhat.com/2502413",
+            "https://bugzilla.redhat.com/2502446",
+            "https://bugzilla.redhat.com/2502473",
+            "https://bugzilla.redhat.com/2502477",
+            "https://bugzilla.redhat.com/2502518",
+            "https://bugzilla.redhat.com/2502541",
+            "https://bugzilla.redhat.com/2506782",
+            "https://bugzilla.redhat.com/2507292",
+            "https://bugzilla.redhat.com/2513141",
+            "https://bugzilla.redhat.com/2513177",
+            "https://bugzilla.redhat.com/2513253",
+            "https://bugzilla.redhat.com/2513324",
+            "https://bugzilla.redhat.com/2513397",
+            "https://bugzilla.redhat.com/2513408",
+            "https://bugzilla.redhat.com/2513474",
+            "https://bugzilla.redhat.com/2516501",
+            "https://errata.almalinux.org/9/ALSA-2026-67150.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:67471",
+            "https://bugzilla.redhat.com/2414466",
+            "https://bugzilla.redhat.com/2461462",
+            "https://bugzilla.redhat.com/2461575",
+            "https://bugzilla.redhat.com/2467084",
+            "https://bugzilla.redhat.com/2482566",
+            "https://bugzilla.redhat.com/2492095",
+            "https://bugzilla.redhat.com/2492747",
+            "https://bugzilla.redhat.com/2492779",
+            "https://bugzilla.redhat.com/2497035",
+            "https://bugzilla.redhat.com/2502368",
+            "https://bugzilla.redhat.com/2502412",
+            "https://bugzilla.redhat.com/2502434",
+            "https://bugzilla.redhat.com/2502490",
+            "https://bugzilla.redhat.com/2513477",
+            "https://bugzilla.redhat.com/2517010",
+            "https://errata.almalinux.org/10/ALSA-2026-67471.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-52972",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "9bf78a08ee8fc61a652825ea2186f83273f1d2a17f6f1c9d6f154aea8fd54fbe",
+      "afterAdvisorySha256": "a2588f42be1a961479b80e6772f55d9938973dcb67834dbc0ba601577d0332fa",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2482104",
+            "https://bugzilla.redhat.com/2487002",
+            "https://bugzilla.redhat.com/2495938",
+            "https://bugzilla.redhat.com/2502318",
+            "https://bugzilla.redhat.com/2502494",
+            "https://bugzilla.redhat.com/2508319",
+            "https://bugzilla.redhat.com/2524423",
+            "https://bugzilla.redhat.com/2524434",
+            "https://errata.almalinux.org/9/ALSA-2026-72623.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:76738",
+            "https://bugzilla.redhat.com/2482115",
+            "https://bugzilla.redhat.com/2482129",
+            "https://bugzilla.redhat.com/2486398",
+            "https://bugzilla.redhat.com/2492853",
+            "https://bugzilla.redhat.com/2496574",
+            "https://bugzilla.redhat.com/2502230",
+            "https://bugzilla.redhat.com/2502241",
+            "https://bugzilla.redhat.com/2502326",
+            "https://bugzilla.redhat.com/2502327",
+            "https://bugzilla.redhat.com/2502330",
+            "https://bugzilla.redhat.com/2502333",
+            "https://bugzilla.redhat.com/2502384",
+            "https://bugzilla.redhat.com/2502395",
+            "https://bugzilla.redhat.com/2502431",
+            "https://bugzilla.redhat.com/2502444",
+            "https://bugzilla.redhat.com/2502554",
+            "https://bugzilla.redhat.com/2502619",
+            "https://bugzilla.redhat.com/2508320",
+            "https://bugzilla.redhat.com/2514441",
+            "https://bugzilla.redhat.com/2516306",
+            "https://bugzilla.redhat.com/2516606",
+            "https://bugzilla.redhat.com/2516717",
+            "https://bugzilla.redhat.com/2516998",
+            "https://bugzilla.redhat.com/2519475",
+            "https://bugzilla.redhat.com/2521057",
+            "https://bugzilla.redhat.com/2521375",
+            "https://bugzilla.redhat.com/2524483",
+            "https://bugzilla.redhat.com/2528542",
+            "https://bugzilla.redhat.com/2528550",
+            "https://bugzilla.redhat.com/2531066",
+            "https://bugzilla.redhat.com/2535140",
+            "https://bugzilla.redhat.com/2536346",
+            "https://bugzilla.redhat.com/2540479",
+            "https://bugzilla.redhat.com/2540500",
+            "https://errata.almalinux.org/10/ALSA-2026-76738.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-53009",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "f9c67ea8cfcd3d9ac716c08f664d6acbe1b3576fabc5b6cb2f0f686692bd2d8b",
+      "afterAdvisorySha256": "121c93629bf03a9a941803bca30147dc5b7e2cb453df3cd28775e32d3f606f05",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2482113",
+            "https://errata.almalinux.org/8/ALSA-2026-54247.html"
+          ],
+          "removed": [
+            "https://bugzilla.redhat.com/2429611",
+            "https://bugzilla.redhat.com/2432366",
+            "https://bugzilla.redhat.com/2439941",
+            "https://bugzilla.redhat.com/2460644",
+            "https://bugzilla.redhat.com/2482523",
+            "https://bugzilla.redhat.com/2482612",
+            "https://bugzilla.redhat.com/2482615",
+            "https://bugzilla.redhat.com/2492284",
+            "https://bugzilla.redhat.com/2492318",
+            "https://bugzilla.redhat.com/2492458",
+            "https://errata.almalinux.org/10/ALSA-2026-42919.html"
+          ],
+          "orderingOnly": false
+        },
+        "VendorSeverity": {
+          "before": {
+            "alma": 3,
+            "amazon": 3,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "after": {
+            "alma": 2,
+            "amazon": 3,
+            "oracle-oval": 2,
+            "photon": 3,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-53091",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "fd66366a61612d7493656076dd2d984089ce80d7c92fec9d451767fd69f21250",
+      "afterAdvisorySha256": "1f524e75fcc4c65548a086b4be3414b554b22cbd4c2e1617d660152eb4809a9f",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2425039",
+            "https://bugzilla.redhat.com/2454867",
+            "https://bugzilla.redhat.com/2460699",
+            "https://bugzilla.redhat.com/2461451",
+            "https://bugzilla.redhat.com/2461525",
+            "https://bugzilla.redhat.com/2464093",
+            "https://bugzilla.redhat.com/2468192",
+            "https://bugzilla.redhat.com/2468244",
+            "https://bugzilla.redhat.com/2492115",
+            "https://bugzilla.redhat.com/2492310",
+            "https://bugzilla.redhat.com/2492771",
+            "https://bugzilla.redhat.com/2502254",
+            "https://bugzilla.redhat.com/2502320",
+            "https://bugzilla.redhat.com/2502331",
+            "https://bugzilla.redhat.com/2502473",
+            "https://bugzilla.redhat.com/2513141",
+            "https://bugzilla.redhat.com/2513177",
+            "https://bugzilla.redhat.com/2513253",
+            "https://bugzilla.redhat.com/2513324",
+            "https://bugzilla.redhat.com/2513397",
+            "https://bugzilla.redhat.com/2513408",
+            "https://bugzilla.redhat.com/2513452",
+            "https://bugzilla.redhat.com/2513474",
+            "https://errata.almalinux.org/9/ALSA-2026-67150.html"
+          ],
+          "removed": [
+            "https://bugzilla.redhat.com/2467065",
+            "https://bugzilla.redhat.com/2482554",
+            "https://bugzilla.redhat.com/2493709",
+            "https://bugzilla.redhat.com/2502380",
+            "https://bugzilla.redhat.com/2502547",
+            "https://bugzilla.redhat.com/2502613",
+            "https://bugzilla.redhat.com/2513299",
+            "https://bugzilla.redhat.com/2513342",
+            "https://bugzilla.redhat.com/2513386",
+            "https://bugzilla.redhat.com/2516731",
+            "https://errata.almalinux.org/10/ALSA-2026-65334.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-63962",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "ab95a05b1adb744d08268ebf5912c61ed5301836172b890994f3e83074ce7686",
+      "afterAdvisorySha256": "f63228ab9d812c00029439a558ae21eda4b2303c775dbe31293543bfc7b6ceac",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2502325",
+            "https://bugzilla.redhat.com/2502332",
+            "https://bugzilla.redhat.com/2502333",
+            "https://bugzilla.redhat.com/2502462",
+            "https://bugzilla.redhat.com/2502486",
+            "https://bugzilla.redhat.com/2511413",
+            "https://bugzilla.redhat.com/2540391",
+            "https://bugzilla.redhat.com/2540872",
+            "https://bugzilla.redhat.com/2553429",
+            "https://errata.almalinux.org/9/ALSA-2026-86033.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:85321",
+            "https://bugzilla.redhat.com/2492115",
+            "https://bugzilla.redhat.com/2502254",
+            "https://bugzilla.redhat.com/2502331",
+            "https://bugzilla.redhat.com/2513314",
+            "https://bugzilla.redhat.com/2513397",
+            "https://bugzilla.redhat.com/2513408",
+            "https://bugzilla.redhat.com/2513474",
+            "https://bugzilla.redhat.com/2521384",
+            "https://bugzilla.redhat.com/2524422",
+            "https://bugzilla.redhat.com/2532089",
+            "https://bugzilla.redhat.com/2546482",
+            "https://errata.almalinux.org/10/ALSA-2026-85321.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-64117",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "15f0c0bbb5bd30fa0343a56e0e74b49d6df4410d4d688794d197449c483553af",
+      "afterAdvisorySha256": "5e225bd8795e28b70bb378c9e2acec174819b82787169c687ca358c0df650d38",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2425039",
+            "https://bugzilla.redhat.com/2454867",
+            "https://bugzilla.redhat.com/2460699",
+            "https://bugzilla.redhat.com/2461451",
+            "https://bugzilla.redhat.com/2461525",
+            "https://bugzilla.redhat.com/2464093",
+            "https://bugzilla.redhat.com/2468192",
+            "https://bugzilla.redhat.com/2468244",
+            "https://bugzilla.redhat.com/2492115",
+            "https://bugzilla.redhat.com/2492310",
+            "https://bugzilla.redhat.com/2492771",
+            "https://bugzilla.redhat.com/2502254",
+            "https://bugzilla.redhat.com/2502320",
+            "https://bugzilla.redhat.com/2502331",
+            "https://bugzilla.redhat.com/2502473",
+            "https://bugzilla.redhat.com/2513141",
+            "https://bugzilla.redhat.com/2513177",
+            "https://bugzilla.redhat.com/2513253",
+            "https://bugzilla.redhat.com/2513324",
+            "https://bugzilla.redhat.com/2513397",
+            "https://bugzilla.redhat.com/2513408",
+            "https://bugzilla.redhat.com/2513452",
+            "https://bugzilla.redhat.com/2513474",
+            "https://errata.almalinux.org/9/ALSA-2026-67150.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:65334",
+            "https://bugzilla.redhat.com/2467065",
+            "https://bugzilla.redhat.com/2482554",
+            "https://bugzilla.redhat.com/2493709",
+            "https://bugzilla.redhat.com/2502380",
+            "https://bugzilla.redhat.com/2502547",
+            "https://bugzilla.redhat.com/2502613",
+            "https://bugzilla.redhat.com/2513299",
+            "https://bugzilla.redhat.com/2513342",
+            "https://bugzilla.redhat.com/2513386",
+            "https://bugzilla.redhat.com/2516731",
+            "https://errata.almalinux.org/10/ALSA-2026-65334.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-64255",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "8871569a4ce45f02b3266d34a71d28d3150368f5d5abf846ff6501a6bfd97274",
+      "afterAdvisorySha256": "89f068791e20ef7913b66719b03938870a3d43cf37b547e1e347ef214d5af5c0",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2425039",
+            "https://bugzilla.redhat.com/2454867",
+            "https://bugzilla.redhat.com/2460699",
+            "https://bugzilla.redhat.com/2461451",
+            "https://bugzilla.redhat.com/2461525",
+            "https://bugzilla.redhat.com/2464093",
+            "https://bugzilla.redhat.com/2468192",
+            "https://bugzilla.redhat.com/2468244",
+            "https://bugzilla.redhat.com/2492115",
+            "https://bugzilla.redhat.com/2492310",
+            "https://bugzilla.redhat.com/2492771",
+            "https://bugzilla.redhat.com/2502254",
+            "https://bugzilla.redhat.com/2502320",
+            "https://bugzilla.redhat.com/2502331",
+            "https://bugzilla.redhat.com/2502473",
+            "https://bugzilla.redhat.com/2513141",
+            "https://bugzilla.redhat.com/2513177",
+            "https://bugzilla.redhat.com/2513253",
+            "https://bugzilla.redhat.com/2513324",
+            "https://bugzilla.redhat.com/2513397",
+            "https://bugzilla.redhat.com/2513408",
+            "https://bugzilla.redhat.com/2513452",
+            "https://bugzilla.redhat.com/2513474",
+            "https://errata.almalinux.org/9/ALSA-2026-67150.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:65334",
+            "https://bugzilla.redhat.com/2467065",
+            "https://bugzilla.redhat.com/2482554",
+            "https://bugzilla.redhat.com/2493709",
+            "https://bugzilla.redhat.com/2502380",
+            "https://bugzilla.redhat.com/2502547",
+            "https://bugzilla.redhat.com/2502613",
+            "https://bugzilla.redhat.com/2513299",
+            "https://bugzilla.redhat.com/2513342",
+            "https://bugzilla.redhat.com/2513386",
+            "https://bugzilla.redhat.com/2516731",
+            "https://errata.almalinux.org/10/ALSA-2026-65334.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-72098",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "d4d4db0e13e9ea59075afc117f2e7c58f3e8643d6a06df9050b7955479b925af",
+      "afterAdvisorySha256": "2625f63f973336f74c8fcbfba27795206feb965fbc6572a62506861b6b54c86d",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2425039",
+            "https://bugzilla.redhat.com/2454867",
+            "https://bugzilla.redhat.com/2460699",
+            "https://bugzilla.redhat.com/2461451",
+            "https://bugzilla.redhat.com/2461525",
+            "https://bugzilla.redhat.com/2464093",
+            "https://bugzilla.redhat.com/2468192",
+            "https://bugzilla.redhat.com/2468244",
+            "https://bugzilla.redhat.com/2492115",
+            "https://bugzilla.redhat.com/2492310",
+            "https://bugzilla.redhat.com/2492771",
+            "https://bugzilla.redhat.com/2502254",
+            "https://bugzilla.redhat.com/2502320",
+            "https://bugzilla.redhat.com/2502331",
+            "https://bugzilla.redhat.com/2502473",
+            "https://bugzilla.redhat.com/2513141",
+            "https://bugzilla.redhat.com/2513177",
+            "https://bugzilla.redhat.com/2513253",
+            "https://bugzilla.redhat.com/2513324",
+            "https://bugzilla.redhat.com/2513397",
+            "https://bugzilla.redhat.com/2513408",
+            "https://bugzilla.redhat.com/2513452",
+            "https://bugzilla.redhat.com/2513474",
+            "https://errata.almalinux.org/9/ALSA-2026-67150.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:65334",
+            "https://bugzilla.redhat.com/2467065",
+            "https://bugzilla.redhat.com/2482554",
+            "https://bugzilla.redhat.com/2493709",
+            "https://bugzilla.redhat.com/2502380",
+            "https://bugzilla.redhat.com/2502547",
+            "https://bugzilla.redhat.com/2502613",
+            "https://bugzilla.redhat.com/2513299",
+            "https://bugzilla.redhat.com/2513342",
+            "https://bugzilla.redhat.com/2513386",
+            "https://bugzilla.redhat.com/2516731",
+            "https://errata.almalinux.org/10/ALSA-2026-65334.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-89811",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "6119c813a2ff39e91a37ca3dcfb0af0160169f536998d6e5d3c318db83ee8671",
+      "afterAdvisorySha256": "9ce1f1f3d09abbba8efa3609cc15c54eb4ae7dd7a616d0428641fd14af3b27d4",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2486468",
+            "https://bugzilla.redhat.com/2502397",
+            "https://bugzilla.redhat.com/2507153",
+            "https://bugzilla.redhat.com/2507218",
+            "https://bugzilla.redhat.com/2513451",
+            "https://bugzilla.redhat.com/2516396",
+            "https://bugzilla.redhat.com/2535265",
+            "https://bugzilla.redhat.com/2535338",
+            "https://errata.almalinux.org/9/ALSA-2026-81552.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:88477",
+            "https://bugzilla.redhat.com/2376106",
+            "https://bugzilla.redhat.com/2502486",
+            "https://bugzilla.redhat.com/2502589",
+            "https://bugzilla.redhat.com/2507038",
+            "https://bugzilla.redhat.com/2507098",
+            "https://bugzilla.redhat.com/2511413",
+            "https://bugzilla.redhat.com/2513245",
+            "https://bugzilla.redhat.com/2514462",
+            "https://bugzilla.redhat.com/2524501",
+            "https://bugzilla.redhat.com/2525413",
+            "https://bugzilla.redhat.com/2535070",
+            "https://bugzilla.redhat.com/2540391",
+            "https://bugzilla.redhat.com/2540475",
+            "https://errata.almalinux.org/10/ALSA-2026-88477.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-45894",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "LOW",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "fa2bd3c64d89d54f99b862b5eed942251c80cd4abfa0d81c69a210be46c113e8",
+      "afterAdvisorySha256": "f91d60d5341672cbca2d18cd13bb85ad0516010eed8deb8f66d118e1200dd77d",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2513212",
+            "https://bugzilla.redhat.com/2513232",
+            "https://bugzilla.redhat.com/2516523",
+            "https://errata.almalinux.org/9/ALSA-2026-70459.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:70498",
+            "https://bugzilla.redhat.com/2507399",
+            "https://bugzilla.redhat.com/2513165",
+            "https://errata.almalinux.org/10/ALSA-2026-70498.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-46054",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "LOW",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "7f2764189e797d46a842c4836ec1611b3ac766f3d8c51bb1e540771078027380",
+      "afterAdvisorySha256": "1ce99716ca8705f54d4a493c304daa5d140f0188e6dd1160f05a8a10f6c83d67",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2460619",
+            "https://bugzilla.redhat.com/2464397",
+            "https://bugzilla.redhat.com/2468124",
+            "https://bugzilla.redhat.com/2481980",
+            "https://bugzilla.redhat.com/2482031",
+            "https://bugzilla.redhat.com/2482588",
+            "https://bugzilla.redhat.com/2482594",
+            "https://errata.almalinux.org/9/ALSA-2026-30848.html"
+          ],
+          "removed": [
+            "https://bugzilla.redhat.com/2457829",
+            "https://bugzilla.redhat.com/2460616",
+            "https://bugzilla.redhat.com/2461107",
+            "https://bugzilla.redhat.com/2461471",
+            "https://bugzilla.redhat.com/2464351",
+            "https://bugzilla.redhat.com/2480457",
+            "https://errata.almalinux.org/10/ALSA-2026-25191.html"
+          ],
+          "orderingOnly": false
+        },
+        "VendorSeverity": {
+          "before": {
+            "alma": 4,
+            "amazon": 3,
+            "azure": 2,
+            "oracle-oval": 3,
+            "photon": 3,
+            "redhat": 3,
+            "rocky": 3,
+            "ubuntu": 1
+          },
+          "after": {
+            "alma": 3,
+            "amazon": 3,
+            "azure": 2,
+            "oracle-oval": 3,
+            "photon": 3,
+            "redhat": 3,
+            "rocky": 3,
+            "ubuntu": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-53053",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "LOW",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "0864d883f2011c6e83d8a7b8d8950366fc80921205cbb7c0e2848b872a51b37f",
+      "afterAdvisorySha256": "af27418139d2eb7ce2befb6649abc5e45ea96a22649be6f76c5c4fbf40ac2f5e",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2425039",
+            "https://bugzilla.redhat.com/2454867",
+            "https://bugzilla.redhat.com/2460699",
+            "https://bugzilla.redhat.com/2461451",
+            "https://bugzilla.redhat.com/2461525",
+            "https://bugzilla.redhat.com/2464093",
+            "https://bugzilla.redhat.com/2468050",
+            "https://bugzilla.redhat.com/2468192",
+            "https://bugzilla.redhat.com/2468244",
+            "https://bugzilla.redhat.com/2492092",
+            "https://bugzilla.redhat.com/2492115",
+            "https://bugzilla.redhat.com/2492270",
+            "https://bugzilla.redhat.com/2492408",
+            "https://bugzilla.redhat.com/2492432",
+            "https://bugzilla.redhat.com/2492717",
+            "https://bugzilla.redhat.com/2492722",
+            "https://bugzilla.redhat.com/2492762",
+            "https://bugzilla.redhat.com/2492771",
+            "https://bugzilla.redhat.com/2492795",
+            "https://bugzilla.redhat.com/2502254",
+            "https://bugzilla.redhat.com/2502320",
+            "https://bugzilla.redhat.com/2502331",
+            "https://bugzilla.redhat.com/2502346",
+            "https://bugzilla.redhat.com/2502388",
+            "https://bugzilla.redhat.com/2502413",
+            "https://bugzilla.redhat.com/2502446",
+            "https://bugzilla.redhat.com/2502473",
+            "https://bugzilla.redhat.com/2502477",
+            "https://bugzilla.redhat.com/2502518",
+            "https://bugzilla.redhat.com/2502541",
+            "https://bugzilla.redhat.com/2506782",
+            "https://bugzilla.redhat.com/2507292",
+            "https://bugzilla.redhat.com/2513177",
+            "https://bugzilla.redhat.com/2513253",
+            "https://bugzilla.redhat.com/2513324",
+            "https://bugzilla.redhat.com/2513397",
+            "https://bugzilla.redhat.com/2513408",
+            "https://bugzilla.redhat.com/2513452",
+            "https://bugzilla.redhat.com/2513474",
+            "https://bugzilla.redhat.com/2516501",
+            "https://errata.almalinux.org/9/ALSA-2026-67150.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:61887",
+            "https://bugzilla.redhat.com/2350398",
+            "https://bugzilla.redhat.com/2432681",
+            "https://bugzilla.redhat.com/2468145",
+            "https://bugzilla.redhat.com/2468228",
+            "https://bugzilla.redhat.com/2482006",
+            "https://bugzilla.redhat.com/2482614",
+            "https://bugzilla.redhat.com/2492454",
+            "https://bugzilla.redhat.com/2492735",
+            "https://bugzilla.redhat.com/2492750",
+            "https://bugzilla.redhat.com/2492788",
+            "https://bugzilla.redhat.com/2492790",
+            "https://bugzilla.redhat.com/2502219",
+            "https://bugzilla.redhat.com/2502227",
+            "https://bugzilla.redhat.com/2502239",
+            "https://bugzilla.redhat.com/2502240",
+            "https://bugzilla.redhat.com/2502260",
+            "https://bugzilla.redhat.com/2502421",
+            "https://bugzilla.redhat.com/2502527",
+            "https://bugzilla.redhat.com/2502889",
+            "https://bugzilla.redhat.com/2507061",
+            "https://bugzilla.redhat.com/2507118",
+            "https://bugzilla.redhat.com/2507119",
+            "https://bugzilla.redhat.com/2507208",
+            "https://bugzilla.redhat.com/2507277",
+            "https://bugzilla.redhat.com/2507285",
+            "https://bugzilla.redhat.com/2507287",
+            "https://bugzilla.redhat.com/2507290",
+            "https://bugzilla.redhat.com/2507301",
+            "https://bugzilla.redhat.com/2508363",
+            "https://bugzilla.redhat.com/2513167",
+            "https://bugzilla.redhat.com/2516248",
+            "https://bugzilla.redhat.com/2516448",
+            "https://errata.almalinux.org/10/ALSA-2026-61887.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-53189",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "LOW",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "66bba849c13a70800669584ac1c4dcfc5908049361e388879bafd7b802fad2b7",
+      "afterAdvisorySha256": "46f7bca39b1a6ac382f966fc31c1ddf5d2ac1060d04788bb464b291aaa5fb0d7",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2467135",
+            "https://bugzilla.redhat.com/2467156",
+            "https://bugzilla.redhat.com/2467202",
+            "https://bugzilla.redhat.com/2482113",
+            "https://bugzilla.redhat.com/2482124",
+            "https://bugzilla.redhat.com/2492403",
+            "https://bugzilla.redhat.com/2492719",
+            "https://bugzilla.redhat.com/2492768",
+            "https://bugzilla.redhat.com/2495941",
+            "https://bugzilla.redhat.com/2495950",
+            "https://bugzilla.redhat.com/2502188",
+            "https://bugzilla.redhat.com/2502321",
+            "https://bugzilla.redhat.com/2502361",
+            "https://bugzilla.redhat.com/2502422",
+            "https://bugzilla.redhat.com/2502443",
+            "https://bugzilla.redhat.com/2502463",
+            "https://bugzilla.redhat.com/2502589",
+            "https://bugzilla.redhat.com/2506790",
+            "https://bugzilla.redhat.com/2507042",
+            "https://bugzilla.redhat.com/2507135",
+            "https://bugzilla.redhat.com/2507216",
+            "https://bugzilla.redhat.com/2508504",
+            "https://bugzilla.redhat.com/2513373",
+            "https://bugzilla.redhat.com/2513470",
+            "https://errata.almalinux.org/9/ALSA-2026-57252.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:61887",
+            "https://bugzilla.redhat.com/2350398",
+            "https://bugzilla.redhat.com/2432681",
+            "https://bugzilla.redhat.com/2468145",
+            "https://bugzilla.redhat.com/2468228",
+            "https://bugzilla.redhat.com/2482006",
+            "https://bugzilla.redhat.com/2492310",
+            "https://bugzilla.redhat.com/2492454",
+            "https://bugzilla.redhat.com/2492735",
+            "https://bugzilla.redhat.com/2492750",
+            "https://bugzilla.redhat.com/2492790",
+            "https://bugzilla.redhat.com/2502219",
+            "https://bugzilla.redhat.com/2502227",
+            "https://bugzilla.redhat.com/2502239",
+            "https://bugzilla.redhat.com/2502240",
+            "https://bugzilla.redhat.com/2502260",
+            "https://bugzilla.redhat.com/2502421",
+            "https://bugzilla.redhat.com/2502527",
+            "https://bugzilla.redhat.com/2502889",
+            "https://bugzilla.redhat.com/2507061",
+            "https://bugzilla.redhat.com/2507118",
+            "https://bugzilla.redhat.com/2507119",
+            "https://bugzilla.redhat.com/2507208",
+            "https://bugzilla.redhat.com/2507277",
+            "https://bugzilla.redhat.com/2507285",
+            "https://bugzilla.redhat.com/2507287",
+            "https://bugzilla.redhat.com/2507290",
+            "https://bugzilla.redhat.com/2507301",
+            "https://bugzilla.redhat.com/2508363",
+            "https://bugzilla.redhat.com/2513141",
+            "https://bugzilla.redhat.com/2513167",
+            "https://bugzilla.redhat.com/2516248",
+            "https://bugzilla.redhat.com/2516448",
+            "https://errata.almalinux.org/10/ALSA-2026-61887.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-63978",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "LOW",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "762fe98e692f4374f109a77d6be1ca4494b53b48fe5f9bf80c119f84091f820f",
+      "afterAdvisorySha256": "a66804f5cc0b05e1df4348865a5eb9d72eea6693efa773b56a7ba01ede17ec63",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2348512",
+            "https://bugzilla.redhat.com/2507098",
+            "https://bugzilla.redhat.com/2516251",
+            "https://bugzilla.redhat.com/2516417",
+            "https://bugzilla.redhat.com/2546385",
+            "https://bugzilla.redhat.com/2546494",
+            "https://errata.almalinux.org/9/ALSA-2026-90365.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:91565",
+            "https://bugzilla.redhat.com/2492709",
+            "https://bugzilla.redhat.com/2502341",
+            "https://bugzilla.redhat.com/2502615",
+            "https://bugzilla.redhat.com/2513163",
+            "https://bugzilla.redhat.com/2513264",
+            "https://bugzilla.redhat.com/2516579",
+            "https://bugzilla.redhat.com/2521413",
+            "https://errata.almalinux.org/10/ALSA-2026-91565.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-63979",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "LOW",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "bb3794d42539dd8189eca974082cec2a2e98341fd6765c82728cd06fde916e07",
+      "afterAdvisorySha256": "b9fad0034e2ad155dcb4ee22a93563d8bcad673890956028f6cf2b3f9e7f9843",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2348512",
+            "https://bugzilla.redhat.com/2507098",
+            "https://bugzilla.redhat.com/2516251",
+            "https://bugzilla.redhat.com/2516417",
+            "https://bugzilla.redhat.com/2546385",
+            "https://bugzilla.redhat.com/2546494",
+            "https://errata.almalinux.org/9/ALSA-2026-90365.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:91565",
+            "https://bugzilla.redhat.com/2492709",
+            "https://bugzilla.redhat.com/2502341",
+            "https://bugzilla.redhat.com/2502615",
+            "https://bugzilla.redhat.com/2513163",
+            "https://bugzilla.redhat.com/2513264",
+            "https://bugzilla.redhat.com/2516579",
+            "https://bugzilla.redhat.com/2521413",
+            "https://errata.almalinux.org/10/ALSA-2026-91565.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-68086",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "LOW",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "11683528b2fa1cdf00fbb18cbe67792e3eec37447d4cc9a0b914d585bb210fe7",
+      "afterAdvisorySha256": "135976c828198fea7e05aa15cbe6afce8a0205539ee52f84543ef9414c2188af",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2425039",
+            "https://bugzilla.redhat.com/2454867",
+            "https://bugzilla.redhat.com/2460699",
+            "https://bugzilla.redhat.com/2461451",
+            "https://bugzilla.redhat.com/2461525",
+            "https://bugzilla.redhat.com/2464093",
+            "https://bugzilla.redhat.com/2468050",
+            "https://bugzilla.redhat.com/2468192",
+            "https://bugzilla.redhat.com/2468244",
+            "https://bugzilla.redhat.com/2492092",
+            "https://bugzilla.redhat.com/2492115",
+            "https://bugzilla.redhat.com/2492270",
+            "https://bugzilla.redhat.com/2492408",
+            "https://bugzilla.redhat.com/2492432",
+            "https://bugzilla.redhat.com/2492717",
+            "https://bugzilla.redhat.com/2492722",
+            "https://bugzilla.redhat.com/2492762",
+            "https://bugzilla.redhat.com/2492771",
+            "https://bugzilla.redhat.com/2492795",
+            "https://bugzilla.redhat.com/2502254",
+            "https://bugzilla.redhat.com/2502320",
+            "https://bugzilla.redhat.com/2502331",
+            "https://bugzilla.redhat.com/2502346",
+            "https://bugzilla.redhat.com/2502388",
+            "https://bugzilla.redhat.com/2502413",
+            "https://bugzilla.redhat.com/2502446",
+            "https://bugzilla.redhat.com/2502473",
+            "https://bugzilla.redhat.com/2502477",
+            "https://bugzilla.redhat.com/2502518",
+            "https://bugzilla.redhat.com/2502541",
+            "https://bugzilla.redhat.com/2506782",
+            "https://bugzilla.redhat.com/2507292",
+            "https://bugzilla.redhat.com/2513177",
+            "https://bugzilla.redhat.com/2513253",
+            "https://bugzilla.redhat.com/2513324",
+            "https://bugzilla.redhat.com/2513397",
+            "https://bugzilla.redhat.com/2513408",
+            "https://bugzilla.redhat.com/2513452",
+            "https://bugzilla.redhat.com/2513474",
+            "https://bugzilla.redhat.com/2516501",
+            "https://errata.almalinux.org/9/ALSA-2026-67150.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:61887",
+            "https://bugzilla.redhat.com/2350398",
+            "https://bugzilla.redhat.com/2432681",
+            "https://bugzilla.redhat.com/2468145",
+            "https://bugzilla.redhat.com/2468228",
+            "https://bugzilla.redhat.com/2482006",
+            "https://bugzilla.redhat.com/2482614",
+            "https://bugzilla.redhat.com/2492454",
+            "https://bugzilla.redhat.com/2492735",
+            "https://bugzilla.redhat.com/2492750",
+            "https://bugzilla.redhat.com/2492788",
+            "https://bugzilla.redhat.com/2492790",
+            "https://bugzilla.redhat.com/2502219",
+            "https://bugzilla.redhat.com/2502227",
+            "https://bugzilla.redhat.com/2502239",
+            "https://bugzilla.redhat.com/2502240",
+            "https://bugzilla.redhat.com/2502260",
+            "https://bugzilla.redhat.com/2502421",
+            "https://bugzilla.redhat.com/2502527",
+            "https://bugzilla.redhat.com/2502889",
+            "https://bugzilla.redhat.com/2507061",
+            "https://bugzilla.redhat.com/2507118",
+            "https://bugzilla.redhat.com/2507119",
+            "https://bugzilla.redhat.com/2507208",
+            "https://bugzilla.redhat.com/2507277",
+            "https://bugzilla.redhat.com/2507285",
+            "https://bugzilla.redhat.com/2507287",
+            "https://bugzilla.redhat.com/2507290",
+            "https://bugzilla.redhat.com/2507301",
+            "https://bugzilla.redhat.com/2508363",
+            "https://bugzilla.redhat.com/2513167",
+            "https://bugzilla.redhat.com/2516248",
+            "https://bugzilla.redhat.com/2516448",
+            "https://errata.almalinux.org/10/ALSA-2026-61887.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-68448",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "LOW",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "77c4ba06c53e113d446e5af812d7fcffe9ec57fd66bc664a9f8552e1e51a8e93",
+      "afterAdvisorySha256": "b63619b96610358e30ad6bcb1bcecdd8107ca8a6991a02afdd13bb23e22f1ae6",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2360273",
+            "https://bugzilla.redhat.com/2513356",
+            "https://bugzilla.redhat.com/2524492",
+            "https://errata.almalinux.org/9/ALSA-2026-87805.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:88477",
+            "https://bugzilla.redhat.com/2502486",
+            "https://bugzilla.redhat.com/2502589",
+            "https://bugzilla.redhat.com/2507098",
+            "https://bugzilla.redhat.com/2511413",
+            "https://bugzilla.redhat.com/2513148",
+            "https://bugzilla.redhat.com/2513287",
+            "https://bugzilla.redhat.com/2513430",
+            "https://bugzilla.redhat.com/2525413",
+            "https://bugzilla.redhat.com/2528788",
+            "https://bugzilla.redhat.com/2535070",
+            "https://bugzilla.redhat.com/2535309",
+            "https://bugzilla.redhat.com/2540391",
+            "https://bugzilla.redhat.com/2540475",
+            "https://errata.almalinux.org/10/ALSA-2026-88477.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-93827",
+      "package": "linux-libc-dev",
+      "packageId": "linux-libc-dev@6.8.0-149.149",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "LOW",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "0f010482e26568a24f1e67eaaaa5fd16d42faec831019a303784d058a4f511dd",
+      "afterAdvisorySha256": "df3a5b3777ad0adb21ad422d287eaf5c26841fd42d6412ee2c2396490ac6aec4",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://bugzilla.redhat.com/2492108",
+            "https://bugzilla.redhat.com/2492733",
+            "https://bugzilla.redhat.com/2492853",
+            "https://bugzilla.redhat.com/2507222",
+            "https://bugzilla.redhat.com/2516579",
+            "https://bugzilla.redhat.com/2516970",
+            "https://bugzilla.redhat.com/2519475",
+            "https://bugzilla.redhat.com/2554835",
+            "https://bugzilla.redhat.com/2559835",
+            "https://errata.almalinux.org/9/ALSA-2026-93412.html"
+          ],
+          "removed": [
+            "https://access.redhat.com/errata/RHSA-2026:93413",
+            "https://bugzilla.redhat.com/2431602",
+            "https://bugzilla.redhat.com/2482549",
+            "https://bugzilla.redhat.com/2502872",
+            "https://bugzilla.redhat.com/2513188",
+            "https://bugzilla.redhat.com/2535212",
+            "https://bugzilla.redhat.com/2546385",
+            "https://errata.almalinux.org/10/ALSA-2026-93413.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-18477",
+      "package": "tar",
+      "packageId": "tar@1.35+dfsg-3ubuntu0.4",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "6858048d07a9c04b9b2169b2c9f26e183d46f00da8fed63d829437acbd4a0102",
+      "afterAdvisorySha256": "972f345a9ee36fdedf3cbbc43527c709655eb22c0f5269c4bcb16b3cd5ae3d13",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-61581.html"
+          ],
+          "removed": [
+            "https://errata.almalinux.org/10/ALSA-2026-61586.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    },
+    {
+      "id": "CVE-2026-18508",
+      "package": "tar",
+      "packageId": "tar@1.35+dfsg-3ubuntu0.4",
+      "class": "os-pkgs",
+      "type": "ubuntu",
+      "target": "/home/runner/work/_temp/image-runtime (ubuntu 24.04)",
+      "severity": "MEDIUM",
+      "withinReviewedCohort": false,
+      "beforeAdvisorySha256": "15147f428818ba001440ff8c582ebd773aa740e3b9319e26247dae1942126326",
+      "afterAdvisorySha256": "5e00e1d4dfd98426396f94b21823a15166036f1655a9c4abf9d8b8f4b9bc3bb9",
+      "changedFields": {
+        "References": {
+          "added": [
+            "https://errata.almalinux.org/9/ALSA-2026-61581.html"
+          ],
+          "removed": [
+            "https://errata.almalinux.org/10/ALSA-2026-61586.html"
+          ],
+          "orderingOnly": false
+        }
+      }
+    }
+  ],
+  "scope": "All 55 normalized finding-record changes are retained. Only the 16 changed HIGH/CRITICAL records within the original exact 182-CVE cohort are proposed for revalidation. The other 39 LOW/MEDIUM changes remain raw reported findings, with no new applicability exception.",
+  "cause": "A newer vulnerability database changed vendor References and five VendorSeverity objects across the whole image. Within the exact reviewed cohort only References and three VendorSeverity.alma values changed. The strict evaluator correctly rejected advisory reuse.",
+  "limits": [
+    "No upstream database-generation root cause is asserted beyond the observed data delta.",
+    "Identical package inventory and header payload do not establish host-kernel safety.",
+    "No ignore fields, new CVE IDs, new component scope, lower gate thresholds, or expiration extension are proposed."
+  ],
+  "expiresAt": "2026-11-30T00:00:00Z"
+}

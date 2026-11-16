@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "provenanceMethod": "GitHub fetch_file immutable ref metadata; retained source bytes independently match GitHub-reported git blob hashes. Offline verifier checks retained bytes and receipt consistency, not remote authenticity.",
+  "sourceFiles": [
+    {
+      "ref": "ab658fe5f05d7d5e65b88183199fa52dd5fff7a3",
+      "repositoryPath": "Front/tests-live/learning-performance.ts",
+      "gitBlob": "50f15ac50213fbf5a874e62c689da275892a71fd",
+      "sha256": "a8e184761cc09cb1fa532834076e2034ac19a0a0526798da50ebe6607d4453c7",
+      "bytes": 18489,
+      "sourceUrl": "https://github.com/yakisoba0728/UnsolvableOJ/blob/ab658fe5f05d7d5e65b88183199fa52dd5fff7a3/Front/tests-live/learning-performance.ts",
+      "retainedPath": "source-snapshots/foundation-learning-performance.ts"
+    },
+    {
+      "ref": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "repositoryPath": "Front/tests-live/learning-performance.ts",
+      "gitBlob": "50f15ac50213fbf5a874e62c689da275892a71fd",
+      "sha256": "a8e184761cc09cb1fa532834076e2034ac19a0a0526798da50ebe6607d4453c7",
+      "bytes": 18489,
+      "sourceUrl": "https://github.com/yakisoba0728/UnsolvableOJ/blob/d0159b1f844bf0608415dded9e84af566c8e2041/Front/tests-live/learning-performance.ts",
+      "retainedPath": "source-snapshots/foundation-learning-performance.ts"
+    },
+    {
+      "ref": "6ec519261b1103b2eadcfe0afcc0dec961353405",
+      "repositoryPath": "Front/tests-live/learning-performance.ts",
+      "gitBlob": "50f15ac50213fbf5a874e62c689da275892a71fd",
+      "sha256": "a8e184761cc09cb1fa532834076e2034ac19a0a0526798da50ebe6607d4453c7",
+      "bytes": 18489,
+      "sourceUrl": "https://github.com/yakisoba0728/UnsolvableOJ/blob/6ec519261b1103b2eadcfe0afcc0dec961353405/Front/tests-live/learning-performance.ts",
+      "retainedPath": "source-snapshots/foundation-learning-performance.ts"
+    },
+    {
+      "ref": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "repositoryPath": "Back/test/judge-capacity.pipeline-spec.ts",
+      "gitBlob": "254d99a561c3ab2b345e7b929b6bc00c9b1eb622",
+      "sha256": "43a75e8479d1d327dfbc5be3f4abf46c2f6963042f362f127025ccb233c04ae3",
+      "bytes": 34211,
+      "sourceUrl": "https://github.com/yakisoba0728/UnsolvableOJ/blob/d0159b1f844bf0608415dded9e84af566c8e2041/Back/test/judge-capacity.pipeline-spec.ts",
+      "retainedPath": "source-snapshots/foundation-judge-capacity.pipeline-spec.ts"
+    },
+    {
+      "ref": "6ec519261b1103b2eadcfe0afcc0dec961353405",
+      "repositoryPath": "Back/test/judge-capacity.pipeline-spec.ts",
+      "gitBlob": "254d99a561c3ab2b345e7b929b6bc00c9b1eb622",
+      "sha256": "43a75e8479d1d327dfbc5be3f4abf46c2f6963042f362f127025ccb233c04ae3",
+      "bytes": 34211,
+      "sourceUrl": "https://github.com/yakisoba0728/UnsolvableOJ/blob/6ec519261b1103b2eadcfe0afcc0dec961353405/Back/test/judge-capacity.pipeline-spec.ts",
+      "retainedPath": "source-snapshots/foundation-judge-capacity.pipeline-spec.ts"
+    }
+  ]
+}

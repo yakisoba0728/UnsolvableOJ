@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-image-applicability-review",
+  "reviewedAt": "2026-11-16T04:23:43.224807+00:00",
+  "reviewer": "/root/product_engineering",
+  "author": "/root/security_audit",
+  "reviewedCommit": "d5c3bd78a0fcb5f2fad02fec2679c6aa36345325",
+  "baseCommit": "2d2bbec",
+  "decision": "APPROVED_SOURCE_AND_BOUNDED_APPLICABILITY_CONTENT",
+  "policyStateAtReview": "PROPOSED",
+  "policyContentSha256": "ebc01bdbbd31f6adf2e0761bdb7c278b92c72ebeca1a175523e4f2a0b74083aa",
+  "policyFileSha256": "e072cfbee3988e84bd33b8b27f12854d2aa3d931f3764ba11b5b9891b91fb665",
+  "evaluatorSourceSha256": "ad66ab2c8bb1f29f4d314911fbdee098f9de7d9d09624cbfec1aad493cdb76d6",
+  "policyExpiresAt": "2026-11-30T00:00:00Z",
+  "scope": {
+    "component": "linux-libc-dev",
+    "installedVersion": "6.8.0-149.149",
+    "source": "linux",
+    "architecture": "amd64",
+    "operatingSystem": "Ubuntu 24.04",
+    "reviewedCves": 182,
+    "officialRegularFiles": 990,
+    "interpretation": "Identified vulnerable implementation is absent from this exact installed header component. Raw scanner findings remain unchanged. This is neither a patch nor a host-kernel determination."
+  },
+  "independentExecution": [
+    {
+      "test": "Actual approved payload helper -> synthetic 990-file OCI -> evaluator without schema translation; byte mutation denies",
+      "tests": 1,
+      "passed": 1,
+      "seconds": 1.271,
+      "synthetic": true,
+      "clockOnlyMocked": true
+    },
+    {
+      "test": "Focused proposed/reviewed separation; new/missing/downgraded/duplicate CVEs; changed advisory; expiry; reviewer independence",
+      "tests": 9,
+      "passed": 9,
+      "seconds": 8.805,
+      "synthetic": true
+    },
+    {
+      "test": "Unmodified actual Actions run43802320491 raw scan + manifest + payload proof CLI",
+      "observed": {
+        "exitCode": 2,
+        "execution": "COMPLETED",
+        "gate": "BLOCKED_REVIEW",
+        "proposed": 182,
+        "reviewed": 0,
+        "remaining": 182,
+        "unresolved": [],
+        "blockingReasons": [
+          "INDEPENDENT_POLICY_REVIEW_REQUIRED"
+        ],
+        "rawCounts": {
+          "UNKNOWN": 1,
+          "LOW": 363,
+          "MEDIUM": 561,
+          "HIGH": 177,
+          "CRITICAL": 5
+        },
+        "evaluatorSourceSha256": "ad66ab2c8bb1f29f4d314911fbdee098f9de7d9d09624cbfec1aad493cdb76d6",
+        "policySha256": "e072cfbee3988e84bd33b8b27f12854d2aa3d931f3764ba11b5b9891b91fb665",
+        "rawReportSha256": "0d1d1ea81522458479ac85bfd27e13d764562f421193b9421e6de0b64cf6751a",
+        "payloadProofSha256": "09939784959227cd539807cd5d88e74f32293ee5d12e87ed33bee63529b6cd59",
+        "scanManifestSha256": "c4c0269be2bc4cb1bf6adb42c2b5121983f5c7f212b38198645422491d384600",
+        "outputSha256": "5c1d79ae1587200f063c143fe98df1d90cde7eeedba7f36ee30e485b1421bc88",
+        "outputPath": "/workspace/scratch/231e81830e94/product-applicability-review/actual-proposed-independent-d5c3bd7.json"
+      },
+      "synthetic": false
+    },
+    {
+      "test": "git diff --check 2d2bbec...d5c3bd7",
+      "passed": true
+    }
+  ],
+  "sourceReview": {
+    "fullEvaluator": true,
+    "all31TestMethodsRead": true,
+    "documentationRead": true,
+    "earlyContractFindingsResolved": true,
+    "whole182CohortRequired": true,
+    "derivedFingerprintRecomputed": true,
+    "entireRemainingAdvisoryContentHashed": true,
+    "rawFindingsAndSeverityPreserved": true,
+    "noNewBlockingFinding": true
+  },
+  "evidenceReviews": [
+    {
+      "file": "independent-evidence-review-cc4bac08.json",
+      "sha256": "90dd206908a9e6ee43bcde131cd6cfd16bde1040f2f667f22374af7ef14755c3"
+    },
+    {
+      "file": "trivy-fingerprint-independent-review.json",
+      "sha256": "e4f606f16fb38d3f9fb7c1b86cd2068c693eb4582257dd440d7e6e70d6586da3"
+    },
+    {
+      "file": "actual-image-payload-independent-review-43802320491.json",
+      "sha256": "84096b8c6cd31186c8b0f49d52089a050a756a5c62ad2865a8f1aa995094775a"
+    },
+    {
+      "file": "independent-payload-and-go-graph-reviews.json",
+      "sha256": "14457d39878ab1ed34a261ef46f9aca7e4e3893aff0c75e12eb1ebd7f3ceb970"
+    }
+  ],
+  "requirementsBeforeMerge": [
+    "Separately review immutable test-transition delta; explicit PROPOSED negative fixture assertions must remain",
+    "Coordinator independently authorizes exact policy content; author must not self-approve",
+    "Independent wrapper/workflow review preserves raw scanner failures and exact-cohort decisions",
+    "Exact composed HEAD image/native/required CI must pass with fresh actual payload proof"
+  ],
+  "limitations": [
+    "Did not independently rerun all73 tests; parent is executing that suite",
+    "Actual OCI byte verifier execution was in Actions; independently validated retained proof, identity, official bytes and raw report, not a local Docker rerun",
+    "Only five Critical and the sole UAPI-overlap High received complete patch review; other176 High use individually retrieved authoritative CNA affected-file metadata",
+    "No separate Ubuntu archive signature verification; official HTTPS package bytes independently reproduced",
+    "No claim about host kernel, deployment readiness, modes/xattrs or unrelated image contents",
+    "Repository reviewer records are not cryptographic attestations"
+  ]
+}

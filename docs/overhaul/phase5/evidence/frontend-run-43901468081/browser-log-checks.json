@@ -1,0 +1,293 @@
+{
+  "jobTotals": [
+    {
+      "job": 133419107740,
+      "passedSummaries": [
+        [
+          "403",
+          "3.6m"
+        ],
+        [
+          "87",
+          "1.3m"
+        ]
+      ]
+    },
+    {
+      "job": 133419107874,
+      "passedSummaries": [
+        [
+          "402",
+          "8.7m"
+        ],
+        [
+          "87",
+          "2.1m"
+        ]
+      ]
+    }
+  ],
+  "phase5UxCases": 42,
+  "editorCases": 1,
+  "phase5Cases": [
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after hour-enter without submitting the form"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after minute-enter without submitting the form"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after clear without submitting the form"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after done without submitting the form"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after escape without submitting the form"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker closes without reclaiming focus when the user moves to another field"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 320px in light"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 320px in dark"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 375px in light"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 375px in dark"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 768px in light"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 768px in dark"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 1440px in light"
+    },
+    {
+      "job": 133419107740,
+      "project": "chromium",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 1440px in dark"
+    },
+    {
+      "job": 133419107874,
+      "project": "chromium",
+      "file": "phase5-editor-observation.spec.ts",
+      "title": "bounded editor heap and interaction observation with mocked persistence"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after minute-enter without submitting the form"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after hour-enter without submitting the form"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after done without submitting the form"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after clear without submitting the form"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after escape without submitting the form"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker closes without reclaiming focus when the user moves to another field"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 320px in light"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 320px in dark"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 375px in dark"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 375px in light"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 768px in light"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 768px in dark"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 1440px in light"
+    },
+    {
+      "job": 133419107874,
+      "project": "webkit",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 1440px in dark"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after minute-enter without submitting the form"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after done without submitting the form"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after clear without submitting the form"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after escape without submitting the form"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker returns focus after hour-enter without submitting the form"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "date picker closes without reclaiming focus when the user moves to another field"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 320px in light"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 375px in light"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 320px in dark"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 768px in light"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 768px in dark"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 1440px in light"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 375px in dark"
+    },
+    {
+      "job": 133419107874,
+      "project": "firefox",
+      "file": "phase5-ux.spec.ts",
+      "title": "goal refresh keeps known content and geometry at 1440px in dark"
+    }
+  ],
+  "testFailureSummaryLines": []
+}

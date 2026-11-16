@@ -1,0 +1,34 @@
+{
+  "C": {
+    "source": "#include <stdio.h>\nint main(void){int c=getchar();if(c=='r')return 7;if(c=='t'){volatile unsigned long n=0;for(;;)n++;}if(c=='o'){for(int i=0;i<1000100;i++)putchar('x');return 0;}if(c=='w'){puts(\"wrong\");return 0;}putchar(c);while((c=getchar())!=EOF)putchar(c);}",
+    "syntaxError": "int main( {"
+  },
+  "CPP": {
+    "source": "#include <iostream>\nint main(){int c=std::cin.get();if(c=='r')return 7;if(c=='t'){for(;;){asm volatile(\"\");}}if(c=='o'){std::cout<<std::string(1000100,'x');return 0;}if(c=='w'){std::cout<<\"wrong\\n\";return 0;}std::cout.put(c);std::cout<<std::cin.rdbuf();}",
+    "syntaxError": "int main( {"
+  },
+  "JAVA": {
+    "source": "public class Main{public static void main(String[] args)throws Exception{int c=System.in.read();if(c=='r')System.exit(7);if(c=='t'){while(true){}}if(c=='o'){System.out.write(new byte[1000100]);return;}if(c=='w'){System.out.println(\"wrong\");return;}System.out.write(c);System.in.transferTo(System.out);}}",
+    "syntaxError": "public class Main { broken syntax"
+  },
+  "PYTHON": {
+    "source": "import sys\nc=sys.stdin.buffer.read(1)\nif c==b\"r\": sys.exit(7)\nif c==b\"t\":\n while True: pass\nif c==b\"o\": sys.stdout.buffer.write(b\"x\"*1000100)\nelif c==b\"w\": print(\"wrong\")\nelse: sys.stdout.buffer.write(c+sys.stdin.buffer.read())",
+    "syntaxError": "def ("
+  },
+  "JAVASCRIPT": {
+    "source": "const fs=require(\"fs\");const b=fs.readFileSync(0);const c=b[0];if(c===114)process.exit(7);if(c===116){while(true){}}if(c===111)fs.writeSync(1,Buffer.alloc(1000100,120));else if(c===119)console.log(\"wrong\");else fs.writeSync(1,b);",
+    "syntaxError": "function ("
+  },
+  "TYPESCRIPT": {
+    "source": "import * as fs from \"fs\";const b=fs.readFileSync(0);const c:number=b[0];if(c===114)process.exit(7);if(c===116){while(true){}}if(c===111)fs.writeSync(1,Buffer.alloc(1000100,120));else if(c===119)console.log(\"wrong\");else fs.writeSync(1,b);",
+    "syntaxError": "function ("
+  },
+  "GO": {
+    "source": "package main\nimport(\"io\";\"os\")\nfunc main(){b,_:=io.ReadAll(os.Stdin);c:=b[0];if c=='r'{os.Exit(7)};if c=='t'{for{}};if c=='o'{os.Stdout.Write(make([]byte,1000100))}else if c=='w'{os.Stdout.WriteString(\"wrong\\n\")}else{os.Stdout.Write(b)}}",
+    "syntaxError": "package main\nfunc main( {"
+  },
+  "RUST": {
+    "source": "use std::io::{self,Read,Write};fn main(){let mut b=Vec::new();io::stdin().read_to_end(&mut b).unwrap();let c=b[0];if c==b'r'{std::process::exit(7)}if c==b't'{loop{std::hint::spin_loop();}}if c==b'o'{io::stdout().write_all(&vec![120;1000100]).unwrap();}else if c==b'w'{println!(\"wrong\");}else{io::stdout().write_all(&b).unwrap();}}",
+    "syntaxError": "fn main( {"
+  }
+}

@@ -1,0 +1,367 @@
+{
+  "schemaVersion": 1,
+  "kind": "phase5-independent-pr91-actual-native-multi-api-acceptance",
+  "reviewer": "/root/security",
+  "observedAt": "2026-11-16T16:37:15.792817+00:00",
+  "verdict": "ACCEPT_SCOPED_PR91_ACTUAL_MULTI_API_AND_NATIVE_PIPELINE",
+  "repository": "yakisoba0728/UnsolvableOJ",
+  "pullRequest": 91,
+  "source": {
+    "checkoutSha": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+    "treeSha": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+    "sourceHeadSha": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+    "baseSha": "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+    "runId": "43905864054",
+    "runAttempt": "1",
+    "trackedTreeClean": true
+  },
+  "scope": "Current-run multi-API,72-row native matrix and dedicated Vibe pipeline artifacts plus full-job execution/cleanup log. Independent QA owns the separate database/restore/image and overall all12-job acceptance receipt; coordinator retains merge authority.",
+  "sourceCarryForward": {
+    "path": "source-carry-forward.json",
+    "sha256": "66910c534ed265e7826cf9f6a8d6fd58d8a39b41fedd118268d614c58b448458",
+    "priorAcceptedCorrection": "7c1731dbcef91b8e8828acdd428d7274d667007c",
+    "unchangedFiles": {
+      "Back/test/phase5-multi-api.pipeline-spec.ts": "9bbb38c3834a6a9f39c9c27224a9ad7aee097804fe5d8cad0bb55f3824cfa5a8",
+      "Back/test/phase5-multi-api.pipeline-helpers.ts": "6e638dab7639ec0b3e955734c9972602ff9562b057479f601da0cfa621152f09",
+      "Back/test/phase5-multi-api-deadline.spec.ts": "4486fe78f5ac64abee367f0af59ce057da7c5b84e3643ee3c9a18b8c85a39285",
+      "Back/test/process.pipeline-helpers.ts": "679ef4bf37e81492fd3661914658a4e6878e93983a1a89bb93fdc16696108098",
+      "Back/src/main.ts": "11ef21b4d3da1c2073534bb60f107e15f8d0986835d3459466171e184b05f3ba",
+      "Back/vitest.config.pipeline.ts": "b02a171b8cfbd88d9d47822e66928b9a8800a15668b21281d74fe8f227bee7b2",
+      "Back/scripts/run-integration.mjs": "5ca93ebd9588f39aea661f9fa90950e4879a8814681fb3274b5dd5399a45d1e7"
+    },
+    "sourceAndCheckoutTreesEqual": true,
+    "mergeParentsVerified": true
+  },
+  "requiredJobContext": [
+    {
+      "id": 133434380407,
+      "name": "Dependency audit",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133434381058,
+      "name": "Docker image (front)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133434381067,
+      "name": "Detect changes",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133434381207,
+      "name": "Docker image (judge)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133434381309,
+      "name": "Docker image (runtime)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133434381899,
+      "name": "Docker image (back)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133434471688,
+      "name": "Browser tests (1/2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133434471718,
+      "name": "Browser tests (2/2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133434471759,
+      "name": "Judge worker",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133434472142,
+      "name": "Backend and API",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133434472878,
+      "name": "Sandbox, pipeline and Compose",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133444654700,
+      "name": "CI required",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "artifactBindings": [
+    {
+      "artifactId": 14246816098,
+      "name": "phase5-multi-api-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+      "zipPath": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/multi-api.zip",
+      "zipSha256": "0f3294c747851ff1650dc61a371457e864a6d9074ce9958901a1db1b356f627d",
+      "sizeBytes": 5265,
+      "inspectionScope": "Full source/provenance and eight-job semantic review",
+      "files": {
+        "multi-api/phase5-multi-api.json": "aa59b7edaab1aefc9e763b6eb9723a4c6f5ce5274ce980933dba162e4cbf3d99"
+      }
+    },
+    {
+      "artifactId": 14245087563,
+      "name": "phase5-verdict-matrix-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+      "zipPath": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/native-verdict.zip",
+      "zipSha256": "c5ba86df716e40778ac7858403bdf0ac715c1b9bf7048d2fb8feaf6fc61bd5e8",
+      "sizeBytes": 5436,
+      "inspectionScope": "Full72-row source-hash/status/limit/provenance review",
+      "files": {
+        "native-verdict/phase5-verdict-matrix.json": "471a00d35365601dd7effd6c3a7aa4f01aebe561abb6fdbff762f326edcc08ed"
+      }
+    },
+    {
+      "artifactId": 14246995865,
+      "name": "phase5-vibe-pipeline-9aa843fad33b30270ab346bc62c4865c17697ff3-1",
+      "zipPath": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/vibe-pipeline.zip",
+      "zipSha256": "60866ea8b753d5b8ee895f0db829f5591f554e0f46e4c6031a8236fb622112ac",
+      "sizeBytes": 1428,
+      "inspectionScope": "Real forwarding/persistence/cleanup/provenance review",
+      "files": {
+        "vibe-pipeline/phase5-vibe-dedicated.json": "d9e1a51714de0971d6b9f77fbc60d5c514d89e20edad0a4604e980ee1f1dbdc0"
+      }
+    },
+    {
+      "artifactId": 14246621238,
+      "name": "phase2-judge-evidence-1",
+      "zipPath": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/judge-evidence.zip",
+      "zipSha256": "2d05283e74e8e2fdb22199a0f7cb0cb9ed375c4e353fb8ed0760f6903353c2da",
+      "sizeBytes": 29126,
+      "inspectionScope": "ZIP integrity and credential-pattern inspection only for older recovery/capacity reports; completed36-test pipeline corroborated by job log",
+      "files": {}
+    }
+  ],
+  "multiApi": {
+    "status": "PASS",
+    "reportSha256": "aa59b7edaab1aefc9e763b6eb9723a4c6f5ce5274ce980933dba162e4cbf3d99",
+    "rows": 8,
+    "sourceHashesChecked": 8,
+    "apiRequests": [
+      4,
+      4
+    ],
+    "workerJobs": [
+      6,
+      2
+    ],
+    "apiPids": [
+      23045,
+      23046
+    ],
+    "workerPids": [
+      23090,
+      23091
+    ],
+    "rateRemaining": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "maximumPersistedPendingOverlap": 3,
+    "maximumQueueOverlap": 2,
+    "perWorkerMaximumOverlap": [
+      1,
+      1
+    ],
+    "terminalClaims409": 8,
+    "duplicateResults200": 8,
+    "activeConflicts409": 2,
+    "scenarioElapsedMs": 8864.357868,
+    "batchElapsedMs": 7361.630467999999,
+    "cleanupElapsedMs": 44.56623700000091,
+    "elapsedBeforeReportWriteMs": 8912.916858999999,
+    "removedOwnedJobs": 8,
+    "processesExited": 4,
+    "forcedSigkills": 0,
+    "closedObserverSets": 2,
+    "nativeCacheBeforeAfter": [
+      0,
+      0
+    ],
+    "persistence": {
+      "submissions": 8,
+      "learned": 8,
+      "notifications": 8,
+      "solves": [
+        {
+          "awarded_xp": 10,
+          "accepted_submission_id": "168499c2-5679-40f8-b64f-d37b01c072f4"
+        }
+      ],
+      "xp": 10,
+      "resultReplays": 8
+    }
+  },
+  "multiApiDetailedChecks": [
+    "All8rows have matching immutable language/source hashes in submission and persistence,202admission, generation1, one started/completed queue attempt,ACCEPTED with1/1cases, zero recoveries, completed learning and one notification.",
+    "Both actual API PIDs expose exactly their owned IPv4 loopback listener on kernel-assigned ports45189 and34313; listener inode/port/URL fields match. Both actual worker PIDs are distinct and complete6+2jobs. Four procfs samples and four exit records refer to the same owned PIDs.",
+    "Public admission is4+4requests through the two APIs, a regular solver, three observed lanes, zero campaign resets/retries, and exact shared remaining quotas12through19 at limit20.",
+    "Using recorded createdAt/updatedAt endpoints, submission-row overlap recomputes to3. Queue start/finish overlap recomputes to2, and1per worker. These are timestamp observations, not independently measured transaction commit boundaries or native CPU execution intervals.",
+    "The observed active Go attempt is the persisted winning attempt and remainsJUDGING while both APIs reject a competing attempt409. Both probes fall inside the recorded Go processing interval.",
+    "All8opposite-API reads match source/result fields; all8terminal claims return409; all8same-attempt result replays through the API opposite the completing worker return200 and the source assertion verifies unchanged persisted rows/timestamps/notification counts.",
+    "Fresh solver persistence shows8submissions,8learning completions,8judged notifications, one solve-ledger row and10XP; awarded submission belongs to this8-job campaign.",
+    "All8owned generation-one queue jobs are removed. APIs exit bySIGTERM and workers exit0; no forcedSIGKILL occurs. Both observer sets report destroyed PostgreSQL sockets, Redisend, zero pending operations, no force-close errors and no queue-close failures. Native cache is[]before and[]after."
+  ],
+  "timingInterpretation": {
+    "actualItDurationMsFromJobLog": 8915,
+    "fileDurationMsFromJobLog": 8916,
+    "scenarioElapsedMs": 8864.357868,
+    "cleanupElapsedMs": 44.56623700000091,
+    "elapsedBeforeReportWriteMs": 8912.916858999999,
+    "allocatedPhaseBudgetsMs": {
+      "actions": 45000,
+      "workerStop": 15000,
+      "apiStop": 15000,
+      "cleanupOperations": 5000,
+      "connectionDrain": 1000,
+      "report": 3000,
+      "total": 84000,
+      "existingTestTimeout": 90000
+    },
+    "result": "Observed complete test duration fits the unchanged90s timeout and allocated84s budget; action and cleanup measurements fit their respective allocations. ReportelapsedMs is sampled before report writing; the completed-test log supplies the enclosing observed duration.",
+    "performanceLimit": "One finite8-job observation; no capacity, saturation, throughput envelope, leak or population-tail claim."
+  },
+  "nativeMatrix": {
+    "status": "PASS",
+    "reportSha256": "471a00d35365601dd7effd6c3a7aa4f01aebe561abb6fdbff762f326edcc08ed",
+    "rows": 72,
+    "elapsedMs": 74640.35740699999,
+    "statusCounts": {
+      "ACCEPTED": 24,
+      "WRONG_ANSWER": 8,
+      "RUNTIME_ERROR": 11,
+      "TIME_LIMIT_EXCEEDED": 8,
+      "OUTPUT_LIMIT_EXCEEDED": 8,
+      "COMPILE_ERROR": 6,
+      "MEMORY_LIMIT_EXCEEDED": 7
+    },
+    "actualNativeTests": 90,
+    "actualPassed": 90,
+    "actualFailed": 0,
+    "actualSkipped": 0,
+    "javaOverAllocation": "RetainedRUNTIME_ERROR; source requires the explicit Java heap exhaustion diagnostic for this branch. It is not relabeledMLE. Seven other oversized cases reportMLE.",
+    "rawLimit": "The sanitized report retains normalizedJudgeResult, not raw cgroupOOM counters or every stderr byte."
+  },
+  "dedicatedVibePipeline": {
+    "status": "PASS",
+    "reportSha256": "d9e1a51714de0971d6b9f77fbc60d5c514d89e20edad0a4604e980ee1f1dbdc0",
+    "requests": 32,
+    "fileDeletes": 4,
+    "assessment": {
+      "publicChecks": 6,
+      "finalPassed": 11,
+      "finalTotal": 11,
+      "evaluationStatus": "unavailable",
+      "persisted": true,
+      "ownershipDenied": true,
+      "artifactDelta": 0
+    },
+    "closed": true,
+    "cleanupFailures": 0
+  },
+  "fullPipeline": {
+    "jobId": 133434472878,
+    "status": "completed",
+    "conclusion": "success",
+    "nativePipelineFilesPassed": 9,
+    "nativePipelineTestsPassed": 36,
+    "composeBrowserTestsPassed": 4,
+    "multiApiArtifactUpload": "success",
+    "nativeVerdictArtifactUpload": "success",
+    "vibePipelineArtifactUpload": "success",
+    "stopSandbox": "success",
+    "stopServiceContainers": "success",
+    "composeContainerNetworkOwnedVolumeRemovalObserved": true
+  },
+  "jobLog": {
+    "path": "/workspace/scratch/3d1215725852/independent-qa/pr91-43905864054/job-133434472878.log",
+    "sha256": "a881db0cfe3ca06e7af23fe3385f9d14c636a257090faddc8552806c17298a34",
+    "bytes": 333143,
+    "credentialPatternCounts": {
+      "privateKeyMarkers": 0,
+      "jwtLikeValues": 0,
+      "ownedBrowserPasswords": 0
+    },
+    "selectedExcerpts": [
+      "2026-11-16T16:18:48.1513682Z {\"result\":\"PASS\",\"transport\":\"actual Redis TLS with mutual authentication\",\"rejected\":[\"untrusted CA\",\"wrong hostname\",\"missing client certificate\",\"wrong Redis password\"],\"bullmqJobs\":1,\"ownedResourcesOnly\":true,\"cleanup\":\"completed\"}",
+      "2026-11-16T16:22:19.0704298Z \u2139 tests 90",
+      "2026-11-16T16:22:19.0704673Z \u2139 pass 90",
+      "2026-11-16T16:22:19.0704835Z \u2139 fail 0",
+      "2026-11-16T16:22:19.0705001Z \u2139 cancelled 0",
+      "2026-11-16T16:22:19.0705176Z \u2139 skipped 0",
+      "2026-11-16T16:22:19.0705370Z \u2139 todo 0",
+      "2026-11-16T16:22:30.5201668Z  \u2713 test/phase5-multi-api.pipeline-spec.ts (1 test) 8916ms",
+      "2026-11-16T16:22:30.5203052Z      \u2713 finishes eight languages through two API processes and two workers with shared admission and fenced persistence  8915ms",
+      "2026-11-16T16:29:59.0610925Z  Test Files  9 passed (9)",
+      "2026-11-16T16:29:59.0611657Z       Tests  36 passed (36)",
+      "2026-11-16T16:32:57.4633629Z   4 passed (1.8m)",
+      "2026-11-16T16:33:03.1017524Z  Container unsolvable-e2e-9f75f678ded0-judge-1  Removed",
+      "2026-11-16T16:33:03.1019349Z  Container unsolvable-e2e-9f75f678ded0-vibe-gateway-1  Removed",
+      "2026-11-16T16:33:03.1020778Z  Container unsolvable-e2e-9f75f678ded0-go-judge-1  Removed",
+      "2026-11-16T16:33:03.1021750Z  Container unsolvable-e2e-9f75f678ded0-front-1  Removed",
+      "2026-11-16T16:33:03.1023195Z  Container unsolvable-e2e-9f75f678ded0-back-1  Removed",
+      "2026-11-16T16:33:03.1024447Z  Container unsolvable-e2e-9f75f678ded0-redis-1  Removed",
+      "2026-11-16T16:33:03.1025561Z  Container unsolvable-e2e-9f75f678ded0-postgres-backup-1  Removed",
+      "2026-11-16T16:33:03.1027091Z  Container unsolvable-e2e-9f75f678ded0-postgres-1  Removed",
+      "2026-11-16T16:33:03.1029016Z  Volume unsolvable-e2e-9f75f678ded0_postgres-backups  Removed",
+      "2026-11-16T16:33:03.1029329Z  Network unsolvable-e2e-9f75f678ded0_app  Removed",
+      "2026-11-16T16:33:03.1029611Z  Network unsolvable-e2e-9f75f678ded0-edge  Removed",
+      "2026-11-16T16:33:03.1029912Z  Network unsolvable-e2e-9f75f678ded0_sandbox  Removed",
+      "2026-11-16T16:33:03.1030208Z  Network unsolvable-e2e-9f75f678ded0_data  Removed"
+    ]
+  },
+  "secretsAndRedaction": {
+    "newReports": "No private-key blocks, JWT-like values, Authorization headers or synthetic registration password in the three primary reportJSONs. Report structure contains source hashes, synthetic IDs and bounded numeric/identifier observations; no raw submission source or full API/worker logs.",
+    "olderEvidence": "All9members of judge-evidence.zip checked for private-key/JWT patterns; zero matches. This is not a full new security review of old recovery experiments.",
+    "limitation": "Pattern scans complement source/schema inspection and do not prove recognition of every arbitrary secret. Existing public synthetic CI fixture capabilities remain distinct from production credentials."
+  },
+  "evidenceMetadata": {
+    "path": "github-evidence-metadata.json",
+    "sha256": "d994f25ea517aa33981eccf0498f654f1aa21d56302a736bfd8728aa634aa612"
+  },
+  "findingClosure": {
+    "id": "PHASE5-MULTIAPI-001",
+    "status": "RESOLVED_SOURCE_FOCUSED_TESTS_AND_CURRENT_ACTUAL_CI",
+    "originalBlockedReceiptPreserved": true,
+    "sourceReviewReceiptSha256": "8c2a1c9912c1ddea1f082131ab76dd197997bb8c47a154ddd8d1deacb8425596"
+  },
+  "blockers": [],
+  "reviewerActions": {
+    "newNativeExecutions": 0,
+    "reruns": 0,
+    "localExperiments": 0,
+    "authorSourceEdits": false,
+    "remoteMutations": false,
+    "activity": "Read-only source/artifact inspection and arithmetic/hash verification; derived receipt files only."
+  },
+  "limitations": [
+    "Single disposable host with2APIprocesses and2workers; production host isolation, fault domains, network/firewall policy and real deployment readiness are not established.",
+    "Per-process CPU/RSS observations describe Node processes; compiler/native sandbox/whole-host resource capacity is outside their scope.",
+    "AI process evaluation remains explicitlyunavailable; no paid provider calls are claimed.",
+    "Overall PR91 merge approval additionally depends on independentQA database/restore/image review and coordinator confirmation of the exact source state."
+  ]
+}

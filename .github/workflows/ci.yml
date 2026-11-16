@@ -4,14 +4,15 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, 'overhaul/integration', 'overhaul4/integration', 'overhaul5/integration']
+    types: [opened, synchronize, reopened, labeled]
   # 매일 03:00 KST(18:00 UTC)에 main에서 전체 검사를 실행한다.
   schedule:
     - cron: '0 18 * * *'
   workflow_dispatch:
     inputs:
       full:
-        description: Include WebKit, native sandbox and full Compose tests
+        description: Include all image builds, WebKit, native sandbox and full Compose tests
         type: boolean
         default: false
 
@@ -29,7 +30,7 @@ defaults:
 
 jobs:
   audit:
-    # 운영 의존성의 high/critical 취약점만 실패로 본다. low/moderate는 보고만 한다.
+    # 운영 및 빌드/테스트 의존성의 moderate/high/critical 취약점은 실패로 본다. low는 보고한다.
     name: Dependency audit
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -40,19 +41,33 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
-      - name: npm audit (production dependencies)
+      - name: npm audit (production and complete dependency graphs)
         run: |
           status=0
           for package in Back Front Judge; do
             echo "::group::$package"
-            npm audit --prefix "$package" --omit=dev --audit-level=high || status=1
+            npm audit --prefix "$package" --omit=dev --audit-level=moderate || status=1
+            npm audit --prefix "$package" --audit-level=moderate || status=1
             echo "::endgroup::"
           done
           exit "$status"
+      - name: Validate and generate complete npm lockfile SBOMs
+        if: ${{ !cancelled() }}
+        run: |
+          node --test scripts/collect-sboms.test.mjs
+          node scripts/collect-sboms.mjs
+      - name: Dependency inventory (runtime and build metadata)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: npm-sbom-${{ github.sha }}-${{ github.run_attempt }}
+          path: reports/sbom/
+          if-no-files-found: error
+          retention-days: 30
 
   images:
-    # 운영 이미지가 빌드되는지만 확인한다. 이미지는 내보내거나 푸시하지 않고 GHA 캐시에만 남긴다.
-    # CI required와 독립된 작업이며, 해당 경로가 바뀌지 않은 항목은 빌드 단계를 건너뛰고 성공으로 끝난다.
+    # 기존 네 이미지를 로컬 OCI로 빌드하고 OS·런타임 의존성과 라이선스 메타데이터를 검사한다. 레지스트리에 푸시하지 않는다.
+    # 해당 경로가 바뀌지 않은 항목은 빌드 단계를 건너뛰고 성공으로 끝난다. 실패는 CI required에 반영된다.
     name: Docker image (${{ matrix.name }})
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -74,27 +89,65 @@ jobs:
           # PR은 merge 커밋과 base를, push는 이전 tip을 비교한다. 야간·수동 실행은 base가 없어 항상 빌드한다.
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
           CONTEXT: ${{ matrix.context }}
+          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main') || github.base_ref == 'overhaul4/integration' || github.head_ref == 'overhaul4/integration' || github.base_ref == 'overhaul5/integration' || github.head_ref == 'overhaul5/integration')) }}
         run: |
+          # Full validation includes all four actual image builds, independent of changed paths.
+          if [ "$FULL" = true ]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           # 새 브랜치(before=000…)처럼 비교할 커밋을 가져올 수 없으면 빌드한다.
           if [ -z "$BASE" ] || ! git fetch --no-tags --depth=1 origin "$BASE"; then
             echo "build=true" >> "$GITHUB_OUTPUT"
-          elif git diff --name-only FETCH_HEAD HEAD | grep -qE "^($CONTEXT/|\.github/workflows/ci\.yml$)"; then
-            echo "build=true" >> "$GITHUB_OUTPUT"
           else
-            echo "No changes under $CONTEXT/; skipping the image build."
-            echo "build=false" >> "$GITHUB_OUTPUT"
+            files=$(git diff --name-only FETCH_HEAD HEAD)
+            if grep -qE "^($CONTEXT/|\.github/workflows/ci\.yml$|scripts/image[-_](audit|gate|applicability))" <<<"$files" || {
+              [ "$CONTEXT" = 'Judge/runtime' ] && grep -qE '^(scripts/verify_image_payload|docs/overhaul/(evidence/|phase5/evidence/security/|repro/(kernel-header-applicability|phase3-refetch-cna-independent)\.py$|measurements/(phase2-image-remediation/before-runtime\.zip$|phase3-runtime-advisory-revalidation/)))' <<<"$files";
+            }; then
+              echo "build=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "No changes under $CONTEXT/; skipping the image build."
+              echo "build=false" >> "$GITHUB_OUTPUT"
+            fi
           fi
       - if: ${{ steps.changes.outputs.build == 'true' }}
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
       - name: Build ${{ matrix.context }}/Dockerfile
+        id: image
         if: ${{ steps.changes.outputs.build == 'true' }}
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: ${{ matrix.context }}
           push: false
-          outputs: type=cacheonly
+          platforms: linux/amd64
+          outputs: type=oci,dest=${{ runner.temp }}/image-${{ matrix.name }},tar=false
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+      - name: Scan image and enforce the explicit evidence gate
+        id: image_scan
+        if: ${{ steps.changes.outputs.build == 'true' }}
+        env:
+          COMPONENT: ${{ matrix.name }}
+          IMAGE_DIRECTORY: ${{ runner.temp }}/image-${{ matrix.name }}
+          BUILD_DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          python3 -m unittest discover -s scripts -p 'image_audit_test.py'
+          python3 -m unittest discover -s scripts -p 'image_gate_test.py'
+          if [ "$COMPONENT" = runtime ]; then
+            python3 -m unittest discover -s scripts -p 'verify_image_payload_test.py'
+            python3 -m unittest discover -s scripts -p 'image_applicability_test.py'
+          fi
+          # The wrapper retains the unchanged scanner exit/report and runs actual payload
+          # verification only for a completed runtime finding gate. PROPOSED still blocks.
+          python3 scripts/image_gate.py "$COMPONENT" "$IMAGE_DIRECTORY" "reports/images/$COMPONENT" "$BUILD_DIGEST"
+      - name: Image vulnerability and inventory evidence
+        if: ${{ !cancelled() && steps.changes.outputs.build == 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: image-audit-${{ matrix.name }}-${{ github.sha }}-${{ github.run_attempt }}
+          path: reports/images/${{ matrix.name }}/
+          if-no-files-found: error
+          retention-days: 30
 
   changes:
     # PR은 바뀐 경로에 해당하는 검사만 돌린다. main push·야간·수동 실행은 항상 전부 돌린다.
@@ -114,20 +167,43 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           BASE: ${{ github.event.pull_request.base.sha }}
-          FULL: ${{ inputs.full || github.event_name == 'schedule' }}
+          # The opt-in label also survives later pushes; it only adds full validation.
+          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main') || github.base_ref == 'overhaul4/integration' || github.head_ref == 'overhaul4/integration' || github.base_ref == 'overhaul5/integration' || github.head_ref == 'overhaul5/integration')) }}
         run: |
-          echo "full=$FULL" >> "$GITHUB_OUTPUT"
           all() { for name in back front judge; do echo "$name=true" >> "$GITHUB_OUTPUT"; done; }
-          # PR이 아니거나 base를 가져올 수 없으면 전부 검사한다.
-          if [ "$EVENT" != pull_request ] || [ -z "$BASE" ] || ! git fetch --no-tags --depth=1 origin "$BASE"; then
+          # 전체 요청은 경로와 무관하게 브라우저·API·워커까지 모두 실행한다.
+          if [ "$FULL" = true ]; then
+            echo "full=true" >> "$GITHUB_OUTPUT"
+            all; exit 0
+          fi
+          if [ "$EVENT" != pull_request ]; then
+            echo "full=false" >> "$GITHUB_OUTPUT"
+            all; exit 0
+          fi
+          # PR의 변경 경로를 알 수 없으면 native 검사까지 포함해 보수적으로 검사한다.
+          if [ -z "$BASE" ] || ! git fetch --no-tags --depth=1 origin "$BASE"; then
+            echo "full=true" >> "$GITHUB_OUTPUT"
             all; exit 0
           fi
           files=$(git diff --name-only FETCH_HEAD HEAD)
           printf '%s\n' "$files"
-          # 워크플로 자체가 바뀌면 전부 검사한다.
+          native_files=$(grep -vE '\.(md|mdx)$' <<<"$files" || true)
+          # 실제 실행·큐 계약·Compose와 그 검사기는 통합 전에 native 검증이 필요하다.
+          # 문서/벤치마크와 일반 UI 변경은 이 목록에 포함하지 않는다.
+          if grep -qE \
+            -e '^Judge/(src/|runtime/|deploy/|scripts/check-redis-tls\.mjs$|Dockerfile$|\.dockerignore$|package(-lock)?\.json$|tsconfig\.json$)' \
+            -e '^Back/src/(modules/submissions/|modules/vibe/vibe\.(runner|transport|service|catalog|types|snapshot|prompts|ai)\.ts$|common/queue\.constants\.ts$|config/(redis\.config|env\.validation)\.ts$)' \
+            -e '^Back/(Dockerfile$|\.dockerignore$|docker-entrypoint\.sh$|package(-lock)?\.json$|scripts/run-integration\.mjs$|vitest\.config\.pipeline\.ts$|test/.*\.pipeline-(spec|helpers)\.ts$)' \
+            -e '^Front/(Dockerfile$|\.dockerignore$|nginx\.conf$|trusted-proxy\.conf\.template$|playwright\.live\.config\.ts$|tests-live/)' \
+            -e '^(compose\.yaml$|deploy/(compose\.yaml$|\.env\.example$)|scripts/(check-(compose|production-compose|sandbox-budget|executor-compose(\.test)?)|compose-vibe-gateway(\.test)?)\.mjs$)' <<<"$native_files"; then
+            echo "full=true" >> "$GITHUB_OUTPUT"
+            all; exit 0
+          fi
+          echo "full=false" >> "$GITHUB_OUTPUT"
+          # 워크플로 자체가 바뀌면 모든 기본 검사를 실행한다.
           if grep -qx '.github/workflows/ci.yml' <<<"$files"; then all; exit 0; fi
           has() { grep -qE "$1" <<<"$files" && echo true || echo false; }
-          # 프론트 테스트는 API를 모의 응답으로 대신하므로 Back 변경만으로는 돌리지 않는다.
+          # 프론트 테스트는 API를 모의 응답으로 대신하므로 일반 Back 변경만으로는 돌리지 않는다.
           echo "back=$(has '^(Back/|deploy/|scripts/|compose\.yaml$)')" >> "$GITHUB_OUTPUT"
           echo "front=$(has '^Front/')" >> "$GITHUB_OUTPUT"
           echo "judge=$(has '^(Judge/|compose\.yaml$)')" >> "$GITHUB_OUTPUT"
@@ -173,13 +249,19 @@ jobs:
         run: npm ci --prefix Back
       - name: Backend lint, types, unit tests and build
         run: |
+          node --test scripts/ci-policy.test.mjs scripts/check-executor-compose.test.mjs scripts/compose-vibe-gateway.test.mjs
           npm run check --prefix Back
+          node --test Back/scripts/check-vibe-tls.mjs
           npm run test:boj-import --prefix Back
           npm run test:operations --prefix Back
+          node --test Back/scripts/benchmark-enterprise-results.test.mjs
+          node --test Back/scripts/phase4-restore-rehearsal.test.mjs
+          node --test Back/scripts/phase5-db-qualification.test.mjs
           node --test Back/scripts/starter-problems.test.mjs Back/scripts/seed-starter.test.mjs
       - name: Production Compose configuration
         run: node scripts/check-production-compose.mjs
       - name: Database migrations and API tests
+        id: database_validation
         working-directory: Back
         env:
           NODE_ENV: test
@@ -190,9 +272,47 @@ jobs:
           JWT_ACCESS_SECRET: test-jwt-secret-with-at-least-32-characters
           JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
+          PHASE4_REHEARSAL: disposable-ci
+          PHASE4_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
         run: |
           node scripts/check-migrations.mjs
           node scripts/run-integration.mjs e2e
+          node scripts/phase4-restore-rehearsal.mjs
+      - name: Preserve disposable restore evidence
+        if: ${{ always() && (steps.database_validation.outcome == 'success' || steps.database_validation.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase4-restore-${{ github.sha }}-${{ github.run_attempt }}
+          path: Back/reports/phase4-restore.json
+          if-no-files-found: ${{ steps.database_validation.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 30
+      - name: Bounded disposable database qualification
+        id: phase5_database
+        working-directory: Back
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://unsolvable:ci_disposable_password@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/unsolvable_ci
+          PHASE5_DB_QUALIFICATION: disposable
+        run: |
+          node scripts/phase5-db-qualification.mjs
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+          const report = JSON.parse(readFileSync('reports/phase5-database.json', 'utf8'));
+          assert.equal(report.status, 'PASS');
+          assert.equal(report.source.head, process.env.GITHUB_SHA);
+          assert.equal(report.measurements.length, 7);
+          assert.equal(report.cleanup.created, true);
+          assert.equal(report.cleanup.dropped, true);
+          NODE
+      - name: Preserve Phase V database qualification evidence
+        if: ${{ always() && (steps.phase5_database.outcome == 'success' || steps.phase5_database.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-database-${{ github.sha }}-${{ github.run_attempt }}
+          path: Back/reports/phase5-database.json
+          if-no-files-found: ${{ steps.phase5_database.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 30
 
   judge:
     name: Judge worker
@@ -246,12 +366,73 @@ jobs:
         if: ${{ matrix.shard == 1 }}
         run: npm run check --prefix Front
       - name: Browser regression tests
+        id: phase5_browser
         working-directory: Front
         env:
           # 컨테이너는 root로 돈다. HOME이 /github/home이면 일부 브라우저가 프로필을 만들지 못한다.
           HOME: /root
           PROJECTS: --project=unit --project=chromium --project=chromium-slow ${{ needs.changes.outputs.full == 'true' && '--project=webkit' || '' }}
-        run: npx --no-install playwright test $PROJECTS --workers=4 --shard=${{ matrix.shard }}/2
+        run: |
+          npx --no-install playwright test $PROJECTS --workers=4 --list --reporter=json > "$RUNNER_TEMP/phase5-browser-all.json"
+          npx --no-install playwright test $PROJECTS --workers=4 --shard=${{ matrix.shard }}/2 --list --reporter=json > "$RUNNER_TEMP/phase5-browser-shard.json"
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+          const collect = suite => [
+            ...(suite.specs ?? []).filter(spec => spec.file.endsWith('phase5-editor-observation.spec.ts')).flatMap(spec => spec.tests),
+            ...(suite.suites ?? []).flatMap(collect),
+          ];
+          const all = collect(JSON.parse(readFileSync(process.env.RUNNER_TEMP + '/phase5-browser-all.json', 'utf8')));
+          const selected = collect(JSON.parse(readFileSync(process.env.RUNNER_TEMP + '/phase5-browser-shard.json', 'utf8')));
+          assert.equal(all.length, 1, 'Exactly one editor observation must be selected across projects');
+          assert.equal(all[0].projectName, 'chromium');
+          assert.ok(selected.length === 0 || selected.length === 1);
+          mkdirSync('reports', { recursive: true });
+          writeFileSync('reports/phase5-browser-selection.json', JSON.stringify({ checkout: process.env.GITHUB_SHA, all: all.length, selected: selected.length }) + '\n');
+          NODE
+          npx --no-install playwright test $PROJECTS --workers=4 --shard=${{ matrix.shard }}/2
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+          const selection = JSON.parse(readFileSync('reports/phase5-browser-selection.json', 'utf8'));
+          if (selection.selected === 1) {
+            const report = JSON.parse(readFileSync('reports/phase5-editor-observation.json', 'utf8'));
+            assert.equal(report.status, 'PASS');
+            assert.equal(report.source.checkout, process.env.GITHUB_SHA);
+            assert.equal(report.actual.heapSamples, 13);
+            assert.equal(report.actual.actions, 20);
+            assert.equal(report.actual.autosaveWrites, 10);
+          }
+          NODE
+      - name: Firefox core-flow regression tests
+        id: phase5_firefox
+        if: ${{ needs.changes.outputs.full == 'true' }}
+        working-directory: Front
+        env:
+          HOME: /root
+          # Keep the first browser invocation's HTML/JUnit/trace outputs intact.
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/firefox
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/firefox.xml
+        run: |
+          node -e 'const fs = require("node:fs"); const { firefox } = require("@playwright/test"); fs.accessSync(firefox.executablePath(), fs.constants.X_OK); console.log("Firefox executable:", firefox.executablePath());'
+          npx --no-install playwright test \
+            enterprise-results.spec.ts \
+            auth.spec.ts editor-focus.spec.ts enterprise-ownership.spec.ts enterprise-pinned-summary.spec.ts enterprise-refresh.spec.ts enterprise-vibe-versioning.spec.ts layout.spec.ts \
+            learning-dashboard.spec.ts learning-goals.spec.ts navigation-accessibility.spec.ts live-qa-followups.spec.ts problem-bookmarks.spec.ts session-refresh.spec.ts ui-harmony.spec.ts phase5-ux.spec.ts \
+            --project=firefox --workers=4 --shard=${{ matrix.shard }}/2 \
+            --output=test-results/firefox
+      - name: Preserve Phase V responsive UX and editor observations
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-frontend-${{ matrix.shard }}-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            Front/reports/phase5-ux/
+            Front/reports/phase5-browser-selection.json
+            Front/reports/phase5-editor-observation.json
+          # One shard owns the editor observation; its selected-run check requires that report.
+          if-no-files-found: ${{ steps.phase5_browser.outcome == 'success' && (needs.changes.outputs.full != 'true' || steps.phase5_firefox.outcome == 'success') && 'error' || 'warn' }}
+          retention-days: 30
       - name: Failed browser test artifacts (disposable test data only)
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -264,7 +445,7 @@ jobs:
           retention-days: 7
 
   full:
-    # 야간·수동 전체 실행에서만 privileged go-judge, 실제 채점 파이프라인, 운영 Compose 브라우저 흐름을 검사한다.
+    # 전체 요청 또는 실행/계약/Compose 변경 PR에서 격리 러너의 native 경로를 검사한다.
     name: Sandbox, pipeline and Compose
     needs: changes
     if: ${{ needs.changes.outputs.full == 'true' }}
@@ -311,6 +492,8 @@ jobs:
         run: |
           npm run build --prefix Back
           npm run build --prefix Judge
+      - name: Verified Redis TLS and BullMQ transport
+        run: node Judge/scripts/check-redis-tls.mjs --docker
       # Compose 흐름 검사가 쓰는 Chromium만 받는다. 러너에 이미 있는 Chrome 의존 패키지를 쓰므로 apt 설치(--with-deps)는 하지 않는다.
       - name: Install Chromium for the Compose flow
         working-directory: Front
@@ -325,13 +508,24 @@ jobs:
           tags: unsolvable-go-judge:local
           cache-from: type=gha,scope=runtime
       - name: go-judge language and isolation regression tests
+        id: phase5_native
         env:
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: |
           sudo swapoff -a
           docker compose up -d --no-build --wait --wait-timeout 180 go-judge
+          node Judge/runtime/check-logs.mjs
           npm run test:runtime --prefix Judge
+      - name: Preserve Phase V native verdict matrix
+        if: ${{ always() && (steps.phase5_native.outcome == 'success' || steps.phase5_native.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-verdict-matrix-${{ github.sha }}-${{ github.run_attempt }}
+          path: Judge/reports/phase5-verdict-matrix.json
+          if-no-files-found: ${{ steps.phase5_native.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 30
       - name: Native judging pipeline
+        id: phase2_pipeline
         working-directory: Back
         env:
           NODE_ENV: test
@@ -343,8 +537,72 @@ jobs:
           JUDGE_SERVICE_TOKEN: test-judge-token-with-at-least-32-characters
           GO_JUDGE_TOKEN: ci-only-go-judge-token-0123456789abcdef
         run: node scripts/run-integration.mjs pipeline
+      - name: Preserve Phase II Judge measurements and recovery evidence
+        if: ${{ always() && (steps.phase2_pipeline.outcome == 'success' || steps.phase2_pipeline.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase2-judge-evidence-${{ github.run_attempt }}
+          path: |
+            Back/reports/phase2-*.json
+            Back/reports/phase2-*.log
+            Back/reports/phase4-mixed-capacity.json
+          # A pipeline setup failure can precede report creation. Its test failure
+          # remains the gate; a missing artifact must not obscure that root cause.
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Preserve Phase V dedicated Vibe pipeline evidence
+        if: ${{ always() && (steps.phase2_pipeline.outcome == 'success' || steps.phase2_pipeline.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-vibe-pipeline-${{ github.sha }}-${{ github.run_attempt }}
+          path: Back/reports/phase5-vibe-dedicated.json
+          if-no-files-found: ${{ steps.phase2_pipeline.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 30
+      - name: Preserve Phase V bounded multi-API evidence
+        if: ${{ always() && (steps.phase2_pipeline.outcome == 'success' || steps.phase2_pipeline.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-multi-api-${{ github.sha }}-${{ github.run_attempt }}
+          path: Back/reports/phase5-multi-api.json
+          if-no-files-found: ${{ steps.phase2_pipeline.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 30
       - name: Full Compose browser flow
-        run: node scripts/check-compose.mjs --production
+        id: compose_live
+        run: |
+          node scripts/check-compose.mjs --production
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync, statSync } from 'node:fs';
+          const prefix = 'Front/reports/phase5-vibe-';
+          for (const suffix of ['browser.json', 'browser.png', 'compose.json']) {
+            assert.ok(statSync(prefix + suffix).size > 0, `Missing Vibe evidence: ${suffix}`);
+          }
+          const browser = JSON.parse(readFileSync(prefix + 'browser.json', 'utf8'));
+          const compose = JSON.parse(readFileSync(prefix + 'compose.json', 'utf8'));
+          assert.equal(browser.status, 'PASS');
+          assert.equal(compose.status, 'PASS');
+          assert.equal(compose.cleanup, true);
+          NODE
+      - name: Preserve bounded browser performance observations
+        if: ${{ always() && (steps.compose_live.outcome == 'success' || steps.compose_live.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase3-browser-performance-${{ github.run_attempt }}
+          path: Front/reports/phase3-browser-performance.json
+          # A failed setup may precede the probe. Successful Compose must emit its evidence.
+          if-no-files-found: ${{ steps.compose_live.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 7
+      - name: Preserve Phase V real Vibe browser and gateway evidence
+        if: ${{ always() && (steps.compose_live.outcome == 'success' || steps.compose_live.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: phase5-vibe-browser-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            Front/reports/phase5-vibe-browser.json
+            Front/reports/phase5-vibe-browser.png
+            Front/reports/phase5-vibe-compose.json
+          if-no-files-found: ${{ steps.compose_live.outcome == 'success' && 'error' || 'warn' }}
+          retention-days: 30
       - name: Failed Compose browser artifacts (disposable test data only)
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -366,7 +624,7 @@ jobs:
   required:
     # 필수 검사 이름은 그대로 'CI required'다. 건너뛴 작업(바뀌지 않은 경로)은 통과로 본다.
     name: CI required
-    needs: [changes, back, judge, front, full]
+    needs: [changes, audit, images, back, judge, front, full]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 2

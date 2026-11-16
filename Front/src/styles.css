@@ -1305,6 +1305,16 @@ input::placeholder, textarea::placeholder { color: var(--color-ink-600); opacity
   flex: 1;
   min-width: 0;
 }
+.bookmark-control {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+}
+.bookmark-control .button { min-height: 40px; }
+.bookmark-error { flex-basis: 100%; max-width: 32rem; font-size: 13px; }
+.bookmark-indicator { display: inline-flex; color: var(--color-primary); flex-shrink: 0; }
 .solve-grid {
   display: grid;
   /* 문제 설명 | 크기 조절 손잡이 | 코드 작성. 열 크기는 화면 코드가 --solve-columns로 정한다(기본은 3:5) */
@@ -7585,6 +7595,11 @@ textarea {
   border-top: 0;
   padding-top: 0;
 }
+.ent-problem-badges {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
 .ent-order {
   color: var(--color-ink-400);
   font: 13px var(--font-mono);
@@ -8265,6 +8280,13 @@ label.check-row input[type="checkbox"] {
 }
 .ent-result-table {
   width: 100%;
+}
+.ent-result-problem-title {
+  display: block;
+  max-width: 24ch;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-weight: 400;
 }
 .verdict-good {
   color: var(--color-success);

@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -10,6 +11,8 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -22,6 +25,7 @@ import {
   UpdateEnterpriseTestDto,
 } from './dto/enterprise-test.dto.js';
 import { EnterpriseService } from './enterprise.service.js';
+import { EnterpriseResultsQuery } from './dto/enterprise-results.query.js';
 
 @ApiTags('enterprise')
 @ApiBearerAuth()
@@ -73,9 +77,24 @@ export class EnterpriseController {
   @Get('tests/:id/results')
   results(
     @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: EnterpriseResultsQuery,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.enterprise.results(id, user);
+    return this.enterprise.results(id, user, query);
+  }
+
+  @Get('tests/:id/results/export')
+  @Header('Cache-Control', 'private, no-store')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  async exportResults(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const csv = await this.enterprise.exportResults(id, user);
+    return new StreamableFile(Buffer.from(csv, 'utf8'), {
+      type: 'text/csv; charset=utf-8',
+      disposition: 'attachment; filename="enterprise-results.csv"',
+    });
   }
 
   @Post('attempts/:id/vibe/:challengeId')

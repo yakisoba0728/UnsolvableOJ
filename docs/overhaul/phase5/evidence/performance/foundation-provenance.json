@@ -1,0 +1,52 @@
+{
+  "run": {
+    "id": 43890166522,
+    "head_sha": "6ec519261b1103b2eadcfe0afcc0dec961353405",
+    "head_branch": "overhaul5/ci-foundation",
+    "status": "completed",
+    "conclusion": "success",
+    "head_commit": {
+      "id": "6ec519261b1103b2eadcfe0afcc0dec961353405",
+      "tree_id": "5588cb3e8648afed8fe10146d4da961a0ebb4035",
+      "message": "security: bind independent Phase V component review without relaxing runtime gates",
+      "timestamp": "2026-11-16T14:51:17Z",
+      "author": {
+        "name": "yakisoba0728",
+        "email": "yakihyuk0728@gmail.com"
+      },
+      "committer": {
+        "name": "yakisoba0728",
+        "email": "yakihyuk0728@gmail.com"
+      }
+    },
+    "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43890166522"
+  },
+  "checkout": {
+    "sha": "93b753d73b12efe2ce6e71805feca6522f7428d2",
+    "tree": "5588cb3e8648afed8fe10146d4da961a0ebb4035",
+    "parents": [
+      "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "6ec519261b1103b2eadcfe0afcc0dec961353405"
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 14238046500,
+      "name": "phase3-browser-performance-1",
+      "digest": "sha256:b436f4fe3802e47df95a20153c68900620c94759755b132aad968947c3f20571",
+      "bytes": 5255,
+      "created_at": "2026-11-16T15:04:34Z",
+      "expires_at": "2026-11-23T15:04:33Z",
+      "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43890166522/artifacts/14238046500"
+    },
+    {
+      "id": 14237646048,
+      "name": "phase2-judge-evidence-1",
+      "digest": "sha256:4eea1a0b5fb550bc2954de1a84cb684faa1e12107af43d3a1fd26e547ce090f9",
+      "bytes": 29161,
+      "created_at": "2026-11-16T15:02:40Z",
+      "expires_at": "2026-11-23T15:02:39Z",
+      "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43890166522/artifacts/14237646048"
+    }
+  ]
+}

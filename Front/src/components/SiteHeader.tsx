@@ -12,11 +12,12 @@ export function SiteHeader({
   links: { path: string; label: string }[];
   onSignOut: () => void;
 }) {
-  const { session } = useAuth();
+  const { session, getSessionIdentityVersion } = useAuth();
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const sessionIdentity = `${session?.user.id ?? "guest"}:${getSessionIdentityVersion()}`;
 
   // 데스크톱 메뉴: 활성 메뉴 아래 표시선이 새 위치로 미끄러져 이동한다.
   const navRef = useRef<HTMLElement>(null);
@@ -46,8 +47,69 @@ export function SiteHeader({
     };
   }, [pathname, Boolean(session), role]);
 
-  // 화면을 옮기면 메뉴를 닫는다.
-  useEffect(() => setMenuOpen(false), [pathname]);
+  // A disclosure is not a modal: opening it places keyboard users on its first
+  // link, but Tab remains free to leave the panel. The DOM puts the toggle after
+  // the links, so leaving focus on the toggle would skip every disclosed link.
+  useLayoutEffect(() => {
+    if (menuOpen && window.matchMedia("(max-width: 1100px)").matches)
+      navRef.current?.querySelector<HTMLAnchorElement>("a")?.focus();
+  }, [menuOpen]);
+
+  // RouteFocus owns the destination after navigation, including lazy routes.
+  useLayoutEffect(() => setMenuOpen(false), [pathname]);
+  // A role/account change can remove the focused link without a route change.
+  useLayoutEffect(() => {
+    if (menuOpen && window.matchMedia("(max-width: 1100px)").matches)
+      menuButtonRef.current?.focus({ preventScroll: true });
+    setMenuOpen(false);
+  }, [sessionIdentity, role]);
+
+  useLayoutEffect(() => {
+    const collapsed = window.matchMedia("(max-width: 1100px)");
+    const belongsToMenu = (element: EventTarget | null): element is HTMLElement =>
+      element instanceof HTMLElement &&
+      (element === menuButtonRef.current || Boolean(navRef.current?.contains(element)));
+    // CSS can hide and blur the toggle/navigation before matchMedia delivers
+    // its change event. Retain that focus owner only across a hidden-element
+    // blur; an actual focus move or outside pointer action clears ownership.
+    let lastMenuFocus = belongsToMenu(document.activeElement) ? document.activeElement : null;
+    const rememberFocus = (event: FocusEvent) => {
+      if ((event.target === document.body || event.target === document.documentElement) &&
+          lastMenuFocus && !lastMenuFocus.getClientRects().length)
+        return;
+      lastMenuFocus = belongsToMenu(event.target) ? event.target : null;
+    };
+    const forgetVisibleBlur = (event: FocusEvent) => {
+      if (event.target === lastMenuFocus && lastMenuFocus?.getClientRects().length)
+        lastMenuFocus = null;
+    };
+    const forgetOutsidePointer = (event: PointerEvent) => {
+      if (!belongsToMenu(event.target)) lastMenuFocus = null;
+    };
+    const resized = () => {
+      const focused = document.activeElement;
+      const nav = navRef.current;
+      const owner = belongsToMenu(focused) ? focused :
+        focused === document.body || focused === document.documentElement ? lastMenuFocus : null;
+      setMenuOpen(false);
+      if (collapsed.matches && owner && nav?.contains(owner)) {
+        menuButtonRef.current?.focus({ preventScroll: true });
+      } else if (!collapsed.matches && owner === menuButtonRef.current) {
+        (nav?.querySelector<HTMLAnchorElement>('a[aria-current="page"]') ??
+          nav?.querySelector<HTMLAnchorElement>("a"))?.focus({ preventScroll: true });
+      }
+    };
+    document.addEventListener("focusin", rememberFocus, true);
+    document.addEventListener("focusout", forgetVisibleBlur, true);
+    document.addEventListener("pointerdown", forgetOutsidePointer, true);
+    collapsed.addEventListener("change", resized);
+    return () => {
+      document.removeEventListener("focusin", rememberFocus, true);
+      document.removeEventListener("focusout", forgetVisibleBlur, true);
+      document.removeEventListener("pointerdown", forgetOutsidePointer, true);
+      collapsed.removeEventListener("change", resized);
+    };
+  }, []);
 
   // 열려 있는 동안: Esc로 닫고(버튼으로 포커스 복귀), 바깥을 누르면 닫는다.
   useEffect(() => {
@@ -86,6 +148,21 @@ export function SiteHeader({
           id="main-menu"
           aria-label="주 메뉴"
           ref={navRef}
+          onClick={(event) => {
+            // Close even when activating the current route (pathname is then
+            // unchanged). Modified clicks keep this tab's disclosure intact.
+            if (!menuOpen || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+              return;
+            if ((event.target as Element).closest("a")) {
+              setMenuOpen(false);
+              menuButtonRef.current?.focus({ preventScroll: true });
+            }
+          }}
+          onBlur={(event) => {
+            if (menuOpen && event.relatedTarget &&
+                !event.currentTarget.contains(event.relatedTarget) && event.relatedTarget !== menuButtonRef.current)
+              setMenuOpen(false);
+          }}
         >
           <NavLink to="/" end>
             홈
@@ -131,7 +208,10 @@ export function SiteHeader({
           <ThemeToggle />
           {session ? (
             <>
-              <NotificationBell token={session.accessToken} />
+              <NotificationBell
+                key={`${session.user.id}:${getSessionIdentityVersion()}`}
+                token={session.accessToken}
+              />
               <Link
                 className="account-link"
                 to="/profile"

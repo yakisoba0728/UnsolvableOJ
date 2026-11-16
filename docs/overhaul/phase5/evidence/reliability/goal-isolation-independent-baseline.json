@@ -1,0 +1,33 @@
+{
+  "reviewer": "independent_qa",
+  "checkedAt": "2026-11-16T14:57:26.728Z",
+  "sourceCommit": "f6f11ed41865226a26a86927d1fe97a8a961915f",
+  "migrationSha256": "d6b423e773f20e9a7baa4f80a7c1053a99667cdbc0f5df1105a9be1a82067dee",
+  "results": [
+    {
+      "isolation": "READ COMMITTED",
+      "committedRowsBeforeDown": 1,
+      "downRejected": true,
+      "error": "Cannot roll back learning goals with saved goals; preserve goal history before reverting.",
+      "tableAfterDownInsideTransaction": "not-inspected",
+      "rowsAfterSafetyRollback": 1
+    },
+    {
+      "isolation": "REPEATABLE READ",
+      "committedRowsBeforeDown": 1,
+      "downRejected": false,
+      "error": null,
+      "tableAfterDownInsideTransaction": null,
+      "rowsAfterSafetyRollback": 1
+    },
+    {
+      "isolation": "SERIALIZABLE",
+      "committedRowsBeforeDown": 1,
+      "downRejected": false,
+      "error": null,
+      "tableAfterDownInsideTransaction": null,
+      "rowsAfterSafetyRollback": 1
+    }
+  ],
+  "cleanup": "Owned generated database dropped; destructive migration effects were always rolled back."
+}

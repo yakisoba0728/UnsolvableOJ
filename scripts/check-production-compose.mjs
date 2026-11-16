@@ -2,10 +2,12 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join, normalize } from 'node:path';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { checkSandboxBudget } from './check-sandbox-budget.mjs';
+import { checkExecutorCompose } from './check-executor-compose.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const required = {
@@ -109,6 +111,9 @@ assert.equal(judge.depends_on['go-judge'].condition, 'service_healthy');
 assert.equal(judge.stop_grace_period, '2m0s');
 // The image healthcheck can only kill a hung worker when node is not PID 1.
 assert.equal(judge.init, true);
+assert.equal(judge.user, '1000:1000');
+assert.equal(judge.read_only, true);
+assert.deepEqual(judge.tmpfs, ['/tmp:rw,noexec,nosuid,nodev,size=16m,uid=1000,gid=1000,mode=0700']);
 
 // Changing worker parallelism also changes the sandbox's execution capacity.
 const resized = config({ JUDGE_CONCURRENCY: '1' });
@@ -124,8 +129,26 @@ const executorEnv = {
 const executor = (overrides = {}) => JSON.parse(execFileSync('docker', [
   'compose', '--env-file', 'Judge/deploy/.env.example', '-f', 'Judge/deploy/compose.yaml', 'config', '--format', 'json',
 ], { cwd: root, env: { ...executorEnv, ...overrides }, encoding: 'utf8', stdio: 'pipe' }));
-checkSandboxBudget(executor());
+checkExecutorCompose(executor());
 assert.equal(executor().services.judge.init, true);
-checkSandboxBudget(executor({ JUDGE_CONCURRENCY: '3', SANDBOX_MEMORY_LIMIT: '14g' }));
-assert.throws(() => checkSandboxBudget(executor({ JUDGE_CONCURRENCY: '3' })), /headroom/);
+checkExecutorCompose(executor({ JUDGE_CONCURRENCY: '3', SANDBOX_MEMORY_LIMIT: '14g' }));
+assert.throws(() => checkExecutorCompose(executor({ JUDGE_CONCURRENCY: '3' })), /headroom/);
+assert.throws(() => checkExecutorCompose(executor({ API_BASE_URL: 'http://api.example.test/api/v1' })), /HTTPS/);
+const identityDirectory = mkdtempSync(join(tmpdir(), 'oj-compose-tls-'));
+try {
+  const tlsEnv = { ...executorEnv };
+  for (const [name, filename] of [['CA', 'ca.pem'], ['CERT', 'cert.pem'], ['KEY', 'key.pem']]) {
+    const path = join(identityDirectory, filename);
+    writeFileSync(path, 'synthetic-config-only-placeholder\n', { mode: 0o600 });
+    tlsEnv[`EXECUTOR_REDIS_${name}_PATH`] = path;
+  }
+  const tlsPlan = JSON.parse(execFileSync('docker', [
+    'compose', '--env-file', 'Judge/deploy/.env.example', '-f', 'Judge/deploy/compose.yaml',
+    '-f', 'Judge/deploy/tls-files.compose.yaml', 'config', '--format', 'json',
+  ], { cwd: root, env: tlsEnv, encoding: 'utf8', stdio: 'pipe' }));
+  checkExecutorCompose(tlsPlan);
+  assert.equal(tlsPlan.services.judge.secrets.length, 3);
+} finally {
+  rmSync(identityDirectory, { recursive: true, force: true });
+}
 console.log('Production Compose: required settings, private networking, persistence, resource budgets and worker wiring passed.');

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "finding": "P5-RELIABILITY-001",
+  "baselineCommit": "f6f11ed41865226a26a86927d1fe97a8a961915f",
+  "baselineMigrationSha256": "d6b423e773f20e9a7baa4f80a7c1053a99667cdbc0f5df1105a9be1a82067dee",
+  "candidateBaseCommit": "f6f11ed41865226a26a86927d1fe97a8a961915f",
+  "candidateFileSha256": {
+    "Back/src/database/migrations/1796200000000-learning-goals.ts": "eb31ae84cf3c994e38aa666148555c2eea7af0a0d9301eadd82fe674d7eafcce",
+    "Back/test/learning-goal-migration.e2e-spec.ts": "af331d6a22ba46d53325921cb34daf4164f72a52be1b2e61ef82081a4eba7ca5"
+  },
+  "captures": [
+    {
+      "name": "goal-isolation-baseline.log",
+      "exitCode": 1,
+      "scope": "Two new old-snapshot tests against f6f11ed migration; both failed; three other cases deliberately unselected by test-name filter.",
+      "rawSha256": "c12b419765f16a5325e90f42e852774d418310fbff4eadffdbc1e90b1c1cc131",
+      "rawBytes": 2034,
+      "rawUtf8": "\n RUN  v4.1.12 /workspace/scratch/3d1215725852/oj-reliability/Back\n\nstdout | test/learning-goal-migration.e2e-spec.ts > Learning-goal migration preservation (real PostgreSQL) > refuses an old REPEATABLE READ snapshot before destructive schema work\n{\"proof\":\"old-snapshot-goal-rollback\",\"isolation\":\"REPEATABLE READ\",\"committedGoal\":true,\"tableAfterDown\":null}\n\nstdout | test/learning-goal-migration.e2e-spec.ts > Learning-goal migration preservation (real PostgreSQL) > refuses an old SERIALIZABLE snapshot before destructive schema work\n{\"proof\":\"old-snapshot-goal-rollback\",\"isolation\":\"SERIALIZABLE\",\"committedGoal\":true,\"tableAfterDown\":null}\n\n ❯ test/learning-goal-migration.e2e-spec.ts (5 tests | 2 failed | 3 skipped) 230ms\n     × refuses an old REPEATABLE READ snapshot before destructive schema work 19ms\n     × refuses an old SERIALIZABLE snapshot before destructive schema work 7ms\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  test/learning-goal-migration.e2e-spec.ts > Learning-goal migration preservation (real PostgreSQL) > refuses an old REPEATABLE READ snapshot before destructive schema work\n FAIL  test/learning-goal-migration.e2e-spec.ts > Learning-goal migration preservation (real PostgreSQL) > refuses an old SERIALIZABLE snapshot before destructive schema work\nAssertionError: expected undefined to be an instance of Error\n ❯ test/learning-goal-migration.e2e-spec.ts:85:26\n     83|             committedGoal: true, tableAfterDown: name }));\n     84|         }\n     85|         expect(rejected).toBeInstanceOf(Error);\n       |                          ^\n     86|         expect((rejected as Error).message).toContain('Learning goals …\n     87|         expect((await runner.query(\"SELECT to_regclass('learning_goals…\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯\n\n\n Test Files  1 failed (1)\n      Tests  2 failed | 3 skipped (5)\n   Start at  00:02:22\n   Duration  2.53s (transform 646ms, setup 0ms, import 2.08s, tests 230ms, environment 0ms)\n\n"
+    },
+    {
+      "name": "goal-isolation-candidate.log",
+      "exitCode": 0,
+      "scope": "All five candidate migration cases plus eight existing learning-goal cases; 13 passed, no skips.",
+      "rawSha256": "0ba0be570b81516921ac6cac4f6f1f48dd90b3049e29eed5fd1d0009f370fc87",
+      "rawBytes": 238,
+      "rawUtf8": "\n RUN  v4.1.12 /workspace/scratch/3d1215725852/oj-reliability/Back\n\n\n Test Files  2 passed (2)\n      Tests  13 passed (13)\n   Start at  00:03:09\n   Duration  4.89s (transform 628ms, setup 0ms, import 3.31s, tests 1.23s, environment 0ms)\n\n"
+    },
+    {
+      "name": "migration-isolation-regression.log",
+      "exitCode": 0,
+      "scope": "Existing complete migration regression; expected username-case refusal is part of passing coverage.",
+      "rawSha256": "c4fa5c836280745d4b47f42dc4a33a737ee7d2612b6dd3fdcfdf02d60f119ca9",
+      "rawBytes": 453,
+      "rawUtf8": "Migration \"BackendHardening1790554000000\" failed, error: Usernames differ only by case; rename them before migrating: Legacy, legacy\nMigrations: legacy upgrade, snapshots, solve/XP idempotency, acceptance and learning evidence backfill/refusal, username case refusal, partial rollback, foundations version/token refusal (signed revoked JWT remains rejected), fresh install/rollback/reapply, vibe history backfill and enterprise rollback refusal passed.\n"
+    },
+    {
+      "name": "fixture-isolation-proof.log",
+      "exitCode": 0,
+      "scope": "Shared synthetic fixture only; full Docker archive/restore is not executed locally.",
+      "rawSha256": "7b86d6fc13a3f8f501270e3d1ca998f3dda7a60c8989e599b35b8b26b716ec41",
+      "rawBytes": 117,
+      "rawUtf8": "Fixture-only proof PASS: 31 migrations, 37 preserved table fingerprints, 12 saved goals; generated database removed.\n"
+    }
+  ],
+  "cleanup": "Each test runner owns and removes its generated database; each destructive baseline transaction was rolled back. The launcher terminated its owned PostgreSQL/Redis processes."
+}

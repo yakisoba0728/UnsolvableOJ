@@ -8,7 +8,12 @@ export interface EnterpriseTest {
   durationMin: number;
   /** 출제 순서대로의 문제 id */
   problemIds: string[];
+  /** 일반 문제를 시험에 추가했을 때 고정한 버전. */
+  problemVersions?: { problemId: string; version: number }[];
+  problemVersionPolicy?: 'ON_SELECTION';
   vibeChallengeIds?: string[];
+  vibeChallengeVersions?: { challengeId: string; version: string }[];
+  vibeVersionPolicy?: 'ON_SELECTION';
   /** 응시 링크 코드: /enterprise/join/:code */
   inviteCode: string;
   /** true면 invitees에 적은 사람만 응시할 수 있다. */
@@ -20,6 +25,26 @@ export interface EnterpriseTest {
   attemptCount: number;
   createdAt: string;
   updatedAt: string;
+}
+
+/** Owner/admin-only detail; never part of the invitation or candidate test summary. */
+export interface EnterpriseTestDetail extends EnterpriseTest {
+  selectedVibeChallenges?: {
+    id: string;
+    version: string;
+    title: string;
+    difficulty: string;
+    stack: string;
+    durationMin: number;
+  }[];
+  selectedProblems: {
+    id: string;
+    version: number;
+    title: string;
+    difficulty: string;
+    timeLimitMs: number;
+    memoryLimitMb: number;
+  }[];
 }
 
 /** 응시자가 링크에서 보는 정보 */
@@ -64,6 +89,7 @@ export interface AttemptView extends Attempt {
 
 export interface EnterpriseVibeTask {
   challengeId: string;
+  challengeVersion?: string;
   title: string;
   id: string | null;
   submittedAt: string | null;
@@ -73,6 +99,11 @@ export interface EnterpriseVibeTask {
 
 export interface TestResults {
   test: EnterpriseTest;
+  /** Global bounded aggregates, independent of the currently displayed page. */
+  analytics?: { finished: number; active: number; expired: number; scoreBands: number[] };
+  exportLimit?: number;
+  /** Bounded candidate details; summary always describes the entire assessment. */
+  pagination: { page: number; limit: number; total: number; totalPages: number };
   summary: {
     candidates: number;
     averageScore: number | null;

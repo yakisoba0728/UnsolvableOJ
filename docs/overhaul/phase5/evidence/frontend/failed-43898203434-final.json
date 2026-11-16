@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "runId": 43898203434,
+  "status": "failure",
+  "source": "500329305615070e4e9edbde0ca9215539ed1cc4",
+  "checkout": "a996275996d543b89e0bd72c140bc993fe71df56",
+  "tree": "e0b79def06480dc462754b5cc039e25b48df37db",
+  "base": "6d8556c07fd370ee97d7c55798286f5b2885cf4c",
+  "jobs": [
+    {
+      "id": 133407401519,
+      "name": "Dependency audit",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407402087,
+      "name": "Docker image (back)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407402094,
+      "name": "Docker image (runtime)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407402245,
+      "name": "Docker image (front)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407402272,
+      "name": "Detect changes",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407402416,
+      "name": "Docker image (judge)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407542604,
+      "name": "Sandbox, pipeline and Compose",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407542652,
+      "name": "Judge worker",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133407542696,
+      "name": "Browser tests (1/2)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 133407542752,
+      "name": "Browser tests (2/2)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 133407542776,
+      "name": "Backend and API",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133418485373,
+      "name": "CI required",
+      "status": "completed",
+      "conclusion": "failure"
+    }
+  ],
+  "failedShards": [
+    {
+      "id": 133407542696,
+      "passed": 395,
+      "failed": 8,
+      "failedScenarios": "eight Chromium geometry provenance calls"
+    },
+    {
+      "id": 133407542752,
+      "passed": 393,
+      "failed": 9,
+      "failedScenarios": "one Chromium editor provenance call and eight WebKit geometry provenance calls"
+    }
+  ],
+  "reason": "Git detected dubious ownership under container HOME=/root. No affected test's remaining geometry assertions/editor observation was counted as completed.",
+  "firefox": "NOT_EXECUTED_AFTER_EACH_SHARD_FAILURE",
+  "retriesConfigured": 0,
+  "sourceCorrection": {
+    "author": "f872de5a344dfa1055fdd5864cf7ff92936fff61",
+    "combinedRemote": "49a3674e76f79b0d1626b12f02862825c189bdff",
+    "tree": "c90c955a3f4c8cd1e28f26a77a5845b9bf874cd1",
+    "independentReceiptSha256": "4443a761b2e9038440257fb5d4536af57b7a3984046e6ca8f3141983c3c26d31"
+  }
+}

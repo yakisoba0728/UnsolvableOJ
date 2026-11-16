@@ -1,3 +1,5 @@
+import { sameOutput } from "./output.js";
+
 export interface Claim {
   language: string;
   sourceCode: string;
@@ -155,6 +157,11 @@ export async function checkSandbox(config: SandboxConfig) {
   }
   // /config is public upstream; check authentication before claiming any jobs.
   await (await request(config, "/file", signal)).body?.cancel();
+  const anonymous = await fetch(new URL("/file", config.url), { redirect: "error", signal });
+  await anonymous.body?.cancel();
+  if (anonymous.status !== 401 && anonymous.status !== 403) {
+    throw new Error("go-judge must enforce authentication on file access");
+  }
 }
 
 async function readOutput(response: Response, signal: AbortSignal) {
@@ -169,28 +176,6 @@ async function readOutput(response: Response, signal: AbortSignal) {
     }
   });
   return Buffer.concat(chunks);
-}
-
-function rstrip(buffer: Buffer) {
-  let end = buffer.length;
-  while (end && [9, 10, 11, 12, 13, 32].includes(buffer[end - 1])) end--;
-  return buffer.subarray(0, end);
-}
-
-/** 줄마다 끝의 ASCII 공백(\r 포함)과 출력 끝의 빈 줄은 무시하고, 나머지 바이트는 그대로 비교한다. */
-function sameOutput(actual: Buffer, expected: Buffer) {
-  const lines = (buffer: Buffer) => {
-    const result: Buffer[] = [];
-    for (let start = 0, i = 0; i <= buffer.length; i++)
-      if (i === buffer.length || buffer[i] === 10) {
-        result.push(rstrip(buffer.subarray(start, i)));
-        start = i + 1;
-      }
-    while (result.length && !result[result.length - 1].length) result.pop();
-    return result;
-  };
-  const [a, b] = [lines(actual), lines(expected)];
-  return a.length === b.length && a.every((line, i) => line.equals(b[i]));
 }
 
 export async function judge(claim: Claim, config: SandboxConfig, cancellation?: AbortSignal): Promise<JudgeResult> {

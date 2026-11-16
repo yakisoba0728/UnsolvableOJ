@@ -1,0 +1,64 @@
+{
+  "reviewer": "independent_qa",
+  "checkedAt": "2026-11-16T15:51:46.833110+00:00",
+  "sourceCommit": "f872de5a344dfa1055fdd5864cf7ff92936fff61",
+  "sourceTree": "d2e61d7580793eef1e90ff532a69acd2b1e8bfe3",
+  "helperSha256": "2f0b3e009441a2b4833c33f4ab59223a14945b2aa593563b2ff41d82a42522ab",
+  "node": "v24.22.1",
+  "git": "git version 2.52.0",
+  "mode": "Real Git and exact helper bytes with GIT_TEST_ASSUME_DIFFERENT_OWNER=1, empty reviewer-owned global config and no system config; no chmod/chown or browser execution.",
+  "result": "PASS",
+  "checks": [
+    {
+      "case": "plain Git rejects forced ownership mismatch",
+      "result": "PASS",
+      "exitCode": 128
+    },
+    {
+      "case": "another exact safe directory does not trust checkout",
+      "result": "PASS",
+      "exitCode": 128
+    },
+    {
+      "case": "actual helper returns real HEAD/tree/clean state despite caller cwd, owner mismatch and false GITHUB_SHA",
+      "result": "PASS",
+      "provenance": {
+        "sha": "37a0fecc5c4f09ea21ae51c49c789fa1265aaae2",
+        "tree": "47fafe9f41bef762f006f68d20522b59f60df9ac",
+        "trackedTreeClean": true
+      }
+    },
+    {
+      "case": "untracked evidence does not falsely dirty tracked-tree status",
+      "result": "PASS"
+    },
+    {
+      "case": "tracked edits are truthfully reported without changing HEAD/tree",
+      "result": "PASS",
+      "provenance": {
+        "sha": "37a0fecc5c4f09ea21ae51c49c789fa1265aaae2",
+        "tree": "47fafe9f41bef762f006f68d20522b59f60df9ac",
+        "trackedTreeClean": false
+      }
+    },
+    {
+      "case": "ordinary Git remains blocked afterward; global and repository Git config unchanged",
+      "result": "PASS"
+    },
+    {
+      "case": "missing Git marker fails without environment provenance fallback",
+      "result": "PASS",
+      "exitCode": 1
+    },
+    {
+      "case": "actual linked worktree .git file stays bound to reviewed commit/tree",
+      "result": "PASS",
+      "provenance": {
+        "sha": "f872de5a344dfa1055fdd5864cf7ff92936fff61",
+        "tree": "d2e61d7580793eef1e90ff532a69acd2b1e8bfe3",
+        "trackedTreeClean": true
+      }
+    }
+  ],
+  "cleanup": "Owned synthetic fixture and config directory removed in finally."
+}

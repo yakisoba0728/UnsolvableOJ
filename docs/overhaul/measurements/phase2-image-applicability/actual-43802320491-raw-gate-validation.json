@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "kind": "retained-actual-scan-validation",
+  "runId": "43802320491",
+  "observedAt": "2026-11-16T04:28:08.623661+00:00",
+  "wrapperSourceSha256": "ca63e433a06d58bb0c495bd9b24d6ebeaea7d3c38b20b1269ee325c11ff2b6b5",
+  "scannerInvoked": false,
+  "ociRebuilt": false,
+  "interpretation": "Read-only validation of retained actual completed scanner reports; this is not a new image scan or workflow execution. Runtime raw findings remain blocked until separately reviewed composition.",
+  "components": [
+    {
+      "component": "back",
+      "rawReportSha256": "0da8b98754b382b07ec927d0ba623df3268853712871d3d6e7e6d84758b8fe98",
+      "rawManifestSha256": "4ce6153ee318c07882c2e03162ce80aafd8126c08f3e9c7bc25bf07e11936f34",
+      "sourceCommit": "d2bba477e9bb58d87c39ad3c79a1373d99b61aac",
+      "originalGate": "PASS",
+      "originalSeverityCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "validation": "PASSED"
+    },
+    {
+      "component": "front",
+      "rawReportSha256": "bfb4fb143344537ab1b69289d7095b98dd1cde82cbdb5dd60f54bd6eb578771c",
+      "rawManifestSha256": "7d80b6f26afb724bedd3bc8bbd7e88b64c1f2454e36cdfeab81939f7ff9fed41",
+      "sourceCommit": "d2bba477e9bb58d87c39ad3c79a1373d99b61aac",
+      "originalGate": "PASS",
+      "originalSeverityCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "validation": "PASSED"
+    },
+    {
+      "component": "judge",
+      "rawReportSha256": "a05ed8bf67ce83c5b3f10ec0b8fd25a8d98c8736bca6c2aec8d48161a02f6056",
+      "rawManifestSha256": "743a78eecc092d9601c78c93cba41a9d90cb43e6a2584877252643c3e24731d2",
+      "sourceCommit": "d2bba477e9bb58d87c39ad3c79a1373d99b61aac",
+      "originalGate": "PASS",
+      "originalSeverityCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "validation": "PASSED"
+    },
+    {
+      "component": "runtime",
+      "rawReportSha256": "0d1d1ea81522458479ac85bfd27e13d764562f421193b9421e6de0b64cf6751a",
+      "rawManifestSha256": "c4c0269be2bc4cb1bf6adb42c2b5121983f5c7f212b38198645422491d384600",
+      "sourceCommit": "d2bba477e9bb58d87c39ad3c79a1373d99b61aac",
+      "originalGate": "BLOCKED_FINDINGS",
+      "originalSeverityCounts": {
+        "UNKNOWN": 1,
+        "LOW": 363,
+        "MEDIUM": 561,
+        "HIGH": 177,
+        "CRITICAL": 5
+      },
+      "validation": "PASSED"
+    }
+  ]
+}

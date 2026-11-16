@@ -1,0 +1,729 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-final-image-gate-validation",
+  "observedAt": "2026-11-16T04:45:22.379416+00:00",
+  "reviewer": "security_audit",
+  "repository": "yakisoba0728/UnsolvableOJ",
+  "pr": 68,
+  "runId": "43805214804",
+  "runUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43805214804",
+  "headSha": "0e70a2fe6d725362bcb248836c3697d310e16742",
+  "headTree": "f302cef7d2459736d3810ee930f1c9e63662ed65",
+  "checkoutCommit": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+  "checkoutTree": "f302cef7d2459736d3810ee930f1c9e63662ed65",
+  "checkoutParents": [
+    "e7caa9b3aa23ac051e3a786780bc3b8c0780affa",
+    "0e70a2fe6d725362bcb248836c3697d310e16742"
+  ],
+  "imagesPassed": 4,
+  "images": [
+    {
+      "component": "back",
+      "jobId": 133094309704,
+      "jobConclusion": "success",
+      "buildAndGateSteps": [
+        {
+          "name": "Build Back/Dockerfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Scan image and enforce the explicit evidence gate",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        }
+      ],
+      "artifact": {
+        "id": 14197833311,
+        "name": "image-audit-back-71370b28d8a30d3ac79cf18de5facd291b6447d2-1",
+        "size_in_bytes": 26970,
+        "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14197833311",
+        "archive_download_url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14197833311/zip",
+        "expired": false,
+        "created_at": "2026-11-16T04:38:18Z",
+        "expires_at": "2026-12-16T04:38:16Z",
+        "updated_at": "2026-11-16T04:38:18Z",
+        "digest": "sha256:e4e59aae772e1f3fb2c3feaa62232f773bfe4e6f0f00898df21935d99fb28a3d",
+        "workflow_run": {
+          "id": 43805214804,
+          "repository_id": 1379559648,
+          "head_repository_id": 1379559648,
+          "head_branch": "overhaul2/image-security",
+          "head_sha": "0e70a2fe6d725362bcb248836c3697d310e16742"
+        }
+      },
+      "archiveSha256": "e4e59aae772e1f3fb2c3feaa62232f773bfe4e6f0f00898df21935d99fb28a3d",
+      "sourceCommit": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+      "image": {
+        "manifestDigest": "sha256:3fd1b07f99652aa236d4df48476456e348438feaa40d4885693f8f2848bc0141",
+        "configDigest": "sha256:b45060f56e9cf75ebacb306a6adcb73590abe137be44f72f6bea9625f9459054",
+        "indexDigest": "sha256:626bfca49e92944a652f7c5e3b63f1af8d62637106467342d2b5c19a2bc7ac83",
+        "buildDigest": "sha256:663110da544189b799254ad21cca5ccd1d52de871ffee7bbbb79d3739a2d3815",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17",
+          "sha256:b72829bc75b7701104d057fde78fe0aef6dc0c3eaf2423e7249e8a14c37ead57",
+          "sha256:89a151fddb377af33d0dda6a24f40061bbde4b159f82c349fe01208baba8a84f",
+          "sha256:60ef5f57e09d3f24d91cfd5547a102a028a7bd629f03e79409f53a202cf9df54",
+          "sha256:97b64ceb74b7cc85b28a10c95e9e759a83a761e4cf25f4ede602b07328349f72",
+          "sha256:33423f398b467958877c006f078ca0f787bef2130ec74d152b1b8b11bfe0fc31",
+          "sha256:ead820859f1c13e0a17c11ea5a6dbad20bb0d65abab0fdaecd8b0862c8ed2912",
+          "sha256:d3f2da48f48d348b54006c5626203a059f55138ba6b8a2b0adf99bdc6a26b3e6",
+          "sha256:2d5d07735fbca03dfe87fd1ad994683b01720e33f9619e0c1e1aadceb55567c0",
+          "sha256:7df61150874fdf321aa755f917c490491ba19cabe70e48c654f814f661737bfa",
+          "sha256:9c51a4bfcb5b7fd1ef5eb741a4255444335f8a2c5daf111a41e7c31998cfdc96",
+          "sha256:f8a925478b4679fb0d451290371c05fb0b663a35a46488c708ef49dc867d7aca"
+        ],
+        "compressedLayerBytes": 119903081
+      },
+      "gate": "PASS_RAW_SCAN",
+      "rawScannerExitCode": 0,
+      "payloadVerifierExitCode": null,
+      "applicabilityExitCode": null,
+      "rawGate": "PASS",
+      "rawSeverityCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "scannerExecutableSha256": "6a972c69606c7b3ea4c6bdcc6fc9332ea9ad38381624310c1e85cc77345909f3",
+      "scannerPin": {
+        "name": "Trivy",
+        "version": "0.76.2",
+        "upstreamCommit": "3f6334d223b52188324af3b9923b4249cd206652",
+        "release": "https://github.com/aquasecurity/trivy/releases/tag/v0.76.2",
+        "publishedAt": "2026-11-05T12:50:25Z",
+        "verifiedAt": "2026-11-16",
+        "archiveUrl": "https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_Linux-64bit.tar.gz",
+        "archiveSha256": "bc0fc726e017b8927a62b2d3531d7a84ee01769daf5c99ed866dced54089fdbf",
+        "checksumsUrl": "https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_checksums.txt",
+        "checksumsSha256": "802e4ac1418ed967cd3c4b901f4f71ca00b7363ede67778665a22d9f13f58c83",
+        "databaseRepository": "ghcr.io/aquasecurity/trivy-db:2",
+        "javaDatabaseRepository": "ghcr.io/aquasecurity/trivy-java-db:1",
+        "verification": "Official immutable release API asset digests, downloaded checksum-file digest, matching archive entry, and downloaded archive digest were independently compared. This is checksum integrity verification, not a Sigstore attestation verification."
+      },
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-11-17T01:11:02.624122856Z",
+        "UpdatedAt": "2026-11-16T01:11:02.624123452Z",
+        "DownloadedAt": "2026-11-16T04:38:12.869348464Z"
+      },
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "javaDatabase": {
+        "status": "NOT_DOWNLOADED",
+        "interpretation": "Scanner did not request the Java index; no Java archive coverage is claimed."
+      },
+      "javaDatabaseSha256": null,
+      "libraryCoverage": {
+        "requiredInstalledNpmPackage": "@nestjs/core",
+        "goJudgeWithStdlibRequired": false,
+        "status": "VERIFIED"
+      },
+      "scanSourceSha256": {
+        "scannerScript": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72",
+        "scannerPin": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c"
+      },
+      "wrapperSourceSha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b",
+      "files": {
+        "database-download.log": {
+          "bytes": 2125,
+          "sha256": "6155a3841989adcb5c190c107bde2d39898c1f82fb79e283efaf57aa07ecde6a"
+        },
+        "gate.json": {
+          "bytes": 3502,
+          "sha256": "af9ad914e03f47ceb799037aa74eb5f90883764bf32099f089d3a58b542c1bfa"
+        },
+        "manifest.json": {
+          "bytes": 5689,
+          "sha256": "a450d2041a19cae259084a9375d876ef3a67f1324f41dc4681626725464fa2b0"
+        },
+        "scan.log": {
+          "bytes": 445,
+          "sha256": "8bd167ae396a84ad0b088bdc8b74d514a5cebac3add03ddfc4d365ba9b62eae1"
+        },
+        "scanner-download.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scanner-version-after.json": {
+          "bytes": 192,
+          "sha256": "3e9fc97b9edfa1252cfa313c4342b3dad18506057e831feaf73602c1ccb5b580"
+        },
+        "scanner-version.json": {
+          "bytes": 192,
+          "sha256": "3e9fc97b9edfa1252cfa313c4342b3dad18506057e831feaf73602c1ccb5b580"
+        },
+        "trivy.json": {
+          "bytes": 257374,
+          "sha256": "c2426d25116363c932c88fd42f26d1c4b424b086fe786482144088fa00b85a87"
+        }
+      }
+    },
+    {
+      "component": "front",
+      "jobId": 133094309797,
+      "jobConclusion": "success",
+      "buildAndGateSteps": [
+        {
+          "name": "Build Front/Dockerfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Scan image and enforce the explicit evidence gate",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        }
+      ],
+      "artifact": {
+        "id": 14198236257,
+        "name": "image-audit-front-71370b28d8a30d3ac79cf18de5facd291b6447d2-1",
+        "size_in_bytes": 28942,
+        "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14198236257",
+        "archive_download_url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14198236257/zip",
+        "expired": false,
+        "created_at": "2026-11-16T04:38:27Z",
+        "expires_at": "2026-12-16T04:38:26Z",
+        "updated_at": "2026-11-16T04:38:27Z",
+        "digest": "sha256:61015f76315a7f05aa18cff8f242b2ad422fc1aa9198fe3671c0df4de82f2bf7",
+        "workflow_run": {
+          "id": 43805214804,
+          "repository_id": 1379559648,
+          "head_repository_id": 1379559648,
+          "head_branch": "overhaul2/image-security",
+          "head_sha": "0e70a2fe6d725362bcb248836c3697d310e16742"
+        }
+      },
+      "archiveSha256": "61015f76315a7f05aa18cff8f242b2ad422fc1aa9198fe3671c0df4de82f2bf7",
+      "sourceCommit": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+      "image": {
+        "manifestDigest": "sha256:0db02e5118b72beaac014f0c447a0e0b24642edd9496dbadc4ade104f20b0fcf",
+        "configDigest": "sha256:8ad3c50fd05e3909fefc2f53fede78f7b82a807f50869bc6aac1c9fabdec109b",
+        "indexDigest": "sha256:5a78bf1fa11dbc61bf8f8f7988c92335900989708c0b80b4111aa58a03ee9ebc",
+        "buildDigest": "sha256:2158be4f8a94d073fe8276f449a5af82e42f0702329f1f523eac4fc30ca076ff",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17",
+          "sha256:1abafee971b93c1ae05f03c35c6fb6e3376e75e6f16b590092a822b61ebf10b6",
+          "sha256:c7dfd64eeb02740cc41e9f32ad7f75781882d4c167b77427aa9615d1419c4515",
+          "sha256:e011f124249bf1c4be27b3311c3b40cb90dd7737381af1c62b508020790b7bd5",
+          "sha256:a746bd1dc828f61bf43b775dcfecb9ded8a3d3b41789915fe135fa6b9fa85965",
+          "sha256:b9c6ee6a30f8811636d7273be348906cf0e4e9725378dd54b7d4a3725538cad4",
+          "sha256:69d81d5522572d5b7abcc8f594ecbc4cf9bea72402675a419e8d7b516e4c3f14",
+          "sha256:da90db506dd5f2d604467c4dc38442534f74c9e76c1982df0c262e144bad7bc9",
+          "sha256:6c9a544d84c4b2c93a2dd6e8a5994c15ef6ee9c5474dd48e3f3edcebc15350fc",
+          "sha256:7dd1905507da14a8812b64fdb269759859fe831c8a300a78b902e3454f91d768",
+          "sha256:5501128006ccec783c73f5909d8cc1e4cc492254be896b0448564d48a72cb4ba",
+          "sha256:e026d06bacefb106af1b36cd2becf504d1be92fcda565283b46cf1a1c30d57b4"
+        ],
+        "compressedLayerBytes": 28201910
+      },
+      "gate": "PASS_RAW_SCAN",
+      "rawScannerExitCode": 0,
+      "payloadVerifierExitCode": null,
+      "applicabilityExitCode": null,
+      "rawGate": "PASS",
+      "rawSeverityCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "scannerExecutableSha256": "6a972c69606c7b3ea4c6bdcc6fc9332ea9ad38381624310c1e85cc77345909f3",
+      "scannerPin": {
+        "name": "Trivy",
+        "version": "0.76.2",
+        "upstreamCommit": "3f6334d223b52188324af3b9923b4249cd206652",
+        "release": "https://github.com/aquasecurity/trivy/releases/tag/v0.76.2",
+        "publishedAt": "2026-11-05T12:50:25Z",
+        "verifiedAt": "2026-11-16",
+        "archiveUrl": "https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_Linux-64bit.tar.gz",
+        "archiveSha256": "bc0fc726e017b8927a62b2d3531d7a84ee01769daf5c99ed866dced54089fdbf",
+        "checksumsUrl": "https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_checksums.txt",
+        "checksumsSha256": "802e4ac1418ed967cd3c4b901f4f71ca00b7363ede67778665a22d9f13f58c83",
+        "databaseRepository": "ghcr.io/aquasecurity/trivy-db:2",
+        "javaDatabaseRepository": "ghcr.io/aquasecurity/trivy-java-db:1",
+        "verification": "Official immutable release API asset digests, downloaded checksum-file digest, matching archive entry, and downloaded archive digest were independently compared. This is checksum integrity verification, not a Sigstore attestation verification."
+      },
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-11-17T01:11:02.624122856Z",
+        "UpdatedAt": "2026-11-16T01:11:02.624123452Z",
+        "DownloadedAt": "2026-11-16T04:38:22.18781907Z"
+      },
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "javaDatabase": {
+        "status": "NOT_DOWNLOADED",
+        "interpretation": "Scanner did not request the Java index; no Java archive coverage is claimed."
+      },
+      "javaDatabaseSha256": null,
+      "libraryCoverage": {
+        "requiredInstalledNpmPackage": null,
+        "goJudgeWithStdlibRequired": false,
+        "status": "VERIFIED"
+      },
+      "scanSourceSha256": {
+        "scannerScript": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72",
+        "scannerPin": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c"
+      },
+      "wrapperSourceSha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b",
+      "files": {
+        "database-download.log": {
+          "bytes": 2625,
+          "sha256": "876dc847801ede39c4c6a1709bbdf1f75f480895bad43a5c2a466e22b6ec1bf8"
+        },
+        "gate.json": {
+          "bytes": 3336,
+          "sha256": "5dc114d5d93ede69e3ff65d56199d8971e597c49ff064d28059f7fc64da6d819"
+        },
+        "manifest.json": {
+          "bytes": 5514,
+          "sha256": "64f49569bd268a46e56b7fd3e14514dc7f17d42fab39f1f0241228ec5709eb11"
+        },
+        "scan.log": {
+          "bytes": 379,
+          "sha256": "b3a77dc5b52f7ebcf71744baa552f6527b62f9fd5a8e8cbbd8ff713760da7370"
+        },
+        "scanner-download.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scanner-version-after.json": {
+          "bytes": 191,
+          "sha256": "e2fbe8631baa38d1dcc49e0ac65133b75b4d996e0dff47fd736157f9f6280d47"
+        },
+        "scanner-version.json": {
+          "bytes": 191,
+          "sha256": "e2fbe8631baa38d1dcc49e0ac65133b75b4d996e0dff47fd736157f9f6280d47"
+        },
+        "trivy.json": {
+          "bytes": 190655,
+          "sha256": "5748dc9e8381e23d718c0e936dc3e54ace78c232d5f3aadf32684e6ee65ca375"
+        }
+      }
+    },
+    {
+      "component": "judge",
+      "jobId": 133094309774,
+      "jobConclusion": "success",
+      "buildAndGateSteps": [
+        {
+          "name": "Build Judge/Dockerfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Scan image and enforce the explicit evidence gate",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        }
+      ],
+      "artifact": {
+        "id": 14198550238,
+        "name": "image-audit-judge-71370b28d8a30d3ac79cf18de5facd291b6447d2-1",
+        "size_in_bytes": 14323,
+        "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14198550238",
+        "archive_download_url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14198550238/zip",
+        "expired": false,
+        "created_at": "2026-11-16T04:38:17Z",
+        "expires_at": "2026-12-16T04:38:16Z",
+        "updated_at": "2026-11-16T04:38:17Z",
+        "digest": "sha256:478e7c1c6e1da96420f6e1e03c0fe107f9fcc8806112311b7e08aa7d31660af2",
+        "workflow_run": {
+          "id": 43805214804,
+          "repository_id": 1379559648,
+          "head_repository_id": 1379559648,
+          "head_branch": "overhaul2/image-security",
+          "head_sha": "0e70a2fe6d725362bcb248836c3697d310e16742"
+        }
+      },
+      "archiveSha256": "478e7c1c6e1da96420f6e1e03c0fe107f9fcc8806112311b7e08aa7d31660af2",
+      "sourceCommit": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+      "image": {
+        "manifestDigest": "sha256:4a52a7d8bcdcceace0512252c69b8bc0c04bbafd5aa4788abeb5d9c64b7c2048",
+        "configDigest": "sha256:745b04bb7f889787f906cff46b6d276696d7189e54a1d3d82b316e2d0128b91e",
+        "indexDigest": "sha256:d212fa17051973947625c164d11fb8545195034ec4b6a061753ad6daa782c3be",
+        "buildDigest": "sha256:2f5aa2303df4082303288eb64cfb23a6fc46a802db23d00243a5def2400d4bc9",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:881fc932939efef04ca120ad44bbd2c0917851eb247aa4995428afb1e80ede17",
+          "sha256:b72829bc75b7701104d057fde78fe0aef6dc0c3eaf2423e7249e8a14c37ead57",
+          "sha256:89a151fddb377af33d0dda6a24f40061bbde4b159f82c349fe01208baba8a84f",
+          "sha256:60ef5f57e09d3f24d91cfd5547a102a028a7bd629f03e79409f53a202cf9df54",
+          "sha256:aae7c25cc34ab5491c6c47d3d7467cb3a99208a2094f7be7e419e57a1cfd7496",
+          "sha256:06cab710e84ddbfaad71563beded7f63f02e94454b4710007aa4d3ca77487c99",
+          "sha256:5439edc5bcb54606791f26c88ea97e20b64788566349a010a6f89f85d89fdbcd",
+          "sha256:fb54163aa8cec92661e9e610a0bd68cce03e62110841961821eebbc8aa3ec532"
+        ],
+        "compressedLayerBytes": 65795679
+      },
+      "gate": "PASS_RAW_SCAN",
+      "rawScannerExitCode": 0,
+      "payloadVerifierExitCode": null,
+      "applicabilityExitCode": null,
+      "rawGate": "PASS",
+      "rawSeverityCounts": {
+        "UNKNOWN": 0,
+        "LOW": 0,
+        "MEDIUM": 0,
+        "HIGH": 0,
+        "CRITICAL": 0
+      },
+      "scannerExecutableSha256": "6a972c69606c7b3ea4c6bdcc6fc9332ea9ad38381624310c1e85cc77345909f3",
+      "scannerPin": {
+        "name": "Trivy",
+        "version": "0.76.2",
+        "upstreamCommit": "3f6334d223b52188324af3b9923b4249cd206652",
+        "release": "https://github.com/aquasecurity/trivy/releases/tag/v0.76.2",
+        "publishedAt": "2026-11-05T12:50:25Z",
+        "verifiedAt": "2026-11-16",
+        "archiveUrl": "https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_Linux-64bit.tar.gz",
+        "archiveSha256": "bc0fc726e017b8927a62b2d3531d7a84ee01769daf5c99ed866dced54089fdbf",
+        "checksumsUrl": "https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_checksums.txt",
+        "checksumsSha256": "802e4ac1418ed967cd3c4b901f4f71ca00b7363ede67778665a22d9f13f58c83",
+        "databaseRepository": "ghcr.io/aquasecurity/trivy-db:2",
+        "javaDatabaseRepository": "ghcr.io/aquasecurity/trivy-java-db:1",
+        "verification": "Official immutable release API asset digests, downloaded checksum-file digest, matching archive entry, and downloaded archive digest were independently compared. This is checksum integrity verification, not a Sigstore attestation verification."
+      },
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-11-17T01:11:02.624122856Z",
+        "UpdatedAt": "2026-11-16T01:11:02.624123452Z",
+        "DownloadedAt": "2026-11-16T04:38:12.662493229Z"
+      },
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "javaDatabase": {
+        "status": "NOT_DOWNLOADED",
+        "interpretation": "Scanner did not request the Java index; no Java archive coverage is claimed."
+      },
+      "javaDatabaseSha256": null,
+      "libraryCoverage": {
+        "requiredInstalledNpmPackage": "bullmq",
+        "goJudgeWithStdlibRequired": false,
+        "status": "VERIFIED"
+      },
+      "scanSourceSha256": {
+        "scannerScript": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72",
+        "scannerPin": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c"
+      },
+      "wrapperSourceSha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b",
+      "files": {
+        "database-download.log": {
+          "bytes": 2125,
+          "sha256": "06e36918c9e6d23a863745ab29fe6e61c1f395f990f5963fb69565d9b7cab259"
+        },
+        "gate.json": {
+          "bytes": 3153,
+          "sha256": "dd57477cd100b8487309cf84b7768a8d3223f2fb1a37dac3c6cdcdcfba419f33"
+        },
+        "manifest.json": {
+          "bytes": 5335,
+          "sha256": "ed6ebed51e15b263dd63575ab03cfa2155c20451991ed683ec350edeecbd57ab"
+        },
+        "scan.log": {
+          "bytes": 445,
+          "sha256": "039fa0fb716badfe336a2d863bdc5c81df51b2bab3a45a848cc639473e5d64b0"
+        },
+        "scanner-download.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scanner-version-after.json": {
+          "bytes": 192,
+          "sha256": "78015d423166cc5bf4886a2cbbccc3487229d551f45e490c464a75a243d8c904"
+        },
+        "scanner-version.json": {
+          "bytes": 192,
+          "sha256": "78015d423166cc5bf4886a2cbbccc3487229d551f45e490c464a75a243d8c904"
+        },
+        "trivy.json": {
+          "bytes": 67088,
+          "sha256": "7bea393f64e5e39fb1e950c48f41c15a67333206a66545fb75d8e3e1680507fd"
+        }
+      }
+    },
+    {
+      "component": "runtime",
+      "jobId": 133094309702,
+      "jobConclusion": "success",
+      "buildAndGateSteps": [
+        {
+          "name": "Build Judge/runtime/Dockerfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Scan image and enforce the explicit evidence gate",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        }
+      ],
+      "artifact": {
+        "id": 14197584045,
+        "name": "image-audit-runtime-71370b28d8a30d3ac79cf18de5facd291b6447d2-1",
+        "size_in_bytes": 1089724,
+        "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14197584045",
+        "archive_download_url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14197584045/zip",
+        "expired": false,
+        "created_at": "2026-11-16T04:40:30Z",
+        "expires_at": "2026-12-16T04:40:29Z",
+        "updated_at": "2026-11-16T04:40:30Z",
+        "digest": "sha256:32e8275ee86fd50823275a5b23dc842ff4c3b75c3471b47fe15895a0ef3bd2c9",
+        "workflow_run": {
+          "id": 43805214804,
+          "repository_id": 1379559648,
+          "head_repository_id": 1379559648,
+          "head_branch": "overhaul2/image-security",
+          "head_sha": "0e70a2fe6d725362bcb248836c3697d310e16742"
+        }
+      },
+      "archiveSha256": "32e8275ee86fd50823275a5b23dc842ff4c3b75c3471b47fe15895a0ef3bd2c9",
+      "sourceCommit": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+      "image": {
+        "manifestDigest": "sha256:fcaa1df6ad35b5e493364e0c2b946b62f235f6fee66b5715fce113c83f182dd6",
+        "configDigest": "sha256:dec26b54a05b8fcc8851d71cbaf56a43b7bc2ef6e23a97290deffc95694cf740",
+        "indexDigest": "sha256:27066e4f390b8ec09265b0a7ca781f3a7ff295b8208b3e83fbb057e5eeb9e507",
+        "buildDigest": "sha256:0bbc0ece1a6a1b049f19d0bbbfb2a26b56d9db4d1447e3faf4d403e94b52f5f2",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+          "sha256:feefb83fb02dd9f7a789cd58ab40233d28932e57d184b37ad8b02b87e0043686",
+          "sha256:b62e09af149b07fc414e810a84918a8392bf1a93f4fa614d0df5d38e02a25e46",
+          "sha256:892d894e16ac8ab74cf1bf73bdbfc75dddf831708a8f23f3551107b2a96a4e71",
+          "sha256:3d7139d61ae863cdb50996b01d8bba0e28e591be42aff4ba4ffabea7ecb06d39",
+          "sha256:92391a9c20febb7d5cab2d124be7e14374f64486f7230d825561d05640251834",
+          "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+          "sha256:e0d532e8d770703de6a7bb18d152dbefc6c33f94ac8bd511f1434c95f4278d88",
+          "sha256:ee45477f739e5bb445129c5d8be837a2e9b6443650aac59c0372698a52dd2e35",
+          "sha256:95539c1204cbe7647dbfd7e650cba43bcb9860d4463cd30651ff383acc2b53be",
+          "sha256:1a12980d9b43f93e855fd0e3ff65aaeb461d9ddb4666ea7e8c572c611b9915be",
+          "sha256:3f1f8f702dc222c213b4a6b19831914eb6a006c5e4e16a039a4bd23e730dbbcb",
+          "sha256:bb01b48f9887bc95728a7451f077bdae1748574cd46576e65842b8a775d551ef",
+          "sha256:2768373a677a70647a6786e37096396a3697d6c12f5aba94c450f6aaf8a0adb7"
+        ],
+        "compressedLayerBytes": 574140597
+      },
+      "gate": "PASS_WITH_REVIEWED_COMPONENT_FINDINGS",
+      "rawScannerExitCode": 2,
+      "payloadVerifierExitCode": 0,
+      "applicabilityExitCode": 0,
+      "rawGate": "BLOCKED_FINDINGS",
+      "rawSeverityCounts": {
+        "UNKNOWN": 1,
+        "LOW": 363,
+        "MEDIUM": 561,
+        "HIGH": 177,
+        "CRITICAL": 5
+      },
+      "scannerExecutableSha256": "6a972c69606c7b3ea4c6bdcc6fc9332ea9ad38381624310c1e85cc77345909f3",
+      "scannerPin": {
+        "name": "Trivy",
+        "version": "0.76.2",
+        "upstreamCommit": "3f6334d223b52188324af3b9923b4249cd206652",
+        "release": "https://github.com/aquasecurity/trivy/releases/tag/v0.76.2",
+        "publishedAt": "2026-11-05T12:50:25Z",
+        "verifiedAt": "2026-11-16",
+        "archiveUrl": "https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_Linux-64bit.tar.gz",
+        "archiveSha256": "bc0fc726e017b8927a62b2d3531d7a84ee01769daf5c99ed866dced54089fdbf",
+        "checksumsUrl": "https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_checksums.txt",
+        "checksumsSha256": "802e4ac1418ed967cd3c4b901f4f71ca00b7363ede67778665a22d9f13f58c83",
+        "databaseRepository": "ghcr.io/aquasecurity/trivy-db:2",
+        "javaDatabaseRepository": "ghcr.io/aquasecurity/trivy-java-db:1",
+        "verification": "Official immutable release API asset digests, downloaded checksum-file digest, matching archive entry, and downloaded archive digest were independently compared. This is checksum integrity verification, not a Sigstore attestation verification."
+      },
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-11-17T01:11:02.624122856Z",
+        "UpdatedAt": "2026-11-16T01:11:02.624123452Z",
+        "DownloadedAt": "2026-11-16T04:39:33.88608822Z"
+      },
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "javaDatabase": {
+        "Version": 1,
+        "NextUpdate": "2026-11-19T00:57:00.601023403Z",
+        "UpdatedAt": "2026-11-16T00:57:00.601024044Z",
+        "DownloadedAt": "2026-11-16T04:40:16.442425385Z"
+      },
+      "javaDatabaseSha256": "daccf4e446cddb30d061d57f131a1acda3728935e95f79e94d462d38b95b24f4",
+      "libraryCoverage": {
+        "requiredInstalledNpmPackage": "esbuild",
+        "goJudgeWithStdlibRequired": true,
+        "status": "VERIFIED"
+      },
+      "scanSourceSha256": {
+        "scannerScript": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72",
+        "scannerPin": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c"
+      },
+      "wrapperSourceSha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b",
+      "files": {
+        "applicability-evaluation.json": {
+          "bytes": 234462,
+          "sha256": "70a2ff9aec9ece79a389073b2c49083144c90cd907d9677a51e2478cacf2a973"
+        },
+        "database-download.log": {
+          "bytes": 2125,
+          "sha256": "68f56dc3dd32983bfdde5b4f44e673105fcc4f5501cf3e52bac6ca03d56b29c1"
+        },
+        "gate.json": {
+          "bytes": 81913,
+          "sha256": "55a671e9b5990b8331c4b2f6f1df2bba672b899efbb39c7fd4992e06dfaac9ac"
+        },
+        "manifest.json": {
+          "bytes": 83914,
+          "sha256": "c49ad1a6cd66e2c9b707ea368188a23945a896784482ab7d12ee8240e960c3e6"
+        },
+        "payload-verification.json": {
+          "bytes": 436156,
+          "sha256": "49a4c9c368bb0ce67295c305ccee81e68845b2cfb20e07e149ce314abeae0e1b"
+        },
+        "scan.log": {
+          "bytes": 18419,
+          "sha256": "3ab672df15595e670aae4f7be23127ddc992cf06e294b00910821abf80b6854a"
+        },
+        "scanner-download.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scanner-version-after.json": {
+          "bytes": 353,
+          "sha256": "0615d343ba23c2bb26ed12e3093ff61899adcac726295e0b68eb071122e55768"
+        },
+        "scanner-version.json": {
+          "bytes": 191,
+          "sha256": "8ffd0c48d5daa1bd1586c81d9d3a62af09224994251b2bb4b510d925482fbc7d"
+        },
+        "trivy.json": {
+          "bytes": 6639819,
+          "sha256": "3402fb8c6690e6a5e8714aba4e26462129c706e04704387dcea43d7d8fa5e771"
+        }
+      },
+      "applicability": {
+        "reviewed": 182,
+        "proposed": 0,
+        "remainingBlockingFindings": 0,
+        "unresolvedEvaluations": [],
+        "policySha256": "77fcae5ce3d800b1b6289de7a7e84a2ee6364867ec13b321346520075ddd3b73",
+        "policyContentSha256": "ebc01bdbbd31f6adf2e0761bdb7c278b92c72ebeca1a175523e4f2a0b74083aa",
+        "policyExpiresAt": "2026-11-30T00:00:00Z",
+        "policyReview": {
+          "state": "REVIEWED",
+          "reviewedAt": "2026-11-16T04:25:01.490449+00:00",
+          "contentSha256": "ebc01bdbbd31f6adf2e0761bdb7c278b92c72ebeca1a175523e4f2a0b74083aa",
+          "reviews": [
+            {
+              "role": "independent-reviewer",
+              "reviewer": "product_engineering",
+              "reviewedCommit": "d5c3bd78a0fcb5f2fad02fec2679c6aa36345325"
+            },
+            {
+              "role": "coordinator",
+              "reviewer": "root",
+              "reviewedCommit": "d5c3bd78a0fcb5f2fad02fec2679c6aa36345325"
+            }
+          ]
+        },
+        "evaluatorSourceSha256": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f",
+        "hostKernelReadiness": "UNVERIFIED"
+      },
+      "actualPayload": {
+        "state": "MATCH",
+        "expectedManifest": {
+          "sha256": "010441a3487f836ca8d56b32d3264cd286c2d11b569f44b54d2ba3e949911172",
+          "package": {
+            "name": "linux-libc-dev",
+            "version": "6.8.0-149.149",
+            "architecture": "amd64",
+            "sourceField": "linux"
+          },
+          "archiveSha256": "e4b7b9c5023ba727908868661e1113d28ed9b68e47aed00e314723dad4b2b31d",
+          "fileCount": 990
+        },
+        "matchedFiles": 990,
+        "missingFiles": 0,
+        "changedFiles": 0,
+        "nonRegularFiles": 0,
+        "unexpectedOwnedFiles": [],
+        "missingOwnedFiles": [],
+        "packageControl": {
+          "state": "MATCH",
+          "observed": {
+            "name": "linux-libc-dev",
+            "version": "6.8.0-149.149",
+            "architecture": "amd64",
+            "sourceField": "linux",
+            "status": "install ok installed"
+          },
+          "statusPath": "/var/lib/dpkg/status",
+          "statusSha256": "c20931d9239a4708f5e9964582a26acc64d0350af64385f057ee241228863c47",
+          "listPath": "/var/lib/dpkg/info/linux-libc-dev:amd64.list",
+          "listSha256": "32d9e172ef54b79528d0e5e02278c9e37e8d3c9e1a0ed87056a9f0dabdd72a5b",
+          "ownedRegularFileCount": 990,
+          "ownedDirectoryCount": 53,
+          "ownedFilesSha256": "3ea86e4b614d360f652d132a75518a110ea340a6ed10699ccdfa3c610f369a93"
+        },
+        "verifierSourceSha256": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0",
+        "sourceSha256": {
+          "scripts/verify_image_payload.py": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0",
+          "scripts/image_audit.py": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72"
+        },
+        "observedAt": "2026-11-16T04:40:28.752577+00:00",
+        "execution": {
+          "containersStarted": false,
+          "filesystemExtraction": false,
+          "elapsedSeconds": 9.008268476000012,
+          "uncompressedLayerBytes": 1529720832,
+          "archiveEntries": 25481
+        }
+      }
+    }
+  ],
+  "actualRuntimeRegressionEvidence": [
+    "2026-11-16T04:38:48.1114752Z Ran 15 tests in 0.153s",
+    "2026-11-16T04:38:57.2444895Z Ran 15 tests in 9.031s",
+    "2026-11-16T04:38:57.7713930Z Ran 27 tests in 0.429s",
+    "2026-11-16T04:39:27.7286266Z Ran 31 tests in 29.883s"
+  ],
+  "runtimeJobLogSha256": "757e2746a8205ba13d9c8908864c6608d960eaf8d905b4b726ff4ebb78747482",
+  "sourceFilesSha256": {
+    "scripts/image_gate.py": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b",
+    "scripts/image_audit.py": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72",
+    "scripts/image-audit-tool.json": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c",
+    "scripts/image_applicability.py": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f",
+    "scripts/image-applicability-policy.json": "77fcae5ce3d800b1b6289de7a7e84a2ee6364867ec13b321346520075ddd3b73",
+    "scripts/verify_image_payload.py": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0"
+  },
+  "policyEvidenceBindings": {
+    "cnaInventory": {
+      "path": "docs/overhaul/evidence/phase2-kernel-header-applicability.json",
+      "sha256": "6e9c99fc4fa7b4d6b91cb88b0c5970dce12528b3d8193e1bd496cffd3a5f7050"
+    },
+    "manualReview": {
+      "path": "docs/overhaul/evidence/phase2-kernel-header-review.json",
+      "sha256": "989a6d39b698dda950072c852bdf9b6f0675cbcbf5b72aca5c44619062020647"
+    },
+    "packageFiles": {
+      "path": "docs/overhaul/evidence/linux-libc-dev-6.8.0-149.149-amd64-files.json",
+      "sha256": "010441a3487f836ca8d56b32d3264cd286c2d11b569f44b54d2ba3e949911172"
+    },
+    "baselineArtifact": {
+      "path": "docs/overhaul/measurements/phase2-image-remediation/before-runtime.zip",
+      "sha256": "eb0737414fb6c45c6ebc866ed3a2f4892c372dba9934078299bf158ae06b7c51"
+    },
+    "scannerIdentity": {
+      "path": "docs/overhaul/evidence/phase2-trivy-fingerprint-binding.json",
+      "sha256": "98472239faff13ffe141181af911cf0841931df59028b985b5cf7466ec939eed"
+    }
+  },
+  "interpretation": "All four actual image builds/gates passed on this exact source tree. Runtime raw scanner exit2 and177HIGH/5CRITICAL remain unchanged;182 exact component code-not-present decisions are separate from patch status. UNKNOWN1/LOW363/MEDIUM561 remain reported under original policy. Host kernel remains UNVERIFIED. This checks retained actual CI artifacts; no local OCI build or payload reexecution is claimed. Complete non-image CI status is tracked separately by the coordinator."
+}

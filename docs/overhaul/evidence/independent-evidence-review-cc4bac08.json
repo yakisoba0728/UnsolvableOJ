@@ -1,0 +1,3246 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/product_engineering",
+  "observedAt": "2026-11-16T03:54:02.478385+00:00",
+  "candidateCommit": "cc4bac08c107a4a230317e8cb283f4857142daac",
+  "candidateWorktree": "/workspace/scratch/231e81830e94/image-applicability",
+  "scope": "Independent static review of exact-component applicability evidence; no root edits, application execution, kernel tests or gate changes",
+  "decision": "APPROVED_STATIC_EVIDENCE_PROPOSAL_ONLY",
+  "gateDecision": "BLOCKED_PENDING_ACTUAL_OCI_BYTE_BINDING_AND_EVALUATOR_REVIEW",
+  "reviewedEvidenceSha256": {
+    "phase2-kernel-header-applicability.json": "6e9c99fc4fa7b4d6b91cb88b0c5970dce12528b3d8193e1bd496cffd3a5f7050",
+    "phase2-kernel-header-review.json": "989a6d39b698dda950072c852bdf9b6f0675cbcbf5b72aca5c44619062020647",
+    "linux-libc-dev-6.8.0-149.149-amd64-files.json": "010441a3487f836ca8d56b32d3264cd286c2d11b569f44b54d2ba3e949911172"
+  },
+  "originalScan": {
+    "rawReportSha256": "406d2627e4b48c8d248552e1f9d1d7daf8d8dd8c09d9cd33125fd1f9167a8926",
+    "imageId": "sha256:00b0bf5c0eb5e5eab8bee4a458985d1f8b81ec2c298156eb0c1843ee14e8bf85",
+    "provenance": {
+      "manifestSha256": "2a3a0d09870cc70eb8a651fe18e45a4756d34072b87b63d1d5056855df3f8858",
+      "sourceCommit": "c167a1e17e7b915fc313c52357e7505f8cf56b6f",
+      "ci": {
+        "GITHUB_SHA": "c167a1e17e7b915fc313c52357e7505f8cf56b6f",
+        "GITHUB_RUN_ID": "43796045174",
+        "GITHUB_RUN_ATTEMPT": "1"
+      },
+      "image": {
+        "manifestDigest": "sha256:5c441685db9ee2b1af03cbf01d5c1aca2c0729fe522f42fb04934823c91bb303",
+        "configDigest": "sha256:00b0bf5c0eb5e5eab8bee4a458985d1f8b81ec2c298156eb0c1843ee14e8bf85",
+        "indexDigest": "sha256:be560dc8d16df9b2cede89762fdef3dbbda27643e2cc5760c7c0be777a95acf6",
+        "buildDigest": "sha256:a6c9b7cf6c769c5a41e63fc40f612e223bc710380731431e9c5b1c09c3f98f24",
+        "platform": "linux/amd64",
+        "layerDigests": [
+          "sha256:7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+          "sha256:9af353f9a1d274b5c5913927a09db410af6281580de1040fb51eb1fa443a3442",
+          "sha256:e323104e3710920655c3de21d47f6f343742dcf25a1a33dec55466719fd2b8af",
+          "sha256:6940956208c28fcaea7957623bc1d4564d4dcc0e77d273c0ff676c615ec11fd6",
+          "sha256:b146a1ec317d1e4501099a930293489c7d9a4308a506ba37f8ce09ca56dc17aa",
+          "sha256:f0de8c349487c1dd979c643606726a144b3946ed6410466198a0cb5664b76161",
+          "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+          "sha256:19e8ebdf26b4d6f0c8476eb50a9774115abb2877c6d2549129a9f3d88b319943",
+          "sha256:1f95828c7b08addfe40e75c6ce357674bc59751338311b442511b1a42b8f8404",
+          "sha256:0829222e44f47fd58aa524848a30f65323aa100311f927e771e65fb34a99872c",
+          "sha256:d059b20f4bcf7e8363620354deadf52d3c5c2e278b47e8a2b0c474a05a9254c9",
+          "sha256:f81ad4194698bd12e9b2422f07981da72dee0c0f7ca65d99bc4cb0d829f42da3"
+        ],
+        "compressedLayerBytes": 563678557
+      },
+      "scannerVersion": "0.76.2",
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-11-17T01:11:02.624122856Z",
+        "UpdatedAt": "2026-11-16T01:11:02.624123452Z",
+        "DownloadedAt": "2026-11-16T03:06:30.605189437Z"
+      }
+    }
+  },
+  "sourceRead": {
+    "immutableCnaCommit": "050afa4f401f53a4001e1bc7268f74e952418f8e",
+    "independentlyVerifiedRecords": 182,
+    "unknown": 0,
+    "firstBoundedAttempt": {
+      "verified": 108,
+      "remaining": 74,
+      "elapsedSeconds": 166.452
+    },
+    "boundedResume": {
+      "scope": "resume only prior unknowns",
+      "requested": 74,
+      "elapsedSeconds": 114.412,
+      "verified": 74,
+      "unknown": 0
+    },
+    "fiveCriticalCompletePatchesRead": true,
+    "uapiOverlapCompleteUpstreamAndStablePatchesRead": true,
+    "otherHighEvidence": "176 individual explicit CNA affected-file sets; not 176 complete patch or runtime exploitability reviews",
+    "patchSources": [
+      {
+        "name": "CVE-2026-63825",
+        "url": "https://github.com/gregkh/linux/commit/76cb9fde95eba4bd8f06d142a8b8810bf2d09de4.patch",
+        "verified": true,
+        "sha256": "188470ea333d4725695a32bb8e5d8e110281a47a10edf7564058a579c9ff5598",
+        "bytes": 5441
+      },
+      {
+        "name": "CVE-2026-64523",
+        "url": "https://github.com/gregkh/linux/commit/22e371a93563c30ebebc576db049785e0d7fc617.patch",
+        "verified": true,
+        "sha256": "3a55d580664abb30befc9faf719ac8476002f044470bf9dfa75ffcf95c7bc84d",
+        "bytes": 6694
+      },
+      {
+        "name": "CVE-2026-68426",
+        "url": "https://github.com/gregkh/linux/commit/4e695742396be18d5291c310a3d7c450959d647a.patch",
+        "verified": true,
+        "sha256": "c585e564d5343266a8e844b605b7070b23ec9c1844cdb7ca88f2d1db6e8eda82",
+        "bytes": 1993
+      },
+      {
+        "name": "CVE-2026-90162",
+        "url": "https://github.com/gregkh/linux/commit/f1371a140722c1d6868f9acf69d601de7d4142bf.patch",
+        "verified": true,
+        "sha256": "64c3409c45f57a90fcdfd128c4011fe861f0f236c9b913bb4f86c2956cc9907f",
+        "bytes": 3593
+      },
+      {
+        "name": "CVE-2026-93221",
+        "url": "https://github.com/gregkh/linux/commit/94b450977c60261903c945419d2df4a464de60c4.patch",
+        "verified": true,
+        "sha256": "3c84ed9d3be501e1f9fbe1c3a991cc014cc2696ed6b9619b14659ee8ebe03ac1",
+        "bytes": 13658
+      },
+      {
+        "name": "CVE-2026-80668-upstream",
+        "url": "https://github.com/torvalds/linux/commit/b8b09dc2bf35a00d4e0556b5d6308c7b917ebda2.patch",
+        "verified": true,
+        "sha256": "6bdd50613ee3f010f1e4f8da405d4666cfda26d011ee142a8bcce977fc3ce3a3",
+        "bytes": 22478
+      },
+      {
+        "name": "headers-install",
+        "url": "https://raw.githubusercontent.com/torvalds/linux/b8b09dc2bf35a00d4e0556b5d6308c7b917ebda2/scripts/headers_install.sh",
+        "verified": true,
+        "sha256": "868a1c45cff9befd5b5d61b4c9b0c4a97e23c285b921cfa10c14dc37a8bc643b",
+        "bytes": 1844
+      },
+      {
+        "name": "CVE-2026-80668-stable",
+        "url": "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/patch/?id=61ca26e1a45965590f7e477c4d6f711162642e1c",
+        "readSource": "shared cached public response, complete patch independently read",
+        "sha256": "e11a0cedf656eeb584dc768b5592a340f8e70e06417de819fbfca6b6c2f032d6",
+        "independentHttpsRefetch": false
+      }
+    ]
+  },
+  "officialPackageRead": {
+    "officialUrl": "https://archive.ubuntu.com/ubuntu/pool/main/l/linux/linux-libc-dev_6.8.0-149.149_amd64.deb",
+    "archiveSha256": "e4b7b9c5023ba727908868661e1113d28ed9b68e47aed00e314723dad4b2b31d",
+    "independentHttpsRead": true,
+    "regularFiles": 990,
+    "directories": 53,
+    "exactFileManifestMatches": true,
+    "header": {
+      "path": "/usr/include/linux/netfilter/nf_conntrack_common.h",
+      "type": "file",
+      "size": 4588,
+      "sha256": "f96c03a170825a42f0a417efe70d77f05dd4265d7855eb05ba8024a58cc938f8"
+    },
+    "control": "Package: linux-libc-dev\nVersion: 6.8.0-149.149\nSource: linux\nArchitecture: amd64\n",
+    "actualOciPayloadVerified": false,
+    "scope": "Official deb bytes read without installation, extraction or maintainer script execution. This is not evidence of actual OCI file identity."
+  },
+  "collectorReview": {
+    "immutableSnapshotFailure": "null commit + UNKNOWN entries; no mutable-main record fetch",
+    "resumeTrustBoundary": "Collector output alone is not trusted gate authorization. Committed evidence byte hashes and independent review must bind all records.",
+    "liveCollectorExecutionPerformed": false
+  },
+  "requiredDecisionContract": [
+    "All original raw findings, severity counts, package inventory, scanner and DB identity remain unchanged and retained.",
+    "Decision applies only to each listed CVE and exact binary/source/version/PURL/arch and official 990-file payload, never all linux or linux-libc-dev CVEs.",
+    "Current OCI manifest/config/layer bytes and scan raw digest/ImageID must be verified. Resolve complete final-layer payload and dpkg status/list metadata; missing, extra, changed or aliased component bytes fail closed.",
+    "Current advisory fingerprint must cover every raw finding field except separately validated current-image layer and UID identities; new IDs, duplicates, changed metadata, missing evidence or invalid schema remain blocking.",
+    "Evidence byte hashes and independent approvals must be committed. Unapproved or expired decisions remain blocking; finite review expiry and clock checks are required.",
+    "The 80668 overlap requires exact source/patch/export proof in addition to header path metadata.",
+    "A matched component-absence classification is not a fixed-package claim or host-kernel security assessment. Host applicability and privileged runtime deployment readiness remain UNKNOWN."
+  ],
+  "remainingProofGaps": [
+    "Actual OCI payload byte verification has not yet completed.",
+    "Upcoming applicability evaluator and payload-verifier implementation require independent source review and meaningful fail-closed tests.",
+    "Exact combined Actions image scans and other required CI gates must complete.",
+    "Repository archive signature verification was not independently performed; official package downloaded over HTTPS.",
+    "Host kernel version/configuration/patch level and exploit reachability were not inspected."
+  ],
+  "primaryContextSources": [
+    "https://www.kernel.org/doc/html/latest/kbuild/headers_install.html",
+    "https://packages.ubuntu.com/noble/linux-libc-dev",
+    "https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/"
+  ],
+  "findings": [
+    {
+      "inputIndex": 0,
+      "id": "CVE-2026-63825",
+      "rawSeverity": "CRITICAL",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "ea301354c755557fc58a4f86818fb71e55823348a49936b70f2e1d7f6aaabc53",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/63xxx/CVE-2026-63825.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "Makefile"
+      ],
+      "sourceEvidenceMethod": "complete fix patch + explicit CNA affected-file metadata",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 1,
+      "id": "CVE-2026-64523",
+      "rawSeverity": "CRITICAL",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "caebf76bb2f303766f0801e6baebb7377d51797e0025a9245ff04891cf819e08",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/64xxx/CVE-2026-64523.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/handshake/handshake.h",
+        "net/handshake/netlink.c",
+        "net/handshake/request.c"
+      ],
+      "sourceEvidenceMethod": "complete fix patch + explicit CNA affected-file metadata",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 2,
+      "id": "CVE-2026-68426",
+      "rawSeverity": "CRITICAL",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "57f5d2c6e6d86218aaae37928e66f08b1afabaef4f002faadfc6d042752ed356",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68426.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/xfrm/xfrm_device.c"
+      ],
+      "sourceEvidenceMethod": "complete fix patch + explicit CNA affected-file metadata",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 3,
+      "id": "CVE-2026-90162",
+      "rawSeverity": "CRITICAL",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "c261977faed1cc08bdedf735f242ff2c83dd7f30fb9a9933156f55d05b54070f",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90162.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/smb2pdu.c"
+      ],
+      "sourceEvidenceMethod": "complete fix patch + explicit CNA affected-file metadata",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 4,
+      "id": "CVE-2026-93221",
+      "rawSeverity": "CRITICAL",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "9fe53b2f8a72711db5ab4e2b33888f0f9ddae943e82bc6cdf87ac3c87d2120e7",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/93xxx/CVE-2026-93221.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/nfsd/netns.h",
+        "fs/nfsd/nfs4proc.c",
+        "fs/nfsd/nfs4recover.c",
+        "fs/nfsd/nfs4state.c",
+        "fs/nfsd/nfsctl.c",
+        "fs/nfsd/nfssvc.c"
+      ],
+      "sourceEvidenceMethod": "complete fix patch + explicit CNA affected-file metadata",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 5,
+      "id": "CVE-2022-50240",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "a9efe408f15503529c18ce9ac53d37b390d441e220c8825c3d146411259c6bda",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2022/50xxx/CVE-2022-50240.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/android/binder_alloc.c",
+        "drivers/android/binder_alloc.h",
+        "drivers/android/binder_alloc_selftest.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 6,
+      "id": "CVE-2024-35948",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "1f2a55edd517bc6f82a67e6ef3804884a6dc9eadf6720eec87a04ce5e95474bd",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2024/35xxx/CVE-2024-35948.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/bcachefs/sb-clean.c",
+        "fs/bcachefs/sb-errors_types.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 7,
+      "id": "CVE-2024-38581",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "7f154cdb80b2257464d4e49d4ecb291cbf6bea207971ecf4845f5b6ebdcc62d1",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2024/38xxx/CVE-2024-38581.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/gpu/drm/amd/amdgpu/amdgpu_mes.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 8,
+      "id": "CVE-2024-40954",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "f5e911c025f4faf8b715ed595e00895c846d3b8c9ec02b4db82d68b7845ca9c6",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2024/40xxx/CVE-2024-40954.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/core/sock.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 9,
+      "id": "CVE-2024-44964",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "946469bc2002df11327eea7858a4886b2d6814c1e76c1a6baf3d121d363ddf15",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2024/44xxx/CVE-2024-44964.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/ethernet/intel/idpf/idpf_lib.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 10,
+      "id": "CVE-2024-46742",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "13893020e471aca2624c9c3391a14affdc3b3ab0ea3ec7c2e6834d8facd4b0a7",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2024/46xxx/CVE-2024-46742.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/oplock.c",
+        "fs/smb/server/smb2pdu.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 11,
+      "id": "CVE-2024-56591",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "943228d709df699298adf0fd19d58794fcee9576273435c1e7798930722b1565",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2024/56xxx/CVE-2024-56591.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/bluetooth/hci_conn.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 12,
+      "id": "CVE-2024-57857",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "6c46eaa287d19c4788d755bf8570ec5871f34ebc4be53e8f331b1b4f7837b050",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2024/57xxx/CVE-2024-57857.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/infiniband/sw/siw/siw.h",
+        "drivers/infiniband/sw/siw/siw_cm.c",
+        "drivers/infiniband/sw/siw/siw_main.c",
+        "drivers/infiniband/sw/siw/siw_verbs.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 13,
+      "id": "CVE-2024-58098",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "20ebf319ae0472179509bab20345fc9cbee9fd637d352105cbbbfa55e54f8786",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2024/58xxx/CVE-2024-58098.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/linux/bpf_verifier.h",
+        "kernel/bpf/verifier.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 14,
+      "id": "CVE-2024-58100",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "43db164b12b1953c9ff418e17ff8da5e58689e7eebc3e1f8ac2526cdc00a915a",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2024/58xxx/CVE-2024-58100.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/linux/bpf.h",
+        "kernel/bpf/verifier.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 15,
+      "id": "CVE-2025-22043",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "e2afafe4fdedcf9bdb0b9b5a825275dab5bd52079a6025b4f9b310eb29457a69",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/22xxx/CVE-2025-22043.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/smb2pdu.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 16,
+      "id": "CVE-2025-37743",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "da9421b5e44903067042c95a2b2e45cb5b4543d1b3c93cfbc23d2371d5476b1e",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/37xxx/CVE-2025-37743.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/wireless/ath/ath12k/dp_mon.c",
+        "drivers/net/wireless/ath/ath12k/hal_rx.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 17,
+      "id": "CVE-2025-37776",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "3ae29c6305cd8620cb16b90e7e4cc3a82c5bf7fd4b5a0bc978d5602e110fb8cc",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/37xxx/CVE-2025-37776.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/oplock.c",
+        "fs/smb/server/oplock.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 18,
+      "id": "CVE-2025-37906",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "f39616a2ab89690a958cb9d9ee408c09bbe0354778e69e67f36847f1a7e3b330",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/37xxx/CVE-2025-37906.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/block/ublk_drv.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 19,
+      "id": "CVE-2025-38717",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "2a5eb1dbbdd2d929209d1f83e97975d3386e823725d8ea72ca6e76b392b398c5",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/38xxx/CVE-2025-38717.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/net/kcm.h",
+        "net/kcm/kcmsock.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 20,
+      "id": "CVE-2025-39933",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "a2747914dc9020331ca9a4883d64c2cb50c74f97fe68eab95b084d48fcf14d44",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/39xxx/CVE-2025-39933.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/client/smbdirect.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 21,
+      "id": "CVE-2025-40025",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "e69fce88be9e7364d7f5d35a67bc633ab9fcafe06d8244f00175a32fcab79c99",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/40xxx/CVE-2025-40025.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/f2fs/f2fs.h",
+        "fs/f2fs/gc.c",
+        "fs/f2fs/node.c",
+        "fs/f2fs/node.h",
+        "fs/f2fs/recovery.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 22,
+      "id": "CVE-2025-40075",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "6e36488686ab4dd053d3d9dec66138ad24ee38f92ae31507c6a601a464108920",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/40xxx/CVE-2025-40075.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/ipv4/tcp_metrics.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 23,
+      "id": "CVE-2025-40170",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "00682aa497a14d0660cb93f44cc55272a18439fb69a5d4a3e04cedabd0583999",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/40xxx/CVE-2025-40170.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/net/ip.h",
+        "include/net/ip6_route.h",
+        "include/net/route.h",
+        "net/core/sock.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 24,
+      "id": "CVE-2025-40190",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "7788f374f4838ddd052b6d684da23ef5f7457b34e084c3aa33dc754560de986a",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/40xxx/CVE-2025-40190.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/ext4/xattr.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 25,
+      "id": "CVE-2025-40274",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "d7a2f187975659d57f8801de474824aa4632ce111dbb77e9f19cfdff51bb0832",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/40xxx/CVE-2025-40274.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "virt/kvm/guest_memfd.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 26,
+      "id": "CVE-2025-40344",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "580aa70c2034a1e32522df200fe52f49c3844bde9b0da8ff86e23988c7cce45e",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/40xxx/CVE-2025-40344.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "sound/soc/intel/avs/pcm.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 27,
+      "id": "CVE-2025-68251",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "cd0212f7e7eb8111e4e619e7f03a621e7c338c5d9ac4b296a74e1ed50308abb9",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/68xxx/CVE-2025-68251.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/erofs/zmap.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 28,
+      "id": "CVE-2025-68304",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "880df8736ee3126a98b2b7bf603f845b9aed003a247bfb0de8e0ce90159195b3",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/68xxx/CVE-2025-68304.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/net/bluetooth/hci_core.h",
+        "net/bluetooth/hci_core.c",
+        "net/bluetooth/iso.c",
+        "net/bluetooth/l2cap_core.c",
+        "net/bluetooth/sco.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 29,
+      "id": "CVE-2025-68360",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "fe7bf3048c7720b16e871173780f8b8d137eb161438efdae6084167b2dfa3461",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/68xxx/CVE-2025-68360.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/wireless/mediatek/mt76/mt76.h",
+        "drivers/net/wireless/mediatek/mt76/mt7996/mmio.c",
+        "drivers/net/wireless/mediatek/mt76/wed.c",
+        "include/linux/soc/mediatek/mtk_wed.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 30,
+      "id": "CVE-2025-68729",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "1a5132dfc1fa824d4c61244a336e76b729c49180614126d0b4d10d97b407bcc6",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/68xxx/CVE-2025-68729.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/wireless/ath/ath12k/dp_rx.c",
+        "drivers/net/wireless/ath/ath12k/hal_rx.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 31,
+      "id": "CVE-2025-68730",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "881f917751a965934f11907e3de31d849be52209b2cc23b46c1ade814144aab3",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/68xxx/CVE-2025-68730.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/accel/ivpu/ivpu_gem.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 32,
+      "id": "CVE-2025-68745",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "422e34cb2dab490ae023798672747c3de014fce60ac3883e0c5a68af8f7dc6bb",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/68xxx/CVE-2025-68745.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/scsi/qla2xxx/qla_os.c",
+        "drivers/scsi/qla2xxx/qla_target.c",
+        "drivers/scsi/qla2xxx/qla_target.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 33,
+      "id": "CVE-2025-71073",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "1f4559279146f05fbd6f5df6fba161459d408aedd268b4df8f4f79c0dfd7ef12",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/71xxx/CVE-2025-71073.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/input/keyboard/lkkbd.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 34,
+      "id": "CVE-2025-71074",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "fedfebd400f25cd10c50364d4ec5b6505f22816c075345eff2f9c36c6676fdfa",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/71xxx/CVE-2025-71074.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/usb/gadget/function/f_fs.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 35,
+      "id": "CVE-2025-71202",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "4dcea577e35a7412f222b410188a87ebf3a6399dde8f5dbc0474271377084442",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/71xxx/CVE-2025-71202.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "arch/x86/Kconfig",
+        "drivers/iommu/iommu-sva.c",
+        "include/linux/iommu.h",
+        "mm/pgtable-generic.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 36,
+      "id": "CVE-2025-71315",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "a8935cf7341c363db4e3cf6e7b49ecf538c9db8a17fb3e30e4c0752f81c62c11",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2025/71xxx/CVE-2025-71315.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/gpu/drm/vkms/vkms_crtc.c",
+        "drivers/gpu/drm/vkms/vkms_drv.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 37,
+      "id": "CVE-2026-100074",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "8504fc8f65ee88b1da81b7779c2cda0f3b58fc3c44217f506f7486c72af26b6b",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/100xxx/CVE-2026-100074.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/btf.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 38,
+      "id": "CVE-2026-23208",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "fc77cbccde5856b41f0b8f177020981e9209bb7079dbb4c1832e7918bb033e5e",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/23xxx/CVE-2026-23208.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "sound/usb/pcm.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 39,
+      "id": "CVE-2026-23239",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "2f68b57b4ae024a442bcd1c64a5f23670f94e694522bbdc683933d50dbd10654",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/23xxx/CVE-2026-23239.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/xfrm/espintcp.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 40,
+      "id": "CVE-2026-23240",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "a97945aae0b1edc39ebaedd80c43730d194c715595f913e8d75c6e4a93b233ee",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/23xxx/CVE-2026-23240.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/tls/tls_sw.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 41,
+      "id": "CVE-2026-23265",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "552fe67dd81ff2415794c845d73d98c9b218c7689f871f6091ee40ba927cfc49",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/23xxx/CVE-2026-23265.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/f2fs/data.c",
+        "fs/f2fs/f2fs.h",
+        "fs/f2fs/node.c",
+        "fs/f2fs/node.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 42,
+      "id": "CVE-2026-23377",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "0f52c086d4e7574e4bd5baab737300e97fbf2d8b7c2454ed491660e919705797",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/23xxx/CVE-2026-23377.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/ethernet/intel/ice/ice_base.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 43,
+      "id": "CVE-2026-23393",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "06e2ce94e5c5a48645325aa6ca93f21ff88939759649ab2f5eb563b2d77cb0d3",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/23xxx/CVE-2026-23393.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/bridge/br_cfm.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 44,
+      "id": "CVE-2026-31410",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "e00c4ac6065ad955e1d1c6c48d79153f03d5372c25732580ad5dfb20e64d436b",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/31xxx/CVE-2026-31410.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/smb2pdu.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 45,
+      "id": "CVE-2026-31536",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "68b637da3bdca9fa511635c186fa8e95ab9d69a155d960acf862344f9655bf96",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/31xxx/CVE-2026-31536.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/transport_rdma.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 46,
+      "id": "CVE-2026-31692",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "111c0e9078ccb915175ca4aa70f9ea7d6d61b02f0a123394af8e82a055211abb",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/31xxx/CVE-2026-31692.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/core/rtnetlink.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 47,
+      "id": "CVE-2026-43009",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "7621626447d3e62e6302e93476ef9f6bf3a43f2d59308564c05439a3395e3703",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/43xxx/CVE-2026-43009.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/verifier.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 48,
+      "id": "CVE-2026-43034",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "3f49ed66bfa9ffd5e2189e902bfc33d5982c22a308fc0f31f89e3c1b83155902",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/43xxx/CVE-2026-43034.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/ethernet/broadcom/bnxt/bnxt.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 49,
+      "id": "CVE-2026-43042",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "68c0598d92762fb05be18df0369181f5d6ae1f9120e126acddd8c6b05f3d837b",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/43xxx/CVE-2026-43042.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/net/netns/mpls.h",
+        "net/mpls/af_mpls.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 50,
+      "id": "CVE-2026-43048",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "d3b1e1839e362eb8592fcbf3a80ff0806273381202989c97c7e4c74d04998f77",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/43xxx/CVE-2026-43048.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/hid/hid-core.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 51,
+      "id": "CVE-2026-43213",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "302ba3a308a7871a9b60d4eec9785197cb31c875f7fe90f4a9821af564a3a448",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/43xxx/CVE-2026-43213.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/wireless/realtek/rtw89/pci.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 52,
+      "id": "CVE-2026-43263",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "644a630fb6cb05815a01f3bba7e099c09a66079e35e496b6ddbd989ab1d143ea",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/43xxx/CVE-2026-43263.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/media/platform/chips-media/wave5/wave5-helper.c",
+        "drivers/media/platform/chips-media/wave5/wave5-helper.h",
+        "drivers/media/platform/chips-media/wave5/wave5-vpu-dec.c",
+        "drivers/media/platform/chips-media/wave5/wave5-vpu-enc.c",
+        "drivers/media/platform/chips-media/wave5/wave5-vpu.c",
+        "drivers/media/platform/chips-media/wave5/wave5-vpuapi.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 53,
+      "id": "CVE-2026-43379",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "7dd4b6087443df37de602f4ab70fd7ed2cf4bb4b2a76d1d48ab9acb3ef21c109",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/43xxx/CVE-2026-43379.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/oplock.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 54,
+      "id": "CVE-2026-43464",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "535d9035bbafa05fdaade54436cc1a6656cafa79ade5514d2aa30679c949221e",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/43xxx/CVE-2026-43464.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/ethernet/mellanox/mlx5/core/en_rx.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 55,
+      "id": "CVE-2026-45940",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "be971cf88c7ed06cdd61b415ae3b98f2961d74ac17fcc15000f7faad33b9ab69",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/45xxx/CVE-2026-45940.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/ethernet/stmicro/stmmac/stmmac_main.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 56,
+      "id": "CVE-2026-46181",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "4544454f33b4fae672cd8a98c13eda577ece70d6fd2b6fb642f01a698272923f",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/46xxx/CVE-2026-46181.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/ethernet/mellanox/mlx4/srq.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 57,
+      "id": "CVE-2026-46330",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "4756fb6a55fbd71861b2148f6e554f3fa84bfb0c77e26f484a8eecf6ce802582",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/46xxx/CVE-2026-46330.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/smc/af_smc.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 58,
+      "id": "CVE-2026-52946",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "b28063dea640ce125e532ab8131c49e0908543371303d7cf7332777c51cd6e72",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/52xxx/CVE-2026-52946.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/fcntl.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 59,
+      "id": "CVE-2026-52991",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "c0186f68c782354046ecee23f7298087c820b4d65f6bc8a1649f8dc005b574c2",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/52xxx/CVE-2026-52991.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/cgroup/cgroup.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 60,
+      "id": "CVE-2026-53024",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "a988c2db44f7c0fd3bc7d148f9b05425288906117c3ea585b4b5ca5b07ae872c",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/53xxx/CVE-2026-53024.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/staging/greybus/raw.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 61,
+      "id": "CVE-2026-53178",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "c41b18532c52f54b1bdc7e51b3a755dcfc84b435cdf715ce5861119a286ea38f",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/53xxx/CVE-2026-53178.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/staging/rtl8723bs/core/rtw_mlme.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 62,
+      "id": "CVE-2026-53281",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "ae51769b9efdaa6bdff61bad316c24cc2495b8334c882023f66271ccd8c8f763",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/53xxx/CVE-2026-53281.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/iommu/intel/iommu.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 63,
+      "id": "CVE-2026-53377",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "6689239bafba8c1feb07c40f7a2cddb01b965630e87190af0b12a766a871a128",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/53xxx/CVE-2026-53377.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/gpu/drm/msm/msm_gpu.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 64,
+      "id": "CVE-2026-53401",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "7fd414027437fb01ce36a86c687b83162093e49a7900a2eb9a462c2e8012c84f",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/53xxx/CVE-2026-53401.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/video/fbdev/omap2/omapfb/omapfb-main.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 65,
+      "id": "CVE-2026-63819",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "cde9005a9f2b0eeca41ebba80a25a3e2a702b69667e46b57a067ced21142aa97",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/63xxx/CVE-2026-63819.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/f2fs/f2fs.h",
+        "fs/f2fs/node.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 66,
+      "id": "CVE-2026-63879",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "d08d45a42780fc4da95bbd38a84015b9ee737fa3de7c90079c4e6a2afc661464",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/63xxx/CVE-2026-63879.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/gpu/drm/amd/amdgpu/amdgpu_hmm.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 67,
+      "id": "CVE-2026-64036",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "2e0f036397e0aaf5d9152a2264926a810f5ca4a38dceb1130fafd9e8f2987d18",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/64xxx/CVE-2026-64036.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "block/blk-cgroup.c",
+        "include/linux/cgroup.h",
+        "kernel/cgroup/rstat.c",
+        "mm/memcontrol.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 68,
+      "id": "CVE-2026-64052",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "7700f7dbfbe70d4cf197044227981bd172c4809c8e360f68f465c8e83eb91e16",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/64xxx/CVE-2026-64052.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "block/bio-integrity.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 69,
+      "id": "CVE-2026-64077",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "47b0396cb8a258cd210250761e786041dc3ce5bf8798615c5725aa382fdf1aad",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/64xxx/CVE-2026-64077.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/bridge/netfilter/ebtable_broute.c",
+        "net/bridge/netfilter/ebtable_filter.c",
+        "net/bridge/netfilter/ebtable_nat.c",
+        "net/bridge/netfilter/ebtables.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 70,
+      "id": "CVE-2026-64078",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "ea72a7e0f2e0bd28a60136a628ece54902da277ace06d5907207b6295f49e54a",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/64xxx/CVE-2026-64078.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/linux/netfilter/x_tables.h",
+        "net/ipv4/netfilter/arp_tables.c",
+        "net/ipv4/netfilter/ip_tables.c",
+        "net/ipv4/netfilter/iptable_nat.c",
+        "net/ipv6/netfilter/ip6_tables.c",
+        "net/ipv6/netfilter/ip6table_nat.c",
+        "net/netfilter/x_tables.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 71,
+      "id": "CVE-2026-68081",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "700866b145e6454a016706a48092cf15ccfb31165073a3c3be21f81ca8b7234b",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68081.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "arch/x86/kvm/vmx/nested.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 72,
+      "id": "CVE-2026-68103",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "1da44bac6aa887df2721b04083977d3f50f5046fa1dc68b9ab97ee2be2d0a0e2",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68103.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/gpu/drm/amd/amdgpu/amdgpu_userq.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 73,
+      "id": "CVE-2026-68152",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "65a6fa025b411a2021d99a38bc1bf6e15ad436e91c3901309962ad574df3349f",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68152.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/amt.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 74,
+      "id": "CVE-2026-68245",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "72011977d065edddfddca34de09a3d6f4acf5da0d7109e4341e3e31757acab0a",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68245.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/gpu/drm/amd/amdgpu/amdgpu_vm.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 75,
+      "id": "CVE-2026-68257",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "ca27337c3e79378e80307a16a556ee5bce3a4869ebab3cfe45297aac2778d550",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68257.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/gpu/drm/amd/amdkfd/kfd_queue.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 76,
+      "id": "CVE-2026-68323",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "9f59c4efdd73b434a117a2de89b6d003c3947057109a97f70faf51fa47234742",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68323.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/tipc/udp_media.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 77,
+      "id": "CVE-2026-68401",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "3f46899d35dfa4a458f254739df767b6e6a383a46ede38e862a960697590ca70",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68401.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/firmware/arm_ffa/driver.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 78,
+      "id": "CVE-2026-68404",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "2b6975523aa86550f641f15d4c3c480ada22ceeb23513bad592af7cf08896a94",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68404.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/net/cfg80211.h",
+        "net/wireless/core.c",
+        "net/wireless/core.h",
+        "net/wireless/nl80211.c",
+        "net/wireless/sme.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 79,
+      "id": "CVE-2026-68409",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "e8c0c18d194b49aa0990b193fe51bef5281753770fae0ecd342e6b1496ca80a9",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68409.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/mac80211/sta_info.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 80,
+      "id": "CVE-2026-68447",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "c4d854d0a9fcda8d1c4e825be3331cac28493b65d7b6ac7e93c87e7cca177c04",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68447.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/gpu/drm/amd/amdkfd/kfd_mqd_manager.h",
+        "drivers/gpu/drm/amd/amdkfd/kfd_mqd_manager_v9.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 81,
+      "id": "CVE-2026-68470",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "598f8fbe361bc5b49d944a5a5740fb2e808a4050944b33d1ad3d9d79dd489096",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68470.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/mac80211/rx.c",
+        "net/mac80211/util.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 82,
+      "id": "CVE-2026-68471",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "27fcf579c7120bafb1c80f60915f2d21f71037c1cbfe93c550d77f2402c50c60",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/68xxx/CVE-2026-68471.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/linux/ieee80211-eht.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 83,
+      "id": "CVE-2026-72162",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "1030a36098edfb9a8f7c48fc9b210289ffd169eeced4e09b21cf3428e8c88ac5",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/72xxx/CVE-2026-72162.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/ocfs2/inode.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 84,
+      "id": "CVE-2026-72198",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "aabbe7c565916a6f6019e7cd84540dc3a84cac75e834a86bf45264a1f68c1cc4",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/72xxx/CVE-2026-72198.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/ntfs/attrib.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 85,
+      "id": "CVE-2026-72288",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "aecd50d27dd9f881a15be8c09b2d57c12a8106ceb4164f4346e1896d122cc4f1",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/72xxx/CVE-2026-72288.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "arch/arm64/kvm/vgic/vgic.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 86,
+      "id": "CVE-2026-72375",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "0e76c793e758b39d5b4d7da529df1ce81a7a5b11828d775b59d5b6d2eebf4b49",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/72xxx/CVE-2026-72375.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/afs/inode.c",
+        "fs/afs/super.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 87,
+      "id": "CVE-2026-72380",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "4e02bc258ca572d149b7be2bafa03d4f32f17789e1afa1f42fb37837c7410892",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/72xxx/CVE-2026-72380.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/xen/pvcalls-front.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 88,
+      "id": "CVE-2026-72383",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "ad65231760b007aa915e2073a97058b3721f25b23ae0d86696b8ec91632d5298",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/72xxx/CVE-2026-72383.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/sctp/protocol.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 89,
+      "id": "CVE-2026-72423",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "fa01b3c098978bfce119c9cf972311e070dac83d2814aac2c1749a791a52bceb",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/72xxx/CVE-2026-72423.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/netfilter/nf_conntrack_bpf.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 90,
+      "id": "CVE-2026-72472",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "64ddeffee6400ff2ee409021748956feff4c39a57b4d2a49ef90f89a0cb086dd",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/72xxx/CVE-2026-72472.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/nfs/delegation.c",
+        "fs/nfs/nfs4proc.c",
+        "include/linux/nfs_xdr.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 91,
+      "id": "CVE-2026-72493",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "de49df8eceb36e43524a46e74e8afda32c60ef1b17ad060c9125e678ca86fdf3",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/72xxx/CVE-2026-72493.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/core/dev.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 92,
+      "id": "CVE-2026-72494",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "2387d43e3febe405270bd3d32bbb1b42d9922be7e3a58779ec6fbe9afa875f7f",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/72xxx/CVE-2026-72494.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/infiniband/hw/irdma/hw.c",
+        "drivers/infiniband/hw/irdma/main.h",
+        "drivers/infiniband/hw/irdma/utils.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 93,
+      "id": "CVE-2026-74257",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "52c4a6aaf4d028184e07da026a30571ff889ab404126141756138c0144e7c9f7",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74257.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/ipv4/udp_bpf.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 94,
+      "id": "CVE-2026-74269",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "68edde58f15b8f20c6e2e675864792553ca79c020550760a5ce289a13b99f7b3",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74269.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/ethernet/broadcom/bnxt/bnxt.c",
+        "drivers/net/ethernet/broadcom/bnxt/bnxt.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 95,
+      "id": "CVE-2026-74314",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "bc3d48a2a1133a59b6ef8743a72bc9becacb069202ffd52cad3b7d0e0d0881c6",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74314.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/linux/bpf.h",
+        "kernel/bpf/arraymap.c",
+        "kernel/bpf/hashtab.c",
+        "kernel/bpf/syscall.c",
+        "tools/testing/selftests/bpf/prog_tests/htab_update.c",
+        "tools/testing/selftests/bpf/prog_tests/linked_list.c",
+        "tools/testing/selftests/bpf/prog_tests/map_kptr.c",
+        "tools/testing/selftests/bpf/prog_tests/refcounted_kptr.c",
+        "tools/testing/selftests/bpf/progs/htab_update.c",
+        "tools/testing/selftests/bpf/progs/linked_list.c",
+        "tools/testing/selftests/bpf/progs/refcounted_kptr.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 96,
+      "id": "CVE-2026-74317",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "91d9b5b9a9f0a5b9d15d5d093da6e0b980081dab71b9c33c8810792d9b0b4a33",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74317.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/ethernet/intel/ixgbe/ixgbe_main.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 97,
+      "id": "CVE-2026-74344",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "91c8ec88b05628b6ba3207daf3c789916e1dff0c8171ba5cb12f4bd12125f05e",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74344.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/helpers.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 98,
+      "id": "CVE-2026-74385",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "fe35302c831ca93dc97c3cb53932d9c7477cd2ad8fb490a5a295aedae868bb73",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74385.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/nvme/target/tcp.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 99,
+      "id": "CVE-2026-74388",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "66dd0060bb1a3203aaf71cd61e28e91057cd77690a1a87632c309b0265e74be9",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74388.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "sound/core/seq/oss/seq_oss_event.c",
+        "sound/core/seq/oss/seq_oss_event.h",
+        "sound/core/seq/oss/seq_oss_ioctl.c",
+        "sound/core/seq/oss/seq_oss_midi.c",
+        "sound/core/seq/oss/seq_oss_midi.h",
+        "sound/core/seq/oss/seq_oss_rw.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 100,
+      "id": "CVE-2026-74506",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "c5ca6f2c7bc327993403a5cac102eac68f281b39f7ef6c71aa53b2344d1b4809",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74506.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/afs/internal.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 101,
+      "id": "CVE-2026-74530",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "005e9698042cbfa292e6aad3d056d661664fa495dfe951ea156237953ed3ce59",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74530.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/bluetooth/hci_sync.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 102,
+      "id": "CVE-2026-74533",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "0f489ff88b700319971b0ac199ba590f76a71311136d737f50ddbcfd715e674a",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74533.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/net/bluetooth/hci_core.h",
+        "net/bluetooth/hci_conn.c",
+        "net/bluetooth/iso.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 103,
+      "id": "CVE-2026-74534",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "83f49953e4bd127719fa63f67764795b1558ecfcdece399f52625e531d98c3f9",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74534.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/bluetooth/iso.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 104,
+      "id": "CVE-2026-74537",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "a5d2a7830fba1a1c91fe0ee796fb066e3b3f145441da0c899c464f9d3f3218c1",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74537.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/bluetooth/iso.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 105,
+      "id": "CVE-2026-74578",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "0b7f3fb861d70111737832b4fc1eda9bf01871a6e35d35458bce1c152e8d8f66",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74578.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "crypto/algif_skcipher.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 106,
+      "id": "CVE-2026-74715",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "60205f58d804e3d2a63d3e2c56cfb98ed225d5abc942a997d96d3a7a7a8b7952",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74715.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/netfilter/nf_conntrack_bpf.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 107,
+      "id": "CVE-2026-74723",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "0762e22009e3d524d45d3596de6b0254cd3dbf943eead9e2e3517fc876d0569b",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74723.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/btrfs/lzo.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 108,
+      "id": "CVE-2026-74752",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "7dcb9d1aaf2bc764afc44716151f349ab70c12e45a9fbcf0ecb86cff11fc85c9",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/74xxx/CVE-2026-74752.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/net/sctp/auth.h",
+        "net/sctp/auth.c",
+        "net/sctp/sm_make_chunk.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 109,
+      "id": "CVE-2026-80631",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "0ee0a646756043eec2fabf16edcbfbaff62e0b0daca0f9c7da998c445c2a73e9",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/80xxx/CVE-2026-80631.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/btrfs/lzo.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 110,
+      "id": "CVE-2026-80634",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "af48b817ec15e89ac9c31f7e73ace533e53941e27eb96ff2f5a4f05cb5b2f843",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/80xxx/CVE-2026-80634.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/netfilter/nf_flow_table_path.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 111,
+      "id": "CVE-2026-80668",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "82a4fff489b9b8129c5b09a57733735ddd30459b87d03857cff825d73d56ced3",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/80xxx/CVE-2026-80668.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/net/netfilter/nf_conntrack_expect.h",
+        "include/uapi/linux/netfilter/nf_conntrack_common.h",
+        "net/netfilter/nf_conntrack_core.c",
+        "net/netfilter/nf_conntrack_expect.c",
+        "net/netfilter/nf_conntrack_h323_main.c",
+        "net/netfilter/nf_conntrack_helper.c",
+        "net/netfilter/nf_conntrack_netlink.c",
+        "net/netfilter/nf_conntrack_sip.c",
+        "net/netfilter/nft_ct.c"
+      ],
+      "sourceEvidenceMethod": "complete fix patch + explicit CNA affected-file metadata",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 112,
+      "id": "CVE-2026-80692",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "72d309b90458e0b63de850a87e7f2d4f764b871398544159d74c6066916a89ee",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/80xxx/CVE-2026-80692.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/bluetooth/hci_sync.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 113,
+      "id": "CVE-2026-80693",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "ba04d9d240f5b851687565d2424eb9893779c2b672e2f270ba2ab85714e2532a",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/80xxx/CVE-2026-80693.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/ethernet/intel/idpf/idpf_dev.c",
+        "drivers/net/ethernet/intel/idpf/idpf_vf_dev.c",
+        "drivers/net/ethernet/intel/idpf/idpf_virtchnl.c",
+        "drivers/net/ethernet/intel/idpf/idpf_virtchnl.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 114,
+      "id": "CVE-2026-80721",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "4a3d92f26041a3a6f2b15d1f779ae53506da9385f38c76663b4f2249f2704897",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/80xxx/CVE-2026-80721.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/bluetooth/iso.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 115,
+      "id": "CVE-2026-80725",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "95cccf43ea14e4db5a8788025d11f8a343e166e2e07c06c15a42245b2e4e1768",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/80xxx/CVE-2026-80725.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/core/gro.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 116,
+      "id": "CVE-2026-80905",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "b98a39a9cb61ef70bf09ba9bb924239e7e7e6e270f57bfe039a6be98e95e3cc7",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/80xxx/CVE-2026-80905.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/tap.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 117,
+      "id": "CVE-2026-89528",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "b7c6229ca781849a1a2d63d0f7418dbaf81032b34936019a18d0a525d333faa2",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/89xxx/CVE-2026-89528.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/sunrpc/xprtrdma/svc_rdma_recvfrom.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 118,
+      "id": "CVE-2026-89537",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "cd0d1396858413ac105e678462232a01f4b1b3a417f5d8435886adae28a36c2c",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/89xxx/CVE-2026-89537.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/sunrpc/auth_gss/gss_krb5_unseal.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 119,
+      "id": "CVE-2026-89631",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "f6f01d3d093f28d22b4b20f2542e0e413a817f27b126233e9fb277c7805d9b5d",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/89xxx/CVE-2026-89631.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/client/cifssmb.c",
+        "fs/smb/client/trace.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 120,
+      "id": "CVE-2026-89637",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "01e4d03a5ad52e2ed1b6bfdf72b823021f55a093548822aeeda70909150d3644",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/89xxx/CVE-2026-89637.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/client/smb1transport.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 121,
+      "id": "CVE-2026-89675",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "703cf00c3e85e5c41d1d9aee02425dc40179e7dbf3f62fc29375549be20158f1",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/89xxx/CVE-2026-89675.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/nfsd/nfs4proc.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 122,
+      "id": "CVE-2026-89788",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "62496a784fadfb529cb81f89e9e5c6c583e857f94236997ed7e333d5a7f3695f",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/89xxx/CVE-2026-89788.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/mgmt/tree_connect.c",
+        "fs/smb/server/smb2pdu.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 123,
+      "id": "CVE-2026-89810",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "199d49f9d609be56e8787b37169d655605457e215d2d08d75e6e35450946cfa6",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/89xxx/CVE-2026-89810.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/gpu/drm/amd/amdkfd/kfd_migrate.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 124,
+      "id": "CVE-2026-89913",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "863e3abf780c3953bdb9dda080073ad0905c10963a9c36b0b9bd8200b9660203",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/89xxx/CVE-2026-89913.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "arch/arm64/kvm/vgic/vgic-v3.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 125,
+      "id": "CVE-2026-90093",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "16d693e77ef85dd07be566c67e79525f95b4f98e0df2eaac51b237cb0e889a42",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90093.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/bluetooth/l2cap_sock.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 126,
+      "id": "CVE-2026-90104",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "5309cad38035ea0af1cecebb72cbd49578af319fb92117054dca9f8b1ec8dbeb",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90104.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/nfs/callback_xdr.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 127,
+      "id": "CVE-2026-90111",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "f8792a7d8ae5912250e2e8fc72b658a7e93fd90cfb0c08cb380849b3eaab51f4",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90111.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/ipv6/ip6mr.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 128,
+      "id": "CVE-2026-90149",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "51254568c28e676ebcce90501bb8d40a727849cecfd75c9d520e9ea89ef73301",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90149.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/nfs/flexfilelayout/flexfilelayout.c",
+        "fs/nfs/nfs4session.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 129,
+      "id": "CVE-2026-90155",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "8b361b6f4983d990558856176ac760ccef79d49fba08c33c56d7592e09b25b4b",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90155.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/smb2pdu.c",
+        "fs/smb/server/vfs_cache.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 130,
+      "id": "CVE-2026-90161",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "2a404849aa50aaefc836bd774e3890e1b5cefc39d6f4fc79ae81cbb1184af3cd",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90161.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/erofs/decompressor.c",
+        "fs/erofs/zmap.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 131,
+      "id": "CVE-2026-90167",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "d462d272329a22a2d678e41578fd25e96479b0d1645220cb21b3f4f9472b6bb3",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90167.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/oplock.c",
+        "fs/smb/server/oplock.h",
+        "fs/smb/server/smb2pdu.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 132,
+      "id": "CVE-2026-90204",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "16b64da25655746d256bdf9e9f6c5820bba355cc71302cad8b07e04af03fbb94",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90204.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/ocfs2/inode.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 133,
+      "id": "CVE-2026-90205",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "acb976d89919a906ab30e7b16b1ed74c6c0f0c1dee60b44680fc95880f9572b3",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90205.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/ocfs2/inode.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 134,
+      "id": "CVE-2026-90217",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "503c9c57b760f6383e5a968200854034376dff244f6d02f2def108e608661104",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90217.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/states.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 135,
+      "id": "CVE-2026-90237",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "5d0be9829336f769a919395c7f0dbdfb619619f7020d59759747ac4290345cea",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90237.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/net/netfilter/nf_conntrack_helper.h",
+        "net/netfilter/nf_conntrack_helper.c",
+        "net/netfilter/nft_ct.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 136,
+      "id": "CVE-2026-90256",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "c1585873d1614ab021653ad2a18087a85c26f8dc50e89d843916671776ac0c2e",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90256.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/bluetooth/l2cap_core.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 137,
+      "id": "CVE-2026-90317",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "ac54a0db122fd277cfcee45d974f24e219ff49eab94494755d50aa406d34349a",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90317.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/verifier.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 138,
+      "id": "CVE-2026-90320",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "745a42a649250704c206aff7b6e70eb167f45e2fa477e21dcb8c323163bff666",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90320.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/ocfs2/xattr.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 139,
+      "id": "CVE-2026-90321",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "59bffe628554ffec4a5332816d7104823745c8913ade49c701caf251430ec221",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90321.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/ocfs2/inode.c",
+        "fs/ocfs2/xattr.c",
+        "fs/ocfs2/xattr.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 140,
+      "id": "CVE-2026-90324",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "3c6d84c9a4fdfea1d28ac59be5cb1216f537a55029274299e548c566cb0716b9",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90324.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/block/ublk_drv.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 141,
+      "id": "CVE-2026-90343",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "f413132097b7bff2d0c355e4d3307c9909a6b9fb85e8ee7197e14f2b2e7c9408",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90343.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/wireless/core.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 142,
+      "id": "CVE-2026-90380",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "f9b704e952f67f875e74801747bb26c42fdd1c1e40957271d55192592710deb6",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90380.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/wireless/mediatek/mt76/mt7925/main.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 143,
+      "id": "CVE-2026-90417",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "e11403ec8cd5daf4dc839116a379a385618703ccdc7e6dac0b97c73f194a3ef7",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/90xxx/CVE-2026-90417.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/infiniband/hw/cxgb4/mem.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 144,
+      "id": "CVE-2026-92499",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "42b0b897764eda8b0aa0b6a3ffa01e08817af02567d92c45ddcf2839f402d1ea",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/92xxx/CVE-2026-92499.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/ext4/dir.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 145,
+      "id": "CVE-2026-93125",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "ce3bf5648dba2b910a364cc20ed3181b910df49a4de39c1a0892b0ae29d5d2f7",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/93xxx/CVE-2026-93125.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/verifier.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 146,
+      "id": "CVE-2026-93144",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "5427b41877a2f79ad1b1ef5bfbfdf505ca2927498774f19ef4b6b1ce59a476e1",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/93xxx/CVE-2026-93144.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/verifier.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 147,
+      "id": "CVE-2026-93148",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "86cfbeb657f86e7c82072cfb586de15d65a5142097259a4fb78dcb1c4b1153c3",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/93xxx/CVE-2026-93148.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/linux/bpf.h",
+        "kernel/bpf/btf.c",
+        "kernel/bpf/verifier.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 148,
+      "id": "CVE-2026-93154",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "3e335b62f941636686c41bf3d9602f860c7a0425e2ade50a770d45d4c25579e0",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/93xxx/CVE-2026-93154.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/infiniband/hw/irdma/utils.c",
+        "drivers/infiniband/hw/irdma/verbs.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 149,
+      "id": "CVE-2026-93175",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "463ffa16e61ed47839979faf16b7659bbab72f1710cc1f6dbfe8d9a2c188a8c3",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/93xxx/CVE-2026-93175.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_crtc.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 150,
+      "id": "CVE-2026-93176",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "f893efd976a52b3c35dea7e6957f3084659bb27c2bc4c0042c64bd04b8efb9bb",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/93xxx/CVE-2026-93176.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_plane.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 151,
+      "id": "CVE-2026-93282",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "48159ab5fcb19f231fca03c0e160d12786e4315c8f618c4f528d45e9b9976cc3",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/93xxx/CVE-2026-93282.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/smb2pdu.c",
+        "fs/smb/server/smbacl.c",
+        "fs/smb/server/smbacl.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 152,
+      "id": "CVE-2026-97493",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "7746ceef13d1fa24b665e62af1877dcb8840dd6bf478e22a6a884bd35fbe6cea",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/97xxx/CVE-2026-97493.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 153,
+      "id": "CVE-2026-97513",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "2b1fb7fc76b022aae89d09a1b49f60b6ef9079df6e55549f1fc6613df0d43ac4",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/97xxx/CVE-2026-97513.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/media/platform/chips-media/wave5/wave5-helper.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 154,
+      "id": "CVE-2026-97565",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "2cc2c20ff9dbd1deb915324ba466e9688b8eeb3580fd1716482a0fabe2de0a77",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/97xxx/CVE-2026-97565.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/client/cifssmb.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 155,
+      "id": "CVE-2026-97603",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "352a97efa3eea6917c992d273f4c19b1062e188547f2c9b877aa322c03e46c45",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/97xxx/CVE-2026-97603.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/ethernet/intel/idpf/idpf_txrx.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 156,
+      "id": "CVE-2026-97960",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "cedcf55a51bb265c263e030be671e2a9d528c90dc05faf875b547fa6510f536a",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/97xxx/CVE-2026-97960.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "arch/x86/events/intel/core.c",
+        "arch/x86/events/intel/ds.c",
+        "arch/x86/events/perf_event.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 157,
+      "id": "CVE-2026-97988",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "8a399a94e414eea2b2130f4f139d4945e3e806675f55d03d577d2313a797e370",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/97xxx/CVE-2026-97988.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/vhost/net.c",
+        "drivers/vhost/vhost.c",
+        "drivers/vhost/vhost.h",
+        "drivers/vhost/vsock.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 158,
+      "id": "CVE-2026-98019",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "7e395b714277c1a2df3f7b062e6e119552faba0784ba7aeb2d252859c2b615fd",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98019.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/verifier.c",
+        "tools/testing/selftests/bpf/progs/verifier_subprog_precision.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 159,
+      "id": "CVE-2026-98033",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "57dc496a8c9b78af9b842103d1b2d2d1d30e1211b4b03a9d210076825de42b75",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98033.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/verifier.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 160,
+      "id": "CVE-2026-98034",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "76618ca7243161bd421f32b5d49211e4526eee3fc4e38168d9a70e3ed77ec277",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98034.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/verifier.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 161,
+      "id": "CVE-2026-98084",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "25977161f3033f445738142ac8b131e27a7c0c00135760de41d0e812be30d8af",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98084.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/backtrack.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 162,
+      "id": "CVE-2026-98085",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "c4ace74ee57ef000bd96d5ab0601aebfc0db56fc48e1248ea293f848ee33072a",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98085.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/backtrack.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 163,
+      "id": "CVE-2026-98115",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "15144697422c5f4a77142075e3d07bb384bec5bc4d845e3a479e9522963afb15",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98115.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/connection.c",
+        "fs/smb/server/mgmt/user_session.c",
+        "fs/smb/server/mgmt/user_session.h",
+        "fs/smb/server/smb2pdu.c",
+        "fs/smb/server/vfs_cache.c",
+        "fs/smb/server/vfs_cache.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 164,
+      "id": "CVE-2026-98134",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "45683bd5a3cabb8a9787ea8eae1f2854b8b9c481fc7d7f78bbf380968687c20d",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98134.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/verifier.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 165,
+      "id": "CVE-2026-98332",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "3e099697f13c14257ccd8f02098d40356ed553ddfb07440b3bc7e9f5d078d873",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98332.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/mac80211/tdls.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 166,
+      "id": "CVE-2026-98333",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "00cc3242cfb8679da7ad8ce40894d1737b1352d558b4b53433507d5a1c1c8678",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98333.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/mac80211/iface.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 167,
+      "id": "CVE-2026-98341",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "7e241eb8b5663fd201a0863b157dd34558234251fb85703239a57e35e3410f90",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98341.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/wireless/core.c",
+        "net/wireless/core.h",
+        "net/wireless/rdev-ops.h",
+        "net/wireless/scan.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 168,
+      "id": "CVE-2026-98364",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "2215a2d73fa8a831065ad37311af040ec609727ea5272bcbb2a4c461da05cac7",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98364.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/xfrm/xfrm_policy.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 169,
+      "id": "CVE-2026-98420",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "3e3ab49b4a599ec52b4d75840b2c66a2c70599be78a32235791a26a59bfbaf83",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98420.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/connection.c",
+        "fs/smb/server/connection.h",
+        "fs/smb/server/mgmt/user_session.c",
+        "fs/smb/server/mgmt/user_session.h",
+        "fs/smb/server/proc.c",
+        "fs/smb/server/server.c",
+        "fs/smb/server/smb2pdu.c",
+        "fs/smb/server/smb2pdu.h",
+        "fs/smb/server/stats.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 170,
+      "id": "CVE-2026-98439",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "51aa0b0d956a1c2036132215b8f9e181366bd0dc7453420cc6a1bd56fa7ec432",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98439.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "fs/smb/server/connection.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 171,
+      "id": "CVE-2026-98570",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "0ea72de7b1ed7fdd206c23d826bc86b6a65e1aff01e5393d708469adff367f9a",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98570.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/net/dst.h"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 172,
+      "id": "CVE-2026-98589",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "d672212620fb9ba80576bc54cc2ca318eeaf8321fb8cd8c10df689057e2b6232",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98589.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/verifier.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 173,
+      "id": "CVE-2026-98599",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "7edf916f12c248f4dd419f9f1d00f92fb441044d2cc79aa684bb6791dd333189",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98599.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/verifier.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 174,
+      "id": "CVE-2026-98652",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "400634f446209784823452f27ff674ad0accfd73a73eed8b07cd714e2d45527e",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98652.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "arch/s390/kvm/s390/interrupt.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 175,
+      "id": "CVE-2026-98799",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "2e1afb6690fbf6fe0286e304e19b8ecc6d7d6b5a873a7e5c13d336ccb205c54c",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98799.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "arch/arm64/net/bpf_jit_comp.c",
+        "arch/loongarch/net/bpf_jit.c",
+        "arch/powerpc/net/bpf_jit_comp.c",
+        "arch/riscv/net/bpf_jit_comp64.c",
+        "arch/s390/net/bpf_jit_comp.c",
+        "arch/x86/net/bpf_jit_comp.c",
+        "include/linux/bpf.h",
+        "kernel/bpf/trampoline.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 176,
+      "id": "CVE-2026-98800",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "366f656b5b391e354ed889657a1028925bcfc54896df129193c471b49e57fd80",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98800.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "include/linux/bpf.h",
+        "kernel/bpf/syscall.c",
+        "kernel/bpf/trampoline.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 177,
+      "id": "CVE-2026-98803",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "0a688bacb162096527612279eb8836b45d91456aee59d80621f9fce60c2fee0b",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98803.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "drivers/net/ethernet/stmicro/stmmac/stmmac_main.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 178,
+      "id": "CVE-2026-98813",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "d0fc259d27315192a7be32c93cdf8433dba9b7381f778a57abd84ee989792999",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98813.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "kernel/bpf/hashtab.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 179,
+      "id": "CVE-2026-98824",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "42cebe09d42881983f68446d1ec2dfa2e77af825b7e899a854787f15102fb1d1",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98824.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/mac80211/rc80211_minstrel_ht.c",
+        "net/mac80211/status.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 180,
+      "id": "CVE-2026-98829",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "f3cbc9aa6033ddd274caad1d6d9a1c0f17becd718f300acb366e985aefceb9c1",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98829.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "net/mac80211/drop.h",
+        "net/mac80211/rx.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    },
+    {
+      "inputIndex": 181,
+      "id": "CVE-2026-98863",
+      "rawSeverity": "HIGH",
+      "rawInstalledVersion": "6.8.0-149.149",
+      "pinnedCnaSha256": "a6432f841dc5d223f5a2c9cc1a1774fbb2414c64b27d04d1e999aa4917d6a443",
+      "pinnedCnaUrl": "https://raw.githubusercontent.com/CVEProject/cvelistV5/050afa4f401f53a4001e1bc7268f74e952418f8e/cves/2026/98xxx/CVE-2026-98863.json",
+      "allAffectedSourcePathsIndependentlyMatched": true,
+      "sourcePaths": [
+        "arch/x86/kvm/x86.c"
+      ],
+      "sourceEvidenceMethod": "authoritative explicit CNA affected-file metadata; full patch not independently read",
+      "staticComponentProposal": "VULNERABLE_CODE_NOT_PRESENT_IN_EXACT_OFFICIAL_HEADER_PACKAGE",
+      "imageGateDisposition": "NEEDS_REVIEW_PENDING_ACTUAL_OCI_PAYLOAD_AND_APPROVED_EVALUATOR",
+      "hostKernelApplicability": "UNKNOWN"
+    }
+  ]
+}

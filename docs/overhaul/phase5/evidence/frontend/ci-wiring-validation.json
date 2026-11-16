@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "kind": "frontend-ci-selection-validation",
+  "result": "PASS",
+  "allEditorCases": 1,
+  "shards": [
+    0,
+    1
+  ],
+  "actualBrowserExecution": false,
+  "initialValidationMistake": "An initial local ad-hoc assertion guessed shard1 ownership and failed; the actual manifests select shard2. The committed workflow already discovers actual selection and never hardcodes a shard.",
+  "correctedInvariant": "Exactly one Chromium editor case across all requested projects and exactly one assigned shard; selected shard must emit its source-bound PASS report.",
+  "ciPolicyTests": {
+    "passed": 17,
+    "failed": 0,
+    "skipped": 0
+  }
+}

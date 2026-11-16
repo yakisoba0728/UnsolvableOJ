@@ -7,7 +7,7 @@ export async function withMissionClock<T>(db: DataSource, at: string, run: () =>
   const spy = vi.spyOn(db, 'createQueryRunner').mockImplementation((mode) => {
     const runner = create(mode);
     const query = runner.query.bind(runner) as typeof runner.query;
-    vi.spyOn(runner, 'query').mockImplementation((sql: string, parameters?: unknown[], structured?: boolean) => {
+    vi.spyOn(runner, 'query').mockImplementation((sql: string, parameters?: unknown[] | Record<string, unknown>, structured?: boolean) => {
       if (sql.includes('SELECT clock_timestamp()')) {
         sql = sql.replace('clock_timestamp()', '$1::timestamptz');
         parameters = [at];

@@ -1,0 +1,10 @@
+Owned PG17.11/Redis8.10.3 ready on loopback; fresh temporary cluster. Command: ['node', 'scripts/run-integration.mjs', 'e2e', 'test/incremental-problem-stats.e2e-spec.ts', 'test/independent-problem-stats.e2e-spec.ts']
+
+ RUN  v4.1.12 /workspace/scratch/86de5f814139/oj-dbperf-review/Back
+
+
+ Test Files  2 passed (2)
+      Tests  13 passed (13)
+   Start at  15:38:53
+   Duration  4.27s (transform 733ms, setup 0ms, import 2.12s, tests 1.67s, environment 0ms)
+

@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "kind": "phase5-independent-multi-api-source-review",
+  "reviewer": "/root/security",
+  "observedAt": "2026-11-16T15:43:56.582692+00:00",
+  "verdict": "BLOCKED_BOUNDED_LIFECYCLE_CONTRACT",
+  "source": {
+    "commit": "da8deeba09e0ad0009fddbb884728ab68d1274e5",
+    "tree": "5f1787125215cc4cc968319938fbbc3be03d7607",
+    "parent": "e9f056bccf99e75938beadf02b652003f0c4ee23",
+    "worktree": "/workspace/scratch/3d1215725852/oj-multiapi"
+  },
+  "scope": "All three changed files plus directly supporting lifecycle, HTTP/auth, queue/result persistence, worker and installed runner/library code. No whole-repository audit.",
+  "sourceBindings": {
+    "Back/test/phase5-multi-api.pipeline-spec.ts": "ae048f9411072a206342484c18a8ee93109195d18fa4d35189eac9871c7c9175",
+    "Back/test/vibe-dedicated.pipeline-spec.ts": "d7a53084c42bfd223c5b7f5d888e23e93a02c2aaf6356754da668242cb9b57dd",
+    "docs/overhaul/phase5/MULTI-API.md": "c97455f4c7ea8db66ef0a5dd53dbc1145b2f871f10b609d725313c94b5d1a824"
+  },
+  "supportingSourceBindings": {
+    "Back/test/helpers.ts": "b47fd13089434485aa578a6a7d2b7eb17e230fbc482614f3ed8151cd9bf52732",
+    "Back/test/process.pipeline-helpers.ts": "679ef4bf37e81492fd3661914658a4e6878e93983a1a89bb93fdc16696108098",
+    "Back/scripts/run-integration.mjs": "5ca93ebd9588f39aea661f9fa90950e4879a8814681fb3274b5dd5399a45d1e7",
+    "Back/vitest.config.pipeline.ts": "b02a171b8cfbd88d9d47822e66928b9a8800a15668b21281d74fe8f227bee7b2",
+    "Back/vitest.config.e2e.ts": "5333cd414c00fc0273d5d2dd04404bef2258dfd30fee8036c4a312369256bc3f",
+    "Back/src/main.ts": "11ef21b4d3da1c2073534bb60f107e15f8d0986835d3459466171e184b05f3ba",
+    "Back/src/app.module.ts": "0ed1d480332a71ef66e86a13746290ef03e4fc63545acb872e52906c5895e0ac",
+    "Back/src/config/redis-throttler.storage.ts": "8599252e12ccdc4a2b7d315763f02395444763ebb18a012339ee3f52083a36ea",
+    "Back/src/config/redis.config.ts": "1d52647e1666b07dfe9884b462f34985b2545a29d57e71d09a0468e0dc57152f",
+    "Back/src/config/env.validation.ts": "82dc9da7996e40f64006001e74dace3d9ec6b7548f641b07b625067003edaf07",
+    "Back/src/modules/submissions/submissions.controller.ts": "1d4d854285c3622e100e71807cdcd72579d677e28549fe7bccafacd94f530194",
+    "Back/src/modules/submissions/submissions.service.ts": "d22e8117186381688e85c48992a9d7085f0b1c1cf869ed0ffb03589757f49ceb",
+    "Back/src/modules/submissions/judge-internal.controller.ts": "b7bb6c28b7452b9013de234b4e3efd41fe41c2420a2183db176ea7fe3c60c6be",
+    "Back/src/modules/submissions/judge.service.ts": "cbf2a123b0e139032a2047e2460a8aab92b2cf43c823be8a2d9fddee6e8ab4ae",
+    "Back/src/modules/submissions/dto/judge-result.dto.ts": "7183f566f6706125132ba6e8f0ed90c94662732c62fcaec1b75e6e484d442f04",
+    "Back/src/modules/auth/auth.service.ts": "faecf284d74720a643d2ef87f4d856d216192179041b44a8de047f8d8b90519c",
+    "Back/src/modules/email/email.service.ts": "0ca2dd7a8fc6c5958ca771c8d52895c99a0f7622a81177b2068c7b0e5289cb1e",
+    "Judge/src/worker.ts": "73fa2c716ead7d5e9af7ae8788a934603a1ca8126c68cfaa76c84b9a6a3a8b9b",
+    "Judge/src/config.ts": "ef933bf12873d11286a5e45f1f5d1415a7b7d82e0357efdb65f1e86d747c4f58",
+    "Judge/src/judge.ts": "03698b951764dbb0bb4c9f012445d29995bd420d4c9bf7f81ffd2c6610c7c11f",
+    ".github/workflows/ci.yml": "199dd1bc58b20b95dc7a90b9a5d92eba310d14209637e45b2320914a5536787b"
+  },
+  "installedLibraryEvidence": {
+    "Back/node_modules/@vitest/runner/dist/chunk-artifact.js": "bf6af6d2f4469911879a67e83b8f9e7b20332cf42795032c53457b10ccc1c617",
+    "Back/node_modules/bullmq/dist/cjs/classes/job.js": "fd46478e3583de6f4ba50ae73633bca2f43b6bd67cfbc8429f132309f64fea5f",
+    "Back/node_modules/ioredis/built/redis/RedisOptions.js": "b4e69abd60297d0f54c9ff5b5787665061f08711ca9033d6ce617d8bcbaba737"
+  },
+  "findings": [
+    {
+      "id": "PHASE5-MULTIAPI-001",
+      "priority": "P2",
+      "classification": "Test-harness bounded lifecycle and evidence correctness",
+      "blocking": true,
+      "title": "The 50-second cancellation signal does not bound all setup and observer awaits",
+      "locations": [
+        {
+          "path": "Back/test/phase5-multi-api.pipeline-spec.ts",
+          "startLine": 113,
+          "endLine": 115
+        },
+        {
+          "path": "Back/test/phase5-multi-api.pipeline-spec.ts",
+          "startLine": 227,
+          "endLine": 252
+        },
+        {
+          "path": "Back/test/phase5-multi-api.pipeline-spec.ts",
+          "startLine": 324,
+          "endLine": 328
+        },
+        {
+          "path": "Back/test/phase5-multi-api.pipeline-spec.ts",
+          "startLine": 452,
+          "endLine": 468
+        }
+      ],
+      "evidence": [
+        "The timer aborts a private AbortController, but createApp(), fixture.listen(), both register() calls, login(), and the pre-child closeApp() await do not receive/check that signal or a per-operation deadline.",
+        "Back/test/helpers.ts createApp() awaits resetThrottle() and Nest module compilation; resetThrottle uses Redis keys/del/quit without command timeout. register/login use Supertest without .timeout(). closeApp awaits app.close().",
+        "The installed Vitest withTimeout wrapper rejects the test promise when its timeout fires; it does not await/cancel these unrelated operations. This test also does not consume the Vitest test-context signal.",
+        "Even after bounded setup, a state SQL query followed by queue.getJob() and job.getState() may run sequentially across the 50-second boundary. Their independent 2-second timeouts do not implement one remaining scenario budget.",
+        "The advertised worst-case arithmetic is 50+15+15+6=86 seconds before report writing. Observer overshoot can consume the remaining four seconds; unbounded setup can exceed it entirely."
+      ],
+      "reachability": "A stalled fixture Redis command, Nest bootstrap, registration/login response, or app close keeps the test inside the try block despite the 50-second timer. A slow observer sequence can also continue after cancellation. No hostile production endpoint is needed; these are owned CI dependency failure paths.",
+      "impact": "The promised action bound and total 90-second cleanup/report budget are not guaranteed. Vitest can fail the test before finally has stopped children, closed fixture connections, or emitted the partial failure report. The outer integration process-group cleanup is a last-resort containment boundary, not evidence that the test completed its own bounded cleanup.",
+      "recommendedResolution": "Bound the entire setup/action lifecycle, stop scheduling further observer/setup operations when the shared deadline expires, and retain explicit ownership of any operation that can resolve late. A bare Promise.race around Nest creation is insufficient if its late result can escape cleanup. An owned stoppable setup process or cancellation-aware helper lifecycle are possible bounded designs. Preserve the existing 90-second test limit and reserve time for both stop phases, I/O, and report writing.",
+      "verificationNeeded": "Focused deterministic deadline/late-resolution checks should demonstrate FAIL plus owned-resource cleanup/report completion on stalled setup and observer paths, without running a new native benchmark. Then the existing real pipeline CI must execute this exact corrected source.",
+      "validationMethod": "Source tracing into installed primary implementations; no deliberate fault injection or native execution was performed."
+    }
+  ],
+  "reviewedWithoutAdditionalBlockers": [
+    {
+      "area": "Immutable scope",
+      "result": "Two test/documentation additions and one limitation-string correction; no production application logic, admission limit, CI timeout, privilege or required-gate changes."
+    },
+    {
+      "area": "Process and socket ownership",
+      "result": "Exactly two dist/main.js and two worker.js children are registered by the existing owned-process helper, use separate loopback ports and 256 MiB V8 heap ceilings, and are sampled only by their owned PIDs. API listener rows must match both procfs socket inode ownership and the exact 127.0.0.1 port. Worker/API stops are parallel within two sequential 15-second phases."
+    },
+    {
+      "area": "Disposable boundaries",
+      "result": "PostgreSQL URL must name the runner-owned disposable database and use loopback with no query/fragment override; Redis and native endpoints are loopback. Queue removal is scoped to the fresh solver/problem, at most eight submissions and generations one through six. The native cache is compared to baseline and arbitrary native files are never deleted."
+    },
+    {
+      "area": "Public admission",
+      "result": "One regular solver submits the eight immutable language fixtures through real public endpoints, four requests per API, with three lanes. Each lane waits for persisted acceptance and completed queue state before its next submission. No submission retry or forwarded-address bypass occurs. The eight observed remaining quotas must equal 12 through 19 under limit20. createApp resets test counters once before this campaign, not during it."
+    },
+    {
+      "area": "Real worker evidence",
+      "result": "Exactly eight acknowledged worker metrics must cover eight unique IDs across both workers; one worker ID per child, at least one completion per child, finite nonnegative phase/resource values, per-worker queue overlap one, total overlap at most two. Reported fields come from actual request/DB/BullMQ/worker observations rather than fabricated success rows."
+    },
+    {
+      "area": "Claims and persistence",
+      "result": "The observed active Go attempt must reject competing claims through both APIs without changing the lease owner. Terminal claims must return409. Same-attempt terminal result replays through the opposite worker API must return200 and preserve the selected persisted row including timestamps and notification count. Exactly eight submissions/learning completions/notifications, one solve ledger row, and10XP are required."
+    },
+    {
+      "area": "Metric interpretation",
+      "result": "Documentation correctly distinguishes queue wall-clock intervals, worker monotonic durations, process CPU/RSS totals, native compiler memory, and finite sample limitations. Installed BullMQ moveToCompleted increments attemptsMade; requiring attemptsMade=attemptsStarted=1 is valid for this installed implementation."
+    },
+    {
+      "area": "Secrets and report retention",
+      "result": "Report selection excludes source bodies, account/service tokens, headers, environment values, and full process logs. Synthetic identifiers and source hashes are retained. API children force empty OpenAI key and disable email. The fixed CI fixture has email disabled by default; only algorithm/auth/problem endpoints are exercised. No paid provider route is invoked."
+    },
+    {
+      "area": "Failure status and cleanup honesty",
+      "result": "Once finally is entered, stop errors and cleanup-I/O failures are retained and force FAIL; a successful body alone cannot yield PASS. The remaining blocker is reaching and completing that finally within the promised deadline."
+    },
+    {
+      "area": "Vibe limitation correction",
+      "result": "The changed sentence accurately distinguishes the Node API pipeline from separately retained nginx/browser evidence and changes no test logic."
+    }
+  ],
+  "execution": {
+    "native": "NOT_EXECUTED",
+    "multiApiRuntime": "NOT_EXECUTED",
+    "independentChecks": [
+      "Exact commit/tree/parent and changed-file hashes verified",
+      "All changed source/docs read",
+      "Direct supporting source and installed Vitest/BullMQ/ioredis implementations inspected",
+      "git diff --check passed"
+    ],
+    "authorReportedOnly": [
+      "Back TypeScript with --preserveSymlinks passed",
+      "Focused lint passed",
+      "Standalone Vitest list blocked by absent built dist; no native result claimed"
+    ],
+    "sourceFilesModified": false,
+    "remoteActions": false
+  },
+  "acceptanceConditions": [
+    "Resolve PHASE5-MULTIAPI-001 in a new immutable commit and re-review exact source.",
+    "Preserve actual native NOT_EXECUTED status until the full CI pipeline supplies a source-bound report.",
+    "Coordinator must retain phase5-multi-api.json on success and failure and require nonempty valid PASS evidence before accepting actual CI."
+  ],
+  "limits": [
+    "This is a source/lifecycle review, not a production penetration test or a native runtime/performance qualification.",
+    "Actual two-API startup, both worker participation, observed active Go claim, all shared admission headers, and real cleanup remain pending CI."
+  ]
+}

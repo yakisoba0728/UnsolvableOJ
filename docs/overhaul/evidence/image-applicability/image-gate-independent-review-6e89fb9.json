@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-image-gate-review",
+  "reviewer": "/root/judge_reliability",
+  "reviewedAt": "2026-11-16T04:34:08.565020+00:00",
+  "verdict": "APPROVED_SOURCE_CONDITIONAL_ON_EXACT_COMPOSED_HEAD_CI",
+  "candidate": "6e89fb963cd32f516498bf74ea997bd43ccab5a6",
+  "originalCandidate": "4bdd58b32a18e1950717e932d8910b2f6a78c644",
+  "wrapperSha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b",
+  "rawScannerSha256": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72",
+  "payloadVerifierSha256": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0",
+  "independentTests": [
+    {
+      "commit": "4bdd58b32a18e1950717e932d8910b2f6a78c644",
+      "suite": "all image Python regressions",
+      "passed": 88,
+      "failed": 0,
+      "seconds": 46.491
+    },
+    {
+      "commit": "4bdd58b32a18e1950717e932d8910b2f6a78c644",
+      "suite": "CI policy and SBOM",
+      "passed": 21,
+      "failed": 0
+    },
+    {
+      "commit": "6e89fb963cd32f516498bf74ea997bd43ccab5a6",
+      "suite": "CI policy and actual shell image selection",
+      "passed": 17,
+      "failed": 0
+    },
+    {
+      "commit": "6e89fb963cd32f516498bf74ea997bd43ccab5a6",
+      "suite": "payload workflow selector regression",
+      "passed": 1,
+      "failed": 0
+    }
+  ],
+  "incrementalExecutableWrapperAstUnchanged": true,
+  "findings": [
+    {
+      "scope": "ordinary PR image selectors",
+      "finding": "Shared applicability validators were initially classified runtime-only although all image wrappers import them.",
+      "fixedIn": "6e89fb963cd32f516498bf74ea997bd43ccab5a6",
+      "status": "RESOLVED",
+      "verification": "Actual workflow shell now selects Back, Front, Judge and runtime for applicability source/tests/policy; full mode selects all four even with empty or unrelated diff and failed fetch/diff fixtures."
+    }
+  ],
+  "confirmed": [
+    "Unchanged scanner CLI and source; no ignore or suppression flags and no continue-on-error.",
+    "Raw scanner exit, original report/manifest and all severity counts retained separately.",
+    "Execution errors, timeouts, signal/unknown exits, identity/coverage/freshness mismatches and EOSL remain blocking.",
+    "Ordinary raw PASS is corroborated by original summary/coverage and claims no applicability decision.",
+    "Only completed runtime raw exit 2 can invoke actual OCI payload verifier and separately approved exact 182 evaluator.",
+    "PROPOSED/expired policy, changed/missing/new/downgraded cohort, missing/stale/mismatched payload and raw evidence mutation remain blocking.",
+    "Actual retained run 43802320491 raw reports independently pass validate_raw with three raw PASS and runtime BLOCKED_FINDINGS; no scanner rerun was claimed."
+  ],
+  "actualRawReviewFileSha256": "559e0946c38c53ed4480763df261569d9b35f18477c2002f9cc3a13317ed4a83",
+  "limitations": [
+    "No local Docker/image build or wrapper scanner subprocess execution; exact composed-head Actions remains mandatory.",
+    "This is wrapper/workflow approval, not policy authorization; root and Product separately reviewed policy 9523ccd.",
+    "Raw runtime 177 HIGH and 5 CRITICAL remain in retained evidence; reviewed code-not-present is not a patch or host-kernel safety statement."
+  ]
+}

@@ -1,0 +1,1406 @@
+{
+  "schemaVersion": 1,
+  "status": "DRAFT_FINAL_CANDIDATE_CI_PENDING",
+  "foundation": {
+    "run": {
+      "id": 43890166522,
+      "head_sha": "6ec519261b1103b2eadcfe0afcc0dec961353405",
+      "head_branch": "overhaul5/ci-foundation",
+      "status": "completed",
+      "conclusion": "success",
+      "head_commit": {
+        "id": "6ec519261b1103b2eadcfe0afcc0dec961353405",
+        "tree_id": "5588cb3e8648afed8fe10146d4da961a0ebb4035",
+        "message": "security: bind independent Phase V component review without relaxing runtime gates",
+        "timestamp": "2026-11-16T14:51:17Z",
+        "author": {
+          "name": "yakisoba0728",
+          "email": "yakihyuk0728@gmail.com"
+        },
+        "committer": {
+          "name": "yakisoba0728",
+          "email": "yakihyuk0728@gmail.com"
+        }
+      },
+      "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43890166522"
+    },
+    "checkout": {
+      "sha": "93b753d73b12efe2ce6e71805feca6522f7428d2",
+      "tree": "5588cb3e8648afed8fe10146d4da961a0ebb4035",
+      "parents": [
+        "d0159b1f844bf0608415dded9e84af566c8e2041",
+        "6ec519261b1103b2eadcfe0afcc0dec961353405"
+      ]
+    },
+    "artifacts": [
+      {
+        "id": 14238046500,
+        "name": "phase3-browser-performance-1",
+        "digest": "sha256:b436f4fe3802e47df95a20153c68900620c94759755b132aad968947c3f20571",
+        "bytes": 5255,
+        "created_at": "2026-11-16T15:04:34Z",
+        "expires_at": "2026-11-23T15:04:33Z",
+        "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43890166522/artifacts/14238046500"
+      },
+      {
+        "id": 14237646048,
+        "name": "phase2-judge-evidence-1",
+        "digest": "sha256:4eea1a0b5fb550bc2954de1a84cb684faa1e12107af43d3a1fd26e547ce090f9",
+        "bytes": 29161,
+        "created_at": "2026-11-16T15:02:40Z",
+        "expires_at": "2026-11-23T15:02:39Z",
+        "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43890166522/artifacts/14237646048"
+      }
+    ]
+  },
+  "database": {
+    "source": {
+      "head": "f037d5c91f6b9cc5561fb46a3e7ed13d0289aa77",
+      "tree": "01f16eb13077f3e12b99d34b14a5cca6b7057bef",
+      "dirtyPaths": "",
+      "hashes": {
+        "scripts/phase5-db-qualification.mjs": "7ee117df19f12c9946a8ba9e308508593d18352efa32f051e27861dbb325d357",
+        "src/modules/enterprise/enterprise-result-queries.ts": "a0e6441a25e69f4a464e646217ed1944c04844021fbd1497d1f52a60f9849962",
+        "src/modules/enterprise/enterprise-result-export.ts": "2033214890d0bfbb8bd3ce5ea45747c15421c9741d89e20ed1998c51f75e2845",
+        "src/modules/users/learning.service.ts": "69d7a47ee6ee853d54179f2c6955bcff9eb24bed9a40f7924c4980862eb810dc",
+        "src/database/migrations/1796100000000-incremental-problem-stats.ts": "de6b2cdab05abefe6ed37f3c1e33f251a206517800f39e4d47ec1f6f7dc50e82"
+      }
+    },
+    "rawPath": "docs/overhaul/phase5/evidence/database-local-f037d5c.json",
+    "rawSha256": "9d67ee4ea9cd4f1fce6e4882c6a4eefefdb48c84b789743c93e719dc05555d69",
+    "environment": {
+      "node": "v24.22.1",
+      "os": "6.18.57",
+      "cpu": "AMD EPYC 9V74 80-Core Processor",
+      "logicalCpus": 9,
+      "postgres": "PostgreSQL 17.11 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0, 64-bit",
+      "settings": [
+        {
+          "name": "fsync",
+          "setting": "on",
+          "unit": null
+        },
+        {
+          "name": "full_page_writes",
+          "setting": "on",
+          "unit": null
+        },
+        {
+          "name": "lock_timeout",
+          "setting": "2000",
+          "unit": "ms"
+        },
+        {
+          "name": "max_connections",
+          "setting": "30",
+          "unit": null
+        },
+        {
+          "name": "shared_buffers",
+          "setting": "8192",
+          "unit": "8kB"
+        },
+        {
+          "name": "statement_timeout",
+          "setting": "15000",
+          "unit": "ms"
+        },
+        {
+          "name": "synchronous_commit",
+          "setting": "on",
+          "unit": null
+        },
+        {
+          "name": "temp_file_limit",
+          "setting": "32768",
+          "unit": "kB"
+        },
+        {
+          "name": "wal_compression",
+          "setting": "off",
+          "unit": null
+        },
+        {
+          "name": "work_mem",
+          "setting": "4096",
+          "unit": "kB"
+        }
+      ]
+    },
+    "fixture": {
+      "candidates": 5000,
+      "enterpriseSubmissions": 10000,
+      "learningSubmissions": 20000,
+      "visibleLearningSubmissions": 10000,
+      "distinctStatsSolvers": 5000,
+      "bulkRows": 256,
+      "bulkSourceBytesPerRow": 32768
+    },
+    "limits": {
+      "candidates": 5000,
+      "learningRows": 20000,
+      "largeSources": 256,
+      "sourceBytes": 32768,
+      "samples": 5,
+      "statementMs": 15000,
+      "lockMs": 2000,
+      "temporaryBytes": 33554432,
+      "databaseBytes": 167772160,
+      "durationMs": 180000
+    },
+    "readSamples": [
+      {
+        "label": "enterprise page offset 0",
+        "queryLatencyMs": {
+          "n": 5,
+          "p50": 3.5566899999998896,
+          "p95": 4.366786000000047,
+          "p99": 4.366786000000047,
+          "min": 3.34074099999998,
+          "max": 4.366786000000047
+        },
+        "rawMs": [
+          4.024310000000241,
+          3.5566899999998896,
+          4.366786000000047,
+          3.34074099999998,
+          3.411475999999766
+        ],
+        "clientCpuMsTotal": 11.466,
+        "clientRssBytesRange": [
+          86495232,
+          88330240
+        ],
+        "resultDigest": "16f8b76a9671ca65b15329c9bbd58240c67c65ff9e7f99c1498ca00732cced4e",
+        "explainExecutionMs": 2.055
+      },
+      {
+        "label": "enterprise page offset 4950",
+        "queryLatencyMs": {
+          "n": 5,
+          "p50": 3.1911509999999907,
+          "p95": 4.221435999999812,
+          "p99": 4.221435999999812,
+          "min": 2.334635999999591,
+          "max": 4.221435999999812
+        },
+        "rawMs": [
+          3.1911509999999907,
+          4.221435999999812,
+          3.6624659999997675,
+          2.78067400000009,
+          2.334635999999591
+        ],
+        "clientCpuMsTotal": 13.499,
+        "clientRssBytesRange": [
+          88985600,
+          89772032
+        ],
+        "resultDigest": "0c8a233c28170e3f1112d8725384442228f1a366ec09dfab42bdd6c0404d4dc1",
+        "explainExecutionMs": 2.269
+      },
+      {
+        "label": "whole-assessment summary 5000 candidates",
+        "queryLatencyMs": {
+          "n": 5,
+          "p50": 34.49720500000012,
+          "p95": 98.13111799999979,
+          "p99": 98.13111799999979,
+          "min": 31.230287999999746,
+          "max": 98.13111799999979
+        },
+        "rawMs": [
+          31.230287999999746,
+          34.49720500000012,
+          33.52420399999983,
+          48.558220999999776,
+          98.13111799999979
+        ],
+        "clientCpuMsTotal": 50.315000000000005,
+        "clientRssBytesRange": [
+          89772032,
+          89772032
+        ],
+        "resultDigest": "d81ff13c0724ec80e4fdd454c73d3243f827fadad539b61e055e4c05f685fb31",
+        "explainExecutionMs": 44.966
+      },
+      {
+        "label": "scalar export SQL 5000 candidates",
+        "queryLatencyMs": {
+          "n": 5,
+          "p50": 47.50619200000028,
+          "p95": 78.46479499999987,
+          "p99": 78.46479499999987,
+          "min": 36.66550099999995,
+          "max": 78.46479499999987
+        },
+        "rawMs": [
+          41.26942700000018,
+          47.50619200000028,
+          36.66550099999995,
+          71.79077699999971,
+          78.46479499999987
+        ],
+        "clientCpuMsTotal": 296.44,
+        "clientRssBytesRange": [
+          107622400,
+          153878528
+        ],
+        "resultDigest": "73735419ec332d5015031ea9807b9380d1b9ced49a394b3e9d38970f8afa411b",
+        "explainExecutionMs": 19.821
+      },
+      {
+        "label": "learning 90 days over 20000-row history",
+        "queryLatencyMs": {
+          "n": 5,
+          "p50": 19.04702899999984,
+          "p95": 21.63051399999995,
+          "p99": 21.63051399999995,
+          "min": 18.26565299999993,
+          "max": 21.63051399999995
+        },
+        "rawMs": [
+          19.04702899999984,
+          21.63051399999995,
+          18.85111900000038,
+          19.23880199999985,
+          18.26565299999993
+        ],
+        "clientCpuMsTotal": 2.856,
+        "clientRssBytesRange": [
+          157728768,
+          157728768
+        ],
+        "resultDigest": "2efe810413e0dd9abc13023fc029777d070bbc0e87e0dac92f130bf777c1c336",
+        "explainExecutionMs": 22.196
+      }
+    ],
+    "distinctSolvers": {
+      "insertMs": 284.85898,
+      "oracle": {
+        "solver_count": 5000,
+        "accepted_count": 5000,
+        "finished_count": 5000
+      },
+      "entireCounterRelationBytes": 638976
+    },
+    "bulk": {
+      "committedMs": 8.382657000000108,
+      "clusterWalBytes": 195400,
+      "initial": {
+        "solver_count": 256,
+        "accepted_count": 256,
+        "finished_count": 256
+      },
+      "afterRollback": {
+        "solver_count": 0,
+        "accepted_count": 0,
+        "finished_count": 256
+      },
+      "caution": "Single committed sample; cluster WAL includes concurrent/checkpoint effects if any. EXPLAIN temp blocks do not expose all trigger-internal temporary IO."
+    },
+    "bulkExplain": {
+      "executionMs": 7.402,
+      "topNodeTempReadBlocks": 0,
+      "topNodeTempWrittenBlocks": 8,
+      "triggerEntries": [
+        {
+          "Trigger Name": "trg_submissions_stats_update",
+          "Relation": "submissions",
+          "Time": 3.877,
+          "Calls": 1
+        }
+      ]
+    },
+    "maximumDatabaseBytes": 33035955,
+    "elapsedMs": 3237.5166109999996,
+    "cleanup": {
+      "created": true,
+      "dropped": true
+    },
+    "allRecordedQuantilesRecomputed": true,
+    "sourceDirtyPathsEmpty": true,
+    "allWorkloadResultDigestsStable": true
+  },
+  "judge": {
+    "rawSha256": "984a1656b15ae9e1743c217f0663486b63b4204394d3683d80cc0b5a72ab0c42",
+    "provenance": {
+      "checkoutSha": "93b753d73b12efe2ce6e71805feca6522f7428d2",
+      "treeSha": "5588cb3e8648afed8fe10146d4da961a0ebb4035",
+      "sourceHeadSha": "6ec519261b1103b2eadcfe0afcc0dec961353405",
+      "baseSha": "d0159b1f844bf0608415dded9e84af566c8e2041",
+      "trackedTreeClean": true,
+      "runId": "43890166522",
+      "runAttempt": "1",
+      "workflow": "CI",
+      "job": "full"
+    },
+    "environment": {
+      "node": "v24.22.2",
+      "platform": "linux",
+      "kernel": "7.0.0-1014-aws",
+      "logicalCpus": 4,
+      "cpu": "Intel(R) Xeon(R) 6975P-C",
+      "clockTicks": 100
+    },
+    "limits": {
+      "workers": 2,
+      "concurrencyPerWorker": 1,
+      "waves": 3,
+      "submissionsPerWave": 8,
+      "totalSubmissions": 24,
+      "testTimeoutMs": 240000,
+      "admissionRequestsPerMinute": 20,
+      "faultInjection": false,
+      "restartsBetweenWaves": 0
+    },
+    "apiInstances": 1,
+    "apiInstanceEvidence": "Single createApp fixture and submit helper in immutable Back/test/judge-capacity.pipeline-spec.ts; no multi-API wave field or experiment exists.",
+    "summary": {
+      "submissions": 24,
+      "acknowledgedJobs": 24,
+      "activeBatchMs": 21848.26584799998,
+      "jobsPerActiveSecond": 1.0984853519711721,
+      "admissionWaitMs": 89961.75439200003,
+      "queueWaitMs": {
+        "p50": 97,
+        "p95": 1025,
+        "p99": 1092,
+        "min": 1,
+        "max": 1092
+      },
+      "acknowledgedWorkerMs": {
+        "p50": 70.50444900000002,
+        "p95": 6626.025456000003,
+        "p99": 6845.959849000006,
+        "min": 22.765989999999874,
+        "max": 6845.959849000006
+      },
+      "failedJobs": 0,
+      "failureRate": 0,
+      "recoveredJobs": 0,
+      "recoveredJobRate": 0,
+      "recoveryCount": 0,
+      "retryCount": 0,
+      "activeWorkerCpuMs": 370,
+      "workerCpuIncludingWaitsMs": 460,
+      "workerPeakRssKiB": [
+        110780,
+        110508
+      ],
+      "workerCpuSamples": {
+        "before": [
+          {
+            "cpuTicks": 23,
+            "peakRssKiB": 110780
+          },
+          {
+            "cpuTicks": 23,
+            "peakRssKiB": 110508
+          }
+        ],
+        "after": [
+          {
+            "cpuTicks": 45,
+            "peakRssKiB": 110780
+          },
+          {
+            "cpuTicks": 47,
+            "peakRssKiB": 110508
+          }
+        ]
+      }
+    },
+    "totalWallMs": 112287.05064800002,
+    "jobsPerWallSecond": 0.21373791422517402,
+    "workerStartupMs": 447.3021730000037,
+    "shutdownMs": 8.036495000007562,
+    "waves": [
+      {
+        "wave": 1,
+        "submissions": 8,
+        "activeBatchMs": 7325.480416000006,
+        "admissionWaitMs": 43923.153192,
+        "jobsPerActiveSecond": 1.0920785458011377,
+        "queueWaitMs": {
+          "p50": 97,
+          "p95": 598,
+          "p99": 598,
+          "min": 3,
+          "max": 598
+        },
+        "apiSubmissionMs": {
+          "p50": 42.381150999994134,
+          "p95": 48.2729629999958,
+          "p99": 48.2729629999958,
+          "min": 20.562944999997853,
+          "max": 48.2729629999958
+        },
+        "acknowledgedWorkerMs": {
+          "p50": 70.50444900000002,
+          "p95": 6626.025456000003,
+          "p99": 6626.025456000003,
+          "min": 22.765989999999874,
+          "max": 6626.025456000003
+        },
+        "workerCpuMs": 130,
+        "workerPeakRssKiB": [
+          110780,
+          110508
+        ],
+        "failedJobs": 0,
+        "recoveredJobs": 0,
+        "recoveryCount": 0,
+        "retryCount": 0,
+        "workerPids": [
+          14111,
+          14123
+        ]
+      },
+      {
+        "wave": 2,
+        "submissions": 8,
+        "activeBatchMs": 7084.133069999982,
+        "admissionWaitMs": 0.01701500001945533,
+        "jobsPerActiveSecond": 1.129284263995343,
+        "queueWaitMs": {
+          "p50": 321,
+          "p95": 1092,
+          "p99": 1092,
+          "min": 1,
+          "max": 1092
+        },
+        "apiSubmissionMs": {
+          "p50": 22.141311999992467,
+          "p95": 27.147100000001956,
+          "p99": 27.147100000001956,
+          "min": 16.82805899999221,
+          "max": 27.147100000001956
+        },
+        "acknowledgedWorkerMs": {
+          "p50": 68.09862300000532,
+          "p95": 6593.583633000002,
+          "p99": 6593.583633000002,
+          "min": 30.829388999998628,
+          "max": 6593.583633000002
+        },
+        "workerCpuMs": 130,
+        "workerPeakRssKiB": [
+          110780,
+          110508
+        ],
+        "failedJobs": 0,
+        "recoveredJobs": 0,
+        "recoveryCount": 0,
+        "retryCount": 0,
+        "workerPids": [
+          14111,
+          14123
+        ]
+      },
+      {
+        "wave": 3,
+        "submissions": 8,
+        "activeBatchMs": 7438.652361999993,
+        "admissionWaitMs": 46038.584185000014,
+        "jobsPerActiveSecond": 1.07546362038205,
+        "queueWaitMs": {
+          "p50": 51,
+          "p95": 1019,
+          "p99": 1019,
+          "min": 1,
+          "max": 1019
+        },
+        "apiSubmissionMs": {
+          "p50": 38.20246800000314,
+          "p95": 42.76176900000428,
+          "p99": 42.76176900000428,
+          "min": 20.4509309999994,
+          "max": 42.76176900000428
+        },
+        "acknowledgedWorkerMs": {
+          "p50": 65.82357100000081,
+          "p95": 6845.959849000006,
+          "p99": 6845.959849000006,
+          "min": 22.802172999989125,
+          "max": 6845.959849000006
+        },
+        "workerCpuMs": 110,
+        "workerPeakRssKiB": [
+          110780,
+          110508
+        ],
+        "failedJobs": 0,
+        "recoveredJobs": 0,
+        "recoveryCount": 0,
+        "retryCount": 0,
+        "workerPids": [
+          14111,
+          14123
+        ]
+      }
+    ],
+    "rawDurationsMs": {
+      "queueWaitMs": [
+        4,
+        57,
+        97,
+        120,
+        154,
+        3,
+        315,
+        598,
+        1,
+        321,
+        349,
+        388,
+        2,
+        61,
+        1025,
+        1092,
+        1,
+        51,
+        1019,
+        2,
+        51,
+        73,
+        402,
+        455
+      ],
+      "claimMs": [
+        11.111344999997527,
+        3.650976000004448,
+        4.156457999997656,
+        3.4669189999985974,
+        6.044018000000506,
+        8.839725999998336,
+        4.459596000000602,
+        4.931757999998808,
+        11.20909599999868,
+        5.755839000004926,
+        3.7542780000003404,
+        3.246624999999767,
+        12.877926000001025,
+        3.357458000005863,
+        3.451600000000326,
+        3.321278000003076,
+        10.194925999996485,
+        3.5374460000020918,
+        3.5491449999972247,
+        15.636966000005486,
+        3.7056460000021616,
+        3.77850899999612,
+        3.525863999995636,
+        3.3123869999981252
+      ],
+      "judgeMs": [
+        51.484424000002036,
+        33.18623300000036,
+        12.974094000004698,
+        23.765073999995366,
+        942.0171950000004,
+        305.76949000000604,
+        271.68955099999584,
+        6614.937189000004,
+        306.1209869999948,
+        18.783857999995234,
+        31.09119500000088,
+        6584.228275000001,
+        42.92819099999906,
+        959.6146030000018,
+        55.00878299999749,
+        271.40745400000014,
+        31.61897300000419,
+        970.3326549999911,
+        287.5601339999994,
+        42.921303000010084,
+        13.00061299999652,
+        320.4513350000052,
+        42.57926500000758,
+        6836.463967000003
+      ],
+      "reportMs": [
+        7.860006000002613,
+        5.2529970000032336,
+        5.61257299999852,
+        8.870175000003655,
+        5.6667989999987185,
+        7.029583000003186,
+        7.575083999996423,
+        6.119725999997172,
+        6.31998300000123,
+        6.249382000001788,
+        4.444390000004205,
+        6.088472000003094,
+        6.640014000004157,
+        5.940082000000984,
+        9.613550000001851,
+        9.069433999997273,
+        7.604639999990468,
+        6.995242999997572,
+        6.03907500000787,
+        7.216996000002837,
+        6.068029999994906,
+        6.049547000002349,
+        8.60564299998805,
+        6.166148000003886
+      ],
+      "totalMs": [
+        70.50444900000002,
+        42.112052999997104,
+        22.765989999999874,
+        36.12680999999429,
+        953.7504859999972,
+        321.6908079999994,
+        283.7537250000023,
+        6626.025456000003,
+        323.6828899999964,
+        30.829388999998628,
+        39.32594300000346,
+        6593.583633000002,
+        62.479278999999224,
+        968.933984000003,
+        68.09862300000532,
+        283.8257530000046,
+        49.45575700000336,
+        980.8861059999908,
+        297.16743600000336,
+        65.82357100000081,
+        22.802172999989125,
+        330.30676700000186,
+        54.729097999996156,
+        6845.959849000006
+      ]
+    },
+    "derivedStageQuantilesMs": {
+      "claimMs": {
+        "n": 24,
+        "p50": 3.7542780000003404,
+        "p95": 12.877926000001025,
+        "p99": 15.636966000005486,
+        "min": 3.246624999999767,
+        "max": 15.636966000005486
+      },
+      "judgeMs": {
+        "n": 24,
+        "p50": 55.00878299999749,
+        "p95": 6614.937189000004,
+        "p99": 6836.463967000003,
+        "min": 12.974094000004698,
+        "max": 6836.463967000003
+      },
+      "reportMs": {
+        "n": 24,
+        "p50": 6.249382000001788,
+        "p95": 9.069433999997273,
+        "p99": 9.613550000001851,
+        "min": 4.444390000004205,
+        "max": 9.613550000001851
+      }
+    },
+    "waveDriftFromFirst": [
+      {
+        "wave": 1,
+        "throughputRatio": 1,
+        "queueP95DeltaMs": 0,
+        "workerCpuDeltaMs": 0,
+        "workerPeakRssDeltaKiB": [
+          0,
+          0
+        ]
+      },
+      {
+        "wave": 2,
+        "throughputRatio": 1.0340687199993583,
+        "queueP95DeltaMs": 494,
+        "workerCpuDeltaMs": 0,
+        "workerPeakRssDeltaKiB": [
+          0,
+          0
+        ]
+      },
+      {
+        "wave": 3,
+        "throughputRatio": 0.9847859611536466,
+        "queueP95DeltaMs": 421,
+        "workerCpuDeltaMs": -20,
+        "workerPeakRssDeltaKiB": [
+          0,
+          0
+        ]
+      }
+    ],
+    "availableRawQueueWorkerQuantilesThroughputAndCpuRecomputed": true,
+    "allJobsAcceptedOnceGenerationOne": true,
+    "apiSubmissionRawSamplesPresent": false,
+    "absoluteArrivalQueueStartFinishTimestampsPresent": false,
+    "limitations": [
+      "Three eight-job waves are a finite regression campaign, not sustained saturation or a production capacity bound.",
+      "No campaign warmup submissions. Earlier tests may have warmed the shared executor; wave drift is descriptive, not causal.",
+      "Nearest-rank percentiles: per-wave p95/p99 are maxima; aggregate n=24 p99 is the maximum. No population-tail estimate.",
+      "Active throughput includes admission HTTP and completion observation, but excludes quota waits and consistency queries. Wall throughput includes startup, all waits, verification and worker shutdown.",
+      "Worker CPU and lifetime peak RSS cover the two owned Node PIDs only; API/DB/Redis and compiler/executor resources are not included.",
+      "All cases expect AC. This is not a full eight-language verdict/memory matrix or a before/after optimization comparison."
+    ]
+  },
+  "phase2ScalingTrials": {
+    "rawSha256": "4b5fa1722a21907949b1791319fafb322efd18de75fbea14f15e58c5a684fa19",
+    "environment": {
+      "node": "v24.22.2",
+      "platform": "linux",
+      "kernel": "7.0.0-1014-aws",
+      "logicalCpus": 4,
+      "cpu": "Intel(R) Xeon(R) 6975P-C"
+    },
+    "scope": "Disposable API/PostgreSQL/Redis, real workers and go-judge; eight accepted languages, one sample/job, alternating 1/2/2/1 worker trials after Python warmup.",
+    "apiInstances": 1,
+    "trials": [
+      {
+        "workers": 1,
+        "concurrencyPerWorker": 1,
+        "submissions": 8,
+        "elapsedMs": 8259.834807000001,
+        "jobsPerSecond": 0.9685423724479577,
+        "apiSubmissionMs": {
+          "p50": 46.970597,
+          "p95": 52.644301999999925,
+          "p99": 52.644301999999925,
+          "min": 18.46520099999998,
+          "max": 52.644301999999925
+        },
+        "queueWaitMs": {
+          "p50": 938,
+          "p95": 7920,
+          "p99": 7920,
+          "min": 1,
+          "max": 7920
+        },
+        "workerCpuMs": 90,
+        "workerCpuCores": 0.010896101690039524,
+        "workerPeakRssKiB": [
+          112572
+        ],
+        "acknowledgedWorkerMs": {
+          "p50": 64.64765799999998,
+          "p95": 6652.301003999999,
+          "p99": 6652.301003999999,
+          "min": 23.218435999999883,
+          "max": 6652.301003999999
+        }
+      },
+      {
+        "workers": 2,
+        "concurrencyPerWorker": 1,
+        "submissions": 8,
+        "elapsedMs": 7421.23134,
+        "jobsPerSecond": 1.0779882250645483,
+        "apiSubmissionMs": {
+          "p50": 22.428783999999723,
+          "p95": 27.792061999998623,
+          "p99": 27.792061999998623,
+          "min": 17.555069000000003,
+          "max": 27.792061999998623
+        },
+        "queueWaitMs": {
+          "p50": 323,
+          "p95": 1361,
+          "p99": 1361,
+          "min": 1,
+          "max": 1361
+        },
+        "workerCpuMs": 100,
+        "workerCpuCores": 0.013474852813306855,
+        "workerPeakRssKiB": [
+          111964,
+          111196
+        ],
+        "acknowledgedWorkerMs": {
+          "p50": 58.72985300000005,
+          "p95": 6943.495451999999,
+          "p99": 6943.495451999999,
+          "min": 26.872946999999954,
+          "max": 6943.495451999999
+        }
+      },
+      {
+        "workers": 2,
+        "concurrencyPerWorker": 1,
+        "submissions": 8,
+        "elapsedMs": 7218.38754399999,
+        "jobsPerSecond": 1.1082807553952538,
+        "apiSubmissionMs": {
+          "p50": 33.77100200000132,
+          "p95": 48.627448999999615,
+          "p99": 48.627448999999615,
+          "min": 15.925788000000466,
+          "max": 48.627448999999615
+        },
+        "queueWaitMs": {
+          "p50": 89,
+          "p95": 661,
+          "p99": 661,
+          "min": 1,
+          "max": 661
+        },
+        "workerCpuMs": 100,
+        "workerCpuCores": 0.013853509442440673,
+        "workerPeakRssKiB": [
+          111452,
+          111156
+        ],
+        "acknowledgedWorkerMs": {
+          "p50": 67.92319500000008,
+          "p95": 6446.178239,
+          "p99": 6446.178239,
+          "min": 23.14939000000004,
+          "max": 6446.178239
+        }
+      },
+      {
+        "workers": 1,
+        "concurrencyPerWorker": 1,
+        "submissions": 8,
+        "elapsedMs": 8415.05793299999,
+        "jobsPerSecond": 0.9506767586979619,
+        "apiSubmissionMs": {
+          "p50": 26.98239000000467,
+          "p95": 28.664682000002358,
+          "p99": 28.664682000002358,
+          "min": 15.685949999999139,
+          "max": 28.664682000002358
+        },
+        "queueWaitMs": {
+          "p50": 1231,
+          "p95": 8074,
+          "p99": 8074,
+          "min": 1,
+          "max": 8074
+        },
+        "workerCpuMs": 90,
+        "workerCpuCores": 0.01069511353535207,
+        "workerPeakRssKiB": [
+          110756
+        ],
+        "acknowledgedWorkerMs": {
+          "p50": 49.761078,
+          "p95": 6746.08876,
+          "p99": 6746.08876,
+          "min": 20.40010899999993,
+          "max": 6746.08876
+        }
+      }
+    ],
+    "admissionPauses": [
+      {
+        "requiredRequests": 10,
+        "elapsedMs": 44361.575147999996
+      }
+    ],
+    "measuredJobs": 32,
+    "separateMixedCampaignJobs": 24,
+    "submissionIdOverlap": 0,
+    "availableRawQueueWorkerQuantilesThroughputAndCpuRecomputed": true,
+    "apiSubmissionRawSamplesPresent": false,
+    "limitations": [
+      "Eight jobs/trial: p95/p99 are sample maxima, not steady-state tail estimates.",
+      "Jobs/s measures admitted bursts; per-IP 20/minute admission pauses are recorded outside the timed interval.",
+      "Shared CI runner; no production capacity or before/after optimization claim.",
+      "Worker CPU uses owned-PID procfs tick deltas; peak RSS includes warmup. API also hosts the test harness: isolated API CPU/RSS is not reported.",
+      "Proxy faults interrupt worker TCP links, not Redis/API services. Natural lease expiry uses real time."
+    ],
+    "doNotPoolWithMixedCampaign": true
+  },
+  "recovery": [
+    {
+      "file": "phase2-api-restart.json",
+      "rawSha256": "4dc631ca268fc821bc28373548fdc2d203ee551072b28b7ff0d785bc23d165d2",
+      "case": {
+        "scenario": "actual owned API SIGKILL and replacement process",
+        "restartMs": 1030.7216359999998,
+        "completionMs": 8088.204465999999,
+        "submissions": 3,
+        "finalStatus": "ACCEPTED",
+        "generation": 1,
+        "recoveries": 0,
+        "xp": 10,
+        "failedDuringDowntime": 1,
+        "otherApiInstancesRunning": 0,
+        "redisRestarted": false
+      }
+    },
+    {
+      "file": "phase2-judge-capacity.json",
+      "rawSha256": "4b5fa1722a21907949b1791319fafb322efd18de75fbea14f15e58c5a684fa19",
+      "case": {
+        "scenario": "worker Redis TCP interruption/reconnect and duplicate delivery",
+        "elapsedMs": 2433.878965000011,
+        "rejectedConnections": 16,
+        "result": "ACCEPTED",
+        "generation": 1
+      }
+    },
+    {
+      "file": "phase2-judge-capacity.json",
+      "rawSha256": "4b5fa1722a21907949b1791319fafb322efd18de75fbea14f15e58c5a684fa19",
+      "case": {
+        "scenario": "worker API TCP interruption and result retry",
+        "elapsedMs": 3026.3356670000067,
+        "rejectedConnections": 1,
+        "result": "ACCEPTED",
+        "generation": 1,
+        "reportMs": 1009.4736670000002
+      }
+    },
+    {
+      "file": "phase2-judge-capacity.json",
+      "rawSha256": "4b5fa1722a21907949b1791319fafb322efd18de75fbea14f15e58c5a684fa19",
+      "case": {
+        "scenario": "two-worker duplicate delivery during active lease",
+        "result": "ACCEPTED",
+        "generation": 1,
+        "executions": 1
+      }
+    },
+    {
+      "file": "phase2-judge-capacity.json",
+      "rawSha256": "4b5fa1722a21907949b1791319fafb322efd18de75fbea14f15e58c5a684fa19",
+      "case": {
+        "scenario": "SIGKILL and natural database lease expiry",
+        "recoveredMs": 69676.88099800001,
+        "completedMs": 71902.58898600002,
+        "result": "ACCEPTED",
+        "generation": 2,
+        "recoveries": 1,
+        "staleCallback": 409
+      }
+    },
+    {
+      "file": "phase2-redis-restart.json",
+      "rawSha256": "ca65312210c01154c914e214bc3051dd4d8165269f4a6172e5759e12eb89ace0",
+      "case": {
+        "scenario": "actual clean owned Redis daemon restart with AOF and mixed queued work",
+        "restartMs": 8648.224247999999,
+        "completionMs": 10245.199392999999,
+        "originalLanguages": [
+          "PYTHON",
+          "C",
+          "JAVASCRIPT"
+        ],
+        "acceptedSubmissions": 4,
+        "failedDuringDowntime": 1,
+        "failureStatus": 500,
+        "failureLatencyMs": 452.8251190000001,
+        "generation": 1,
+        "recoveries": 0,
+        "xp": 10,
+        "redisImage": "redis:8.10.3",
+        "redisImageId": "sha256:978293674c6b207a799aa6003064828846a7771cd521603c41e9a4c7f28ec4dc",
+        "appendonly": true,
+        "appendfsync": "everysec",
+        "cleanStopExitCode": 0,
+        "firstRunId": "19a540621cccf8453f73090e23941acf6f98f4de",
+        "secondRunId": "fe425a5360f6fe2b16a20f96d12af4b6a10957f4",
+        "workflowRedisRestarted": false,
+        "crashDurabilityTested": false
+      }
+    },
+    {
+      "file": "phase2-rejudge-recovery.json",
+      "rawSha256": "2adae1a3d6961ac099b038ca1879645207a3a99da57106ae9024c45021a97272",
+      "case": {
+        "scenario": "accepted generation 1, interrupted rejudge generation 2, natural recovery generation 3",
+        "recoveredMs": 86561.455223,
+        "completedMs": 89818.119537,
+        "finalStatus": "ACCEPTED",
+        "generation": 3,
+        "recoveries": 1,
+        "xp": 10,
+        "solveRows": 1,
+        "learningRows": 1,
+        "notifications": 1,
+        "staleCallback": 409,
+        "duplicateFinalCallback": 200,
+        "leaseClockChanged": false
+      }
+    }
+  ],
+  "browser": {
+    "probeSha256": "a8e184761cc09cb1fa532834076e2034ac19a0a0526798da50ebe6607d4453c7",
+    "probeGitBlob": "50f15ac50213fbf5a874e62c689da275892a71fd",
+    "probeEqualAcrossThreeSources": true,
+    "runs": [
+      {
+        "label": "Phase IV foundation",
+        "runId": 43841589126,
+        "artifactId": 14213359764,
+        "artifactUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43841589126/artifacts/14213359764",
+        "zipSha256": "8e21922d89433c65856ae5ab4885018e7704228eaf473b60ed5d2b0c9bd19cd4",
+        "jsonSha256": "61d8f0ca7a1911ed974cea25157afe07abb9881ddbdb3f0face1e2300c1a955a",
+        "checkout": {
+          "sha": "8e1296c5483282331029a2ce784dddd3722f054d",
+          "tree": "09103af262fa16382919701966677795240b9746",
+          "workflowRunId": "43841589126",
+          "workflowAttempt": "1"
+        },
+        "fixture": {
+          "ownership": "created by this disposable Compose test",
+          "publishedPublicProblems": 1,
+          "ordinarySubmissions": 2,
+          "acceptedSubmissions": 1,
+          "wrongAnswerSubmissions": 1,
+          "solvedProblems": 1
+        },
+        "environment": {
+          "browser": "chromium",
+          "browserVersion": "153.0.8010.12",
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "node": "v24.22.2",
+          "platform": "linux",
+          "architecture": "x64",
+          "composeMode": "production",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36"
+        },
+        "protocol": {
+          "navigations": 3,
+          "periodsPerNavigation": [
+            7,
+            90,
+            30,
+            7,
+            90
+          ],
+          "initialObservationAfterUiReadyMs": 500,
+          "finalEventDeliveryWaitMs": 100,
+          "maximumRenderFrameWaitMs": 250,
+          "cache": "warm context reused after existing learning visits; no cache clearing",
+          "networkOrCpuThrottling": "none",
+          "maximumEntriesPerTypePerDocument": 1000,
+          "forcedGarbageCollection": false
+        },
+        "lcpCandidateMs": {
+          "raw": [
+            368,
+            364,
+            364
+          ],
+          "median": 364,
+          "max": 368
+        },
+        "initialObservedCls": {
+          "raw": [
+            0.029426997502644856,
+            0.029426997502644856,
+            0.029426997502644856
+          ],
+          "median": 0.029426997502644856,
+          "max": 0.029426997502644856
+        },
+        "clickToSecondVerifiedFrameMs": {
+          "raw": [
+            46.59999999997672,
+            47.90000000002328,
+            45.59999999997672,
+            38.20000000006985,
+            48.5,
+            45.39999999990687,
+            47.89999999990687,
+            45.29999999993015,
+            46.199999999953434,
+            46.60000000009313,
+            46.699999999953434,
+            46.699999999953434,
+            46.199999999953434,
+            46,
+            47.699999999953434
+          ],
+          "median": 46.59999999997672,
+          "max": 48.5
+        },
+        "lcpCandidateAreas": [
+          6498,
+          6498,
+          6498
+        ],
+        "heapDeltaUsedBytes": [
+          -6242156,
+          7821228,
+          7138472
+        ],
+        "inp": {
+          "value": null,
+          "reason": "Three finite scripted page visits do not establish page-lifetime or field INP. Event Timing samples are retained separately."
+        },
+        "apiStatusesAll200": true,
+        "observerBuffersTruncated": false
+      },
+      {
+        "label": "Phase IV final",
+        "runId": 43852089830,
+        "artifactId": 14220435745,
+        "artifactUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43852089830/artifacts/14220435745",
+        "zipSha256": "333fe6f8119bf2ff947df7c95c01feca11aef3bc95df88aafcd38b44f40493fe",
+        "jsonSha256": "677e880c3fd1f4592a14d61bcff123a438810a6f3ddaf54fbcbeb8607c6f8493",
+        "checkout": {
+          "sha": "906819c36a56f1f8326e6d8743b02a102762138a",
+          "tree": "f12f6c377ea07f0cb4b498ca0fe5889ed4401a66",
+          "workflowRunId": "43852089830",
+          "workflowAttempt": "1"
+        },
+        "fixture": {
+          "ownership": "created by this disposable Compose test",
+          "publishedPublicProblems": 1,
+          "ordinarySubmissions": 2,
+          "acceptedSubmissions": 1,
+          "wrongAnswerSubmissions": 1,
+          "solvedProblems": 1
+        },
+        "environment": {
+          "browser": "chromium",
+          "browserVersion": "153.0.8010.12",
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "node": "v24.22.2",
+          "platform": "linux",
+          "architecture": "x64",
+          "composeMode": "production",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36"
+        },
+        "protocol": {
+          "navigations": 3,
+          "periodsPerNavigation": [
+            7,
+            90,
+            30,
+            7,
+            90
+          ],
+          "initialObservationAfterUiReadyMs": 500,
+          "finalEventDeliveryWaitMs": 100,
+          "maximumRenderFrameWaitMs": 250,
+          "cache": "warm context reused after existing learning visits; no cache clearing",
+          "networkOrCpuThrottling": "none",
+          "maximumEntriesPerTypePerDocument": 1000,
+          "forcedGarbageCollection": false
+        },
+        "lcpCandidateMs": {
+          "raw": [
+            380,
+            384,
+            400
+          ],
+          "median": 384,
+          "max": 400
+        },
+        "initialObservedCls": {
+          "raw": [
+            0.05432499885559082,
+            0.048731330235799154,
+            0.048731330235799154
+          ],
+          "median": 0.048731330235799154,
+          "max": 0.05432499885559082
+        },
+        "clickToSecondVerifiedFrameMs": {
+          "raw": [
+            45.5,
+            47.20000000006985,
+            45.60000000009313,
+            45.90000000002328,
+            46.90000000002328,
+            45.59999999997672,
+            48.29999999993015,
+            45.699999999953434,
+            46.5,
+            46.40000000002328,
+            45.800000000046566,
+            47.5,
+            45.59999999997672,
+            46.59999999997672,
+            45.79999999993015
+          ],
+          "median": 45.90000000002328,
+          "max": 48.29999999993015
+        },
+        "lcpCandidateAreas": [
+          7410,
+          7410,
+          7410
+        ],
+        "heapDeltaUsedBytes": [
+          -14390460,
+          -5462372,
+          7727712
+        ],
+        "inp": {
+          "value": null,
+          "reason": "Three finite scripted page visits do not establish page-lifetime or field INP. Event Timing samples are retained separately."
+        },
+        "apiStatusesAll200": true,
+        "observerBuffersTruncated": false
+      },
+      {
+        "label": "Phase V foundation",
+        "runId": 43890166522,
+        "artifactId": 14238046500,
+        "artifactUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43890166522/artifacts/14238046500",
+        "zipSha256": "b436f4fe3802e47df95a20153c68900620c94759755b132aad968947c3f20571",
+        "jsonSha256": "aae1f89bc02f3bbc18beabad0efd888bcf361764ffbae413195d9ca6366d7c2b",
+        "checkout": {
+          "sha": "93b753d73b12efe2ce6e71805feca6522f7428d2",
+          "tree": "5588cb3e8648afed8fe10146d4da961a0ebb4035",
+          "workflowRunId": "43890166522",
+          "workflowAttempt": "1"
+        },
+        "fixture": {
+          "ownership": "created by this disposable Compose test",
+          "publishedPublicProblems": 1,
+          "ordinarySubmissions": 2,
+          "acceptedSubmissions": 1,
+          "wrongAnswerSubmissions": 1,
+          "solvedProblems": 1
+        },
+        "environment": {
+          "browser": "chromium",
+          "browserVersion": "153.0.8010.12",
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "node": "v24.22.2",
+          "platform": "linux",
+          "architecture": "x64",
+          "composeMode": "production",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36"
+        },
+        "protocol": {
+          "navigations": 3,
+          "periodsPerNavigation": [
+            7,
+            90,
+            30,
+            7,
+            90
+          ],
+          "initialObservationAfterUiReadyMs": 500,
+          "finalEventDeliveryWaitMs": 100,
+          "maximumRenderFrameWaitMs": 250,
+          "cache": "warm context reused after existing learning visits; no cache clearing",
+          "networkOrCpuThrottling": "none",
+          "maximumEntriesPerTypePerDocument": 1000,
+          "forcedGarbageCollection": false
+        },
+        "lcpCandidateMs": {
+          "raw": [
+            368,
+            368,
+            384
+          ],
+          "median": 368,
+          "max": 384
+        },
+        "initialObservedCls": {
+          "raw": [
+            0.048731330235799154,
+            0.048731330235799154,
+            0.048731330235799154
+          ],
+          "median": 0.048731330235799154,
+          "max": 0.048731330235799154
+        },
+        "clickToSecondVerifiedFrameMs": {
+          "raw": [
+            46.59999999997672,
+            47.199999999953434,
+            46.29999999993015,
+            46.800000000046566,
+            47.29999999993015,
+            46.59999999997672,
+            48.5,
+            44.90000000002328,
+            47,
+            47.199999999953434,
+            46.09999999997672,
+            47.800000000046566,
+            40.20000000006985,
+            46.40000000002328,
+            47.199999999953434
+          ],
+          "median": 46.800000000046566,
+          "max": 48.5
+        },
+        "lcpCandidateAreas": [
+          7410,
+          7410,
+          7410
+        ],
+        "heapDeltaUsedBytes": [
+          -13409080,
+          6895664,
+          -2858052
+        ],
+        "inp": {
+          "value": null,
+          "reason": "Three finite scripted page visits do not establish page-lifetime or field INP. Event Timing samples are retained separately."
+        },
+        "apiStatusesAll200": true,
+        "observerBuffersTruncated": false
+      }
+    ]
+  },
+  "bundle": {
+    "protocol": "One production build per source, same installed Front node_modules and lockfile, default monitoring, Node v24.22.1. gzip level 9, mtime=0, each emitted JS file compressed separately. Byte counts only, no latency inference.",
+    "baselineSource": "d0159b1f844bf0608415dded9e84af566c8e2041",
+    "candidateComponentSha256": {
+      "Front/src/components/DateTimePicker.tsx": "b5a29172305342bac76b08977a41d1eb93281d4ed39add5cc541c42ae9a77af6",
+      "Front/src/learning/LearningGoalPanel.tsx": "8f6edbdf3a04bef4c667abd0dbedc731d5ce46a9ac5852bdc7c8b503f01506df"
+    },
+    "lockSha256": "728910bbbdfbc955cede2da1d604f9508e475cde4ce3222f5502d70ee238a644",
+    "baseline": {
+      "entry": "assets/index-CIlgqROi.js",
+      "entryBytes": 383981,
+      "entryGzip9Bytes": 123080,
+      "allJsFiles": 54,
+      "allJsBytes": 1493955,
+      "allJsSeparateGzip9Bytes": 489252,
+      "entrySha256": "ebd75d8c5a8e0c82b67a25789400e537b451000fde1491bca839ec0d03485b82"
+    },
+    "candidate": {
+      "entry": "assets/index-D3rT7Zuw.js",
+      "entryBytes": 383981,
+      "entryGzip9Bytes": 123079,
+      "allJsFiles": 54,
+      "allJsBytes": 1494009,
+      "allJsSeparateGzip9Bytes": 489331,
+      "entrySha256": "0bbf8a7118388aab2b72df5038c896912bd5bb905fbecfeaf90c0ace9ff8b9cf"
+    },
+    "delta": {
+      "entryBytes": 0,
+      "entryGzip9Bytes": -1,
+      "allJsFiles": 0,
+      "allJsBytes": 54,
+      "allJsSeparateGzip9Bytes": 79
+    },
+    "artifactSha256": "d8b4fcc76d4d0a3c8c0233acfd62da242a438855266fef3d83a50d245b756667",
+    "verifiedCurrentFrontHead": "4326d7febcf4f3a0e2ae819abdba7c81596b6e25"
+  },
+  "pending": {
+    "candidateSource": null,
+    "candidateCheckout": null,
+    "candidateTree": null,
+    "candidateRunId": null,
+    "editorObservation": {
+      "status": "PENDING_ACTUAL_CI_ARTIFACT",
+      "value": null
+    },
+    "layoutAttribution": {
+      "status": "PENDING_ACTUAL_CI_ARTIFACT",
+      "value": null
+    }
+  },
+  "analysisScope": "Read-only extraction, source/hash binding and independent arithmetic; no new benchmark, build, repository mutation or remote write."
+}

@@ -1,0 +1,28 @@
+Owned PG17.11/Redis8.10.3 ready on loopback; fresh temporary cluster. Command: ['node', 'scripts/run-integration.mjs', 'e2e', 'test/incremental-problem-stats.e2e-spec.ts', 'test/independent-problem-stats.e2e-spec.ts']
+
+ RUN  v4.1.12 /workspace/scratch/86de5f814139/oj-dbperf-review/Back
+
+ ❯ test/independent-problem-stats.e2e-spec.ts (2 tests | 2 skipped) 22ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/independent-problem-stats.e2e-spec.ts > Independent incremental-statistics boundary probes
+QueryFailedError: value too long for type character varying(30)
+ ❯ PostgresQueryRunner.query src/driver/postgres/PostgresQueryRunner.ts:346:18
+ ❯ DataSource.query src/data-source/DataSource.ts:545:19
+ ❯ test/independent-problem-stats.e2e-spec.ts:11:29
+      9|   beforeAll(async () => {
+     10|     await db.initialize();
+     11|     for (const id of users) await db.query(`INSERT INTO users(id,email…
+       |                             ^
+     12|       VALUES($1,$2,$3,'synthetic')`, [id, `${id}@independent.invalid`,…
+     13|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  11 passed | 2 skipped (13)
+   Start at  15:38:38
+   Duration  3.49s (transform 637ms, setup 0ms, import 2.00s, tests 1.17s, environment 0ms)
+
