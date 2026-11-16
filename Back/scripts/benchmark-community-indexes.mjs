@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
 import { cpus, platform, release } from 'node:os';
 import { DataSource } from 'typeorm';
+import pg from 'pg';
 import configured from '../dist/database/data-source.js';
 import { CommunityService } from '../dist/modules/community/community.service.js';
 import { CommunityProfileIndexes1795700000000 } from '../dist/database/migrations/1795700000000-community-profile-indexes.js';
@@ -11,7 +12,11 @@ import { CommunityProfileIndexes1795700000000 } from '../dist/database/migration
 // the configured database; require an explicit opt-in and local disposable server.
 assert.equal(process.env.UNSOLVABLE_BENCHMARK, '1', 'Set UNSOLVABLE_BENCHMARK=1 for an isolated local test server.');
 const url = new URL(configured.options.url);
+assert.ok(['postgres:', 'postgresql:'].includes(url.protocol), 'Use a PostgreSQL connection URL.');
+assert.equal(url.search, '', 'Connection query overrides are forbidden in this local benchmark.');
 assert.ok(['localhost', '127.0.0.1', '[::1]'].includes(url.hostname), 'Use a local disposable PostgreSQL server.');
+const effectiveHost = new pg.Client({ connectionString: url.href }).connectionParameters.host;
+assert.ok(['localhost', '127.0.0.1', '::1'].includes(effectiveHost), 'The effective PostgreSQL destination must be loopback.');
 const admin = await new DataSource({ ...configured.options, entities: [], migrations: [] }).initialize();
 const name = `unsolvable_benchmark_${randomUUID().replaceAll('-', '')}`;
 url.pathname = `/${name}`;
