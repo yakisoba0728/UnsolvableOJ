@@ -24,7 +24,12 @@ export function checkExecutorCompose(plan) {
     assert.ok(!service.network_mode && !service.pid && !service.userns_mode && service.ipc !== 'host', 'Host namespaces are prohibited');
     assert.equal(service.privileged ?? false, name === 'go-judge', 'Only go-judge requires privileged mode');
     assert.ok(service.cpus > 0 && Number.isFinite(service.cpus), 'Finite CPU ceilings are required');
-    assert.ok(service.mem_limit > 0 && Number.isSafeInteger(service.mem_limit), 'Finite memory ceilings are required');
+    // Compose JSON serializes byte values as decimal strings in some versions.
+    // Accept that canonical representation without accepting units, fractions,
+    // booleans or unsafe integers as resource ceilings.
+    const memory = typeof service.mem_limit === 'string' && /^[1-9]\d*$/.test(service.mem_limit)
+      ? Number(service.mem_limit) : service.mem_limit;
+    assert.ok(memory > 0 && Number.isSafeInteger(memory), 'Finite memory ceilings are required');
     assert.equal(service.restart, 'unless-stopped');
     assert.equal(service.logging?.driver, 'json-file');
     assert.equal(service.logging?.options?.['max-file'], '3');

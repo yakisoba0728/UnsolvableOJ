@@ -33,6 +33,23 @@ test('dedicated plan accepts isolated topology and optional named TLS identity f
   checkExecutorCompose(plan);
 });
 
+test('rendered Compose decimal byte strings retain the same finite memory and swap checks', () => {
+  const plan = fixture();
+  for (const service of Object.values(plan.services)) service.mem_limit = String(service.mem_limit);
+  plan.services['go-judge'].memswap_limit = String(plan.services['go-judge'].memswap_limit);
+  checkExecutorCompose(plan);
+  plan.services['go-judge'].mem_limit = String(1024 ** 3);
+  assert.throws(() => checkExecutorCompose(plan), /headroom/);
+});
+
+for (const value of ['', '0', '-1', '512m', '1.5', 'Infinity', '9007199254740992', true, 1.5, 0, -1, Infinity]) {
+  test(`preflight rejects noncanonical or unbounded memory ${JSON.stringify(value)}`, () => {
+    const plan = fixture();
+    plan.services.judge.mem_limit = value;
+    assert.throws(() => checkExecutorCompose(plan), /Finite memory/);
+  });
+}
+
 for (const [name, mutate] of [
   ['plaintext Redis', p => p.services.judge.environment.REDIS_TLS = 'false'],
   ['plaintext API', p => p.services.judge.environment.API_BASE_URL = 'http://api.example.test/api/v1'],
