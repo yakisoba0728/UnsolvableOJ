@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main, 'overhaul/integration', 'overhaul4/integration']
+    branches: [main, 'overhaul/integration', 'overhaul4/integration', 'overhaul5/integration']
     types: [opened, synchronize, reopened, labeled]
   # 매일 03:00 KST(18:00 UTC)에 main에서 전체 검사를 실행한다.
   schedule:
@@ -89,7 +89,7 @@ jobs:
           # PR은 merge 커밋과 base를, push는 이전 tip을 비교한다. 야간·수동 실행은 base가 없어 항상 빌드한다.
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
           CONTEXT: ${{ matrix.context }}
-          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main') || github.base_ref == 'overhaul4/integration' || github.head_ref == 'overhaul4/integration')) }}
+          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main') || github.base_ref == 'overhaul4/integration' || github.head_ref == 'overhaul4/integration' || github.base_ref == 'overhaul5/integration' || github.head_ref == 'overhaul5/integration')) }}
         run: |
           # Full validation includes all four actual image builds, independent of changed paths.
           if [ "$FULL" = true ]; then
@@ -102,7 +102,7 @@ jobs:
           else
             files=$(git diff --name-only FETCH_HEAD HEAD)
             if grep -qE "^($CONTEXT/|\.github/workflows/ci\.yml$|scripts/image[-_](audit|gate|applicability))" <<<"$files" || {
-              [ "$CONTEXT" = 'Judge/runtime' ] && grep -qE '^(scripts/verify_image_payload|docs/overhaul/(evidence/|repro/(kernel-header-applicability|phase3-refetch-cna-independent)\.py$|measurements/(phase2-image-remediation/before-runtime\.zip$|phase3-runtime-advisory-revalidation/)))' <<<"$files";
+              [ "$CONTEXT" = 'Judge/runtime' ] && grep -qE '^(scripts/verify_image_payload|docs/overhaul/(evidence/|phase5/evidence/security/|repro/(kernel-header-applicability|phase3-refetch-cna-independent)\.py$|measurements/(phase2-image-remediation/before-runtime\.zip$|phase3-runtime-advisory-revalidation/)))' <<<"$files";
             }; then
               echo "build=true" >> "$GITHUB_OUTPUT"
             else
@@ -168,7 +168,7 @@ jobs:
           EVENT: ${{ github.event_name }}
           BASE: ${{ github.event.pull_request.base.sha }}
           # The opt-in label also survives later pushes; it only adds full validation.
-          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main') || github.base_ref == 'overhaul4/integration' || github.head_ref == 'overhaul4/integration')) }}
+          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main') || github.base_ref == 'overhaul4/integration' || github.head_ref == 'overhaul4/integration' || github.base_ref == 'overhaul5/integration' || github.head_ref == 'overhaul5/integration')) }}
         run: |
           all() { for name in back front judge; do echo "$name=true" >> "$GITHUB_OUTPUT"; done; }
           # 전체 요청은 경로와 무관하게 브라우저·API·워커까지 모두 실행한다.

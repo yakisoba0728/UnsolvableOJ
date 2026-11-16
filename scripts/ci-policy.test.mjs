@@ -65,8 +65,8 @@ test('required gate fails for every failure/cancellation and accepts only succes
   assert.equal(run.status, 0);
 });
 
-test('both integration generations trigger CI and preserve final full validation', () => {
-  assert.match(workflow, /pull_request:\n    branches: \[main, 'overhaul\/integration', 'overhaul4\/integration'\]/);
+test('all integration generations trigger CI and preserve final full validation', () => {
+  assert.match(workflow, /pull_request:\n    branches: \[main, 'overhaul\/integration', 'overhaul4\/integration', 'overhaul5\/integration'\]/);
   assert.match(workflow, /FULL:.*github\.head_ref == 'overhaul\/integration'.*github\.base_ref == 'main'/);
   assert.match(workflow, /FULL:.*inputs\.full.*github\.event_name == 'schedule'/);
 });
@@ -81,7 +81,7 @@ test('adding a PR label triggers CI without replacing its original activity type
   assert.doesNotMatch(workflow, /^  pull_request_target:/m, 'Label opt-in must not change the workflow trust context');
 });
 
-test('Phase IV feature and final PRs always request full validation in both selectors', () => {
+test('Phase IV and V feature and final PRs always request full validation in both selectors', () => {
   const expressions = [...workflow.matchAll(/^\s+FULL: \$\{\{ (.+) \}\}$/gm)].map(match => match[1]);
   assert.equal(expressions.length, 2);
   assert.equal(expressions[0], expressions[1], 'Image and suite selection must use the same policy');
@@ -96,6 +96,9 @@ test('Phase IV feature and final PRs always request full validation in both sele
     ['overhaul4/feature', 'overhaul4/integration', 'pull_request', '', false, true],
     ['overhaul4/integration', 'overhaul/integration', 'pull_request', '', false, true],
     ['overhaul4/integration', 'main', 'pull_request', '', false, true],
+    ['overhaul5/feature', 'overhaul5/integration', 'pull_request', '', false, true],
+    ['overhaul5/integration', 'overhaul4/integration', 'pull_request', '', false, true],
+    ['overhaul5/integration', 'main', 'pull_request', '', false, true],
     ['feature', 'main', 'pull_request', 'full-validation', false, true],
     ['main', 'main', 'schedule', '', false, true],
     ['main', 'main', 'workflow_dispatch', '', true, true],
