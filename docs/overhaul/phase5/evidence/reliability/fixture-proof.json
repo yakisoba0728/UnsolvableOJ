@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-16T14:40:36.210Z",
+  "result": "PASS",
+  "scope": "fixture seed, product relationships, empty rollback/reapply, populated rollback refusal and all-table preservation only",
+  "postgres": "PostgreSQL 17.11 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0, 64-bit",
+  "node": "v24.22.1",
+  "baseHead": "ce26659b816c1dc1450cdc48f0c58d6e41ecea1e",
+  "fileSha256": {
+    "Back/scripts/phase4-restore-rehearsal.mjs": "ba7ccd1dc85a1926e5f71ba1b18a8e4a72a9d583d725a9e18f89243e48b0c1c5",
+    "Back/src/database/migrations/1796200000000-learning-goals.ts": "d6b423e773f20e9a7baa4f80a7c1053a99667cdbc0f5df1105a9be1a82067dee",
+    "Back/test/learning-goal-migration.e2e-spec.ts": "4a8dcb82d7cf928cae36930f493a5442092240ead9ea59111aa827b0f136b6f2"
+  },
+  "migrations": 31,
+  "databaseBytes": 11245235,
+  "products": {
+    "goals": 12,
+    "problemVersions": 24,
+    "solves": 128,
+    "xpMatchesLedger": true,
+    "solveEvidenceMatches": true,
+    "assessments": 1,
+    "candidates": 8,
+    "algorithmPins": 1,
+    "vibePins": 1,
+    "assessmentSubmissions": 8,
+    "assessmentSubmissionOwnershipVersionsMatch": true,
+    "workspaces": 8,
+    "revisions": 16,
+    "workspaceOwnershipVersionsMatch": true
+  },
+  "tables": [
+    {
+      "table": "analysis_attempts",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "audit_events",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "community_comment_votes",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "community_comments",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "community_follows",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "community_post_views",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "community_posts",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "community_reports",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "community_saved",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "community_votes",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "email_delivery_clock",
+      "rows": 1,
+      "digest": "7f07a0af5270acec2ef23add3dffc141"
+    },
+    {
+      "table": "email_outbox",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "email_preferences",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "email_request_limits",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "email_tokens",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "enterprise_attempts",
+      "rows": 8,
+      "digest": "e439f1d10916f62bad7abd5d79559b8e"
+    },
+    {
+      "table": "enterprise_problem_versions",
+      "rows": 1,
+      "digest": "80eaa1b4c8e5bdd85e7415cde4d6efa2"
+    },
+    {
+      "table": "enterprise_tests",
+      "rows": 1,
+      "digest": "f3e1bf476f95af9abca0492b504a4f68"
+    },
+    {
+      "table": "enterprise_vibe_versions",
+      "rows": 1,
+      "digest": "048bf6fb159fb035c3c8a891c0c63c22"
+    },
+    {
+      "table": "learning_goals",
+      "rows": 12,
+      "digest": "0230926751c18ea1c3f6aabd241c6af5"
+    },
+    {
+      "table": "migrations",
+      "rows": 31,
+      "digest": "78d1465cfb5d2de87340ea341607b74e"
+    },
+    {
+      "table": "mission_states",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "notifications",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "problem_bookmarks",
+      "rows": 128,
+      "digest": "efb3ef7525add1eb38380c4f650f4dda"
+    },
+    {
+      "table": "problem_solver_counts",
+      "rows": 384,
+      "digest": "c60b6df804332f48a02f57e5d197e717"
+    },
+    {
+      "table": "problem_stats",
+      "rows": 24,
+      "digest": "2693210c663036d46ea3cf6a1bb11b03"
+    },
+    {
+      "table": "problem_versions",
+      "rows": 24,
+      "digest": "7fd5f8c6922baa7f157b8d911f0e92f9"
+    },
+    {
+      "table": "problems",
+      "rows": 24,
+      "digest": "e3b149a5b2c7fb7bcb673983979ef308"
+    },
+    {
+      "table": "refresh_tokens",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "submissions",
+      "rows": 2056,
+      "digest": "4db2427be075f2dfffd8789fa9368b4e"
+    },
+    {
+      "table": "test_cases",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "user_badges",
+      "rows": 0,
+      "digest": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "table": "user_problem_solves",
+      "rows": 128,
+      "digest": "8db701f80a514b603165b941a1294d47"
+    },
+    {
+      "table": "users",
+      "rows": 128,
+      "digest": "88d7f29fd1b7fd90e3efe6fe24018037"
+    },
+    {
+      "table": "vibe_attempts",
+      "rows": 8,
+      "digest": "5dbf410be04d0f892733bea4a70f3725"
+    },
+    {
+      "table": "vibe_challenge_versions",
+      "rows": 1,
+      "digest": "00c81660a88cbe81ce16011588db375d"
+    },
+    {
+      "table": "vibe_revisions",
+      "rows": 16,
+      "digest": "33e3bd10e65aebf550cfd8ea61c8806c"
+    }
+  ],
+  "archiveRestore": "NOT_EXECUTED_DOCKER_UNAVAILABLE",
+  "providerCalls": 0,
+  "limits": [
+    "Synthetic fixture only; no API authorization, native judging, real award, deployment, RTO/RPO or capacity claim.",
+    "The fixture proof does not call or bypass the guarded full restore entrypoint."
+  ],
+  "cleanup": "generated fixture database removed"
+}
