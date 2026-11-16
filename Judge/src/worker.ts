@@ -54,6 +54,7 @@ export async function startWorker(
     const deadline = AbortSignal.timeout(15_000);
     const response = await fetch(`${api.url}${path}`, {
       method,
+      redirect: "error",
       headers: {
         "X-Judge-Token": api.token,
         "X-Judge-Worker": workerId,
@@ -117,7 +118,7 @@ export async function startWorker(
         if (cancellation.signal.aborted) return;
         console.error(`Judge failed for ${job.data.submissionId}:`, error);
         if (error instanceof SandboxUnavailableError) {
-          // lease를 반납하면 API가 복구 횟수를 쓰지 않고 다음 generation으로 다시 큐에 넣는다.
+          // lease를 반납하면 API가 복구 횟수를 한 번 쓰고 다음 generation으로 다시 큐에 넣는다.
           // 반납에 실패하면 예전처럼 lease 만료 복구에 맡긴다(제출당 5회 뒤에는 API가 SYSTEM_ERROR로 끝냄).
           void waitForSandbox().catch(() => {});
           await callApi(`${path}/release`, "PATCH", undefined, attempt, cancellation.signal).catch((releaseError) => {
