@@ -9,6 +9,7 @@ import {
 import { InjectDataSource } from '@nestjs/typeorm';
 import { randomUUID } from 'node:crypto';
 import { DataSource, type EntityManager } from 'typeorm';
+import { lockActiveActor } from '../../common/active-actor.js';
 import { challenge, VIBE_LIMITS, validateFiles } from './vibe.catalog.js';
 import { VibeAi } from './vibe.ai.js';
 import {
@@ -156,8 +157,14 @@ export class VibeService {
       ],
     );
   }
-  async startEnterprise(examId: string, challengeId: string, userId: string) {
+  async startEnterprise(
+    examId: string,
+    challengeId: string,
+    user: AuthenticatedUser,
+  ) {
+    const userId = user.id;
     return this.db.transaction(async (manager) => {
+      await lockActiveActor(manager, user);
       // Acquire the parent lock before deriving eligibility. A candidate can
       // spend the remaining exam time waiting behind another workspace/finish
       // transaction; PostgreSQL now() remains fixed at transaction start.
@@ -265,29 +272,34 @@ export class VibeService {
       previousFiles: rows[1]?.files ?? rows[0].files,
     };
   }
-  async finalize(id: string, userId: string) {
+  async finalize(id: string, userId: string, actor: AuthenticatedUser) {
     const row = await this.owned(id, userId);
-    if (!row.submitted_at) return this.run(id, userId, row.revision, true);
+    if (!row.submitted_at)
+      return this.runForOwner(id, userId, row.revision, actor, true);
     if (row.state.report?.evaluationStatus !== 'complete')
-      return this.evaluate(id, userId, row.revision);
+      return this.evaluateForOwner(id, userId, row.revision, actor);
     return this.get(id, userId);
   }
-  async finalizeExam(examId: string, userId: string) {
+  async finalizeExam(examId: string, user: AuthenticatedUser) {
     const rows: { id: string }[] = await this.db.query(
       'SELECT id FROM vibe_attempts WHERE enterprise_attempt_id=$1 AND user_id=$2',
-      [examId, userId],
+      [examId, user.id],
     );
     // A busy or unavailable task stays pending; its saved snapshot remains available to the reviewer.
-    await Promise.allSettled(rows.map((row) => this.finalize(row.id, userId)));
+    await Promise.allSettled(
+      rows.map((row) => this.finalize(row.id, user.id, user)),
+    );
   }
   async get(id: string, userId: string) {
     return this.view(await this.owned(id, userId));
   }
 
-  async start(challengeId: string, userId: string) {
+  async start(challengeId: string, user: AuthenticatedUser) {
     if (challengeId !== challenge.id)
       throw new NotFoundException('과제를 찾을 수 없습니다.');
+    const userId = user.id;
     return this.db.transaction(async (manager) => {
+      await lockActiveActor(manager, user);
       await manager.query(
         "SELECT pg_advisory_xact_lock(hashtextextended('vibe-user:' || $1, 0))",
         [userId],
@@ -386,14 +398,15 @@ export class VibeService {
   }
   async edit(
     id: string,
-    userId: string,
+    user: AuthenticatedUser,
     revision: number,
     action: 'save' | 'apply' | 'undo',
     files?: unknown,
     messageId?: string,
   ) {
     return this.db.transaction(async (manager) => {
-      const row = await this.owned(id, userId, manager, true);
+      await lockActiveActor(manager, user);
+      const row = await this.owned(id, user.id, manager, true);
       this.assertRevision(row, revision);
       const content = attemptSnapshot(row);
       let next: ProjectFiles;
@@ -436,8 +449,12 @@ export class VibeService {
     userId: string,
     revision: number,
     kind: 'chat' | 'run' | 'submit' | 'evaluate',
+    actor: AuthenticatedUser,
   ) {
     return this.db.transaction(async (manager) => {
+      // Account/session changes serialize before admission, then parent/workspace
+      // locks. Staff finalization authenticates the staff actor, not the owner.
+      await lockActiveActor(manager, actor);
       await manager.query(
         "SELECT pg_advisory_xact_lock(hashtextextended('vibe-operations', 0))",
       );
@@ -491,14 +508,19 @@ export class VibeService {
     );
   }
 
-  async chat(id: string, userId: string, revision: number, prompt: string) {
+  async chat(
+    id: string,
+    user: AuthenticatedUser,
+    revision: number,
+    prompt: string,
+  ) {
     if (!prompt.trim()) throw new BadRequestException('질문을 입력해 주세요.');
     if (!this.ai.available)
       throw new HttpException(
         '대화 기능이 아직 준비되지 않았습니다.',
         HttpStatus.SERVICE_UNAVAILABLE,
       );
-    const row = await this.operation(id, userId, revision, 'chat');
+    const row = await this.operation(id, user.id, revision, 'chat', user);
     row.state.messages.push({
       id: randomUUID(),
       role: 'user',
@@ -528,10 +550,21 @@ export class VibeService {
     return this.finish(row);
   }
 
-  async run(
+  run(
+    id: string,
+    user: AuthenticatedUser,
+    revision: number,
+    final = false,
+    reflection = '',
+  ) {
+    return this.runForOwner(id, user.id, revision, user, final, reflection);
+  }
+
+  private async runForOwner(
     id: string,
     userId: string,
     revision: number,
+    actor: AuthenticatedUser,
     final = false,
     reflection = '',
   ) {
@@ -540,6 +573,7 @@ export class VibeService {
       userId,
       revision,
       final ? 'submit' : 'run',
+      actor,
     );
     try {
       const content = attemptSnapshot(row);
@@ -585,8 +619,17 @@ export class VibeService {
     }
   }
 
-  async evaluate(id: string, userId: string, revision: number) {
-    const row = await this.operation(id, userId, revision, 'evaluate');
+  evaluate(id: string, user: AuthenticatedUser, revision: number) {
+    return this.evaluateForOwner(id, user.id, revision, user);
+  }
+
+  private async evaluateForOwner(
+    id: string,
+    userId: string,
+    revision: number,
+    actor: AuthenticatedUser,
+  ) {
+    const row = await this.operation(id, userId, revision, 'evaluate', actor);
     try {
       if (!row.state.report)
         throw new BadRequestException('평가할 제출이 없습니다.');

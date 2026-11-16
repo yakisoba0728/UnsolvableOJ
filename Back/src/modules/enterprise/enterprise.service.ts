@@ -470,7 +470,7 @@ export class EnterpriseService {
   }
 
   async startVibe(id: string, challengeId: string, user: AuthenticatedUser) {
-    return this.vibe.startEnterprise(id, challengeId, user.id);
+    return this.vibe.startEnterprise(id, challengeId, user);
   }
   async finish(id: string, user: AuthenticatedUser) {
     const row = await this.dataSource.transaction(async (manager) => {
@@ -481,7 +481,7 @@ export class EnterpriseService {
       );
       return saved;
     });
-    await this.vibe.finalizeExam(id, user.id);
+    await this.vibe.finalizeExam(id, user);
     return toAttempt(row);
   }
   private async ownAttempt(
@@ -557,7 +557,7 @@ export class EnterpriseService {
       throw new ConflictException(
         '응시가 끝난 뒤 저장본을 채점할 수 있습니다.',
       );
-    await this.vibe.finalize(vibeId, row.user_id);
+    await this.vibe.finalize(vibeId, row.user_id, user);
     return this.reviewVibe(testId, attemptId, vibeId, user);
   }
   private assertTasks(problems: string[], vibeIds: string[], retainedVibeIds: string[] = []) {

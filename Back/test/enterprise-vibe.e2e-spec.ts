@@ -12,7 +12,10 @@ import {
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { Redis } from 'ioredis';
+import { JwtService } from '@nestjs/jwt';
 import type { NestExpressApplication } from '@nestjs/platform-express';
+import type { AuthenticatedUser } from '../src/modules/auth/auth.types.js';
+import { UserRole } from '../src/modules/users/user-role.enum.js';
 import { base, bearer, createApp, register } from './helpers.js';
 import { VibeAi } from '../src/modules/vibe/vibe.ai.js';
 import { VibeRunner } from '../src/modules/vibe/vibe.runner.js';
@@ -27,6 +30,7 @@ describe('enterprise vibe assignments and private candidate review', () => {
   let outsider: string;
   let admin: string;
   let candidateId: string;
+  let candidateActor: AuthenticatedUser;
   let ai: VibeAi;
   let runner: VibeRunner;
   const evaluate = vi.fn<VibeAi['evaluate']>();
@@ -81,6 +85,9 @@ describe('enterprise vibe assignments and private candidate review', () => {
     const account = await register(app, 'ev_candidate', suffix);
     candidate = account.accessToken;
     candidateId = account.user.id;
+    const payload = app.get(JwtService).decode(candidate);
+    candidateActor = { id: candidateId, role: UserRole.USER,
+      tokenVersion: payload.tokenVersion, sessionId: payload.sid };
     outsider = (await register(app, 'ev_outsider', suffix)).accessToken;
     const administrator = await register(app, 'ev_admin', suffix);
     await db.query("UPDATE users SET role='ADMIN' WHERE id=$1", [
@@ -377,7 +384,7 @@ describe('enterprise vibe assignments and private candidate review', () => {
       [test.id, [randomUUID()]],
     );
     await expect(
-      app.get(VibeService).startEnterprise(exam.id, taskId, candidateId),
+      app.get(VibeService).startEnterprise(exam.id, taskId, candidateActor),
     ).rejects.toThrow('응시 과제');
   });
 
@@ -390,7 +397,7 @@ describe('enterprise vibe assignments and private candidate review', () => {
     try {
       const [{ pid }]: { pid: number }[] = await lock.query('SELECT pg_backend_pid() AS pid');
       await lock.query('SELECT id FROM enterprise_attempts WHERE id=$1 FOR UPDATE', [exam.id]);
-      pending = app.get(VibeService).startEnterprise(exam.id, taskId, candidateId)
+      pending = app.get(VibeService).startEnterprise(exam.id, taskId, candidateActor)
         .then((result) => ({ result }), (error: unknown) => ({ error }));
       const until = Date.now() + 2500;
       let blocked = false;

@@ -60,7 +60,7 @@ export class VibeController {
     @Param('challengeId') challengeId: string,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.service.start(challengeId, user.id);
+    return this.service.start(challengeId, user);
   }
   @Get('attempts/:id')
   @UseGuards(JwtAuthGuard)
@@ -77,7 +77,7 @@ export class VibeController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: FilesDto,
   ) {
-    return this.service.edit(id, user.id, dto.revision, 'save', dto.files);
+    return this.service.edit(id, user, dto.revision, 'save', dto.files);
   }
   @Post('attempts/:id/undo')
   @UseGuards(JwtAuthGuard)
@@ -86,7 +86,7 @@ export class VibeController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: RevisionDto,
   ) {
-    return this.service.edit(id, user.id, dto.revision, 'undo');
+    return this.service.edit(id, user, dto.revision, 'undo');
   }
   @Post('attempts/:id/apply')
   @UseGuards(JwtAuthGuard)
@@ -97,7 +97,7 @@ export class VibeController {
   ) {
     return this.service.edit(
       id,
-      user.id,
+      user,
       dto.revision,
       'apply',
       undefined,
@@ -112,7 +112,7 @@ export class VibeController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: PromptDto,
   ) {
-    return this.service.chat(id, user.id, dto.revision, dto.prompt);
+    return this.service.chat(id, user, dto.revision, dto.prompt);
   }
   @Post('attempts/:id/runs')
   @UseGuards(JwtAuthGuard)
@@ -122,7 +122,7 @@ export class VibeController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: RevisionDto,
   ) {
-    return this.service.run(id, user.id, dto.revision);
+    return this.service.run(id, user, dto.revision);
   }
   @Post('attempts/:id/submit')
   @UseGuards(JwtAuthGuard)
@@ -132,7 +132,7 @@ export class VibeController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: SubmitDto,
   ) {
-    return this.service.run(id, user.id, dto.revision, true, dto.reflection);
+    return this.service.run(id, user, dto.revision, true, dto.reflection);
   }
   @Post('attempts/:id/evaluation')
   @UseGuards(JwtAuthGuard)
@@ -142,6 +142,6 @@ export class VibeController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: RevisionDto,
   ) {
-    return this.service.evaluate(id, user.id, dto.revision);
+    return this.service.evaluate(id, user, dto.revision);
   }
 }
