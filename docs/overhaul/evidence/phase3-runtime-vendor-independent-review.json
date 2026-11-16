@@ -1,0 +1,269 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "independent_recovery",
+  "observedAt": "2026-11-16T07:45:20.172835+00:00",
+  "method": "Direct independent web retrieval and reading of all 14 unique newly added AlmaLinux advisory pages plus the two changed CRITICAL Ubuntu pages; compared issue descriptions to pinned prior CNA source mappings.",
+  "advisoriesOpened": 14,
+  "records": [
+    {
+      "id": "CVE-2025-39933",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-0793.html"
+      ],
+      "vendorSeverityChanges": {
+        "alma": {
+          "before": 2,
+          "after": 3
+        }
+      },
+      "priorCnaSourceFiles": [
+        "fs/smb/client/smbdirect.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2025-40170",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-2212.html"
+      ],
+      "vendorSeverityChanges": {
+        "alma": {
+          "before": 3,
+          "after": 2
+        }
+      },
+      "priorCnaSourceFiles": [
+        "include/net/ip.h",
+        "include/net/ip6_route.h",
+        "include/net/route.h",
+        "net/core/sock.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2025-68745",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-67150.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "drivers/scsi/qla2xxx/qla_os.c",
+        "drivers/scsi/qla2xxx/qla_target.c",
+        "drivers/scsi/qla2xxx/qla_target.h"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-31692",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-67150.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "net/core/rtnetlink.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-52991",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-57252.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "kernel/cgroup/cgroup.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-53281",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-47040.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "drivers/iommu/intel/iommu.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-63879",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-57252.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "drivers/gpu/drm/amd/amdgpu/amdgpu_hmm.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-64523",
+      "scannerSeverityPreserved": "CRITICAL",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-90365.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "net/handshake/handshake.h",
+        "net/handshake/netlink.c",
+        "net/handshake/request.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-68245",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-81552.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "drivers/gpu/drm/amd/amdgpu/amdgpu_vm.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-68257",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-71700.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "drivers/gpu/drm/amd/amdkfd/kfd_queue.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-68409",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-83156.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "net/mac80211/sta_info.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-68426",
+      "scannerSeverityPreserved": "CRITICAL",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-68570.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "net/xfrm/xfrm_device.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-74752",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-95370.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "include/net/sctp/auth.h",
+        "net/sctp/auth.c",
+        "net/sctp/sm_make_chunk.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-89631",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/8/ALSA-2026-85774.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "fs/smb/client/cifssmb.c",
+        "fs/smb/client/trace.h"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-97493",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/8/ALSA-2026-99031.html"
+      ],
+      "vendorSeverityChanges": {
+        "alma": {
+          "before": 3,
+          "after": 2
+        }
+      },
+      "priorCnaSourceFiles": [
+        "drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    },
+    {
+      "id": "CVE-2026-98364",
+      "scannerSeverityPreserved": "HIGH",
+      "newAlmaAdvisoryUrls": [
+        "https://errata.almalinux.org/9/ALSA-2026-93412.html"
+      ],
+      "vendorSeverityChanges": {},
+      "priorCnaSourceFiles": [
+        "net/xfrm/xfrm_policy.c"
+      ],
+      "primaryVendorPageReview": "Opened current AlmaLinux advisory. It identifies this CVE in kernel or kernel-rt implementation fixes; no new userspace implementation claim was observed.",
+      "interpretation": "This is contextual consistency review, not an AlmaLinux-to-Ubuntu applicability substitution."
+    }
+  ],
+  "ubuntuCriticalReview": [
+    {
+      "id": "CVE-2026-64523",
+      "url": "https://ubuntu.com/security/CVE-2026-64523",
+      "observedLastUpdated": "2026-11-10",
+      "observedPriority": "Critical",
+      "observedCvss": "9.8",
+      "nobleLinuxStatus": "Vulnerable work in progress in 6.8.0-151.151",
+      "scope": "Kernel handshake lifetime logic; does not establish host safety or a patched current Ubuntu kernel."
+    },
+    {
+      "id": "CVE-2026-68426",
+      "url": "https://ubuntu.com/security/CVE-2026-68426",
+      "observedLastUpdated": "2026-11-13",
+      "observedPriority": "Critical",
+      "observedCvss": "9.8",
+      "nobleLinuxStatus": "Vulnerable work in progress in 6.8.0-151.151",
+      "scope": "Kernel xfrm async crypto packet list lifetime logic; does not establish host safety or a patched current Ubuntu kernel."
+    }
+  ],
+  "conclusion": "No contradiction to the existing narrow header-package code-absence assessment was found in these changed vendor references. This is an inference requiring separate exact current CNA and payload identity checks; it is not approval of any policy.",
+  "limits": [
+    "CNA raw byte comparisons are recorded separately. No new manual review of all 182 kernel patches is claimed.",
+    "The pages may list kernel headers among an overall source-package rebuild; that alone does not establish that the affected implementation is shipped in the exact Ubuntu linux-libc-dev payload.",
+    "Ubuntu H/C severities remain unchanged; vendor severity changes are not grounds for suppressing Ubuntu findings.",
+    "The executing host kernel remains unverified and a privileged container is not a VM boundary."
+  ]
+}

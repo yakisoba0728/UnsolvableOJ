@@ -283,6 +283,28 @@ class ApplicabilityTests(unittest.TestCase):
 
     def test_original_other_package_findings_still_block(self):
         self.scan = deepcopy(self.original_scan)
+        # The current baseline contains the Phase II fixes for these four
+        # unrelated findings. Preserve the original denial scenario explicitly:
+        # inject the unchanged real findings from the historical report into a
+        # temporary synthetic current-image fixture. This is not a new scan.
+        historical = self.repo / "docs/overhaul/measurements/phase2-image-remediation/before-runtime.zip"
+        with zipfile.ZipFile(historical) as archive:
+            original = json.loads(archive.read("trivy.json"))
+        injected = 0
+        for old_result in original["Results"]:
+            unrelated = [finding for finding in old_result.get("Vulnerabilities", [])
+                         if finding["PkgName"] != applicability.PACKAGE_NAME
+                         and finding["Severity"] in applicability.HIGH]
+            if not unrelated:
+                continue
+            current = next(result for result in self.scan["Results"]
+                           if all(result.get(key) == old_result.get(key) for key in ("Class", "Type", "Target")))
+            for finding in unrelated:
+                finding = deepcopy(finding)
+                finding["Fingerprint"] = applicability.scanner_fingerprint(self.scan, current, finding)
+                current.setdefault("Vulnerabilities", []).append(finding)
+                injected += 1
+        self.assertEqual(injected, 4)
         result, code = self.evaluate()
         self.assertEqual(code, 2)
         self.assertEqual(result["gate"], "BLOCKED_FINDINGS")
@@ -681,6 +703,120 @@ class ApplicabilityTests(unittest.TestCase):
                 self.assertEqual(json.loads(run.stdout)["gate"], "BLOCKED_EVIDENCE")
                 self.assertEqual(hashlib.sha256(raw.read_bytes()).hexdigest(), before)
                 self.assertEqual(existing.read_text(), "existing report must remain unchanged\n")
+
+
+class HistoricalAdvisoryRevalidationTests(unittest.TestCase):
+    """Replay retained real artifacts; this does not run or approve a new scan."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.repo = Path(__file__).resolve().parent.parent
+        cls.evidence = cls.repo / "docs/overhaul/evidence"
+        cls.old_policy_bytes = (cls.evidence / "phase3-runtime-advisory-revalidation-original-policy.json").read_bytes()
+        cls.old_policy = json.loads(cls.old_policy_bytes)
+        cls.proposed_bytes = (cls.evidence / "phase3-runtime-advisory-revalidation-proposed-policy.json").read_bytes()
+        cls.proposed = json.loads(cls.proposed_bytes)
+        cls.delta = json.loads((cls.evidence / "phase3-runtime-advisory-delta.json").read_bytes())
+        artifact = cls.repo / cls.proposed["evidence"]["baselineArtifact"]["path"]
+        with zipfile.ZipFile(artifact) as archive:
+            cls.raw = archive.read("trivy.json")
+            cls.manifest = archive.read("manifest.json")
+            cls.proof = archive.read("payload-verification.json")
+            cls.original_evaluation = json.loads(archive.read("applicability-evaluation.json"))
+
+    def test_original_approved_policy_reproduces_actual_sixteen_record_drift(self):
+        # Use the recorded observation time without rewriting any scan/proof
+        # timestamps. This is a historical replay, never current OCI evidence.
+        clock = applicability.timestamp(self.original_evaluation["observedAt"], "historical-clock")
+        result, code = applicability.evaluate(self.raw, self.manifest, self.proof, self.old_policy_bytes,
+                                              root=self.repo, now=clock)
+        self.assertEqual(code, 2)
+        self.assertEqual(result["gate"], "BLOCKED_FINDINGS")
+        self.assertEqual(result["unresolvedEvaluations"], self.original_evaluation["unresolvedEvaluations"])
+        self.assertEqual(len(result["unresolvedEvaluations"]), 16)
+        self.assertEqual(len(result["remainingBlockingFindings"]), 182)
+        self.assertEqual(result["reviewedCodeNotPresent"], [])
+
+    def test_exact_new_baseline_still_blocks_without_independent_approval(self):
+        self.assertEqual(self.proposed["review"],
+                         {"state": "PROPOSED", "reviewedAt": None, "contentSha256": None, "reviews": []})
+        clock = applicability.timestamp(self.proposed["createdAt"], "proposal-clock")
+        result, code = applicability.evaluate(self.raw, self.manifest, self.proof, self.proposed_bytes,
+                                              root=self.repo, now=clock)
+        self.assertEqual(code, 2)
+        self.assertEqual(result["gate"], "BLOCKED_REVIEW", result["blockingReasons"])
+        self.assertEqual(result["unresolvedEvaluations"], [])
+        self.assertEqual(len(result["proposedCodeNotPresent"]), 182)
+        self.assertEqual(result["reviewedCodeNotPresent"], [])
+        self.assertEqual(len(result["remainingBlockingFindings"]), 182)
+        self.assertEqual(result["rawSummary"]["vulnerabilitiesBySeverity"]["HIGH"], 177)
+        self.assertEqual(result["rawSummary"]["vulnerabilitiesBySeverity"]["CRITICAL"], 5)
+        self.assertEqual(result["hostKernelReadiness"], "UNVERIFIED")
+
+    def test_additional_review_evidence_is_hash_bound_and_preserves_component_scope(self):
+        manual_path = applicability.bound_file(self.proposed["evidence"]["manualReview"], self.repo)
+        manual = json.loads(manual_path.read_bytes())
+        bindings = manual["revalidation"]["evidenceBindings"]
+        for binding in bindings.values():
+            applicability.bound_file(binding, self.repo)
+        previous_manual = json.loads((self.repo / bindings["inheritedManualReview"]["path"]).read_bytes())
+        self.assertEqual(manual["componentAssessments"], previous_manual["componentAssessments"])
+        self.assertEqual(manual["criticalPatchReviews"], previous_manual["criticalPatchReviews"])
+        self.assertEqual(manual["uapiOverlap"], previous_manual["uapiOverlap"])
+        self.assertEqual(self.proposed["scope"], self.old_policy["scope"])
+        self.assertEqual(self.proposed["implementations"], self.old_policy["implementations"])
+        self.assertEqual(self.proposed["fingerprintSchema"], self.old_policy["fingerprintSchema"])
+        self.assertEqual(self.proposed["expiresAt"], self.old_policy["expiresAt"])
+        self.assertEqual(self.proposed["expiresAt"], "2026-11-30T00:00:00Z")
+        self.assertEqual(self.proposed["evidence"]["packageFiles"], self.old_policy["evidence"]["packageFiles"])
+        self.assertEqual({r["id"] for r in self.proposed["records"]}, {r["id"] for r in self.old_policy["records"]})
+        self.assertEqual(self.delta["comparison"]["allFindingChanges"], 55)
+        self.assertEqual(self.delta["comparison"]["changedFindingSeverityCounts"],
+                         {"CRITICAL": 2, "HIGH": 14, "LOW": 9, "MEDIUM": 30})
+        self.assertEqual(self.delta["comparison"]["unchangedReviewedAdvisoryCount"], 166)
+        changed_ids = {r["id"] for r in self.delta["changes"] if r["withinReviewedCohort"]}
+        self.assertEqual(changed_ids, {r["id"] for r in self.original_evaluation["unresolvedEvaluations"]})
+        original_records = {r["id"]: r for r in self.old_policy["records"]}
+        for record in self.proposed["records"]:
+            self.assertEqual(record["cnaRecordSha256"], original_records[record["id"]]["cnaRecordSha256"])
+            self.assertEqual(record["advisorySha256"] != original_records[record["id"]]["advisorySha256"],
+                             record["id"] in changed_ids)
+
+    def test_retained_cna_bodies_match_both_inventories_and_the_collection_receipt(self):
+        manual = json.loads((self.repo / self.proposed["evidence"]["manualReview"]["path"]).read_bytes())
+        bindings = manual["revalidation"]["evidenceBindings"]
+        receipt = json.loads(applicability.bound_file(bindings["currentCnaArchiveManifest"], self.repo).read_bytes())
+        fresh = json.loads((self.repo / self.proposed["evidence"]["cnaInventory"]["path"]).read_bytes())
+        previous = json.loads(applicability.bound_file(bindings["inheritedInventory"], self.repo).read_bytes())
+        fresh_records = {record["id"]: record for record in fresh["entries"]}
+        previous_records = {record["id"]: record for record in previous["entries"]}
+        receipts = {record["id"]: record for record in receipt["records"]}
+        self.assertEqual(len(fresh_records), 182)
+        self.assertEqual(set(fresh_records), set(previous_records))
+        self.assertEqual(set(fresh_records), set(receipts))
+        self.assertEqual(receipt["repositoryCommit"], fresh["cveRepositoryCommit"])
+        self.assertEqual(receipt["failed"], [])
+        self.assertEqual(receipt["changed"], [])
+        self.assertEqual(receipt["archiveSha256"], bindings["currentCnaArchive"]["sha256"])
+        archive_path = applicability.bound_file(bindings["currentCnaArchive"], self.repo)
+        with zipfile.ZipFile(archive_path) as archive:
+            self.assertEqual(len(archive.namelist()), 182)
+            self.assertEqual(set(archive.namelist()), {identifier + ".json" for identifier in fresh_records})
+            for identifier, entry in fresh_records.items():
+                raw = archive.read(identifier + ".json")
+                digest = applicability.digest(raw)
+                self.assertEqual(digest, entry["cnaRecordSha256"])
+                self.assertEqual(digest, previous_records[identifier]["cnaRecordSha256"])
+                self.assertEqual(digest, receipts[identifier]["sha256"])
+                self.assertEqual(entry["cnaUrl"], receipts[identifier]["url"])
+                cna = json.loads(raw)
+                self.assertEqual(cna["cveMetadata"]["cveId"], identifier)
+                self.assertEqual(cna["cveMetadata"]["state"], "PUBLISHED")
+                self.assertEqual(cna["containers"]["cna"]["providerMetadata"]["shortName"], "Linux")
+                paths = sorted({path for affected in cna["containers"]["cna"]["affected"]
+                                for path in affected["programFiles"]})
+                self.assertEqual(paths, entry["programFiles"])
+                self.assertEqual(paths, previous_records[identifier]["programFiles"])
 
 
 if __name__ == "__main__":
