@@ -21,6 +21,7 @@ import { HomePage } from "./pages/HomePage";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { NotFoundPage } from "./components/NotFoundPage";
 import { SiteHeader } from "./components/SiteHeader";
+import { RouteFocus } from "./components/RouteFocus";
 
 // 화면 단위로 코드를 나눠, 처음 방문한 화면의 코드만 내려받는다.
 // import()는 호출하는 자리에 그대로 둬야 Vite가 화면마다 청크를 나눈다.
@@ -68,6 +69,10 @@ const menu = [
 export function App({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   const { session, setSession, getSessionIdentityVersion } = useAuth();
   const { pathname, search, hash, key: locationKey } = useLocation();
+  const mainRef = useRef<HTMLElement>(null);
+  // Keep the previous committed route outside Suspense: a cold lazy page must
+  // not mistake its first mount for a user-requested in-app navigation.
+  const committedPath = useRef(pathname);
   // A login identity and navigation entry own private exam data and editor state.
   // Access-token refresh does not change this identity or reset in-progress code.
   const enterpriseOwner = `${session?.user.id ?? "guest"}:${getSessionIdentityVersion()}:${pathname}:${locationKey}`;
@@ -119,11 +124,11 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
           navigate("/");
         }}
       />
-      <main className="main-content" id="main" tabIndex={-1}>
+      <main className="main-content" id="main" tabIndex={-1} ref={mainRef}>
         <ErrorBoundary resetKey={pathname}>
           <Suspense
             fallback={
-              <div className="page-width empty-state">불러오는 중입니다…</div>
+              <div className="page-width empty-state" role="status">화면을 불러오는 중입니다…</div>
             }
           >
             {/* 임시 비밀번호로 로그인했다면 비밀번호를 바꿀 때까지 계정 설정에 머문다(서버도 다른 API를 403으로 막는다). */}
@@ -230,6 +235,7 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
             )}
+            <RouteFocus pathname={pathname} hash={hash} target={mainRef} committedPath={committedPath} />
           </Suspense>
         </ErrorBoundary>
       </main>

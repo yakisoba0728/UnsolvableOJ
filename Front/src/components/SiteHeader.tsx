@@ -17,6 +17,7 @@ export function SiteHeader({
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const sessionIdentity = `${session?.user.id ?? "guest"}:${getSessionIdentityVersion()}`;
 
   // 데스크톱 메뉴: 활성 메뉴 아래 표시선이 새 위치로 미끄러져 이동한다.
   const navRef = useRef<HTMLElement>(null);
@@ -46,8 +47,39 @@ export function SiteHeader({
     };
   }, [pathname, Boolean(session), role]);
 
-  // 화면을 옮기면 메뉴를 닫는다.
-  useEffect(() => setMenuOpen(false), [pathname]);
+  // A disclosure is not a modal: opening it places keyboard users on its first
+  // link, but Tab remains free to leave the panel. The DOM puts the toggle after
+  // the links, so leaving focus on the toggle would skip every disclosed link.
+  useLayoutEffect(() => {
+    if (menuOpen && window.matchMedia("(max-width: 1100px)").matches)
+      navRef.current?.querySelector<HTMLAnchorElement>("a")?.focus();
+  }, [menuOpen]);
+
+  // RouteFocus owns the destination after navigation, including lazy routes.
+  useLayoutEffect(() => setMenuOpen(false), [pathname]);
+  // A role/account change can remove the focused link without a route change.
+  useLayoutEffect(() => {
+    if (menuOpen && window.matchMedia("(max-width: 1100px)").matches)
+      menuButtonRef.current?.focus({ preventScroll: true });
+    setMenuOpen(false);
+  }, [sessionIdentity, role]);
+
+  useEffect(() => {
+    const collapsed = window.matchMedia("(max-width: 1100px)");
+    const resized = () => {
+      const focused = document.activeElement;
+      const nav = navRef.current;
+      setMenuOpen(false);
+      if (collapsed.matches && focused && nav?.contains(focused)) {
+        menuButtonRef.current?.focus({ preventScroll: true });
+      } else if (!collapsed.matches && focused === menuButtonRef.current) {
+        (nav?.querySelector<HTMLAnchorElement>('a[aria-current="page"]') ??
+          nav?.querySelector<HTMLAnchorElement>("a"))?.focus({ preventScroll: true });
+      }
+    };
+    collapsed.addEventListener("change", resized);
+    return () => collapsed.removeEventListener("change", resized);
+  }, []);
 
   // 열려 있는 동안: Esc로 닫고(버튼으로 포커스 복귀), 바깥을 누르면 닫는다.
   useEffect(() => {
@@ -86,6 +118,21 @@ export function SiteHeader({
           id="main-menu"
           aria-label="주 메뉴"
           ref={navRef}
+          onClick={(event) => {
+            // Close even when activating the current route (pathname is then
+            // unchanged). Modified clicks keep this tab's disclosure intact.
+            if (!menuOpen || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+              return;
+            if ((event.target as Element).closest("a")) {
+              setMenuOpen(false);
+              menuButtonRef.current?.focus({ preventScroll: true });
+            }
+          }}
+          onBlur={(event) => {
+            if (menuOpen && event.relatedTarget &&
+                !event.currentTarget.contains(event.relatedTarget) && event.relatedTarget !== menuButtonRef.current)
+              setMenuOpen(false);
+          }}
         >
           <NavLink to="/" end>
             홈
