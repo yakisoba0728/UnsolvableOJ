@@ -89,5 +89,14 @@
   "reviews": [
     "final-pr68-independent-qa-0e70a2f.json",
     "../judge-run-43805214804/independent-final-qa.json"
-  ]
+  ],
+  "reviewChronology": {
+    "approvalReceivedBeforeMerge": true,
+    "approvalSource": "Explicit independent Product and Judge approval messages were received by the coordinator in the active session before the GitHub comment and merge operation. The coordinator also independently checked source/base/tree, all12 successful jobs and actual74/28/3 completed log counts before merging.",
+    "preMergeGitHubReceipt": "https://github.com/yakisoba0728/UnsolvableOJ/pull/68#issuecomment-6907677784",
+    "preMergeGitHubReceiptCreatedAt": "2026-11-16T04:53:23Z",
+    "mergedAt": "2026-11-16T04:53:27Z",
+    "reviewArtifactTiming": "The original Judge JSON was serialized after the prior approval message and merge. Its reviewedAt field records that later artifact-writing checkpoint, not the first approval. Original reviewer bytes are preserved unchanged.",
+    "judgeArtifactReviewedAt": "2026-11-16T04:54:55.436367+00:00"
+  }
 }
