@@ -41,6 +41,24 @@ test('integration PRs trigger CI, and the final main PR requests full validation
   assert.match(workflow, /FULL:.*inputs\.full.*github\.event_name == 'schedule'/);
 });
 
+test('adding a PR label triggers CI without replacing its original activity types', () => {
+  const pullRequest = workflow.match(/^  pull_request:\n((?:    .*\n)+)/m)?.[1];
+  assert.ok(pullRequest, 'Expected the pull_request event');
+  const types = pullRequest.match(/types: \[([^\]]+)\]/)?.[1];
+  assert.ok(types, 'Label changes must explicitly trigger the PR workflow');
+  assert.deepEqual(types.split(',').map(value => value.trim()).toSorted(),
+    ['opened', 'synchronize', 'reopened', 'labeled'].toSorted());
+  assert.doesNotMatch(workflow, /^  pull_request_target:/m, 'Label opt-in must not change the workflow trust context');
+});
+
+test('the full-validation PR label only escalates the existing full-mode input', () => {
+  const expression = workflow.match(/^\s+FULL: \$\{\{ (.+) \}\}$/m)?.[1];
+  // Assert the event wiring; the existing FULL=true/false tests execute the
+  // real selection shell and cover the downstream full and bounded modes.
+  assert.equal(expression,
+    "inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main')))");
+});
+
 test('large image diffs cannot be skipped by a pipefail/SIGPIPE race', () => {
   const directory = mkdtempSync(join(tmpdir(), 'oj-ci-policy-'));
   try {

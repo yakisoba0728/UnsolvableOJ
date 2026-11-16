@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main, 'overhaul/integration']
+    types: [opened, synchronize, reopened, labeled]
   # 매일 03:00 KST(18:00 UTC)에 main에서 전체 검사를 실행한다.
   schedule:
     - cron: '0 18 * * *'
@@ -130,7 +131,8 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           BASE: ${{ github.event.pull_request.base.sha }}
-          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && github.head_ref == 'overhaul/integration' && github.base_ref == 'main') }}
+          # The opt-in label also survives later pushes; it only adds full validation.
+          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main'))) }}
         run: |
           all() { for name in back front judge; do echo "$name=true" >> "$GITHUB_OUTPUT"; done; }
           # 전체 요청은 경로와 무관하게 브라우저·API·워커까지 모두 실행한다.
