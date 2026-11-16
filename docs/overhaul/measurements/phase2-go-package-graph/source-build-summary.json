@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-build-package-graph",
+  "actualContainerBuild": false,
+  "sourceCommit": "4ebd2ffe9474639c665fa21cfb438f68820fe77c",
+  "sourceArchiveSha256": "5b5293e4300de03251c3b43d38241386937012722adb44d084f8f3eb4cc79b55",
+  "backportSha256": "6028a08141401f6e3d04ee2ff6259a3e967fdd0f5f4b3e7a281d1883c6afc501",
+  "goModSha256": "8534d496bf9a2740227dee47c2c35574500e5e1f7b3c54e37ccf33b4aa17f55e",
+  "goSumSha256": "68618e489aead517a346cffc44564342f53905c6503c6792628ab4a365750ca6",
+  "builtBinarySha256": "8a0d089d8631246dd638ebab714b0ac3dee1bf2d30f9173a87c2c13ac9646361",
+  "command": [
+    "go",
+    "list",
+    "-mod=readonly",
+    "-buildvcs=false",
+    "-trimpath",
+    "-tags=nomsgpack,grpcnotrace",
+    "-deps",
+    "-f",
+    "{{.ImportPath}}",
+    "./cmd/go-judge"
+  ],
+  "environment": {
+    "CGO_ENABLED": "0",
+    "GOARCH": "amd64",
+    "GOOS": "linux",
+    "GOTOOLCHAIN": "local",
+    "GOVERSION": "go1.27.4"
+  },
+  "packageCount": 505,
+  "packageListSha256": "1aa051d8531ccc96759b472ef4cf03d2ddda07d80bdfb660d3b4a9c9163192b6",
+  "checkerSha256": "79eb8091c474921e9f3d5fc3f8238632f7d8258eb7b8d9c1f9387a24ed68ee0a",
+  "checkerOutput": "Verified production Go package graph: 505 packages; OpenPGP imports: 0",
+  "prohibitedPackages": [],
+  "advisory": "https://pkg.go.dev/vuln/GO-2026-5932",
+  "scope": "Actual local source build configuration and package closure; the exact final container build and scanner report remain separate CI evidence.",
+  "observedAt": "2026-11-16T04:07:27.509357+00:00"
+}

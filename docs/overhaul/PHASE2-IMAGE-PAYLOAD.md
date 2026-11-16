@@ -23,9 +23,29 @@ Local verification at introduction: **27 payload regressions, 15 existing
 image-audit regressions, 10 CI policy tests and 4 SBOM tests passed**. A separate
 synthetic OCI containing all 990 official package files also returned `MATCH`.
 That smoke used synthetic dpkg and scanner metadata; it is **not evidence that
-the application image contains those bytes**. The actual runtime-image result
-is pending the exact-HEAD Actions image job and is retained with that job's
-original scanner report.
+the application image contains those bytes**.
+
+The first actual image comparison subsequently passed in
+[run 43802320491](https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43802320491)
+for PR #68 head `2d2bbec55022e66959c31bbe800be5366bc618bf` (Actions merge checkout
+`d2bba477e9bb58d87c39ad3c79a1373d99b61aac`). It matched **990/990** final regular
+files, exact source/version/architecture and the owned-file inventory; no file
+was missing, changed, nonregular, or unexpectedly owned. The image's package
+list included 53 directories. The verifier read 1,529,695,232 decompressed bytes
+and 25,476 tar entries in 9.54 seconds without starting a container or extracting
+a filesystem. This elapsed time is a verification observation, not a service
+performance benchmark.
+
+`measurements/phase2-image-payload/` retains all four **original ZIP artifacts**
+and compact run/head/image/report/hash provenance. The runtime proof's SHA256 is
+`09939784959227cd539807cd5d88e74f32293ee5d12e87ed33bee63529b6cd59` and its raw
+scanner-report SHA256 is
+`0d1d1ea81522458479ac85bfd27e13d764562f421193b9421e6de0b64cf6751a`.
+The manifest/config/layer identity in both reports agrees. The scanner's runtime
+gate remains **BLOCKED_FINDINGS** with 177 HIGH and 5 CRITICAL findings; the
+payload match does not change that result. Back, Front, and Judge image scans in
+this run completed with zero reported findings at every severity. These results
+apply to this exact run; later rebuilt images require fresh evidence.
 
 ## Reproduce against an actual exported image
 

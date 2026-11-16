@@ -378,7 +378,7 @@ class PayloadTests(unittest.TestCase):
             self.assertNotEqual(subprocess.run(command, capture_output=True, timeout=20).returncode, 0)
             self.assertFalse((args[0] / "forbidden.json").exists())
 
-    def test_verifier_and_manifest_changes_select_runtime_and_keep_existing_scan_gate(self):
+    def test_verifier_and_manifest_changes_select_runtime_and_require_explicit_gate(self):
         workflow = (Path(__file__).parents[1] / ".github/workflows/ci.yml").read_text()
         images = workflow.split("\n  images:\n", 1)[1].split("\n  changes:\n", 1)[0]
         match = re.search(r"        run: \|\n((?:          .*\n|\n)+)", images)
@@ -397,16 +397,21 @@ class PayloadTests(unittest.TestCase):
                     run = subprocess.run(["bash", "-e", "-o", "pipefail", "-c", script], capture_output=True, text=True,
                                          timeout=10, env={**os.environ, "PATH": f'{root}{os.pathsep}{os.environ["PATH"]}',
                                                          "BASE": "test-base", "CONTEXT": context, "GITHUB_OUTPUT": str(output),
-                                                         "CI_TEST_FILES": changed})
+                                                         "CI_TEST_FILES": changed, "FULL": "false"})
                     self.assertEqual(run.returncode, 0, run.stderr)
                     self.assertEqual(output.read_text().strip(), "build=" + ("true" if context == "Judge/runtime" else "false"))
-        evidence = images.split("      - name: Compare actual runtime package bytes", 1)[1].split("      - name: Image vulnerability", 1)[0]
+        # Orchestration now records the original exit and invokes this helper
+        # inside a separately tested gate, without continuing a failed step.
+        gate = images.split("      - name: Scan image and enforce the explicit evidence gate", 1)[1].split("      - name: Image vulnerability", 1)[0]
+        self.assertIn('python3 scripts/image_gate.py "$COMPONENT"', gate)
+        self.assertIn("-p 'verify_image_payload_test.py'", gate)
+        self.assertIn("-p 'image_applicability_test.py'", gate)
+        self.assertIn("-p 'image_gate_test.py'", gate)
+        evidence = images.split("      - name: Image vulnerability", 1)[1]
         self.assertIn("!cancelled()", evidence)
-        self.assertIn("steps.image_scan.outcome == 'failure'", evidence)
-        self.assertIn("steps.image.outcome == 'success'", evidence)
+        self.assertIn("if-no-files-found: error", evidence)
         self.assertNotIn("continue-on-error", images)
-        self.assertNotIn("|| true", evidence)
-        self.assertIn('python3 scripts/image_audit.py "$COMPONENT"', images)
+        self.assertNotIn("|| true", images)
 
 
 if __name__ == "__main__":

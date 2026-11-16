@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       full:
-        description: Include WebKit, native sandbox and full Compose tests
+        description: Include all image builds, WebKit, native sandbox and full Compose tests
         type: boolean
         default: false
 
@@ -89,14 +89,20 @@ jobs:
           # PR은 merge 커밋과 base를, push는 이전 tip을 비교한다. 야간·수동 실행은 base가 없어 항상 빌드한다.
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
           CONTEXT: ${{ matrix.context }}
+          FULL: ${{ inputs.full || github.event_name == 'schedule' || (github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'full-validation') || (github.head_ref == 'overhaul/integration' && github.base_ref == 'main'))) }}
         run: |
+          # Full validation includes all four actual image builds, independent of changed paths.
+          if [ "$FULL" = true ]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           # 새 브랜치(before=000…)처럼 비교할 커밋을 가져올 수 없으면 빌드한다.
           if [ -z "$BASE" ] || ! git fetch --no-tags --depth=1 origin "$BASE"; then
             echo "build=true" >> "$GITHUB_OUTPUT"
           else
             files=$(git diff --name-only FETCH_HEAD HEAD)
-            if grep -qE "^($CONTEXT/|\.github/workflows/ci\.yml$|scripts/image[-_]audit)" <<<"$files" || {
-              [ "$CONTEXT" = 'Judge/runtime' ] && grep -qE '^(scripts/verify_image_payload|docs/overhaul/evidence/linux-libc-dev-.*-files\.json$)' <<<"$files";
+            if grep -qE "^($CONTEXT/|\.github/workflows/ci\.yml$|scripts/image[-_](audit|gate|applicability))" <<<"$files" || {
+              [ "$CONTEXT" = 'Judge/runtime' ] && grep -qE '^(scripts/verify_image_payload|docs/overhaul/(evidence/|repro/kernel-header-applicability\.py$|measurements/phase2-image-remediation/before-runtime\.zip$))' <<<"$files";
             }; then
               echo "build=true" >> "$GITHUB_OUTPUT"
             else
@@ -117,7 +123,7 @@ jobs:
           outputs: type=oci,dest=${{ runner.temp }}/image-${{ matrix.name }},tar=false
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
-      - name: Scan installed image OS/runtime packages and license metadata
+      - name: Scan image and enforce the explicit evidence gate
         id: image_scan
         if: ${{ steps.changes.outputs.build == 'true' }}
         env:
@@ -126,22 +132,14 @@ jobs:
           BUILD_DIGEST: ${{ steps.image.outputs.digest }}
         run: |
           python3 -m unittest discover -s scripts -p 'image_audit_test.py'
-          python3 scripts/image_audit.py "$COMPONENT" "$IMAGE_DIRECTORY" "reports/images/$COMPONENT" "$BUILD_DIGEST"
-      - name: Compare actual runtime package bytes with official payload evidence
-        # Preserve this evidence even when the original vulnerability gate fails.
-        # A byte match does not accept or suppress any scanner finding.
-        if: ${{ !cancelled() && matrix.name == 'runtime' && steps.image.outcome == 'success' && (steps.image_scan.outcome == 'success' || steps.image_scan.outcome == 'failure') }}
-        env:
-          IMAGE_DIRECTORY: ${{ runner.temp }}/image-runtime
-          BUILD_DIGEST: ${{ steps.image.outputs.digest }}
-        run: |
-          python3 -m unittest discover -s scripts -p 'verify_image_payload_test.py'
-          python3 scripts/verify_image_payload.py \
-            --oci "$IMAGE_DIRECTORY" \
-            --build-digest "$BUILD_DIGEST" \
-            --expected-manifest docs/overhaul/evidence/linux-libc-dev-6.8.0-149.149-amd64-files.json \
-            --scan-report reports/images/runtime/trivy.json \
-            --output reports/images/runtime/payload-verification.json
+          python3 -m unittest discover -s scripts -p 'image_gate_test.py'
+          if [ "$COMPONENT" = runtime ]; then
+            python3 -m unittest discover -s scripts -p 'verify_image_payload_test.py'
+            python3 -m unittest discover -s scripts -p 'image_applicability_test.py'
+          fi
+          # The wrapper retains the unchanged scanner exit/report and runs actual payload
+          # verification only for a completed runtime finding gate. PROPOSED still blocks.
+          python3 scripts/image_gate.py "$COMPONENT" "$IMAGE_DIRECTORY" "reports/images/$COMPONENT" "$BUILD_DIGEST"
       - name: Image vulnerability and inventory evidence
         if: ${{ !cancelled() && steps.changes.outputs.build == 'true' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

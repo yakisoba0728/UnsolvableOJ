@@ -17,6 +17,17 @@ RUN go mod download && go mod verify \
     && printf '%s\n' 'v1.13.3-unsolvable.1' > cmd/go-judge/version/version.txt \
     && go build -mod=readonly -buildvcs=false -trimpath -tags=nomsgpack,grpcnotrace -ldflags='-s -w' -o /opt/go-judge ./cmd/go-judge \
     && go version -m /opt/go-judge
+# Retain the production package closure with the same source/toolchain/flags.
+# A separate layer preserves the verified compile/test layer above.
+COPY check-go-package-graph.awk /tmp/check-go-package-graph.awk
+RUN go list -mod=readonly -buildvcs=false -trimpath -tags=nomsgpack,grpcnotrace -deps -f '{{.ImportPath}}' ./cmd/go-judge > /opt/go-judge-packages.txt \
+    && LC_ALL=C sort -o /opt/go-judge-packages.txt /opt/go-judge-packages.txt \
+    && awk -f /tmp/check-go-package-graph.awk /opt/go-judge-packages.txt \
+    && go env -json GOOS GOARCH CGO_ENABLED GOVERSION GOTOOLCHAIN > /opt/go-judge-build-env.json \
+    && go version -m /opt/go-judge > /opt/go-judge-build-info.txt \
+    && sha256sum go.mod go.sum > /opt/go-judge-source-locks.sha256 \
+    && cd /opt \
+    && sha256sum go-judge go-judge-packages.txt go-judge-build-env.json go-judge-build-info.txt go-judge-source-locks.sha256 > go-judge-artifacts.sha256
 # Ubuntu apt의 nodejs는 지원이 끝난 18.x이므로 공식 Node 24 바이너리를 가져옵니다.
 FROM node:24.22.2-bookworm-slim@sha256:01d566e8d94d8c619591d78652babfccd3c6992a3dffa9ed5ab39e11cf6c70e9 AS node
 RUN npm install -g esbuild@0.28.2
@@ -42,7 +53,9 @@ COPY --from=node /usr/local/lib/node_modules/esbuild /usr/local/lib/node_modules
 RUN ln -s /usr/local/bin/node /usr/bin/node && ln -s ../lib/node_modules/esbuild/bin/esbuild /usr/local/bin/esbuild
 
 WORKDIR /opt
-COPY --from=go-judge /opt/go-judge /opt/go-judge
+COPY --from=go-judge /opt/go-judge /opt/go-judge-packages.txt \
+    /opt/go-judge-build-env.json /opt/go-judge-build-info.txt \
+    /opt/go-judge-source-locks.sha256 /opt/go-judge-artifacts.sha256 /opt/
 COPY go-judge-build.json /opt/go-judge-build.json
 COPY --from=go-judge /src/LICENSE /usr/share/licenses/go-judge/LICENSE
 COPY --from=go-judge /usr/local/go/LICENSE /usr/share/licenses/go-judge/Go-LICENSE

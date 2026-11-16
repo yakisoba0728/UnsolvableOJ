@@ -30,6 +30,17 @@
     "grpcnotrace"
   ],
   "cgoEnabled": false,
+  "packageGraphEvidence": {
+    "paths": "/opt/go-judge-packages.txt",
+    "environment": "/opt/go-judge-build-env.json",
+    "binaryBuildInfo": "/opt/go-judge-build-info.txt",
+    "actualSourceLockHashes": "/opt/go-judge-source-locks.sha256",
+    "artifactHashes": "/opt/go-judge-artifacts.sha256",
+    "command": "go list -mod=readonly -buildvcs=false -trimpath -tags=nomsgpack,grpcnotrace -deps -f '{{.ImportPath}}' ./cmd/go-judge",
+    "forbiddenImportPrefix": "golang.org/x/crypto/openpgp",
+    "advisory": "https://pkg.go.dev/vuln/GO-2026-5932",
+    "scope": "Production package import closure for this exact build configuration; no scanner suppression, host assertion, or general module safety claim."
+  },
   "mainModuleVersionInGoBuildInfo": "(devel)",
   "note": "Source archive build; actual application version is embedded in /version. No upstream release or main-module version is forged."
 }

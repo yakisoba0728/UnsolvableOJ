@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "root",
+  "role": "coordinator",
+  "reviewedCommit": "d5c3bd78a0fcb5f2fad02fec2679c6aa36345325",
+  "observedAt": "2026-11-16T04:21:47.522854+00:00",
+  "sourceReview": "APPROVED_STANDALONE_EVALUATOR",
+  "scope": "Exact source/evidence-bound component decision, not a host-kernel assertion or workflow authorization.",
+  "checks": {
+    "fullSourceAndTestsRead": true,
+    "independentPythonTests": {
+      "passed": 73,
+      "seconds": 39.979,
+      "candidateWorktree": "detached d5c3bd78a0fcb5f2fad02fec2679c6aa36345325"
+    },
+    "actualGitHubArtifactId": 14197565704,
+    "actualArtifactZipSha256": "f493ee332e211aa74e2129f82d3abb58a7fb38082117ba067c6de002a8acbd5f",
+    "actualPayloadFilesChecked": 990,
+    "actualProposedCli": {
+      "exitCode": 2,
+      "execution": "COMPLETED",
+      "gate": "BLOCKED_REVIEW",
+      "proposedCount": 182,
+      "reviewedCount": 0,
+      "remainingBlockers": 182,
+      "blockingReasons": [
+        "INDEPENDENT_POLICY_REVIEW_REQUIRED"
+      ],
+      "rawReportSha256": "0d1d1ea81522458479ac85bfd27e13d764562f421193b9421e6de0b64cf6751a",
+      "scanManifestSha256": "c4c0269be2bc4cb1bf6adb42c2b5121983f5c7f212b38198645422491d384600",
+      "payloadProofSha256": "09939784959227cd539807cd5d88e74f32293ee5d12e87ed33bee63529b6cd59",
+      "policySha256": "e072cfbee3988e84bd33b8b27f12854d2aa3d931f3764ba11b5b9891b91fb665",
+      "evaluatorSourceSha256": "ad66ab2c8bb1f29f4d314911fbdee098f9de7d9d09624cbfec1aad493cdb76d6",
+      "rawSeverityCounts": {
+        "UNKNOWN": 1,
+        "LOW": 363,
+        "MEDIUM": 561,
+        "HIGH": 177,
+        "CRITICAL": 5
+      }
+    },
+    "exactCohortAndChangesBlock": true,
+    "unknownOrMissingSourceProofBlocks": true,
+    "allRawFindingsRetained": true,
+    "eoslAndOtherPackagesStillBlock": true,
+    "expiryRequiresNewReview": true
+  },
+  "remainingGates": [
+    "Separate independent reviewer final approval",
+    "Explicit proposed-fixture/committed-approval test transition review",
+    "Gate wrapper and workflow independent review",
+    "Exact final source-head full CI and actual rebuilt image evidence"
+  ],
+  "interpretation": "This is an actual coordinator source/evidence review record. It does not populate the proposed policy or waive any remaining gate."
+}
