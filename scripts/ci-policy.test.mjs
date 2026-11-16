@@ -81,6 +81,32 @@ test('full validation selects all component suites even for a documentation-only
   }
 });
 
+test('full browser validation adds the WebKit core flows on Firefox without weakening existing checks', () => {
+  const front = workflow.slice(workflow.indexOf('\n  front:'), workflow.indexOf('\n  full:'));
+  const firefox = front.match(/      - name: Firefox core-flow regression tests\n([\s\S]*?)(?=      - name:|$)/)?.[1];
+  assert.ok(firefox, 'Full validation must include the Firefox core-flow step');
+  assert.match(firefox, /if: \$\{\{ needs\.changes\.outputs\.full == 'true' \}\}/);
+  assert.match(firefox, /working-directory: Front/);
+  assert.match(front, /timeout-minutes: 20/);
+  assert.match(front, /shard: \[1, 2\]/);
+  const command = runBlock(firefox);
+  assert.match(command, /--project=firefox --workers=4 --shard=\$\{\{ matrix\.shard \}\}\/2/);
+  const config = readFileSync(new URL('../Front/playwright.config.ts', import.meta.url), 'utf8');
+  const webkit = config.match(/const webkitSpecs = \[([\s\S]*?)\];/);
+  assert.ok(webkit);
+  const specs = (value) => [...value.matchAll(/[a-z-]+\.spec\.ts/g)].map((match) => match[0]).toSorted();
+  assert.deepEqual(specs(command), specs(webkit[1]), 'Firefox must exercise the same bounded core-flow files as WebKit');
+  assert.match(command, /--output=test-results\/firefox/);
+  assert.match(firefox, /PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report\/firefox/);
+  assert.match(firefox, /PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results\/firefox\.xml/);
+  assert.doesNotMatch(firefox, /continue-on-error|--retries|--pass-with-no-tests/);
+  assert.match(front, /PROJECTS: --project=unit --project=chromium --project=chromium-slow .*--project=webkit/);
+  assert.ok(front.indexOf('name: Firefox core-flow regression tests') > front.indexOf('name: Browser regression tests'));
+  assert.ok(front.indexOf('name: Failed browser test artifacts') > front.indexOf('name: Firefox core-flow regression tests'));
+  const version = JSON.parse(readFileSync(new URL('../Front/package.json', import.meta.url), 'utf8')).devDependencies['@playwright/test'];
+  assert.ok(front.includes(`image: mcr.microsoft.com/playwright:v${version}-noble`), 'Container browsers must match the installed Playwright version');
+});
+
 function selectJobs(paths, overrides = {}) {
   const directory = mkdtempSync(join(tmpdir(), 'oj-ci-selection-'));
   try {
@@ -129,6 +155,7 @@ test('Compose and live-test harness changes cannot skip their own execution', ()
     'Front/Dockerfile', 'Front/.dockerignore', 'Front/nginx.conf', 'Front/trusted-proxy.conf.template',
     'scripts/check-compose.mjs', 'scripts/check-production-compose.mjs', 'scripts/check-sandbox-budget.mjs',
     'Back/scripts/run-integration.mjs', 'Back/test/judge.pipeline-spec.ts',
+    'Back/test/judge-recovery.pipeline-spec.ts', 'Back/vitest.config.pipeline.ts',
     'Front/playwright.live.config.ts', 'Front/tests-live/judge-flow.spec.ts',
   ]) {
     const run = selectJobs([path]);
