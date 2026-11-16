@@ -14,6 +14,9 @@ import {
 const diagnostic = (value: string) =>
   value.slice(0, 2000).replace(/[\0\p{Cs}]/gu, '\uFFFD');
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
 @Injectable()
 export class VibeRunner {
   private readonly dedicated?: VibeTransportSettings;
@@ -108,7 +111,36 @@ export class VibeRunner {
           }),
         })
       ).json();
-      if (!Array.isArray(payload) || payload.length !== 1)
+      // A malformed/partial reply can still own cached files. Retain safe IDs
+      // before rejecting its result, and never interpret strings/arrays as maps.
+      // Cleanup stays bounded even when the executor exceeds its protocol budget.
+      let invalidArtifacts = false;
+      for (const item of Array.isArray(payload) ? payload : [payload]) {
+        if (!isRecord(item) || item.fileIds === undefined) continue;
+        if (!isRecord(item.fileIds)) {
+          invalidArtifacts = true;
+          continue;
+        }
+        const ids = Object.values(item.fileIds);
+        if (ids.length > 16) invalidArtifacts = true;
+        for (const id of ids) {
+          if (
+            typeof id !== 'string' ||
+            !/^[A-Za-z0-9_-]{1,200}$/.test(id) ||
+            (!cached.has(id) && cached.size === 16)
+          ) {
+            invalidArtifacts = true;
+            continue;
+          }
+          cached.add(id);
+        }
+      }
+      if (
+        !Array.isArray(payload) ||
+        payload.length !== 1 ||
+        !isRecord(payload[0]) ||
+        invalidArtifacts
+      )
         throw new Error('Invalid execution response');
       const result = payload[0] as {
         status: string;
@@ -116,15 +148,6 @@ export class VibeRunner {
         files?: Record<string, string>;
         fileIds?: Record<string, string>;
       };
-      const ids = Object.values(result.fileIds ?? {});
-      if (ids.length > 16) throw new Error('Too many cached artifacts');
-      for (const id of ids) {
-        if (typeof id !== 'string' || !/^[A-Za-z0-9_-]{1,200}$/.test(id))
-          throw new Error('Invalid cached artifact');
-        if (!cached.has(id) && cached.size === 16)
-          throw new Error('Too many cached artifacts');
-        cached.add(id);
-      }
       if (
         ![
           'Accepted',

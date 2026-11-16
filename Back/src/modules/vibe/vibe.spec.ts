@@ -283,4 +283,98 @@ describe('vibe project trust boundaries', () => {
         .every((c) => c.detail === undefined),
     ).toBe(true);
   });
+
+  it.each([
+    {
+      name: 'unexpected multiple command results',
+      payload: [
+        { status: 'Accepted', exitStatus: 0, fileIds: { 'main.cjs': 'main' } },
+        { status: 'Internal Error', fileIds: { partial: 'partial' } },
+      ],
+      deleted: ['main', 'partial'],
+    },
+    {
+      name: 'an invalid result before valid cleanup metadata',
+      payload: [null, { fileIds: { partial: 'partial' } }],
+      deleted: ['partial'],
+    },
+    {
+      name: 'an invalid artifact between two valid artifacts',
+      payload: [
+        {
+          status: 'Accepted',
+          exitStatus: 0,
+          fileIds: { first: 'first', invalid: '../unsafe', last: 'last' },
+        },
+      ],
+      deleted: ['first', 'last'],
+    },
+    {
+      name: 'artifact overflow without an unbounded cleanup fanout',
+      payload: [
+        {
+          status: 'Accepted',
+          exitStatus: 0,
+          fileIds: Object.fromEntries(
+            Array.from({ length: 17 }, (_, i) => [`file-${i}`, `cached-${i}`]),
+          ),
+        },
+      ],
+      deleted: Array.from({ length: 16 }, (_, i) => `cached-${i}`).sort(),
+    },
+    {
+      name: 'a string instead of the artifact map',
+      payload: [{ status: 'Accepted', exitStatus: 0, fileIds: 'artifact' }],
+      deleted: [],
+    },
+    {
+      name: 'an array instead of the artifact map',
+      payload: [{ status: 'Accepted', exitStatus: 0, fileIds: ['main'] }],
+      deleted: [],
+    },
+  ])(
+    'fails closed and reclaims bounded known artifacts for $name',
+    async ({ payload, deleted }) => {
+      const removals: string[] = [];
+      let executions = 0;
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async (url: URL, options: RequestInit) => {
+          if (options.method === 'DELETE') {
+            removals.push(url.pathname.slice('/file/'.length));
+            return new Response(null, { status: 204 });
+          }
+          if (url.pathname === '/version')
+            return Response.json({ os: 'linux' });
+          if (url.pathname === '/config')
+            return Response.json({
+              runnerConfig: {
+                seccomp: true,
+                cgroupType: 2,
+                workDir: '/w',
+                cgroupControllers: ['cpu', 'memory', 'pids'],
+              },
+            });
+          if (url.pathname === '/file')
+            return new Headers(options.headers).has('Authorization')
+              ? Response.json([])
+              : new Response(null, { status: 401 });
+          expect(url.pathname).toBe('/run');
+          executions++;
+          return Response.json(payload);
+        }),
+      );
+      const runner = new VibeRunner(
+        new ConfigService({
+          VIBE_SANDBOX_URL: 'http://sandbox.test',
+          VIBE_SANDBOX_TOKEN: 'fixture-token',
+        }),
+      );
+      await expect(
+        runner.run(editableFiles(), true, currentVibeSnapshot()),
+      ).rejects.toThrow('격리 실행기');
+      expect(executions).toBe(1);
+      expect(removals.sort()).toEqual(deleted);
+    },
+  );
 });
