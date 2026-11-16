@@ -20,12 +20,13 @@ export class ApiError extends Error {
 
 export async function api<T>(
   path: string,
-  options: RequestInit = {},
+  options: RequestInit & { responseType?: "json" | "text" } = {},
   token?: string,
   retried = false,
 ): Promise<T> {
+  const { responseType = "json", ...requestOptions } = options;
   const response = await fetch(`${baseUrl}${path}`, {
-    ...options,
+    ...requestOptions,
     headers: {
       ...(options.body ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -40,7 +41,10 @@ export async function api<T>(
   });
   // 본문 없는 성공(로그아웃·기기 로그아웃의 204)은 SPA 대체 응답과 구분해 그대로 성공으로 본다.
   if (response.status === 204) return undefined as T;
-  const data = await response.json().catch(() => null);
+  // Error responses keep the normal JSON/auth-refresh path even for downloads.
+  const data = response.ok && responseType === "text"
+    ? await response.text()
+    : await response.json().catch(() => null);
   // 백엔드가 없거나 주소가 틀리면 SPA의 index.html(200)이 돌아온다. 빈 값을 성공으로 넘기지 않는다.
   if (response.ok && data === null)
     throw new ApiError(

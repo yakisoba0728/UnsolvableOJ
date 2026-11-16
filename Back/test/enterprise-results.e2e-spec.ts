@@ -82,6 +82,8 @@ describe('bounded enterprise result pages with global scores', () => {
     const { body } = await http().get(endpoint()).set(bearer(owner)).expect(200);
     expect(body.pagination).toEqual({ page: 1, limit: 50, total: 123, totalPages: 3 });
     expect(body.summary).toEqual(summary);
+    expect(body.analytics).toEqual({ finished: 0, active: 123, expired: 0,
+      scoreBands: [0, 20, 40, 60, 80].map((min) => expected.filter((row) => row.score !== null && row.score >= min && row.score <= (min === 80 ? 100 : min + 19)).length) });
     expect(body.candidates.map((row: { id: string }) => row.id)).toEqual(expected.slice(0, 50).map((row) => row.id));
     for (const [index, row] of body.candidates.entries()) {
       expect(row).toMatchObject({ id: expected[index].id, score: expected[index].score, solved: expected[index].solved });
