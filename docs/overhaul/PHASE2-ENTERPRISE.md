@@ -59,3 +59,39 @@ Local environment: Linux x86-64, Node24.22.1/npm11.9.0, owned temporary PostgreS
 The first full API run after adding migration/withdrawal fixtures exposed two test-isolation errors: the legacy ranking test counted deleted users, and the migration fixture included synthetic assessments from other files. The ranking case now creates an explicit high-XP deleted user and asserts exclusion while counting the public population. The migration case clears other assessment fixtures only inside a rollback-only transaction. No product assertion, timeout or gate was weakened. The corrected full run passed as recorded above.
 
 Production-sized migration lock duration, old/new deployment overlap, Vibe assessment version parity, and dedicated-host operations remain unmeasured. Code integration readiness and deployment readiness are separate decisions.
+
+## Submission-detail title boundary follow-up
+
+Review of the real browser flow found a separate API projection error: the
+assessment view and Judge used the bound version, but `GET /submissions/:id`
+still derived the problem title from the mutable current problem relation.
+An actual disposable API regression against `b8b8a6d` reproduced a queued
+version-1 assessment submission returning a later private version's title.
+This is a metadata disclosure/correctness defect, not evidence of hidden test
+case or editorial disclosure.
+
+Assessment detail now reads its submitted immutable snapshot even when the
+Judge has not yet returned debug output, and uses the snapshot title in the
+small existing problem projection. Sample reconstruction reuses that same
+read. Missing/incomplete assessment snapshots fail closed with HTTP 503; the
+current title is never a fallback. Normal submissions retain their existing
+behavior. The canonical slug is not editable through the problem API and is
+not a field in historical snapshots, so no fabricated versioned slug is used.
+Authorization runs before the snapshot read, and no snapshot object is spread
+into the response.
+
+The new actual API case checks queued and judged states for candidate and
+assessment owner, outsider 404, sample-only data, no later private title/body
+or hidden/editorial data, and exclusion from the public learning list. Three
+units check queued metadata and both missing and incomplete snapshot cases.
+Back lint/types/build and 320 units pass; the focused real API run passes all
+22 cases across four files, including prior version, submission-concurrency
+and judging-core regressions. The first implementation check caught two
+TypeScript errors in the test parameterization/response union; these were
+corrected before any success claim or publication.
+
+Reproduction and passing-run logs:
+[before](evidence/enterprise-submission-metadata-before.log),
+[after](evidence/enterprise-submission-metadata-after.log).
+Independent source review and the full combined live browser/Judge CI remain
+separate required gates.

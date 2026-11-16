@@ -25,6 +25,18 @@ export interface EnterpriseTest {
   updatedAt: string;
 }
 
+/** Owner/admin-only detail; never part of the invitation or candidate test summary. */
+export interface EnterpriseTestDetail extends EnterpriseTest {
+  selectedProblems: {
+    id: string;
+    version: number;
+    title: string;
+    difficulty: string;
+    timeLimitMs: number;
+    memoryLimitMb: number;
+  }[];
+}
+
 /** 응시자가 링크에서 보는 정보 */
 export interface PublicTest {
   title: string;

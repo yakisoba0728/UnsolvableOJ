@@ -7595,6 +7595,11 @@ textarea {
   border-top: 0;
   padding-top: 0;
 }
+.ent-problem-badges {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
 .ent-order {
   color: var(--color-ink-400);
   font: 13px var(--font-mono);
@@ -8275,6 +8280,13 @@ label.check-row input[type="checkbox"] {
 }
 .ent-result-table {
   width: 100%;
+}
+.ent-result-problem-title {
+  display: block;
+  max-width: 24ch;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-weight: 400;
 }
 .verdict-good {
   color: var(--color-success);

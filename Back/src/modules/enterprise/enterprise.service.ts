@@ -146,7 +146,26 @@ export class EnterpriseService {
   }
 
   async findOwned(id: string, user: AuthenticatedUser) {
-    return toTest(await this.owned(this.dataSource.manager, id, user));
+    // Keep the test header/bindings and their summaries on one snapshot while an
+    // owner may refresh a scheduled assessment. Only this authorized detail
+    // response gains metadata; invitation/list/result projections stay unchanged.
+    return this.dataSource.transaction('REPEATABLE READ', async (manager) => {
+      const test = await this.owned(manager, id, user);
+      const selectedProblems: {
+        id: string; version: number; title: string; difficulty: string;
+        timeLimitMs: number; memoryLimitMb: number;
+      }[] = await manager.query(
+        `SELECT b.problem_id AS id, b.version, v.snapshot->>'title' AS title,
+                v.snapshot->>'difficulty' AS difficulty,
+                (v.snapshot->>'timeLimitMs')::int AS "timeLimitMs",
+                (v.snapshot->>'memoryLimitMb')::int AS "memoryLimitMb"
+           FROM enterprise_problem_versions b
+           JOIN problem_versions v ON v.problem_id=b.problem_id AND v.version=b.version
+          WHERE b.test_id=$1 ORDER BY b.position`,
+        [id],
+      );
+      return { ...toTest(test), selectedProblems };
+    });
   }
 
   async update(
