@@ -76,6 +76,8 @@ export interface EnterpriseVibeTask {
 
 export interface TestResults {
   test: EnterpriseTest;
+  /** Bounded candidate details; summary always describes the entire assessment. */
+  pagination: { page: number; limit: number; total: number; totalPages: number };
   summary: {
     candidates: number;
     averageScore: number | null;

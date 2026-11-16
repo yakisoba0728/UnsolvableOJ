@@ -241,6 +241,7 @@ test("the owner opens a candidate's prompts, code revisions and runs, then retri
     route.fulfill({ json: exam() }),
   );
   const results: TestResults = {
+    pagination: { page: 1, limit: 50, total: 1, totalPages: 1 },
     test: exam(),
     summary: { candidates: 1, averageScore: null, pending: 1, perfect: 0 },
     candidates: [

@@ -215,6 +215,7 @@ jobs:
           npm run check --prefix Back
           npm run test:boj-import --prefix Back
           npm run test:operations --prefix Back
+          node --test Back/scripts/benchmark-enterprise-results.test.mjs
           node --test Back/scripts/starter-problems.test.mjs Back/scripts/seed-starter.test.mjs
       - name: Production Compose configuration
         run: node scripts/check-production-compose.mjs
@@ -302,6 +303,7 @@ jobs:
         run: |
           node -e 'const fs = require("node:fs"); const { firefox } = require("@playwright/test"); fs.accessSync(firefox.executablePath(), fs.constants.X_OK); console.log("Firefox executable:", firefox.executablePath());'
           npx --no-install playwright test \
+            enterprise-results.spec.ts \
             auth.spec.ts editor-focus.spec.ts enterprise-ownership.spec.ts enterprise-refresh.spec.ts layout.spec.ts \
             live-qa-followups.spec.ts problem-bookmarks.spec.ts session-refresh.spec.ts ui-harmony.spec.ts \
             --project=firefox --workers=4 --shard=${{ matrix.shard }}/2 \

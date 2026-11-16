@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "integrationBaseCommit": "6bb0a063d6b731da3bb0435bc3d1678195ffe6c9",
+  "compositionCommitBeforeFollowup": "dca3bc2",
+  "node": "v24.22.1",
+  "sourceBlobs": {
+    "Front/src/pages/EnterpriseDetailPage.tsx": "afdd19b2cb3298d6191f8077ea4474368c9ddbbf",
+    "Front/src/enterprise/api.ts": "00562657a5ec4ce3f7d7eb8292c8c330c4f83fc6",
+    "Front/src/App.tsx": "11cd030c2a8ee812404a2af8a29e4661c248efad",
+    "Front/src/pages/EnterpriseFormPage.tsx": "0e387740dbf52d3a1f5596bfc31da18c9afb2847",
+    "Front/src/community/useRequestOwner.ts": "3e86d0025a5af92839b9c4cf3c444db9af921de4",
+    "docs/overhaul/repro/enterprise-results-dom.mjs": "85b28ce4f59a7fd0c9ff31aa510518e12fecb6b0"
+  },
+  "environment": "Actual React DOM in jsdom with synthetic HTTP fixtures; no native browser, layout or Web Vitals measurement",
+  "reviewRegression": {
+    "before": {
+      "productionCommit": "dca3bc2",
+      "exitCode": 1,
+      "observedError": "Error: DOM timeout: ← 기업 테스트Result pages마감1문항 · 30분 · 1월1일부터, 1월2일까지시작2026. 01. 01. 09:00 GMT+9종료2026. 01. 02. 09:00 GMT+9기준 시간대: Asia/Seoul (이 기기의 현지 시간)출제 문제1문항1비공개 또는 삭제된 문제응시 현황1월2일에 마감됐어요응시자1명평균 점수100점전부 맞힌 사람1명응시 링크http://localhost/enterprise/join/fixture링크 복사로그인한 사람은 누구나 이 링크로 한 번 응시할 수 있어요. 응시 기간 안에 시작하면 그때부터 30분이 주어집니다.응시 결과새로고침전체 1명 중 0–1명 · 2/1페이지응시자점수1번상태"
+    },
+    "after": {
+      "passed": true,
+      "environment": "Actual React DOM in jsdom; native browser/layout metrics not measured",
+      "checks": [
+        "50/50/3 bounded rows",
+        "heading focus and busy state during loading",
+        "no stale rows relabelled",
+        "failed page retry/first-page recovery control",
+        "route identity resets page",
+        "out-of-range page recovers after shrink to one/zero candidates"
+      ],
+      "requests": [
+        {
+          "id": "results",
+          "page": 1
+        },
+        {
+          "id": "results",
+          "page": 2
+        },
+        {
+          "id": "results",
+          "page": 3
+        },
+        {
+          "id": "results",
+          "page": 3
+        },
+        {
+          "id": "another",
+          "page": 1
+        },
+        {
+          "id": "another",
+          "page": 1
+        },
+        {
+          "id": "shrunk-1",
+          "page": 1
+        },
+        {
+          "id": "shrunk-1",
+          "page": 1
+        },
+        {
+          "id": "shrunk-1",
+          "page": 2
+        },
+        {
+          "id": "shrunk-1",
+          "page": 2
+        },
+        {
+          "id": "shrunk-1",
+          "page": 1
+        },
+        {
+          "id": "shrunk-0",
+          "page": 1
+        },
+        {
+          "id": "shrunk-0",
+          "page": 1
+        },
+        {
+          "id": "shrunk-0",
+          "page": 2
+        },
+        {
+          "id": "shrunk-0",
+          "page": 2
+        },
+        {
+          "id": "shrunk-0",
+          "page": 1
+        }
+      ]
+    }
+  },
+  "preservedOwnership": {
+    "label": "results-combined-ownership",
+    "root": "/workspace/scratch/231e81830e94/results-integration",
+    "node": "v24.22.1",
+    "dom": "jsdom 31.0.1",
+    "scenarios": [
+      {
+        "name": "late-delete-navigation",
+        "mutations": 1,
+        "expected": "/problems",
+        "actual": "/problems",
+        "passed": true
+      },
+      {
+        "name": "late-start-account",
+        "mutations": 1,
+        "expected": "/enterprise/join/abc",
+        "actual": "/enterprise/join/abc",
+        "passed": true
+      }
+    ]
+  },
+  "preservedFormRefresh": {
+    "label": "results-combined-refresh",
+    "root": "/workspace/scratch/231e81830e94/results-integration",
+    "node": "v24.22.1",
+    "dom": "jsdom 31.0.1",
+    "scenarios": [
+      {
+        "name": "edit-draft-refresh",
+        "before": "unsaved title",
+        "pending": "unsaved title",
+        "after": "unsaved title",
+        "passed": true
+      }
+    ]
+  }
+}
