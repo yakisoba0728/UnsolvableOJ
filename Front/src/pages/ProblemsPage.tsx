@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Bookmark } from "lucide-react";
 import { api } from "../api";
 import { Link } from "react-router-dom";
 import { canAuthor, useAuth } from "../auth";
@@ -78,6 +79,13 @@ const statusChips: { value: "" | SolveState; label: string }[] = [
  */
 export function ProblemsPage() {
   const { session } = useAuth();
+  // The same public route now carries private bookmark state. Clear synchronously
+  // on account changes, while retaining previous results for this owner's filters.
+  return <OwnedProblemsPage key={session?.user.id ?? "guest"} />;
+}
+
+function OwnedProblemsPage() {
+  const { session } = useAuth();
   useDocumentTitle("문제 목록");
   const history = useSubmissionHistory(session);
   const { profile, rank, profileLoading, rankLoading, profileError, rankError, retryProfile, retryRank } =
@@ -105,6 +113,7 @@ export function ProblemsPage() {
       ["solved", "attempted", "none"].includes(value),
     );
   const selectedTag = params.get("t") ?? "";
+  const savedOnly = Boolean(session && params.get("saved") === "1");
   const rawSort = params.get("sort") ?? "latest";
   const legacySort = legacySorts[rawSort];
   // 모르는 정렬 이름은 서버가 거절하므로 기본 정렬로 읽는다.
@@ -134,6 +143,7 @@ export function ProblemsPage() {
     request.set("difficulty", selectedDifficulties.join(","));
   if (selectedTag) request.set("tag", selectedTag);
   if (statuses.length) request.set("solve", statuses.join(","));
+  if (savedOnly) request.set("bookmarked", "true");
   if (sort !== "latest") request.set("sort", sort);
   if (sort === "random") request.set("seed", String(seed));
   else if (reversed) request.set("reverse", "true");
@@ -156,6 +166,12 @@ export function ProblemsPage() {
     // 조건을 바꿔도 새 결과가 올 때까지 앞선 목록을 보여 주고(깜빡임 없음), 연달아 바꾸면 마지막 조건으로 한 번만 요청한다.
     { keepPrevious: true, debounceMs: 150 },
   );
+  // Problems open in another tab; returning to this list reflects saves made there.
+  useEffect(() => {
+    if (!session) return;
+    window.addEventListener("focus", retry);
+    return () => window.removeEventListener("focus", retry);
+  }, [session, retry]);
   // 실패한 요청의 조건에는 앞선 목록을 보이지 않는다.
   const list = error ? EMPTY_PAGE : loaded;
   const problems = list.items;
@@ -325,6 +341,11 @@ export function ProblemsPage() {
             }))}
             onChange={changeSort}
           />
+          {session ? <button type="button" className={`button ${savedOnly ? "button-outline" : "button-soft"}`}
+            aria-pressed={savedOnly} onClick={() => update({ saved: savedOnly ? null : "1" })}>
+            <Bookmark size={16} aria-hidden="true" fill={savedOnly ? "currentColor" : "none"} />
+            저장한 문제
+          </button> : null}
         </div>
 
         <div className="filter-groups">
@@ -428,7 +449,7 @@ export function ProblemsPage() {
         <section aria-label="문제 목록">
           <div className="section-heading compact">
             <div className="title-line">
-              <h2>{hasFilter ? "검색 결과" : "전체 문제"}</h2>
+              <h2>{savedOnly ? "저장한 문제" : hasFilter ? "검색 결과" : "전체 문제"}</h2>
               {sort === "random" ? (
                 <>
                   <span className="pill pill-primary">무작위 순서</span>
@@ -483,6 +504,10 @@ export function ProblemsPage() {
                     <span className="problem-title">
                       <span className="post-title-line">
                         <strong title={problem.title}>{problem.title}</strong>
+                        {session && problem.bookmarked ? <span className="bookmark-indicator">
+                          <Bookmark size={14} fill="currentColor" aria-hidden="true" />
+                          <span className="sr-only">저장한 문제</span>
+                        </span> : null}
                         <span className="sr-only">(새 탭에서 열려요)</span>
                         {session && history.loading ? (
                           <Skeleton width={48} height={16} />
@@ -506,7 +531,13 @@ export function ProblemsPage() {
             </div>
           ) : error ? null : (
             <div className="empty-state">
-              {hasFilter ? (
+              {savedOnly && !hasFilter ? (
+                <>
+                  <strong>아직 저장한 문제가 없어요.</strong>
+                  <p>다시 풀고 싶은 문제에서 저장을 누르면 이곳에 모여요. 저장 목록은 나에게만 보입니다.</p>
+                  <button type="button" className="inline-button" onClick={() => update({ saved: null })}>전체 문제 둘러보기</button>
+                </>
+              ) : hasFilter ? (
                 <>
                   <strong>조건에 맞는 문제가 없어요.</strong>
                   <p>

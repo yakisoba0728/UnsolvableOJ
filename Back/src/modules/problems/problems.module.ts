@@ -5,6 +5,7 @@ import { Problem } from './problem.entity.js';
 import { ProblemsController } from './problems.controller.js';
 import { ProblemsService } from './problems.service.js';
 import { TestCase } from './test-case.entity.js';
+import { ProblemBookmarksService } from './problem-bookmarks.service.js';
 
 @Module({
   imports: [
@@ -12,6 +13,6 @@ import { TestCase } from './test-case.entity.js';
     TypeOrmModule.forFeature([Problem, TestCase]),
   ],
   controllers: [ProblemsController],
-  providers: [ProblemsService],
+  providers: [ProblemsService, ProblemBookmarksService],
 })
 export class ProblemsModule {}
