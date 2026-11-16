@@ -4,7 +4,7 @@ import { authenticate, mockProblemApi, session, storageKey } from "./fixtures";
 const notification = (id: string, title = id) => ({
   id,
   type: "ANSWER",
-  readAt: null,
+  readAt: null as string | null,
   createdAt: new Date().toISOString(),
   commentId: null,
   actor: { id: "author", username: "author" },
@@ -12,7 +12,7 @@ const notification = (id: string, title = id) => ({
   submission: null,
 });
 const pageOf = (items: ReturnType<typeof notification>[], page = 1, totalPages = 1) => ({
-  items, page, totalPages, unread: items.length,
+  items, page, totalPages, unread: items.filter(item => !item.readAt).length,
 });
 async function changeAccount(page: Page) {
   await page.evaluate(({ key, original }) => {
@@ -131,8 +131,12 @@ test("a failed read request retains the unread badge", async ({ page }) => {
 
 test("a delayed unread poll cannot undo marking all notifications read", async ({ page }) => {
   await setup(page);
-  await page.route("**/api/v1/notifications?*", route => route.fulfill({ json: pageOf([notification("first")]) }));
-  await page.route("**/api/v1/notifications/read-all", route => route.fulfill({ json: { unread: 0 } }));
+  const first = notification("first");
+  await page.route("**/api/v1/notifications?*", route => route.fulfill({ json: pageOf([first]) }));
+  await page.route("**/api/v1/notifications/read-all", route => {
+    first.readAt = new Date().toISOString();
+    return route.fulfill({ json: { unread: 0 } });
+  });
   await page.goto("/problems");
   await bell(page).click();
   await expect(panel(page).getByRole("link")).toHaveCount(1);
@@ -142,7 +146,130 @@ test("a delayed unread poll cannot undo marking all notifications read", async (
   await expect.poll(() => Boolean(pending)).toBe(true);
   await panel(page).getByRole("button", { name: "모두 읽음" }).click();
   await expect(bell(page)).toHaveAccessibleName("알림");
-  await pending!.fulfill({ json: { unread: 1 } });
+  await pending!.fulfill({ json: { unread: 1 } }).catch(() => {});
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   await expect(bell(page)).toHaveAccessibleName("알림");
+});
+
+/** Keep the server state separate from response delivery so completion order is explicit. */
+async function notificationRace(page: Page, ids = ["a", "b"]) {
+  await setup(page);
+  let rows = ids.map(id => notification(id));
+  const unread = () => rows.filter(row => !row.readAt).length;
+  const mutations = new Map<string, Route>();
+  let listRequests = 0;
+  let delayNextList = false;
+  let delayedList: { route: Route; payload: ReturnType<typeof pageOf> } | undefined;
+  await page.route("**/api/v1/notifications/unread-count", route => route.fulfill({ json: { unread: unread() } }));
+  await page.route("**/api/v1/notifications?*", route => {
+    listRequests += 1;
+    const payload = pageOf(rows.map(row => ({ ...row })));
+    if (delayNextList) {
+      delayNextList = false;
+      delayedList = { route, payload };
+      return;
+    }
+    return route.fulfill({ json: payload });
+  });
+  await page.route(/\/api\/v1\/notifications\/(?:read-all|[^/]+\/read)$/, route => {
+    mutations.set(new URL(route.request().url()).pathname.split("/notifications")[1], route);
+  });
+  await page.goto("/problems");
+  await bell(page).click();
+  await expect(panel(page).getByRole("link")).toHaveCount(ids.length);
+  return {
+    pending: mutations,
+    unread,
+    listRequests: () => listRequests,
+    delayList: () => { delayNextList = true; },
+    hasDelayedList: () => Boolean(delayedList),
+    async complete(path: string, succeeds = true) {
+      const route = mutations.get(path);
+      expect(route, `pending mutation ${path}`).toBeDefined();
+      if (succeeds) rows = rows.map(row => path === "/read-all" || path === `/${row.id}/read`
+        ? { ...row, readAt: new Date().toISOString() } : row);
+      await route!.fulfill({ status: succeeds ? 200 : 503, json: succeeds ? { unread: unread() } : { message: "temporary" } });
+    },
+    async releaseList() {
+      expect(delayedList).toBeDefined();
+      await delayedList!.route.fulfill({ json: delayedList!.payload }).catch(() => {});
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    },
+  };
+}
+
+test("a completed individual read reconciles after the panel was closed and reopened", async ({ page }) => {
+  const api = await notificationRace(page, ["a"]);
+  await panel(page).getByRole("link").click();
+  await expect.poll(() => api.pending.has("/a/read")).toBe(true);
+  await bell(page).click();
+  await expect.poll(api.listRequests).toBe(2);
+  await api.complete("/a/read");
+  await expect(bell(page)).toHaveAccessibleName("알림");
+  await expect(panel(page).locator("li.unread")).toHaveCount(0);
+});
+
+test("an older reopened list cannot undo a completed read", async ({ page }) => {
+  const api = await notificationRace(page, ["a"]);
+  await panel(page).getByRole("link").click();
+  await expect.poll(() => api.pending.has("/a/read")).toBe(true);
+  api.delayList();
+  await bell(page).click();
+  await expect.poll(api.hasDelayedList).toBe(true);
+  await api.complete("/a/read");
+  await expect(bell(page)).toHaveAccessibleName("알림");
+  await api.releaseList();
+  await expect(bell(page)).toHaveAccessibleName("알림");
+  await expect(panel(page).locator("li.unread")).toHaveCount(0);
+});
+
+test("mark-all completing after an overlapping individual read reconciles the final count", async ({ page }) => {
+  const api = await notificationRace(page);
+  await panel(page).getByRole("button", { name: "모두 읽음" }).click();
+  await expect.poll(() => api.pending.has("/read-all")).toBe(true);
+  await panel(page).getByRole("link").first().click();
+  await expect.poll(() => api.pending.has("/a/read")).toBe(true);
+  await api.complete("/a/read");
+  await api.complete("/read-all");
+  await expect(bell(page)).toHaveAccessibleName("알림");
+  await bell(page).click();
+  await expect(panel(page).locator("li.unread")).toHaveCount(0);
+});
+
+test("different individual reads can finish in reverse order", async ({ page }) => {
+  const api = await notificationRace(page);
+  await panel(page).getByRole("link").first().click();
+  await expect.poll(() => api.pending.has("/a/read")).toBe(true);
+  await bell(page).click();
+  await expect.poll(api.listRequests).toBe(2);
+  await panel(page).getByRole("link").nth(1).click();
+  await expect.poll(() => api.pending.has("/b/read")).toBe(true);
+  await api.complete("/b/read");
+  await api.complete("/a/read");
+  await expect(bell(page)).toHaveAccessibleName("알림");
+});
+
+test("a failed overlapping mutation still reconciles a different successful read", async ({ page }) => {
+  const api = await notificationRace(page);
+  await panel(page).getByRole("button", { name: "모두 읽음" }).click();
+  await expect.poll(() => api.pending.has("/read-all")).toBe(true);
+  await panel(page).getByRole("link").first().click();
+  await expect.poll(() => api.pending.has("/a/read")).toBe(true);
+  await api.complete("/a/read");
+  await api.complete("/read-all", false);
+  await expect(bell(page)).toHaveAccessibleName("알림, 안 읽음 1개");
+  await bell(page).click();
+  await expect(panel(page).locator("li.unread")).toHaveCount(1);
+});
+
+test("a completed old-account read cannot reconcile into the new account", async ({ page }) => {
+  const api = await notificationRace(page, ["a"]);
+  await panel(page).getByRole("link").click();
+  await expect.poll(() => api.pending.has("/a/read")).toBe(true);
+  await page.route("**/api/v1/notifications/unread-count", route => route.fulfill({ json: { unread: 4 } }));
+  await changeAccount(page);
+  await expect(bell(page)).toHaveAccessibleName("알림, 안 읽음 4개");
+  await api.complete("/a/read").catch(() => {});
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  await expect(bell(page)).toHaveAccessibleName("알림, 안 읽음 4개");
 });

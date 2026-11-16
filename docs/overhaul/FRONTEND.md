@@ -25,7 +25,7 @@
 | Shared editor and display | Keyboard/IME behavior, snippets, resizable panels, sanitized Markdown/math, confirmation dialogs | `autocomplete`, `code-editing`, `solve-split`, `editor-focus`, `vibe`, `problem-content` |
 | Monitoring and build privacy | Optional Sentry error reporting, email bearer-link suppression, payload scrubbing, answer-bundle checks | `scripts/monitoring-privacy.test.mjs`, `scripts/check-bundle-answers.mjs` |
 
-The updated Playwright configuration discovers 1,035 test instances in 42 spec files, including browser repetition. This is a discovery count, **not** a count of executed passes. The `unit` project has 85 browser-free cases. Live tests have separate configuration and require the real isolated backend/Judge stack.
+The updated Playwright configuration discovers 1,047 test instances in 42 spec files, including browser repetition. This is a discovery count, **not** a count of executed passes. The `unit` project has 85 browser-free cases. Live tests have separate configuration and require the real isolated backend/Judge stack.
 
 ## Findings and changes
 
@@ -33,7 +33,7 @@ The updated Playwright configuration discovers 1,035 test instances in 42 spec f
 | --- | --- | --- | --- |
 | FRONT-001 | P1 | Notification UI state did not follow authentication identity changes. | The header now keys the notification component by user and login identity; pending list, count and mutation responses are cancelled or ignored after their owner is gone. Reproduced in React DOM; implemented; browser CI and independent review pending. |
 | FRONT-002 | P2 | Repeated load-more activation could issue duplicate requests and append duplicate rows. | Synchronous request ownership prevents repeated activation before disabled state renders; appended pages deduplicate stable IDs. Reproduced in React DOM; implemented; browser CI pending. |
-| FRONT-003 | P2 | Notification loading errors lacked an in-panel retry; failed read operations could present an inaccurate unread state. | Added retry, loading feedback, guarded read-all activation and successful-response updates. Existing data remains available during same-account refresh. Six browser regressions cover ownership, pending responses, duplicate activation, retry, failed reads and stale unread polling; browser CI pending. |
+| FRONT-003 | P2 | Notification loading errors lacked an in-panel retry; failed read operations could present an inaccurate unread state. | Added retry, loading feedback, guarded read-all activation and successful-response updates. Existing data remains available during same-account refresh. Twelve browser regressions cover ownership, pending responses, duplicate activation, retry, failed reads, stale polling, overlapping mutations and reopened list ordering; browser CI pending. |
 | FRONT-004 | P2 | Configured telemetry contributed SDK code to the initial application entry. | Separated the optional SDK behind a small, testable client and an error-only adapter chunk. Initial entry reduced under the telemetry-enabled comparison below. Four lifecycle/privacy regressions pass locally. |
 
 These public descriptions omit detailed exploitation instructions and contain no actual user data or credentials. There is no claim of a backend authorization bypass.
@@ -78,8 +78,8 @@ Read the module script path from `dist/index.html`; measure that file and gzip i
 
 | Metric | Baseline | After | Interpretation |
 | --- | ---: | ---: | --- |
-| Default initial JS | 377.84 kB | 380.79 kB | Safety/lifecycle logic adds about 2.95 kB; no improvement claimed |
-| Default initial JS, gzip | 121.58 kB | 122.68 kB | About 1.10 kB added |
+| Default initial JS | 377.84 kB | 381.32 kB | Safety/lifecycle logic adds about 3.48 kB; no improvement claimed |
+| Default initial JS, gzip | 121.58 kB | 122.82 kB | About 1.24 kB added |
 | Initial stylesheet | 144.89 kB | 144.89 kB | Unchanged |
 | Requests from two immediate load-more activations | 2 | 1 | React DOM execution with identical response fixture |
 | Rows after those activations (one initial plus one new) | 3 | 2 | Duplicate removed |
@@ -105,7 +105,7 @@ The DOM reproduction used temporary JSDOM tooling only; it is not a browser repl
 
 ## Follow-up and limits
 
-- Run the six new regressions and the existing Chromium/Firefox/WebKit suites in CI; do not merge on local type/build results alone.
+- Run the twelve notification regressions and the existing Chromium/Firefox/WebKit suites in CI; do not merge on local type/build results alone.
 - Live candidate/Judge flows, responsive layouts and accessibility need the existing integration/browser gates.
 - Home/profile/problem pages still derive some summaries from full submission history. Enterprise problem selection reads all selectable problems. Both are scaling candidates requiring a coordinated API contract and measured dataset; no unmeasured optimization was applied.
 - Large editor/workspace render costs and one-second Vibe timer updates need browser profiling before memoization or component splitting is justified.
@@ -115,3 +115,11 @@ The DOM reproduction used temporary JSDOM tooling only; it is not a browser repl
 ### Invitation policy guidance
 
 The coordinator aligned the assessment form help text with the security branch: email invitations require a verified address; explicit username invitations remain available when email verification is not configured. No new endpoint or form field was added.
+
+## Independent review correction: notification ordering
+
+Review of `56cdfdd` reproduced four ordering failures in the initial notification patch: reopening during an individual read, an older list arriving after that read, overlapping individual/read-all mutations, and two individual reads finishing in reverse order. The badge could remain inconsistent with completed server operations; a delayed list could also restore an unread row. These were implementation defects, not environment failures.
+
+The follow-up separates GET acceptance from mutation responses. Starting or settling a mutation invalidates outstanding list/count GETs. Results of GETs overlapping pending mutations are rejected. After all pending mutations settle, including partial failures, the component fetches an authoritative list when open or an unread count when closed. Per-request cancellation still isolates old accounts and unmounted components. Successful row-read acknowledgements are retained while reconciliation runs.
+
+The independent four-scenario React/JSDOM harness failed at `56cdfdd` and passed all four against the follow-up working tree. Six additional committed browser cases cover those races, partial failure, and late old-account mutation completion. A fixture now models the actual server read state rather than always returning an unread row after a successful read-all. An initial type-check failure caused by importing a TSX type from the non-JSX test configuration was corrected without changing the test configuration. Final checks and immutable review status are recorded by the coordinator.
