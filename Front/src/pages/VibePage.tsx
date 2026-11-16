@@ -9,15 +9,17 @@ import {
 } from "lucide-react";
 import { api } from "../api";
 import { useAuth } from "../auth";
+import { useRequestOwner } from "../community/useRequestOwner";
 import { useDocumentTitle, useRequest } from "../hooks";
 import { PageHeader } from "../components/PageHeader";
 import { SkeletonRows } from "../components/Skeleton";
 import type { VibeAttempt, VibeCatalog, VibeSummary } from "../vibe/types";
 import "../vibe.css";
 
-export function VibePage() {
+export function VibePage({ getNavigationVersion }: { getNavigationVersion: () => number }) {
   useDocumentTitle("바이브코딩");
   const { session } = useAuth();
+  const beginRequest = useRequestOwner(getNavigationVersion, true);
   const catalog = useRequest<VibeCatalog | null>(
     (signal) => api("/vibe/challenges", { signal }),
     null,
@@ -36,6 +38,7 @@ export function VibePage() {
   const [error, setError] = useState("");
   async function start(challengeId: string) {
     if (!session || pending) return;
+    const current = beginRequest();
     setPending(true);
     setError("");
     // 문제 목록처럼 연습은 새 탭에서 연다. 요청이 끝난 뒤에 열면 팝업으로 막히므로
@@ -48,6 +51,12 @@ export function VibePage() {
         { method: "POST" },
         session.accessToken,
       );
+      // Only the login and navigation that opened this blank tab own its result.
+      // A routine token refresh retains that ownership; a new login does not.
+      if (!current()) {
+        tab?.close();
+        return;
+      }
       const path = `/vibe/attempts/${attempt.id}`;
       // 기다리는 사이 빈 탭을 닫았다면 연습은 만들어졌으니 오류 없이 목록에 남는다(최근 연습에서 이어 연다).
       if (tab) {
@@ -55,11 +64,12 @@ export function VibePage() {
       } else window.location.assign(path);
     } catch (cause) {
       tab?.close();
-      setError(
-        cause instanceof Error ? cause.message : "연습을 시작하지 못했습니다.",
-      );
+      if (current())
+        setError(
+          cause instanceof Error ? cause.message : "연습을 시작하지 못했습니다.",
+        );
     } finally {
-      setPending(false);
+      if (current()) setPending(false);
     }
   }
   return (

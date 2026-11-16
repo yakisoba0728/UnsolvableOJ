@@ -204,7 +204,7 @@ export function App({ getNavigationVersion }: { getNavigationVersion: () => numb
               />
               <Route path="/community/:id" element={<CommunityPostPage key={communityOwner} getNavigationVersion={getNavigationVersion} />} />
               <Route path="/analysis" element={<AnalysisPage />} />
-              <Route path="/vibe" element={<VibePage key={session?.user.id ?? 'guest'} />} />
+              <Route path="/vibe" element={<VibePage key={`${session?.user.id ?? "guest"}:${getSessionIdentityVersion()}:${locationKey}`} getNavigationVersion={getNavigationVersion} />} />
               <Route path="/vibe/attempts/:id" element={session ? <VibeWorkspacePage key={`${session.user.id}:${pathname}`} /> : loginRedirect} />
               <Route path="/analysis/:id" element={<AnalysisQuestionPage />} />
               <Route path="/missions" element={<MissionsPage />} />

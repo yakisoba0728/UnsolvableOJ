@@ -344,3 +344,133 @@ test.describe("account settings request ownership", () => {
     });
   }
 });
+
+test.describe("Vibe start request ownership", () => {
+  const attemptId = "request-ownership-attempt";
+  const challengeId = "request-ownership-challenge";
+  const startPath = `/api/v1/vibe/challenges/${challengeId}/attempts`;
+
+  async function setup(page: Page) {
+    await seed(page, Date.now() + 900_000);
+    await mockProblemApi(page);
+    await page.route("**/api/v1/vibe/challenges", route => route.fulfill({ json: {
+      items: [{ id: challengeId, title: "요청 소유권 과제", summary: "대기 중인 요청의 로그인과 화면을 확인합니다.",
+        stack: "TypeScript", difficulty: "입문", durationMin: 5, requirements: [], rubric: [] }],
+      availability: { ai: true, runner: true },
+    } }));
+    await page.route("**/api/v1/vibe/attempts", route => route.fulfill({ json: [] }));
+    // This suite checks navigation ownership, not workspace rendering/API behavior.
+    await page.context().route(`**/vibe/attempts/${attemptId}`, route => route.request().isNavigationRequest()
+      ? route.fulfill({ contentType: "text/html", body: "<!doctype html><title>Owned workspace navigation</title>" })
+      : route.fallback());
+    await page.goto("/vibe");
+  }
+
+  async function replaceLogin(page: Page, mode: "account" | "login" | "logout") {
+    const next = { ...refreshed("explicit-new-vibe-login", "new-family"),
+      user: mode === "account" ? { ...session.user, id: "second", username: "second" } : session.user };
+    await page.evaluate(({ key, nextSession, logout }) => {
+      const oldValue = localStorage.getItem(key);
+      const newValue = logout ? null : JSON.stringify({ session: nextSession, expiresAt: Date.now() + 900_000 });
+      if (newValue === null) localStorage.removeItem(key);
+      else localStorage.setItem(key, newValue);
+      window.dispatchEvent(new StorageEvent("storage", { key, oldValue, newValue, storageArea: localStorage }));
+    }, { key: storageKey, nextSession: next, logout: mode === "logout" });
+  }
+
+  for (const mode of ["account", "login", "logout", "navigate"] as const) {
+    test(`a late Vibe start closes only its own blank tab after ${mode}`, async ({ page }) => {
+      await setup(page);
+      let pending: Route | undefined;
+      await page.route(url => url.pathname === startPath, route => { pending = route; });
+      const unrelated = await page.context().newPage();
+      const [popup] = await Promise.all([
+        page.waitForEvent("popup"),
+        page.getByRole("button", { name: /연습 시작 \/ 이어하기/ }).click(),
+      ]);
+      try {
+        await expect.poll(() => Boolean(pending)).toBe(true);
+        if (mode === "navigate") {
+          await page.getByRole("link", { name: "문제", exact: true }).first().click();
+          await expect(page).toHaveURL(/\/problems$/);
+        } else {
+          await replaceLogin(page, mode);
+          if (mode !== "logout")
+            await expect(page.getByRole("button", { name: /연습 시작 \/ 이어하기/ })).toBeEnabled();
+        }
+        await pending!.fulfill({ json: { id: attemptId } });
+        pending = undefined;
+        await expect.poll(() => popup.isClosed()).toBe(true);
+        expect(unrelated.isClosed()).toBe(false);
+        await expect(page).toHaveURL(mode === "navigate" ? /\/problems$/ : /\/vibe$/);
+      } finally {
+        await pending?.abort().catch(() => {});
+        if (!popup.isClosed()) await popup.close();
+        await unrelated.close();
+      }
+    });
+  }
+
+  test("a late failed Vibe start cannot set the replacement login's error", async ({ page }) => {
+    await setup(page);
+    let pending: Route | undefined;
+    await page.route(url => url.pathname === startPath, route => { pending = route; });
+    const [popup] = await Promise.all([
+      page.waitForEvent("popup"),
+      page.getByRole("button", { name: /연습 시작 \/ 이어하기/ }).click(),
+    ]);
+    try {
+      await expect.poll(() => Boolean(pending)).toBe(true);
+      await replaceLogin(page, "login");
+      await expect(page.getByRole("button", { name: /연습 시작 \/ 이어하기/ })).toBeEnabled();
+      await pending!.fulfill({ status: 503, json: { message: "old login start failed" } });
+      pending = undefined;
+      await expect.poll(() => popup.isClosed()).toBe(true);
+      await expect(page.getByText("old login start failed", { exact: true })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: /연습 시작 \/ 이어하기/ })).toBeEnabled();
+    } finally {
+      await pending?.abort().catch(() => {});
+      if (!popup.isClosed()) await popup.close();
+    }
+  });
+
+  for (const blocked of [false, true]) {
+    test(`same-login refresh preserves Vibe start with popup blocked=${blocked}`, async ({ page }) => {
+      if (blocked) await page.addInitScript(() => { window.open = () => null; });
+      await setup(page);
+      let pending: Route | undefined;
+      let refreshes = 0;
+      const authorizations: string[] = [];
+      await page.route("**/api/v1/auth/refresh", route => {
+        refreshes++;
+        return route.fulfill({ json: refreshed("new-access", "r2") });
+      });
+      await page.route(url => url.pathname === startPath, route => {
+        const authorization = route.request().headers().authorization ?? "";
+        authorizations.push(authorization);
+        if (authorization === "Bearer old-access")
+          return route.fulfill({ status: 401, json: { message: "Expired" } });
+        pending = route;
+      });
+      let popup: Page | undefined;
+      try {
+        if (blocked) await page.getByRole("button", { name: /연습 시작 \/ 이어하기/ }).click();
+        else [popup] = await Promise.all([
+          page.waitForEvent("popup"),
+          page.getByRole("button", { name: /연습 시작 \/ 이어하기/ }).click(),
+        ]);
+        await expect.poll(() => Boolean(pending)).toBe(true);
+        await expect(page.getByRole("button", { name: /준비 중/ })).toBeDisabled();
+        await pending!.fulfill({ json: { id: attemptId } });
+        pending = undefined;
+        await expect(popup ?? page).toHaveURL(new RegExp(`/vibe/attempts/${attemptId}$`));
+        expect(refreshes).toBe(1);
+        expect(authorizations).toEqual(["Bearer old-access", "Bearer new-access"]);
+        if (popup) await expect(page).toHaveURL(/\/vibe$/);
+      } finally {
+        await pending?.abort().catch(() => {});
+        if (popup && !popup.isClosed()) await popup.close();
+      }
+    });
+  }
+});
