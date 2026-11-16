@@ -12,7 +12,7 @@ export function SiteHeader({
   links: { path: string; label: string }[];
   onSignOut: () => void;
 }) {
-  const { session } = useAuth();
+  const { session, getSessionIdentityVersion } = useAuth();
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -131,7 +131,10 @@ export function SiteHeader({
           <ThemeToggle />
           {session ? (
             <>
-              <NotificationBell token={session.accessToken} />
+              <NotificationBell
+                key={`${session.user.id}:${getSessionIdentityVersion()}`}
+                token={session.accessToken}
+              />
               <Link
                 className="account-link"
                 to="/profile"

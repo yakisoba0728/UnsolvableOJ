@@ -1,36 +1,53 @@
-# Audit scope and finding register
+# Audit scope and findings
 
-Baseline: `6176015b63a1615cc2269172f246725ef08abab3`.
+Baseline: `6176015b63a1615cc2269172f246725ef08abab3`, re-read from GitHub at task start. Structural inventory: 453 tracked files, 112 method/path declarations, 13 controller files, 35 frontend routes, 25 original migrations and 30 application tables. Counts describe discovery, not line coverage.
 
 ## Scope accounting
 
-| Area | Structural inventory | Human/code-path audit | Runtime evidence |
+| Area | Inspection and runtime evidence | Limits |
+|---|---|---|
+| Frontend | Whole-tree/routes/dependencies indexed; principal auth/request/editor/enterprise/community/Markdown/notification/telemetry paths reviewed; build/privacy/type/unit and real CI browser suites | Not every visual state manually exercised; no browser load/interaction timing claim |
+| Backend | Controllers, DTOs, modules, transactions, queue/XP/session and authorization paths inspected; real Nest/PostgreSQL/Redis tests and controlled lock races | Existing behavior is not an exhaustive specification; external AI/email calls use deterministic substitutes |
+| Judge | All worker/runtime source and configuration reviewed; byte-differential/transport/unit tests; native isolation/language/pipeline/Compose CI | No sandbox escape research or production host test; mixed-language sustained throughput unmeasured |
+| Database | Migrations and live catalog inspected; 30 app tables, 48 FKs, 20 CHECKs, 5 SQL UNIQUE constraints (unique indexes additional); migration round trips and real query plans | Representative production cardinalities/write pressure/lock distributions unavailable |
+| Security | Auth/session/RBAC/owner/enterprise/callback/sandbox/provider boundaries reviewed; confirmed before/after unit and HTTP regressions | No guarantee against every attack, dependency or model prompt-injection behavior |
+| Infrastructure | Compose, Dockerfiles, CI, proxy, resource budgets and backups read; images and native disposable flows built/tested in Actions | Production host, CDN/TLS, off-host restore and image-CVE/SBOM drill not executed |
+| Documentation/assets | Full tracked inventory; execution and operation guidance inspected | Static assets are not counted as application security review |
+
+See specialist reports and VALIDATION-COVERAGE.md for executable-suite mappings. Seven distinct specialist agents participated, with at most three children active alongside the coordinator. Implementation/reviewer separation and exact-tree evidence are in REVIEW.md.
+
+## Confirmed remediation register
+
+This register includes correctness, privacy, performance and verification-process defects, plus defects caught in newly written tooling. It is not a count of independently exploitable security vulnerabilities. P1 process entries are explicitly distinguished from application defects. States are updated through PROGRESS.md and exact-head CI evidence; no item is INTEGRATED solely because its local test passed.
+
+| ID | Priority | Finding / correction | PR or evidence |
 |---|---|---|---|
-| Frontend | Routes, pages, dependencies, test files generated | Auth/request ownership, notification UX, telemetry and selected editor/enterprise flows | Build/static/unit baseline; browser blocked locally, CI pending |
-| Backend | All controllers and schema migrations inventoried | Auth/domain/enterprise/submission/queue/XP paths inspected | 275 baseline unit tests; DB runs being prepared |
-| Judge | All six original source/test files and runtime/deploy configuration read | Compile/run/limits/leases/output/private cases inspected | 89 baseline and 94 changed tests; native runtime pending |
-| Database | 25 migrations and 30 table declarations inventoried | Specialist query/constraint pass pending | Isolated PostgreSQL binary available; live catalog/performance pending |
-| Security | Trust boundaries mapped | Dedicated cross-domain review in progress | Focused reproductions and regression tests in progress |
-| Infrastructure | Compose/CI/scripts/Dockerfiles inventoried | CI gating, sandbox topology, backup assumptions inspected | CI policy reproduced/fixed; Docker/full checks in CI |
-| Documentation/assets | Tracked-file inventory | Relevant execution docs read; static presentation/assets are not an application code audit | Not applicable |
+| INF-001 | P1 process | Aggregate required CI omitted audit/image failures; include all required dependencies | #54 |
+| INF-002 | P2 | Changed-file pipe could misclassify large image diffs; avoid early-reader SIGPIPE | #54 |
+| INF-003 | P1 process | Integration target lacked PR validation; enable integration and full final checks | #54 |
+| REL-001 | P1 process | Execution changes could enter integration without native gates; risk-path full selection | #57 |
+| REL-002 | P2 preventive | Judge build context omitted `.env.*` exclusion; add it, without alleging a leaked secret | #57 |
+| BE-001 | P1 | Submission authorization could expire/change before insertion; lock and freshly check inside transaction | #59, BACKEND.md |
+| BE-002 | P1 | Workspace deadline check used transaction-start time after waiting; post-lock wall clock | #59 |
+| BE-003 | P2 | Quota/attempt/FK lock cycle; retain serialization with NO KEY UPDATE | #59 |
+| FE-001 | P1 privacy | Notification state/replies outlived login identity; remount/abort by identity | #56, FRONTEND.md |
+| FE-002 | P2 | Duplicate page requests/rows; synchronous ownership and ID deduplication | #56 |
+| FE-003 | P2 | Failed loading/reads lacked truthful recovery; retry and explicit failure state | #56 |
+| FE-004 | P2 performance | Configured telemetry loaded SDK in initial entry; defer optional adapter with privacy rechecks | #56 |
+| FE-005 | P2 introduced/reviewed | Initial patch mishandled overlapping reads/stale lists; independently reproduce four orderings and reconcile | #56, REVIEW.md |
+| JG-001 | P2 | Internal API followed redirects; reject redirects | #55, JUDGE.md |
+| JG-002 | P2 | Readiness did not prove auth enforcement; require anonymous rejection | #55 |
+| JG-003 | P2 performance | Line-count amplified comparator allocation; constant auxiliary state | #55 |
+| JG-004 | P3 | Incorrect recovery-budget comment; align with actual lease release | #55 |
+| SEC-001 | P1 | Email invitation did not require verified mailbox ownership; shared verified predicate | #60, SECURITY.md |
+| SEC-002 | P2 defense | Detailed callback self-labelled diagnostic visibility; validate immutable case membership | #60 |
+| SEC-003 | P2 defense | Vibe readiness did not prove auth enforcement; anonymous rejection | #60 |
+| SEC-004 | P2 | Pending-password identity retained privileged optional-route visibility; anonymous visibility until replacement | #60 |
+| DB-001 | P2 performance | Reverse profile lookup lacked user-first indexes; add two measured composite indexes | #58, DATABASE.md |
+| DB-002 | P2 performance | Enterprise score assembly repeatedly scanned all rows; index once | #58 |
+| TOOL-001 | P2 introduced/reviewed | New benchmarks checked URL text rather than effective DB destination; reject overrides/protocol mismatch | #58 and audit-evidence |
+| TOOL-002 | P2 introduced/reviewed | New HTTP harness cleanup/ownership gaps; bounded cleanup, empty Redis and signal handling | audit-evidence, 8-case safety evidence |
 
-A structural inventory is not a claim of line-by-line review. Remaining audit gaps are retained in BACKLOG.md.
+Totals for this bounded register: **25 items: P0 0, P1 7 (4 application/privacy + 3 process), P2 17, P3 1**. Public summaries omit operational exploit instructions. No P0 was established; that is not proof that none can exist. Deferred observations in BACKLOG.md are separate from these confirmed remediations.
 
-## Findings tracked this iteration
-
-| ID | Priority | Summary | State / evidence owner |
-|---|---|---|---|
-| INF-001 | P1 | Aggregate CI status omitted independent audit/image failures | Local TESTED, independent REVIEWED; PR #54 CI pending |
-| INF-002 | P2 | Large changed-file output could wrongly skip image builds | REPRODUCED → TESTED; PR #54 |
-| INF-003 | P1 process | Integration target lacked PR validation trigger | TESTED → REVIEWED; PR #54 |
-| BE-001 | P1 | Assessment state/deadline could change during submission lock waits | REPRODUCED → IMPLEMENTED; DB validation pending |
-| BE-002 | P1 | Workspace start could use transaction-start time after a lock wait | IMPLEMENTED; DB validation pending |
-| BE-003 | P1 | Quota locking could conflict with assessment/FK lock order | IMPLEMENTED; real concurrency validation pending |
-| FE-001 | P1 privacy | Notification state/replies could outlive their authenticated owner | REPRODUCED with React DOM → IMPLEMENTED; browser CI pending |
-| FE-002 | P2 | Concurrent pagination/read failures could show duplicates or false success | REPRODUCED with React DOM → IMPLEMENTED; browser CI pending |
-| JG-001 | P2 | Internal transport followed redirects | REPRODUCED → TESTED; independent review pending |
-| JG-002 | P2 | Sandbox readiness did not prove authentication enforcement | REPRODUCED → TESTED; native confirmation pending |
-| JG-003 | P2 performance | Output line count amplified comparator allocation | Measured → IMPLEMENTED → TESTED |
-| SEC-review | Undetermined | Cross-domain identity and callback data boundaries under dedicated review | Do not publish sensitive reproduction detail; final classification after verification |
-
-States: DISCOVERED → REPRODUCED → IMPLEMENTED → TESTED → REVIEWED → INTEGRATED. BLOCKED/UNVERIFIED are separate from success. No current entry establishes production exploitability or a clean bill of health for unrelated paths.
+Application tests follow DISCOVERED → REPRODUCED → IMPLEMENTED → TESTED → REVIEWED → INTEGRATED. Pure preventive/documentation changes have static/configuration evidence instead of an invented failing exploit. BLOCKED and UNMEASURED remain explicit states.

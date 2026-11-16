@@ -1,0 +1,75 @@
+{
+  "harnessSha256": "128fb248645703205a8c7e51877f416dde3838967c09bfbb794cd2137012f5b5",
+  "cases": [
+    {
+      "case": "host-query-rejected",
+      "passed": true,
+      "exitCode": 1,
+      "elapsedSeconds": 0.358,
+      "leftoverDatabases": []
+    },
+    {
+      "case": "protocol-rejected",
+      "passed": true,
+      "exitCode": 1,
+      "elapsedSeconds": 0.179,
+      "leftoverDatabases": []
+    },
+    {
+      "case": "explicit-opt-in-required",
+      "passed": true,
+      "exitCode": 1,
+      "elapsedSeconds": 0.175,
+      "leftoverDatabases": []
+    },
+    {
+      "case": "email-must-be-disabled",
+      "passed": true,
+      "exitCode": 1,
+      "elapsedSeconds": 0.171,
+      "leftoverDatabases": []
+    },
+    {
+      "case": "direct-server-unowned-database-rejected",
+      "passed": true,
+      "exitCode": 1,
+      "elapsedSeconds": 0.171,
+      "leftoverDatabases": []
+    },
+    {
+      "case": "nonempty-redis-rejected",
+      "passed": true,
+      "exitCode": 1,
+      "elapsedSeconds": 0.541,
+      "leftoverDatabases": [],
+      "preexistingRedisSentinelPreserved": true
+    },
+    {
+      "case": "sigint-cleans-owned-resources",
+      "passed": true,
+      "exitCode": 130,
+      "signalDuring": "active HTTP requests (observed own Redis throttle key)",
+      "cleanupSeconds": 0.166,
+      "observedApiPids": [
+        165
+      ],
+      "leftoverApiPids": [],
+      "processGroupGone": true,
+      "leftoverDatabases": []
+    },
+    {
+      "case": "sigterm-cleans-owned-resources",
+      "passed": true,
+      "exitCode": 143,
+      "signalDuring": "active HTTP requests (observed own Redis throttle key)",
+      "cleanupSeconds": 0.164,
+      "observedApiPids": [
+        203
+      ],
+      "leftoverApiPids": [],
+      "processGroupGone": true,
+      "leftoverDatabases": []
+    }
+  ],
+  "servicesStopped": true
+}

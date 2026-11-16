@@ -234,6 +234,8 @@ describe('Enterprise tests: server storage, invite link, attempts, results (e2e)
     const ownerInfo = await http().get(`${base}/enterprise/join/${code}`).set(bearer(owner)).expect(200);
     expect(ownerInfo.body.isOwner).toBe(true);
     await http().get(`${base}/enterprise/join/${code}`).set(bearer(byName.accessToken)).expect(200);
+    // Email invitations require a mailbox that the account has verified.
+    await db.query('UPDATE users SET email_verified_at=now() WHERE id=$1', [byEmail.user.id]);
     const viaEmail = await http().post(`${base}/enterprise/join/${code}/start`).set(bearer(byEmail.accessToken)).expect(201);
     const started = await http().post(`${base}/enterprise/join/${code}/start`).set(bearer(byName.accessToken)).expect(201);
     await http().get(`${base}/enterprise/attempts/${started.body.id}`).set(bearer(other)).expect(404);

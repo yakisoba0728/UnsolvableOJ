@@ -131,6 +131,13 @@ export class VibeRunner {
       )
         throw new Error('Sandbox isolation is unavailable');
       await (await request('/file')).body?.cancel();
+      const anonymous = await fetch(new URL('/file', url), {
+        redirect: 'error',
+        signal,
+      });
+      await anonymous.body?.cancel();
+      if (anonymous.status !== 401 && anonymous.status !== 403)
+        throw new Error('Sandbox file access must require authentication');
       const compile = await execute(
         [
           '/bin/sh',

@@ -58,58 +58,139 @@ export function NotificationBell({ token }: { token: string }) {
   const [open, setOpen] = useState(false);
   const [list, setList] = useState<NotificationPage | null>(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [failedPage, setFailedPage] = useState(1);
+  const [markingAll, setMarkingAll] = useState(false);
+  const listRequest = useRef<AbortController | null>(null);
+  const readRequests = useRef(new Set<AbortController>());
+  const markingAllRef = useRef(false);
+  const countRequest = useRef<AbortController | null>(null);
+  // Only GET responses use this epoch. Mutation response order does not establish
+  // server state; after all mutations settle, fetch that state again.
+  const queryEpoch = useRef(0);
+  const tokenRef = useRef(token);
+  tokenRef.current = token;
+  const openRef = useRef(open);
+  openRef.current = open;
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
+
+  function setPanelOpen(next: boolean) {
+    openRef.current = next;
+    setOpen(next);
+  }
+
+  function invalidateQueries() {
+    queryEpoch.current += 1;
+    countRequest.current?.abort();
+    countRequest.current = null;
+    listRequest.current?.abort();
+    listRequest.current = null;
+    setLoading(false);
+  }
+
+  async function refreshUnread(reportFailure = false) {
+    // An open list supplies its own count. Polling must not invalidate its rows.
+    if (readRequests.current.size || listRequest.current) return;
+    countRequest.current?.abort();
+    const controller = new AbortController();
+    countRequest.current = controller;
+    const epoch = ++queryEpoch.current;
+    try {
+      const result = await request<{ unread: number }>(tokenRef.current, "/unread-count", {
+        signal: controller.signal,
+      });
+      if (!controller.signal.aborted && epoch === queryEpoch.current && !readRequests.current.size)
+        setUnread(result.unread);
+    } catch {
+      if (reportFailure && !controller.signal.aborted && epoch === queryEpoch.current)
+        setError("읽음 상태를 다시 확인하지 못했어요.");
+    } finally {
+      if (countRequest.current === controller) countRequest.current = null;
+    }
+  }
 
   useEffect(() => {
     let timer: number | undefined;
     const poll = () => {
       window.clearTimeout(timer);
+      countRequest.current?.abort();
       if (document.hidden) return;
-      request<{ unread: number }>(token, "/unread-count")
-        .then((result) => setUnread(result.unread))
-        .catch(() => {});
       timer = window.setTimeout(poll, POLL_MS);
+      void refreshUnread();
     };
     poll();
     document.addEventListener("visibilitychange", poll);
     return () => {
       window.clearTimeout(timer);
+      countRequest.current?.abort();
       document.removeEventListener("visibilitychange", poll);
     };
   }, [token]);
 
-  async function load(page: number) {
-    setError("");
+  useEffect(() => () => {
+    listRequest.current?.abort();
+    countRequest.current?.abort();
+    readRequests.current.forEach((controller) => controller.abort());
+  }, []);
+
+  async function load(page: number, preserveError = false) {
+    // A repeated click before React paints the disabled button is also ignored.
+    if (page > 1 && listRequest.current) return;
+    listRequest.current?.abort();
+    countRequest.current?.abort();
+    const controller = new AbortController();
+    listRequest.current = controller;
+    const epoch = ++queryEpoch.current;
+    if (!preserveError) setError("");
+    setLoading(true);
     try {
       const next = await request<NotificationPage>(
-        token,
+        tokenRef.current,
         `?page=${page}&limit=${PAGE_SIZE}`,
+        { signal: controller.signal },
       );
+      if (controller.signal.aborted || epoch !== queryEpoch.current || readRequests.current.size) return;
       setUnread(next.unread);
       setList((current) =>
         page > 1 && current
-          ? { ...next, items: [...current.items, ...next.items] }
+          ? {
+              ...next,
+              // New notifications can shift offset pages while the panel is open.
+              items: [...new Map([...current.items, ...next.items].map((item) => [item.id, item])).values()],
+            }
           : next,
       );
     } catch {
-      setError("알림을 불러오지 못했어요.");
+      if (!controller.signal.aborted && epoch === queryEpoch.current && !readRequests.current.size) {
+        setFailedPage(page);
+        setError("알림을 불러오지 못했어요.");
+      }
+    } finally {
+      if (listRequest.current === controller) {
+        listRequest.current = null;
+        setLoading(false);
+      }
     }
   }
 
   useEffect(() => {
     if (open) void load(1);
-  }, [open]);
+    return () => {
+      listRequest.current?.abort();
+      listRequest.current = null;
+    };
+  }, [open, token]);
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      setOpen(false);
+      setPanelOpen(false);
       buttonRef.current?.focus();
     };
     const onPointer = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      if (!rootRef.current?.contains(event.target as Node)) setPanelOpen(false);
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onPointer);
@@ -119,26 +200,51 @@ export function NotificationBell({ token }: { token: string }) {
     };
   }, [open]);
 
-  function markRead(item: AppNotification) {
+  function finishRead(controller: AbortController) {
+    readRequests.current.delete(controller);
+    if (controller.signal.aborted) return;
+    // This also rejects a GET started while a mutation was in flight, even when
+    // its response arrives after that mutation. Reconcile on success and failure.
+    invalidateQueries();
+    if (!readRequests.current.size) {
+      if (openRef.current) void load(1, true);
+      else void refreshUnread(true);
+    }
+  }
+
+  async function markRead(item: AppNotification) {
     if (item.readAt) return;
-    const readAt = new Date().toISOString();
-    setList((current) =>
-      current && {
+    const controller = new AbortController();
+    readRequests.current.add(controller);
+    invalidateQueries();
+    try {
+      await request(tokenRef.current, `/${item.id}/read`, {
+        method: "PUT", signal: controller.signal,
+      });
+      if (controller.signal.aborted) return;
+      const readAt = new Date().toISOString();
+      setList((current) => current && {
         ...current,
-        items: current.items.map((other) =>
-          other.id === item.id ? { ...other, readAt } : other,
-        ),
-      },
-    );
-    setUnread((count) => Math.max(0, count - 1));
-    request(token, `/${item.id}/read`, { method: "PUT" }).catch(() => {});
+        items: current.items.map((other) => other.id === item.id ? { ...other, readAt } : other),
+      });
+    } catch {
+      if (!controller.signal.aborted) setError("읽음으로 바꾸지 못했어요.");
+    } finally {
+      finishRead(controller);
+    }
   }
 
   async function markAllRead() {
+    if (markingAllRef.current || listRequest.current) return;
+    markingAllRef.current = true;
+    setMarkingAll(true);
+    const controller = new AbortController();
+    readRequests.current.add(controller);
+    invalidateQueries();
     try {
-      await request(token, "/read-all", { method: "PUT" });
+      await request(tokenRef.current, "/read-all", { method: "PUT", signal: controller.signal });
+      if (controller.signal.aborted) return;
       const readAt = new Date().toISOString();
-      setUnread(0);
       setList(
         (current) =>
           current && {
@@ -150,7 +256,11 @@ export function NotificationBell({ token }: { token: string }) {
           },
       );
     } catch {
-      setError("읽음으로 바꾸지 못했어요.");
+      if (!controller.signal.aborted) setError("읽음으로 바꾸지 못했어요.");
+    } finally {
+      markingAllRef.current = false;
+      if (!controller.signal.aborted) setMarkingAll(false);
+      finishRead(controller);
     }
   }
 
@@ -163,7 +273,7 @@ export function NotificationBell({ token }: { token: string }) {
         aria-label={unread ? `알림, 안 읽음 ${unread}개` : "알림"}
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => setPanelOpen(!openRef.current)}
       >
         <Bell size={20} aria-hidden="true" />
         {unread ? (
@@ -184,7 +294,7 @@ export function NotificationBell({ token }: { token: string }) {
             <button
               type="button"
               className="inline-button"
-              disabled={!unread}
+              disabled={!unread || loading || markingAll}
               onClick={() => void markAllRead()}
             >
               모두 읽음
@@ -192,7 +302,10 @@ export function NotificationBell({ token }: { token: string }) {
           </div>
           {error ? (
             <p className="error-message" role="alert">
-              {error}
+              {error}{" "}
+              <button type="button" className="inline-button" disabled={loading} onClick={() => void load(failedPage)}>
+                다시 시도
+              </button>
             </p>
           ) : null}
           {!list ? (
@@ -210,9 +323,9 @@ export function NotificationBell({ token }: { token: string }) {
                     <Link
                       to={to}
                       onClick={() => {
-                        markRead(item);
+                        void markRead(item);
                         // 지연 로딩 화면은 주소 변경이 늦게 반영되므로 누르는 즉시 닫는다.
-                        setOpen(false);
+                        setPanelOpen(false);
                       }}
                     >
                       <span>{text}</span>
@@ -232,9 +345,10 @@ export function NotificationBell({ token }: { token: string }) {
             <button
               type="button"
               className="button button-outline button-small"
+              disabled={loading}
               onClick={() => void load(list.page + 1)}
             >
-              더 보기
+              {loading ? "불러오는 중…" : "더 보기"}
             </button>
           ) : null}
         </div>
