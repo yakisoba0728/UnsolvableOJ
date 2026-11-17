@@ -1,0 +1,280 @@
+[
+  {
+    "id": "CVE-2024-40954",
+    "severity": "HIGH",
+    "fields": [
+      "References"
+    ],
+    "addedReferences": 274,
+    "removedReferences": 81,
+    "addedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2024:7000",
+      "https://errata.rockylinux.org/RLSA-2024:7000"
+    ],
+    "removedPrimary": [
+      "https://errata.rockylinux.org/RLSA-2024:5363"
+    ]
+  },
+  {
+    "id": "CVE-2025-39933",
+    "severity": "HIGH",
+    "fields": [
+      "References",
+      "VendorSeverity"
+    ],
+    "addedReferences": 10,
+    "removedReferences": 16,
+    "addedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:0759",
+      "https://errata.rockylinux.org/RLSA-2026:0759"
+    ],
+    "removedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:2282",
+      "https://errata.rockylinux.org/RLSA-2026:2282"
+    ],
+    "VendorSeverity": {
+      "before": {
+        "alma": 3,
+        "nvd": 2,
+        "oracle-oval": 2,
+        "photon": 2,
+        "redhat": 2,
+        "rocky": 2,
+        "ubuntu": 3
+      },
+      "after": {
+        "alma": 3,
+        "nvd": 2,
+        "oracle-oval": 2,
+        "photon": 2,
+        "redhat": 2,
+        "rocky": 3,
+        "ubuntu": 3
+      }
+    }
+  },
+  {
+    "id": "CVE-2025-40170",
+    "severity": "HIGH",
+    "fields": [
+      "References",
+      "VendorSeverity"
+    ],
+    "addedReferences": 12,
+    "removedReferences": 34,
+    "addedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:2264",
+      "https://errata.rockylinux.org/RLSA-2026:2264"
+    ],
+    "removedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:1690",
+      "https://errata.rockylinux.org/RLSA-2026:1690"
+    ],
+    "VendorSeverity": {
+      "before": {
+        "alma": 2,
+        "amazon": 3,
+        "azure": 2,
+        "oracle-oval": 3,
+        "photon": 3,
+        "redhat": 2,
+        "rocky": 3,
+        "ubuntu": 3
+      },
+      "after": {
+        "alma": 2,
+        "amazon": 3,
+        "azure": 2,
+        "oracle-oval": 3,
+        "photon": 3,
+        "redhat": 2,
+        "rocky": 2,
+        "ubuntu": 3
+      }
+    }
+  },
+  {
+    "id": "CVE-2025-68745",
+    "severity": "HIGH",
+    "fields": [
+      "References"
+    ],
+    "addedReferences": 26,
+    "removedReferences": 46,
+    "addedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:66325",
+      "https://errata.rockylinux.org/RLSA-2026:66325"
+    ],
+    "removedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:67471",
+      "https://errata.rockylinux.org/RLSA-2026:67471"
+    ]
+  },
+  {
+    "id": "CVE-2026-31692",
+    "severity": "HIGH",
+    "fields": [
+      "References"
+    ],
+    "addedReferences": 8,
+    "removedReferences": 14,
+    "addedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:49214",
+      "https://errata.rockylinux.org/RLSA-2026:49214"
+    ],
+    "removedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:45114",
+      "https://errata.rockylinux.org/RLSA-2026:45114"
+    ]
+  },
+  {
+    "id": "CVE-2026-46181",
+    "severity": "HIGH",
+    "fields": [
+      "References",
+      "VendorSeverity"
+    ],
+    "addedReferences": 17,
+    "removedReferences": 13,
+    "addedPrimary": [
+      "https://errata.rockylinux.org/RLSA-2026:25121"
+    ],
+    "removedPrimary": [
+      "https://errata.rockylinux.org/RLSA-2026:25217"
+    ],
+    "VendorSeverity": {
+      "before": {
+        "alma": 3,
+        "oracle-oval": 3,
+        "photon": 3,
+        "redhat": 3,
+        "rocky": 3,
+        "ubuntu": 3
+      },
+      "after": {
+        "alma": 3,
+        "oracle-oval": 3,
+        "photon": 3,
+        "redhat": 3,
+        "rocky": 4,
+        "ubuntu": 3
+      }
+    }
+  },
+  {
+    "id": "CVE-2026-52991",
+    "severity": "HIGH",
+    "fields": [
+      "References"
+    ],
+    "addedReferences": 11,
+    "removedReferences": 41,
+    "addedPrimary": [
+      "https://errata.rockylinux.org/RLSA-2026:57253"
+    ],
+    "removedPrimary": [
+      "https://errata.rockylinux.org/RLSA-2026:57251"
+    ]
+  },
+  {
+    "id": "CVE-2026-63879",
+    "severity": "HIGH",
+    "fields": [
+      "References"
+    ],
+    "addedReferences": 8,
+    "removedReferences": 36,
+    "addedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:55764",
+      "https://errata.rockylinux.org/RLSA-2026:55764"
+    ],
+    "removedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:57251",
+      "https://errata.rockylinux.org/RLSA-2026:57251"
+    ]
+  },
+  {
+    "id": "CVE-2026-68409",
+    "severity": "HIGH",
+    "fields": [
+      "References"
+    ],
+    "addedReferences": 18,
+    "removedReferences": 58,
+    "addedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:82807",
+      "https://errata.rockylinux.org/RLSA-2026:82807"
+    ],
+    "removedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:65334",
+      "https://errata.rockylinux.org/RLSA-2026:65334"
+    ]
+  },
+  {
+    "id": "CVE-2026-68426",
+    "severity": "CRITICAL",
+    "fields": [
+      "References"
+    ],
+    "addedReferences": 32,
+    "removedReferences": 38,
+    "addedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:68531",
+      "https://errata.rockylinux.org/RLSA-2026:68531"
+    ],
+    "removedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:67471",
+      "https://errata.rockylinux.org/RLSA-2026:67471"
+    ]
+  },
+  {
+    "id": "CVE-2026-72288",
+    "severity": "HIGH",
+    "fields": [
+      "References"
+    ],
+    "addedReferences": 8,
+    "removedReferences": 35,
+    "addedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:92209",
+      "https://errata.rockylinux.org/RLSA-2026:92209"
+    ],
+    "removedPrimary": [
+      "https://errata.rockylinux.org/RLSA-2026:83156"
+    ]
+  },
+  {
+    "id": "CVE-2026-74752",
+    "severity": "HIGH",
+    "fields": [
+      "References"
+    ],
+    "addedReferences": 12,
+    "removedReferences": 30,
+    "addedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:85773",
+      "https://errata.rockylinux.org/RLSA-2026:85773"
+    ],
+    "removedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:85321",
+      "https://errata.rockylinux.org/RLSA-2026:85321"
+    ]
+  },
+  {
+    "id": "CVE-2026-89631",
+    "severity": "HIGH",
+    "fields": [
+      "References"
+    ],
+    "addedReferences": 12,
+    "removedReferences": 30,
+    "addedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:85773",
+      "https://errata.rockylinux.org/RLSA-2026:85773"
+    ],
+    "removedPrimary": [
+      "https://access.redhat.com/errata/RHSA-2026:85321",
+      "https://errata.rockylinux.org/RLSA-2026:85321"
+    ]
+  }
+]

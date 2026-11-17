@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "kind": "consolidation-runtime-author-revalidation",
+  "authoredBy": "/root/security_infra",
+  "observedAt": "2026-11-17T00:02:20.728156+00:00",
+  "state": "PROPOSED_AUTHOR_EVIDENCE_ONLY",
+  "policyContentSha256": "4cf9be9773cd0d5f95773edd0e75552608839b512854ab10a8faea4d09ccdb0c",
+  "proposedPolicy": {
+    "path": "docs/consolidation/evidence/runtime-revalidation/proposed-policy.json",
+    "sha256": "8a69704ce8de75e0eb7cd068e21c0f00aeb8b36ec914a830e82383c0cce602ff"
+  },
+  "source": {
+    "branch": "internal/consolidation-runtime-revalidation",
+    "baseCommit": "9823070e8dfbf978b6e40394aaaa78ca09a909d5",
+    "testedPrHead": "9823070e8dfbf978b6e40394aaaa78ca09a909d5",
+    "actionsCheckout": "b3e3bc385aae450cf388826466bc4371ca8bbaf4",
+    "actionsCheckoutTree": "1000f9a3b0b58ec342d19a4a5717aea8b3b0d81e",
+    "actionsBase": "6176015b63a1615cc2269172f246725ef08abab3"
+  },
+  "ci": {
+    "runId": "43982539575",
+    "attempt": 1,
+    "jobId": "133702382826",
+    "artifactId": "14283672389",
+    "url": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43982539575",
+    "artifactUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43982539575/artifacts/14283672389",
+    "gate": "BLOCKED_FINDINGS",
+    "rawScannerExit": 2,
+    "payloadExit": 0,
+    "applicabilityExit": 2
+  },
+  "failedArtifact": {
+    "path": "docs/consolidation/evidence/runtime-revalidation/blocked-runtime.zip",
+    "sha256": "e9cfceecf94782787d3019442207728a1f797bd8383b09e8d4f919afcb98c045"
+  },
+  "rawReportSha256": "b39c0ffd54187c8ecd5e6ec5a4c781e44a85f6636eb8a1103ce1dff2d6cf93e2",
+  "scanManifestSha256": "a03c7abb93587f3c9f29f600032f93bb7e801660a28cbdc6bf9285a410d2b96b",
+  "payloadProofSha256": "ed80b6bed95ff0a5d38038d3fe851de7e16ff54e29b9d1a2c10d637f2f1e19d0",
+  "originalEvaluationSha256": "c15bc4c805978c1cce5c614d55de9a669d8afa4327171d1d3afc41ee08d25659",
+  "rawCounts": {
+    "UNKNOWN": 1,
+    "LOW": 363,
+    "MEDIUM": 560,
+    "HIGH": 177,
+    "CRITICAL": 5
+  },
+  "database": {
+    "Version": 2,
+    "NextUpdate": "2026-11-17T18:50:18.311537396Z",
+    "UpdatedAt": "2026-11-16T18:50:18.311537747Z",
+    "DownloadedAt": "2026-11-16T23:53:22.18438803Z"
+  },
+  "databaseSha256": "c4c65516369d80d1fe4a9ae8667f2721393630107d8d2277a9222def00efd19d",
+  "javaDatabase": {
+    "Version": 1,
+    "NextUpdate": "2026-11-19T00:57:00.601023403Z",
+    "UpdatedAt": "2026-11-16T00:57:00.601024044Z",
+    "DownloadedAt": "2026-11-16T23:53:42.82517991Z"
+  },
+  "javaDatabaseSha256": "daccf4e446cddb30d061d57f131a1acda3728935e95f79e94d462d38b95b24f4",
+  "image": {
+    "manifestDigest": "sha256:176c4048d9659935502959e84404244c466faa5a2f418da15d134ad98dddee99",
+    "configDigest": "sha256:d31c13a944d9bff4a805ac44124b8d638dc3244180ea8838a427fd321acfe7ac",
+    "indexDigest": "sha256:fdf09d58730e735084a1f4a45aaf474de05cd34b1d53411da428229d73efd229",
+    "buildDigest": "sha256:beff47793b6f97c0cf9930f2c8fe6865a5186970e0244e6fad67484c27dd79f8",
+    "platform": "linux/amd64",
+    "layerDigests": [
+      "sha256:7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+      "sha256:cd6f8df3a5e7cd39e82d82c3404c3ca851ff435d5429928e970db4f6a7979c9e",
+      "sha256:9c8fb7b4854814ecaf0b443d052269ca2087e262e5e8b80708765382b14c727b",
+      "sha256:4de64405e5bf2fddc3795501d6d0dd5c49b0e11d77299037bccdc00433569ac7",
+      "sha256:ffa37f7bd89372978604ed6bac3a2c91fa3785cd43e2c5787232ad556b9c59be",
+      "sha256:3ba4cd7e988dfab0b74b499271faadaeb81416d98e7b93c3abde8cb66a679be8",
+      "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+      "sha256:7a24b6431d7182a8fb2315da59ab85480b1276523fa352374a7ec1c80185fc0c",
+      "sha256:0488b489665381cdda16d7543148daada476185e3f4670b61e470c56dd02c29c",
+      "sha256:61a5779beb53a8a043ec46fe0d281bc6b582df822dcceecd4bd25b671606227d",
+      "sha256:1a74d6a6fd94fc1ef7cb90d1c70ef031e83b72bca7da68aa36497b6f8baabf62",
+      "sha256:3eeb164d8d654bd1051e6ca26c17937763de0cf206fe3aad0f5158aa226a3cf8",
+      "sha256:85f4467547a3019015fa3a97e78af10fc050b2a6c0ba22225ed01ae6d488dd3b",
+      "sha256:022081e6ed2f178583babfe7f0ac496cae2dda2abadb6b4db9070e97ec7a9e7b"
+    ],
+    "compressedLayerBytes": 574139621
+  },
+  "payloadComparison": {
+    "expectedFiles": 990,
+    "matchedFiles": 990,
+    "missingFiles": 0,
+    "changedFiles": 0,
+    "nonRegularFiles": 0,
+    "unexpectedOwnedFiles": [],
+    "missingOwnedFiles": []
+  },
+  "delta": {
+    "changedTotal": 47,
+    "changedReviewed": 13,
+    "unchangedReviewed": 169,
+    "addedIds": [],
+    "removedIds": [],
+    "reviewedCohortUnchanged": true,
+    "currentRawScannerExit": 2,
+    "expiryUnchanged": "2026-11-30T00:00:00Z"
+  },
+  "proposalEvaluation": {
+    "path": "docs/consolidation/evidence/runtime-revalidation/proposed-evaluation.json",
+    "sha256": "7aa2791cdc0073c1ed268ea098587c08b0fa6922240c7c3f108d92a08f2d16e2",
+    "exitCode": 2,
+    "gate": "BLOCKED_REVIEW",
+    "blockingReasons": [
+      "INDEPENDENT_POLICY_REVIEW_REQUIRED"
+    ],
+    "proposedCount": 182,
+    "reviewedCount": 0,
+    "blockingCount": 182
+  },
+  "limits": [
+    "This proposal does not turn the failed CI run into a successful run or constitute independent approval.",
+    "Host/kernel readiness is UNVERIFIED. Raw vulnerability counts remain nonzero.",
+    "No scanner, database, fingerprint normalization, evaluator, assertions, expiry or cohort scope was altered."
+  ]
+}

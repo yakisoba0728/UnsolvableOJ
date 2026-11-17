@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "kind": "author-validation-not-independent-approval",
+  "authoredBy": "/root/security_infra",
+  "policyContentSha256": "4cf9be9773cd0d5f95773edd0e75552608839b512854ab10a8faea4d09ccdb0c",
+  "policyReviewState": {
+    "state": "PROPOSED",
+    "reviewedAt": null,
+    "contentSha256": null,
+    "reviews": []
+  },
+  "unchangedExistingTests": [
+    {
+      "command": "python3 -m unittest discover -s scripts -p 'image*_test.py'",
+      "tests": 65,
+      "passed": 65,
+      "log": {
+        "path": "docs/consolidation/evidence/runtime-revalidation/author-image-tests.log",
+        "sha256": "56fb721b5eedf9b83cab64d749a77ab43706bd48820f9d7151f9db1c6299a09c"
+      }
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p 'verify_image_payload_test.py'",
+      "tests": 27,
+      "passed": 27,
+      "log": {
+        "path": "docs/consolidation/evidence/runtime-revalidation/author-payload-tests.log",
+        "sha256": "1f1abe62a21f3f76cf079a135608501331d2fdf0e7a3f2ec561bebff2209900b"
+      }
+    }
+  ],
+  "boundFilesVerified": 27,
+  "originalFailedEvaluationReplay": "EXACT_EQUAL_AT_RECORDED_OBSERVATION_TIME",
+  "newProposalGate": "BLOCKED_REVIEW",
+  "newProposalBlockingReasons": [
+    "INDEPENDENT_POLICY_REVIEW_REQUIRED"
+  ],
+  "newProposalRemainingBlockingCount": 182,
+  "newProposalReviewedCount": 0,
+  "historicalPhaseVEvidenceUnchanged": true,
+  "scannerEvaluatorNormalizationAssertionsAndExpiryUnchanged": true,
+  "readmeLocalLinksVerified": 16,
+  "limits": [
+    "Unit tests include synthetic proofs and approval fixtures; no fixture is independent approval or a fresh image scan.",
+    "Original raw CI results are preserved unchanged."
+  ]
+}

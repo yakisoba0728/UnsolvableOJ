@@ -1,0 +1,656 @@
+{
+  "schemaVersion": 1,
+  "kind": "runtime-advisory-primary-source-review",
+  "authoredBy": "/root/security_infra",
+  "observedAt": "2026-11-17T00:02:20.728156+00:00",
+  "scope": "Thirteen changed reviewed CVEs, twelve newly selected Rocky kernel advisories, and current pinned Linux CNA source mappings. No widening of the fixed component cohort.",
+  "records": [
+    {
+      "id": "RLSA-2024:7000",
+      "reviewedCves": [
+        "CVE-2024-40954"
+      ],
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2024:7000.json",
+      "finalUrl": "https://storage.googleapis.com/resf-osv-data/RLSA-2024:7000.json",
+      "status": 200,
+      "contentType": "text/plain",
+      "responseDate": "Mon, 16 Nov 2026 23:57:35 GMT",
+      "retrievedAt": "2026-11-16T23:57:35.367489+00:00",
+      "attempt": 1,
+      "errorsBeforeSuccess": [],
+      "bytes": 17203,
+      "sha256": "084b6b4f8659bad2f95390495d3c38f79a9d442f677d13ee03ad93a31edd243f",
+      "file": "RLSA-2024-7000.json",
+      "summary": "Important: kernel security update",
+      "severity": null,
+      "affectedPackages": [
+        {
+          "ecosystem": "Rocky Linux:8",
+          "name": "kernel",
+          "purl": "pkg:rpm/rocky-linux/kernel?distro=rocky-linux-8&epoch=0"
+        }
+      ],
+      "modified": "2025-05-07T19:14:54.961232Z",
+      "publisher": "Rocky Linux",
+      "published": "2025-05-07T19:11:34.309952Z",
+      "advisoryLevelSeverity": "Important",
+      "severityEvidenceField": "summary (advisory-level severity; not an Ubuntu CVE rating)",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2024:7000",
+      "containsAllReviewedIds": true,
+      "assessment": "The publisher describes kernel implementation fixes. Its RPM versions and batch-advisory severity do not establish an Ubuntu fix, package payload change or host readiness."
+    },
+    {
+      "id": "RLSA-2026:0759",
+      "reviewedCves": [
+        "CVE-2025-39933"
+      ],
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:0759.json",
+      "finalUrl": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:0759.json",
+      "status": 200,
+      "contentType": "text/plain",
+      "responseDate": "Mon, 16 Nov 2026 23:57:35 GMT",
+      "retrievedAt": "2026-11-16T23:57:35.288046+00:00",
+      "attempt": 1,
+      "errorsBeforeSuccess": [],
+      "bytes": 2076,
+      "sha256": "8e9c9cebfd0d5d5643649502b8761c63212164f935c812d5d467eb990c71fdeb",
+      "file": "RLSA-2026-0759.json",
+      "summary": "Important: kernel security update",
+      "severity": null,
+      "affectedPackages": [
+        {
+          "ecosystem": "Rocky Linux:8",
+          "name": "kernel",
+          "purl": "pkg:rpm/rocky-linux/kernel?distro=rocky-linux-8&epoch=0"
+        }
+      ],
+      "modified": "2026-01-24T09:04:52.271994Z",
+      "publisher": "Rocky Linux",
+      "published": "2026-01-24T09:02:41.574986Z",
+      "advisoryLevelSeverity": "Important",
+      "severityEvidenceField": "summary (advisory-level severity; not an Ubuntu CVE rating)",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:0759",
+      "containsAllReviewedIds": true,
+      "assessment": "The publisher describes kernel implementation fixes. Its RPM versions and batch-advisory severity do not establish an Ubuntu fix, package payload change or host readiness."
+    },
+    {
+      "id": "RLSA-2026:2264",
+      "reviewedCves": [
+        "CVE-2025-40170"
+      ],
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:2264.json",
+      "finalUrl": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:2264.json",
+      "status": 200,
+      "contentType": "text/plain",
+      "responseDate": "Mon, 16 Nov 2026 23:57:35 GMT",
+      "retrievedAt": "2026-11-16T23:57:35.290016+00:00",
+      "attempt": 1,
+      "errorsBeforeSuccess": [],
+      "bytes": 2598,
+      "sha256": "dbd5ea46146ee2deef5010e604f58a7611a6bf73796c6f6dc7ed7c32882b562e",
+      "file": "RLSA-2026-2264.json",
+      "summary": "Moderate: kernel security update",
+      "severity": null,
+      "affectedPackages": [
+        {
+          "ecosystem": "Rocky Linux:8",
+          "name": "kernel",
+          "purl": "pkg:rpm/rocky-linux/kernel?distro=rocky-linux-8&epoch=0"
+        }
+      ],
+      "modified": "2026-02-15T09:04:59.666779Z",
+      "publisher": "Rocky Linux",
+      "published": "2026-02-15T09:02:43.921640Z",
+      "advisoryLevelSeverity": "Moderate",
+      "severityEvidenceField": "summary (advisory-level severity; not an Ubuntu CVE rating)",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:2264",
+      "containsAllReviewedIds": true,
+      "assessment": "The publisher describes kernel implementation fixes. Its RPM versions and batch-advisory severity do not establish an Ubuntu fix, package payload change or host readiness."
+    },
+    {
+      "id": "RLSA-2026:25121",
+      "reviewedCves": [
+        "CVE-2026-46181"
+      ],
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:25121.json",
+      "finalUrl": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:25121.json",
+      "status": 200,
+      "contentType": "text/plain",
+      "responseDate": "Mon, 16 Nov 2026 23:57:40 GMT",
+      "retrievedAt": "2026-11-16T23:57:41.080205+00:00",
+      "attempt": 1,
+      "errorsBeforeSuccess": [],
+      "bytes": 3481,
+      "sha256": "6fdbcc34f50ee99acde3aee03ee1f4410382c2e70223da59b9a20c401626e5a7",
+      "file": "RLSA-2026-25121.json",
+      "summary": "Critical: kernel security update",
+      "severity": null,
+      "affectedPackages": [
+        {
+          "ecosystem": "Rocky Linux:8",
+          "name": "kernel",
+          "purl": "pkg:rpm/rocky-linux/kernel?distro=rocky-linux-8&epoch=0"
+        }
+      ],
+      "modified": "2026-06-12T18:05:55.380231Z",
+      "publisher": "Rocky Linux",
+      "published": "2026-06-12T18:00:42.192023Z",
+      "advisoryLevelSeverity": "Critical",
+      "severityEvidenceField": "summary (advisory-level severity; not an Ubuntu CVE rating)",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:25121",
+      "containsAllReviewedIds": true,
+      "assessment": "The publisher describes kernel implementation fixes. Its RPM versions and batch-advisory severity do not establish an Ubuntu fix, package payload change or host readiness."
+    },
+    {
+      "id": "RLSA-2026:49214",
+      "reviewedCves": [
+        "CVE-2026-31692"
+      ],
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:49214.json",
+      "finalUrl": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:49214.json",
+      "status": 200,
+      "contentType": "text/plain",
+      "responseDate": "Mon, 16 Nov 2026 23:57:41 GMT",
+      "retrievedAt": "2026-11-16T23:57:41.136653+00:00",
+      "attempt": 1,
+      "errorsBeforeSuccess": [],
+      "bytes": 1940,
+      "sha256": "20de7eedd0d5a8e1e6f6ff87c75a51483dd81f91b7f871c58c76724b9c4c1781",
+      "file": "RLSA-2026-49214.json",
+      "summary": "Important: kernel security update",
+      "severity": null,
+      "affectedPackages": [
+        {
+          "ecosystem": "Rocky Linux:8",
+          "name": "kernel",
+          "purl": "pkg:rpm/rocky-linux/kernel?distro=rocky-linux-8&epoch=0"
+        }
+      ],
+      "modified": "2026-08-04T12:08:31.091457Z",
+      "publisher": "Rocky Linux",
+      "published": "2026-08-04T12:00:48.049738Z",
+      "advisoryLevelSeverity": "Important",
+      "severityEvidenceField": "summary (advisory-level severity; not an Ubuntu CVE rating)",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:49214",
+      "containsAllReviewedIds": true,
+      "assessment": "The publisher describes kernel implementation fixes. Its RPM versions and batch-advisory severity do not establish an Ubuntu fix, package payload change or host readiness."
+    },
+    {
+      "id": "RLSA-2026:55764",
+      "reviewedCves": [
+        "CVE-2026-63879"
+      ],
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:55764.json",
+      "finalUrl": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:55764.json",
+      "status": 200,
+      "contentType": "text/plain",
+      "responseDate": "Mon, 16 Nov 2026 23:57:41 GMT",
+      "retrievedAt": "2026-11-16T23:57:41.120149+00:00",
+      "attempt": 1,
+      "errorsBeforeSuccess": [],
+      "bytes": 3525,
+      "sha256": "80b10660a016e49077aace1eef54ff3b53e9c7c20112bb7b01c6c65776eb9baa",
+      "file": "RLSA-2026-55764.json",
+      "summary": "Important: kernel security, bug fix, and enhancement update",
+      "severity": null,
+      "affectedPackages": [
+        {
+          "ecosystem": "Rocky Linux:8",
+          "name": "kernel",
+          "purl": "pkg:rpm/rocky-linux/kernel?distro=rocky-linux-8&epoch=0"
+        }
+      ],
+      "modified": "2026-08-18T06:10:10.235305Z",
+      "publisher": "Rocky Linux",
+      "published": "2026-08-18T06:00:58.283966Z",
+      "advisoryLevelSeverity": "Important",
+      "severityEvidenceField": "summary (advisory-level severity; not an Ubuntu CVE rating)",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:55764",
+      "containsAllReviewedIds": true,
+      "assessment": "The publisher describes kernel implementation fixes. Its RPM versions and batch-advisory severity do not establish an Ubuntu fix, package payload change or host readiness."
+    },
+    {
+      "id": "RLSA-2026:57253",
+      "reviewedCves": [
+        "CVE-2026-52991"
+      ],
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:57253.json",
+      "finalUrl": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:57253.json",
+      "status": 200,
+      "contentType": "text/plain",
+      "responseDate": "Mon, 16 Nov 2026 23:57:41 GMT",
+      "retrievedAt": "2026-11-16T23:57:41.141208+00:00",
+      "attempt": 1,
+      "errorsBeforeSuccess": [],
+      "bytes": 3283,
+      "sha256": "d4a39869384eeacc3131cafb8833c30441f5eca43999af72af2d69b3ec0503e5",
+      "file": "RLSA-2026-57253.json",
+      "summary": "Important: kernel security, bug fix, and enhancement update",
+      "severity": null,
+      "affectedPackages": [
+        {
+          "ecosystem": "Rocky Linux:8",
+          "name": "kernel",
+          "purl": "pkg:rpm/rocky-linux/kernel?distro=rocky-linux-8&epoch=0"
+        }
+      ],
+      "modified": "2026-08-21T06:10:30.939870Z",
+      "publisher": "Rocky Linux",
+      "published": "2026-08-21T06:01:06.770182Z",
+      "advisoryLevelSeverity": "Important",
+      "severityEvidenceField": "summary (advisory-level severity; not an Ubuntu CVE rating)",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:57253",
+      "containsAllReviewedIds": true,
+      "assessment": "The publisher describes kernel implementation fixes. Its RPM versions and batch-advisory severity do not establish an Ubuntu fix, package payload change or host readiness."
+    },
+    {
+      "id": "RLSA-2026:66325",
+      "reviewedCves": [
+        "CVE-2025-68745"
+      ],
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:66325.json",
+      "finalUrl": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:66325.json",
+      "status": 200,
+      "contentType": "text/plain",
+      "responseDate": "Mon, 16 Nov 2026 23:57:35 GMT",
+      "retrievedAt": "2026-11-16T23:57:35.308664+00:00",
+      "attempt": 1,
+      "errorsBeforeSuccess": [],
+      "bytes": 4451,
+      "sha256": "483e2aa1dfadf80a22d9bd9994162d2bf7fb165815470bd1afb547cb7c840079",
+      "file": "RLSA-2026-66325.json",
+      "summary": "Important: kernel security, bug fix, and enhancement update",
+      "severity": null,
+      "affectedPackages": [
+        {
+          "ecosystem": "Rocky Linux:8",
+          "name": "kernel",
+          "purl": "pkg:rpm/rocky-linux/kernel?distro=rocky-linux-8&epoch=0"
+        }
+      ],
+      "modified": "2026-09-11T06:13:11.981102Z",
+      "publisher": "Rocky Linux",
+      "published": "2026-09-11T06:01:11.299759Z",
+      "advisoryLevelSeverity": "Important",
+      "severityEvidenceField": "summary (advisory-level severity; not an Ubuntu CVE rating)",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:66325",
+      "containsAllReviewedIds": true,
+      "assessment": "The publisher describes kernel implementation fixes. Its RPM versions and batch-advisory severity do not establish an Ubuntu fix, package payload change or host readiness."
+    },
+    {
+      "id": "RLSA-2026:68531",
+      "reviewedCves": [
+        "CVE-2026-68426"
+      ],
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:68531.json",
+      "finalUrl": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:68531.json",
+      "status": 200,
+      "contentType": "text/plain",
+      "responseDate": "Mon, 16 Nov 2026 23:57:46 GMT",
+      "retrievedAt": "2026-11-16T23:57:46.699678+00:00",
+      "attempt": 1,
+      "errorsBeforeSuccess": [],
+      "bytes": 5483,
+      "sha256": "5b0eefe436c524f73996e1d38ec5e590cb0f13a8a7e017e33cbdfd40621b996f",
+      "file": "RLSA-2026-68531.json",
+      "summary": "Important: kernel security update",
+      "severity": null,
+      "affectedPackages": [
+        {
+          "ecosystem": "Rocky Linux:8",
+          "name": "kernel",
+          "purl": "pkg:rpm/rocky-linux/kernel?distro=rocky-linux-8&epoch=0"
+        }
+      ],
+      "modified": "2026-09-19T06:13:18.611690Z",
+      "publisher": "Rocky Linux",
+      "published": "2026-09-19T06:01:07.228044Z",
+      "advisoryLevelSeverity": "Important",
+      "severityEvidenceField": "summary (advisory-level severity; not an Ubuntu CVE rating)",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:68531",
+      "containsAllReviewedIds": true,
+      "assessment": "The publisher describes kernel implementation fixes. Its RPM versions and batch-advisory severity do not establish an Ubuntu fix, package payload change or host readiness."
+    },
+    {
+      "id": "RLSA-2026:82807",
+      "reviewedCves": [
+        "CVE-2026-68409"
+      ],
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:82807.json",
+      "finalUrl": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:82807.json",
+      "status": 200,
+      "contentType": "text/plain",
+      "responseDate": "Mon, 16 Nov 2026 23:57:46 GMT",
+      "retrievedAt": "2026-11-16T23:57:46.819229+00:00",
+      "attempt": 1,
+      "errorsBeforeSuccess": [],
+      "bytes": 2993,
+      "sha256": "568fb6200a5abac210f3a15b59eab10bb1591b70e460a8c2de93d86ec865f29b",
+      "file": "RLSA-2026-82807.json",
+      "summary": "Important: kernel security update",
+      "severity": null,
+      "affectedPackages": [
+        {
+          "ecosystem": "Rocky Linux:8",
+          "name": "kernel",
+          "purl": "pkg:rpm/rocky-linux/kernel?distro=rocky-linux-8&epoch=0"
+        }
+      ],
+      "modified": "2026-10-15T12:24:03.491287Z",
+      "publisher": "Rocky Linux",
+      "published": "2026-10-15T12:12:31.576932Z",
+      "advisoryLevelSeverity": "Important",
+      "severityEvidenceField": "summary (advisory-level severity; not an Ubuntu CVE rating)",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:82807",
+      "containsAllReviewedIds": true,
+      "assessment": "The publisher describes kernel implementation fixes. Its RPM versions and batch-advisory severity do not establish an Ubuntu fix, package payload change or host readiness."
+    },
+    {
+      "id": "RLSA-2026:85773",
+      "reviewedCves": [
+        "CVE-2026-74752",
+        "CVE-2026-89631"
+      ],
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:85773.json",
+      "finalUrl": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:85773.json",
+      "status": 200,
+      "contentType": "text/plain",
+      "responseDate": "Mon, 16 Nov 2026 23:57:46 GMT",
+      "retrievedAt": "2026-11-16T23:57:46.769703+00:00",
+      "attempt": 1,
+      "errorsBeforeSuccess": [],
+      "bytes": 3364,
+      "sha256": "de63d5be46c2653bebbfdd6847e1fa8092b8d6cd5887500237a3070b53c738e1",
+      "file": "RLSA-2026-85773.json",
+      "summary": "Important: kernel security, bug fix, and enhancement update",
+      "severity": null,
+      "affectedPackages": [
+        {
+          "ecosystem": "Rocky Linux:8",
+          "name": "kernel",
+          "purl": "pkg:rpm/rocky-linux/kernel?distro=rocky-linux-8&epoch=0"
+        }
+      ],
+      "modified": "2026-10-21T06:48:00.517016Z",
+      "publisher": "Rocky Linux",
+      "published": "2026-10-21T06:37:12.817086Z",
+      "advisoryLevelSeverity": "Important",
+      "severityEvidenceField": "summary (advisory-level severity; not an Ubuntu CVE rating)",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:85773",
+      "containsAllReviewedIds": true,
+      "assessment": "The publisher describes kernel implementation fixes. Its RPM versions and batch-advisory severity do not establish an Ubuntu fix, package payload change or host readiness."
+    },
+    {
+      "id": "RLSA-2026:92209",
+      "reviewedCves": [
+        "CVE-2026-72288"
+      ],
+      "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:92209.json",
+      "finalUrl": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:92209.json",
+      "status": 200,
+      "contentType": "text/plain",
+      "responseDate": "Mon, 16 Nov 2026 23:57:46 GMT",
+      "retrievedAt": "2026-11-16T23:57:46.787714+00:00",
+      "attempt": 1,
+      "errorsBeforeSuccess": [],
+      "bytes": 2342,
+      "sha256": "35cb7db9f22af8457d55ba4156ff8f64316d84e72c87d6f08d8002fc5cc68f7d",
+      "file": "RLSA-2026-92209.json",
+      "summary": "Important: kernel security, bug fix, and enhancement update",
+      "severity": null,
+      "affectedPackages": [
+        {
+          "ecosystem": "Rocky Linux:8",
+          "name": "kernel",
+          "purl": "pkg:rpm/rocky-linux/kernel?distro=rocky-linux-8&epoch=0"
+        }
+      ],
+      "modified": "2026-10-31T00:13:19.232541Z",
+      "publisher": "Rocky Linux",
+      "published": "2026-10-31T00:00:55.117580Z",
+      "advisoryLevelSeverity": "Important",
+      "severityEvidenceField": "summary (advisory-level severity; not an Ubuntu CVE rating)",
+      "advisoryUrl": "https://errata.rockylinux.org/RLSA-2026:92209",
+      "containsAllReviewedIds": true,
+      "assessment": "The publisher describes kernel implementation fixes. Its RPM versions and batch-advisory severity do not establish an Ubuntu fix, package payload change or host readiness."
+    }
+  ],
+  "changedCveAssessments": [
+    {
+      "id": "CVE-2024-40954",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "cnaProgramFiles": [
+        "net/core/sock.c"
+      ],
+      "cnaRawSha256": "f5e911c025f4faf8b715ed595e00895c846d3b8c9ec02b4db82d68b7845ca9c6",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2024:7000",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    },
+    {
+      "id": "CVE-2025-39933",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References",
+        "VendorSeverity"
+      ],
+      "cnaProgramFiles": [
+        "fs/smb/client/smbdirect.c"
+      ],
+      "cnaRawSha256": "a2747914dc9020331ca9a4883d64c2cb50c74f97fe68eab95b084d48fcf14d44",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2026:0759",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    },
+    {
+      "id": "CVE-2025-40170",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References",
+        "VendorSeverity"
+      ],
+      "cnaProgramFiles": [
+        "include/net/ip.h",
+        "include/net/ip6_route.h",
+        "include/net/route.h",
+        "net/core/sock.c"
+      ],
+      "cnaRawSha256": "00682aa497a14d0660cb93f44cc55272a18439fb69a5d4a3e04cedabd0583999",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2026:2264",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    },
+    {
+      "id": "CVE-2025-68745",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "cnaProgramFiles": [
+        "drivers/scsi/qla2xxx/qla_os.c",
+        "drivers/scsi/qla2xxx/qla_target.c",
+        "drivers/scsi/qla2xxx/qla_target.h"
+      ],
+      "cnaRawSha256": "422e34cb2dab490ae023798672747c3de014fce60ac3883e0c5a68af8f7dc6bb",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2026:66325",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    },
+    {
+      "id": "CVE-2026-31692",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "cnaProgramFiles": [
+        "net/core/rtnetlink.c"
+      ],
+      "cnaRawSha256": "111c0e9078ccb915175ca4aa70f9ea7d6d61b02f0a123394af8e82a055211abb",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2026:49214",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    },
+    {
+      "id": "CVE-2026-46181",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References",
+        "VendorSeverity"
+      ],
+      "cnaProgramFiles": [
+        "drivers/net/ethernet/mellanox/mlx4/srq.c"
+      ],
+      "cnaRawSha256": "4544454f33b4fae672cd8a98c13eda577ece70d6fd2b6fb642f01a698272923f",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2026:25121",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    },
+    {
+      "id": "CVE-2026-52991",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "cnaProgramFiles": [
+        "kernel/cgroup/cgroup.c"
+      ],
+      "cnaRawSha256": "c0186f68c782354046ecee23f7298087c820b4d65f6bc8a1649f8dc005b574c2",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2026:57253",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    },
+    {
+      "id": "CVE-2026-63879",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "cnaProgramFiles": [
+        "drivers/gpu/drm/amd/amdgpu/amdgpu_hmm.c"
+      ],
+      "cnaRawSha256": "d08d45a42780fc4da95bbd38a84015b9ee737fa3de7c90079c4e6a2afc661464",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2026:55764",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    },
+    {
+      "id": "CVE-2026-68409",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "cnaProgramFiles": [
+        "net/mac80211/sta_info.c"
+      ],
+      "cnaRawSha256": "e8c0c18d194b49aa0990b193fe51bef5281753770fae0ecd342e6b1496ca80a9",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2026:82807",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    },
+    {
+      "id": "CVE-2026-68426",
+      "rawSeverityUnchanged": "CRITICAL",
+      "changedFields": [
+        "References"
+      ],
+      "cnaProgramFiles": [
+        "net/xfrm/xfrm_device.c"
+      ],
+      "cnaRawSha256": "57f5d2c6e6d86218aaae37928e66f08b1afabaef4f002faadfc6d042752ed356",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2026:68531",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    },
+    {
+      "id": "CVE-2026-72288",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "cnaProgramFiles": [
+        "arch/arm64/kvm/vgic/vgic.c"
+      ],
+      "cnaRawSha256": "aecd50d27dd9f881a15be8c09b2d57c12a8106ceb4164f4346e1896d122cc4f1",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2026:92209",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    },
+    {
+      "id": "CVE-2026-74752",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "cnaProgramFiles": [
+        "include/net/sctp/auth.h",
+        "net/sctp/auth.c",
+        "net/sctp/sm_make_chunk.c"
+      ],
+      "cnaRawSha256": "7dcb9d1aaf2bc764afc44716151f349ab70c12e45a9fbcf0ecb86cff11fc85c9",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2026:85773",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    },
+    {
+      "id": "CVE-2026-89631",
+      "rawSeverityUnchanged": "HIGH",
+      "changedFields": [
+        "References"
+      ],
+      "cnaProgramFiles": [
+        "fs/smb/client/cifssmb.c",
+        "fs/smb/client/trace.h"
+      ],
+      "cnaRawSha256": "f6f01d3d093f28d22b4b20f2542e0e413a817f27b126233e9fb277c7805d9b5d",
+      "exportedHeaderMatches": [],
+      "primaryAdvisory": "RLSA-2026:85773",
+      "assessment": "Fresh identical CNA bytes and exact source mappings, the newly selected publisher advisory, and the unchanged 990-file image payload do not contradict the inherited exact-component absence assessment. Separate policy review remains required."
+    }
+  ],
+  "vendorSeverityChanges": [
+    {
+      "id": "CVE-2025-39933",
+      "field": "VendorSeverity.rocky",
+      "before": 2,
+      "after": 3,
+      "publisherLevel": "Important",
+      "advisory": "RLSA-2026:0759"
+    },
+    {
+      "id": "CVE-2025-40170",
+      "field": "VendorSeverity.rocky",
+      "before": 3,
+      "after": 2,
+      "publisherLevel": "Moderate",
+      "advisory": "RLSA-2026:2264"
+    },
+    {
+      "id": "CVE-2026-46181",
+      "field": "VendorSeverity.rocky",
+      "before": 3,
+      "after": 4,
+      "publisherLevel": "Critical",
+      "advisory": "RLSA-2026:25121"
+    }
+  ],
+  "retrieval": {
+    "path": "docs/consolidation/evidence/runtime-revalidation/vendor-retrieval.json",
+    "sha256": "2aa1a846f40a166ea52fb9db50ef0dcee87b7c766711d4ef4915e25f2d657911"
+  },
+  "rawPublisherArchive": {
+    "path": "docs/consolidation/evidence/runtime-revalidation/primary-vendor-records.zip",
+    "sha256": "01a2bbf6d7b1757025b8480eb2db8f36ab3e11e1aaa4936670c3d846fe64a8ea"
+  },
+  "cnaComparison": {
+    "path": "docs/consolidation/evidence/runtime-revalidation/cna-revalidation.json",
+    "sha256": "45ed1d843fe22132acbb7b6ef7c51e35cd780ab06702f43bd75fcfbe3e36b5c3"
+  },
+  "limits": [
+    "Changed references were inspected; reference-only changes are not automatically approved.",
+    "Bundled unrelated CVEs and Bugzilla cross-links were not individually audited and remain preserved in the exact raw delta.",
+    "Rocky advisory severity is distinct from the unchanged Ubuntu scanner severity. No host kernel assessment or new patch installation is claimed."
+  ]
+}

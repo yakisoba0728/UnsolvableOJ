@@ -1,0 +1,151 @@
+{
+  "observedAt": "2026-11-16T23:56:39.001489+00:00",
+  "rawEvidenceValidation": "PASS",
+  "applicabilityReplayMatchesCiExceptObservedAt": true,
+  "exitCode": 2,
+  "gate": "BLOCKED_FINDINGS",
+  "blockingReasons": [
+    "EXACT_CVE_COHORT_REVALIDATION_REQUIRED"
+  ],
+  "rawCounts": {
+    "UNKNOWN": 1,
+    "LOW": 363,
+    "MEDIUM": 560,
+    "HIGH": 177,
+    "CRITICAL": 5
+  },
+  "reviewedCount": 0,
+  "remainingBlockingCount": 182,
+  "unresolved": [
+    {
+      "id": "CVE-2026-68426",
+      "resultIndex": 0,
+      "findingIndex": 122,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    },
+    {
+      "id": "CVE-2024-40954",
+      "resultIndex": 0,
+      "findingIndex": 128,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    },
+    {
+      "id": "CVE-2025-39933",
+      "resultIndex": 0,
+      "findingIndex": 140,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    },
+    {
+      "id": "CVE-2025-40170",
+      "resultIndex": 0,
+      "findingIndex": 143,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    },
+    {
+      "id": "CVE-2025-68745",
+      "resultIndex": 0,
+      "findingIndex": 152,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    },
+    {
+      "id": "CVE-2026-31692",
+      "resultIndex": 0,
+      "findingIndex": 166,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    },
+    {
+      "id": "CVE-2026-46181",
+      "resultIndex": 0,
+      "findingIndex": 176,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    },
+    {
+      "id": "CVE-2026-52991",
+      "resultIndex": 0,
+      "findingIndex": 179,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    },
+    {
+      "id": "CVE-2026-63879",
+      "resultIndex": 0,
+      "findingIndex": 186,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    },
+    {
+      "id": "CVE-2026-68409",
+      "resultIndex": 0,
+      "findingIndex": 199,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    },
+    {
+      "id": "CVE-2026-72288",
+      "resultIndex": 0,
+      "findingIndex": 205,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    },
+    {
+      "id": "CVE-2026-74752",
+      "resultIndex": 0,
+      "findingIndex": 228,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    },
+    {
+      "id": "CVE-2026-89631",
+      "resultIndex": 0,
+      "findingIndex": 239,
+      "reason": "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+    }
+  ],
+  "policyExpiresAt": "2026-11-30T00:00:00Z",
+  "policySha256": "81f0bf685f2ffc22cdb0933c2c55f6f5fff05f8f252765c0af8fe56189084603",
+  "payloadMatchedFiles": 990,
+  "allIndividualPayloadHashesAndSizesMatch": true,
+  "image": {
+    "manifestDigest": "sha256:176c4048d9659935502959e84404244c466faa5a2f418da15d134ad98dddee99",
+    "configDigest": "sha256:d31c13a944d9bff4a805ac44124b8d638dc3244180ea8838a427fd321acfe7ac",
+    "indexDigest": "sha256:fdf09d58730e735084a1f4a45aaf474de05cd34b1d53411da428229d73efd229",
+    "buildDigest": "sha256:beff47793b6f97c0cf9930f2c8fe6865a5186970e0244e6fad67484c27dd79f8",
+    "platform": "linux/amd64",
+    "layerDigests": [
+      "sha256:7a48b8f0e5c73d0cc2a85b008978396aa19d253dc1b96fdb0b769ee6dcbeca4a",
+      "sha256:cd6f8df3a5e7cd39e82d82c3404c3ca851ff435d5429928e970db4f6a7979c9e",
+      "sha256:9c8fb7b4854814ecaf0b443d052269ca2087e262e5e8b80708765382b14c727b",
+      "sha256:4de64405e5bf2fddc3795501d6d0dd5c49b0e11d77299037bccdc00433569ac7",
+      "sha256:ffa37f7bd89372978604ed6bac3a2c91fa3785cd43e2c5787232ad556b9c59be",
+      "sha256:3ba4cd7e988dfab0b74b499271faadaeb81416d98e7b93c3abde8cb66a679be8",
+      "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+      "sha256:7a24b6431d7182a8fb2315da59ab85480b1276523fa352374a7ec1c80185fc0c",
+      "sha256:0488b489665381cdda16d7543148daada476185e3f4670b61e470c56dd02c29c",
+      "sha256:61a5779beb53a8a043ec46fe0d281bc6b582df822dcceecd4bd25b671606227d",
+      "sha256:1a74d6a6fd94fc1ef7cb90d1c70ef031e83b72bca7da68aa36497b6f8baabf62",
+      "sha256:3eeb164d8d654bd1051e6ca26c17937763de0cf206fe3aad0f5158aa226a3cf8",
+      "sha256:85f4467547a3019015fa3a97e78af10fc050b2a6c0ba22225ed01ae6d488dd3b",
+      "sha256:022081e6ed2f178583babfe7f0ac496cae2dda2abadb6b4db9070e97ec7a9e7b"
+    ],
+    "compressedLayerBytes": 574139621
+  },
+  "database": {
+    "Version": 2,
+    "NextUpdate": "2026-11-17T18:50:18.311537396Z",
+    "UpdatedAt": "2026-11-16T18:50:18.311537747Z",
+    "DownloadedAt": "2026-11-16T23:53:22.18438803Z"
+  },
+  "databaseSha256": "c4c65516369d80d1fe4a9ae8667f2721393630107d8d2277a9222def00efd19d",
+  "javaDatabase": {
+    "Version": 1,
+    "NextUpdate": "2026-11-19T00:57:00.601023403Z",
+    "UpdatedAt": "2026-11-16T00:57:00.601024044Z",
+    "DownloadedAt": "2026-11-16T23:53:42.82517991Z"
+  },
+  "javaDatabaseSha256": "daccf4e446cddb30d061d57f131a1acda3728935e95f79e94d462d38b95b24f4",
+  "rawReportSha256": "b39c0ffd54187c8ecd5e6ec5a4c781e44a85f6636eb8a1103ce1dff2d6cf93e2",
+  "archive": "image-audit-runtime-b3e3bc385aae450cf388826466bc4371ca8bbaf4-1.zip",
+  "archiveBytes": 1062577,
+  "archiveSha256": "e9cfceecf94782787d3019442207728a1f797bd8383b09e8d4f919afcb98c045",
+  "buildRecord": {
+    "file": "yakisoba0728~UnsolvableOJ~YS0YAW.dockerbuild.zip",
+    "sha256": "9d2cbbaf7eb8b0ec9ae16abd13379d5fb49e76caa7ad87904abc28ff1d9d8f7b",
+    "blobChecks": 6
+  },
+  "scope": "Independent original CI artifact verification and unchanged evaluator replay; no fresh scanner or OCI extraction by reviewer"
+}
