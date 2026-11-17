@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-checker-fix-review",
+  "reviewer": "/root/recovery_qa",
+  "author": "/root",
+  "reviewedAt": "2026-11-17T00:11:37Z",
+  "decision": "APPROVED_SCOPED_CHECKER_FIX",
+  "reviewedCommit": "062a031b948f1bb2a6a5ece535405dba9d4dfaef",
+  "tree": "48a49e1ccd9e381474f0e1efc937ffaf55279bf9",
+  "parent": "05e98f7fb25a8eba7ff233872007387fa6a272b0",
+  "changedFiles": [
+    "scripts/check_consolidation_evidence.py",
+    "scripts/check_consolidation_evidence_test.py"
+  ],
+  "independentBefore": {
+    "commit": "2af7018855f4f374314f851afbf851644b23794c",
+    "exit": 1,
+    "classification": "R059",
+    "hiddenHistoricalPath": "docs/overhaul/phase5/evidence/frontend-run-43901468081/runtime-independent-replay.json",
+    "log": "archive-checker-before-fix.log"
+  },
+  "independentAfter": {
+    "unitTests": 2,
+    "unitPassed": 2,
+    "actualCheckerExit": 0,
+    "archivedFiles": 51,
+    "verifiedOriginalBytes": 13205154,
+    "localMarkdownTargets": 442,
+    "unitLog": "archive-checker-independent-unit-after.log",
+    "checkerLog": "archive-checker-independent-after.log"
+  },
+  "reasoning": "Historical archival accounting concerns removed source paths. Git rename heuristics describe similarity and can hide a true path deletion. --no-renames restores complete path accounting without weakening any archive manifest, original size/hash/blob/tree or local Markdown-link assertion. The real Git regression covers an identical new receipt plus a separate undeclared deletion.",
+  "limits": [
+    "No application, Runtime policy or scanner behavior changes.",
+    "This is an independent agent review of this exact fix, not a human GitHub approval or full PR qualification.",
+    "Final integrated source still requires exact-source QA and a successful full 12-job run."
+  ]
+}

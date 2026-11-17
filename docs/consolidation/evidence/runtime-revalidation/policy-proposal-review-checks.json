@@ -1,0 +1,254 @@
+{
+  "reviewer": "/root/recovery_qa",
+  "proposalAuthor": "/root/security_infra",
+  "localProposedCommit": "2af7018855f4f374314f851afbf851644b23794c",
+  "tree": "78823c96529351b8100dfaa037175f555ed85542",
+  "parent": "9823070e8dfbf978b6e40394aaaa78ca09a909d5",
+  "policyContentSha256": "4cf9be9773cd0d5f95773edd0e75552608839b512854ab10a8faea4d09ccdb0c",
+  "proposalPolicyFileSha256": "8a69704ce8de75e0eb7cd068e21c0f00aeb8b36ec914a830e82383c0cce602ff",
+  "scopeExpiryFingerprintSchemaImplementationHashesUnchanged": true,
+  "allPriorTrackedFilesExceptActivePolicyUnchanged": true,
+  "changedPaths": [
+    "docs/consolidation/evidence/runtime-revalidation/README.md",
+    "docs/consolidation/evidence/runtime-revalidation/advisory-delta-summary.json",
+    "docs/consolidation/evidence/runtime-revalidation/advisory-delta.json",
+    "docs/consolidation/evidence/runtime-revalidation/author-image-tests.log",
+    "docs/consolidation/evidence/runtime-revalidation/author-payload-tests.log",
+    "docs/consolidation/evidence/runtime-revalidation/author-validation.json",
+    "docs/consolidation/evidence/runtime-revalidation/blocked-runtime.zip",
+    "docs/consolidation/evidence/runtime-revalidation/cna-collector-output.json",
+    "docs/consolidation/evidence/runtime-revalidation/cna-head-response.json",
+    "docs/consolidation/evidence/runtime-revalidation/cna-revalidation.json",
+    "docs/consolidation/evidence/runtime-revalidation/current-cna-refetch-receipt.json",
+    "docs/consolidation/evidence/runtime-revalidation/failed-scan-independent-replay.json",
+    "docs/consolidation/evidence/runtime-revalidation/inherited-policy.json",
+    "docs/consolidation/evidence/runtime-revalidation/kernel-header-applicability.json",
+    "docs/consolidation/evidence/runtime-revalidation/kernel-header-review.json",
+    "docs/consolidation/evidence/runtime-revalidation/primary-vendor-records.zip",
+    "docs/consolidation/evidence/runtime-revalidation/proposed-evaluation.json",
+    "docs/consolidation/evidence/runtime-revalidation/proposed-policy.json",
+    "docs/consolidation/evidence/runtime-revalidation/runtime-revalidation.json",
+    "docs/consolidation/evidence/runtime-revalidation/vendor-advisory-review.json",
+    "docs/consolidation/evidence/runtime-revalidation/vendor-retrieval.json",
+    "scripts/image-applicability-policy.json"
+  ],
+  "verifiedFileBindings": [
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/kernel-header-applicability.json",
+      "sha256": "3370a01c0eb0e7525af0c6daac194ce2d90ddaa40b816f8aa2723ac47eef888f"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/kernel-header-review.json",
+      "sha256": "cfe6f479a7f4483ad90e8e4b45782035be3c688df8ec1eab075dd8ff82acf14f"
+    },
+    {
+      "path": "docs/overhaul/evidence/linux-libc-dev-6.8.0-149.149-amd64-files.json",
+      "sha256": "010441a3487f836ca8d56b32d3264cd286c2d11b569f44b54d2ba3e949911172"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/blocked-runtime.zip",
+      "sha256": "e9cfceecf94782787d3019442207728a1f797bd8383b09e8d4f919afcb98c045"
+    },
+    {
+      "path": "docs/overhaul/evidence/phase2-trivy-fingerprint-binding.json",
+      "sha256": "98472239faff13ffe141181af911cf0841931df59028b985b5cf7466ec939eed"
+    },
+    {
+      "path": "scripts/image_audit.py",
+      "sha256": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72"
+    },
+    {
+      "path": "scripts/image-audit-tool.json",
+      "sha256": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c"
+    },
+    {
+      "path": "scripts/verify_image_payload.py",
+      "sha256": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/inherited-policy.json",
+      "sha256": "81f0bf685f2ffc22cdb0933c2c55f6f5fff05f8f252765c0af8fe56189084603"
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/security/kernel-header-applicability.json",
+      "sha256": "e9b1637730a77cc002f61039aff36a2e852a94341890aa04906f14a3f8ea5f81"
+    },
+    {
+      "path": "docs/overhaul/phase5/evidence/security/kernel-header-review.json",
+      "sha256": "57403747bd3f525a2cfdcb88a3f8acd8c625ad6f82171b9c5388d3a3559cd103"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/advisory-delta.json",
+      "sha256": "d00cf14a4aef040a2feb888fa772c18ff2ed7f7aa2740220864e297d79ea2a6f"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/advisory-delta-summary.json",
+      "sha256": "9c13d4eb2a05827cca7792e4c365d7961aec27959715f38df8ee2d7c2d60c19b"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/vendor-advisory-review.json",
+      "sha256": "7f1a36f069ed306926213bc31868cafc16bcac7cbb9817af9488a384a0b99184"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/vendor-retrieval.json",
+      "sha256": "2aa1a846f40a166ea52fb9db50ef0dcee87b7c766711d4ef4915e25f2d657911"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/primary-vendor-records.zip",
+      "sha256": "01a2bbf6d7b1757025b8480eb2db8f36ab3e11e1aaa4936670c3d846fe64a8ea"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/blocked-runtime.zip",
+      "sha256": "e9cfceecf94782787d3019442207728a1f797bd8383b09e8d4f919afcb98c045"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/failed-scan-independent-replay.json",
+      "sha256": "8c32be172eaf69a82441e9ebbb057f45b29f4d556e5e5f0409097b74a6f6ab97"
+    },
+    {
+      "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/current-cna-records.zip",
+      "sha256": "54c6826a9e0b1453dbf8e99ddf68f644edd519af3829d8106fc719bc3aa7e89c"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/current-cna-refetch-receipt.json",
+      "sha256": "0bb0c06ba0797933f4e939b1561ced89568564d6f122f8a1d4a8eabfc28d59f0"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/cna-collector-output.json",
+      "sha256": "9e776b70c9bf51f68044d20f834ca5816f924e59cee9b9dc8f7483e5c62ec825"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/cna-revalidation.json",
+      "sha256": "45ed1d843fe22132acbb7b6ef7c51e35cd780ab06702f43bd75fcfbe3e36b5c3"
+    },
+    {
+      "path": "docs/consolidation/evidence/runtime-revalidation/cna-head-response.json",
+      "sha256": "980b96a4e6769ffe2020d841c43e3b37867f463ad5a276b7e1ae182bed10ef17"
+    },
+    {
+      "path": "docs/overhaul/repro/kernel-header-applicability.py",
+      "sha256": "96609e11c379ec67a89d9f7d774bc0da14d04a6bd790b57c6320387ca88115e6"
+    },
+    {
+      "path": "docs/overhaul/repro/phase3-refetch-cna-independent.py",
+      "sha256": "b6741499e32cbb0951f93247dcea3f4470bcc3a259337c1ba547a08dc021eaa0"
+    },
+    {
+      "path": "scripts/image_applicability.py",
+      "sha256": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f"
+    },
+    {
+      "path": "scripts/image_gate.py",
+      "sha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b"
+    }
+  ],
+  "verifiedBindingCount": 27,
+  "allFindingRecords": 1106,
+  "changedAllRecords": 47,
+  "changedReviewedRecords": [
+    {
+      "id": "CVE-2026-68426",
+      "fields": [
+        "References"
+      ]
+    },
+    {
+      "id": "CVE-2024-40954",
+      "fields": [
+        "References"
+      ]
+    },
+    {
+      "id": "CVE-2025-39933",
+      "fields": [
+        "References",
+        "VendorSeverity"
+      ]
+    },
+    {
+      "id": "CVE-2025-40170",
+      "fields": [
+        "References",
+        "VendorSeverity"
+      ]
+    },
+    {
+      "id": "CVE-2025-68745",
+      "fields": [
+        "References"
+      ]
+    },
+    {
+      "id": "CVE-2026-31692",
+      "fields": [
+        "References"
+      ]
+    },
+    {
+      "id": "CVE-2026-46181",
+      "fields": [
+        "References",
+        "VendorSeverity"
+      ]
+    },
+    {
+      "id": "CVE-2026-52991",
+      "fields": [
+        "References"
+      ]
+    },
+    {
+      "id": "CVE-2026-63879",
+      "fields": [
+        "References"
+      ]
+    },
+    {
+      "id": "CVE-2026-68409",
+      "fields": [
+        "References"
+      ]
+    },
+    {
+      "id": "CVE-2026-72288",
+      "fields": [
+        "References"
+      ]
+    },
+    {
+      "id": "CVE-2026-74752",
+      "fields": [
+        "References"
+      ]
+    },
+    {
+      "id": "CVE-2026-89631",
+      "fields": [
+        "References"
+      ]
+    }
+  ],
+  "freshCnaRecordsExactBytesAndSourceMaps": 182,
+  "publisherRecords": 12,
+  "correctedAuthorAttributionVerified": true,
+  "inheritedAssessmentAndFiveCriticalAndOneUapiReviewsUnchanged": true,
+  "oldFailedEvaluationExactReplay": true,
+  "proposedEvaluationExactReplay": true,
+  "proposedState": "BLOCKED_REVIEW",
+  "proposedDecisions": 182,
+  "reviewedDecisions": 0,
+  "remainingBlockers": 182,
+  "policyExpiry": "2026-11-30T00:00:00Z",
+  "rawCounts": {
+    "UNKNOWN": 1,
+    "LOW": 363,
+    "MEDIUM": 560,
+    "HIGH": 177,
+    "CRITICAL": 5
+  },
+  "independentlyExecutedTests": {
+    "imageTests": 65,
+    "payloadTests": 27
+  },
+  "scope": "Independent checks of concrete proposal evidence; final acceptance still needs remote immutable anchor, separate actual review activation and a new full successful CI run."
+}

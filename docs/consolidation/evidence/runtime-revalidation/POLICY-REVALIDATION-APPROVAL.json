@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-agent-exact-policy-review",
+  "reviewer": "/root/recovery_qa",
+  "proposalAuthor": "/root/security_infra",
+  "reviewedAt": "2026-11-17T00:07:36Z",
+  "decision": "APPROVED_FOR_SCOPED_POLICY_ACTIVATION",
+  "reviewedCommit": "05e98f7fb25a8eba7ff233872007387fa6a272b0",
+  "localEquivalent": "2af7018855f4f374314f851afbf851644b23794c",
+  "tree": "78823c96529351b8100dfaa037175f555ed85542",
+  "parent": "9823070e8dfbf978b6e40394aaaa78ca09a909d5",
+  "contentSha256": "4cf9be9773cd0d5f95773edd0e75552608839b512854ab10a8faea4d09ccdb0c",
+  "proposedPolicyFileSha256": "8a69704ce8de75e0eb7cd068e21c0f00aeb8b36ec914a830e82383c0cce602ff",
+  "policyExpiry": "2026-11-30T00:00:00Z",
+  "proofs": [
+    "policy-proposal-review-checks.json",
+    "primary-evidence-cohort-check.json",
+    "independent-primary-cna-fetch.json",
+    "proposal-image-tests.log",
+    "proposal-payload-tests.log"
+  ],
+  "checks": {
+    "remoteGitObjectFetchedAndTreeMatched": true,
+    "all27FileBindingsVerified": true,
+    "priorFailureReproducedExactly": true,
+    "proposalRemainsBlockedReview": true,
+    "remainingBlockingFindings": 182,
+    "approvedDecisionsBeforeActivation": 0,
+    "changedAdvisories": 13,
+    "totalChangedRecords": 47,
+    "freshCnaRecordsExactBytesAndPaths": 182,
+    "publisherAdvisories": 12,
+    "independentImageTestsPassed": 65,
+    "independentPayloadTestsPassed": 27,
+    "expiryScopeEvaluatorFingerprintCoverageAndAssertionsUnchanged": true,
+    "historicalPhaseVEvidenceUnchanged": true,
+    "authorAttributionCorrected": true
+  },
+  "scope": "The exact shipped linux-libc-dev 6.8.0-149.149 amd64 component, all 182 enumerated CVEs, and 990-file payload manifest only. The full raw scanner findings remain unchanged.",
+  "limits": [
+    "This is an independent agent evidence review, not a human GitHub approval.",
+    "Coordinator must independently approve the same immutable authored content before recording activation.",
+    "PR93 is not qualified by this receipt. Run 43982539575 failed; the final activated source needs a new full 12-job successful CI run and exact-source QA.",
+    "No production deployment or host-kernel readiness is authorized. Host kernel remains UNVERIFIED.",
+    "Future advisory, payload, implementation, scope or expiry changes require revalidation; expiry was not extended.",
+    "Optional Docker build payloads remain withheld pending publication-secret classification; mandatory scan ZIP evidence was verified."
+  ]
+}

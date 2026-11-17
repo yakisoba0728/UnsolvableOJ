@@ -1,0 +1,12 @@
+{
+  "reviewer": "/root",
+  "reviewedCommit": "05e98f7fb25a8eba7ff233872007387fa6a272b0",
+  "tree": "78823c96529351b8100dfaa037175f555ed85542",
+  "contentSha256": "4cf9be9773cd0d5f95773edd0e75552608839b512854ab10a8faea4d09ccdb0c",
+  "observedAt": "2026-11-17T00:07:54.131441+00:00",
+  "decision": "APPROVE_FINITE_COMPONENT_REVALIDATION",
+  "scope": "Same182CVEIDs,990payloadmanifest,fixedexpiry,evaluator,scannerpin,normalization,assertions unchanged. Independently retrieved4keyCNA and4officialRockyAPI records corroborate author primary evidence; separateQA reviewedall182CNA plus12publisherrecords. No host or overallPR acceptance.",
+  "gateBeforeApproval": "BLOCKED_REVIEW",
+  "blockingBeforeApproval": 182,
+  "harnessNote": "First coordinator invocation treated evaluate() tuple as dict and stopped before writing approval. Correct unpacking used here; no product source or policy change."
+}

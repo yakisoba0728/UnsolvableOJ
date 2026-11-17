@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/c0f7c387c945/oj-final-qa/scripts/check_consolidation_evidence.py", line 92, in <module>
+    verify(parser.parse_args().verify_git)
+  File "/workspace/scratch/c0f7c387c945/oj-final-qa/scripts/check_consolidation_evidence.py", line 66, in verify
+    assert historical == archived, f"Unindexed historical deletions: {historical ^ archived}"
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Unindexed historical deletions: {'docs/overhaul/phase5/evidence/frontend-run-43901468081/runtime-independent-replay.json'}

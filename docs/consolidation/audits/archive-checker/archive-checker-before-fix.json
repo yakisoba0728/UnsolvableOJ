@@ -1,0 +1,7 @@
+{
+  "testedCommit": "2af7018855f4f374314f851afbf851644b23794c",
+  "tree": "78823c96529351b8100dfaa037175f555ed85542",
+  "checkerExit": 1,
+  "gitClassification": "R059\tdocs/overhaul/phase5/evidence/frontend-run-43901468081/runtime-independent-replay.json\tdocs/consolidation/evidence/runtime-revalidation/proposed-evaluation.json\n",
+  "log": "archive-checker-before-fix.log"
+}

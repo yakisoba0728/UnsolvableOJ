@@ -47,3 +47,11 @@ They are retained after scanning on the final evidence-only Git branch linked by
 the final PR receipt. Recovery observations predate this new branch; their earlier
 absence of a consolidation PR and CI-selection finding are historical checkpoints,
 not contradictions of the later implemented state.
+
+After the first complete run correctly blocked Runtime advisory drift,
+Security/Infra authored a separate finite evidence proposal. Independent QA and
+the coordinator reviewed and approved immutable published proposal
+`05e98f7fb25a8eba7ff233872007387fa6a272b0` (same tree as local
+`2af7018855f4f374314f851afbf851644b23794c`). See the [activation record](../evidence/runtime-revalidation/ACTIVATION.md).
+Security's earlier source-audit report remains its historical checkpoint; it is
+not the independent approval of its own later policy proposal.

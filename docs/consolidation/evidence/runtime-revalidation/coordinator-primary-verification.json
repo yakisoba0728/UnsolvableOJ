@@ -1,0 +1,85 @@
+{
+  "scope": "Independent coordinator fetch and interpretation of three changed vendor-severity records and the changed CRITICAL CVE. This is not approval of a not-yet-submitted policy proposal.",
+  "cnaCommit": "348e57515f801e770a266938ade34279efd0d827",
+  "records": [
+    {
+      "id": "CVE-2025-39933",
+      "byteIdenticalToPriorReviewedCna": true,
+      "sha256": "a2747914dc9020331ca9a4883d64c2cb50c74f97fe68eab95b084d48fcf14d44",
+      "programFiles": [
+        "fs/smb/client/smbdirect.c"
+      ]
+    },
+    {
+      "id": "CVE-2025-40170",
+      "byteIdenticalToPriorReviewedCna": true,
+      "sha256": "00682aa497a14d0660cb93f44cc55272a18439fb69a5d4a3e04cedabd0583999",
+      "programFiles": [
+        "include/net/ip.h",
+        "include/net/ip6_route.h",
+        "include/net/route.h",
+        "net/core/sock.c"
+      ]
+    },
+    {
+      "id": "CVE-2026-46181",
+      "byteIdenticalToPriorReviewedCna": true,
+      "sha256": "4544454f33b4fae672cd8a98c13eda577ece70d6fd2b6fb642f01a698272923f",
+      "programFiles": [
+        "drivers/net/ethernet/mellanox/mlx4/srq.c"
+      ]
+    },
+    {
+      "id": "CVE-2026-68426",
+      "byteIdenticalToPriorReviewedCna": true,
+      "sha256": "57f5d2c6e6d86218aaae37928e66f08b1afabaef4f002faadfc6d042752ed356",
+      "programFiles": [
+        "net/xfrm/xfrm_device.c"
+      ]
+    }
+  ],
+  "publisherApiRecords": [
+    {
+      "id": "RLSA-2026:0759",
+      "url": "https://errata.rockylinux.org/api/v2/advisories/RLSA-2026%3A0759",
+      "file": "RLSA-2026-0759.json",
+      "bytes": 6096,
+      "sha256": "45575340f27f6045d1e92037c92fb779d52d3cfa201db3f003d7e9026be48b24",
+      "keys": [
+        "advisory"
+      ]
+    },
+    {
+      "id": "RLSA-2026:2264",
+      "url": "https://errata.rockylinux.org/api/v2/advisories/RLSA-2026%3A2264",
+      "file": "RLSA-2026-2264.json",
+      "bytes": 7430,
+      "sha256": "303958b7049b1f9e4a331744f67b285ae5726bf5bc1ad07f507fd28b6f408623",
+      "keys": [
+        "advisory"
+      ]
+    },
+    {
+      "id": "RLSA-2026:25121",
+      "url": "https://errata.rockylinux.org/api/v2/advisories/RLSA-2026%3A25121",
+      "file": "RLSA-2026-25121.json",
+      "bytes": 8725,
+      "sha256": "33458f1d935106fd858c3d303dc4bf276630dc1beb220f3bb4fba3a853ff78f1",
+      "keys": [
+        "advisory"
+      ]
+    },
+    {
+      "id": "RLSA-2026:68531",
+      "url": "https://errata.rockylinux.org/api/v2/advisories/RLSA-2026%3A68531",
+      "file": "RLSA-2026-68531.json",
+      "bytes": 13659,
+      "sha256": "c61a729dea550fbe52e553e3012b1601cf48c526b3f7ef12daf786cf8767b800",
+      "keys": [
+        "advisory"
+      ]
+    }
+  ],
+  "interpretation": "Publisher notices are Rocky Linux 8 kernel batch advisories. They corroborate the changed reference/severity metadata, not an Ubuntu component status or host readiness. CNA records remain byte-identical; actual payload and full cohort must still pass independent proposal review.",
+  "policyDisposition": "NOT_YET_REVIEWED"
+}

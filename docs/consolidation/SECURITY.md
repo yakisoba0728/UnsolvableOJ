@@ -49,6 +49,15 @@ finding or waive a changed payload. Fresh image CI must fail on unsupported drif
 or expiry. A matching reviewed header-package finding does not establish that a
 host kernel is patched or an executor escape is impossible.
 
+The first consolidation run43982539575 correctly blocked13 existing advisory
+records after fresh database metadata changed. A separate [finite revalidation](evidence/runtime-revalidation/ACTIVATION.md)
+retains that original failure, all182 unchanged CNA byte hashes/source mappings,
+all12 newly referenced publisher records and the same990-file payload proof.
+Independent QA and coordinator review approved the exact proposed content before
+activation. Only exact evidence/advisory bindings and review metadata changed;
+scope, expiry, scanner, evaluator, normalization and assertions remain unchanged.
+The resulting final source still requires its own full successful CI receipt.
+
 Back/Front/Judge images had zero findings at the historical checkpoint. The new
 consolidation's four actual current scan reports are required independently; old
 image results cannot substitute for them. Review decisions in this work are AI

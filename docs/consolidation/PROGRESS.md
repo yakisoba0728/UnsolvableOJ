@@ -52,6 +52,26 @@ branch must receive a new complete run before acceptance.
 
 See [audit records](audits/README.md) and [PERFORMANCE.md](PERFORMANCE.md).
 
+## First full-run failure and reviewed correction
+
+Run43982539575 tested source9823070e8dfbf978b6e40394aaaa78ca09a909d5 through
+checkoutb3e3bc385aae450cf388826466bc4371ca8bbaf4, tree1000f9a3b0b58ec342d19a4a5717aea8b3b0d81e.
+Ten jobs succeeded, Runtime failed on exact advisory drift, and CI required failed.
+Actual results included436 Back units,283 real PostgreSQL/API cases,137 Judge
+units plus5 Python tests,90 native assertions including72 language/scenario cells,
+36 pipeline tests,4 Compose browser tests and1,039 Playwright entries. These are
+component observations from a failed qualification run, not final acceptance.
+
+Thirteen existing Runtime records changed reference metadata; three also changed
+Rocky vendor severity. The unchanged gate blocked all182 findings atomically.
+The [new finite evidence proposal](evidence/runtime-revalidation/README.md) preserved
+the failed artifact and prior policy. Its author independently collected current
+primary data; separate QA and coordinator reviews then [approved its exact content](evidence/runtime-revalidation/ACTIVATION.md)
+at immutable remote proposal05e98f7fb25a8eba7ff233872007387fa6a272b0.
+All182 CNA bytes/maps, cohort IDs,990-file manifest and fixed expiry remain unchanged.
+Fresh full CI on the resulting final source remains G5; original PRs stay open
+until the final post-run receipt qualifies their replacement.
+
 ## Confirmed CI correction
 
 The full-validation expression had no explicit final-consolidation branch policy.
@@ -60,6 +80,22 @@ Both the image and suite selectors now always request full validation for this e
 branch/main pair, including documentation-only updates. Other branches retain their
 existing policy. All original required jobs, failure gates, scan policy and expiry
 remain in force.
+
+## Archive path accounting correction
+
+The new advisory evidence exposed a Git similarity heuristic: a deleted historical
+receipt and a new proposed evaluation were classified as a rename. The checker now
+uses `--no-renames` when enumerating historical deletions. A real temporary-Git
+regression demonstrates that both the archived path and an undeclared deletion
+remain visible even when normal Git detection reports R100. The original 51-file
+manifest and all byte, hash, tree and link assertions are unchanged.
+
+[Independent QA approved the immutable two-file change](audits/archive-checker/ARCHIVE-CHECKER-FIX-REVIEW.md)
+at local commit `062a031b948f1bb2a6a5ece535405dba9d4dfaef`. Its published equivalent
+is `251c7d0db091e147349ad39a93bba1dbb6d028b4`; both have tree
+`48a49e1ccd9e381474f0e1efc937ffaf55279bf9`. The regression passed 2/2 tests, and
+all 51 archived originals totaling 13,205,154 bytes passed independent verification.
+This correction still requires the final full CI run on the integrated source.
 
 ## Resume rules
 

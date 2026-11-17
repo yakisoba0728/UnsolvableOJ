@@ -55,6 +55,12 @@ scan or expiry is blocking. No host-kernel safety or zero-vulnerability claim fo
 No new performance speedup is claimed; controlled bundle sizes and finite CI
 observations retain mixed/adverse results and their measurement limits.
 
+The first current-source run blocked changed vendor advisory metadata. A
+[separately reviewed finite revalidation](evidence/runtime-revalidation/ACTIVATION.md)
+preserves the failed scan and prior policy while retaining exactly the same182
+CVE IDs,990-file payload manifest, expiry and enforcement. That update requires a
+new full run; the post-run receipt determines final acceptance.
+
 ## Review guide
 
 | Question | Canonical document |

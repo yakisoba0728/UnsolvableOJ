@@ -16,6 +16,7 @@ source commit.
 | Relocated raw data | [archived-evidence.json](archived-evidence.json) | Per-file SHA256, byte length, Git blob, immutable source/tree and recorded execution provenance |
 | Original phase acceptance ledger | [validation-ledger.json](../overhaul/phase5/evidence/validation-ledger.json) | Exact feature sources/runs and failed or superseded attempts |
 | Active Runtime decision | [policy](../../scripts/image-applicability-policy.json) | Exact applicability, original raw findings and fixed expiry; does not certify a host kernel |
+| Consolidation Runtime metadata drift | [finite revalidation and activation](evidence/runtime-revalidation/ACTIVATION.md) | Original failed run, exact previous policy,13 changed records, fresh182-CNA/12-publisher review and separate approvals; no scope/expiry/gate relaxation |
 | Historical performance arithmetic | [offline verifier](../overhaul/phase5/evidence/performance/verify-performance.py) | Complete inputs remain local; verifies recorded arithmetic rather than rerunning services |
 
 ## Selective cleanup
@@ -63,3 +64,7 @@ The final consolidation run's own raw logs, artifacts, checksums, source binding
 independent reviews and adverse outcomes will be retained on a separate evidence
 branch linked from the final PR receipt. That post-run archive must not move the
 tested release source or create another review PR.
+
+## Archive checker regression review
+
+The [independent review and original before/after logs](audits/archive-checker/ARCHIVE-CHECKER-FIX-REVIEW.md) cover historical deletion accounting under Git rename detection. Published commit `251c7d0db091e147349ad39a93bba1dbb6d028b4` has the exact reviewed tree `48a49e1ccd9e381474f0e1efc937ffaf55279bf9`.
