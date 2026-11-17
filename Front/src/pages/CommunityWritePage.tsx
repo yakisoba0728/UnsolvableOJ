@@ -212,7 +212,7 @@ function WriteForm({
   const location = useLocation();
   const [confirm, confirmDialog] = useConfirm();
   const [params] = useSearchParams();
-  const beginRequest = useRequestOwner(getNavigationVersion);
+  const beginRequest = useRequestOwner(getNavigationVersion, true);
   const linkState = location.state as {
     category?: CategoryKey;
     problem?: { id: string; title: string };

@@ -2,6 +2,8 @@
 
 문제 풀이와 코드 채점을 위한 온라인 저지 MVP입니다.
 
+최종 통합 검토는 [요약과 검토 안내](docs/consolidation/EXECUTIVE-SUMMARY.md)에서 시작합니다. 실제 최신 검증 상태는 [진행 기록](docs/consolidation/PROGRESS.md)과 최종 PR의 검증 댓글을 확인하세요. 과거 단계별 문서는 해당 시점의 기록이며, 운영 배포 판정은 코드 병합 판정과 별개입니다.
+
 | 디렉터리 | 역할 |
 |---|---|
 | `Front/` | React/Vite 웹 UI (문제, 로그인, 제출, 작성자 문제 등록) |

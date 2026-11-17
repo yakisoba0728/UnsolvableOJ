@@ -1,0 +1,124 @@
+{
+  "verification": {
+    "allChecks": "PASS",
+    "checks": 5599,
+    "networkCalls": 0,
+    "gitCalls": 0,
+    "benchmarksExecuted": 0,
+    "originalFoundationSectionsUnchanged": [
+      "foundation",
+      "database",
+      "judge",
+      "phase2ScalingTrials",
+      "recovery",
+      "browser",
+      "bundle"
+    ],
+    "dbWorkloads": 7,
+    "dbReadSamplesPerWorkload": 5,
+    "dbNearestRankP95P99EqualMaximum": true,
+    "mixedCampaignJobs": 24,
+    "separatePhase2Jobs": 32,
+    "submissionIdOverlap": 0,
+    "recoveryObservations": 7,
+    "historicalBrowserReports": 3,
+    "historicalProbeReceipts": 5,
+    "observedCandidateRunId": 43898203434,
+    "observedCandidateOverallConclusion": "failure",
+    "observedCandidateComposeConclusion": "success",
+    "candidateProbeBytesEqualAtCorrectedHead": true,
+    "correctedCandidateVerified": true,
+    "correctedCandidateRunId": 43901468081,
+    "correctedEditorEventTimingTruncated": true,
+    "candidateVectors": {
+      "lcpCandidateMs": {
+        "raw": [
+          392,
+          388,
+          416
+        ],
+        "median": 392,
+        "max": 416
+      },
+      "initialObservedCls": {
+        "raw": [
+          0.05432499885559082,
+          0.05432499885559082,
+          0.048731330235799154
+        ],
+        "median": 0.05432499885559082,
+        "max": 0.05432499885559082
+      },
+      "clickToSecondVerifiedFrameMs": {
+        "raw": [
+          47.5,
+          50,
+          44.60000000009313,
+          46.60000000009313,
+          48.09999999997672,
+          46.800000000046566,
+          48.5,
+          45.60000000009313,
+          43.29999999993015,
+          46.90000000002328,
+          45.59999999997672,
+          46.800000000046566,
+          45.5,
+          45.90000000002328,
+          48.29999999993015
+        ],
+        "median": 46.800000000046566,
+        "max": 50
+      },
+      "lcpCandidateAreas": [
+        7410,
+        7410,
+        7410
+      ],
+      "heapDeltaUsedBytes": [
+        -11212376,
+        -5513892,
+        -5483664
+      ]
+    },
+    "currentRepositoryMeasuredFileBinding": {
+      "status": "NOT_CHECKED_NO_REPOSITORY_SOURCE_PRESENT",
+      "files": []
+    },
+    "verificationScope": "Retained byte integrity, receipt consistency and independent arithmetic only; not experiment replay, remote authentication, causal improvement, current CI acceptance or a capacity claim."
+  },
+  "relocation": {
+    "onlyRetainedEvidenceCopied": true,
+    "workingDirectoryOutsideCopy": true,
+    "pathEnvironmentEmpty": true,
+    "pythonIsolatedMode": true,
+    "exitCode": 0
+  },
+  "adverseObservationNegativeControl": {
+    "fixture": "corrected derived EventTiming truncated flag changed to false in disposable verifier-only copy",
+    "exitCode": 1,
+    "result": {
+      "allChecks": "FAIL",
+      "checksCompleted": 4269,
+      "reason": "corrected candidate derived data.editor.eventTiming.truncated"
+    }
+  },
+  "artifacts": {
+    "verify-performance.py": {
+      "sha256": "84a555560340dc6d880cbbb3363321ba466a498f32f7e04e05d77b5ad6f71191",
+      "bytes": 40170
+    },
+    "performance-source-data.json": {
+      "sha256": "d5a60cb4c4c86c8a0ed7120d0f089592c9fcbb4e9cd42ec1da6383bd3537adf7",
+      "bytes": 121607
+    },
+    "performance-source-data-foundation.json": {
+      "sha256": "d2d971d21d70d1054612ae8e5e7096ab43c89bcf9594153cc16fdf45b9e0d025",
+      "bytes": 42990
+    },
+    "observed-candidates/43901468081/github-metadata.json": {
+      "sha256": "f742420f5eb73723a1d906f4f7bdf253e8bb6d78441effe928f2931f3f0f78ba",
+      "bytes": 42945
+    }
+  }
+}

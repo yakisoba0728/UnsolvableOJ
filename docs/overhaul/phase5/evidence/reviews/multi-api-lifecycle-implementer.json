@@ -1,0 +1,69 @@
+{
+  "kind": "implementer-focused-verification",
+  "agent": "/root/judge",
+  "finding": "PHASE5-MULTIAPI-001",
+  "status": "CORRECTION_IMPLEMENTED_PENDING_INDEPENDENT_REVIEW_AND_CI",
+  "source": {
+    "commit": "7c1731dbcef91b8e8828acdd428d7274d667007c",
+    "tree": "b651e94d0f6ece704d6f8c558c9d75c86ffd48ee",
+    "parent": "da8deeba09e0ad0009fddbb884728ab68d1274e5"
+  },
+  "sourceSha256": {
+    "Back/test/phase5-multi-api.pipeline-spec.ts": "9bbb38c3834a6a9f39c9c27224a9ad7aee097804fe5d8cad0bb55f3824cfa5a8",
+    "Back/test/phase5-multi-api.pipeline-helpers.ts": "6e638dab7639ec0b3e955734c9972602ff9562b057479f601da0cfa621152f09",
+    "Back/test/phase5-multi-api-deadline.spec.ts": "4486fe78f5ac64abee367f0af59ce057da7c5b84e3643ee3c9a18b8c85a39285",
+    "docs/overhaul/phase5/MULTI-API.md": "5930c37ab23f2663299139e9d7212beae95ab01ced1bb1be4c58411b6fc58260"
+  },
+  "checks": {
+    "deadlineOwnershipTests": {
+      "passed": 6,
+      "failed": 0,
+      "command": "node_modules/.bin/vitest run test/phase5-multi-api-deadline.spec.ts"
+    },
+    "typecheck": {
+      "exitCode": 0,
+      "command": "node_modules/.bin/tsc --noEmit --incremental false --preserveSymlinks"
+    },
+    "focusedLint": {
+      "exitCode": 0
+    },
+    "stagedDiffCheck": {
+      "exitCode": 0
+    }
+  },
+  "logs": {
+    "multiapi-lifecycle-correction-vitest.log": {
+      "path": "/workspace/scratch/3d1215725852/evidence/multiapi-lifecycle-correction-vitest.log",
+      "sha256": "08f6e4593d7bff0e13be7e5bb5af39e17333f9fc127f2c584572760262a0e7ca"
+    },
+    "multiapi-lifecycle-correction-typecheck.log": {
+      "path": "/workspace/scratch/3d1215725852/evidence/multiapi-lifecycle-correction-typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "multiapi-lifecycle-correction-lint.log": {
+      "path": "/workspace/scratch/3d1215725852/evidence/multiapi-lifecycle-correction-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "nativeExecution": "NOT_EXECUTED",
+  "remoteActions": false,
+  "lifecycleBudgetsMs": {
+    "actions": 45000,
+    "workerStop": 15000,
+    "apiStop": 15000,
+    "cleanupOperations": 5000,
+    "connectionDrain": 1000,
+    "report": 3000,
+    "allocatedTotal": 84000,
+    "existingTestCeiling": 90000
+  },
+  "initialFocusedProbe": {
+    "passed": 5,
+    "failed": 1,
+    "reason": "Installed pg Client.end during stalled startup suppressed its pending connect callback. Correction destroys the pre-owned socket with an error; six focused tests subsequently pass without timeout changes."
+  },
+  "limits": [
+    "No native qualification, independent approval, or production capacity claim.",
+    "The dependency symlink remains untracked."
+  ]
+}

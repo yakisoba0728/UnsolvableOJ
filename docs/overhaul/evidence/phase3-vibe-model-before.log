@@ -1,0 +1,38 @@
+Owned PG17.11/Redis8.10.3 ready on loopback; fresh temporary cluster. Command: ['node', 'scripts/run-integration.mjs', 'e2e', 'test/independent-vibe-model.e2e-spec.ts']
+
+ RUN  v4.1.12 /workspace/scratch/86de5f814139/oj-vibe-review/Back
+
+ ❯ test/independent-vibe-model.e2e-spec.ts (1 test | 1 failed) 635ms
+   × independent review: the model selected for an exam survives deployment changes for every candidate 633ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/independent-vibe-model.e2e-spec.ts > independent review: the model selected for an exam survives deployment changes for every candidate
+AssertionError: expected [ 'later-fixture-model-0', …(1) ] to deeply equal [ 'selected-fixture-model', …(1) ]
+
+- Expected
++ Received
+
+  [
+-   "selected-fixture-model",
+-   "selected-fixture-model",
++   "later-fixture-model-0",
++   "later-fixture-model-1",
+  ]
+
+ ❯ test/independent-vibe-model.e2e-spec.ts:38:61
+     36|     }
+     37|     const rows = await db.query('SELECT model FROM vibe_attempts WHERE…
+     38|     expect(rows.map((row: { model: string }) => row.model)).toEqual(['…
+       |                                                             ^
+     39|   } finally {
+     40|     vi.restoreAllMocks();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  15:21:34
+   Duration  5.96s (transform 2.12s, setup 0ms, import 4.93s, tests 635ms, environment 0ms)
+

@@ -9,6 +9,7 @@ import {
 import { createHash } from 'node:crypto';
 import { DataSource, type EntityManager } from 'typeorm';
 import { recordAudit } from '../../common/database.js';
+import { lockActiveActor } from '../../common/active-actor.js';
 import type { AuthenticatedUser } from '../auth/auth.types.js';
 import {
   notifyAccepted,
@@ -528,6 +529,10 @@ export class CommunityService {
   ) {
     await this.db.transaction(async (manager) => {
       const post = await this.lock(manager, id, user);
+      // A request may wait on the post while withdrawal erases private rows.
+      // Lock/revalidate afterward, before recreating saved or followed content.
+      // Withdrawal does not lock posts, so this keeps the post-first order.
+      await lockActiveActor(manager, user);
       if (kind === 'follow' && post.authorId === user.id)
         throw new BadRequestException('자신을 팔로우할 수 없습니다.');
       const table = kind === 'saved' ? 'community_saved' : 'community_follows';

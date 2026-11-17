@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { setTimeout as delay } from 'node:timers/promises';
 import {
   afterAll,
   beforeAll,
@@ -11,7 +12,10 @@ import {
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { Redis } from 'ioredis';
+import { JwtService } from '@nestjs/jwt';
 import type { NestExpressApplication } from '@nestjs/platform-express';
+import type { AuthenticatedUser } from '../src/modules/auth/auth.types.js';
+import { UserRole } from '../src/modules/users/user-role.enum.js';
 import { base, bearer, createApp, register } from './helpers.js';
 import { VibeAi } from '../src/modules/vibe/vibe.ai.js';
 import { VibeRunner } from '../src/modules/vibe/vibe.runner.js';
@@ -26,6 +30,7 @@ describe('enterprise vibe assignments and private candidate review', () => {
   let outsider: string;
   let admin: string;
   let candidateId: string;
+  let candidateActor: AuthenticatedUser;
   let ai: VibeAi;
   let runner: VibeRunner;
   const evaluate = vi.fn<VibeAi['evaluate']>();
@@ -80,6 +85,9 @@ describe('enterprise vibe assignments and private candidate review', () => {
     const account = await register(app, 'ev_candidate', suffix);
     candidate = account.accessToken;
     candidateId = account.user.id;
+    const payload = app.get(JwtService).decode(candidate);
+    candidateActor = { id: candidateId, role: UserRole.USER,
+      tokenVersion: payload.tokenVersion, sessionId: payload.sid };
     outsider = (await register(app, 'ev_outsider', suffix)).accessToken;
     const administrator = await register(app, 'ev_admin', suffix);
     await db.query("UPDATE users SET role='ADMIN' WHERE id=$1", [
@@ -376,7 +384,48 @@ describe('enterprise vibe assignments and private candidate review', () => {
       [test.id, [randomUUID()]],
     );
     await expect(
-      app.get(VibeService).startEnterprise(exam.id, taskId, candidateId),
+      app.get(VibeService).startEnterprise(exam.id, taskId, candidateActor),
     ).rejects.toThrow('응시 과제');
+  });
+
+  it('does not create a workspace when the deadline passes while waiting on the exam lock', async () => {
+    const exam = await start(await create());
+    const lock = db.createQueryRunner();
+    await lock.connect();
+    await lock.startTransaction();
+    let pending: Promise<{ result?: unknown; error?: unknown }> | undefined;
+    try {
+      const [{ pid }]: { pid: number }[] = await lock.query('SELECT pg_backend_pid() AS pid');
+      await lock.query('SELECT id FROM enterprise_attempts WHERE id=$1 FOR UPDATE', [exam.id]);
+      pending = app.get(VibeService).startEnterprise(exam.id, taskId, candidateActor)
+        .then((result) => ({ result }), (error: unknown) => ({ error }));
+      const until = Date.now() + 2500;
+      let blocked = false;
+      while (Date.now() < until) {
+        const [row]: { blocked: boolean }[] = await db.query(
+          'SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE $1=ANY(pg_blocking_pids(pid))) AS blocked',
+          [pid],
+        );
+        if (row.blocked) { blocked = true; break; }
+        await delay(20);
+      }
+      expect(blocked).toBe(true);
+      // Move the deadline to the present only after the candidate transaction
+      // has started and is blocked. Its transaction timestamp is earlier, while
+      // the actual clock after lock acquisition is later.
+      await lock.query('UPDATE enterprise_attempts SET deadline_at=clock_timestamp() WHERE id=$1', [exam.id]);
+      await lock.commitTransaction();
+      const outcome = await pending;
+      expect(outcome.error).toMatchObject({ message: '응시가 끝나 새 과제를 시작할 수 없습니다.' });
+      expect(outcome.result).toBeUndefined();
+      const [{ count }]: { count: number }[] = await db.query(
+        'SELECT count(*)::int AS count FROM vibe_attempts WHERE enterprise_attempt_id=$1', [exam.id],
+      );
+      expect(count).toBe(0);
+    } finally {
+      if (lock.isTransactionActive) await lock.rollbackTransaction();
+      await lock.release();
+      if (pending) await pending;
+    }
   });
 });

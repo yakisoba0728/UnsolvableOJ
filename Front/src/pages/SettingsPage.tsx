@@ -1,9 +1,9 @@
 import { AccountPrivacyPanels } from "../components/AccountPrivacyPanels";
-import { useState, type FormEvent } from "react";
+import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { PageHeader } from "../components/PageHeader";
-import { useDocumentTitle, useRequest } from "../hooks";
+import { useDocumentTitle, useMountedRef, useRequest } from "../hooks";
 import type { Session, SessionDevice } from "../types";
 
 type Status = { pending: boolean; error: string; done: string };
@@ -14,7 +14,11 @@ const dateTime = (value: string) =>
 /** 계정 설정: 사용자 이름과 비밀번호 변경, 로그인 기기 관리. 성공하면 서버가 준 새 세션으로 바꾼다. */
 export function SettingsPage() {
   useDocumentTitle("계정 설정");
-  const { session, setSession, getSessionVersion } = useAuth();
+  const { session, setSession, getSessionIdentityVersion } = useAuth();
+  const identity = getSessionIdentityVersion();
+  const formIdentity = useRef(identity);
+  const writing = useRef(false);
+  const mounted = useMountedRef();
   const [username, setUsername] = useState(session?.user.username ?? "");
   const [nameStatus, setNameStatus] = useState(idle);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -22,6 +26,19 @@ export function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStatus, setPasswordStatus] = useState(idle);
   const [deviceStatus, setDeviceStatus] = useState(idle);
+  const busy = nameStatus.pending || passwordStatus.pending || deviceStatus.pending;
+  useLayoutEffect(() => {
+    if (formIdentity.current === identity) return;
+    formIdentity.current = identity;
+    writing.current = false;
+    setUsername(session?.user.username ?? "");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setNameStatus(idle);
+    setPasswordStatus(idle);
+    setDeviceStatus(idle);
+  }, [identity, session?.user.username]);
   const token = session?.accessToken;
   // 비밀번호를 바꾸면 다른 로그인이 모두 끊기고 토큰이 바뀌므로 목록도 다시 받는다.
   const devices = useRequest(
@@ -33,17 +50,25 @@ export function SettingsPage() {
   if (!session) return null;
 
   async function signOutDevices(path: string, done: string) {
+    if (writing.current) return;
+    writing.current = true;
+    const owner = getSessionIdentityVersion();
+    const current = () => mounted.current && getSessionIdentityVersion() === owner;
     setDeviceStatus({ ...idle, pending: true });
     try {
       await api(path, { method: "DELETE" }, session!.accessToken);
+      if (!current()) return;
       setDeviceStatus({ ...idle, done });
     } catch (cause) {
+      if (!current()) return;
       setDeviceStatus({
         ...idle,
         error: cause instanceof Error ? cause.message : "잠시 후 다시 시도해 주세요.",
       });
+    } finally {
+      if (current()) writing.current = false;
     }
-    devices.retry();
+    if (current()) devices.retry();
   }
 
   async function send(
@@ -52,8 +77,11 @@ export function SettingsPage() {
     setStatus: (status: Status) => void,
     done: string,
   ) {
+    if (writing.current) return;
+    writing.current = true;
     setStatus({ ...idle, pending: true });
-    const version = getSessionVersion();
+    const owner = getSessionIdentityVersion();
+    const current = () => mounted.current && getSessionIdentityVersion() === owner;
     try {
       const next = await api<Session>(
         path,
@@ -61,15 +89,22 @@ export function SettingsPage() {
         session!.accessToken,
       );
       // 응답 전에 로그아웃·계정 전환이 있었다면 지난 계정의 세션을 되살리지 않는다.
-      if (getSessionVersion() !== version) return;
+      if (!current()) return;
       setSession(next);
+      // This accepted mutation installs its new session synchronously. Preserve
+      // its completion message; unrelated logins still clear the old form.
+      formIdentity.current = getSessionIdentityVersion();
+      writing.current = false;
       setStatus({ ...idle, done });
       return true;
     } catch (cause) {
+      if (!current()) return;
       setStatus({
         ...idle,
         error: cause instanceof Error ? cause.message : "잠시 후 다시 시도해 주세요.",
       });
+    } finally {
+      if (current()) writing.current = false;
     }
   }
 
@@ -140,7 +175,7 @@ export function SettingsPage() {
           {message(nameStatus)}
           <button
             className="button"
-            disabled={nameStatus.pending || username === session.user.username}
+            disabled={busy || username === session.user.username}
           >
             {nameStatus.pending ? "처리 중…" : "이름 변경"}
           </button>
@@ -185,7 +220,7 @@ export function SettingsPage() {
           {message(passwordStatus)}
           <button
             className="button"
-            disabled={passwordStatus.pending || !currentPassword || !newPassword}
+            disabled={busy || !currentPassword || !newPassword}
           >
             {passwordStatus.pending ? "처리 중…" : "비밀번호 변경"}
           </button>
@@ -218,7 +253,7 @@ export function SettingsPage() {
                   <button
                     type="button"
                     className="button button-small button-outline"
-                    disabled={deviceStatus.pending}
+                    disabled={busy}
                     onClick={() =>
                       void signOutDevices(`/auth/sessions/${device.id}`, "그 기기에서 로그아웃했습니다.")
                     }
@@ -234,7 +269,7 @@ export function SettingsPage() {
         <button
           type="button"
           className="button button-outline"
-          disabled={deviceStatus.pending || !devices.data.some((device) => !device.current)}
+          disabled={busy || !devices.data.some((device) => !device.current)}
           onClick={() =>
             void signOutDevices("/auth/sessions", "다른 기기에서 모두 로그아웃했습니다.")
           }

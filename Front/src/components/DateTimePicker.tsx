@@ -136,6 +136,13 @@ export function DateTimePicker({
     m: selected?.m ?? today.getMonth(),
   }));
 
+  // Closing from inside removes the focused control. Keep the keyboard user's
+  // place in the form; outside focus/pointer dismissal deliberately stays put.
+  const close = () => {
+    setOpen(false);
+    buttonRef.current?.focus();
+  };
+
   useEffect(() => {
     if (!open) return;
     // 바깥을 누르거나 키보드로 바깥(다른 달력 포함)에 포커스가 가면 닫는다.
@@ -144,8 +151,7 @@ export function DateTimePicker({
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setOpen(false);
-        buttonRef.current?.focus();
+        close();
       }
     };
     document.addEventListener("pointerdown", onOutside);
@@ -345,7 +351,7 @@ export function DateTimePicker({
               value={base().h}
               onCommit={(h) => onChange(format({ ...base(), h }))}
               onFilled={() => minuteRef.current?.focus()}
-              onEnter={() => setOpen(false)}
+              onEnter={close}
             />
             <span aria-hidden="true">:</span>
             <TimeField
@@ -354,7 +360,7 @@ export function DateTimePicker({
               inputRef={minuteRef}
               value={base().min}
               onCommit={(min) => onChange(format({ ...base(), min }))}
-              onEnter={() => setOpen(false)}
+              onEnter={close}
             />
           </div>
           <p className="dtp-time-hint">
@@ -366,7 +372,7 @@ export function DateTimePicker({
               type="button"
               onClick={() => {
                 onChange("");
-                setOpen(false);
+                close();
               }}
             >
               삭제
@@ -377,7 +383,7 @@ export function DateTimePicker({
             <button
               type="button"
               className="dtp-done"
-              onClick={() => setOpen(false)}
+              onClick={close}
             >
               확인
             </button>

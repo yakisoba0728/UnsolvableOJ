@@ -1,0 +1,353 @@
+{
+  "schemaVersion": 1,
+  "kind": "phase3-recovery-ci-history-independent-audit",
+  "reviewer": "ci_audit (independent AI engineering reviewer)",
+  "observedAt": "2026-11-16T08:33:30.352439+00:00",
+  "scope": "Read-only audit of PR77 initial CI, PR78 accepted Runtime advisory revalidation, and retained security boundaries. This is not final PR77 composition approval or fresh current-head CI.",
+  "repository": "https://github.com/yakisoba0728/UnsolvableOJ",
+  "pr77Initial": {
+    "prUrl": "https://github.com/yakisoba0728/UnsolvableOJ/pull/77",
+    "observedState": "open",
+    "observedMerged": false,
+    "sourceHead": "e23729640b0ce18b6bb5ab82c578dc1eb35c7392",
+    "sourceTree": "0e90a39685e1246c8f9a3ab1637fc0c89b4d85e7",
+    "actualCheckout": "9e4ce9df2aa4338a99a8deb7f32e161458a39a04",
+    "checkoutParents": [
+      "87cc1e724f3c5bba8ee4a1d3e138c16a18202f02",
+      "e23729640b0ce18b6bb5ab82c578dc1eb35c7392"
+    ],
+    "runId": 43823181757,
+    "runUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43823181757",
+    "conclusion": "failure",
+    "jobCount": 12,
+    "successJobs": 10,
+    "failedJobs": [
+      {
+        "id": 133150795123,
+        "name": "Docker image (runtime)"
+      },
+      {
+        "id": 133156510881,
+        "name": "CI required"
+      }
+    ],
+    "testsActuallyObserved": {
+      "backendUnit": 327,
+      "backendApi": 243,
+      "judgeUnit": 137,
+      "nativeSandbox": 74,
+      "nativePipeline": 33,
+      "realCompose": 3,
+      "composeDurationSeconds": 37.7,
+      "browserProjects": {
+        "chromium": 391,
+        "chromium-slow": 111,
+        "webkit": 131,
+        "firefox": 131
+      },
+      "browserExecutions": 764,
+      "browserFreePlaywrightUnit": 85
+    },
+    "skips": {
+      "failureOnlyArtifactAndLogSteps": "Expected because successful jobs had no failure",
+      "frontendBuildAndTypesShard2": "Intentionally performed by shard1; shard2 executed browser regression and Firefox steps successfully"
+    },
+    "githubSubmittedReviewsAtQuery": 0,
+    "browserArtifact": {
+      "id": 14206046513,
+      "name": "phase3-browser-performance-1",
+      "size_in_bytes": 4523,
+      "url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14206046513",
+      "archive_download_url": "https://api.github.com/repos/yakisoba0728/UnsolvableOJ/actions/artifacts/14206046513/zip",
+      "expired": false,
+      "created_at": "2026-11-16T07:35:24Z",
+      "expires_at": "2026-11-23T07:35:23Z",
+      "updated_at": "2026-11-16T07:35:24Z",
+      "digest": "sha256:140148586cce0cd4ca2f129ff5e735bbd1b48559e457131ba5e68349a8f80bc7",
+      "workflow_run": {
+        "id": 43823181757,
+        "repository_id": 1379559648,
+        "head_repository_id": 1379559648,
+        "head_branch": "overhaul3/phase3-validation",
+        "head_sha": "e23729640b0ce18b6bb5ab82c578dc1eb35c7392"
+      }
+    },
+    "runtimeFailure": {
+      "gate": "BLOCKED_FINDINGS",
+      "sourceCommit": "9e4ce9df2aa4338a99a8deb7f32e161458a39a04",
+      "remainingBlocking": 182,
+      "reviewedComponentDecisions": 0,
+      "unresolvedEvaluations": 16,
+      "unresolvedReasonKinds": [
+        "SCANNER_ADVISORY_CHANGED_REVIEW_REQUIRED"
+      ],
+      "blockingReasons": [
+        "EXACT_CVE_COHORT_REVALIDATION_REQUIRED"
+      ],
+      "rawCounts": {
+        "UNKNOWN": 1,
+        "LOW": 363,
+        "MEDIUM": 561,
+        "HIGH": 177,
+        "CRITICAL": 5
+      },
+      "originalArchiveSha256": "cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55",
+      "hostKernelReadiness": "UNVERIFIED"
+    }
+  },
+  "pr78Accepted": {
+    "prUrl": "https://github.com/yakisoba0728/UnsolvableOJ/pull/78",
+    "observedState": "closed",
+    "merged": true,
+    "mergedAt": "2026-11-16T08:18:02Z",
+    "mergeSha": "f52c7d0aecfb6ae98329d219110eac526bb0dbcb",
+    "acceptedSourceHead": "031275ebcc949514c9721c1d531a5edd90f2ec50",
+    "sourceTree": "2a710d2bf0d6b6c884cea8be548a26196c90a840",
+    "actualCheckout": "a63642e623982cf7d3a10527708c5217634bf10f",
+    "checkoutParents": [
+      "87cc1e724f3c5bba8ee4a1d3e138c16a18202f02",
+      "031275ebcc949514c9721c1d531a5edd90f2ec50"
+    ],
+    "runId": 43828449988,
+    "runUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43828449988",
+    "conclusion": "success",
+    "jobCount": 12,
+    "successJobs": 12,
+    "runtimeArtifact": {
+      "artifactId": 14207502664,
+      "artifactSha256": "f99cf015cfe36394b0a53ef027e7814e8c7cc5940948259516a6f2306bfa3622",
+      "sourceCommit": "a63642e623982cf7d3a10527708c5217634bf10f",
+      "gate": "PASS_WITH_REVIEWED_COMPONENT_FINDINGS",
+      "rawCounts": {
+        "UNKNOWN": 1,
+        "LOW": 363,
+        "MEDIUM": 561,
+        "HIGH": 177,
+        "CRITICAL": 5
+      },
+      "reviewedComponentCount": 182,
+      "proposedComponentCount": 0,
+      "remainingBlockingCount": 0,
+      "unresolvedCount": 0,
+      "blockingReasons": [],
+      "expiry": "2026-11-30T00:00:00Z",
+      "hostKernelReadiness": "UNVERIFIED",
+      "payload": {
+        "state": "MATCH",
+        "matchedFiles": 990,
+        "expectedFiles": 990
+      }
+    },
+    "runtimeSourcePolicy": {
+      "path": "scripts/image-applicability-policy.json",
+      "expiresAt": "2026-11-30T00:00:00Z",
+      "expiryUnchanged": true,
+      "recordCount": 182,
+      "advisoryHashesChanged": 16,
+      "changedAdvisories": [
+        "CVE-2026-64523",
+        "CVE-2026-68426",
+        "CVE-2025-39933",
+        "CVE-2025-40170",
+        "CVE-2025-68745",
+        "CVE-2026-31692",
+        "CVE-2026-52991",
+        "CVE-2026-53281",
+        "CVE-2026-63879",
+        "CVE-2026-68245",
+        "CVE-2026-68257",
+        "CVE-2026-68409",
+        "CVE-2026-74752",
+        "CVE-2026-89631",
+        "CVE-2026-97493",
+        "CVE-2026-98364"
+      ],
+      "review": {
+        "state": "REVIEWED",
+        "reviewedAt": "2026-11-16T07:55:01.997611+00:00",
+        "contentSha256": "99ec18c22bc108759734494755fe4241a36c447949309881f15c01bec5d632db",
+        "reviews": [
+          {
+            "role": "independent-reviewer",
+            "reviewer": "independent_recovery",
+            "reviewedCommit": "08901f36ea19b7ffd4f459357e7b5763822a6bad"
+          },
+          {
+            "role": "coordinator",
+            "reviewer": "root",
+            "reviewedCommit": "08901f36ea19b7ffd4f459357e7b5763822a6bad"
+          }
+        ]
+      },
+      "scopeUnchanged": true,
+      "fingerprintSchemaUnchanged": true,
+      "evaluatorBytesUnchanged": true,
+      "implementationPinsUnchanged": true,
+      "bindingsVerified": 23,
+      "allBindingBytesMatch": true,
+      "bindings": [
+        {
+          "binding": "policyEvidence.cnaInventory",
+          "path": "docs/overhaul/evidence/phase3-kernel-header-applicability.json",
+          "expectedSha256": "9d317229d78b224757dddbc9c03db68b5d6f1d5d2b191f02de857d3c46dd3796",
+          "actualSha256": "9d317229d78b224757dddbc9c03db68b5d6f1d5d2b191f02de857d3c46dd3796"
+        },
+        {
+          "binding": "policyEvidence.manualReview",
+          "path": "docs/overhaul/evidence/phase3-kernel-header-review.json",
+          "expectedSha256": "a6d7cca70204e26b1bb76533f2b2103b1286316f6eecc92573218257b36a3a24",
+          "actualSha256": "a6d7cca70204e26b1bb76533f2b2103b1286316f6eecc92573218257b36a3a24"
+        },
+        {
+          "binding": "policyEvidence.packageFiles",
+          "path": "docs/overhaul/evidence/linux-libc-dev-6.8.0-149.149-amd64-files.json",
+          "expectedSha256": "010441a3487f836ca8d56b32d3264cd286c2d11b569f44b54d2ba3e949911172",
+          "actualSha256": "010441a3487f836ca8d56b32d3264cd286c2d11b569f44b54d2ba3e949911172"
+        },
+        {
+          "binding": "policyEvidence.baselineArtifact",
+          "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/blocked-runtime.zip",
+          "expectedSha256": "cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55",
+          "actualSha256": "cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55"
+        },
+        {
+          "binding": "policyEvidence.scannerIdentity",
+          "path": "docs/overhaul/evidence/phase2-trivy-fingerprint-binding.json",
+          "expectedSha256": "98472239faff13ffe141181af911cf0841931df59028b985b5cf7466ec939eed",
+          "actualSha256": "98472239faff13ffe141181af911cf0841931df59028b985b5cf7466ec939eed"
+        },
+        {
+          "binding": "implementation.imageAudit",
+          "path": "scripts/image_audit.py",
+          "expectedSha256": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72",
+          "actualSha256": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72"
+        },
+        {
+          "binding": "implementation.scannerPin",
+          "path": "scripts/image-audit-tool.json",
+          "expectedSha256": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c",
+          "actualSha256": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c"
+        },
+        {
+          "binding": "implementation.payloadVerifier",
+          "path": "scripts/verify_image_payload.py",
+          "expectedSha256": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0",
+          "actualSha256": "7e78255490cb16ad6369423d6efc75a7bb2faebd35500f0918035a329da119e0"
+        },
+        {
+          "binding": "additional.inheritedPolicy",
+          "path": "docs/overhaul/evidence/phase3-runtime-advisory-revalidation-original-policy.json",
+          "expectedSha256": "77fcae5ce3d800b1b6289de7a7e84a2ee6364867ec13b321346520075ddd3b73",
+          "actualSha256": "77fcae5ce3d800b1b6289de7a7e84a2ee6364867ec13b321346520075ddd3b73"
+        },
+        {
+          "binding": "additional.inheritedInventory",
+          "path": "docs/overhaul/evidence/phase2-kernel-header-applicability.json",
+          "expectedSha256": "6e9c99fc4fa7b4d6b91cb88b0c5970dce12528b3d8193e1bd496cffd3a5f7050",
+          "actualSha256": "6e9c99fc4fa7b4d6b91cb88b0c5970dce12528b3d8193e1bd496cffd3a5f7050"
+        },
+        {
+          "binding": "additional.inheritedManualReview",
+          "path": "docs/overhaul/evidence/phase2-kernel-header-review.json",
+          "expectedSha256": "989a6d39b698dda950072c852bdf9b6f0675cbcbf5b72aca5c44619062020647",
+          "actualSha256": "989a6d39b698dda950072c852bdf9b6f0675cbcbf5b72aca5c44619062020647"
+        },
+        {
+          "binding": "additional.advisoryDelta",
+          "path": "docs/overhaul/evidence/phase3-runtime-advisory-delta.json",
+          "expectedSha256": "799cb41e570135fb6c0b223f5bd22d401162bbd4f35005844b299c26524a966d",
+          "actualSha256": "799cb41e570135fb6c0b223f5bd22d401162bbd4f35005844b299c26524a966d"
+        },
+        {
+          "binding": "additional.primaryVendorReview",
+          "path": "docs/overhaul/evidence/phase3-runtime-vendor-advisory-review.json",
+          "expectedSha256": "60285c0506ad1ceb2dfc5f107784855043ed9b145fb31bfb800f051c930870cd",
+          "actualSha256": "60285c0506ad1ceb2dfc5f107784855043ed9b145fb31bfb800f051c930870cd"
+        },
+        {
+          "binding": "additional.independentVendorCollection",
+          "path": "docs/overhaul/evidence/phase3-runtime-vendor-independent-review.json",
+          "expectedSha256": "b2c0fc2fde6f0dd3696ed7db55d122cec8aa8e10d68ee143de7c602d4f05cb43",
+          "actualSha256": "b2c0fc2fde6f0dd3696ed7db55d122cec8aa8e10d68ee143de7c602d4f05cb43"
+        },
+        {
+          "binding": "additional.acceptedScanArtifact",
+          "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/accepted-runtime.zip",
+          "expectedSha256": "128ea68ac07435b95731ffe00ac6f6171f0fa18915ded6133c1ce077e06e53a0",
+          "actualSha256": "128ea68ac07435b95731ffe00ac6f6171f0fa18915ded6133c1ce077e06e53a0"
+        },
+        {
+          "binding": "additional.blockedScanArtifact",
+          "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/blocked-runtime.zip",
+          "expectedSha256": "cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55",
+          "actualSha256": "cdd5669658af1d7744abbc2aae6c3c33ad523b7cb7ca88a155febf7ed14b3d55"
+        },
+        {
+          "binding": "additional.currentCnaArchive",
+          "path": "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/current-cna-records.zip",
+          "expectedSha256": "54c6826a9e0b1453dbf8e99ddf68f644edd519af3829d8106fc719bc3aa7e89c",
+          "actualSha256": "54c6826a9e0b1453dbf8e99ddf68f644edd519af3829d8106fc719bc3aa7e89c"
+        },
+        {
+          "binding": "additional.currentCnaArchiveManifest",
+          "path": "docs/overhaul/evidence/phase3-current-cna-independent-receipt.json",
+          "expectedSha256": "850c53a6bad6779cce05e821c0757dd7c377c9ed26dec907a9ab57fb70eb0bf1",
+          "actualSha256": "850c53a6bad6779cce05e821c0757dd7c377c9ed26dec907a9ab57fb70eb0bf1"
+        },
+        {
+          "binding": "additional.independentCnaContentComparison",
+          "path": "docs/overhaul/evidence/phase3-current-cna-independent-content-comparison.json",
+          "expectedSha256": "9bb7a8c5a527fcfb8a5336e98eb4d3dd5431305ef00af5baf93140413093ad30",
+          "actualSha256": "9bb7a8c5a527fcfb8a5336e98eb4d3dd5431305ef00af5baf93140413093ad30"
+        },
+        {
+          "binding": "additional.inventoryCollector",
+          "path": "docs/overhaul/repro/kernel-header-applicability.py",
+          "expectedSha256": "96609e11c379ec67a89d9f7d774bc0da14d04a6bd790b57c6320387ca88115e6",
+          "actualSha256": "96609e11c379ec67a89d9f7d774bc0da14d04a6bd790b57c6320387ca88115e6"
+        },
+        {
+          "binding": "additional.independentCollector",
+          "path": "docs/overhaul/repro/phase3-refetch-cna-independent.py",
+          "expectedSha256": "b6741499e32cbb0951f93247dcea3f4470bcc3a259337c1ba547a08dc021eaa0",
+          "actualSha256": "b6741499e32cbb0951f93247dcea3f4470bcc3a259337c1ba547a08dc021eaa0"
+        },
+        {
+          "binding": "additional.unchangedEvaluator",
+          "path": "scripts/image_applicability.py",
+          "expectedSha256": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f",
+          "actualSha256": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f"
+        },
+        {
+          "binding": "additional.unchangedImageGate",
+          "path": "scripts/image_gate.py",
+          "expectedSha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b",
+          "actualSha256": "fa07bb9127c824eff07588461275232672eac86479c5cb4961993a55c293ae2b"
+        }
+      ]
+    },
+    "selectorPreservationRequired": {
+      "workflow": ".github/workflows/ci.yml",
+      "tests": "scripts/ci-policy.test.mjs",
+      "selectionExpansion": [
+        "docs/overhaul/measurements/phase3-runtime-advisory-revalidation/",
+        "docs/overhaul/repro/phase3-refetch-cna-independent.py"
+      ],
+      "testExpansion": "Every manual revalidation evidence binding selects Runtime; all original assertions remain."
+    }
+  },
+  "remainingGates": [
+    "Confirm PR76 merged into overhaul/integration using live GitHub state and integration ref; this independent historical audit does not establish that prerequisite.",
+    "Incorporate current integration into PR77 without force push and preserve PR78 policy, selector, and all immutable bindings.",
+    "Run and inspect all required CI jobs and actual build/test steps at resulting exact PR77 source HEAD, including all four images and real Compose browser artifact.",
+    "Obtain independent final composition review for resulting PR77 source. Historical PR78 acceptance is not approval of current PR77.",
+    "Do not change expiry, remove raw 177 HIGH / 5 CRITICAL, claim host-kernel readiness, or represent the initial failed #77 run as final CI success."
+  ],
+  "sourceReceipts": [
+    "queried-actions-records.json",
+    "queried-test-log-excerpts.json",
+    "pr78-runtime-14207502664.zip",
+    "pr78-runtime-summary.json"
+  ],
+  "testsRunByThisReviewer": "None. This audit inspected actual GitHub CI metadata/logs/artifacts and performed immutable-source/hash/arithmetic comparisons; historical test execution is attributed to the named CI jobs."
+}

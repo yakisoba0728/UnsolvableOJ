@@ -2,8 +2,10 @@ import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { promisify } from "node:util";
 import { expect, test } from "@playwright/test";
+import { measureLearningPerformance } from "./learning-performance";
+import { exerciseLearningGoals } from "./learning-goals-flow";
 
-test("real signup, publication, judging, XP and logout through nginx", async ({ page }) => {
+test("real signup, publication, bookmarks, judging, private learning, XP and logout through nginx", async ({ page }, testInfo) => {
   const suffix = randomUUID().replaceAll("-", "").slice(0, 12);
   const email = `browser-${suffix}@example.com`;
   const password = `browser-${randomUUID()}`;
@@ -49,6 +51,16 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
   await expect(page).toHaveURL(new RegExp(`/problems/view/${slug}$`));
   await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
 
+  // Real Front -> nginx -> API -> PostgreSQL persistence, without mocked API routes.
+  await page.getByRole("button", { name: "문제 저장", exact: true }).click();
+  await expect(page.getByRole("button", { name: "문제 저장 취소" })).toHaveAttribute("aria-pressed", "true");
+  await page.reload();
+  await expect(page.getByRole("button", { name: "문제 저장 취소" })).toBeEnabled();
+  await page.getByRole("link", { name: "저장한 문제", exact: true }).click();
+  await expect(page.locator(".problem-row").filter({ hasText: title })).toBeVisible();
+  await expect(page.getByRole("button", { name: "저장한 문제", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.goto(`/problems/view/${slug}`);
+
   await page.getByRole("combobox", { name: "언어", exact: true }).click();
   await page.getByRole("option", { name: "Python 3", exact: true }).click();
   await page.getByLabel("소스 코드").fill("print(sum(map(int,input().split())))");
@@ -68,6 +80,12 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
   await page.goto("/profile");
   await expect(page.getByText("10 / 100 XP", { exact: false })).toBeVisible();
   await expect(page.locator(".profile-stats")).toContainText("해결한 문제");
+  const learningResponse = page.waitForResponse(response => new URL(response.url()).pathname === "/api/v1/users/me/learning");
+  await page.getByRole("link", { name: "학습 대시보드", exact: true }).click();
+  expect((await learningResponse).status()).toBe(200);
+  await expect(page.getByRole("definition").first()).toContainText("1건");
+  await expect(page.getByRole("definition").nth(1)).toContainText("1 / 시도 1문제");
+  await expect(page.getByRole("definition").last()).toContainText("100%");
   await page.goto(`/problems/view/${slug}`);
   await page.getByLabel("소스 코드").fill("print(0)");
   const wrongRequest = page.waitForRequest((request) =>
@@ -82,10 +100,25 @@ test("real signup, publication, judging, XP and logout through nginx", async ({ 
     console.error("Actual judging details:", await panel.innerText());
     throw error;
   }
+  // The real learning API keeps an already solved problem out of the review queue
+  // even when its newest ordinary submission is wrong.
+  await page.goto("/learning?days=7");
+  await expect(page.getByRole("definition").first()).toContainText("2건");
+  await expect(page.getByRole("definition").nth(1)).toContainText("1 / 시도 1문제");
+  await expect(page.getByRole("definition").last()).toContainText("50%");
+  await expect(page.getByText("이 기간에 다시 도전할 문제가 없어요.")).toBeVisible();
+  await expect(page.locator(".learning-review-list")).toHaveCount(0);
+  await measureLearningPerformance(page, testInfo);
+  await exerciseLearningGoals(page);
   await page.goto(`/problems?q=${slug}`);
   const row = page.getByRole("link").filter({ hasText: title });
   await expect(row).toContainText("1명");
   await expect(row).toContainText("50%");
+  await page.goto(`/problems/view/${slug}`);
+  await page.getByRole("button", { name: "문제 저장 취소" }).click();
+  await expect(page.getByRole("button", { name: "문제 저장", exact: true })).toHaveAttribute("aria-pressed", "false");
+  await page.goto(`/problems?saved=1&q=${slug}`);
+  await expect(page.locator(".problem-row")).toHaveCount(0);
   await page.getByRole("button", { name: "로그아웃" }).click();
   await expect(page).toHaveURL(/\/$/);
   await page.goto("/submissions");

@@ -1,0 +1,333 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "timestamp": "2026-11-16T15:18:35.040Z",
+  "provenance": {
+    "checkoutSha": "af29ece67e20e06b0cce453434b482cc5215d4f6",
+    "treeSha": "8a5843db4feba7ba619159731f62d4d824369520",
+    "sourceHeadSha": "1583ee1c5f30310b37c02d30d53fb9226f776f19",
+    "baseSha": "e7a61bce79d39d2571c810e6edbdf04c7fa41361",
+    "runId": "43893025800",
+    "runAttempt": "1",
+    "trackedTreeClean": true
+  },
+  "limits": {
+    "testTimeoutMs": 90000,
+    "gatewayRequests": 128,
+    "gatewayBytesPerDirection": 1048576,
+    "gatewayRequestTimeoutMs": 15000,
+    "providerCalls": 0
+  },
+  "scope": "Real HTTP API, PostgreSQL persistence, VibeRunner, ephemeral mTLS forwarding gateway and native go-judge. Only the paid evaluator is replaced by an unavailable-provider double.",
+  "limitations": [
+    "The gateway is an owned Node HTTPS forwarding test fixture, not the production nginx configuration or a deployed dedicated host.",
+    "The existing CI native sandbox is reused sequentially with unchanged upstream bearer forwarding; the application algorithm secret is an independent synthetic value.",
+    "The browser is not part of this test. Existing Compose browser flows exercise embedded mode separately.",
+    "Production network isolation, gateway software approval, certificate operations and provider quality remain UNVERIFIED."
+  ],
+  "assessment": {
+    "publicChecks": 6,
+    "finalPassed": 11,
+    "finalTotal": 11,
+    "evaluationStatus": "unavailable",
+    "persisted": true,
+    "ownershipDenied": true,
+    "artifactDelta": 0
+  },
+  "gateway": {
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/version",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 0,
+        "responseBytes": 276
+      },
+      {
+        "method": "GET",
+        "path": "/config",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 0,
+        "responseBytes": 2088
+      },
+      {
+        "method": "GET",
+        "path": "/file",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 0,
+        "responseBytes": 41
+      },
+      {
+        "method": "GET",
+        "path": "/file",
+        "mtls": true,
+        "bearer": "absent",
+        "status": 401,
+        "requestBytes": 0,
+        "responseBytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 3087,
+        "responseBytes": 278
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 718,
+        "responseBytes": 144
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 722,
+        "responseBytes": 144
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 723,
+        "responseBytes": 141
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 732,
+        "responseBytes": 143
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 737,
+        "responseBytes": 142
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 427,
+        "responseBytes": 183
+      },
+      {
+        "method": "DELETE",
+        "path": "/file/:id",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 0,
+        "responseBytes": 0
+      },
+      {
+        "method": "DELETE",
+        "path": "/file/:id",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 0,
+        "responseBytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/version",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 0,
+        "responseBytes": 276
+      },
+      {
+        "method": "GET",
+        "path": "/config",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 0,
+        "responseBytes": 2088
+      },
+      {
+        "method": "GET",
+        "path": "/file",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 0,
+        "responseBytes": 41
+      },
+      {
+        "method": "GET",
+        "path": "/file",
+        "mtls": true,
+        "bearer": "absent",
+        "status": 401,
+        "requestBytes": 0,
+        "responseBytes": 0
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 3087,
+        "responseBytes": 278
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 718,
+        "responseBytes": 144
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 722,
+        "responseBytes": 144
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 723,
+        "responseBytes": 142
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 732,
+        "responseBytes": 143
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 737,
+        "responseBytes": 141
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 714,
+        "responseBytes": 146
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 465,
+        "responseBytes": 140
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 744,
+        "responseBytes": 141
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 528,
+        "responseBytes": 141
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 731,
+        "responseBytes": 144
+      },
+      {
+        "method": "POST",
+        "path": "/run",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 742,
+        "responseBytes": 141
+      },
+      {
+        "method": "DELETE",
+        "path": "/file/:id",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 0,
+        "responseBytes": 0
+      },
+      {
+        "method": "DELETE",
+        "path": "/file/:id",
+        "mtls": true,
+        "bearer": "expected",
+        "status": 200,
+        "requestBytes": 0,
+        "responseBytes": 0
+      },
+      {
+        "method": "GET",
+        "path": "/file",
+        "mtls": true,
+        "bearer": "other",
+        "status": 401,
+        "requestBytes": 0,
+        "responseBytes": 0
+      }
+    ],
+    "upstreamFailures": 0,
+    "closed": true
+  },
+  "cleanupFailures": 0,
+  "elapsedMs": 1783.6699939999999
+}

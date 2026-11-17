@@ -1,0 +1,82 @@
+{
+  "source": {
+    "head": "75763aa23decb164fd9d369590099c9365e42400",
+    "diff": ""
+  },
+  "node": "v24.22.1",
+  "jsdom": "31.0.1",
+  "browser": false,
+  "limitations": "DOM focus and content regression only. No layout, paint, native keyboard default actions, screenshots, accessibility certification or browser performance measurement.",
+  "cases": [
+    {
+      "name": "hour-enter",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "date",
+        "focusTag": "BUTTON",
+        "submits": 0
+      }
+    },
+    {
+      "name": "minute-enter",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "date",
+        "focusTag": "BUTTON",
+        "submits": 0
+      }
+    },
+    {
+      "name": "done",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "date",
+        "focusTag": "BUTTON",
+        "submits": 0
+      }
+    },
+    {
+      "name": "clear",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "date",
+        "focusTag": "BUTTON",
+        "submits": 0
+      }
+    },
+    {
+      "name": "escape",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "date",
+        "focusTag": "BUTTON",
+        "submits": 0
+      }
+    },
+    {
+      "name": "outside-focus",
+      "passed": true,
+      "observed": {
+        "dialogClosed": true,
+        "focusId": "outside",
+        "focusTag": "INPUT",
+        "submits": 0
+      }
+    },
+    {
+      "name": "goal-refresh",
+      "passed": true,
+      "observed": {
+        "beforeCount": "900 / 1,000문제",
+        "duringCount": "900 / 1,000문제",
+        "busy": "true",
+        "disabled": true
+      }
+    }
+  ]
+}

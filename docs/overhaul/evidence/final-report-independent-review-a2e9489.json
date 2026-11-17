@@ -1,0 +1,634 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-final-report-checkpoint-review",
+  "reviewer": "/root/product_engineering",
+  "reviewedReportCommit": "a2e9489c862cb1ed8bd6cd16fe210814af5f9942",
+  "reportIntroductionCommit": "65f2fa538a49edc3bc91055bf70c534568f107b1",
+  "decision": "APPROVED_AS_EXPLICITLY_PENDING_CHECKPOINT",
+  "observedAt": "2026-11-16T04:31:14.510Z",
+  "scope": [
+    "docs/overhaul/PHASE2-FINAL-REPORT.md",
+    "docs/overhaul/README.md"
+  ],
+  "observations": [
+    {
+      "runId": 43790101564,
+      "jobCount": 12,
+      "jobs": [
+        {
+          "id": 133046334924,
+          "name": "Detect changes",
+          "conclusion": "success"
+        },
+        {
+          "id": 133046335091,
+          "name": "Docker image (runtime)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133046335119,
+          "name": "Dependency audit",
+          "conclusion": "success"
+        },
+        {
+          "id": 133046335237,
+          "name": "Docker image (front)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133046335244,
+          "name": "Docker image (judge)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133046335260,
+          "name": "Docker image (back)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133046383060,
+          "name": "Judge worker",
+          "conclusion": "success"
+        },
+        {
+          "id": 133046383105,
+          "name": "Backend and API",
+          "conclusion": "success"
+        },
+        {
+          "id": 133046383129,
+          "name": "Sandbox, pipeline and Compose",
+          "conclusion": "success"
+        },
+        {
+          "id": 133046383180,
+          "name": "Browser tests (1/2)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133046385111,
+          "name": "Browser tests (2/2)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133048329807,
+          "name": "CI required",
+          "conclusion": "success"
+        }
+      ],
+      "nativeRequiredSteps": [
+        {
+          "name": "go-judge language and isolation regression tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Native judging pipeline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Full Compose browser flow",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        }
+      ],
+      "firefox": [
+        {
+          "job": "Browser tests (1/2)",
+          "conclusion": "success"
+        },
+        {
+          "job": "Browser tests (2/2)",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "runId": 43792648475,
+      "jobCount": 12,
+      "jobs": [
+        {
+          "id": 133054351487,
+          "name": "Detect changes",
+          "conclusion": "success"
+        },
+        {
+          "id": 133054351684,
+          "name": "Dependency audit",
+          "conclusion": "success"
+        },
+        {
+          "id": 133054351716,
+          "name": "Docker image (back)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133054351732,
+          "name": "Docker image (front)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133054351804,
+          "name": "Docker image (runtime)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133054351864,
+          "name": "Docker image (judge)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133054419681,
+          "name": "Judge worker",
+          "conclusion": "success"
+        },
+        {
+          "id": 133054419685,
+          "name": "Backend and API",
+          "conclusion": "success"
+        },
+        {
+          "id": 133054419719,
+          "name": "Browser tests (1/2)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133054419739,
+          "name": "Sandbox, pipeline and Compose",
+          "conclusion": "success"
+        },
+        {
+          "id": 133054419819,
+          "name": "Browser tests (2/2)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133057193039,
+          "name": "CI required",
+          "conclusion": "success"
+        }
+      ],
+      "nativeRequiredSteps": [
+        {
+          "name": "go-judge language and isolation regression tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Native judging pipeline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Full Compose browser flow",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        }
+      ],
+      "firefox": [
+        {
+          "job": "Browser tests (1/2)",
+          "conclusion": "success"
+        },
+        {
+          "job": "Browser tests (2/2)",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "runId": 43794094432,
+      "jobCount": 12,
+      "jobs": [
+        {
+          "id": 133058846715,
+          "name": "Detect changes",
+          "conclusion": "success"
+        },
+        {
+          "id": 133058846961,
+          "name": "Dependency audit",
+          "conclusion": "success"
+        },
+        {
+          "id": 133058846970,
+          "name": "Docker image (front)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133058847036,
+          "name": "Docker image (runtime)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133058847040,
+          "name": "Docker image (back)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133058847239,
+          "name": "Docker image (judge)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133058883956,
+          "name": "Backend and API",
+          "conclusion": "success"
+        },
+        {
+          "id": 133058883974,
+          "name": "Browser tests (1/2)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133058883985,
+          "name": "Judge worker",
+          "conclusion": "success"
+        },
+        {
+          "id": 133058884123,
+          "name": "Browser tests (2/2)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133058884124,
+          "name": "Sandbox, pipeline and Compose",
+          "conclusion": "success"
+        },
+        {
+          "id": 133062021537,
+          "name": "CI required",
+          "conclusion": "success"
+        }
+      ],
+      "nativeRequiredSteps": [
+        {
+          "name": "go-judge language and isolation regression tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Native judging pipeline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Full Compose browser flow",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ],
+      "firefox": [
+        {
+          "job": "Browser tests (1/2)",
+          "conclusion": "success"
+        },
+        {
+          "job": "Browser tests (2/2)",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "runId": 43795876240,
+      "jobCount": 12,
+      "jobs": [
+        {
+          "id": 133064454543,
+          "name": "Detect changes",
+          "conclusion": "success"
+        },
+        {
+          "id": 133064454753,
+          "name": "Docker image (runtime)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133064454754,
+          "name": "Docker image (back)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133064454829,
+          "name": "Docker image (judge)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133064454844,
+          "name": "Docker image (front)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133064454873,
+          "name": "Dependency audit",
+          "conclusion": "success"
+        },
+        {
+          "id": 133064507435,
+          "name": "Browser tests (1/2)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133064507442,
+          "name": "Judge worker",
+          "conclusion": "success"
+        },
+        {
+          "id": 133064507458,
+          "name": "Browser tests (2/2)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133064507495,
+          "name": "Sandbox, pipeline and Compose",
+          "conclusion": "success"
+        },
+        {
+          "id": 133064507555,
+          "name": "Backend and API",
+          "conclusion": "success"
+        },
+        {
+          "id": 133067609525,
+          "name": "CI required",
+          "conclusion": "success"
+        }
+      ],
+      "nativeRequiredSteps": [
+        {
+          "name": "go-judge language and isolation regression tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Native judging pipeline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Full Compose browser flow",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ],
+      "firefox": [
+        {
+          "job": "Browser tests (1/2)",
+          "conclusion": "success"
+        },
+        {
+          "job": "Browser tests (2/2)",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "runId": 43798756788,
+      "jobCount": 12,
+      "jobs": [
+        {
+          "id": 133073617065,
+          "name": "Detect changes",
+          "conclusion": "success"
+        },
+        {
+          "id": 133073617305,
+          "name": "Dependency audit",
+          "conclusion": "success"
+        },
+        {
+          "id": 133073617432,
+          "name": "Docker image (judge)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133073617475,
+          "name": "Docker image (front)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133073617501,
+          "name": "Docker image (runtime)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133073617541,
+          "name": "Docker image (back)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133073694599,
+          "name": "Sandbox, pipeline and Compose",
+          "conclusion": "success"
+        },
+        {
+          "id": 133073694615,
+          "name": "Browser tests (2/2)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133073694655,
+          "name": "Judge worker",
+          "conclusion": "success"
+        },
+        {
+          "id": 133073694660,
+          "name": "Backend and API",
+          "conclusion": "success"
+        },
+        {
+          "id": 133073694898,
+          "name": "Browser tests (1/2)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133076760821,
+          "name": "CI required",
+          "conclusion": "success"
+        }
+      ],
+      "nativeRequiredSteps": [
+        {
+          "name": "go-judge language and isolation regression tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Native judging pipeline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Full Compose browser flow",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ],
+      "firefox": [
+        {
+          "job": "Browser tests (2/2)",
+          "conclusion": "success"
+        },
+        {
+          "job": "Browser tests (1/2)",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "runId": 43800127993,
+      "jobCount": 12,
+      "jobs": [
+        {
+          "id": 133078185067,
+          "name": "Docker image (front)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133078185327,
+          "name": "Dependency audit",
+          "conclusion": "success"
+        },
+        {
+          "id": 133078185333,
+          "name": "Detect changes",
+          "conclusion": "success"
+        },
+        {
+          "id": 133078185345,
+          "name": "Docker image (judge)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133078185383,
+          "name": "Docker image (runtime)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133078185474,
+          "name": "Docker image (back)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133078238869,
+          "name": "Judge worker",
+          "conclusion": "success"
+        },
+        {
+          "id": 133078238898,
+          "name": "Backend and API",
+          "conclusion": "success"
+        },
+        {
+          "id": 133078238928,
+          "name": "Browser tests (2/2)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133078238985,
+          "name": "Sandbox, pipeline and Compose",
+          "conclusion": "success"
+        },
+        {
+          "id": 133078238991,
+          "name": "Browser tests (1/2)",
+          "conclusion": "success"
+        },
+        {
+          "id": 133081901254,
+          "name": "CI required",
+          "conclusion": "success"
+        }
+      ],
+      "nativeRequiredSteps": [
+        {
+          "name": "go-judge language and isolation regression tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Native judging pipeline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Full Compose browser flow",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ],
+      "firefox": [
+        {
+          "job": "Browser tests (2/2)",
+          "conclusion": "success"
+        },
+        {
+          "job": "Browser tests (1/2)",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "actualPr70Counts": {
+    "backendUnits": 320,
+    "postgresApi": 209,
+    "nativeRuntime": 74,
+    "pipeline": 28,
+    "composeBrowser": 3,
+    "browserFreeUnits": 85,
+    "chromium": 372,
+    "chromiumSlow": 111,
+    "webkit": 112,
+    "firefox": 112
+  },
+  "verification": [
+    "Independently fetched all six merged PR metadata and matching immutable-head workflow run identities through authenticated GitHub connector.",
+    "All six specified runs have twelve successful jobs; actual native pipeline/Compose and Firefox steps were successful, not skipped.",
+    "Fetched PR70 actual backend/native/browser/audit job logs and counted per-project passed test lines; no flaky or retry-only pass was observed.",
+    "Independently recomputed5000-candidate request quantiles, RPS, CPU tick deltas, RSS maxima, response sizes and errors from all120 measured responses; summaries and first50 digests agree.",
+    "Independently recomputed index read/insert medians and INSERT-plan WAL from raw samples; favorable reads and adverse write costs agree with report.",
+    "Matched frontend entry/total gzip values and unchanged lock provenance; no runtime rendering or field metrics inferred.",
+    "Matched historical Judge worker scaling ranges to exact run43794094432, not final image rebuild or PhaseI-to-II comparison.",
+    "Verified original recovery artifact ZIP hash and byte equality of all four retained JSON reports; timers, generations, XP, status and callback codes agree.",
+    "Relative report/readme links resolve at reviewed immutable commit."
+  ],
+  "claimBoundaries": {
+    "algorithmAssessmentPinning": "Explicitly algorithm-only; Vibe challenge/runtime version parity remains a separate unimplemented/unverified item.",
+    "browser": "707 executed browser instances plus85 browser-free cases; not707 unique stories or all routes in all engines.",
+    "performance": "Finite bursts and changed result-response cardinality; no equal-byte throughput, sustained ingress, complete process resources or production SLO claim.",
+    "runtimeMatrix": "Representative all-language verdicts; managed-runtime MLE matrix remains incomplete.",
+    "images": "PR68 and final integration-head gates remain pending at this checkpoint; no premature merge-readiness claim.",
+    "host": "Host kernel, unsafe escape testing, deployment readiness and operational migration rehearsal remain outside observed evidence."
+  },
+  "blockingFindings": [],
+  "minorRecommendation": "When updating the final checkpoint, include run43794094432 directly beside the historical scaling numbers to make their pre-image-remediation source unmistakable. Existing PHASE2-PERFORMANCE attribution is correct.",
+  "remainingGates": [
+    "Independently reviewed image wrapper/workflow and fresh exact PR68 full CI",
+    "Final combined integration-head full CI",
+    "Updated final report/progress/PR63 matching observed resulting source and unmerged main handoff"
+  ],
+  "limitations": [
+    "Reviewed retained experiment data and harness contracts, not a fresh performance rerun.",
+    "Did not rerun browsers locally; counts are independently retrieved actual Actions logs.",
+    "Current report's image-pending statements must be refreshed only after the later gate is observed."
+  ]
+}

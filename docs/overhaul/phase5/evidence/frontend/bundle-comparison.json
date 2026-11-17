@@ -1,0 +1,34 @@
+{
+  "protocol": "One production build per source, same installed Front node_modules and lockfile, default monitoring, Node v24.22.1. gzip level 9, mtime=0, each emitted JS file compressed separately. Byte counts only, no latency inference.",
+  "baselineSource": "d0159b1f844bf0608415dded9e84af566c8e2041",
+  "candidateComponentSha256": {
+    "Front/src/components/DateTimePicker.tsx": "b5a29172305342bac76b08977a41d1eb93281d4ed39add5cc541c42ae9a77af6",
+    "Front/src/learning/LearningGoalPanel.tsx": "8f6edbdf3a04bef4c667abd0dbedc731d5ce46a9ac5852bdc7c8b503f01506df"
+  },
+  "lockSha256": "728910bbbdfbc955cede2da1d604f9508e475cde4ce3222f5502d70ee238a644",
+  "baseline": {
+    "entry": "assets/index-CIlgqROi.js",
+    "entryBytes": 383981,
+    "entryGzip9Bytes": 123080,
+    "allJsFiles": 54,
+    "allJsBytes": 1493955,
+    "allJsSeparateGzip9Bytes": 489252,
+    "entrySha256": "ebd75d8c5a8e0c82b67a25789400e537b451000fde1491bca839ec0d03485b82"
+  },
+  "candidate": {
+    "entry": "assets/index-D3rT7Zuw.js",
+    "entryBytes": 383981,
+    "entryGzip9Bytes": 123079,
+    "allJsFiles": 54,
+    "allJsBytes": 1494009,
+    "allJsSeparateGzip9Bytes": 489331,
+    "entrySha256": "0bbf8a7118388aab2b72df5038c896912bd5bb905fbecfeaf90c0ace9ff8b9cf"
+  },
+  "delta": {
+    "entryBytes": 0,
+    "entryGzip9Bytes": -1,
+    "allJsFiles": 0,
+    "allJsBytes": 54,
+    "allJsSeparateGzip9Bytes": 79
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "independent_qa",
+  "reviewedAt": "2026-11-16T15:00:06.498727+00:00",
+  "decision": "BLOCK_SOURCE_PENDING_SNAPSHOT_ISOLATION_FIX",
+  "sourceCommit": "f6f11ed41865226a26a86927d1fe97a8a961915f",
+  "sourceTree": "24964ba260019a09d80ca20c842cba336e419038",
+  "baselineCommit": "ce26659b816c1dc1450cdc48f0c58d6e41ecea1e",
+  "blockingFindings": [
+    {
+      "id": "P5-RELIABILITY-001",
+      "severity": "HIGH",
+      "status": "CONFIRMED_REAL_POSTGRESQL",
+      "path": "Back/src/database/migrations/1796200000000-learning-goals.ts",
+      "function": "LearningGoals1796200000000.down",
+      "summary": "Active higher-isolation transaction with an old snapshot can drop a table containing a newly committed goal.",
+      "mechanism": "ACCESS EXCLUSIVE prevents concurrent writes but does not refresh an existing REPEATABLE READ or SERIALIZABLE transaction snapshot. The emptiness query then misses a committed goal and DROP executes. The migration currently checks only transaction activity, not snapshot/isolation safety.",
+      "reproduction": [
+        "Start reverting QueryRunner in REPEATABLE READ or SERIALIZABLE.",
+        "SELECT count(*) FROM migrations establishes its snapshot without reading/locking learning_goals.",
+        "A separate DataSource connection inserts and commits a synthetic learning goal. An outside count sees one row.",
+        "Invoke the actual compiled migration down(reverting). It returns successfully and to_regclass(learning_goals) is NULL inside that transaction.",
+        "Always ROLLBACK the destructive transaction, verify the committed goal is restored/preserved, then drop only the generated review database."
+      ],
+      "control": "The same interleaving under READ COMMITTED correctly rejects with Cannot roll back learning goals with saved goals.",
+      "recommendedCorrection": "Fail closed on unsupported transaction isolation before destructive work, or otherwise establish/prove a fresh snapshot. Explicitly requiring READ COMMITTED is a narrow correction; add regression cases for old-snapshot REPEATABLE READ and SERIALIZABLE.",
+      "primarySource": "https://www.postgresql.org/docs/17/sql-lock.html",
+      "sourceExplanation": "PostgreSQL documents that LOCK after an earlier SELECT does not refresh REPEATABLE READ/SERIALIZABLE visibility."
+    }
+  ],
+  "reproduction": {
+    "postgres": "17.11",
+    "scriptPath": "goal-isolation-repro.mjs",
+    "scriptSha256": "e9449add1521c9f3edb2934c956e3ac272370b768720f729d6fbfaad0171da7e",
+    "reportPath": "goal-isolation-repro.json",
+    "reportSha256": "cb01fda89f969733082863d5afadae25dcf5477eb654060ecb4962e488f09068",
+    "launcherPath": "run-reliability-local.py",
+    "launcherSha256": "d092b8b70cea61608793d8f48ed495106c06e6ae0e858fb4a2552147425923e6",
+    "migrationSourceSha256": "d6b423e773f20e9a7baa4f80a7c1053a99667cdbc0f5df1105a9be1a82067dee",
+    "compiledMigrationSha256": "0cce8cf3ea1f20b17ab8524a86210cd018bfb3742fb59916c8f94e8e8e15350a",
+    "compiledMigrationMatchesAuthorBuildBytes": true,
+    "actualResults": [
+      {
+        "isolation": "READ COMMITTED",
+        "committedRowsBeforeDown": 1,
+        "downRejected": true,
+        "error": "Cannot roll back learning goals with saved goals; preserve goal history before reverting.",
+        "tableAfterDownInsideTransaction": "not-inspected",
+        "rowsAfterSafetyRollback": 1
+      },
+      {
+        "isolation": "REPEATABLE READ",
+        "committedRowsBeforeDown": 1,
+        "downRejected": false,
+        "error": null,
+        "tableAfterDownInsideTransaction": null,
+        "rowsAfterSafetyRollback": 1
+      },
+      {
+        "isolation": "SERIALIZABLE",
+        "committedRowsBeforeDown": 1,
+        "downRejected": false,
+        "error": null,
+        "tableAfterDownInsideTransaction": null,
+        "rowsAfterSafetyRollback": 1
+      }
+    ],
+    "cleanup": "All destructive transaction effects rolled back; generated database dropped; owned PostgreSQL and Redis processes stopped."
+  },
+  "otherSourceReview": {
+    "readFiles": [
+      "Back/scripts/phase4-restore-rehearsal.mjs",
+      "Back/scripts/phase4-restore-rehearsal.test.mjs",
+      "Back/test/learning-goal-migration.e2e-spec.ts",
+      "docs/overhaul/phase5/evidence/reliability/fixture-proof.mjs",
+      "docs/overhaul/phase5/RELIABILITY.md",
+      "docs/overhaul/phase5/RELEASE-RUNBOOK.md"
+    ],
+    "findings": [
+      "Under READ COMMITTED, the new ACCESS EXCLUSIVE lock correctly covers emptiness check and DROP; transaction refusal is an appropriate boundary.",
+      "Synthetic product history and semantic checks are bounded and distinguish fixture consistency from real API/award/provider execution.",
+      "SHARE barrier permits dump reads and denies writers; cleanup releases barrier/connections and drops only generated databases.",
+      "Source/restore report is explicitly schema2; actual pg_dump/pg_restore,37-table comparison, writer denial and postrestore writes must be executed by CI.",
+      "Runbook preserves writer drain, evidence and backup identity, stops on destructive migration refusal, requires isolated recovery, and distinguishes external operations from completed code evidence."
+    ],
+    "additionalBlockingSourceFindings": []
+  },
+  "testTruth": {
+    "ownActualPg": "Only focused isolation interleaving reproduction completed in this review turn.",
+    "authorReported": "11 targeted tests, existing migration regression and local fixture proof were inspected but not independently rerun yet.",
+    "dockerRestore": "NOT_EXECUTED_LOCALLY; full schema2 CI restore required.",
+    "reviewEnvironmentIssue": "The first own build with individually symlinked packages raised unrelated TS2883 declaration-path errors from shared @types/ms. No source or compiler options were relaxed and no build pass is claimed. The emitted migration JS used in the actual-PG probe was byte-compared with the author successful build and matches exactly."
+  },
+  "requiredFollowup": [
+    "Review new immutable fix commit; retain this failed-candidate receipt and reproduction.",
+    "Independently rerun default path, no-transaction/refusal/empty-reapply, concurrent writer and higher-isolation rejection checks.",
+    "Execute shared enriched fixture proof in an isolated checkout/database without overwriting author evidence.",
+    "Require actual exact-source and combined CI schema2 restore artifact before acceptance."
+  ],
+  "authorshipBoundary": "Reviewer did not edit author files, modify guards, merge or make remote writes."
+}

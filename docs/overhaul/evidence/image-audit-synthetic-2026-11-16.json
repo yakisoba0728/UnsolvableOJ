@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "component": "synthetic-fixture",
+  "execution": "COMPLETED",
+  "stage": "report-validation",
+  "startedAt": "2026-11-16T02:58:08.911972+00:00",
+  "scannerPin": {
+    "name": "Trivy",
+    "version": "0.76.2",
+    "upstreamCommit": "3f6334d223b52188324af3b9923b4249cd206652",
+    "release": "https://github.com/aquasecurity/trivy/releases/tag/v0.76.2",
+    "publishedAt": "2026-11-05T12:50:25Z",
+    "verifiedAt": "2026-11-16",
+    "archiveUrl": "https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_Linux-64bit.tar.gz",
+    "archiveSha256": "bc0fc726e017b8927a62b2d3531d7a84ee01769daf5c99ed866dced54089fdbf",
+    "checksumsUrl": "https://github.com/aquasecurity/trivy/releases/download/v0.76.2/trivy_0.76.2_checksums.txt",
+    "checksumsSha256": "802e4ac1418ed967cd3c4b901f4f71ca00b7363ede67778665a22d9f13f58c83",
+    "databaseRepository": "ghcr.io/aquasecurity/trivy-db:2",
+    "javaDatabaseRepository": "ghcr.io/aquasecurity/trivy-java-db:1",
+    "verification": "Official immutable release API asset digests, downloaded checksum-file digest, matching archive entry, and downloaded archive digest were independently compared. This is checksum integrity verification, not a Sigstore attestation verification."
+  },
+  "scope": "Installed image OS packages and supported language/runtime libraries, including installed npm and embedded Go modules/stdlib; standard package license metadata. Not complete lockfile/bundled-JavaScript/arbitrary-binary coverage or legal approval.",
+  "policy": "All severities reported; HIGH/CRITICAL OS and library vulnerabilities and EOSL block. No ignores, unfixed suppression, or automatic risk acceptance. Other findings and unknown versions still require explicit triage.",
+  "ci": {
+    "GITHUB_SHA": null,
+    "GITHUB_RUN_ID": null,
+    "GITHUB_RUN_ATTEMPT": null
+  },
+  "sourceCommit": "8a72b3701a94153a5b5ab353a6af5efc15378d3c",
+  "workingTreeDirty": true,
+  "sourceSha256": {
+    "scannerScript": "0965d3c80e041a0e222da867c8ed0cdc09e42157061c34f95cc194c71d225b72",
+    "scannerPin": "5f65d24ba72501e2195d3344ef3d2dacf7f0b66413951ea102e408ce524c769c"
+  },
+  "image": {
+    "manifestDigest": "sha256:4c6559370a72ba2ed5a65d947dc0dd69265450a945d33b289358c7e03659449d",
+    "configDigest": "sha256:a1802496bea3c636f9b6dbe9c09452b530dc0ea763dcff8d0cfb227a86f72752",
+    "indexDigest": "sha256:192ab6a7bc50f7a48f2ce80ccddd9424060387ca37f75d7c99133764b7551e77",
+    "buildDigest": "sha256:4c6559370a72ba2ed5a65d947dc0dd69265450a945d33b289358c7e03659449d",
+    "platform": "linux/amd64",
+    "layerDigests": [
+      "sha256:dd99b49414a25cf98e86ab5b4752bfaf806955d90c457f64fdb57692c268294c"
+    ],
+    "compressedLayerBytes": 363
+  },
+  "scannerExecutableSha256": "6a972c69606c7b3ea4c6bdcc6fc9332ea9ad38381624310c1e85cc77345909f3",
+  "database": {
+    "Version": 2,
+    "NextUpdate": "2026-11-17T01:11:02.624122856Z",
+    "UpdatedAt": "2026-11-16T01:11:02.624123452Z",
+    "DownloadedAt": "2026-11-16T02:58:48.243411959Z"
+  },
+  "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+  "summary": {
+    "operatingSystem": {
+      "Family": "alpine",
+      "Name": "3.24.3"
+    },
+    "installedOsPackages": 2,
+    "installedLibraryPackages": 1,
+    "inventoryByTarget": [
+      {
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine",
+        "packages": 2,
+        "packagesWithoutVersion": 0
+      },
+      {
+        "Target": "Node.js",
+        "Class": "lang-pkgs",
+        "Type": "node-pkg",
+        "packages": 1,
+        "packagesWithoutVersion": 0
+      }
+    ],
+    "libraryPackagesWithoutVersion": 0,
+    "vulnerabilitiesBySeverity": {
+      "UNKNOWN": 0,
+      "LOW": 33,
+      "MEDIUM": 27,
+      "HIGH": 14,
+      "CRITICAL": 3
+    },
+    "blockingVulnerabilities": [
+      {
+        "VulnerabilityID": "CVE-2022-48174",
+        "PkgName": "busybox",
+        "InstalledVersion": "1.36.1-r0",
+        "FixedVersion": "1.36.1-r2",
+        "Severity": "CRITICAL",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-48174",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2026-31789",
+        "PkgName": "openssl",
+        "InstalledVersion": "3.1.1-r0",
+        "FixedVersion": "3.5.6-r0",
+        "Severity": "CRITICAL",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-31789",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2023-5363",
+        "PkgName": "openssl",
+        "InstalledVersion": "3.1.1-r0",
+        "FixedVersion": "3.1.4-r0",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2023-5363",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2024-12797",
+        "PkgName": "openssl",
+        "InstalledVersion": "3.1.1-r0",
+        "FixedVersion": "3.3.3-r0",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-12797",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2024-6119",
+        "PkgName": "openssl",
+        "InstalledVersion": "3.1.1-r0",
+        "FixedVersion": "3.3.2-r0",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-6119",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2025-15467",
+        "PkgName": "openssl",
+        "InstalledVersion": "3.1.1-r0",
+        "FixedVersion": "3.5.5-r0",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15467",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2025-69421",
+        "PkgName": "openssl",
+        "InstalledVersion": "3.1.1-r0",
+        "FixedVersion": "3.5.5-r0",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-69421",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2026-14456",
+        "PkgName": "openssl",
+        "InstalledVersion": "3.1.1-r0",
+        "FixedVersion": "3.5.8-r0",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-14456",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2026-28387",
+        "PkgName": "openssl",
+        "InstalledVersion": "3.1.1-r0",
+        "FixedVersion": "3.5.6-r0",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-28387",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2026-28388",
+        "PkgName": "openssl",
+        "InstalledVersion": "3.1.1-r0",
+        "FixedVersion": "3.5.6-r0",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-28388",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2026-28389",
+        "PkgName": "openssl",
+        "InstalledVersion": "3.1.1-r0",
+        "FixedVersion": "3.5.6-r0",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-28389",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2026-28390",
+        "PkgName": "openssl",
+        "InstalledVersion": "3.1.1-r0",
+        "FixedVersion": "3.5.6-r0",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-28390",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2026-45447",
+        "PkgName": "openssl",
+        "InstalledVersion": "3.1.1-r0",
+        "FixedVersion": "3.5.7-r0",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-45447",
+        "Target": "/workspace/scratch/231e81830e94/image-audit-fixture (alpine 3.24.3)",
+        "Class": "os-pkgs",
+        "Type": "alpine"
+      },
+      {
+        "VulnerabilityID": "CVE-2019-10744",
+        "PkgName": "lodash",
+        "InstalledVersion": "4.17.11",
+        "FixedVersion": "4.17.12",
+        "Severity": "CRITICAL",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2019-10744",
+        "Target": "Node.js",
+        "Class": "lang-pkgs",
+        "Type": "node-pkg"
+      },
+      {
+        "VulnerabilityID": "CVE-2020-8203",
+        "PkgName": "lodash",
+        "InstalledVersion": "4.17.11",
+        "FixedVersion": "4.17.19",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2020-8203",
+        "Target": "Node.js",
+        "Class": "lang-pkgs",
+        "Type": "node-pkg"
+      },
+      {
+        "VulnerabilityID": "CVE-2021-23337",
+        "PkgName": "lodash",
+        "InstalledVersion": "4.17.11",
+        "FixedVersion": "4.17.21",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2021-23337",
+        "Target": "Node.js",
+        "Class": "lang-pkgs",
+        "Type": "node-pkg"
+      },
+      {
+        "VulnerabilityID": "CVE-2026-4800",
+        "PkgName": "lodash",
+        "InstalledVersion": "4.17.11",
+        "FixedVersion": "4.18.0",
+        "Severity": "HIGH",
+        "Status": "fixed",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-4800",
+        "Target": "Node.js",
+        "Class": "lang-pkgs",
+        "Type": "node-pkg"
+      }
+    ],
+    "requiresFindingTriage": true,
+    "licenseMetadata": {
+      "records": 3,
+      "classificationCounts": {
+        "restricted": 1,
+        "notice": 2
+      },
+      "packagesWithoutDeclaredLicense": 0,
+      "interpretation": "Reported package metadata; no repository license grant or legal approval."
+    },
+    "gate": "BLOCKED_FINDINGS"
+  },
+  "libraryCoverage": {
+    "requiredInstalledNpmPackage": null,
+    "goJudgeWithStdlibRequired": false,
+    "status": "VERIFIED"
+  },
+  "javaDatabase": {
+    "status": "NOT_DOWNLOADED",
+    "interpretation": "Scanner did not request the Java index; no Java archive coverage is claimed."
+  },
+  "rawReportSha256": "2f0f37678f335ecf824de97b4135978ea63993700c42976efa730b5637b34f83",
+  "finishedAt": "2026-11-16T02:58:51.371278+00:00",
+  "elapsedSeconds": 42.459
+}

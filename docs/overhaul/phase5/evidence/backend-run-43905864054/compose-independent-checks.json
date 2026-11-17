@@ -1,0 +1,142 @@
+{
+  "result": "PASS_ACTUAL_COMPOSE_AND_FULL_JOB_EVIDENCE",
+  "source": {
+    "checkout": "9aa843fad33b30270ab346bc62c4865c17697ff3",
+    "tree": "0f191c89a17b984cae8706cb02137ab0e4e2c3a4",
+    "sourceHead": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+    "base": "e8b08d6ab86181859d9491d15d1881a6b10262eb",
+    "workflowRunId": "43905864054",
+    "workflowAttempt": "1",
+    "trackedTreeClean": true
+  },
+  "checkCount": 43,
+  "checks": [
+    "browser exact clean source and PASS",
+    "compose exact clean source and PASS",
+    "browser zero page errors",
+    "actual browser/native chain without API mocks or paid provider",
+    "bounded browser admission and main deadline",
+    "actual public and final native grading results",
+    "provider evaluation remains honestly unavailable",
+    "browser persistedReloadEqual",
+    "browser outsiderDenied",
+    "browser sourceRestoredInReadOnlyEditor",
+    "gateway final owned cleanup complete",
+    "embedded gateway receipt is an earlier preflight snapshot",
+    "same live gateway fixture",
+    "same live gateway imageId",
+    "same live gateway probes",
+    "exact production example gateway config",
+    "bounded mutual certificate fixture",
+    "gateway authority limits remain explicit",
+    "gateway positive actual status",
+    "gateway noClient actual status",
+    "gateway wrongBearer actual status",
+    "gateway anonymous actual status",
+    "gateway disallowed actual status",
+    "gateway query actual status",
+    "gateway TLS hostname and bounded request probes",
+    "current Compose performance schema 2 complete",
+    "Compose performance exact source",
+    "bounded three performance samples and no field INP claim",
+    "vibe-browser/phase5-vibe-browser.json no retained credential values",
+    "vibe-browser/phase5-vibe-compose.json no retained credential values",
+    "browser-performance/phase3-browser-performance.json no retained credential values",
+    "result screenshot is PNG",
+    "PNG excludes hidden text/exif metadata",
+    "actual native 90 passed",
+    "actual pipeline 36 tests in 9 files",
+    "actual multi-API suite executed",
+    "four actual Compose browser flows",
+    "actual Compose community-flow.spec.ts",
+    "actual Compose enterprise-flow.spec.ts",
+    "actual Compose judge-flow.spec.ts",
+    "actual Compose vibe-flow.spec.ts",
+    "actual eight containers/four networks/one backup volume removed",
+    "actual Redis mutual TLS regression and owned cleanup"
+  ],
+  "actualTests": {
+    "native": 90,
+    "pipeline": 36,
+    "pipelineFiles": 9,
+    "compose": 4
+  },
+  "composeCases": [
+    "2026-11-16T16:31:23.7826448Z   \u2713  1 [chromium] \u203a tests-live/community-flow.spec.ts:26:1 \u203a two real accounts write, answer, vote, follow, accept, edit and delete a community post (7.3s)",
+    "2026-11-16T16:31:31.5007853Z   \u2713  2 [chromium] \u203a tests-live/enterprise-flow.spec.ts:23:1 \u203a real assessment selection, explicit refresh, frozen candidate content, Judge and owner results (7.7s)",
+    "2026-11-16T16:31:51.7456853Z   \u2713  3 [chromium] \u203a tests-live/judge-flow.spec.ts:8:1 \u203a real signup, publication, bookmarks, judging, private learning, XP and logout through nginx (20.2s)",
+    "2026-11-16T16:32:57.4315309Z   \u2713  4 [chromium] \u203a tests-live/vibe-flow.spec.ts:23:1 \u203a real Vibe new-tab editing, nginx mTLS native grading and persisted private result (4.3s)"
+  ],
+  "ownedResourceRemoval": [
+    "2026-11-16T16:33:03.1017524Z  Container unsolvable-e2e-9f75f678ded0-judge-1  Removed",
+    "2026-11-16T16:33:03.1019349Z  Container unsolvable-e2e-9f75f678ded0-vibe-gateway-1  Removed",
+    "2026-11-16T16:33:03.1020778Z  Container unsolvable-e2e-9f75f678ded0-go-judge-1  Removed",
+    "2026-11-16T16:33:03.1021750Z  Container unsolvable-e2e-9f75f678ded0-front-1  Removed",
+    "2026-11-16T16:33:03.1023195Z  Container unsolvable-e2e-9f75f678ded0-back-1  Removed",
+    "2026-11-16T16:33:03.1024447Z  Container unsolvable-e2e-9f75f678ded0-redis-1  Removed",
+    "2026-11-16T16:33:03.1025561Z  Container unsolvable-e2e-9f75f678ded0-postgres-backup-1  Removed",
+    "2026-11-16T16:33:03.1027091Z  Container unsolvable-e2e-9f75f678ded0-postgres-1  Removed",
+    "2026-11-16T16:33:03.1029016Z  Volume unsolvable-e2e-9f75f678ded0_postgres-backups  Removed",
+    "2026-11-16T16:33:03.1029329Z  Network unsolvable-e2e-9f75f678ded0_app  Removed",
+    "2026-11-16T16:33:03.1029611Z  Network unsolvable-e2e-9f75f678ded0-edge  Removed",
+    "2026-11-16T16:33:03.1029912Z  Network unsolvable-e2e-9f75f678ded0_sandbox  Removed",
+    "2026-11-16T16:33:03.1030208Z  Network unsolvable-e2e-9f75f678ded0_data  Removed"
+  ],
+  "assessment": {
+    "publicChecks": 6,
+    "passed": 11,
+    "total": 11,
+    "outcome": 40,
+    "evaluationStatus": "unavailable",
+    "challengeVersion": "2e1df0949b196347b2820c72e2c72749011e8406ef658e45009d01f2c8324e18",
+    "persistedReloadEqual": true,
+    "outsiderDenied": true,
+    "sourceRestoredInReadOnlyEditor": true
+  },
+  "gatewayProbes": {
+    "positive": {
+      "status": 200,
+      "elapsedMs": 19.288555000000002
+    },
+    "noClient": {
+      "status": 400,
+      "elapsedMs": 4.128425
+    },
+    "wrongBearer": {
+      "status": 401,
+      "elapsedMs": 1.1888409999999965
+    },
+    "anonymous": {
+      "status": 401,
+      "elapsedMs": 0.8152720000000002
+    },
+    "wrongHostname": {
+      "errorCode": "ERR_TLS_CERT_ALTNAME_INVALID",
+      "elapsedMs": 4.353816999999999
+    },
+    "disallowed": {
+      "status": 404,
+      "elapsedMs": 0.7860270000000043
+    },
+    "query": {
+      "status": 400,
+      "elapsedMs": 0.45096000000000913
+    },
+    "requests": 7,
+    "perRequestTimeoutMs": 4000
+  },
+  "fileHashes": {
+    "vibe-browser/phase5-vibe-browser.json": "7b9b771cdbe92670c1f866d7de3c83c5071b115e9e956edfab4ce9b0173f40ce",
+    "vibe-browser/phase5-vibe-compose.json": "2718d20038d048ebd790c34c67205c2abf23372d3af190de96e0f80622893997",
+    "vibe-browser/phase5-vibe-browser.png": "0b2953dcb3f77d588beb9649d07c470ee004c136f89a120497bd9ed87838a485",
+    "browser-performance/phase3-browser-performance.json": "2bd71b7aa203a091feacb3505e357a6aeefccbb14dee4aa6e5fdf0424be27dd9",
+    "job-133434472878.log": "a881db0cfe3ca06e7af23fe3385f9d14c636a257090faddc8552806c17298a34"
+  },
+  "visualInspection": "Personally inspected current result PNG: 40/40 outcome and 11/11 checks; provider process-score columns remain unavailable. Synthetic account label is visible; no password, token, certificate private material or solution body is captured.",
+  "limits": [
+    "Owned same-host disposable Compose fixture; no production host, firewall, certificate rotation or provider-quality certification.",
+    "Existing algorithm native sandbox is reused sequentially; its token is a synthetic shared fixture capability, not a recommended production credential arrangement.",
+    "No long-duration editor-memory or field INP result is collected; the finite deadline is reserved for the real end-to-end chain."
+  ],
+  "multiApiDetailedReview": "Separate security reviewer inspects original current-source multi-API/native reports before final acceptance."
+}

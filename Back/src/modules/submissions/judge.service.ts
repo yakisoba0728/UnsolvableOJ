@@ -153,7 +153,12 @@ export class JudgeService {
     this.validateAttempt(generation, attemptId);
     const fence =
       'id = :id AND judge_generation = :generation AND judge_attempt_id = :attemptId AND status = :status';
-    const params = { id, generation, attemptId, status: SubmissionStatus.JUDGING };
+    const params = {
+      id,
+      generation,
+      attemptId,
+      status: SubmissionStatus.JUDGING,
+    };
     const lease = {
       judgeGeneration: generation + 1,
       judgeAttemptId: null,
@@ -165,7 +170,10 @@ export class JudgeService {
       .createQueryBuilder()
       .update()
       .set({ ...lease, status: SubmissionStatus.QUEUED })
-      .where(`${fence} AND recovery_count < :max`, { ...params, max: MAX_LEASE_RECOVERIES })
+      .where(`${fence} AND recovery_count < :max`, {
+        ...params,
+        max: MAX_LEASE_RECOVERIES,
+      })
       .execute();
     if (released.affected !== 1) {
       const stopped = await this.submissions
@@ -227,6 +235,34 @@ export class JudgeService {
       }
       if (submission.status !== SubmissionStatus.JUDGING)
         throw new ConflictException('채점 중인 제출이 아닙니다.');
+      // The API owns sample visibility. Use the immutable submitted version,
+      // never the current problem or a worker-supplied sample flag.
+      const hasDetails = Boolean(
+        dto.debugOutputs?.length || dto.testResults?.length,
+      );
+      const snapshot = hasDetails
+        ? await findProblemSnapshot(manager, submission)
+        : undefined;
+      if (hasDetails && !snapshot)
+        throw new NotFoundException('문제 버전을 찾을 수 없습니다.');
+      const cases = [...(snapshot?.testCases ?? [])].sort(
+        (a, b) => a.order - b.order,
+      );
+      const resultCases = new Set<number>();
+      for (const result of dto.testResults ?? []) {
+        if (!cases[result.testCase - 1] || resultCases.has(result.testCase))
+          throw new BadRequestException(
+            '테스트별 결과가 문제 버전과 맞지 않습니다.',
+          );
+        resultCases.add(result.testCase);
+      }
+      const outputCases = new Set<number>();
+      const publicOutputs = (dto.debugOutputs ?? []).filter(({ testCase }) => {
+        if (cases[testCase - 1]?.isSample !== true || outputCases.has(testCase))
+          return false;
+        outputCases.add(testCase);
+        return true;
+      });
       if (!submission.isTest) {
         if (dto.status === SubmissionStatus.ACCEPTED)
           submission.acceptedForXp = true;
@@ -244,7 +280,7 @@ export class JudgeService {
         dto.compileOutput == null
           ? null
           : this.safeDiagnosticText(dto.compileOutput);
-      submission.debugOutputs = (dto.debugOutputs ?? []).map((output) => ({
+      submission.debugOutputs = publicOutputs.map((output) => ({
         testCase: output.testCase,
         stdout: this.safeDiagnosticText(output.stdout),
         stderr: this.safeDiagnosticText(output.stderr),
@@ -252,9 +288,9 @@ export class JudgeService {
         stderrTruncated: output.stderrTruncated,
       }));
       submission.testResults = (dto.testResults ?? []).map(
-        ({ testCase, isSample, status, runtimeMs, memoryKb }) => ({
+        ({ testCase, status, runtimeMs, memoryKb }) => ({
           testCase,
-          isSample,
+          isSample: cases[testCase - 1].isSample === true,
           status,
           runtimeMs,
           memoryKb,

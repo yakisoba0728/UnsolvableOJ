@@ -1,0 +1,101 @@
+[
+  {
+    "component": "back",
+    "before": {
+      "archiveSha256": "706256f1e68ee8f646e6d80e05a6ea802e3bbb09555e4ff6a528a06bca82ea1c",
+      "rawSha256": "065d8c2d5535fe5d12d4d73848865c0ea6984f0eca26958524b0464396b8765e",
+      "sourceCommit": "c167a1e17e7b915fc313c52357e7505f8cf56b6f",
+      "scannerVersion": "0.76.2",
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "counts": {
+        "MEDIUM": 13,
+        "HIGH": 6,
+        "LOW": 1
+      }
+    },
+    "after": {
+      "archiveSha256": "e4e59aae772e1f3fb2c3feaa62232f773bfe4e6f0f00898df21935d99fb28a3d",
+      "rawSha256": "c2426d25116363c932c88fd42f26d1c4b424b086fe786482144088fa00b85a87",
+      "sourceCommit": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+      "scannerVersion": "0.76.2",
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "counts": {}
+    }
+  },
+  {
+    "component": "front",
+    "before": {
+      "archiveSha256": "57e21f6c5c2ffc22195c34a95b872ea9ed53ed7d6b4512c212bde6c3f449dbfa",
+      "rawSha256": "dd10bde4d6eb08aa920cc1249f2a808b687e62ff08f8e1ab3aa7b13f5eadc0ff",
+      "sourceCommit": "c167a1e17e7b915fc313c52357e7505f8cf56b6f",
+      "scannerVersion": "0.76.2",
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "counts": {
+        "HIGH": 3,
+        "MEDIUM": 2
+      }
+    },
+    "after": {
+      "archiveSha256": "61015f76315a7f05aa18cff8f242b2ad422fc1aa9198fe3671c0df4de82f2bf7",
+      "rawSha256": "5748dc9e8381e23d718c0e936dc3e54ace78c232d5f3aadf32684e6ee65ca375",
+      "sourceCommit": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+      "scannerVersion": "0.76.2",
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "counts": {}
+    }
+  },
+  {
+    "component": "judge",
+    "before": {
+      "archiveSha256": "762a79291291374c9e89ff114f6b98596cfbc56cb1f951f570eb7268c1486563",
+      "rawSha256": "affc9c1bd87054e1161404fe4bfc35bc12bfcb487433d1dcdf9804191c5fe885",
+      "sourceCommit": "c167a1e17e7b915fc313c52357e7505f8cf56b6f",
+      "scannerVersion": "0.76.2",
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "counts": {
+        "MEDIUM": 13,
+        "HIGH": 6,
+        "LOW": 1
+      }
+    },
+    "after": {
+      "archiveSha256": "478e7c1c6e1da96420f6e1e03c0fe107f9fcc8806112311b7e08aa7d31660af2",
+      "rawSha256": "7bea393f64e5e39fb1e950c48f41c15a67333206a66545fb75d8e3e1680507fd",
+      "sourceCommit": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+      "scannerVersion": "0.76.2",
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "counts": {}
+    }
+  },
+  {
+    "component": "runtime",
+    "before": {
+      "archiveSha256": "eb0737414fb6c45c6ebc866ed3a2f4892c372dba9934078299bf158ae06b7c51",
+      "rawSha256": "406d2627e4b48c8d248552e1f9d1d7daf8d8dd8c09d9cd33125fd1f9167a8926",
+      "sourceCommit": "c167a1e17e7b915fc313c52357e7505f8cf56b6f",
+      "scannerVersion": "0.76.2",
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "counts": {
+        "HIGH": 181,
+        "MEDIUM": 594,
+        "LOW": 363,
+        "CRITICAL": 5,
+        "UNKNOWN": 2
+      }
+    },
+    "after": {
+      "archiveSha256": "32e8275ee86fd50823275a5b23dc842ff4c3b75c3471b47fe15895a0ef3bd2c9",
+      "rawSha256": "3402fb8c6690e6a5e8714aba4e26462129c706e04704387dcea43d7d8fa5e771",
+      "sourceCommit": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+      "scannerVersion": "0.76.2",
+      "databaseSha256": "dcbd479f6de2e82a0d1588afe354c12456dcacd4b8f6128e2046ae0623a67f87",
+      "counts": {
+        "MEDIUM": 561,
+        "LOW": 363,
+        "CRITICAL": 5,
+        "HIGH": 177,
+        "UNKNOWN": 1
+      }
+    }
+  }
+]

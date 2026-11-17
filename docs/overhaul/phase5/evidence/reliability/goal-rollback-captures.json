@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "captures": [
+    {
+      "file": "goal-rollback-baseline.log",
+      "rawSha256": "be56c0b57e818ef9de7cd543b4b2d34764d48953a5347cd67ff4dcf2dc58c58e",
+      "rawBytes": 1419,
+      "rawUtf8": "\n RUN  v4.1.12 /workspace/scratch/3d1215725852/oj-reliability/Back\n\nstdout | test/learning-goal-migration.e2e-spec.ts > Learning-goal migration preservation (real PostgreSQL) > refuses populated goals and preserves their exact rows and migration ledger\n{\"proof\":\"populated-goal-rollback\",\"rowsBefore\":1,\"tableAfterDown\":null}\n\n ❯ test/learning-goal-migration.e2e-spec.ts (3 tests | 1 failed | 2 skipped) 184ms\n     × refuses populated goals and preserves their exact rows and migration ledger 15ms\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  test/learning-goal-migration.e2e-spec.ts > Learning-goal migration preservation (real PostgreSQL) > refuses populated goals and preserves their exact rows and migration ledger\nAssertionError: expected undefined to be an instance of Error\n ❯ test/learning-goal-migration.e2e-spec.ts:53:24\n     51|         console.log(JSON.stringify({ proof: 'populated-goal-rollback',…\n     52|       }\n     53|       expect(rejected).toBeInstanceOf(Error);\n       |                        ^\n     54|       expect((rejected as Error).message).toContain('Cannot roll back …\n     55|     } finally {\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n\n Test Files  1 failed (1)\n      Tests  1 failed | 2 skipped (3)\n   Start at  23:32:17\n   Duration  2.39s (transform 638ms, setup 0ms, import 1.98s, tests 184ms, environment 0ms)\n\n",
+      "displayNormalization": "Trailing empty lines removed from the companion .log only; rawUtf8 preserves the full original capture."
+    },
+    {
+      "file": "goal-rollback-candidate.log",
+      "rawSha256": "994a9eaf56af3d684ad8bc1e306e61128fc165cce1c563e19b3f0ac4c2ed4738",
+      "rawBytes": 238,
+      "rawUtf8": "\n RUN  v4.1.12 /workspace/scratch/3d1215725852/oj-reliability/Back\n\n\n Test Files  2 passed (2)\n      Tests  11 passed (11)\n   Start at  23:32:57\n   Duration  4.52s (transform 758ms, setup 0ms, import 3.10s, tests 1.10s, environment 0ms)\n\n",
+      "displayNormalization": "Trailing empty lines removed from the companion .log only; rawUtf8 preserves the full original capture."
+    }
+  ]
+}

@@ -1,52 +1,72 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { isDeepStrictEqual } from 'node:util';
-import {
-  harness,
-  hiddenChecks,
-  publicChecks,
-  validateFiles,
-} from './vibe.catalog.js';
+import { validateFiles } from './vibe.catalog.js';
+import type { VibeChallengeSnapshot } from './vibe.snapshot.js';
 import type { ProjectFiles, VibeCheck } from './vibe.types.js';
+import {
+  createVibeTransport,
+  loadVibeTransportSettings,
+  vibeSettingNames,
+  type VibeTransportSettings,
+} from './vibe.transport.js';
 
 const diagnostic = (value: string) =>
   value.slice(0, 2000).replace(/[\0\p{Cs}]/gu, '\uFFFD');
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
 @Injectable()
 export class VibeRunner {
-  constructor(private readonly config: ConfigService) {}
+  private readonly dedicated?: VibeTransportSettings;
+  constructor(private readonly config: ConfigService) {
+    // Fail startup before serving requests if a dedicated identity is invalid.
+    // Embedded tests/operators can still enable their local runner dynamically.
+    if (config.get<string>('VIBE_EXECUTION_MODE') === 'dedicated')
+      this.dedicated = this.settings();
+  }
 
-  get available() {
-    return Boolean(
-      this.config.get<string>('VIBE_SANDBOX_URL') &&
-      this.config.get<string>('VIBE_SANDBOX_TOKEN'),
+  private settings() {
+    return loadVibeTransportSettings(
+      Object.fromEntries(
+        vibeSettingNames.map((name) => [name, this.config.get<string>(name)]),
+      ),
     );
   }
 
-  async run(files: ProjectFiles, final: boolean): Promise<VibeCheck[]> {
-    validateFiles(files);
+  get available() {
+    return Boolean(
+      this.dedicated ||
+      (this.config.get<string>('VIBE_SANDBOX_URL') &&
+        this.config.get<string>('VIBE_SANDBOX_TOKEN')),
+    );
+  }
+
+  async run(
+    files: ProjectFiles,
+    final: boolean,
+    content: VibeChallengeSnapshot,
+  ): Promise<VibeCheck[]> {
+    validateFiles(files, false, content.editablePaths);
     if (!this.available)
       throw new ServiceUnavailableException(
         '프로젝트 실행기가 아직 설정되지 않았습니다.',
       );
-    const url = this.config.getOrThrow<string>('VIBE_SANDBOX_URL');
-    const token = this.config.getOrThrow<string>('VIBE_SANDBOX_TOKEN');
     const signal = AbortSignal.timeout(45_000);
     const cached = new Set<string>();
+    let transport: ReturnType<typeof createVibeTransport> | undefined;
     const request = async (
       path: string,
       options: {
-        method?: string;
-        headers?: Record<string, string>;
+        method?: 'GET' | 'POST' | 'DELETE';
         body?: string;
       } = {},
-      cleanup = false,
+      cleanupSignal?: AbortSignal,
     ) => {
-      const response = await fetch(new URL(path, url), {
+      const response = await transport!.request(path, {
         ...options,
-        redirect: 'error',
-        signal: cleanup ? AbortSignal.timeout(5_000) : signal,
-        headers: { Authorization: `Bearer ${token}`, ...options.headers },
+        signal: cleanupSignal ?? signal,
       });
       if (!response.ok) {
         await response.body?.cancel();
@@ -63,7 +83,6 @@ export class VibeRunner {
       const payload: unknown = await (
         await request('/run', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             cmd: [
               {
@@ -92,7 +111,36 @@ export class VibeRunner {
           }),
         })
       ).json();
-      if (!Array.isArray(payload) || payload.length !== 1)
+      // A malformed/partial reply can still own cached files. Retain safe IDs
+      // before rejecting its result, and never interpret strings/arrays as maps.
+      // Cleanup stays bounded even when the executor exceeds its protocol budget.
+      let invalidArtifacts = false;
+      for (const item of Array.isArray(payload) ? payload : [payload]) {
+        if (!isRecord(item) || item.fileIds === undefined) continue;
+        if (!isRecord(item.fileIds)) {
+          invalidArtifacts = true;
+          continue;
+        }
+        const ids = Object.values(item.fileIds);
+        if (ids.length > 16) invalidArtifacts = true;
+        for (const id of ids) {
+          if (
+            typeof id !== 'string' ||
+            !/^[A-Za-z0-9_-]{1,200}$/.test(id) ||
+            (!cached.has(id) && cached.size === 16)
+          ) {
+            invalidArtifacts = true;
+            continue;
+          }
+          cached.add(id);
+        }
+      }
+      if (
+        !Array.isArray(payload) ||
+        payload.length !== 1 ||
+        !isRecord(payload[0]) ||
+        invalidArtifacts
+      )
         throw new Error('Invalid execution response');
       const result = payload[0] as {
         status: string;
@@ -100,8 +148,6 @@ export class VibeRunner {
         files?: Record<string, string>;
         fileIds?: Record<string, string>;
       };
-      for (const id of Object.values(result.fileIds ?? {}))
-        if (typeof id === 'string') cached.add(id);
       if (
         ![
           'Accepted',
@@ -117,6 +163,7 @@ export class VibeRunner {
       return result;
     };
     try {
+      transport = createVibeTransport(this.dedicated ?? this.settings());
       const version = await (await request('/version')).json();
       const settings = await (await request('/config')).json();
       const runner = settings?.runnerConfig;
@@ -131,6 +178,13 @@ export class VibeRunner {
       )
         throw new Error('Sandbox isolation is unavailable');
       await (await request('/file')).body?.cancel();
+      const anonymous = await transport.request('/file', {
+        anonymous: true,
+        signal,
+      });
+      await anonymous.body?.cancel();
+      if (anonymous.status !== 401 && anonymous.status !== 403)
+        throw new Error('Sandbox file access must require authentication');
       const compile = await execute(
         [
           '/bin/sh',
@@ -138,9 +192,11 @@ export class VibeRunner {
           '/usr/local/bin/esbuild harness.ts --bundle --platform=node --format=cjs --outfile=main.cjs && /usr/local/bin/esbuild tests/search.test.ts --bundle --platform=node --format=cjs --outfile=checks.cjs',
         ],
         Object.fromEntries(
-          Object.entries({ ...files, 'harness.ts': harness }).map(
-            ([path, content]) => [path, { content }],
-          ),
+          Object.entries({
+            ...content.initialFiles,
+            ...files,
+            'harness.ts': content.harness,
+          }).map(([path, content]) => [path, { content }]),
         ),
         '',
         ['main.cjs', 'checks.cjs'],
@@ -161,7 +217,12 @@ export class VibeRunner {
       if (!artifact || !checksArtifact)
         throw new Error('Compiled files missing');
       const checks: VibeCheck[] = [];
-      for (const test of [...publicChecks, ...(final ? hiddenChecks : [])]) {
+      for (const { test, hidden } of [
+        ...content.publicChecks.map((test) => ({ test, hidden: false })),
+        ...(final
+          ? content.hiddenChecks.map((test) => ({ test, hidden: true }))
+          : []),
+      ]) {
         const execution = await execute(
           ['/usr/bin/node', '/w/main.cjs'],
           { 'main.cjs': { fileId: artifact } },
@@ -180,7 +241,7 @@ export class VibeRunner {
         checks.push({
           name: test.name,
           passed,
-          ...(!passed && !test.name.startsWith('숨김')
+          ...(!passed && !hidden
             ? {
                 detail: diagnostic(
                   execution.files?.stderr ||
@@ -208,17 +269,19 @@ export class VibeRunner {
         '격리 실행기에 연결하지 못했습니다. 코드는 저장되어 있습니다. 잠시 뒤 다시 시도해 주세요.',
       );
     } finally {
+      const cleanupSignal = AbortSignal.timeout(5_000);
       await Promise.allSettled(
         [...cached].map(async (id) => {
           await (
             await request(
               `/file/${encodeURIComponent(id)}`,
               { method: 'DELETE' },
-              true,
+              cleanupSignal,
             )
           ).body?.cancel();
         }),
       );
+      transport?.close();
     }
   }
 }

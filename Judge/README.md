@@ -24,6 +24,8 @@ npm run start:dev
 
 `npm run check`는 빌드와 모의 HTTP 서버 기반 회귀 테스트이며 외부 서비스가 필요하지 않습니다. `npm run test:runtime`은 실행 중인 go-judge에서 8개 언어, 실패 판정·메모리·PID·고아 프로세스·네트워크·파일 초기화·캐시 회수를 검사합니다. 다른 워커가 사용하지 않는 테스트용 go-judge에서 실행하세요.
 
+`npm run benchmark:output`은 출력 비교기만 측정합니다. 기준 커밋 `6176015`의 비교기와 현재 비교기를 같은 입력으로 별도 Node 프로세스에서 각각 5회 실행하고, 실행시간·CPU 시간·프로세스 최대 RSS의 중앙값과 원시 표본을 JSON으로 출력합니다. 이 수치는 전체 채점 처리량이나 실제 샌드박스 성능을 나타내지 않습니다.
+
 ## 채점 정책
 
 - C17(`gnu17`, `-lm` 링크), C++20, Java 21(`Main`), Python 3, JavaScript(Node 24), TypeScript(esbuild), Go, Rust(2021 edition)를 지원합니다. 도구는 `runtime/Dockerfile`에 설치하며 기반 이미지는 digest, Node·esbuild는 정확한 버전으로 고정합니다. Java는 모든 class 파일을 jar로 묶습니다.
@@ -32,6 +34,7 @@ npm run start:dev
 - REST에는 명령별 파일 크기 상한이 없어, 실행 명령에 표준 Linux `prlimit`을 붙여 stdout/stderr 및 생성 파일에 **정확히 1,000,000바이트 hard limit**을 적용합니다. 컴파일 산출물은 별도 상한 64MiB입니다.
 - 테스트는 공개 예제부터 순차 실행하고 첫 실패에서 중단합니다. 각 테스트는 새로 초기화된 환경에서 실행되므로 이전 테스트 파일을 읽을 수 없습니다. `Accepted` 응답도 출력 비교를 통과해야 정답입니다.
 - 출력은 줄 단위·바이트 기준으로 비교합니다. 줄마다 끝의 ASCII 공백(CRLF의 `\r` 포함)과 출력 끝의 빈 줄만 무시하고, 줄 안·앞의 공백과 중간 빈 줄은 그대로 비교합니다. JSON의 UTF-8 치환이 판정을 바꾸지 않도록 캐시 출력을 원시 바이트로 다운로드합니다.
+- 비교기는 줄 배열이나 줄마다 Buffer 객체를 만들지 않고 바이트 위치만 저장합니다. 따라서 개행이 많은 출력에서도 비교 보조 메모리는 일정하며 위 판정 규칙은 동일합니다.
 - 공개 예제 최대 5개의 stdout/stderr 앞 1,000바이트와 잘림 여부를 보존합니다. 번호는 원래 테스트 순서입니다. 비공개 출력·오류 원문은 응답에 넣지 않습니다.
 - 실행한 테스트마다 `testResults`에 `{ testCase, isSample, status, runtimeMs, memoryKb }`를 실행 순서대로 담습니다. `testCase`는 예제를 앞으로 옮기기 전의 원래 번호(1부터)이고, 첫 실패에서 멈추므로 실패가 있으면 마지막 항목이 실패한 테스트입니다. 비공개 테스트도 입력·출력 없이 이 다섯 값만 보냅니다. 컴파일 실패·시스템 오류는 빈 배열입니다.
 - 실행 시간은 `runTime`(wall)을 ms로, 메모리는 bytes를 KiB로 바꾼 뒤 테스트별 최대값을 저장합니다. **이전 RSS 샘플러와 cgroup 메모리 측정은 동등하지 않습니다.** 검증 없이 기존 제출을 일괄 재채점하면 판정·XP가 바뀔 수 있습니다.
@@ -46,11 +49,42 @@ npm run start:dev
 **루트 Compose는 로컬 개발용입니다.** go-judge는 중첩 격리를 위해 `privileged`로 실행하므로 운영에서는 API/DB와 분리된 전용 Linux 호스트/VM을 권장합니다. 동일 호스트 배치를 선택한 경우 [Dokploy 운영 Compose와 제한](../deploy/README.md)을 확인하세요. 제출 프로세스 자체는 별도 namespace·seccomp·제한된 권한으로 실행되지만 컨테이너가 호스트 간 격리를 대신하지는 않습니다.
 
 - 서비스 API는 Bearer 인증을 사용하며 localhost 포트만 공개합니다. Compose에서는 워커만 애플리케이션·sandbox 두 네트워크에 연결합니다. 외부에 `/run`·`/file`을 공개하지 마세요.
+- 워커 시작 검사에서는 올바른 토큰의 파일 API 접근과 인증 없는 요청의 거부를 모두 확인합니다. 인증을 끈 실행기는 채점에 사용하지 않습니다. 애플리케이션 API 요청도 HTTP redirect를 따르지 않으므로 `API_BASE_URL`에는 redirect 없이 응답하는 최종 주소를 지정하세요.
 - `-no-fallback`, seccomp, cpu/memory/pids controller와 `/w`를 healthcheck 및 워커 시작 시 검사합니다. 잘못된 인증/격리 설정에서는 채점을 시작하지 않습니다. `-no-seccomp`, `-net-share`를 켜지 마세요.
 - 호스트 swap이 꺼져 있으면 cgroup 루트 제한을 쓰지 않습니다. swap이 켜진 v2에서는 서비스 상위 `memory.swap.max=0` 설정에 성공해야 시작하며, v1은 호스트 swap이 꺼져 있어야 합니다. 실제 호스트 루트 cgroup은 제한할 수 없으므로 그런 환경에서는 관리자가 swap을 끄거나 위임된 cgroup을 제공해야 합니다.
 - 제출에는 해당 소스/산출물과 해당 테스트 입력만 전달합니다. 읽기 전용 도구·라이브러리와 임시 `/w`·`/tmp`만 mount하며, API/DB 비밀키·정답·호스트 디렉터리·Docker socket을 넣지 않습니다.
-- upstream은 시작 로그에 설정/인증 토큰을 기록할 수 있으므로 실행 노드 로그도 접근을 제한하세요. 이미지/호스트 패치와 실제 자원 제한 검증은 별도로 필요합니다.
+- 이 저장소의 고정 소스 이미지는 upstream 인증 로그 수정과 토큰 비노출 검사를 포함합니다. 원본/다른 이미지를 사용할 때는 같은 보장을 추정하지 마세요. 실행 노드 로그의 접근 제한, 이미지/호스트 패치와 실제 자원 제한 검증은 별도로 필요합니다.
 
 실행 이미지 변경 후 `docker compose up -d --build --wait go-judge`로 다시 빌드하세요. [공식 API](https://docs.goj.ac/api), [설계·제한](https://docs.goj.ac/design), [전환 조사](../docs/research/go-judge-migration.md)를 참고하세요.
 
 별도 승인 후 사용할 [전용 실행 노드 템플릿](./deploy/README.md)은 필수 비밀키가 없으면 시작하지 않으며 host port를 공개하지 않습니다. 전체 앱의 실제 브라우저 검사는 저장소 루트에서 `node scripts/check-compose.mjs`로 실행합니다. 기존 개발 DB와 서비스는 재사용하지 않습니다.
+
+전용 실행 모드는 HTTPS API와 검증된 Redis TLS/mTLS를 요구합니다. 일반 로컬/동일 호스트 모드는 기존 사설 HTTP 연결을 유지합니다. `REDIS_TLS=true`와 선택적 `REDIS_TLS_SERVERNAME`, `REDIS_TLS_CA_FILE`, `REDIS_TLS_CERT_FILE`/`REDIS_TLS_KEY_FILE`을 지원하며 인증서 검증을 끄는 옵션은 없습니다. 포트·DB·동시성(1~128)과 URL·비밀키 설정은 연결 전에 검증합니다. 동시성 상한은 구성 오류 방지 한도이며 실제 호스트 처리 용량을 의미하지 않습니다.
+
+## Optional worker measurements
+
+Set `JUDGE_METRICS=json` on a worker process to emit one `judge_completed` JSON
+record after the API acknowledges a verdict. It includes queue wait, claim,
+compile/run/cleanup combined (`judgeMs`), result-delivery/retry duration, and worker
+process CPU/RSS. Source code, input, expected output, diagnostics and credentials
+are excluded. The metric sink cannot fail a successfully committed job.
+
+CPU counters are cumulative **process** microseconds, not per-submission CPU.
+Subtract samples from the same worker to measure an interval; do not add
+per-job deltas from overlapping executions. RSS peak is the process lifetime
+high-water mark in KiB and includes warmup. Judge CPU/memory fields in the result
+remain sandbox execution measurements and are separate from worker overhead.
+
+The worker connects/pings Redis before startup presence, then stops renewing
+API readiness while either its main or blocking queue Redis connection is
+unavailable. Initial API authentication still precedes blocking-client construction.
+Queue wait is elapsed time since the BullMQ enqueue timestamp at claim, including
+retries and outage waits; cross-host values require synchronized clocks. The existing API presence TTL still applies; local liveness remains
+fresh while ioredis reconnects, avoiding restart loops during a short outage.
+
+`Back/test/judge-capacity.pipeline-spec.ts` runs finite disposable pipeline trials,
+worker link interruptions, duplicate deliveries and real lease-expiry recovery.
+It writes `Back/reports/phase2-judge-capacity.json` and redacted synthetic worker
+logs. Eight jobs/trial and two repetitions/configuration are CI smoke evidence,
+not a maximum-throughput or production p99 estimate. The test never runs submitted
+code outside go-judge, restarts production services or changes lease timestamps.

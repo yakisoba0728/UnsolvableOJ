@@ -1,0 +1,168 @@
+{
+  "reviewer": "independent_recovery",
+  "authorSeparated": true,
+  "humanApprovalClaim": false,
+  "reviewedHead": "5f7cd7f61431d0a0a579c3491b804b3700874116",
+  "tree": "d4a9ee8ede7ed0fed6e91d2b967018a89e2cf173",
+  "initialHead": "20e5a99b33b6827c134084562c6c2e7fb839be74",
+  "scope": [
+    "Front/tests-live/learning-performance.ts",
+    "Front/tests-live/judge-flow.spec.ts",
+    ".github/workflows/ci.yml",
+    "PHASE3-BROWSER-PERFORMANCE.md",
+    "PHASE3-ARCHITECTURE.md",
+    "PHASE3-AUDIT.md",
+    "PHASE3-ROADMAP.md",
+    "PHASE3-FEATURES.md",
+    "independent evidence references"
+  ],
+  "findings": [
+    {
+      "id": "review-browser-summary-projection",
+      "severity": "low; artifact contract hardening",
+      "initial": "Unknown extra fields in data.summary would be retained despite the numeric-only documentation. Current API returns the expected five numeric fields; no actual credential disclosure was observed.",
+      "resolution": "Five explicit summary fields and nonnegative safe-integer checks now precede persistence. Existing API/UI assertions retained.",
+      "status": "resolved in reviewed HEAD"
+    },
+    {
+      "id": "review-evidence-reference-resolution",
+      "severity": "P2 reproducibility",
+      "initial": "Historical reviewer JSON referenced scratch names, eight logs were absent, and the retained DB fixture failure was not reachable from the proposed repository evidence.",
+      "resolution": "Sixteen-entry original-name to repository-path manifest, SHA256 identities, and byte-identical missing logs. Twelve targets exist in this validation tree; four exist in the committed incoming DB branch and must be retained on composition.",
+      "status": "resolved in component sources; composition must preserve four incoming files"
+    },
+    {
+      "id": "review-xp-ledger-wording",
+      "severity": "documentation correctness",
+      "initial": "Describing XP/solve evidence as immutable contradicted existing rejudge revocation and alternative-solve replacement.",
+      "resolution": "Architecture distinguishes retained learning completion from revocable solve/XP credit; DB document corrected in d254ad183fc348165e0b07847863d1c19273a51e.",
+      "status": "resolved in component sources"
+    }
+  ],
+  "protocolAssessment": {
+    "scope": "Three warm real-API document visits and fifteen period switches on the existing disposable two-submission fixture. Existing timeout/retry/functional assertions remain unchanged.",
+    "metrics": "LCP is a bounded candidate, CLS uses observed session windows with recent-input exclusion, period time is click to verified DOM plus two animation frames, raw Event Timing does not become INP, and CDP heap bytes are not RSS or leak proof.",
+    "privacy": "Only selected timing scalars and explicitly projected fixture counts are retained. No response bodies, request headers, tokens, cookies, problem titles/source, DOM targets or full environment are persisted.",
+    "artifactGate": "Successful Compose requires the JSON artifact; failure before entry remains failed and may lack a report. Partial started probes attempt incomplete output. Artifact action is pinned with seven-day retention.",
+    "executionBoundary": "No actual browser or Docker run performed by reviewer. Real metrics must be observed in fresh exact-head CI."
+  },
+  "primaryDefinitionSources": [
+    "https://www.w3.org/TR/largest-contentful-paint/",
+    "https://web.dev/articles/cls",
+    "https://w3c.github.io/event-timing/"
+  ],
+  "heapDefinitionSource": "Installed Playwright CDP Runtime.getHeapUsage declaration documents isolate-wide used/allocated bytes; source inspected read-only.",
+  "evidenceManifestValidation": [
+    {
+      "reference": "/workspace/scratch/86de5f814139/oj-dbperf-review/Back/test/independent-problem-stats.e2e-spec.ts",
+      "repositoryPath": "Back/test/incremental-problem-stats-races.e2e-spec.ts",
+      "sha256Matches": true,
+      "availability": "incoming DB commit d254ad183fc348165e0b07847863d1c19273a51e"
+    },
+    {
+      "reference": "db-0db4481-api.log",
+      "repositoryPath": "docs/overhaul/evidence/phase3-database-independent.log",
+      "sha256Matches": true,
+      "availability": "incoming DB commit d254ad183fc348165e0b07847863d1c19273a51e"
+    },
+    {
+      "reference": "db-0db4481-benchmark-audit.json",
+      "repositoryPath": "docs/overhaul/evidence/phase3-database-benchmark-review.json",
+      "sha256Matches": true,
+      "availability": "incoming DB commit d254ad183fc348165e0b07847863d1c19273a51e"
+    },
+    {
+      "reference": "db-0db4481-build.log",
+      "repositoryPath": "docs/overhaul/evidence/phase3-db-0db4481-build.log",
+      "sha256Matches": true,
+      "availability": "current validation tree"
+    },
+    {
+      "reference": "db-0db4481-reviewer-fixture-error.log",
+      "repositoryPath": "docs/overhaul/evidence/phase3-db-0db4481-reviewer-fixture-error.log",
+      "sha256Matches": true,
+      "availability": "current validation tree"
+    },
+    {
+      "reference": "learning-02aee85-dom.json",
+      "repositoryPath": "docs/overhaul/evidence/phase3-learning-strict-after.json",
+      "sha256Matches": true,
+      "availability": "current validation tree"
+    },
+    {
+      "reference": "oj-dbperf/docs/overhaul/measurements/phase3-problem-stats.json",
+      "repositoryPath": "docs/overhaul/measurements/phase3-problem-stats.json",
+      "sha256Matches": true,
+      "availability": "incoming DB commit d254ad183fc348165e0b07847863d1c19273a51e"
+    },
+    {
+      "reference": "security-a0ad96f-prototype-before.log",
+      "repositoryPath": "docs/overhaul/evidence/phase3-security-secret-before.log",
+      "sha256Matches": true,
+      "availability": "current validation tree"
+    },
+    {
+      "reference": "security-d35f297-policy.log",
+      "repositoryPath": "docs/overhaul/evidence/phase3-security-d35f297-policy.log",
+      "sha256Matches": true,
+      "availability": "current validation tree"
+    },
+    {
+      "reference": "security-d35f297-prototype-after.log",
+      "repositoryPath": "docs/overhaul/evidence/phase3-security-secret-after.log",
+      "sha256Matches": true,
+      "availability": "current validation tree"
+    },
+    {
+      "reference": "security-d9cf765-policy.log",
+      "repositoryPath": "docs/overhaul/evidence/phase3-security-d9cf765-policy.log",
+      "sha256Matches": true,
+      "availability": "current validation tree"
+    },
+    {
+      "reference": "security-e008263-merge-policy.log",
+      "repositoryPath": "docs/overhaul/evidence/phase3-security-e008263-merge-policy.log",
+      "sha256Matches": true,
+      "availability": "current validation tree"
+    },
+    {
+      "reference": "security-secret-prototype-probe.mjs",
+      "repositoryPath": "docs/overhaul/repro/phase3-secret-allowlist-probe.mjs",
+      "sha256Matches": true,
+      "availability": "current validation tree"
+    },
+    {
+      "reference": "vibe-2b5610b-typecheck.log",
+      "repositoryPath": "docs/overhaul/evidence/phase3-vibe-2b5610b-typecheck.log",
+      "sha256Matches": true,
+      "availability": "current validation tree"
+    },
+    {
+      "reference": "vibe-508545d-merge-policy.log",
+      "repositoryPath": "docs/overhaul/evidence/phase3-vibe-508545d-merge-policy.log",
+      "sha256Matches": true,
+      "availability": "current validation tree"
+    },
+    {
+      "reference": "vibe-53e015b-policy.log",
+      "repositoryPath": "docs/overhaul/evidence/phase3-vibe-53e015b-policy.log",
+      "sha256Matches": true,
+      "availability": "current validation tree"
+    }
+  ],
+  "checks": {
+    "initialPolicyTests": {
+      "head": "20e5a99b33b6827c134084562c6c2e7fb839be74",
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0,
+      "evidence": "validation-20e5a99-policy.log"
+    },
+    "finalE2eTypecheck": {
+      "status": "passed",
+      "evidence": "validation-5f7cd7f-e2e-types.log"
+    },
+    "sourceWhitespace": "No source whitespace issues; raw retained logs contain their original trailing blank lines."
+  },
+  "disposition": "Source/protocol/doc review accepted. Complete component composition, actual browser/Compose execution and fresh exact-head full CI remain separate gates."
+}

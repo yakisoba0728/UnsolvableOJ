@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "node": "v24.22.1",
+  "git": "git version 2.52.0",
+  "mode": "GIT_TEST_ASSUME_DIFFERENT_OWNER=1 with empty owned global configuration; no chmod/chown or browser execution",
+  "helperSha256": "2f0b3e009441a2b4833c33f4ab59223a14945b2aa593563b2ff41d82a42522ab",
+  "outcomes": [
+    {
+      "name": "unmodified git rejects simulated foreign ownership",
+      "result": "PASS"
+    },
+    {
+      "name": "another exact directory does not trust this checkout",
+      "result": "PASS"
+    },
+    {
+      "name": "actual helper reads exact HEAD/tree/clean status despite caller cwd and owner mismatch",
+      "result": "PASS"
+    },
+    {
+      "name": "unmodified git still rejects ownership after helper",
+      "result": "PASS"
+    },
+    {
+      "name": "global configuration is unchanged",
+      "result": "PASS"
+    },
+    {
+      "name": "missing Git marker fails without a provenance fallback",
+      "result": "PASS"
+    },
+    {
+      "name": "actual working checkout remains bound to author HEAD/tree",
+      "result": "PASS"
+    }
+  ],
+  "actualSource": {
+    "sha": "4fe583c1bf418e9489bc3275c9871db8f62461f3",
+    "tree": "f150df8f8739f5bdde31df5560aa568f30b577a5",
+    "trackedTreeClean": false
+  },
+  "globalConfigUntouched": true,
+  "noWildcardTrust": true,
+  "committedCheckout": {
+    "sha": "f872de5a344dfa1055fdd5864cf7ff92936fff61",
+    "tree": "d2e61d7580793eef1e90ff532a69acd2b1e8bfe3",
+    "trackedTreeClean": true
+  }
+}

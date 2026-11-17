@@ -1,0 +1,10 @@
+Owned PG17.11/Redis8.10.3 ready on loopback; fresh temporary cluster. Command: ['node', 'scripts/run-integration.mjs', 'e2e', 'test/missions.e2e-spec.ts']
+
+ RUN  v4.1.12 /workspace/scratch/86de5f814139/oj-vibe/Back
+
+
+ Test Files  1 passed (1)
+      Tests  24 passed (24)
+   Start at  15:32:16
+   Duration  3.83s (transform 387ms, setup 0ms, import 1.13s, tests 2.47s, environment 0ms)
+

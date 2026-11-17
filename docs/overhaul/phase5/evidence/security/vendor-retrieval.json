@@ -1,0 +1,522 @@
+{
+  "schemaVersion": 1,
+  "authoredBy": "/root/security",
+  "observedAt": "2026-11-16T14:40:33.986470+00:00",
+  "publisherFeed": {
+    "retrieval": "direct publisher OSV JSON feed linked by OSV; not parsed web-page HTML",
+    "maxWorkers": 4,
+    "timeoutSeconds": 12,
+    "maxResponseBytes": 2097152,
+    "rows": [
+      {
+        "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:1690.json",
+        "reviewedCves": [
+          "CVE-2025-40170"
+        ],
+        "retrievedAt": "2026-11-16T14:36:12.751656+00:00",
+        "status": 200,
+        "bytes": 4738,
+        "sha256": "359d9131de545b5061a11de22a43abe80e442466c464f81bb3a857b82acc6d73",
+        "path": "RLSA-2026-1690.json",
+        "id": "RLSA-2026:1690",
+        "containsAllReviewedIds": true
+      },
+      {
+        "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:2282.json",
+        "reviewedCves": [
+          "CVE-2025-39933"
+        ],
+        "retrievedAt": "2026-11-16T14:36:12.752243+00:00",
+        "status": 200,
+        "bytes": 2810,
+        "sha256": "91a1dc8a74bda8d25b6c4bb56d3f229d0c748bb0721383087c86e4066b8f3125",
+        "path": "RLSA-2026-2282.json",
+        "id": "RLSA-2026:2282",
+        "containsAllReviewedIds": true
+      },
+      {
+        "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:45114.json",
+        "reviewedCves": [
+          "CVE-2026-31692"
+        ],
+        "retrievedAt": "2026-11-16T14:36:12.752707+00:00",
+        "status": 200,
+        "bytes": 2050,
+        "sha256": "3698eecb7e156b0be33cf56eb3ab8a270dfa4fdd422ae009e6c58182055ead4f",
+        "path": "RLSA-2026-45114.json",
+        "id": "RLSA-2026:45114",
+        "containsAllReviewedIds": true
+      },
+      {
+        "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:47017.json",
+        "reviewedCves": [
+          "CVE-2026-53281"
+        ],
+        "retrievedAt": "2026-11-16T14:36:12.753463+00:00",
+        "status": 200,
+        "bytes": 1950,
+        "sha256": "3dad4aebe2d1523482a21b174000aa0c323636f172a385a311444b37cd8a85aa",
+        "path": "RLSA-2026-47017.json",
+        "id": "RLSA-2026:47017",
+        "containsAllReviewedIds": true
+      },
+      {
+        "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:57251.json",
+        "reviewedCves": [
+          "CVE-2026-52991",
+          "CVE-2026-63879"
+        ],
+        "retrievedAt": "2026-11-16T14:36:19.819492+00:00",
+        "status": 200,
+        "bytes": 6433,
+        "sha256": "f069a99898963994fe12955fc7089d0ca2b1200bc7ba7251ff5f75fcef1b4b33",
+        "path": "RLSA-2026-57251.json",
+        "id": "RLSA-2026:57251",
+        "containsAllReviewedIds": true
+      },
+      {
+        "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:65334.json",
+        "reviewedCves": [
+          "CVE-2026-68409"
+        ],
+        "retrievedAt": "2026-11-16T14:36:19.820451+00:00",
+        "status": 200,
+        "bytes": 6966,
+        "sha256": "3073c73f5f86946e871e11f4a508c0fbf67668d128b88f8b80ca68d0fa84466d",
+        "path": "RLSA-2026-65334.json",
+        "id": "RLSA-2026:65334",
+        "containsAllReviewedIds": true
+      },
+      {
+        "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:67471.json",
+        "reviewedCves": [
+          "CVE-2026-68426",
+          "CVE-2025-68745"
+        ],
+        "retrievedAt": "2026-11-16T14:36:19.845433+00:00",
+        "status": 200,
+        "bytes": 6699,
+        "sha256": "8ffb8b6b79d0c6d5a7265a75e8f4aa5c7c2ae900ace44676c365f0adc73e7af0",
+        "path": "RLSA-2026-67471.json",
+        "id": "RLSA-2026:67471",
+        "containsAllReviewedIds": true
+      },
+      {
+        "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:71602.json",
+        "reviewedCves": [
+          "CVE-2026-68257"
+        ],
+        "retrievedAt": "2026-11-16T14:36:19.895493+00:00",
+        "status": 200,
+        "bytes": 5674,
+        "sha256": "d71c3ae9ba7194b3a8eb7398e43e8717ec2180b6dd62515393aab7bcc45cf4f7",
+        "path": "RLSA-2026-71602.json",
+        "id": "RLSA-2026:71602",
+        "containsAllReviewedIds": true
+      },
+      {
+        "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:85321.json",
+        "reviewedCves": [
+          "CVE-2026-74752",
+          "CVE-2026-89631"
+        ],
+        "retrievedAt": "2026-11-16T14:36:25.953685+00:00",
+        "status": 200,
+        "bytes": 5187,
+        "sha256": "7e65a87f4b3698628b79da98085d0add555f90f677dd80c3c89afc588ea046dc",
+        "path": "RLSA-2026-85321.json",
+        "id": "RLSA-2026:85321",
+        "containsAllReviewedIds": true
+      },
+      {
+        "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:88477.json",
+        "reviewedCves": [
+          "CVE-2026-68245"
+        ],
+        "retrievedAt": "2026-11-16T14:36:25.987099+00:00",
+        "status": 200,
+        "bytes": 5013,
+        "sha256": "a8379a5cf2f8964508e460ab6ef89d8526265fd871fef4ca9f0300ffedca51b8",
+        "path": "RLSA-2026-88477.json",
+        "id": "RLSA-2026:88477",
+        "containsAllReviewedIds": true
+      },
+      {
+        "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:91565.json",
+        "reviewedCves": [
+          "CVE-2026-64523"
+        ],
+        "retrievedAt": "2026-11-16T14:36:25.994964+00:00",
+        "status": 200,
+        "bytes": 4795,
+        "sha256": "1e70e998560f3429382187df500264659c92c5d84a005e9a8cc0c2d74e8c01c7",
+        "path": "RLSA-2026-91565.json",
+        "id": "RLSA-2026:91565",
+        "containsAllReviewedIds": true
+      },
+      {
+        "url": "https://storage.googleapis.com/resf-osv-data/RLSA-2026:93413.json",
+        "reviewedCves": [
+          "CVE-2026-98364"
+        ],
+        "retrievedAt": "2026-11-16T14:36:26.024838+00:00",
+        "status": 200,
+        "bytes": 4627,
+        "sha256": "81c44fcf38296fdb937a6045dc32ba5b94f40db33461f58de08b58ebd6d1e691",
+        "path": "RLSA-2026-93413.json",
+        "id": "RLSA-2026:93413",
+        "containsAllReviewedIds": true
+      }
+    ]
+  },
+  "htmlRetrievalLimit": "HTTP 200 alone was insufficient: direct Red Hat pages returned 195-byte Site Unavailable bodies; Rocky pages returned 447-byte JavaScript shells. These HTML bodies are not treated as advisory evidence. The retained publisher feed JSON below supplies the reviewed content.",
+  "htmlRetrieval": {
+    "scope": "23 newly selected primary vendor errata URLs for 15 reviewed CVEs",
+    "maxWorkers": 4,
+    "timeoutSeconds": 12,
+    "maxResponseBytes": 2097152,
+    "rows": [
+      {
+        "url": "https://access.redhat.com/errata/RHSA-2026:1690",
+        "reviewedCves": [
+          "CVE-2025-40170"
+        ],
+        "retrievedAt": "2026-11-16T14:34:57.108774+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 195,
+        "sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+        "path": "RHSA-2026-1690.html",
+        "finalUrl": "https://access.redhat.com/errata/RHSA-2026:1690",
+        "contentAssessment": "NO_ADVISORY_CONTENT_SITE_UNAVAILABLE"
+      },
+      {
+        "url": "https://access.redhat.com/errata/RHSA-2026:2282",
+        "reviewedCves": [
+          "CVE-2025-39933"
+        ],
+        "retrievedAt": "2026-11-16T14:34:57.110406+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 195,
+        "sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+        "path": "RHSA-2026-2282.html",
+        "finalUrl": "https://access.redhat.com/errata/RHSA-2026:2282",
+        "contentAssessment": "NO_ADVISORY_CONTENT_SITE_UNAVAILABLE"
+      },
+      {
+        "url": "https://access.redhat.com/errata/RHSA-2026:45114",
+        "reviewedCves": [
+          "CVE-2026-31692"
+        ],
+        "retrievedAt": "2026-11-16T14:34:57.111196+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 195,
+        "sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+        "path": "RHSA-2026-45114.html",
+        "finalUrl": "https://access.redhat.com/errata/RHSA-2026:45114",
+        "contentAssessment": "NO_ADVISORY_CONTENT_SITE_UNAVAILABLE"
+      },
+      {
+        "url": "https://access.redhat.com/errata/RHSA-2026:57251",
+        "reviewedCves": [
+          "CVE-2026-63879"
+        ],
+        "retrievedAt": "2026-11-16T14:34:57.111719+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 195,
+        "sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+        "path": "RHSA-2026-57251.html",
+        "finalUrl": "https://access.redhat.com/errata/RHSA-2026:57251",
+        "contentAssessment": "NO_ADVISORY_CONTENT_SITE_UNAVAILABLE"
+      },
+      {
+        "url": "https://access.redhat.com/errata/RHSA-2026:65334",
+        "reviewedCves": [
+          "CVE-2026-68409"
+        ],
+        "retrievedAt": "2026-11-16T14:35:05.048568+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 195,
+        "sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+        "path": "RHSA-2026-65334.html",
+        "finalUrl": "https://access.redhat.com/errata/RHSA-2026:65334",
+        "contentAssessment": "NO_ADVISORY_CONTENT_SITE_UNAVAILABLE"
+      },
+      {
+        "url": "https://access.redhat.com/errata/RHSA-2026:67471",
+        "reviewedCves": [
+          "CVE-2026-68426",
+          "CVE-2025-68745"
+        ],
+        "retrievedAt": "2026-11-16T14:35:05.056264+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 195,
+        "sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+        "path": "RHSA-2026-67471.html",
+        "finalUrl": "https://access.redhat.com/errata/RHSA-2026:67471",
+        "contentAssessment": "NO_ADVISORY_CONTENT_SITE_UNAVAILABLE"
+      },
+      {
+        "url": "https://access.redhat.com/errata/RHSA-2026:71602",
+        "reviewedCves": [
+          "CVE-2026-68257"
+        ],
+        "retrievedAt": "2026-11-16T14:35:05.105393+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 195,
+        "sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+        "path": "RHSA-2026-71602.html",
+        "finalUrl": "https://access.redhat.com/errata/RHSA-2026:71602",
+        "contentAssessment": "NO_ADVISORY_CONTENT_SITE_UNAVAILABLE"
+      },
+      {
+        "url": "https://access.redhat.com/errata/RHSA-2026:85321",
+        "reviewedCves": [
+          "CVE-2026-74752",
+          "CVE-2026-89631"
+        ],
+        "retrievedAt": "2026-11-16T14:35:05.109074+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 195,
+        "sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+        "path": "RHSA-2026-85321.html",
+        "finalUrl": "https://access.redhat.com/errata/RHSA-2026:85321",
+        "contentAssessment": "NO_ADVISORY_CONTENT_SITE_UNAVAILABLE"
+      },
+      {
+        "url": "https://access.redhat.com/errata/RHSA-2026:88477",
+        "reviewedCves": [
+          "CVE-2026-68245"
+        ],
+        "retrievedAt": "2026-11-16T14:35:11.105914+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 195,
+        "sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+        "path": "RHSA-2026-88477.html",
+        "finalUrl": "https://access.redhat.com/errata/RHSA-2026:88477",
+        "contentAssessment": "NO_ADVISORY_CONTENT_SITE_UNAVAILABLE"
+      },
+      {
+        "url": "https://access.redhat.com/errata/RHSA-2026:91565",
+        "reviewedCves": [
+          "CVE-2026-64523"
+        ],
+        "retrievedAt": "2026-11-16T14:35:11.150754+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 195,
+        "sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+        "path": "RHSA-2026-91565.html",
+        "finalUrl": "https://access.redhat.com/errata/RHSA-2026:91565",
+        "contentAssessment": "NO_ADVISORY_CONTENT_SITE_UNAVAILABLE"
+      },
+      {
+        "url": "https://access.redhat.com/errata/RHSA-2026:93413",
+        "reviewedCves": [
+          "CVE-2026-98364"
+        ],
+        "retrievedAt": "2026-11-16T14:35:11.151298+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 195,
+        "sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+        "path": "RHSA-2026-93413.html",
+        "finalUrl": "https://access.redhat.com/errata/RHSA-2026:93413",
+        "contentAssessment": "NO_ADVISORY_CONTENT_SITE_UNAVAILABLE"
+      },
+      {
+        "url": "https://errata.rockylinux.org/RLSA-2026:1690",
+        "reviewedCves": [
+          "CVE-2025-40170"
+        ],
+        "retrievedAt": "2026-11-16T14:35:11.151825+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 447,
+        "sha256": "baf756ceff2f6607f0fc853e63d3a57b9386fe0f71d3449ed94780d6228724ff",
+        "path": "RLSA-2026-1690.html",
+        "finalUrl": "https://errata.rockylinux.org/RLSA-2026:1690",
+        "contentAssessment": "NO_ADVISORY_CONTENT_JAVASCRIPT_SHELL"
+      },
+      {
+        "url": "https://errata.rockylinux.org/RLSA-2026:2282",
+        "reviewedCves": [
+          "CVE-2025-39933"
+        ],
+        "retrievedAt": "2026-11-16T14:35:16.480580+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 447,
+        "sha256": "baf756ceff2f6607f0fc853e63d3a57b9386fe0f71d3449ed94780d6228724ff",
+        "path": "RLSA-2026-2282.html",
+        "finalUrl": "https://errata.rockylinux.org/RLSA-2026:2282",
+        "contentAssessment": "NO_ADVISORY_CONTENT_JAVASCRIPT_SHELL"
+      },
+      {
+        "url": "https://errata.rockylinux.org/RLSA-2026:45114",
+        "reviewedCves": [
+          "CVE-2026-31692"
+        ],
+        "retrievedAt": "2026-11-16T14:35:17.116699+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 447,
+        "sha256": "baf756ceff2f6607f0fc853e63d3a57b9386fe0f71d3449ed94780d6228724ff",
+        "path": "RLSA-2026-45114.html",
+        "finalUrl": "https://errata.rockylinux.org/RLSA-2026:45114",
+        "contentAssessment": "NO_ADVISORY_CONTENT_JAVASCRIPT_SHELL"
+      },
+      {
+        "url": "https://errata.rockylinux.org/RLSA-2026:47017",
+        "reviewedCves": [
+          "CVE-2026-53281"
+        ],
+        "retrievedAt": "2026-11-16T14:35:17.118434+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 447,
+        "sha256": "baf756ceff2f6607f0fc853e63d3a57b9386fe0f71d3449ed94780d6228724ff",
+        "path": "RLSA-2026-47017.html",
+        "finalUrl": "https://errata.rockylinux.org/RLSA-2026:47017",
+        "contentAssessment": "NO_ADVISORY_CONTENT_JAVASCRIPT_SHELL"
+      },
+      {
+        "url": "https://errata.rockylinux.org/RLSA-2026:57251",
+        "reviewedCves": [
+          "CVE-2026-52991",
+          "CVE-2026-63879"
+        ],
+        "retrievedAt": "2026-11-16T14:35:17.118999+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 447,
+        "sha256": "baf756ceff2f6607f0fc853e63d3a57b9386fe0f71d3449ed94780d6228724ff",
+        "path": "RLSA-2026-57251.html",
+        "finalUrl": "https://errata.rockylinux.org/RLSA-2026:57251",
+        "contentAssessment": "NO_ADVISORY_CONTENT_JAVASCRIPT_SHELL"
+      },
+      {
+        "url": "https://errata.rockylinux.org/RLSA-2026:65334",
+        "reviewedCves": [
+          "CVE-2026-68409"
+        ],
+        "retrievedAt": "2026-11-16T14:35:21.353789+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 447,
+        "sha256": "baf756ceff2f6607f0fc853e63d3a57b9386fe0f71d3449ed94780d6228724ff",
+        "path": "RLSA-2026-65334.html",
+        "finalUrl": "https://errata.rockylinux.org/RLSA-2026:65334",
+        "contentAssessment": "NO_ADVISORY_CONTENT_JAVASCRIPT_SHELL"
+      },
+      {
+        "url": "https://errata.rockylinux.org/RLSA-2026:67471",
+        "reviewedCves": [
+          "CVE-2026-68426",
+          "CVE-2025-68745"
+        ],
+        "retrievedAt": "2026-11-16T14:35:21.438373+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 447,
+        "sha256": "baf756ceff2f6607f0fc853e63d3a57b9386fe0f71d3449ed94780d6228724ff",
+        "path": "RLSA-2026-67471.html",
+        "finalUrl": "https://errata.rockylinux.org/RLSA-2026:67471",
+        "contentAssessment": "NO_ADVISORY_CONTENT_JAVASCRIPT_SHELL"
+      },
+      {
+        "url": "https://errata.rockylinux.org/RLSA-2026:71602",
+        "reviewedCves": [
+          "CVE-2026-68257"
+        ],
+        "retrievedAt": "2026-11-16T14:35:21.493639+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 447,
+        "sha256": "baf756ceff2f6607f0fc853e63d3a57b9386fe0f71d3449ed94780d6228724ff",
+        "path": "RLSA-2026-71602.html",
+        "finalUrl": "https://errata.rockylinux.org/RLSA-2026:71602",
+        "contentAssessment": "NO_ADVISORY_CONTENT_JAVASCRIPT_SHELL"
+      },
+      {
+        "url": "https://errata.rockylinux.org/RLSA-2026:85321",
+        "reviewedCves": [
+          "CVE-2026-74752",
+          "CVE-2026-89631"
+        ],
+        "retrievedAt": "2026-11-16T14:35:21.613192+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 447,
+        "sha256": "baf756ceff2f6607f0fc853e63d3a57b9386fe0f71d3449ed94780d6228724ff",
+        "path": "RLSA-2026-85321.html",
+        "finalUrl": "https://errata.rockylinux.org/RLSA-2026:85321",
+        "contentAssessment": "NO_ADVISORY_CONTENT_JAVASCRIPT_SHELL"
+      },
+      {
+        "url": "https://errata.rockylinux.org/RLSA-2026:88477",
+        "reviewedCves": [
+          "CVE-2026-68245"
+        ],
+        "retrievedAt": "2026-11-16T14:35:27.879411+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 447,
+        "sha256": "baf756ceff2f6607f0fc853e63d3a57b9386fe0f71d3449ed94780d6228724ff",
+        "path": "RLSA-2026-88477.html",
+        "finalUrl": "https://errata.rockylinux.org/RLSA-2026:88477",
+        "contentAssessment": "NO_ADVISORY_CONTENT_JAVASCRIPT_SHELL"
+      },
+      {
+        "url": "https://errata.rockylinux.org/RLSA-2026:91565",
+        "reviewedCves": [
+          "CVE-2026-64523"
+        ],
+        "retrievedAt": "2026-11-16T14:35:27.882903+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 447,
+        "sha256": "baf756ceff2f6607f0fc853e63d3a57b9386fe0f71d3449ed94780d6228724ff",
+        "path": "RLSA-2026-91565.html",
+        "finalUrl": "https://errata.rockylinux.org/RLSA-2026:91565",
+        "contentAssessment": "NO_ADVISORY_CONTENT_JAVASCRIPT_SHELL"
+      },
+      {
+        "url": "https://errata.rockylinux.org/RLSA-2026:93413",
+        "reviewedCves": [
+          "CVE-2026-98364"
+        ],
+        "retrievedAt": "2026-11-16T14:35:27.883178+00:00",
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 447,
+        "sha256": "baf756ceff2f6607f0fc853e63d3a57b9386fe0f71d3449ed94780d6228724ff",
+        "path": "RLSA-2026-93413.html",
+        "finalUrl": "https://errata.rockylinux.org/RLSA-2026:93413",
+        "contentAssessment": "NO_ADVISORY_CONTENT_JAVASCRIPT_SHELL"
+      }
+    ]
+  },
+  "publisherArchive": {
+    "path": "docs/overhaul/phase5/evidence/security/primary-vendor-records.zip",
+    "sha256": "795aaf4acc30481356a00f8682e98ff20e936f47f16815f647e0619ea1323153"
+  },
+  "webCorroboration": {
+    "method": "Primary publisher pages rendered by web open; raw HTML bytes not retained.",
+    "urls": [
+      "https://access.redhat.com/errata/RHSA-2026:1690",
+      "https://access.redhat.com/errata/RHSA-2026:2282",
+      "https://access.redhat.com/errata/RHSA-2026:67471",
+      "https://access.redhat.com/errata/RHSA-2026:91565"
+    ],
+    "boundary": "Supplemental corroboration, not an invented raw HTML hash."
+  }
+}

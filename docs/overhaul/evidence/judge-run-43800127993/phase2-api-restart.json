@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "timestamp": "2026-11-16T03:53:42.344Z",
+  "evidence": [
+    {
+      "scenario": "actual owned API SIGKILL and replacement process",
+      "restartMs": 1547.6292720000006,
+      "completionMs": 8145.033499000001,
+      "submissions": 3,
+      "finalStatus": "ACCEPTED",
+      "generation": 1,
+      "recoveries": 0,
+      "xp": 10,
+      "failedDuringDowntime": 1,
+      "otherApiInstancesRunning": 0,
+      "redisRestarted": false
+    }
+  ]
+}

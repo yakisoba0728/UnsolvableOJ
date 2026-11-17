@@ -1,0 +1,188 @@
+{
+  "baselineCommit": "c8ba9712d1a29ac633519511e50428ef647edf66",
+  "date": "2026-11-16",
+  "command": "npm audit --omit=dev --json",
+  "baseline": {
+    "Back": {
+      "auditReportVersion": 2,
+      "vulnerabilities": {
+        "glob": {
+          "name": "glob",
+          "severity": "moderate",
+          "isDirect": false,
+          "via": [
+            {
+              "source": 1244013,
+              "name": "glob",
+              "dependency": "glob",
+              "title": "Glob: AbortSignal cancellation bypass allows post-timeout filesystem traversal",
+              "url": "https://github.com/advisories/GHSA-3g3m-2fjr-6pw4",
+              "severity": "moderate",
+              "cwe": [
+                "CWE-400"
+              ],
+              "cvss": {
+                "score": 0,
+                "vectorString": null
+              },
+              "range": ">=9.0.0 <=14.0.1"
+            },
+            "minimatch"
+          ],
+          "effects": [
+            "typeorm"
+          ],
+          "range": "9.0.0 - 14.0.1",
+          "nodes": [
+            "node_modules/glob"
+          ],
+          "fixAvailable": {
+            "name": "typeorm",
+            "version": "1.1.3",
+            "isSemVerMajor": true
+          }
+        },
+        "minimatch": {
+          "name": "minimatch",
+          "severity": "moderate",
+          "isDirect": false,
+          "via": [
+            {
+              "source": 1244623,
+              "name": "minimatch",
+              "dependency": "minimatch",
+              "title": "minimatch has potential denial of service via globparts amplification",
+              "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+              "severity": "moderate",
+              "cwe": [
+                "CWE-405"
+              ],
+              "cvss": {
+                "score": 0,
+                "vectorString": null
+              },
+              "range": ">=7.0.0 <11.0.1"
+            }
+          ],
+          "effects": [
+            "glob"
+          ],
+          "range": "7.0.0 - 11.0.0",
+          "nodes": [
+            "node_modules/glob/node_modules/minimatch"
+          ],
+          "fixAvailable": {
+            "name": "typeorm",
+            "version": "1.1.3",
+            "isSemVerMajor": true
+          }
+        },
+        "typeorm": {
+          "name": "typeorm",
+          "severity": "moderate",
+          "isDirect": true,
+          "via": [
+            "glob"
+          ],
+          "effects": [],
+          "range": "0.3.18-dev.022d2b5 - 0.3.31",
+          "nodes": [
+            "node_modules/typeorm"
+          ],
+          "fixAvailable": {
+            "name": "typeorm",
+            "version": "1.1.3",
+            "isSemVerMajor": true
+          }
+        }
+      },
+      "metadata": {
+        "vulnerabilities": {
+          "info": 0,
+          "low": 0,
+          "moderate": 3,
+          "high": 0,
+          "critical": 0,
+          "total": 3
+        },
+        "dependencies": {
+          "prod": 264,
+          "dev": 230,
+          "optional": 63,
+          "peer": 1,
+          "peerOptional": 0,
+          "total": 504
+        }
+      }
+    }
+  },
+  "candidate": {
+    "Back": {
+      "auditReportVersion": 2,
+      "vulnerabilities": {},
+      "metadata": {
+        "vulnerabilities": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "total": 0
+        },
+        "dependencies": {
+          "prod": 223,
+          "dev": 233,
+          "optional": 62,
+          "peer": 1,
+          "peerOptional": 0,
+          "total": 465
+        }
+      }
+    },
+    "Front": {
+      "auditReportVersion": 2,
+      "vulnerabilities": {},
+      "metadata": {
+        "vulnerabilities": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "total": 0
+        },
+        "dependencies": {
+          "prod": 148,
+          "dev": 116,
+          "optional": 53,
+          "peer": 0,
+          "peerOptional": 0,
+          "total": 263
+        }
+      }
+    },
+    "Judge": {
+      "auditReportVersion": 2,
+      "vulnerabilities": {},
+      "metadata": {
+        "vulnerabilities": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "total": 0
+        },
+        "dependencies": {
+          "prod": 18,
+          "dev": 3,
+          "optional": 9,
+          "peer": 0,
+          "peerOptional": 0,
+          "total": 29
+        }
+      }
+    }
+  },
+  "scope": "npm advisory responses only; no OS/container vulnerability scan"
+}

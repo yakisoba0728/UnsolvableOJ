@@ -1,5 +1,5 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
-import { mockProblemApi, session, storageKey } from "./fixtures";
+import { mockCommunityApi, mockProblemApi, session, storageKey } from "./fixtures";
 
 const later = () => new Date(Date.now() + 12 * 3_600_000).toISOString();
 const refreshed = (accessToken: string, refreshToken: string) => ({
@@ -147,3 +147,330 @@ for (const locks of [true, false])
         .toMatchObject({ accessToken: "new-access", refreshToken: "r2" });
     }
   });
+
+test.describe("community request ownership", () => {
+  const question = {
+    id: "refresh-question", category: "question", title: "갱신 테스트 질문",
+    body: "기존 질문 본문입니다.", author: session.user.username,
+  };
+
+  async function setup(page: Page) {
+    await seed(page, Date.now() + 900_000);
+    await mockProblemApi(page);
+    return mockCommunityApi(page, { posts: [question] });
+  }
+
+  for (const kind of ["post", "edit", "answer"] as const) {
+    test(`${kind} completes exactly once when its write refreshes an expired access token`, async ({ page }) => {
+      const state = await setup(page);
+      let refreshes = 0;
+      await page.route("**/api/v1/auth/refresh", (route) => {
+        refreshes++;
+        return route.fulfill({ json: refreshed("new-access", "r2") });
+      });
+      const path = kind === "post" ? "/community/new"
+        : `/community/refresh-question${kind === "edit" ? "/edit" : ""}`;
+      await page.goto(path);
+      const input = kind === "answer" ? page.getByLabel("답변 내용") : page.getByLabel(/^제목/);
+      await input.fill(kind === "answer" ? "갱신하면서 등록한 답변입니다." : "갱신하면서 저장한 글 제목");
+      if (kind !== "answer") await page.getByLabel(/^본문/).fill("갱신하면서 저장한 글 본문입니다.");
+      await input.evaluate(element => element.setAttribute("data-refresh-marker", "same-form"));
+      const method = kind === "edit" ? "PUT" : "POST";
+      const endpoint = `/api/v1/community/posts${kind === "post" ? "" : `/refresh-question${kind === "answer" ? "/comments" : ""}`}`;
+      let pending: Route | undefined;
+      const authorizations: string[] = [];
+      await page.route(url => url.pathname === endpoint, route => {
+        if (route.request().method() !== method) return route.fallback();
+        const authorization = route.request().headers().authorization ?? "";
+        authorizations.push(authorization);
+        if (authorization === "Bearer old-access")
+          return route.fulfill({ status: 401, json: { message: "다시 로그인해야 합니다." } });
+        pending = route;
+      });
+      try {
+        await page.getByRole("button", { name: kind === "answer" ? "답변 등록" : kind === "edit" ? "수정 저장" : "글 등록", exact: true }).click();
+        await expect.poll(() => Boolean(pending)).toBe(true);
+        await expect(input).toHaveAttribute("data-refresh-marker", "same-form");
+        await expect(input).toBeDisabled();
+        expect(refreshes).toBe(1);
+        expect(authorizations).toEqual(["Bearer old-access", "Bearer new-access"]);
+        await pending!.fallback();
+        pending = undefined;
+        if (kind === "answer") {
+          await expect(page.getByText("답변을 등록했어요.", { exact: true })).toBeVisible();
+          await expect(input).toHaveValue("");
+          expect(state.answers.filter(answer => answer.body === "갱신하면서 등록한 답변입니다.")).toHaveLength(1);
+        } else {
+          await expect(page).toHaveURL(new RegExp(`/community/${kind === "edit" ? "refresh-question" : "new-2"}$`));
+          await expect(page.getByRole("heading", { name: "갱신하면서 저장한 글 제목", exact: true })).toBeVisible();
+          expect(state.posts.filter(post => post.title === "갱신하면서 저장한 글 제목")).toHaveLength(1);
+        }
+        expect(state.requests.filter(request => request.method === method && request.path === endpoint.replace("/api/v1/community/posts", ""))).toHaveLength(1);
+      } finally {
+        await pending?.abort().catch(() => {});
+      }
+    });
+  }
+
+  for (const kind of ["post", "answer"] as const) for (const mode of ["account", "login"] as const) {
+    test(`a late ${kind} write cannot update a new ${mode} after replacing its login`, async ({ page }) => {
+      await setup(page);
+      const path = kind === "post" ? "/community/new" : "/community/refresh-question";
+      await page.goto(path);
+      const input = kind === "answer" ? page.getByLabel("답변 내용") : page.getByLabel(/^제목/);
+      await input.fill(kind === "answer" ? "이전 로그인에서 보낸 답변입니다." : "이전 로그인에서 보낸 제목");
+      if (kind === "post") await page.getByLabel(/^본문/).fill("이전 로그인에서 보낸 본문입니다.");
+      await input.evaluate(element => element.setAttribute("data-refresh-marker", "old-login"));
+      const endpoint = `/api/v1/community/posts${kind === "answer" ? "/refresh-question/comments" : ""}`;
+      let pending: Route | undefined;
+      await page.route(url => url.pathname === endpoint, route => {
+        if (route.request().method() !== "POST") return route.fallback();
+        pending = route;
+      });
+      try {
+        await page.getByRole("button", { name: kind === "answer" ? "답변 등록" : "글 등록", exact: true }).click();
+        await expect.poll(() => Boolean(pending)).toBe(true);
+        const next = { ...refreshed("explicit-new-login", "new-family"),
+          user: mode === "account" ? { ...session.user, id: "second", username: "second" } : session.user };
+        await page.evaluate(({ key, nextSession }) => {
+          const oldValue = localStorage.getItem(key);
+          const newValue = JSON.stringify({ session: nextSession, expiresAt: Date.now() + 900_000 });
+          localStorage.setItem(key, newValue);
+          window.dispatchEvent(new StorageEvent("storage", { key, oldValue, newValue, storageArea: localStorage }));
+        }, { key: storageKey, nextSession: next });
+        await expect(page.locator(".account-name")).toHaveText(next.user.username);
+        await expect(input).not.toHaveAttribute("data-refresh-marker", "old-login");
+        await pending!.fallback();
+        pending = undefined;
+        // The old completion must settle before asserting that the new route/state remains intact.
+        await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+        await expect(page).toHaveURL(new RegExp(`${path}$`));
+        await expect(page.getByText(/(글|답변)을 등록했어요\./)).toHaveCount(0);
+        if (mode === "account") await expect(input).toHaveValue("");
+      } finally {
+        await pending?.abort().catch(() => {});
+      }
+    });
+  }
+});
+
+test.describe("account settings request ownership", () => {
+  async function setup(page: Page) {
+    await seed(page, Date.now() + 900_000);
+    await mockProblemApi(page);
+    await page.route("**/api/v1/auth/sessions", route => route.fulfill({ json: [] }));
+    await page.goto("/settings");
+    await page.getByLabel("새 사용자 이름").fill("renamed");
+    await page.getByLabel("현재 비밀번호").fill("old-password-1");
+    await page.getByLabel("새 비밀번호", { exact: true }).fill("new-password-2");
+    await page.getByLabel("새 비밀번호 확인").fill("new-password-2");
+  }
+
+  for (const action of ["username", "password"] as const) {
+    test(`a ${action} change accepts its renewed session after automatic access-token refresh`, async ({ page }) => {
+      await setup(page);
+      let refreshes = 0;
+      await page.route("**/api/v1/auth/refresh", route => {
+        refreshes++;
+        return route.fulfill({ json: refreshed("new-access", "r2") });
+      });
+      let pending: Route | undefined;
+      const authorizations: string[] = [];
+      await page.route(`**/api/v1/auth/${action}`, route => {
+        const authorization = route.request().headers().authorization ?? "";
+        authorizations.push(authorization);
+        if (authorization === "Bearer old-access")
+          return route.fulfill({ status: 401, json: { message: "다시 로그인해야 합니다." } });
+        pending = route;
+      });
+      try {
+        await page.getByRole("button", { name: action === "username" ? "이름 변경" : "비밀번호 변경", exact: true }).click();
+        await expect.poll(() => Boolean(pending)).toBe(true);
+        await expect(page.getByRole("button", { name: action === "username" ? "비밀번호 변경" : "이름 변경", exact: true })).toBeDisabled();
+        await expect(page.getByLabel("현재 비밀번호")).toHaveValue("old-password-1");
+        const accepted = { ...refreshed("accepted-session", "accepted-refresh"),
+          user: { ...session.user, username: action === "username" ? "renamed" : session.user.username } };
+        await pending!.fulfill({ json: accepted });
+        pending = undefined;
+        await expect(page.getByRole("status").filter({ hasText: action === "username" ? "사용자 이름을 바꿨습니다." : "비밀번호를 바꿨습니다." })).toBeVisible();
+        await expect.poll(async () => (await saved(page)).session.accessToken).toBe("accepted-session");
+        expect(refreshes).toBe(1);
+        expect(authorizations).toEqual(["Bearer old-access", "Bearer new-access"]);
+        await expect(page.getByRole("button", { name: "처리 중…", exact: true })).toHaveCount(0);
+        if (action === "password") {
+          await expect(page.getByLabel("현재 비밀번호")).toHaveValue("");
+          await expect(page.getByLabel("새 비밀번호", { exact: true })).toHaveValue("");
+          await expect(page.getByLabel("새 비밀번호 확인")).toHaveValue("");
+        } else await expect(page.locator(".account-name")).toHaveText("renamed");
+      } finally {
+        await pending?.abort().catch(() => {});
+      }
+    });
+  }
+
+  for (const mode of ["account", "login"] as const) for (const outcome of ["success", "failure"] as const) {
+    test(`a new ${mode} clears settings secrets and ignores a late mutation ${outcome}`, async ({ page }) => {
+      await setup(page);
+      let pending: Route | undefined;
+      await page.route("**/api/v1/auth/username", route => { pending = route; });
+      try {
+        await page.getByRole("button", { name: "이름 변경", exact: true }).click();
+        await expect.poll(() => Boolean(pending)).toBe(true);
+        const next = { ...refreshed("explicit-new-login", "new-family"),
+          user: mode === "account" ? { ...session.user, id: "second", username: "second" } : session.user };
+        await page.evaluate(({ key, nextSession }) => {
+          const oldValue = localStorage.getItem(key);
+          const newValue = JSON.stringify({ session: nextSession, expiresAt: Date.now() + 900_000 });
+          localStorage.setItem(key, newValue);
+          window.dispatchEvent(new StorageEvent("storage", { key, oldValue, newValue, storageArea: localStorage }));
+        }, { key: storageKey, nextSession: next });
+        await expect(page.locator(".account-name")).toHaveText(next.user.username);
+        await expect(page.getByLabel("새 사용자 이름")).toHaveValue(next.user.username);
+        await expect(page.getByLabel("현재 비밀번호")).toHaveValue("");
+        await expect(page.getByLabel("새 비밀번호", { exact: true })).toHaveValue("");
+        await expect(page.getByLabel("새 비밀번호 확인")).toHaveValue("");
+        await pending!.fulfill(outcome === "success"
+          ? { json: { ...refreshed("old-write-response", "old-family"), user: { ...session.user, username: "renamed" } } }
+          : { status: 503, json: { message: "old login mutation failed" } });
+        pending = undefined;
+        await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+        expect((await saved(page)).session.accessToken).toBe("explicit-new-login");
+        await expect(page.getByText("사용자 이름을 바꿨습니다.", { exact: true })).toHaveCount(0);
+        await expect(page.getByText("old login mutation failed", { exact: true })).toHaveCount(0);
+        await expect(page.getByRole("button", { name: "처리 중…", exact: true })).toHaveCount(0);
+      } finally {
+        await pending?.abort().catch(() => {});
+      }
+    });
+  }
+});
+
+test.describe("Vibe start request ownership", () => {
+  const attemptId = "request-ownership-attempt";
+  const challengeId = "request-ownership-challenge";
+  const startPath = `/api/v1/vibe/challenges/${challengeId}/attempts`;
+
+  async function setup(page: Page) {
+    await seed(page, Date.now() + 900_000);
+    await mockProblemApi(page);
+    await page.route("**/api/v1/vibe/challenges", route => route.fulfill({ json: {
+      items: [{ id: challengeId, title: "요청 소유권 과제", summary: "대기 중인 요청의 로그인과 화면을 확인합니다.",
+        stack: "TypeScript", difficulty: "입문", durationMin: 5, requirements: [], rubric: [] }],
+      availability: { ai: true, runner: true },
+    } }));
+    await page.route("**/api/v1/vibe/attempts", route => route.fulfill({ json: [] }));
+    // This suite checks navigation ownership, not workspace rendering/API behavior.
+    await page.context().route(`**/vibe/attempts/${attemptId}`, route => route.request().isNavigationRequest()
+      ? route.fulfill({ contentType: "text/html", body: "<!doctype html><title>Owned workspace navigation</title>" })
+      : route.fallback());
+    await page.goto("/vibe");
+  }
+
+  async function replaceLogin(page: Page, mode: "account" | "login" | "logout") {
+    const next = { ...refreshed("explicit-new-vibe-login", "new-family"),
+      user: mode === "account" ? { ...session.user, id: "second", username: "second" } : session.user };
+    await page.evaluate(({ key, nextSession, logout }) => {
+      const oldValue = localStorage.getItem(key);
+      const newValue = logout ? null : JSON.stringify({ session: nextSession, expiresAt: Date.now() + 900_000 });
+      if (newValue === null) localStorage.removeItem(key);
+      else localStorage.setItem(key, newValue);
+      window.dispatchEvent(new StorageEvent("storage", { key, oldValue, newValue, storageArea: localStorage }));
+    }, { key: storageKey, nextSession: next, logout: mode === "logout" });
+  }
+
+  for (const mode of ["account", "login", "logout", "navigate"] as const) {
+    test(`a late Vibe start closes only its own blank tab after ${mode}`, async ({ page }) => {
+      await setup(page);
+      let pending: Route | undefined;
+      await page.route(url => url.pathname === startPath, route => { pending = route; });
+      const unrelated = await page.context().newPage();
+      const [popup] = await Promise.all([
+        page.waitForEvent("popup"),
+        page.getByRole("button", { name: /연습 시작 \/ 이어하기/ }).click(),
+      ]);
+      try {
+        await expect.poll(() => Boolean(pending)).toBe(true);
+        if (mode === "navigate") {
+          await page.getByRole("link", { name: "문제", exact: true }).first().click();
+          await expect(page).toHaveURL(/\/problems$/);
+        } else {
+          await replaceLogin(page, mode);
+          if (mode !== "logout")
+            await expect(page.getByRole("button", { name: /연습 시작 \/ 이어하기/ })).toBeEnabled();
+        }
+        await pending!.fulfill({ json: { id: attemptId } });
+        pending = undefined;
+        await expect.poll(() => popup.isClosed()).toBe(true);
+        expect(unrelated.isClosed()).toBe(false);
+        await expect(page).toHaveURL(mode === "navigate" ? /\/problems$/ : /\/vibe$/);
+      } finally {
+        await pending?.abort().catch(() => {});
+        if (!popup.isClosed()) await popup.close();
+        await unrelated.close();
+      }
+    });
+  }
+
+  test("a late failed Vibe start cannot set the replacement login's error", async ({ page }) => {
+    await setup(page);
+    let pending: Route | undefined;
+    await page.route(url => url.pathname === startPath, route => { pending = route; });
+    const [popup] = await Promise.all([
+      page.waitForEvent("popup"),
+      page.getByRole("button", { name: /연습 시작 \/ 이어하기/ }).click(),
+    ]);
+    try {
+      await expect.poll(() => Boolean(pending)).toBe(true);
+      await replaceLogin(page, "login");
+      await expect(page.getByRole("button", { name: /연습 시작 \/ 이어하기/ })).toBeEnabled();
+      await pending!.fulfill({ status: 503, json: { message: "old login start failed" } });
+      pending = undefined;
+      await expect.poll(() => popup.isClosed()).toBe(true);
+      await expect(page.getByText("old login start failed", { exact: true })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: /연습 시작 \/ 이어하기/ })).toBeEnabled();
+    } finally {
+      await pending?.abort().catch(() => {});
+      if (!popup.isClosed()) await popup.close();
+    }
+  });
+
+  for (const blocked of [false, true]) {
+    test(`same-login refresh preserves Vibe start with popup blocked=${blocked}`, async ({ page }) => {
+      if (blocked) await page.addInitScript(() => { window.open = () => null; });
+      await setup(page);
+      let pending: Route | undefined;
+      let refreshes = 0;
+      const authorizations: string[] = [];
+      await page.route("**/api/v1/auth/refresh", route => {
+        refreshes++;
+        return route.fulfill({ json: refreshed("new-access", "r2") });
+      });
+      await page.route(url => url.pathname === startPath, route => {
+        const authorization = route.request().headers().authorization ?? "";
+        authorizations.push(authorization);
+        if (authorization === "Bearer old-access")
+          return route.fulfill({ status: 401, json: { message: "Expired" } });
+        pending = route;
+      });
+      let popup: Page | undefined;
+      try {
+        if (blocked) await page.getByRole("button", { name: /연습 시작 \/ 이어하기/ }).click();
+        else [popup] = await Promise.all([
+          page.waitForEvent("popup"),
+          page.getByRole("button", { name: /연습 시작 \/ 이어하기/ }).click(),
+        ]);
+        await expect.poll(() => Boolean(pending)).toBe(true);
+        await expect(page.getByRole("button", { name: /준비 중/ })).toBeDisabled();
+        await pending!.fulfill({ json: { id: attemptId } });
+        pending = undefined;
+        await expect(popup ?? page).toHaveURL(new RegExp(`/vibe/attempts/${attemptId}$`));
+        expect(refreshes).toBe(1);
+        expect(authorizations).toEqual(["Bearer old-access", "Bearer new-access"]);
+        if (popup) await expect(page).toHaveURL(/\/vibe$/);
+      } finally {
+        await pending?.abort().catch(() => {});
+        if (popup && !popup.isClosed()) await popup.close();
+      }
+    });
+  }
+});

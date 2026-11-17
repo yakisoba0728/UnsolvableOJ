@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "provenanceMethod": "Retained bytes independently match GitHub immutable-ref fetch_file Git blob hashes. Offline verification checks retained receipts/bytes, not new remote authentication.",
+  "sourceFiles": [
+    {
+      "ref": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+      "repositoryPath": ".github/workflows/ci.yml",
+      "gitBlob": "afbf6980e7e262d6dd93f9ffa9c911aa6f0cd02a",
+      "sha256": "7cb96ddfa94d001c60d777bb0c75ea9f56911ed594aefe3b299c2cf2c5999166",
+      "bytes": 32813,
+      "sourceUrl": "https://github.com/yakisoba0728/UnsolvableOJ/blob/281d0f1a30cd772cf7417e3affb8c98be252f405/.github/workflows/ci.yml",
+      "retainedPath": "source-snapshots/ci.yml"
+    },
+    {
+      "ref": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+      "repositoryPath": "Back/scripts/phase5-db-qualification.mjs",
+      "gitBlob": "5a33e65574a24b0bcd77fef4fbebc80d2c5c1ce4",
+      "sha256": "7ee117df19f12c9946a8ba9e308508593d18352efa32f051e27861dbb325d357",
+      "bytes": 20089,
+      "sourceUrl": "https://github.com/yakisoba0728/UnsolvableOJ/blob/281d0f1a30cd772cf7417e3affb8c98be252f405/Back/scripts/phase5-db-qualification.mjs",
+      "retainedPath": "source-snapshots/phase5-db-qualification.mjs"
+    },
+    {
+      "ref": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+      "repositoryPath": "Back/scripts/phase4-restore-rehearsal.mjs",
+      "gitBlob": "9794e87857a2bc7ad221bcbb6ceac5c6bd1bc485",
+      "sha256": "ba7ccd1dc85a1926e5f71ba1b18a8e4a72a9d583d725a9e18f89243e48b0c1c5",
+      "bytes": 25718,
+      "sourceUrl": "https://github.com/yakisoba0728/UnsolvableOJ/blob/281d0f1a30cd772cf7417e3affb8c98be252f405/Back/scripts/phase4-restore-rehearsal.mjs",
+      "retainedPath": "source-snapshots/phase4-restore-rehearsal.mjs"
+    },
+    {
+      "ref": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+      "repositoryPath": "Back/test/phase5-multi-api.pipeline-spec.ts",
+      "gitBlob": "5d806fed75941d17b07b8f67bb1ec37ca9c81fe2",
+      "sha256": "9bbb38c3834a6a9f39c9c27224a9ad7aee097804fe5d8cad0bb55f3824cfa5a8",
+      "bytes": 36191,
+      "sourceUrl": "https://github.com/yakisoba0728/UnsolvableOJ/blob/281d0f1a30cd772cf7417e3affb8c98be252f405/Back/test/phase5-multi-api.pipeline-spec.ts",
+      "retainedPath": "source-snapshots/phase5-multi-api.pipeline-spec.ts"
+    },
+    {
+      "ref": "281d0f1a30cd772cf7417e3affb8c98be252f405",
+      "repositoryPath": "Back/test/phase5-multi-api.pipeline-helpers.ts",
+      "gitBlob": "685c71d5a30c22255a3afc9f54a027c60498b984",
+      "sha256": "6e638dab7639ec0b3e955734c9972602ff9562b057479f601da0cfa621152f09",
+      "bytes": 5859,
+      "sourceUrl": "https://github.com/yakisoba0728/UnsolvableOJ/blob/281d0f1a30cd772cf7417e3affb8c98be252f405/Back/test/phase5-multi-api.pipeline-helpers.ts",
+      "retainedPath": "source-snapshots/phase5-multi-api.pipeline-helpers.ts"
+    }
+  ]
+}

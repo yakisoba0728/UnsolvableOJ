@@ -1,0 +1,23 @@
+{
+  "observedAt": "2026-11-17T00:09:23.020543+00:00",
+  "gate": "PASS_WITH_REVIEWED_COMPONENT_FINDINGS",
+  "rawReportSha256": "b39c0ffd54187c8ecd5e6ec5a4c781e44a85f6636eb8a1103ce1dff2d6cf93e2",
+  "scanManifestSha256": "a03c7abb93587f3c9f29f600032f93bb7e801660a28cbdc6bf9285a410d2b96b",
+  "policySha256": "92b316dd3f43be9c91874f2d1c4f20c5dac561a87407ac390f7eb781e1416c65",
+  "payloadProofSha256": "ed80b6bed95ff0a5d38038d3fe851de7e16ff54e29b9d1a2c10d637f2f1e19d0",
+  "evaluatorSourceSha256": "b8c67ad1985ff29f654a6edcc3e0a5dc32a62ce6986f50cf97983382d0460c4f",
+  "sourceCommit": "b3e3bc385aae450cf388826466bc4371ca8bbaf4",
+  "databaseSha256": "c4c65516369d80d1fe4a9ae8667f2721393630107d8d2277a9222def00efd19d",
+  "exitCode": 0,
+  "reviewedComponents": 182,
+  "remainingBlockingFindings": 0,
+  "rawCounts": {
+    "UNKNOWN": 1,
+    "LOW": 363,
+    "MEDIUM": 560,
+    "HIGH": 177,
+    "CRITICAL": 5
+  },
+  "completeEvaluationSha256": "74ff2943963d4348b5a1626f0fc3b4c6da878cfa983eb98fa78f0a7e39469f3b",
+  "scope": "Local unchanged evaluator replay against preserved first-run Runtime artifact. Does not rebuild/rescan an image or qualify final source."
+}

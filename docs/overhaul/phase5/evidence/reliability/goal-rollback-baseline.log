@@ -1,0 +1,28 @@
+
+ RUN  v4.1.12 /workspace/scratch/3d1215725852/oj-reliability/Back
+
+stdout | test/learning-goal-migration.e2e-spec.ts > Learning-goal migration preservation (real PostgreSQL) > refuses populated goals and preserves their exact rows and migration ledger
+{"proof":"populated-goal-rollback","rowsBefore":1,"tableAfterDown":null}
+
+ ❯ test/learning-goal-migration.e2e-spec.ts (3 tests | 1 failed | 2 skipped) 184ms
+     × refuses populated goals and preserves their exact rows and migration ledger 15ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/learning-goal-migration.e2e-spec.ts > Learning-goal migration preservation (real PostgreSQL) > refuses populated goals and preserves their exact rows and migration ledger
+AssertionError: expected undefined to be an instance of Error
+ ❯ test/learning-goal-migration.e2e-spec.ts:53:24
+     51|         console.log(JSON.stringify({ proof: 'populated-goal-rollback',…
+     52|       }
+     53|       expect(rejected).toBeInstanceOf(Error);
+       |                        ^
+     54|       expect((rejected as Error).message).toContain('Cannot roll back …
+     55|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 skipped (3)
+   Start at  23:32:17
+   Duration  2.39s (transform 638ms, setup 0ms, import 1.98s, tests 184ms, environment 0ms)

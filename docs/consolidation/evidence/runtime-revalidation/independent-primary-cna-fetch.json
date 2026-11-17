@@ -1,0 +1,67 @@
+{
+  "retrievedBy": "/root/recovery_qa",
+  "records": [
+    {
+      "id": "CVE-2024-40954",
+      "repository": "CVEProject/cvelistV5",
+      "commit": "348e57515f801e770a266938ade34279efd0d827",
+      "url": "https://github.com/CVEProject/cvelistV5/blob/348e57515f801e770a266938ade34279efd0d827/cves/2024/40xxx/CVE-2024-40954.json",
+      "gitBlobSha": "6441387d276eddc079098edc3972fc5d2d3ab477",
+      "sha256": "f5e911c025f4faf8b715ed595e00895c846d3b8c9ec02b4db82d68b7845ca9c6",
+      "bytes": 17783,
+      "matchesInheritedCnaRecord": true,
+      "title": "net: do not leave a dangling sk pointer, when socket creation fails",
+      "affected": [
+        {
+          "product": "Linux",
+          "vendor": "Linux",
+          "repo": "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git",
+          "programFiles": [
+            "net/core/sock.c"
+          ]
+        },
+        {
+          "product": "Linux",
+          "vendor": "Linux",
+          "repo": "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git",
+          "programFiles": [
+            "net/core/sock.c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CVE-2026-74752",
+      "repository": "CVEProject/cvelistV5",
+      "commit": "348e57515f801e770a266938ade34279efd0d827",
+      "url": "https://github.com/CVEProject/cvelistV5/blob/348e57515f801e770a266938ade34279efd0d827/cves/2026/74xxx/CVE-2026-74752.json",
+      "gitBlobSha": "fe1740b137b318c2509ebb2b0358c3fe9563f4c1",
+      "sha256": "7dcb9d1aaf2bc764afc44716151f349ab70c12e45a9fbcf0ecb86cff11fc85c9",
+      "bytes": 11960,
+      "matchesInheritedCnaRecord": true,
+      "title": "sctp: validate cookie AUTH state before use",
+      "affected": [
+        {
+          "product": "Linux",
+          "vendor": "Linux",
+          "repo": "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git",
+          "programFiles": [
+            "include/net/sctp/auth.h",
+            "net/sctp/auth.c",
+            "net/sctp/sm_make_chunk.c"
+          ]
+        },
+        {
+          "product": "Linux",
+          "vendor": "Linux",
+          "repo": "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git",
+          "programFiles": [
+            "include/net/sctp/auth.h",
+            "net/sctp/auth.c",
+            "net/sctp/sm_make_chunk.c"
+          ]
+        }
+      ]
+    }
+  ]
+}

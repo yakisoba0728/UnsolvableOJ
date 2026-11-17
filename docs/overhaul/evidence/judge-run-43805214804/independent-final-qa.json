@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-final-native-and-go-build-qa",
+  "reviewer": "/root/judge_reliability",
+  "reviewedAt": "2026-11-16T04:54:55.436367+00:00",
+  "verdict": "APPROVED_FOR_AUTHORIZED_INTEGRATION_AT_VERIFIED_HEAD",
+  "runId": 43805214804,
+  "runUrl": "https://github.com/yakisoba0728/UnsolvableOJ/actions/runs/43805214804",
+  "attempt": 1,
+  "status": "completed",
+  "conclusion": "success",
+  "pullRequest": 68,
+  "headCommit": "0e70a2fe6d725362bcb248836c3697d310e16742",
+  "baseCommit": "e7caa9b3aa23ac051e3a786780bc3b8c0780affa",
+  "checkoutCommit": "71370b28d8a30d3ac79cf18de5facd291b6447d2",
+  "treeSha": "f302cef7d2459736d3810ee930f1c9e63662ed65",
+  "checkoutParents": [
+    "e7caa9b3aa23ac051e3a786780bc3b8c0780affa",
+    "0e70a2fe6d725362bcb248836c3697d310e16742"
+  ],
+  "jobs": [
+    {
+      "id": 133094309456,
+      "name": "Detect changes",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309702,
+      "name": "Docker image (runtime)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309704,
+      "name": "Docker image (back)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309774,
+      "name": "Docker image (judge)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309797,
+      "name": "Docker image (front)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094309862,
+      "name": "Dependency audit",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349727,
+      "name": "Sandbox, pipeline and Compose",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349764,
+      "name": "Backend and API",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349828,
+      "name": "Judge worker",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349839,
+      "name": "Browser tests (2/2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133094349864,
+      "name": "Browser tests (1/2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133098126260,
+      "name": "CI required",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "artifact": {
+    "id": 14198052584,
+    "name": "phase2-judge-evidence-1",
+    "sizeBytes": 21497,
+    "sha256": "9923d054856a03fb6bc2541af6e372a63a93ddbfafc08c143a0132605cd23e44"
+  },
+  "completedTests": {
+    "native": {
+      "passed": 74,
+      "failed": 0,
+      "skipped": 0,
+      "durationMs": 67027.172053
+    },
+    "pipeline": {
+      "passed": 28,
+      "files": 6
+    },
+    "compose": {
+      "passed": 3,
+      "seconds": 30.8
+    }
+  },
+  "actualGoBuild": {
+    "jobId": 133094309702,
+    "packages": 505,
+    "openpgpImports": 0,
+    "guardExecuted": true,
+    "evidenceGenerationCompleted": true,
+    "finalImageCopyCompleted": true,
+    "files": [
+      "/opt/go-judge-packages.txt",
+      "/opt/go-judge-build-env.json",
+      "/opt/go-judge-build-info.txt",
+      "/opt/go-judge-source-locks.sha256",
+      "/opt/go-judge-artifacts.sha256"
+    ],
+    "scope": "Actual build log verifies guard execution and generation/copy completion; this review did not separately export the generated sidecar contents."
+  },
+  "rawFiles": {
+    "evidence.zip": {
+      "sha256": "9923d054856a03fb6bc2541af6e372a63a93ddbfafc08c143a0132605cd23e44",
+      "sizeBytes": 21497
+    },
+    "full-job.log": {
+      "sha256": "1e860b8acf41347273bed9af9dc963d02794b2eed56e18af3cd96a4929ce4583",
+      "sizeBytes": 225105
+    },
+    "runtime-image-job.log": {
+      "sha256": "ec8cefa445ce4551adf1913fa4e1ec7b081870ab5565c47f8c7631a076dc65df",
+      "sizeBytes": 208991
+    },
+    "phase2-api-restart.json": {
+      "sha256": "69c9e37ed9775474ee72a16bf1b24c481fe30160ed3610c1f4afcc156292393f",
+      "sizeBytes": 471
+    },
+    "phase2-redis-restart.json": {
+      "sha256": "f2893e70e2115ba54341790e4f1eec9f3e9dda00134dffb34bb3b4c7769b7850",
+      "sizeBytes": 2126
+    },
+    "phase2-rejudge-recovery.json": {
+      "sha256": "fff56fe5b59b37e6b2b2cf18dc3c5461c3f4636c715c1f8ca01853ad6a4eeffa",
+      "sizeBytes": 545
+    },
+    "phase2-judge-capacity.json": {
+      "sha256": "912edc64833da1d2e4b21119ecb9a0e9972592e6b27d42e278d5cef113450ea5",
+      "sizeBytes": 26944
+    }
+  },
+  "recovery": {
+    "api": [
+      {
+        "scenario": "actual owned API SIGKILL and replacement process",
+        "restartMs": 1042.0814540000001,
+        "completionMs": 8141.8586589999995,
+        "submissions": 3,
+        "finalStatus": "ACCEPTED",
+        "generation": 1,
+        "recoveries": 0,
+        "xp": 10,
+        "failedDuringDowntime": 1,
+        "otherApiInstancesRunning": 0,
+        "redisRestarted": false
+      }
+    ],
+    "redis": [
+      {
+        "scenario": "actual clean owned Redis daemon restart with AOF and mixed queued work",
+        "restartMs": 8698.233819,
+        "completionMs": 10301.627429,
+        "originalLanguages": [
+          "PYTHON",
+          "C",
+          "JAVASCRIPT"
+        ],
+        "acceptedSubmissions": 4,
+        "failedDuringDowntime": 1,
+        "failureStatus": 500,
+        "failureLatencyMs": 453.300937,
+        "generation": 1,
+        "recoveries": 0,
+        "xp": 10,
+        "redisImage": "redis:8.10.3",
+        "redisImageId": "sha256:978293674c6b207a799aa6003064828846a7771cd521603c41e9a4c7f28ec4dc",
+        "appendonly": true,
+        "appendfsync": "everysec",
+        "cleanStopExitCode": 0,
+        "firstRunId": "23e1b6d247d5e2626b856b7bac0053ea57e87d5d",
+        "secondRunId": "979b5c54f11f80bf9a0ecfdee5e8d310fabd36e9",
+        "workflowRedisRestarted": false,
+        "crashDurabilityTested": false
+      }
+    ],
+    "redisOutageCreatedRows": 0,
+    "redisCleanupSucceeded": true,
+    "rejudge": [
+      {
+        "scenario": "accepted generation 1, interrupted rejudge generation 2, natural recovery generation 3",
+        "recoveredMs": 86510.421852,
+        "completedMs": 89780.419682,
+        "finalStatus": "ACCEPTED",
+        "generation": 3,
+        "recoveries": 1,
+        "xp": 10,
+        "solveRows": 1,
+        "learningRows": 1,
+        "notifications": 1,
+        "staleCallback": 409,
+        "duplicateFinalCallback": 200,
+        "leaseClockChanged": false
+      }
+    ],
+    "workerAndLinkFaults": [
+      {
+        "scenario": "worker Redis TCP interruption/reconnect and duplicate delivery",
+        "elapsedMs": 2346.7957469999965,
+        "rejectedConnections": 16,
+        "result": "ACCEPTED",
+        "generation": 1
+      },
+      {
+        "scenario": "worker API TCP interruption and result retry",
+        "elapsedMs": 3037.11744300001,
+        "rejectedConnections": 1,
+        "result": "ACCEPTED",
+        "generation": 1,
+        "reportMs": 1010.2024340000003
+      },
+      {
+        "scenario": "two-worker duplicate delivery during active lease",
+        "result": "ACCEPTED",
+        "generation": 1,
+        "executions": 1
+      },
+      {
+        "scenario": "SIGKILL and natural database lease expiry",
+        "recoveredMs": 77677.13167999999,
+        "completedMs": 79914.89074799998,
+        "result": "ACCEPTED",
+        "generation": 2,
+        "recoveries": 1,
+        "staleCallback": 409
+      }
+    ]
+  },
+  "limits": [
+    "Clean Redis AOF restart is not crash durability.",
+    "Eight jobs per capacity trial; p95/p99 are sample maxima and worker CPU/RSS excludes sandbox/compiler/solution processes.",
+    "This is exact-head integration evidence, not main merge or production-deployment authorization.",
+    "Image applicability and its unchanged raw findings are separately reviewed by Product, Security and root."
+  ]
+}

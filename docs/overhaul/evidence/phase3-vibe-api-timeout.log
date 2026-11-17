@@ -1,0 +1,48 @@
+Owned PG17.11/Redis8.10.3 ready on loopback; fresh temporary cluster. Command: ['node', 'scripts/run-integration.mjs', 'e2e']
+
+ RUN  v4.1.12 /workspace/scratch/86de5f814139/oj-vibe/Back
+
+ ❯ test/missions.e2e-spec.ts (24 tests | 5 failed) 71216ms
+     × rejects unearned, invalid, missing and another account reward IDs 7012ms
+     × checks analysis IDs and choices on the server, never accepts supplied correctness/user/date 15782ms
+     × serves analysis questions without answers and reveals them only after an answer 10495ms
+     × awards once under concurrent claims, preserves existing XP and persists across new service instances 10703ms
+     × rolls back claim, XP and badge together when a reward write fails 10094ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/missions.e2e-spec.ts > missions (real PostgreSQL transactions and HTTP) > rejects unearned, invalid, missing and another account reward IDs
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/missions.e2e-spec.ts:143:3
+    141|     expect(n).toBe(7);
+    142|   });
+    143|   it('rejects unearned, invalid, missing and another account reward ID…
+       |   ^
+    144|     const mission = (await list()).items[0];
+    145|     await request(app.getHttpServer())
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  test/missions.e2e-spec.ts > missions (real PostgreSQL transactions and HTTP) > checks analysis IDs and choices on the server, never accepts supplied correctness/user/date
+ FAIL  test/missions.e2e-spec.ts > missions (real PostgreSQL transactions and HTTP) > serves analysis questions without answers and reveals them only after an answer
+ FAIL  test/missions.e2e-spec.ts > missions (real PostgreSQL transactions and HTTP) > awards once under concurrent claims, preserves existing XP and persists across new service instances
+ FAIL  test/missions.e2e-spec.ts > missions (real PostgreSQL transactions and HTTP) > rolls back claim, XP and badge together when a reward write fails
+Error: Hook timed out in 10000ms.
+If this is a long-running hook, pass a timeout value as the last argument or configure it globally with "hookTimeout".
+ ❯ test/missions.e2e-spec.ts:59:3
+     57|     service = app.get(MissionsService);
+     58|   });
+     59|   beforeEach(async () => {
+       |   ^
+     60|     const suffix = randomUUID().slice(0, 8);
+     61|     const res = await request(app.getHttpServer())
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+
+ Test Files  1 failed | 36 passed (37)
+      Tests  5 failed | 217 passed (222)
+   Start at  15:27:11
+   Duration  217.61s (transform 2.66s, setup 0ms, import 79.07s, tests 130.83s, environment 4ms)
+

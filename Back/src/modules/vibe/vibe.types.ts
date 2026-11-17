@@ -1,3 +1,4 @@
+import type { VibeChallengeSnapshot } from './vibe.snapshot.js';
 export type ProjectFiles = Record<string, string>;
 export interface VibeMessage {
   id: string;
@@ -57,6 +58,8 @@ export interface VibeAttemptRow {
   id: string;
   user_id: string;
   challenge_id: string;
+  challenge_version: string;
+  challenge_snapshot: VibeChallengeSnapshot;
   revision: number;
   state: VibeState;
   model: string;
