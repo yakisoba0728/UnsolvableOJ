@@ -23,6 +23,12 @@ def git(*args):
     return subprocess.check_output(["git", "-C", str(ROOT), *args])
 
 
+def historical_deletions(commit):
+    # Inventory removed paths, regardless of similarity to a newly added receipt.
+    removed = set(filter(None, git("diff", "--no-renames", "--name-only", "--diff-filter=D", "-z", commit, "--").decode().split("\0")))
+    return {p for p in removed if p.startswith("docs/overhaul/") or "/benchmarks/" in p}
+
+
 def validate_manifest(manifest):
     assert manifest["schemaVersion"] == 1
     assert manifest["repository"] == "yakisoba0728/UnsolvableOJ"
@@ -61,8 +67,7 @@ def verify(verify_git):
                 assert original.count(b"\n") == item["textLines"], f"Archive line count: {item['path']}"
     if verify_git:
         assert git("rev-parse", commit + "^{tree}").decode().strip() == manifest["preservedTree"]
-        removed = set(filter(None, git("diff", "--name-only", "--diff-filter=D", "-z", commit, "--").decode().split("\0")))
-        historical = {p for p in removed if p.startswith("docs/overhaul/") or "/benchmarks/" in p}
+        historical = historical_deletions(commit)
         assert historical == archived, f"Unindexed historical deletions: {historical ^ archived}"
 
     # Git's ignore rules exclude dependency/build trees. Include new documents
