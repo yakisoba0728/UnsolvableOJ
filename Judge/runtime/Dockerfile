@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM criyle/go-judge:v1.13.3 AS go-judge
 # Ubuntu apt의 nodejs는 지원이 끝난 18.x이므로 공식 Node 24 바이너리를 가져옵니다.
-FROM node:24.22.2-bookworm-slim@sha256:01d566e8d94d8c619591d78652babfccd3c6992a3dffa9ed5ab39e11cf6c70e9 AS node
+FROM node:24.22.3-bookworm-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54 AS node
 RUN npm install -g esbuild@0.28.2
 
 FROM ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
